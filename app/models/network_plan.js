@@ -752,7 +752,7 @@ module.exports = class NetworkPlan {
         kml_output += '</Folder>'
 
         // Export 5G coverage polygons
-        kml_output += '<Folder><name>5G Coverage</name>'
+        kml_output += '<Folder><name>Coverage Areas</name>'
         Object.keys(types).forEach((type) => {
           if (nodeTypeHasGeometry[type]) {  // Only export coverage if this type has coverage geometry associated with it
             var arr = types[type]
