@@ -25,7 +25,12 @@
                 <li><strong>longitude</strong>: longitude of the tower</li>
               </ul>
               <p class="help-block">You may also include other columns which will be stored in a hstore field such as "type" for the cell site type.</p>
-              <a class="btn btn-primary btn-sm" href="/csv/example_upload_data_source.csv" download="example_upload_data_source.csv">Download example file</a>
+              Download example file for
+              <div class="btn-group btn-sm">
+                <a class="btn btn-default" href="/csv/example_upload_data_source_businesses.csv" download="example_upload_data_source_businesses.csv">Businesses</a>
+                <a class="btn btn-default" href="/csv/example_upload_data_source_households.csv" download="example_upload_data_source_households.csv">Households</a>
+                <a class="btn btn-default" href="/csv/example_upload_data_source_celltowers.csv" download="example_upload_data_source_celltowers.csv">{{cellTowerConfig.label}}</a>
+              </div>
             </div>
           </div>
         </form>
