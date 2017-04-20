@@ -189,7 +189,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       } else {
         networkNodesLayer.threshold = types.length === 1 && types[0] === 1 ? 8 : 12
         networkNodesLayer.show()
-        networkNodesLayer.setApiEndpoint(`/network/nodes/find/${layer.id}`, {
+        var url = `/network/nodes${$scope.plan ? '/'+$scope.plan.id : ''}/find/${layer.id}`
+        networkNodesLayer.setApiEndpoint(url, {
           node_types: types.join(',')
         })
       }
