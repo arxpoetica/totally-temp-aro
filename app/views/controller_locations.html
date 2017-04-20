@@ -94,7 +94,8 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalBusiness">
+                 ng-model="planState.locationDataSources.useGlobalBusiness"
+                 ng-change="changeLocationsLayer()">
         </label>
         <label>Global Businesses</label>
       </div>
@@ -102,7 +103,8 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalHousehold">
+                 ng-model="planState.locationDataSources.useGlobalHousehold"
+                 ng-change="changeLocationsLayer()">
         </label>
         <label>Global Households</label>
       </div>
@@ -110,7 +112,8 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalCellTower">
+                 ng-model="planState.locationDataSources.useGlobalCellTower"
+                 ng-change="changeLocationsLayer()">
         </label>
         <label>Global Towers</label>
       </div>

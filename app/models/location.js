@@ -14,15 +14,42 @@ module.exports = class Location {
   /*
   * Returns the businesses and households locations except the selected ones
   */
-  static findLocations (plan_id, filters, viewport) {
-    var businesses = filters.business_categories
-    var households = filters.household_categories
-    var dataSources = (filters.dataSources || []).map((id) => +id || -1)
-    var default_businesses_datasource = 1
+  static findLocations (plan_id, viewport, categoryFilters, showTowers,
+                        useGlobalBusinessDataSource, useGlobalHouseholdDataSource, useGlobalCellTowerDataSource,
+                        uploadedDataSources) {
+    // For Businesses - Create arrays to be sent as SQL parameters (can't send empty arrays to SQL)
+    var businessCategories = ['']
+    var businessDataSources = [-1]
+    var getBusinesses = categoryFilters.businessCategories.length > 0 && (useGlobalBusinessDataSource || uploadedDataSources.length > 0)
+    if (getBusinesses) {
+      businessCategories = categoryFilters.businessCategories
+      businessDataSources = uploadedDataSources.slice()
+      if (useGlobalBusinessDataSource) {
+        businessDataSources.push(1)
+      }
+    }
 
-    if (businesses.length === 0) businesses = ['']
-    if (households.length === 0) households = ['']
-    if (dataSources.length === 0) dataSources = [-1]
+    // For Households - Create arrays to be sent as SQL parameters (can't send empty arrays to SQL)
+    var householdCategories = ['']
+    var householdDataSources = [-1]
+    var getHouseholds = categoryFilters.householdCategories.length > 0 && (useGlobalHouseholdDataSource || uploadedDataSources.length > 0)
+    if (getHouseholds) {
+      householdCategories = categoryFilters.householdCategories
+      householdDataSources = uploadedDataSources.slice()
+      if (useGlobalHouseholdDataSource) {
+        householdDataSources.push(1)
+      }
+    }
+
+    // For CellTowers - Create arrays to be sent as SQL parameters (can't send empty arrays to SQL)
+    var cellTowerDataSources = [-1]
+    var getCellTowers = showTowers && (useGlobalCellTowerDataSource || uploadedDataSources.length > 0)
+    if (getCellTowers) {
+      cellTowerDataSources = uploadedDataSources.slice()
+      if (useGlobalCellTowerDataSource) {
+        cellTowerDataSources.push(1)
+      }
+    }
 
     var sql = `
       WITH view_window AS (
@@ -38,8 +65,7 @@ module.exports = class Location {
         SELECT l.id, l.geom,
           array_remove(array_agg(DISTINCT 'b_' || b.category_name::text)
             || array_agg(DISTINCT 'h_' || h.category_name::text)
-            || array_agg(distinct CASE WHEN t.id IS NULL THEN NULL ELSE 'towers' END)
-            || array_agg(distinct case when bu.data_source_id is null then null else 'b_uploaded' end),
+            || array_agg(distinct CASE WHEN t.id IS NULL THEN NULL ELSE 'towers' END),
           NULL) AS entity_categories
         FROM aro.locations l
           INNER JOIN states st
@@ -51,30 +77,31 @@ module.exports = class Location {
 
         ${plan_id ? `LEFT JOIN client.plan_targets pt
           ON pt.location_id = l.id
-          AND pt.plan_id = $5` : ''}
+          AND pt.plan_id = $6` : ''}
 
         LEFT JOIN aro.towers t
           ON t.location_id = l.id
-          AND t.data_source_id IN ($1)
+          AND t.data_source_id IN ($5)
 
         LEFT JOIN client.basic_classified_business b
           ON b.location_id = l.id
-          AND b.category_name IN ($2) and b.data_source_id IN ($4)
-
-       LEFT JOIN client.basic_classified_business bu
-          ON bu.location_id = l.id
-          AND bu.data_source_id > $4 
-          AND bu.data_source_id IN ($1)   
+          AND b.category_name IN ($1) and b.data_source_id IN ($3)
 
         LEFT JOIN client.basic_classified_household h
           ON h.location_id = l.id
-          AND h.category_name IN ($3)
+          AND h.category_name IN ($2) and h.data_source_id IN ($4)
 
-        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR bu.id IS NOT NULL OR h.id IS NOT NULL) ${plan_id ? `AND pt.location_id IS NULL` : ''}
+        WHERE (t.id IS NOT NULL OR b.id IS NOT NULL OR h.id IS NOT NULL) ${plan_id ? `AND pt.location_id IS NULL` : ''}
         GROUP BY 1,2
       )
     `
-    var params = [dataSources, businesses, households, default_businesses_datasource];
+    var params = [
+      businessCategories,
+      householdCategories,
+      businessDataSources,
+      householdDataSources,
+      cellTowerDataSources
+    ]
     if(plan_id) {
       params.push(plan_id);
     }

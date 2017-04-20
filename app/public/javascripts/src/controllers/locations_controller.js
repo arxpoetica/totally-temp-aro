@@ -146,41 +146,30 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
     // Select the business, household, celltower categories to show
-    var business_categories = []
-    var household_categories = []
-    var towers = []
+    var businessCategories = []
+    var householdCategories = []
+    var showTowers = false
     var dataSources = new Set()
     $scope.planState.locationTypes.forEach((locationType) => {
       if ((locationType.type === 'business') && locationType.checked) {
-        business_categories.push(locationType.key)
+        businessCategories.push(locationType.key)
       } else if ((locationType.type === 'household') && locationType.checked) {
-        household_categories.push('small')
-        household_categories.push('medium')
+        householdCategories.push('small')
+        householdCategories.push('medium')
       } else if ((locationType.type === 'celltower') && locationType.checked) {
-        towers.push('towers')
+        showTowers = true
       }
-    })
-
-    // Select the datasources to show
-    if ($scope.planState.locationDataSources.useGlobalBusiness) {
-      dataSources.add(1)
-    }
-    if ($scope.planState.locationDataSources.useGlobalHousehold) {
-      dataSources.add(1)
-    }
-    if ($scope.planState.locationDataSources.useGlobalCellTower) {
-      dataSources.add(1)
-    }
-    $scope.planState.locationDataSources.useUploaded.forEach((uploadedDataSource) => {
-      dataSources.add(uploadedDataSource.dataSourceId)
     })
 
     // Set the selected options in the API endpoint that will show locations in the layer
     var options = {
-      business_categories: business_categories,
-      household_categories: household_categories,
-      towers: towers,
-      dataSources: Array.from(dataSources)
+      businessCategories: businessCategories,
+      householdCategories: householdCategories,
+      showTowers: showTowers,
+      useGlobalBusinessDataSource: $scope.planState.locationDataSources.useGlobalBusiness,
+      useGlobalHouseholdDataSource: $scope.planState.locationDataSources.useGlobalHousehold,
+      useGlobalCellTowerDataSource: $scope.planState.locationDataSources.useGlobalCellTower,
+      uploadedDataSources: _.pluck($scope.planState.locationDataSources.useUploaded, 'dataSourceId')
     }
     locationsLayer.setApiEndpoint('/locations/:plan_id', options)
     locationsLayer.show()
