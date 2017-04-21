@@ -1,6 +1,6 @@
 /* global app swal $ config globalServiceLayers _ */
 // Search Controller
-app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', 'optimization', ($scope, $rootScope, $http, $q, map_tools, regions, optimization) => {
+app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', 'optimization','state', ($scope, $rootScope, $http, $q, map_tools, regions, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.regions = regions
@@ -18,15 +18,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     regions.removeAllGeographies()
   }
   // --
-
-  $scope.entityTypes = [
-    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
-    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
-    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
-    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
-    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
-  ]
-
   $scope.technologyTypes = [
       {id:'Fiber' , label : 'Fiber' , selected :true},
       {id:'FiveG' , label : '5G'}
@@ -41,14 +32,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
-
-  $scope.optimizeHouseholds = true
-  $scope.optimizeBusinesses = false
-  $scope.optimizeLarge = true
-  $scope.optimizeMedium = true
-  $scope.optimizeSMB = true // special case
-  $scope.optimizeTowers = true
-  $scope.optimizeUploaded = false
 
   $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
@@ -93,15 +76,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   function saveExpertMode (expertModeChanges) {
 
 	var expertChanges = JSON.parse(expertModeChanges)
-		
-	/* saving LocationTypes */ 
-	expertChanges.locationTypes.indexOf('household') > -1 ? $scope.optimizeHouseholds = true : $scope.optimizeHouseholds = false
-	expertChanges.locationTypes.indexOf('medium') > -1 ? $scope.optimizeMedium = true : $scope.optimizeMedium = false 
-	expertChanges.locationTypes.indexOf('large') > -1 ? $scope.optimizeLarge = true : $scope.optimizeLarge = false
-	expertChanges.locationTypes.indexOf('small') > -1 ? $scope.optimizeSMB = true : $scope.optimizeSMB = false
-	expertChanges.locationTypes.indexOf('celltower') > -1 ? $scope.optimizeTowers = true : $scope.optimizeTowers = false
 
-	/* saving technology */
+    var locationStateTypes = state.locationTypes;
+    locationStateTypes.map(function (locTypes) {
+      locTypes.checked = expertChanges.locationTypes.indexOf(locTypes.key) != -1;
+    });
+
+    /* saving technology */
 	$scope.selectedTechType.forEach(function(prevSelectedTechId) {
 		$('#'+prevSelectedTechId).prop('checked', false)
 	})
@@ -287,33 +268,33 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       scope = $scope.entityTypesTargeted
     }
 
-    if (scope.optimizeHouseholds) locationTypes.push('household')
-    if (scope.optimizeBusinesses) {
+    var locationDataSources = state.locationDataSources;
+    var locationStateTypes = state.locationTypes;
+
+
+    if (locationDataSources.useGlobalHousehold) locationTypes.push('household')
+    if (locationDataSources.useGlobalBusiness) {
       // locationTypes.push('businesses')
       locationTypes.push('large')
       locationTypes.push('medium')
     }
-    if (scope.optimizeMedium) locationTypes.push('medium')
-    if (scope.optimizeLarge) locationTypes.push('large')
-    if (scope.optimizeSMB) locationTypes.push('small')
-    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
-    if (scope.optimizeTowers) locationTypes.push('celltower')
+
+    locationStateTypes.forEach(function (locType) {
+       if(locType.checked){
+           locationTypes.push(locType.key);
+       }
+    });
+
+    // if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
 
     optimization.datasources = [];
     if(locationTypes.length > 0){
       optimization.datasources.push(1);
     }
 
-    if(scope.optimizeUploaded){
-      var uploadedCustomersSelect = $(".uploadCustomersAreaPlanning")
-      var selectedDatasources = uploadedCustomersSelect.select2('val')
-
-      var dataSources = [];
-      dataSources = dataSources.concat(selectedDatasources)
-      var posSources = dataSources.map((id) => +id);
-      optimization.datasources = _.uniq(optimization.datasources.concat(posSources));
+    if(locationDataSources.useUploaded.length > 0){
+      optimization.datasources.concat(locationDataSources.useUploaded)
     }
-
 
     var processingLayers = []
     var algorithm = $scope.optimizationType
