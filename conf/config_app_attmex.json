@@ -18,7 +18,7 @@
     "layout": "default",
     "defaultSearch":"Mexico City, CDMX, Mexico",
     "map_tools": {
-      "layerVisibilityThresh" : 13,
+      "layerVisibilityThresh" : 12,
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
