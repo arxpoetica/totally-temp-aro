@@ -1,6 +1,6 @@
 {
 	"mapIconFolder": "/images/map_icons/reliance/",
-	"businesses": {
+	"business": {
 		"user_upload": {
 			"active": true,
 			"label": "User Uploaded Customers"
@@ -20,11 +20,11 @@
 			}
 		}
 	},
-	"households": {
+	"household": {
 		"show": true,
 		"label": "5G"
 	},
-	"towers": {
+	"celltower": {
 		"show": true,
 		"label": "Enterprises"
 	}
