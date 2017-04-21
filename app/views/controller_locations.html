@@ -94,7 +94,8 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalBusiness">
+                 ng-model="planState.locationDataSources.useGlobalBusiness"
+                 ng-change="changeLocationsLayer()">
         </label>
         <label>Global Businesses</label>
       </div>
@@ -102,7 +103,8 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalHousehold">
+                 ng-model="planState.locationDataSources.useGlobalHousehold"
+                 ng-change="changeLocationsLayer()">
         </label>
         <label>Global Households</label>
       </div>
@@ -110,20 +112,28 @@
       <div class="customer-type">
         <label class="pull-right">
           <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalCellTower">
+                 ng-model="planState.locationDataSources.useGlobalCellTower"
+                 ng-change="changeLocationsLayer()">
         </label>
         <label>Global Towers</label>
       </div>
+      <!-- Uploaded data sources -->
+      <div class="customer-type">
+        <ui-select multiple ng-model="planState.locationDataSources.useUploaded"
+                   theme="bootstrap"
+                   close-on-select="true"
+                   on-select="changeLocationsLayer()"
+                   on-remove="changeLocationsLayer()">
+          <ui-select-match placeholder="Select uploaded data sources...">{{$item.name}} [id {{$item.dataSourceId}}]</ui-select-match>
+          <ui-select-choices class="ui-select-width-300" repeat="uploadedDataSource in allUploadedDataSources">
+            <div>{{uploadedDataSource.name}}</div>
+          </ui-select-choices>
+        </ui-select>
+        <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addCustomers()">
+          <span class="fa fa-plus"></span> Add data sources...
+        </button>
+      </div>
     </form>
-
-    <div ng-show="showUploadedCustomers" style="padding:10px; margin-left:25px; margin-right:30px">
-      <input class="form-control uploadedCustomersSelect" id="uploadedCustomersSelect"
-          ng-change="changeLocationsLayerOLD_DELETEMETODO()"
-          ng-model="selectedDatasource">
-      <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addCustomers()">
-        <span class="fa fa-plus"></span> Add customers
-      </button>
-    </div>
 
     <div class="alert alert-info text-center" role="alert" ng-show="heatmapVisible">
       To see individual locations, zoom in or turn off the heatmap button below the zoom buttons

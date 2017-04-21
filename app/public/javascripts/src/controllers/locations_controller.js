@@ -42,18 +42,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
 
-  $scope.user_id = user_id
-
-  $scope.show_commercial = config.ui.map_tools.locations.view.indexOf('commercial') >= 0
-  $scope.show_residential = config.ui.map_tools.locations.view.indexOf('residential') >= 0
-
-  $scope.show_businesses =  $scope.show_commercial
-  $scope.show_households = $scope.show_residential
-  $scope.show_towers = false
   $scope.new_location_data = null
-  $scope.industries = []
-
-  var uploadedCustomersSelect = $('.uploadedCustomersSelect')
 
   var locationStyles = {
     normal: {
@@ -157,39 +146,30 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     customerProfileLayer.setVisible($scope.overlay === 'customer_profile')
 
     // Select the business, household, celltower categories to show
-    var business_categories = []
-    var household_categories = []
-    var towers = []
+    var businessCategories = []
+    var householdCategories = []
+    var showTowers = false
     var dataSources = new Set()
     $scope.planState.locationTypes.forEach((locationType) => {
       if ((locationType.type === 'business') && locationType.checked) {
-        business_categories.push(locationType.key)
+        businessCategories.push(locationType.key)
       } else if ((locationType.type === 'household') && locationType.checked) {
-        household_categories.push('small')
-        household_categories.push('medium')
+        householdCategories.push('small')
+        householdCategories.push('medium')
       } else if ((locationType.type === 'celltower') && locationType.checked) {
-        towers.push('towers')
-        dataSources.add(1)  // Pushing towers only works if we also have the global data source id in there
+        showTowers = true
       }
     })
 
-    // Select the datasources to show
-    if ($scope.planState.locationDataSources.useGlobalBusiness) {
-      dataSources.add(1)
-    }
-    if ($scope.planState.locationDataSources.useGlobalHousehold) {
-      dataSources.add(1)
-    }
-    if ($scope.planState.locationDataSources.useGlobalCellTower) {
-      dataSources.add(1)
-    }
-
     // Set the selected options in the API endpoint that will show locations in the layer
     var options = {
-      business_categories: business_categories,
-      household_categories: household_categories,
-      towers: towers,
-      dataSources: Array.from(dataSources)
+      businessCategories: businessCategories,
+      householdCategories: householdCategories,
+      showTowers: showTowers,
+      useGlobalBusinessDataSource: $scope.planState.locationDataSources.useGlobalBusiness,
+      useGlobalHouseholdDataSource: $scope.planState.locationDataSources.useGlobalHousehold,
+      useGlobalCellTowerDataSource: $scope.planState.locationDataSources.useGlobalCellTower,
+      uploadedDataSources: _.pluck($scope.planState.locationDataSources.useUploaded, 'dataSourceId')
     }
     locationsLayer.setApiEndpoint('/locations/:plan_id', options)
     locationsLayer.show()
@@ -258,17 +238,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
   })
 
-  $scope.datasources = []
+  $scope.allUploadedDataSources =[]
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
-    $scope.datasources = []
+    $scope.allUploadedDataSources = []
     optimization.datasources = []
-
-    // unselect all entity types
-    $scope.show_towers = false
-    $scope.show_businesses = true
-    $scope.show_households = false
 
     if (plan) {
       plan.location_types = plan.location_types || []
@@ -278,32 +253,20 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
     }
 
-    uploadedCustomersSelect.select2('val', [])
-    $scope.changeLocationsLayer()
     reloadDatasources()
+    $scope.changeLocationsLayer()
   })
 
   function reloadDatasources (callback) {
     $http.get('/datasources').success((response) => {
       $scope.datasources = response
-      uploadedCustomersSelect.select2({
-        placeholder: 'Select one or more datasets',
-        escapeMarkup: (m) => m,
-        data: response.map((item) => ({ id: item.dataSourceId, text: item.name })),
-        multiple: true
-      })
+      $scope.allUploadedDataSources = response
       callback && callback(response)
     })
   }
 
-  $rootScope.$on('uploaded_customers', (e, info) => {
-    reloadDatasources((response) => {
-      var dataset = response.find((item) => item.id === info.id)
-      if (!dataset) return
-      var val = uploadedCustomersSelect.select2('val')
-      val.push(String(dataset.dataSourceId))
-      uploadedCustomersSelect.select2('val', val, true)
-    })
+  $rootScope.$on('uploaded_data_sources', (e, info) => {
+    reloadDatasources()
   })
 
   $scope.overlay_is_loading = () => {

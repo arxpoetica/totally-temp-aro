@@ -11,47 +11,64 @@ exports.configure = (api, middleware) => {
   var check_owner_permission = middleware.check_owner_permission
   var check_loggedin = middleware.check_loggedin
 
-  function findLocation(plan_id , filters , viewport) {
-      if (plan_id){
-          return models.Location.findLocations(plan_id, filters, viewport);
-      }else {
-          return models.Location.findLocationsNoPlan(filters, viewport);
-      }
-  }
-
   api.get('/locations/:plan_id', check_any_permission, middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var plan_id = +request.params.plan_id
 
-    var filters = {}
-    var keys = ['business_categories', 'household_categories', 'towers', 'dataSources']
+    var categoryFilters = {}
+    var keys = ['businessCategories', 'householdCategories']
     keys.forEach((key) => {
       var value = request.query[key] || []
       if (!Array.isArray(value)) {
         value = [value]
       }
-      filters[key] = value
+      categoryFilters[key] = value
     })
-      findLocation(plan_id , filters , viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
+
+    var uploadedDataSources = request.query['uploadedDataSources'] || []
+    if (!Array.isArray(uploadedDataSources)) {
+      uploadedDataSources = [uploadedDataSources]
+    }
+
+    models.Location.findLocations(plan_id,
+                                  viewport,
+                                  categoryFilters,
+                                  request.query['showTowers'] === 'true',
+                                  request.query['useGlobalBusinessDataSource'] === 'true',
+                                  request.query['useGlobalHouseholdDataSource'] === 'true',
+                                  request.query['useGlobalCellTowerDataSource'] === 'true',
+                                  uploadedDataSources)
+    .then(jsonSuccess(response, next))
+    .catch(next)
   })
 
-    api.get('/locations', check_loggedin, middleware.viewport, (request, response, next) => {
-        var viewport = request.viewport
-        var filters = {}
-        var keys = ['business_categories', 'household_categories', 'towers', 'dataSources']
-        keys.forEach((key) => {
-            var value = request.query[key] || []
-            if (!Array.isArray(value)) {
-                value = [value]
-            }
-            filters[key] = value
-        });
+  api.get('/locations', check_loggedin, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var categoryFilters = {}
+    var keys = ['businessCategories', 'householdCategories']
+    keys.forEach((key) => {
+        var value = request.query[key] || []
+        if (!Array.isArray(value)) {
+            value = [value]
+        }
+        categoryFilters[key] = value
+    });
 
-         findLocation(false , filters , viewport)
-            .then(jsonSuccess(response, next))
-            .catch(next)
+    var uploadedDataSources = request.query['uploadedDataSources'] || []
+    if (!Array.isArray(uploadedDataSources)) {
+      uploadedDataSources = [uploadedDataSources]
+    }
+
+    models.Location.findLocations(false,
+                                  viewport,
+                                  categoryFilters,
+                                  request.query['showTowers'] === 'true',
+                                  request.query['useGlobalBusinessDataSource'] === 'true',
+                                  request.query['useGlobalHouseholdDataSource'] === 'true',
+                                  request.query['useGlobalCellTowerDataSource'] === 'true',
+                                  uploadedDataSources)
+      .then(jsonSuccess(response, next))
+      .catch(next)
     })
 
   
