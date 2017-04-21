@@ -74,19 +74,17 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/network/carriers/:plan_id', (request, response, next) => {
-    var plan_id = request.params.plan_id
+  api.get('/network/carriers', (request, response, next) => {
     var fiberType = request.query.fiberType || 'fiber'
-    models.Network.carriers(plan_id, fiberType)
+    models.Network.carriers(fiberType)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
-  api.get('/network/carriers/:plan_id/viewport', middleware.viewport, (request, response, next) => {
-    var plan_id = request.params.plan_id
+  api.get('/network/carriers/viewport', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     var fiberType = request.query.fiberType || 'fiber'
-    models.Network.carriers(plan_id, fiberType, viewport)
+    models.Network.carriers(fiberType, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

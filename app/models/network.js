@@ -100,7 +100,7 @@ module.exports = class Network {
     return database.density(sql, [config.client_carrier_name], true, viewport, density)
   }
 
-  static carriers (plan_id, fiberType, viewport) {
+  static carriers (fiberType, viewport) {
     var params = [fiberType]
     var sql
     if (fiberType === 'fiber') {

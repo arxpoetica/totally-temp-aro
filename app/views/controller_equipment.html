@@ -13,7 +13,7 @@
               </a>
             </p>
           </div>
-          <div id="serviceLayer{{serviceLayer.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+          <div id="serviceLayer{{serviceLayer.id}}" class="panel-collapse collapse" ng-class="{'disabled' : (serviceLayer.needsPlan && !currentPlan)}" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body" style="border-top: none">
               <div ng-repeat="nodeType in serviceLayer.nodeTypes">
                 <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/composite/{{serviceLayer.name}}_{{nodeType.name}}.png" style="width:16px"></div>

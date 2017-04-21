@@ -121,10 +121,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   // --
   function recalculateMarketProfile () {
-    if (config.ARO_CLIENT === 'verizon') return
-    if (!$scope.plan) {
-      return  // Cannot recalculate market profile without a valid plan
-    }
+    if (!$scope.plan || config.ARO_CLIENT === 'verizon') return
     $scope.market_profile_calculating = true
     map.ready(() => {
       var bounds = map.getBounds()
