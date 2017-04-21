@@ -5,17 +5,18 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <div>
           <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#plan-combo-select" role="tab" data-toggle="tab" ng-click="paneClicked('view')">Open Saved Network Plan</a></li>
-            <li role="presentation"><a href="#plan-combo-create" role="tab" data-toggle="tab" ng-click="paneClicked('add')">Create New Network Plan</a></li>
+            <li role="presentation" class="active"><a href="#plan-combo-create" role="tab" data-toggle="tab" ng-click="paneClicked('add')">Create New Network Plan</a></li>
+            <li role="presentation" ><a href="#plan-combo-select" role="tab" data-toggle="tab" ng-click="paneClicked('view')">Open Saved Network Plan</a></li>
+
           </ul>
           <div class="tab-content">
-            <div role="tabpanel" class="tab-pane pane-viewPlan active" id="plan-combo-select">
-              <br>
-              <% include modal_select_plan_body.html %>
-            </div>
-            <div role="tabpanel" class="tab-pane pane-addPlan" id="plan-combo-create">
+            <div role="tabpanel" class="tab-pane pane-addPlan active" id="plan-combo-create">
               <br>
               <% include modal_new_plan_body.html %>
+            </div>
+            <div role="tabpanel" class="tab-pane pane-viewPlan " id="plan-combo-select">
+              <br>
+              <% include modal_select_plan_body.html %>
             </div>
           </div>
 
