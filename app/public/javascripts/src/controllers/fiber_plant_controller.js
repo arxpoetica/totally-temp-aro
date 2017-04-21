@@ -174,7 +174,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
   }
 
   function refreshAllCarriers () {
-    if (!$scope.plan || !map) return
+    if (!map) return
     var bounds = map.getBounds()
     if (!bounds) return
     refreshCarriers()
@@ -190,7 +190,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       swlon: bounds.getSouthWest().lng(),
       zoom: map.getZoom()
     }
-    var url = '/network/carriers/' + $scope.plan.id + '/viewport?fiberType=ilec'
+    var url = '/network/carriers/viewport?fiberType=ilec'
     $http({ url: url, params: params }).success((carriers) => {
       var all = {
         id: 'all',
@@ -212,7 +212,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       swlon: bounds.getSouthWest().lng(),
       zoom: map.getZoom()
     }
-    var url = '/network/carriers/' + $scope.plan.id + '/viewport?fiberType=fiber'
+    var url = '/network/carriers/viewport?fiberType=fiber'
     $http({ url: url, params: params }).success((carriers) => {
       $scope.carriers = carriers.map((carrier) => {
         return {

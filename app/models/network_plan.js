@@ -589,6 +589,15 @@ module.exports = class NetworkPlan {
              <width>4</width>
            </LineStyle>
           </Style>
+          <Style id="coverageGeometryColor">
+           <LineStyle>
+             <color>cd000000</color>
+             <width>1</width>
+           </LineStyle>
+           <PolyStyle>
+             <color>cd00ff00</color>
+           </PolyStyle>
+          </Style>
           <Style id="targetColor">
            <IconStyle>
              <color>ffffff00</color>
@@ -713,7 +722,8 @@ module.exports = class NetworkPlan {
         var sql = `
           SELECT
             ST_AsKML(nn.geom) AS geom, t.description,
-            hstore_to_json(nn.attributes) as attributes
+            hstore_to_json(nn.attributes) as attributes,
+            ST_AsKML(nn.coverage_geom) AS coverage_geom
           FROM client.network_nodes nn
           JOIN client.network_node_types t ON nn.node_type_id = t.id
           JOIN client.plan p ON nn.plan_id = p.id
@@ -724,6 +734,8 @@ module.exports = class NetworkPlan {
       .then((equipmentNodes) => {
         var types = _.groupBy(equipmentNodes, 'description')
         kml_output += '<Folder><name>Equipment</name>'
+        // Mark network node types that contain non-null coverage geometry for use later below
+        var nodeTypeHasGeometry = {}
         Object.keys(types).forEach((type) => {
           var arr = types[type]
           if (arr.length === 0) return
@@ -731,10 +743,30 @@ module.exports = class NetworkPlan {
           arr.forEach((node) => {
             var name = (node.attributes || {}).name || ''
             kml_output += `<Placemark><styleUrl>#sourceColor</styleUrl><name>${escape(name)}</name>${node.geom}</Placemark>\n`
+            if (node.coverage_geom) {
+              nodeTypeHasGeometry[type] = true
+            }
           })
           kml_output += '</Folder>'
         })
         kml_output += '</Folder>'
+
+        // Export 5G coverage polygons
+        kml_output += '<Folder><name>Coverage Areas</name>'
+        Object.keys(types).forEach((type) => {
+          if (nodeTypeHasGeometry[type]) {  // Only export coverage if this type has coverage geometry associated with it
+            var arr = types[type]
+            if (arr.length === 0) return
+            kml_output += `<Folder><name>${escape(type)}</name>`
+            arr.forEach((node) => {
+              var name = (node.attributes || {}).name || ''
+              kml_output += `<Placemark><styleUrl>#coverageGeometryColor</styleUrl><name>${escape(name)}</name>${node.coverage_geom}</Placemark>\n`
+            })
+            kml_output += '</Folder>'
+          }
+        })
+        kml_output += '</Folder>'
+
 
         kml_output += '</Document></kml>'
         return kml_output

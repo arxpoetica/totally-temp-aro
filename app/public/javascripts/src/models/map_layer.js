@@ -267,6 +267,11 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
 
     // Load GeoJSON data into the layer if it's not already loaded
     loadData () {
+      if(map && (map.getZoom() < config.ui.map_tools.layerVisibilityThresh)){
+        this.clearData();
+        return;
+      }
+
       if (!this.data_loaded || this.dirty) {
         this.dirty = false
         if (this.data) {

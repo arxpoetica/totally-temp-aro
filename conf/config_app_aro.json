@@ -18,6 +18,7 @@
     "layout": "default",
     "defaultSearch":"Seattle, WA, USA",
     "map_tools": {
+      "layerVisibilityThresh" : 13,
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],
