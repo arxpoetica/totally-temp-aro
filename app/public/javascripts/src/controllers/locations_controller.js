@@ -34,6 +34,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     threshold: 12,
     reload: 'always'
   })
+  reloadDatasources() // Reload data sources even without a plan
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
@@ -171,7 +172,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       useGlobalCellTowerDataSource: $scope.planState.locationDataSources.useGlobalCellTower,
       uploadedDataSources: _.pluck($scope.planState.locationDataSources.useUploaded, 'dataSourceId')
     }
-    locationsLayer.setApiEndpoint('/locations/:plan_id', options)
+    locationsLayer.setApiEndpoint('/locations', options)
     locationsLayer.show()
   }
 
