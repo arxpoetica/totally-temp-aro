@@ -60,6 +60,10 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   }
 
   tools.toggle = (name) => {
+     if(!$rootScope.currentPlan){
+       $rootScope.$broadcast('show_create_plan_dialog')
+       return;
+     }
     tools.is_visible(name) ? tools.hide(name) : tools.show(name)
   }
 
