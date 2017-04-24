@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2-bootstrap.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/nouislider.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/angular-ui-notification.min.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/animate.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
@@ -189,31 +190,6 @@
           </div>
 
           <div class="collapse navbar-collapse">
-            <!--
-            <div style="font-size: 110%; padding-top: 3px">
-              <p class="navbar-text saving" id="plan-saving">
-                <span class="label label-default"><span class="spin fa fa-repeat"></span> <span class="text">Saving plan…</span></span>
-              </p>
-              <p class="navbar-text saving" id="plan-saved">
-                <span class="label label-default"><span class="fa fa-check"></span> Plan saved</span>
-              </p>
-            </div>
-            -->
-
-            <!--<div style="float:left; width:200px" id="plan-saving-progress">
-              <div class="progress" style="margin-bottom:0; margin-top:19px;">
-                <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%"></div>
-              </div>
-            </div>-->
-
-<!--             <p class="navbar-text" ng-show="plan">
-              <a style="cursor:pointer; color:white" data-target="#build-sequence" data-toggle="modal"><small>Build Sequence</small></a>
-            </p> -->
-
-<!--             <div class="navbar-text" style="width: 200px" ng-show="plan">
-              <div id="year-slider"></div>
-            </div> -->
-
             <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
                 <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -264,9 +240,6 @@
       </nav>
       <div id="aro-header">
         <div class="header-container">
-          <!--<div class="header-column-child-width">-->
-            <!--<a href="#" ng-click="selectPlan(null)"><span class="fa fa-caret-left fa-2x header-back-button"></span></a>-->
-          <!--</div>-->
           <div class="header-column-child-width">
             <div class="header-plan" ng-click="showCombo()">
               <span ng-if="plan.name">{{plan.name}}</span>
@@ -355,7 +328,7 @@
     </div>
 
     <div id="loader-wrapper"><div class="loader"></div></div>
-
+    <div growl></div>
   </body>
 
   <!-- Angular controllers and services -->
@@ -367,7 +340,12 @@
   <script src="https://maps.googleapis.com/maps/api/js?v=3.exp<%- googleMapsKey ? '&amp;key=' + googleMapsKey : '' %>&amp;libraries=visualization,drawing"></script>
 
   <script>
-    var app = angular.module('aro', ['ngAnimate']);
+    var app = angular.module('aro', ['ngAnimate','ui-notification']);
+    app.config(['NotificationProvider', function (NotificationProvider) {
+      NotificationProvider.setOptions({
+        maxCount : 1
+      });
+    }]);
     var map;
 
     function initialize() {
@@ -422,7 +400,7 @@
   <script src="javascripts/vendors/randomColor.min.js"></script>
   <script src="javascripts/vendors/Chart.StackedBar.js"></script>
   <script src="javascripts/vendors/nouislider.min.js"></script>
-
+  <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
