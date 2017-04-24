@@ -18,14 +18,6 @@
             <div class="col-sm-8">
               <input name="file" type="file" name="dataset" class="form-control">
               <br>
-              <!-- <p class="help-block">Upload a set of customers to include in your analysis - currently only cell sites are supported. The data must include the following categories:</p>
-              <ul class="help-block" style="padding: 0 10px">
-                <li><strong>entity_category_id</strong>: can be one of those: business, household, celltower</li>
-                <li><strong>lat</strong>: latitude of the tower</li>
-                <li><strong>longitude</strong>: longitude of the tower</li>
-              </ul>
-              <p class="help-block">You may also include other columns which will be stored in a hstore field such as "type" for the cell site type.</p>
-              <a class="btn btn-primary btn-sm" href="/csv/example_upload_customers.csv" download="example_upload_customers.csv">Download example file</a> -->
             </div>
           </div>
           <div class="form-group">
@@ -37,6 +29,31 @@
 			</select>
    		    </div>
           </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">Impedance Mapping</label>
+            <div class="col-sm-8">
+              <div class="morp_impedence_table">
+                <table ng-show="Impedences.length > 0">
+                  <thead>
+                  <tr>
+                    <th class="morph_table_header">Code</th>
+                    <th class="morph_table_header">Impedance Per 100m</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr class="morp_impedence_row" ng-repeat="impedence in Impedences">
+                    <td><input name="code" class="form-control col-sm-7 morp_impedence_item" style="width: 75%" ng-model="impedence.code"></td>
+                    <td><input name="impr" class="form-control col-sm-7 morp_impedence_item" style="width: 75%" ng-model="impedence.value"></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <button type="button" class="btn btn-sm btn-primary btn-add-impc" ng-click="addImpedance()"><i class="fa fa-plus btn-add-impd"></i></button>
+              </div>
+            </div>
+          </div>
+
         </form>
       </div>
       <div class="modal-footer">
