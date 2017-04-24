@@ -870,6 +870,12 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .cursor_disabled {
     pointer-events: none;
 }
+
+.new-plan-icon{
+ padding-left: 5px;
+ padding-right: 5px;
+}
+
 .disabled {
   pointer-events: none;
   background: #eee;

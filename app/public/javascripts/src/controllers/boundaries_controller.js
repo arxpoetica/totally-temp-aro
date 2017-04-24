@@ -50,7 +50,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       reload: 'always',
       threshold: 0,
       minZoom: 9,
-      hoverField: 'name'
+      hoverField: 'name',
+      visibilityThreshold : 1
     })
   }
 
@@ -83,7 +84,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       threshold: 13,
       reload: 'dynamic',
       minZoom: 14,
-      hoverField: 'name'
+      hoverField: 'name',
+      visibilityThreshold : 1
     })
   }
 
@@ -108,7 +110,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     reload: 'always',
     threshold: 0,
     minZoom: 9,
-    hoverField: 'name'
+    hoverField: 'name',
+    visibilityThreshold : 1
   })
 
   $scope.areaLayers = [
@@ -141,7 +144,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         hoverField: 'name'
       },
       reload: 'always',
-      threshold: 0
+      threshold: 0,
+      visibilityThreshold : 1
     })
     $scope.areaLayers.push(layer)
   })
@@ -173,7 +177,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       reload: 'always',
       threshold: 0,
       minZoom: 6,
-      hoverField: 'name'
+      hoverField: 'name',
+      visibilityThreshold : 1
     })
     if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
   })

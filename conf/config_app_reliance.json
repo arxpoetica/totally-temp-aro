@@ -19,7 +19,7 @@
     "layout": "default",
     "defaultSearch":"Mumbai, Maharashtra, India",
     "map_tools": {
-      "layerVisibilityThresh" : 13,
+      "layerVisibilityThresh" : 12,
       "locations": {
         "view": ["commercial", "residential"],
         "overlay": ["density"],

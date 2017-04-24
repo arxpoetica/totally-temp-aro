@@ -359,6 +359,7 @@ module.exports = class Network {
     if (options.budget) financialConstraints.budget = options.budget
     if (options.discountRate) financialConstraints.discountRate = options.discountRate
     if (options.irrThreshold) body.threshold = options.irrThreshold
+    if (options.preIrrThreshold) financialConstraints.preIrrThreshold = options.preIrrThreshold
 
 
 
