@@ -52,6 +52,9 @@
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
     "project_menu": ["share", "export_kml"],
+    "defaults" : {
+      "impedence":0.97126
+    },
     "icons": {
       "market_profile": "fa fa-briefcase"
     },

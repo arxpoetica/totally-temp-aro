@@ -880,3 +880,21 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   pointer-events: none;
   background: #eee;
 }
+
+.morp_impedence_table {
+  max-height: 358px;
+  overflow-y: scroll;
+}
+
+.morph_table_header {
+  padding-left: 6px;
+}
+
+
+.btn-add-impc {
+  margin-top: 5px;
+}
+
+.morp_impedence_item {
+  margin: 5px 5px;
+}
