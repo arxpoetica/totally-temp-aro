@@ -876,11 +876,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
  padding-right: 5px;
 }
 
-.disabled {
-  pointer-events: none;
-  background: #eee;
-}
-
 .morp_impedence_table {
   max-height: 358px;
   overflow-y: scroll;

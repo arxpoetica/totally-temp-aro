@@ -59,8 +59,9 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     }
   }
 
-  tools.toggle = (name) => {
-     if(!$rootScope.currentPlan){
+  tools.toggle = (tool) => {
+    var name = tool.id;
+     if(!$rootScope.currentPlan && tool.needsPlan){
        $rootScope.$broadcast('show_create_plan_dialog')
        return;
      }
@@ -120,7 +121,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'Area Network Planning',
       short_name: 'A',
       icon: 'fa fa-legal fa-2x',
-      plan :true
+      needsPlan :true
     }
   ]
 
@@ -130,7 +131,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'Target builder',
       short_name: 'TB',
       icon: 'fa fa-bullseye fa-2x',
-      plan :true
+      needsPlan :true
     })
   }
 
@@ -139,7 +140,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     name: 'Backhaul',
     short_name: 'BH',
     icon: 'fa fa-undo fa-2x',
-    plan :true
+    needsPlan :true
   })
 
   var iconClass = 'fa fa-line-chart fa-2x'
@@ -148,7 +149,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     name: 'Financial Profile',
     short_name: 'F',
     icon: iconClass,
-    plan :true
+    needsPlan :true
   })
 
   if (config.ARO_CLIENT === 'demo') {
