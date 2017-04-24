@@ -98,7 +98,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       try {
         var s = search.select2('data');
         var curProject = plan.area_name === s.text
-        if(!s || !curProject){
+        if(!s || !s.geocoded){
           map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
           map.setZoom(+state.get('mapZoom') || 14)
         }
