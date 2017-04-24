@@ -461,4 +461,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.paneClicked = function (view) {
     $scope.planView = view;
   }
+
+  $rootScope.$on('show_create_plan_dialog' , function (events) {
+    $scope.showCombo();
+    $("#plan-combo").find("a[href='#plan-combo-create']").trigger('click')
+    $scope.paneClicked('add');
+  })
 }])
