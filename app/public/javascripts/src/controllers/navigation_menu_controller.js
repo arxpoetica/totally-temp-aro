@@ -106,6 +106,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.market_profile = {}
     $scope.market_profile_current_year = {}
     $rootScope.currentPlan = plan;
+
+    if(!plan){
+        //collapse optimized equipments with no plan
+      $('#serviceLayersAccordion').find('#serviceLayerall').removeClass('in');
+    }
   })
 
   $rootScope.$on('route_changed', (e) => {
