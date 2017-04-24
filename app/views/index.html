@@ -268,7 +268,10 @@
             <!--<a href="#" ng-click="selectPlan(null)"><span class="fa fa-caret-left fa-2x header-back-button"></span></a>-->
           <!--</div>-->
           <div class="header-column-child-width">
-            <div class="header-plan" ng-click="showCombo()">{{plan.name || "Select a Plan"}}</div>
+            <div class="header-plan" ng-click="showCombo()">
+              <span ng-if="plan.name">{{plan.name}}</span>
+              <span ng-if="!plan.name"><i class="fa fa-plus f-select-plan" style="font-size: 12px"></i> Select a plan</span>
+            </div>
           </div>
           <div class="header-column-child-width">
             <div class="header-plan-location"><span class="fa fa-map-marker pad10"></span>{{plan.area_name}}</div>

@@ -898,3 +898,11 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .morp_impedence_item {
   margin: 5px 5px;
 }
+
+ /*Plan selector icon*/
+.f-select-plan {
+  font-size: 15px;
+  position: relative;
+  bottom: 3px;
+  font-weight: lighter;
+}
