@@ -876,7 +876,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
  padding-right: 5px;
 }
 
-.disabled {
-  pointer-events: none;
-  background: #eee;
-}
+/*.disabled {*/
+  /*pointer-events: none;*/
+  /*background: #eee;*/
+/*}*/
