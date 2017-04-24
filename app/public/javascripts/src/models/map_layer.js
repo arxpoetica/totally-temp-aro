@@ -60,6 +60,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
       this.minZoom = options.minZoom
       this.heatmap = options.heatmap
       this.hoverField = options.hoverField
+      this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
 
       this.setDeclarativeStyle(options.declarativeStyles)
 
@@ -267,7 +268,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
 
     // Load GeoJSON data into the layer if it's not already loaded
     loadData () {
-      if(map && (map.getZoom() < config.ui.map_tools.layerVisibilityThresh)){
+      if(map && (map.getZoom() < this.visibilityThreshold)){
         this.clearData();
         return;
       }

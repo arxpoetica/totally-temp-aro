@@ -521,4 +521,11 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
+
+    $rootScope.$on('show_create_plan_dialog' , function (events) {
+        $scope.showCombo();
+        $("#plan-combo").find("a[href='#plan-combo-create']").trigger('click')
+        $scope.paneClicked('add');
+    })
+
 }])

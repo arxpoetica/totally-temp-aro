@@ -370,12 +370,12 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       changes.threshold = $scope.coverageThreshold / 100;
     }else if (algorithm === "IRR_THRESH") {
         delete  changes.budget;
-        changes.discountRate = changes.irrThreshold;
+        changes.preIrrThreshold = changes.irrThreshold;
         delete changes.irrThreshold;
     }
 
-    changes.fiberNetworkConstraints={};
-    changes.networkTypes = [];
+      changes.fiberNetworkConstraints={};
+      changes.networkTypes = [];
 
       switch ($scope.technology){
           case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
