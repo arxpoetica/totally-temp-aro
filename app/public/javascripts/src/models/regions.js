@@ -175,10 +175,7 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
     })
   }
 
-  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
-    if (!map_tools.is_visible(tool)) return
-
-    var feature = event.feature
+  function regionsSelected(feature, layer) {
     var name = feature.getProperty('name')
     if (feature.getGeometry().getType() === 'MultiPolygon') {
       feature.toGeoJson((obj) => {
@@ -192,6 +189,14 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
         $timeout(() => $rootScope.$broadcast('regions_changed'))
       })
     }
+  }
+
+  regions.regionsSelected = regionsSelected
+
+  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+    if (!map_tools.is_visible(tool)) return
+
+    regionsSelected(event.feature, layer);
   })
 
   regions.setSearchOption = (type, enabled) => {

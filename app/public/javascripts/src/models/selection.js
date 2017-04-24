@@ -28,11 +28,29 @@ app.service('selection', ($rootScope, map_layers) => {
     })
   })
 
-  $rootScope.$on('selection_tool_polygon', (e, overlay, deselect_mode) => {
-    map_layers.getFeatureLayer('locations').changeSelectionForFeaturesMatching(!deselect_mode, (feature) => {
-      var latLng = feature.getGeometry().get()
-      return google.maps.geometry.poly.containsLocation(latLng, overlay)
-    })
+  $rootScope.$on('selection_tool_polygon', (e, overlay, deselect_mode, selectBoundaries) => {
+    if(selectBoundaries){
+      Object.keys(map_layers.feature_layers).forEach(function (key) {
+        var feat = map_layers.feature_layers[key];
+
+        if(feat.isBoundaryLayer){
+          map_layers.getFeatureLayer(feat.type).changeSelectionForFeaturesMatching(!deselect_mode, (feature) => {
+            var doesContain = true;
+            feature.getGeometry().forEachLatLng((l)=>{
+              if(!google.maps.geometry.poly.containsLocation(l, overlay)){
+                doesContain = false;
+              }
+            })
+            return doesContain;
+          })
+        }
+      })
+    } else {
+      map_layers.getFeatureLayer('locations').changeSelectionForFeaturesMatching(!deselect_mode, (feature) => {
+        var latLng = feature.getGeometry().get()
+        return google.maps.geometry.poly.containsLocation(latLng, overlay)
+      })
+    }
   })
 
   return selection
