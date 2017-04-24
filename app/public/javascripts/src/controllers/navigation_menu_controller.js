@@ -1,6 +1,6 @@
 /* global app map config $ user_id google _ swal location */
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state', ($scope, $rootScope, $http, map_tools, tracker, $location, state) => {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state','$q', ($scope, $rootScope, $http, map_tools, tracker, $location, state , $q) => {
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
@@ -12,7 +12,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.currentPage = 1
   $scope.pages = [1]
-
+  $scope.planView ='add';
   if (config.route_planning.length > 0) {
     $scope.market_size_scale_n = 1000000
     $scope.market_size_scale_s = 'M'
@@ -22,7 +22,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var ids = 0
-  var search = $('#new-plan .select2, #plan-combo .select2')
+  var customLoc = {};
+  var search = $('#plan-combo .select2')
   search.select2({
     placeholder: 'Search an address, city, state or CLLI code', // config.ui.default_form_values.create_plan.select_area_text,
     ajax: {
@@ -31,14 +32,18 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       delay: 250,
       data: (term) => ({ text: term }),
       results: (data, params) => {
-        var items = data.map((location) => {
-          return {
-            id: 'id-' + (++ids),
-            text: location.name,
-            bounds: location.bounds,
-            centroid: location.centroid
-          }
+        var items = [];
+        data.forEach((location) => {
+          items.push(
+              {
+                id: 'id-' + (++ids),
+                text: location.name,
+                bounds: location.bounds,
+                centroid: location.centroid
+              }
+          );
         })
+
         $scope.search_results = items
         return {
           results: items,
@@ -48,15 +53,17 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         }
       },
       cache: true
-    }
+    },
+    initSelection : function (select, callback) {
+      callback(customLoc)
+    },
   }).on('change', (e) => {
     var selected = e.added
     if (selected) {
       $scope.new_plan_area_name = selected.text
       $scope.new_plan_area_bounds = selected.bounds
       $scope.new_plan_area_centroid = selected.centroid
-      // console.log('bounds', JSON.stringify(selected.bounds))
-      // console.log('centroid', JSON.stringify(selected.centroid))
+
     }
   })
 
@@ -89,8 +96,12 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     var centroid = plan && plan.area_centroid
     if (centroid) {
       try {
-        map.setCenter(JSON.parse(state.get('mapCenter')))
-        map.setZoom(+state.get('mapZoom') || 14)
+        var s = search.select2('data');
+        var curProject = plan.area_name === s.text
+        if(!s || !s.geocoded){
+          map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
+          map.setZoom(+state.get('mapZoom') || 14)
+        }
       } catch (err) {
         map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
         map.setZoom(14)
@@ -252,6 +263,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.loadPlans(1, () => {
       $('#select-plan').modal('show')
       tracker.track('Open Analysis')
+
+
     })
   }
 
@@ -259,6 +272,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.loadPlans(1, () => {
       $('#plan-combo').modal('show')
       tracker.track('Open Analysis')
+
+      reloadCurrentLocation();
     })
   }
 
@@ -304,6 +319,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         bounds: $scope.new_plan_area_bounds
       }
     }
+
+
     $http.post('/network_plan/create', params).success((response) => {
       state.clearPlan(response)
       $scope.selectPlan(response)
@@ -462,9 +479,58 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $scope.planView = view;
   }
 
-  $rootScope.$on('show_create_plan_dialog' , function (events) {
-    $scope.showCombo();
-    $("#plan-combo").find("a[href='#plan-combo-create']").trigger('click')
-    $scope.paneClicked('add');
-  })
+  function geoCode(latlng) {
+    var promise = $q.defer()
+
+    var geocoder = new google.maps.Geocoder;
+    geocoder.geocode({'location': latlng}, function(results, status) {
+      if (status === 'OK') {
+        if (results[1]) {
+          promise.resolve({message : results[0].formatted_address});
+        } else {
+          promise.reject({error : 'No results found'});
+        }
+      } else {
+        promise.reject({error : 'Geocoder failed due to: ' + status})
+      }
+    });
+
+    return promise.promise;
+  }
+
+  function fetchLocation(location) {
+    return $http.get("/search/addresses" , {params : {text : location.message}}).then(function (results) {
+
+      var location = results.data[0];
+      var loc = {
+        id: 'id-' + (++ids),
+        text: location.name,
+        bounds: location.bounds,
+        centroid: location.centroid,
+        geocoded : true
+      };
+
+      return loc;
+
+    });
+  }
+
+
+  function reloadCurrentLocation() {
+    var center = map.getCenter();
+    geoCode(center).then(function (address) {
+      fetchLocation(address).then(function (location) {
+        customLoc = location
+        $(search[0]).select2('val' , location ,true);
+      })
+    })
+  }
+
+
+    $rootScope.$on('show_create_plan_dialog' , function (events) {
+        $scope.showCombo();
+        $("#plan-combo").find("a[href='#plan-combo-create']").trigger('click')
+        $scope.paneClicked('add');
+    })
+
 }])
