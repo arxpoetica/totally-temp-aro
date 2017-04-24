@@ -1,6 +1,6 @@
 /* global app google map */
 // Map Layers
-app.service('map_layers', ($rootScope) => {
+app.service('map_layers', ($rootScope , $timeout) => {
   var map_layers = {}
   var feature_layers = map_layers.feature_layers = {}
   var equipment_layers = map_layers.equipment_layers = {} // used in equipment_nodes_controller
@@ -66,6 +66,8 @@ app.service('map_layers', ($rootScope) => {
         $rootScope.$broadcast('map_' + eventName, event)
       })
     })
+
+    $rootScope.$broadcast('map_loaded');
   })
 
   var lastTime = null
@@ -80,6 +82,10 @@ app.service('map_layers', ($rootScope) => {
   $rootScope.$on('map_zoom_changed', () => {
     lastTime = Date.now()
   })
+
+  $timeout(function () {
+    google.maps.event.trigger(map, "resize");
+  },100);
 
   return map_layers
 })
