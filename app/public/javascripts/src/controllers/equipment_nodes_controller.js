@@ -473,6 +473,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   var fiberLayers = []
   function reloadDatasources () {
+
+    // Remove older fiber layers (if any)
+    fiberLayers.forEach((fiberLayer) => {
+      fiberLayer.hide()     // Without this, data will be reloaded on map events. Needs to be fixed in map_layer.js.
+      fiberLayer.remove()
+    })
+    fiberLayers = []
+
     $http.get('/user_fiber/list').success((response) => {
       $scope.showingDatasources = $scope.showingDatasources
         .map((ds) => response.find((item) => item.libraryId && item.systemId === ds.systemId))
@@ -564,7 +572,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.remainingDatasources.push(datasource)
     updateOptimizationFiber()
   }
-  
+
   $scope.selectedExistingFiberIds = []
   $scope.setVisibleFibers = (servicelayer, selectedlayer) => {
 	$scope.selectedExistingFiberIds = []
