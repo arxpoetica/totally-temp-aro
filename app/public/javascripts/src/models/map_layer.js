@@ -1,7 +1,7 @@
 /* global app google map _ encodeURIComponent document $ */
 'use strict'
 
-app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils) => {
+app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,Notification) => {
   var plan = null
   $rootScope.$on('plan_selected', (e, p) => {
     plan = p
@@ -61,6 +61,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
       this.heatmap = options.heatmap
       this.hoverField = options.hoverField
       this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
+      this.isBoundaryLayer = options.isBoundaryLayer || false
 
       this.setDeclarativeStyle(options.declarativeStyles)
 
@@ -268,12 +269,13 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
 
     // Load GeoJSON data into the layer if it's not already loaded
     loadData () {
-      if(map && (map.getZoom() < this.visibilityThreshold)){
+      if(map && (map.getZoom() < this.visibilityThreshold) && ((this.heatmapLayer) && this.heatmapLayer.getData().length > 0 || this.features.length > 0)){
         this.clearData();
+        Notification.info({message: 'Layers Hidden, Zoom threshold exceeded.', positionY: 'bottom', positionX: 'right'})
         return;
       }
 
-      if (!this.data_loaded || this.dirty) {
+      if ((!this.data_loaded || this.dirty) && (plan && plan.id)) {
         this.dirty = false
         if (this.data) {
           this.addGeoJson(this.data)
@@ -534,12 +536,15 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils)
       if (!this.visible) return
       var changes = this.createEmptyChanges()
 
+      var matchingFeatures = [];
       this.data_layer.forEach((feature) => {
         if (func(feature)) {
           this.setFeatureSelected(feature, select, changes)
+          matchingFeatures.push(feature);
         }
       })
       this.broadcastChanges(changes)
+      $rootScope.$broadcast('map_layer_selected_items',this , matchingFeatures);
     }
 
     remove () {

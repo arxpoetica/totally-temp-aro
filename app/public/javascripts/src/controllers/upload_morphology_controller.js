@@ -6,6 +6,7 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
     $scope.editingDataset = {
       name: ''
     }
+    $scope.Impedences = []
   }
 
   initialValues()
@@ -29,6 +30,16 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
 		  $scope.tileselected = $scope.tile_systems[0].id;
    	  })
   }
+
+  $scope.addImpedance = () =>{
+    var impedence = {
+      code : $scope.Impedences.length + 1,
+      value : config.ui.defaults.impedence
+    }
+
+    $scope.Impedences.push(impedence);
+
+  };
 
   $scope.save = () => {
     var files = $('#upload_morphology_modal input[type=file]').get(0).files

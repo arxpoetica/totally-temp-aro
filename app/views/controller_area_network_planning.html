@@ -85,14 +85,17 @@
   </div>
 
 
-
   <br>
   <% if (config.ARO_CLIENT !== 'verizon') { %>
   <p><strong>Search or Click Geographies</strong></p>
   <div class="form-group form-group-sm">
     <input id="area-network-planning-search" type="text" class="form-control" placeholder="Search geographies">
   </div>
-
+  <div>
+    <button class="btn btn-primary btn-sm"
+            ng-class="{'btn-success': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"
+            ng-click="toggleSelectedTool('polygon')">Polygon Select</button>
+  </div>
   <p ng-hide="selectedRegions.length > 0"><em>No geographies selected</em></p>
   <ul ng-show="selectedRegions.length > 0" style="list-style-type:none; padding:0">
     <li ng-repeat="geography in selectedRegions | limitTo:5">

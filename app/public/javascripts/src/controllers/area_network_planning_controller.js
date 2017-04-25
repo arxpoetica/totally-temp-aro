@@ -1,6 +1,6 @@
 /* global app swal $ config globalServiceLayers _ */
 // Search Controller
-app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', 'optimization','state', ($scope, $rootScope, $http, $q, map_tools, regions, optimization, state) => {
+app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'regions', 'optimization', 'state', 'map_layers', ($scope, $rootScope, $http, $q, map_tools, regions, optimization, state, map_layers) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.regions = regions
@@ -476,4 +476,67 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   };
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
+
+
+    var drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: null,
+        drawingControl: false
+    });
+
+    $scope.deselectMode = false
+
+    drawingManager.addListener('overlaycomplete', (e) => {
+        var overlay = e.overlay
+        if (e.type !== drawingManager.getDrawingMode()) {
+            return overlay.setMap(null)
+        }
+        $rootScope.$broadcast('selection_tool_' + e.type, overlay, $scope.deselectMode , true)
+        setTimeout(() => {
+            overlay.setMap(null)
+        }, 100)
+    })
+
+    $(document).ready(() => drawingManager.setMap(map));
+
+    function setDrawingManagerEnabled (enabled) {
+        if (enabled) {
+            drawingManager.setDrawingMode(drawingManager.oldDrawingMode || null)
+        } else {
+            drawingManager.setDrawingMode(null)
+        }
+    }
+
+  $scope.toggleSelectedTool =(name)=>{
+
+      var unselected;
+      if ($scope.selectedTool != name) {
+          $scope.selectedTool = name
+          drawingManager.oldDrawingMode = name
+          drawingManager.setDrawingMode('polygon')
+
+          unselected = true;
+
+      } else {
+          $scope.selectedTool = null
+          drawingManager.oldDrawingMode = null
+          drawingManager.setDrawingMode(null)
+
+          unselected = false;
+
+      }
+
+      map_layers.getFeatureLayer('locations').unselectable = unselected
+      map_layers.getFeatureLayer('selected_locations').unselectable = unselected
+  }
+
+  $scope.isToolSelected = (name) => {
+    return $scope.selectedTool === name
+  }
+
+  $rootScope.$on('map_layer_selected_items', (e, layer, features) => {
+      features.forEach(function (feature) {
+        regions.regionsSelected(feature , layer)
+      })
+  })
+
 }])

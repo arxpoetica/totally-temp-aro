@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization,map_layers) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -51,9 +51,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       threshold: 0,
       minZoom: 9,
       hoverField: 'name',
-      visibilityThreshold : 1
+      visibilityThreshold : 1,
+      isBoundaryLayer : true
     })
   }
+  map_layers.addFeatureLayer(countySubdivisionsLayer);
+
 
   if (config.ui.map_tools.boundaries.view.indexOf('census_blocks') >= 0) {
     censusBlocksLayer = new MapLayer({
@@ -85,8 +88,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       reload: 'dynamic',
       minZoom: 14,
       hoverField: 'name',
-      visibilityThreshold : 1
+      visibilityThreshold : 1,
+      isBoundaryLayer : true
     })
+
+    map_layers.addFeatureLayer(censusBlocksLayer);
   }
 
   $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
@@ -111,8 +117,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     threshold: 0,
     minZoom: 9,
     hoverField: 'name',
-    visibilityThreshold : 1
+    visibilityThreshold : 1,
+    isBoundaryLayer : true
   })
+
+  map_layers.addFeatureLayer(userDefinedLayer);
 
   $scope.areaLayers = [
     censusBlocksLayer,
@@ -145,9 +154,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       },
       reload: 'always',
       threshold: 0,
-      visibilityThreshold : 1
+      visibilityThreshold : 1,
+      isBoundaryLayer : true
     })
     $scope.areaLayers.push(layer)
+    map_layers.addFeatureLayer(layer);
   })
 
   var serviceLayersColors = [
@@ -178,9 +189,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       threshold: 0,
       minZoom: 6,
       hoverField: 'name',
-      visibilityThreshold : 1
+      visibilityThreshold : 1,
+      isBoundaryLayer : true
     })
     if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
+    map_layers.addFeatureLayer(layer);
   })
 
   $scope.areaLayers.push(userDefinedLayer)
