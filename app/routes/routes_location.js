@@ -208,7 +208,9 @@ exports.configure = (api, middleware) => {
     var id = request.params.id || null
     var user = request.user
     var fullpath = request.file && request.file.path
-    models.Location.saveMorphology(user, id, name, fullpath)
+    var mappings = JSON.parse(request.body.mappings);
+
+    models.Location.saveMorphology(user, id, name, fullpath, mappings)
       .then(jsonSuccess(response, next))
       .catch(next)
   }

@@ -795,13 +795,27 @@ module.exports = class Location {
     .then((foo) => console.log('foo', foo) || foo)
   }
 
-  static saveMorphology (user, id, name, file) {
+  static saveMorphology (user, id, name, file, mappings) {
+    var maps = mappings.mappings;
+    var default_imp = mappings.default[0];
+
+    var url = config.aro_service_url + '/tile-system/' + id +'/files';
+    if(maps.length > 0){
+      var mapstr = "";
+      maps.forEach((mapping)=>{
+        mapstr += "mapping="+mapping.code+":"+mapping.value
+        mapstr += "&";
+      });
+
+      mapstr += "nodata_value="+default_imp.value;
+      url = url + "?" +mapstr;
+    }
     return Promise.resolve()
       .then(() => {
         if (id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/tile-system/' + id +'/files',
+            url: url,
             headers:{
               "Accept":"*/*"
             },

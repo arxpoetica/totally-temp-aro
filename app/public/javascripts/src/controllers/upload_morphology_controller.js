@@ -7,6 +7,7 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
       name: ''
     }
     $scope.Impedences = []
+    $scope.imp_default = 1;
   }
 
   initialValues()
@@ -41,6 +42,15 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
 
   };
 
+  $scope.removeMapping =(impedence)=>{
+    $scope.Impedences.splice($scope.Impedences.indexOf(impedence) , 1);
+
+    //correct the missing code values
+    $scope.Impedences.map((k , v)=>{
+      k.code = v + 1;
+    })
+  };
+
   $scope.save = () => {
     var files = $('#upload_morphology_modal input[type=file]').get(0).files
     submit()
@@ -50,6 +60,10 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
     var id = $scope.tileselected
     var url = id ? `/locations/morphology/${id}` : '/locations/morphology'
     var formData = new FormData(form)
+    if($scope.Impedences.length > 0){
+      var no_data = $scope.Impedences.filter((imp)=>{return imp.code == $scope.imp_default});
+      formData.append('mappings' , JSON.stringify({mappings : $scope.Impedences , default : no_data}));
+    }
     var xhr = new XMLHttpRequest()
     xhr.open('POST', url, true)
     xhr.addEventListener('error', (err) => {
