@@ -875,7 +875,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
  padding-left: 5px;
  padding-right: 5px;
 }
-
 .morp_impedence_table {
   max-height: 358px;
   overflow-y: scroll;
@@ -892,4 +891,12 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .morp_impedence_item {
   margin: 5px 5px;
+}
+
+ /*Plan selector icon*/
+.f-select-plan {
+  font-size: 15px;
+  position: relative;
+  bottom: 3px;
+  font-weight: lighter;
 }

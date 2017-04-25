@@ -61,6 +61,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
       this.heatmap = options.heatmap
       this.hoverField = options.hoverField
       this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
+      this.isBoundaryLayer = options.isBoundaryLayer || false
 
       this.setDeclarativeStyle(options.declarativeStyles)
 
@@ -535,12 +536,15 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
       if (!this.visible) return
       var changes = this.createEmptyChanges()
 
+      var matchingFeatures = [];
       this.data_layer.forEach((feature) => {
         if (func(feature)) {
           this.setFeatureSelected(feature, select, changes)
+          matchingFeatures.push(feature);
         }
       })
       this.broadcastChanges(changes)
+      $rootScope.$broadcast('map_layer_selected_items',this , matchingFeatures);
     }
 
     remove () {
