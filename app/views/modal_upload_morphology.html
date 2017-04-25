@@ -43,7 +43,11 @@
                   <tbody>
                   <tr class="morp_impedence_row" ng-repeat="impedence in Impedences">
                     <td><input name="code" class="form-control col-sm-7 morp_impedence_item" style="width: 75%" ng-model="impedence.code"></td>
-                    <td><input name="impr" class="form-control col-sm-7 morp_impedence_item" style="width: 75%" ng-model="impedence.value"></td>
+                    <td>
+                      <div class="imp_item_1 inp_txt">  <input name="impr" class="form-control col-sm-7 morp_impedence_item" style="width: 75%" ng-model="impedence.value"></div>
+                      <div class="imp_item_1 inp_radio"><input class="" ng-model="$parent.imp_default" type="radio" value="{{impedence.code}}" title="Mark as default"/></div>
+                    </td>
+                    <td><button class="btn_remove_imp" title="Remove mapping" ng-click="removeMapping(impedence)"><i class="fa fa-close"></i></button></td>
                   </tr>
                   </tbody>
                 </table>

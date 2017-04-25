@@ -900,3 +900,15 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   bottom: 3px;
   font-weight: lighter;
 }
+.imp_item_1 {
+  display: inline;
+}
+
+.imp_item_1.inp_radio {
+  position: relative;
+  top: 11px;
+}
+
+.btn_remove_imp {
+  margin-right: 5px;
+}
