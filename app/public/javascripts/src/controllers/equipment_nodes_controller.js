@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -8,7 +8,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.selected_tool = null
   $scope.vztfttp = true
-
+  $scope.planState = state;
   $scope.serviceLayers = []
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
@@ -107,9 +107,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // layer.enabled = true
         $timeout(() => {
           $(`#serviceLayer${layer.id}`).addClass('in')
-          $scope.serviceLayers.slice(1).forEach((layer) => {
-            $(`#serviceLayer${layer.id}`).addClass('disabled')
-          })
+          // $scope.serviceLayers.slice(1).forEach((layer) => {
+          //   $(`#serviceLayer${layer.id}`).addClass('disabled')
+          // })
         }, 1)
       }
       $scope.serviceLayers.forEach((layer) => {

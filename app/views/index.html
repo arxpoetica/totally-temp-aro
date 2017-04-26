@@ -9,6 +9,8 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/angular-ui-select.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/angular-ui-select.aro.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/angular-ui-notification.min.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
@@ -340,7 +342,7 @@
   <script src="https://maps.googleapis.com/maps/api/js?v=3.exp<%- googleMapsKey ? '&amp;key=' + googleMapsKey : '' %>&amp;libraries=visualization,drawing"></script>
 
   <script>
-    var app = angular.module('aro', ['ngAnimate','ui-notification']);
+    var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select']);
     app.config(['NotificationProvider', function (NotificationProvider) {
       NotificationProvider.setOptions({
         maxCount : 1
@@ -396,6 +398,7 @@
   <script src="javascripts/vendors/sweetalert.min.js"></script>
   <script src="javascripts/vendors/Chart.min.js"></script>
   <script src="javascripts/vendors/select2.min.js"></script>
+  <script src="javascripts/vendors/angular-ui-select.min.js"></script>
   <script src="javascripts/vendors/tinycolor.js"></script>
   <script src="javascripts/vendors/randomColor.min.js"></script>
   <script src="javascripts/vendors/Chart.StackedBar.js"></script>

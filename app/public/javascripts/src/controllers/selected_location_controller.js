@@ -17,7 +17,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
 
   $scope.isLoadingConfiguration = true;
   $rootScope.$on('configuration_loaded', function () {
-    $scope.cellTowerLabel = configuration.locationCategories.towers.label;
+    $scope.cellTowerLabel = configuration.locationCategories.celltower.label;
     $scope.isLoadingConfiguration = false;
   });
 

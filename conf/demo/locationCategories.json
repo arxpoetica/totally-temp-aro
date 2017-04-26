@@ -1,6 +1,6 @@
 {
 	"mapIconFolder": "/images/map_icons/demo/",
-	"businesses": {
+	"business": {
 		"user_upload": {
 			"active": true,
 			"label": "User Uploaded Customers"
@@ -20,20 +20,11 @@
 			}
 		}
 	},
-	"households": {
-		"description": "Residential",
-		"segments": {
-			"small": {
-				"show": true,
-				"label": "SFU"
-			},
-			"medium": {
-				"show": true,
-				"label": "MDU"
-			}
-		}
+	"household": {
+		"show": true,
+		"label": "Residential"
 	},
-	"towers": {
+	"celltower": {
 		"show": true,
 		"label": "Cell Sites"
 	},

@@ -23,13 +23,13 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $rootScope.$on('configuration_loaded', () => {
 
     $scope.entityTypes = {
-      smallBusiness: configuration.locationCategories.businesses.segments.small.label,
-      mediumBusiness: configuration.locationCategories.businesses.segments.medium.label,
-      largeBusiness: configuration.locationCategories.businesses.segments.large.label,
-      household: configuration.locationCategories.households.description
+      smallBusiness: configuration.locationCategories.business.segments.small.label,
+      mediumBusiness: configuration.locationCategories.business.segments.medium.label,
+      largeBusiness: configuration.locationCategories.business.segments.large.label,
+      household: configuration.locationCategories.household.label
     }
-    if (configuration.locationCategories.towers.show) {
-      $scope.entityTypes.cellTower = configuration.locationCategories.towers.label
+    if (configuration.locationCategories.celltower.show) {
+      $scope.entityTypes.cellTower = configuration.locationCategories.celltower.label
     }
     $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
       key: key,

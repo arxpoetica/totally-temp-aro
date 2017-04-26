@@ -1,5 +1,5 @@
 /* global $ app FormData XMLHttpRequest swal */
-app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', ($scope, $rootScope, $http) => {
+app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 'configuration', ($scope, $rootScope, $http, configuration) => {
   var form = $('#upload_customers_modal form').get(0)
   function initialValues () {
     $('#upload_customers_modal input[type=file]').get(0).value = ''
@@ -7,6 +7,11 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
       name: ''
     }
   }
+
+  $scope.cellTowerConfig = { label: 'Cell Tower' }
+  $rootScope.$on('configuration_loaded', () => {
+    $scope.cellTowerConfig = configuration.locationCategories.celltower
+  })
 
   initialValues()
 
@@ -55,7 +60,7 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
         return swal('Error', data.error || 'Unknown error', 'error')
       }
       $scope.editingDataset.id = data.id
-      $rootScope.$broadcast('uploaded_customers', $scope.editingDataset)
+      $rootScope.$broadcast('uploaded_data_sources', $scope.editingDataset)
       $('#upload_customers_modal').modal('hide')
     })
     xhr.send(formData)

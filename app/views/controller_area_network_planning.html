@@ -113,66 +113,6 @@
   </p>
   <% } %>
 
-  <% if (!config.ui.eye_checkboxes) { %>
-  <p><strong>Endpoints</strong></p>
-  <!-- Using ARO_CLIENT here as we are in a rush. To be refactored -->
-  <% if (config.ARO_CLIENT === 'reliance') { %>
-  <!-- For reliance, we want the business categories separate -->
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeLarge"> Very-High-Rise
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeMedium"> High-Rise
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeSMB"> Low-Rise
-    </label>
-  </div>
-  <% } else { %>
-  <!-- For all other clients, we want to club medium and large size businesses in one checkbox -->
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeSMB"> Small Businesses
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeMedium"> Medium Businesses
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeLarge"> Large Businesses
-    </label>
-  </div>
-  <% } %>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeHouseholds"> Households
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeTowers"> {{ARO_CLIENT=='reliance' ? 'Enterprise':'Cell Towers'}}
-    </label>
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" ng-model="optimizeUploaded"> Uploaded Locations
-
-      <div ng-show="optimizeUploaded" style="width: 200px">
-        <input class="form-control uploadedCustomersSelect uploadCustomersAreaPlanning" class="uploadedCustomersSelect"
-               ng-model="selectedDatasource">
-      </div>
-    </label>
-  </div>
-  <% } %>
-
   <p><strong>Technology</strong></p>
 
   <div class="checkbox" ng-repeat="type in technologyTypes">
