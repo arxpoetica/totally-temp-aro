@@ -6,8 +6,10 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
     $scope.editingDataset = {
       name: ''
     }
-    $scope.Impedences = []
+    $scope.Impedences = config.ui.defaults.impedence;
     $scope.imp_default = 1;
+    $scope.imp_length = config.ui.defaults.impedence.length;
+
   }
 
   initialValues()
@@ -17,7 +19,7 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
     $scope.editingDataset.name = (dataset && dataset.name) || ''
     $scope.editingDataset.id = dataset && dataset.id
     $('#upload_morphology_modal').modal('show')
-  })  
+  })
   
   getTiles()
   
@@ -33,22 +35,17 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
   }
 
   $scope.addImpedance = () =>{
+    $scope.imp_length++;
     var impedence = {
-      code : $scope.Impedences.length + 1,
-      value : config.ui.defaults.impedence
+      code : $scope.imp_length,
+      value : config.ui.defaults.impedence_value
     }
 
     $scope.Impedences.push(impedence);
-
   };
 
   $scope.removeMapping =(impedence)=>{
     $scope.Impedences.splice($scope.Impedences.indexOf(impedence) , 1);
-
-    //correct the missing code values
-    $scope.Impedences.map((k , v)=>{
-      k.code = v + 1;
-    })
   };
 
   $scope.save = () => {
@@ -87,4 +84,5 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
     })
     xhr.send(formData)
   }
+
 }])
