@@ -1,6 +1,6 @@
 /* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', 'state', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selectedTool = null
