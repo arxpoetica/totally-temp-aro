@@ -261,31 +261,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	  
 	var defer=$q.defer();
 	  
-    var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
       scope = $scope.entityTypesTargeted
     }
 
-    var locationDataSources = state.locationDataSources;
-    var locationStateTypes = state.locationTypes;
-
-
-    if (locationDataSources.useGlobalHousehold) locationTypes.push('household')
-    if (locationDataSources.useGlobalBusiness) {
-      // locationTypes.push('businesses')
-      locationTypes.push('large')
-      locationTypes.push('medium')
-    }
-
-    locationStateTypes.forEach(function (locType) {
-       if(locType.checked){
-           locationTypes.push(locType.key);
-       }
-    });
-
-    // if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
+    var locationDataSources = state.locationDataSources
+    var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)  // Get all location types that are checked
+    var locationTypes = _.pluck(selectedLocationTypes, 'key')   // Get the 'key' property of all checked location types
 
     optimization.datasources = [];
     if(locationTypes.length > 0){
