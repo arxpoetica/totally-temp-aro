@@ -267,23 +267,40 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       scope = $scope.entityTypesTargeted
     }
 
-    var locationDataSources = state.locationDataSources
+    // Set location types
     var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)  // Get all location types that are checked
     var locationTypes = _.pluck(selectedLocationTypes, 'key')   // Get the 'key' property of all checked location types
 
-    optimization.datasources = [];
-    if(locationTypes.length > 0){
-      optimization.datasources.push(1);
-    }
+    // Set location data sources
+    var locationDataSources = {}
 
-    if(locationDataSources.useUploaded.length > 0){
-      optimization.datasources.concat(locationDataSources.useUploaded)
+    if (state.locationDataSources.useGlobalBusiness) {
+      locationDataSources.business = [1]
+    }
+    if (state.locationDataSources.useGlobalHousehold) {
+      locationDataSources.household = [1]
+    }
+    if (state.locationDataSources.useGlobalCellTower) {
+      locationDataSources.celltower = [1]
+    }
+    if (state.locationDataSources.useUploaded.length > 0) {
+      var uploadedDataSourceIds = _.pluck(state.locationDataSources.useUploaded, 'dataSourceId')
+
+      locationDataSources.business = locationDataSources.business || []
+      locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)
+
+      locationDataSources.household = locationDataSources.household || []
+      locationDataSources.household = locationDataSources.household.concat(uploadedDataSourceIds)
+
+      locationDataSources.celltower = locationDataSources.celltower || []
+      locationDataSources.celltower = locationDataSources.celltower.concat(uploadedDataSourceIds)
     }
 
     var processingLayers = []
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
+      locationDataSources: locationDataSources,
       geographies: regions.selectedRegions.map((i) => {
         var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
         // geography information may be too large so we avoid to send it for known region types
@@ -380,7 +397,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     $scope.selectLocationTypes = selectLocationTypes
-    changes.entityDataSources = optimization.datasources
     
     var fiberSourceIds = optimization.getFiberSourceIds
     changes.fiberSourceIds = fiberSourceIds()
