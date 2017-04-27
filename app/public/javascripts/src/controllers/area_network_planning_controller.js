@@ -261,45 +261,46 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	  
 	var defer=$q.defer();
 	  
-    var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
       scope = $scope.entityTypesTargeted
     }
 
-    var locationDataSources = state.locationDataSources;
-    var locationStateTypes = state.locationTypes;
+    // Set location types
+    var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)  // Get all location types that are checked
+    var locationTypes = _.pluck(selectedLocationTypes, 'key')   // Get the 'key' property of all checked location types
 
+    // Set location data sources
+    var locationDataSources = {}
 
-    if (locationDataSources.useGlobalHousehold) locationTypes.push('household')
-    if (locationDataSources.useGlobalBusiness) {
-      // locationTypes.push('businesses')
-      locationTypes.push('large')
-      locationTypes.push('medium')
+    if (state.locationDataSources.useGlobalBusiness) {
+      locationDataSources.business = [1]
     }
-
-    locationStateTypes.forEach(function (locType) {
-       if(locType.checked){
-           locationTypes.push(locType.key);
-       }
-    });
-
-    // if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
-
-    optimization.datasources = [];
-    if(locationTypes.length > 0){
-      optimization.datasources.push(1);
+    if (state.locationDataSources.useGlobalHousehold) {
+      locationDataSources.household = [1]
     }
+    if (state.locationDataSources.useGlobalCellTower) {
+      locationDataSources.celltower = [1]
+    }
+    if (state.locationDataSources.useUploaded.length > 0) {
+      var uploadedDataSourceIds = _.pluck(state.locationDataSources.useUploaded, 'dataSourceId')
 
-    if(locationDataSources.useUploaded.length > 0){
-      optimization.datasources.concat(locationDataSources.useUploaded)
+      locationDataSources.business = locationDataSources.business || []
+      locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)
+
+      locationDataSources.household = locationDataSources.household || []
+      locationDataSources.household = locationDataSources.household.concat(uploadedDataSourceIds)
+
+      locationDataSources.celltower = locationDataSources.celltower || []
+      locationDataSources.celltower = locationDataSources.celltower.concat(uploadedDataSourceIds)
     }
 
     var processingLayers = []
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
+      locationDataSources: locationDataSources,
       geographies: regions.selectedRegions.map((i) => {
         var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
         // geography information may be too large so we avoid to send it for known region types
@@ -396,7 +397,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     $scope.selectLocationTypes = selectLocationTypes
-    changes.entityDataSources = optimization.datasources
     
     var fiberSourceIds = optimization.getFiberSourceIds
     changes.fiberSourceIds = fiberSourceIds()

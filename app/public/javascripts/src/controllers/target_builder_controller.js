@@ -1,6 +1,6 @@
 /* global app user_id google $ map FormData XMLHttpRequest swal config _ */
 // Search Controller
-app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization) => {
+app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', 'state', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.selectedTool = null
@@ -216,29 +216,40 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       scope = $scope.entityTypesTargeted
     }
 
-    if (scope.optimizeHouseholds) locationTypes.push('household')
-    if (scope.optimizeBusinesses) locationTypes.push('businesses')
-    if (scope.optimizeMedium) locationTypes.push('medium')
-    if (scope.optimizeLarge) locationTypes.push('large')
-    if (scope.optimizeSMB) locationTypes.push('small')
-    if (scope.optimize2kplus) locationTypes.push('mrcgte2000')
-    if (scope.optimizeTowers) locationTypes.push('celltower')
+    // Set location types
+    var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)  // Get all location types that are checked
+    var locationTypes = _.pluck(selectedLocationTypes, 'key')   // Get the 'key' property of all checked location types
 
-    if(scope.optimizeUploaded){
-      var uploadedCustomersSelect = $('.uploadCustomersTargetBuilding')
-      var selectedDatasources = uploadedCustomersSelect.select2('val')
+    // Set location data sources
+    var locationDataSources = {}
 
-      var dataSources = [];
-      dataSources = dataSources.concat(selectedDatasources)
-      var posSources = dataSources.map((id) => +id);
-      optimization.datasources = _.uniq(optimization.datasources.concat(posSources));
-      //changeSelectionForFeaturesMatching(dataSources)
+    if (state.locationDataSources.useGlobalBusiness) {
+      locationDataSources.business = [1]
+    }
+    if (state.locationDataSources.useGlobalHousehold) {
+      locationDataSources.household = [1]
+    }
+    if (state.locationDataSources.useGlobalCellTower) {
+      locationDataSources.celltower = [1]
+    }
+    if (state.locationDataSources.useUploaded.length > 0) {
+      var uploadedDataSourceIds = _.pluck(state.locationDataSources.useUploaded, 'dataSourceId')
+
+      locationDataSources.business = locationDataSources.business || []
+      locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)
+
+      locationDataSources.household = locationDataSources.household || []
+      locationDataSources.household = locationDataSources.household.concat(uploadedDataSourceIds)
+
+      locationDataSources.celltower = locationDataSources.celltower || []
+      locationDataSources.celltower = locationDataSources.celltower.concat(uploadedDataSourceIds)
     }
 
     var processingLayers = []
     var algorithm = $scope.optimizationType
     var changes = {
       locationTypes: locationTypes,
+      locationDataSources: locationDataSources,
       algorithm: $scope.optimizationType,
       budget: parseBudget(),
       irrThreshold: $scope.irrThreshold / 100,
@@ -306,7 +317,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     }
 
     $scope.selectLocationTypes = selectLocationTypes
-    changes.entityDataSources = optimization.datasources
     
     var fiberSourceIds = optimization.getFiberSourceIds
     changes.fiberSourceIds = fiberSourceIds()
