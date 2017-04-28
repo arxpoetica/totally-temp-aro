@@ -5,6 +5,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.map_tools = map_tools
   $scope.regions = regions
   $scope.ARO_CLIENT = config.ARO_CLIENT
+  $scope.state = state
 
   // selected regions
   $scope.selectedRegions = []
@@ -33,10 +34,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.calculating = false
 
-  $scope.optimizationType = 'CAPEX'
-  $scope.irrThreshold = $scope.irrThresholdRange = 10
+  $scope.irrThresholdRange = state.optimizationOptions.preIrrThreshold
   $scope.budget = 10000000
-  $scope.technology = 'direct_routing' // 'odn1'
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
   $scope.polygonOptions = {
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
@@ -51,19 +50,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.routeGenerationOptionsValues = {}
 
   $scope.optimizationTypeOptions = []
-
-  var budgetInput = $('#area_network_planning_controller input[name=budget]')
-  budgetInput.val($scope.budget.toLocaleString())
-
-  const parseBudget = () => +(budgetInput.val() || '0').match(/\d+/g).join('') || 0
-
-  budgetInput.on('focus', () => {
-    budgetInput.val(String(parseBudget()))
-  })
-
-  budgetInput.on('blur', () => {
-    budgetInput.val(parseBudget().toLocaleString())
-  })
   
   $scope.runExpertMode = () => {
 	  $scope.prerun().then(function(changes){
@@ -99,20 +85,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	});
 		
 	/* saving network construction */
-	switch (expertChanges.fiberNetworkConstraints.routingMode.toUpperCase()){
-	   case "DIRECT_ROUTING" :  $scope.technology = "direct_routing";
-	       break;
-	   case "ODN_1": $scope.technology = "odn1";
-	       break;
-	   case "ODN_2": $scope.technology = "odn2";
-	       break;
-	}
+  $scope.state.optimizationOptions.fiberNetworkConstraints = expertChanges.fiberNetworkConstraints
 
 	/* saving optimization type */
-	if (expertChanges.algorithm === 'UNCONSTRAINED')
-		$scope.optimizationType = 'CAPEX'
-	else
-		$scope.optimizationType = expertChanges.algorithm
+  $scope.state.optimizationOptions.algorithm = expertChanges.algorithm
 			
 	/* saving regions */		
 	regions.removeAllGeographies()
@@ -191,9 +167,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
     if (plan) {
       $scope.reportName = plan.name
-      var optimizationType = plan.optimization_type
-      if (!optimizationType || optimizationType === 'UNCONSTRAINED') optimizationType = 'CAPEX'
-      $scope.optimizationType = optimizationType
+      $scope.state.optimizationOptions.algorithm = plan.optimization_type ? plan.optimization_type : 'UNCONSTRAINED'
     }
 
     $scope.routeGenerationOptions.forEach((option) => {
@@ -224,11 +198,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
 
   $scope.irrThresholdRangeChanged = () => {
-    $scope.irrThreshold = +$scope.irrThresholdRange
+    $scope.state.optimizationOptions.preIrrThreshold = +$scope.irrThresholdRange
   }
 
   $scope.irrThresholdChanged = () => {
-    $scope.irrThresholdRange = $scope.irrThreshold
+    $scope.irrThresholdRange = $scope.state.optimizationOptions.preIrrThreshold
   }
 
   var canceler = null
@@ -258,12 +232,13 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   $scope.prerun = () => {
+      console.log(state.getOptimizationBody())
 	  
 	var defer=$q.defer();
 	  
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 
-    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+    if ($scope.optimizationMode === 'targets' && $scope.state.optimizationOptions.algorithm === 'IRR') {
       scope = $scope.entityTypesTargeted
     }
 
@@ -300,7 +275,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     var processingLayers = []
-    var algorithm = $scope.optimizationType
+    var algorithm = $scope.state.optimizationOptions.algorithm
     var changes = {
       locationTypes: locationTypes,
       locationDataSources: locationDataSources,
@@ -318,9 +293,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         }
         return info
       }),
-      algorithm: $scope.optimizationType,
-      budget: parseBudget(),
-      irrThreshold: $scope.irrThreshold / 100,
+      algorithm: $scope.state.optimizationOptions.algorithm,
+      budget: $scope.state.optimizationOptions.budget,
+      irrThreshold: $scope.state.optimizationOptions.preIrrThreshold / 100,
       selectionMode: $scope.optimizationMode === 'boundaries' ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     }
     if ($rootScope.selectedUserDefinedBoundary) {
@@ -330,8 +305,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       changes.processingLayers = _.uniq(processingLayers)
     }
 
-    if (algorithm === 'CAPEX') {
-      algorithm = 'UNCONSTRAINED'
+    if (algorithm === 'UNCONSTRAINED') {
       changes.algorithm = algorithm
       delete changes.budget
       delete changes.irrThreshold
@@ -362,19 +336,12 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         delete changes.irrThreshold;
     }
 
-      changes.fiberNetworkConstraints={};
-      changes.networkTypes = [];
+    changes.fiberNetworkConstraints={
+      routingMode = $scope.state.optimizationOptions.fiberNetworkConstraints.routingMode
+    }
 
-      switch ($scope.technology){
-          case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
-              break;
-          case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
-              break;
-          case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
-              break;
-      }
-
-     changes.networkTypes = $scope.selectedTechType;
+    changes.networkTypes = [];
+    changes.networkTypes = $scope.selectedTechType;
     if($scope.selectedTechType.indexOf("FiveG")!=-1){
         if($scope.cellNodeConstraints.cellRadius == ""){
             $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
@@ -388,7 +355,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     var selectLocationTypes = []
-    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
+    if ($scope.optimizationMode === 'targets' && $scope.state.optimizationOptions.algorithm === 'IRR') {
       selectLocationTypes = Object.keys($scope.entityTypesTargeted)
         .map((key) => {
           return $scope.entityTypesTargeted[key]
@@ -451,15 +418,15 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   function optimizationModeChanged (e, mode) {
     $scope.optimizationMode = mode
-    $scope.optimizationType = 'CAPEX'
+    $scope.state.optimizationOptions.algorithm = 'UNCONSTRAINED'
     if (mode === 'targets') {
       $scope.optimizationTypeOptions = [
-        { id: 'CAPEX', label: 'Full Coverage' },
+        { id: 'UNCONSTRAINED', label: 'Full Coverage' },
         { id: 'IRR', label: 'Budget' }
       ]
     } else {
       $scope.optimizationTypeOptions = [
-        { id: 'CAPEX', label: 'Full Coverage' },
+        { id: 'UNCONSTRAINED', label: 'Full Coverage' },
         { id: 'MAX_IRR', label: 'Maximum IRR' },
         { id: 'IRR', label: 'Budget' },
         { id: 'BUDGET_IRR', label: 'IRR Target' },

@@ -1,10 +1,10 @@
 <div id="area_network_planning_controller">
   <p><strong>Optimization Type</strong></p>
   <select class="form-control"
-    ng-model="optimizationType"
+    ng-model="state.optimizationOptions.algorithm"
     ng-options="item.id as item.label for item in optimizationTypeOptions">
   </select>
-  <div ng-show="optimizationType === 'TARGET_IRR' || optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR_THRESH'">
+  <div ng-show="state.optimizationOptions.algorithm === 'TARGET_IRR' || state.optimizationOptions.algorithm === 'BUDGET_IRR' || state.optimizationOptions.algorithm === 'IRR_THRESH'">
     <br>
     <p><strong>IRR Threshold</strong></p>
     <div class="row">
@@ -14,23 +14,23 @@
       <div class="col-md-5">
         <div class="form-group form-group-sm">
           <div class="input-group input-group-sm">
-            <input type="number" min="0" max="100" step="1" ng-model="irrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+            <input type="number" min="0" max="100" step="1" ng-model="state.optimizationOptions.preIrrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
             <div class="input-group-addon">%</div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div ng-show="optimizationType === 'BUDGET_IRR' || optimizationType === 'IRR' || optimizationType === 'IRR_THRESH'">
+  <div ng-show="state.optimizationOptions.algorithm === 'BUDGET_IRR' || state.optimizationOptions.algorithm === 'IRR' || state.optimizationOptions.algorithm === 'IRR_THRESH'">
     <br>
-    <div ng-hide="optimizationType === 'IRR_THRESH'">
+    <div ng-hide="state.optimizationOptions.algorithm === 'IRR_THRESH'">
       <p><strong>Target Capital</strong></p>
       <div class="row">
         <div class="col-md-12">
           <div class="form-group form-group-sm">
             <div class="input-group input-group-sm">
               <div class="input-group-addon"><%- config.currency_symbol %></div>
-              <input type="text" class="form-control text-right" placeholder="Amount" value="10,000,000" name="budget">
+              <input type="text" class="form-control text-right" placeholder="Amount" ng-model="state.optimizationOptions.budget">
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
         <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
       </div>
     </div>
-    <div ng-show="optimizationMode === 'targets' && optimizationType === 'IRR'">
+    <div ng-show="optimizationMode === 'targets' && state.optimizationOptions.algorithm === 'IRR'">
       <br>
       <p><strong>Non-Targeted Customers</strong></p>
       <div class="checkbox" ng-repeat="entity in entityTypes">
@@ -75,7 +75,7 @@
       </div>
     </div>
   </div>
-  <div ng-show="optimizationType === 'COVERAGE'">
+  <div ng-show="state.optimizationOptions.algorithm === 'COVERAGE'">
     <br>
     <p><strong>Coverage Target</strong></p>
     <div class="row">
@@ -177,13 +177,13 @@
   <p><strong>Network Construction</strong></p>
   <form>
 
-    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="technology" >
-      <option value="direct_routing">Unsplit Routing</option>
-      <option value="odn1" >Hub-Only Split</option>
+    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="state.optimizationOptions.fiberNetworkConstraints.routingMode" >
+      <option value="DIRECT_ROUTING">Unsplit Routing</option>
+      <option value="ODN_1" >Hub-Only Split</option>
       <% if (config.ARO_CLIENT === 'reliance') { %>
-      <option value="odn2" > Hub-Terminal Split </option>
+      <option value="ODN_2">Hub-Terminal Split </option>
       <% } else {%>
-      <option value="odn2" >Hub-Distribution Split</option>
+      <option value="ODN_2">Hub-Distribution Split</option>
       <% } %>
     </select>
 
@@ -193,7 +193,7 @@
 
   <% if (config.ARO_CLIENT === 'verizon') { %>
 
-  <div ng-show="optimizationType === 'TABC'">
+  <div ng-show="state.optimizationOptions.algorithm === 'TABC'">
     <p><strong>Route Generation Options</strong></p>
     <form>
       <div class="checkbox" ng-repeat="option in routeGenerationOptions">
