@@ -77,8 +77,8 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
   
-  api.get('/boundary/info', (request, response, next) => {
-    var serviceareas = request.query.expertSelectedWirecenters
+  api.post('/boundary/info', (request, response, next) => {
+    var serviceareas = request.body.expertSelectedWirecenters
     models.Boundary.getBoundariesInfo(serviceareas)
       .then(jsonSuccess(response, next))
       .catch(next)

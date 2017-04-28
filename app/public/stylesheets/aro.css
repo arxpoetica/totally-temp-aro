@@ -760,6 +760,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .selected-location-pill-padding {
   padding: 4px 10px!important;
+  color:white;
 }
 
 .selected-modal-table-header {
