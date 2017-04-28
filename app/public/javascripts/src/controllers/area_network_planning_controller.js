@@ -304,7 +304,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       geographies: regions.selectedRegions.map((i) => {
         var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
         // geography information may be too large so we avoid to send it for known region types
-        if (standardTypes.indexOf(i.type) === -1) {
+        // if (standardTypes.indexOf(i.type) === -1) {
+        //   info.geog = i.geog
+        // }
+        if(!i.id){
           info.geog = i.geog
         }
         if (i.layerId) {
