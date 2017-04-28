@@ -156,11 +156,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	var defer=$q.defer();	
 	var params = {
 		expertSelectedWirecenters: expertSelectedWirecenters
-	} 
+	}
 	$http({
 		url: '/boundary/info',
-		method: 'GET',
-        params: params
+		method: 'POST',
+        data: params
     })
 	.success((response) => {
 		defer.resolve(response); 	  
