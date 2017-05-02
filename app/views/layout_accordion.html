@@ -85,6 +85,28 @@
       </div>
     </div>
 
+
+    <div class="panel panel-default wrapper_csites_controller" ng-controller="construction_sites_controller">
+      <div class="panel-heading" role="tab">
+        <h4 class="panel-title">
+          <div class="pull-right hide-on-collapsed">
+            <span class="fa fa-info-circle" data-toggle="popover" data-trigger="hover" data-placement="bottom"
+              data-content="Select locations for Generation of possible construction sites."></span>
+          </div>
+
+          <span class="hide-on-expanded icon icon-network-equipment"></span>
+          <a class="collapsed hide-on-collapsed" role="button" data-toggle="collapse" data-parent="#map-tools-accordion" href="#map-tools-construction-sites">
+            Construction Sites
+          </a>
+        </h4>
+      </div>
+      <div id="map-tools-construction-sites" class="panel-collapse collapse" role="tabpanel" data-tool="construction_sites">
+        <div class="panel-body">
+          <% include controller_construction_sites.html %>
+        </div>
+      </div>
+    </div>
+
     <div class="panel panel-default" ng-controller="boundaries_controller">
       <div class="panel-heading" role="tab">
         <h4 class="panel-title">

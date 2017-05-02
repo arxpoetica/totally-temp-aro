@@ -50,6 +50,31 @@
     },
     "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
     "project_menu": ["share", "export_kml"],
+    "defaults" : {
+      "impedence":[{
+        "code" : "-9999",
+        "value" : ".35"
+      },{
+        "code" : "1",
+        "value" : "0.225"
+      },{
+        "code" : "3",
+        "value" : "0.35"
+      },{
+        "code" : "4",
+        "value" : "0.823346304"
+      },{
+        "code" : "5",
+        "value" : "1"
+      },{
+        "code" : "0",
+        "value" : "0.35"
+      },{
+        "code" : "65535",
+        "value" : "0.35"
+      }],
+      "impedence_value" : 0.97126
+    },
     "icons": {
       "market_profile": "fa fa-briefcase"
     },
