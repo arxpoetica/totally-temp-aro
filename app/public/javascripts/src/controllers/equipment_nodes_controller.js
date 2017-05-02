@@ -171,7 +171,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         iconW = iconW > 35 ? 35 : iconW;
         if (name) {
           styles.icon = {
-            anchor: new google.maps.Point(15, 15),
+            anchor: new google.maps.Point(iconW /2, iconW/2),
             url: `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`,
             scaledSize:  new google.maps.Size(iconW, iconW)
           }
