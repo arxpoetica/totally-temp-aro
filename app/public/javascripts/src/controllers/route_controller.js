@@ -10,13 +10,4 @@ app.controller('route_controller', ['$rootScope', 'selection', 'map_tools', ($ro
     selection.clearSelection()
   })
 
-  $rootScope.$on('map_zoom_changed', () => {
-    if (map.getZoom() < 11) {
-      map_tools.disable('locations')
-      map_tools.disable('fiber_plant')
-    } else {
-      map_tools.enable('locations')
-      map_tools.enable('fiber_plant')
-    }
-  })
 }])
