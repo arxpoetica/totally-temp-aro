@@ -103,7 +103,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     },
     {
       id: 'construction_sites',
-      name: 'Construction_Sites',
+      name: 'Construction Sites',
       short_name: 'C',
       icon: 'fa fa-wrench fa-2x'
     },
