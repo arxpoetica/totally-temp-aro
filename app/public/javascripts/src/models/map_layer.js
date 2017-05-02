@@ -62,6 +62,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
       this.hoverField = options.hoverField
       this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
       this.isBoundaryLayer = options.isBoundaryLayer || false
+      this.scaleIcon = options.scaleIcon || false
 
       this.setDeclarativeStyle(options.declarativeStyles)
 
@@ -144,6 +145,10 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
           } else if (this.reload === 'always') {
             this.markAsDirty()
           }
+
+          if(this.scaleIcon){
+              this.data_layer.revertStyle()    ;
+          }
         })
       })
 
@@ -170,7 +175,9 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
           styles.draggable = true
         }
         var icon = !styles.icon && feature.getProperty('icon')
-        if (icon) styles.icon = icon
+        if (icon) {
+          styles.icon = icon;
+        }
         this.declarativeStyles && this.declarativeStyles(feature, styles)
         return styles
       })
