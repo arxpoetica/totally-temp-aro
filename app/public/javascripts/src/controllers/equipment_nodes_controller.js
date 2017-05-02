@@ -162,12 +162,19 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       },
       threshold: 12,
       reload: 'always',
+      scaleIcon : true,
       declarativeStyles: (feature, styles) => {
+        var zoom  = map.getZoom();
+        //https://gis.stackexchange.com/questions/108763/how-to-calculate-pixels-per-meter-ratio-according-to-google-or-bing-map-zoom-le
+        var scale = zoom /(156543.03392 * Math.cos(13.0373668 * Math.PI / 180) / Math.pow(2, zoom));
         var name = feature.getProperty('name')
+        var iconW = zoom * scale;
+        iconW = iconW > 35 ? 35 : iconW;
         if (name) {
           styles.icon = {
-            anchor: new google.maps.Point(15, 15),
-            url: `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`
+            anchor: new google.maps.Point(iconW /2, iconW/2),
+            url: `/images/map_icons/${config.ARO_CLIENT}/composite/${layer.name}_${name}.png`,
+            scaledSize:  new google.maps.Size(iconW, iconW)
           }
         } else {
           styles.icon = { path: 0, scale: 3, strokeColor: 'brown' }
