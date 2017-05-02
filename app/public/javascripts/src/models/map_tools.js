@@ -102,6 +102,12 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       icon: 'fa fa-sitemap fa-2x'
     },
     {
+      id: 'construction_sites',
+      name: 'Construction_Sites',
+      short_name: 'C',
+      icon: 'fa fa-wrench fa-2x'
+    },
+    {
       id: 'fiber_plant',
       name: 'Competitor Networks',
       short_name: 'F',
