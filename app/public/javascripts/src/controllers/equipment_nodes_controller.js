@@ -165,6 +165,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       scaleIcon : true,
       declarativeStyles: (feature, styles) => {
         var zoom  = map.getZoom();
+        //https://gis.stackexchange.com/questions/108763/how-to-calculate-pixels-per-meter-ratio-according-to-google-or-bing-map-zoom-le
         var scale = zoom /(156543.03392 * Math.cos(13.0373668 * Math.PI / 180) / Math.pow(2, zoom));
         var name = feature.getProperty('name')
         var iconW = zoom * scale;
