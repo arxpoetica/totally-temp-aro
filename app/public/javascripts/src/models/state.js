@@ -62,7 +62,17 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
       customOptimization: null,
       fiberSourceIds: [],
       networkTypes: null,
-      threshold: null
+      threshold: null,
+      routeGenerationOptions: [
+        { id: 'T', value: 'A Route', checked: false },
+        { id: 'A', value: 'B Route', checked: false },
+        { id: 'B', value: 'C Route', checked: false },
+        { id: 'C', value: 'D Route', checked: false }
+      ],
+      technologies: {
+        fiber: false,
+        fiveG: false
+      }
     }
 
     // Iterate over the business segments in the configuration
@@ -158,6 +168,13 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
 
     // Set algorithm
     optimizationBody.algorithm = service.optimizationOptions.algorithm
+    if (service.optimizationOptions.algorithm === 'TABC') {
+      var generations = service.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
+      optimizationBody.customOptimization = {
+        name: 'TABC',
+        map: { generations: generations.join(',') }
+      }
+    }
 
     // Set regions/geometries for area planning
     var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined', 'wirecenter', 'cran', 'directional_facility']
@@ -179,43 +196,10 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
     optimizationBody.selectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     optimizationBody.fiberNetworkConstraints = service.optimizationOptions.fiberNetworkConstraints
 
+    if ()
+
     // TODO: USER DEFINED BOUNDARIES
     return optimizationBody
-
-
-
-
-    // if (algorithm === 'CAPEX') {
-    //   algorithm = 'UNCONSTRAINED'
-    //   changes.algorithm = algorithm
-    //   delete changes.budget
-    //   delete changes.irrThreshold
-    // } else if (algorithm === 'MAX_IRR') {
-    //   delete changes.budget
-    //   delete changes.irrThreshold
-    // } else if (algorithm === 'IRR') {
-    //   delete changes.irrThreshold
-    // } else if (algorithm === 'BUDGET_IRR') {
-    // } else if (algorithm === 'TABC') {
-    //   delete changes.budget
-    //   delete changes.irrThreshold
-    //   var values = $scope.routeGenerationOptionsValues
-    //   var generations = Object.keys(values).filter((id) => values[id])
-    //   changes.customOptimization = {
-    //     name: 'TABC',
-    //     map: {
-    //       generations: generations.join(',')
-    //     }
-    //   }
-    // } else if (algorithm === "COVERAGE") {
-    //   delete changes.budget
-    //   delete changes.irrThreshold
-    //   changes.threshold = $scope.coverageThreshold / 100;
-    // } else if (algorithm === "IRR_THRESH") {
-    //   delete changes.budget;
-    //   changes.preIrrThreshold = changes.irrThreshold;
-    //   delete changes.irrThreshold;
-    // }
 
     // changes.networkTypes = [];
     // changes.networkTypes = $scope.selectedTechType;

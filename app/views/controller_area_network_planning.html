@@ -196,10 +196,10 @@
   <div ng-show="state.optimizationOptions.algorithm === 'TABC'">
     <p><strong>Route Generation Options</strong></p>
     <form>
-      <div class="checkbox" ng-repeat="option in routeGenerationOptions">
+      <div class="checkbox" ng-repeat="option in state.optimizationOptions.routeGenerationOptions">
         <label>
           <input type="checkbox"
-            ng-model="routeGenerationOptionsValues[option.id]"
+            ng-model="option.checked"
             ng-click="routeGenerationOptionsChanged(option.id)"> {{ option.value }}
         </label>
       </div>

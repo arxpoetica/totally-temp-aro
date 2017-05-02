@@ -41,14 +41,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
 
-  $scope.routeGenerationOptions = [
-    { id: 'T', value: 'A Route' },
-    { id: 'A', value: 'B Route' },
-    { id: 'B', value: 'C Route' },
-    { id: 'C', value: 'D Route' }
-  ]
-  $scope.routeGenerationOptionsValues = {}
-
   $scope.optimizationTypeOptions = []
   
   $scope.runExpertMode = () => {
@@ -170,28 +162,24 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       $scope.state.optimizationOptions.algorithm = plan.optimization_type ? plan.optimization_type : 'UNCONSTRAINED'
     }
 
-    $scope.routeGenerationOptions.forEach((option) => {
-      $scope.routeGenerationOptionsValues[option.id] = true
-    })
-
     $scope.entityTypes.forEach((entity) => {
       $scope.entityTypesTargeted[entity.id] = true
     })
   })
 
   $scope.routeGenerationOptionsChanged = (id) => {
-    if ($scope.routeGenerationOptionsValues[id]) {
+    if ($scope.state.routeGenerationOptions[id]) {
       // check all above
-      $scope.routeGenerationOptions.some((option) => {
+      $scope.state.optimizationOptions.routeGenerationOptions.some((option) => {
         if (option.id === id) return true
-        $scope.routeGenerationOptionsValues[option.id] = true
+        $scope.state.optimizationOptions.routeGenerationOptions[option.id].checked = true
         return false
       })
     } else {
       // uncheck all below
-      $scope.routeGenerationOptions.slice(0).reverse().some((option) => {
+      $scope.state.optimizationOptions.routeGenerationOptions.slice(0).reverse().some((option) => {
         if (option.id === id) return true
-        $scope.routeGenerationOptionsValues[option.id] = false
+        $scope.state.optimizationOptions.routeGenerationOptions[option.id].checked = false
         return false
       })
     }
@@ -337,7 +325,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
 
     changes.fiberNetworkConstraints={
-      routingMode = $scope.state.optimizationOptions.fiberNetworkConstraints.routingMode
+      routingMode: $scope.state.optimizationOptions.fiberNetworkConstraints.routingMode
     }
 
     changes.networkTypes = [];
