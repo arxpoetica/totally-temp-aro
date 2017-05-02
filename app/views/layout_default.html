@@ -61,6 +61,22 @@
 </div>
 </div>
 
+<div class="map-tool-wrapper wrapper_csites_controller" ng-controller="construction_sites_controller">
+    <div ng-show="map_tools.is_visible('construction_sites')" class="map-tool panel panel-primary">
+        <div class="panel-heading" ng-bind="map_tools.get_tool_name('construction_sites')">
+            <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('construction_sites')" ng-click="map_tools.collapse('construction_sites')">
+                <span style="color:white" class="fa fa-chevron-up"></span>
+            </a>
+            <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('construction_sites')" ng-click="map_tools.expand('construction_sites')">
+                <span style="color:white" class="fa fa-chevron-down"></span>
+            </a>
+        </div>
+        <div id="map_tools_construction_sites_panel_body" class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded('construction_sites')">
+            <% include controller_construction_sites.html %>
+        </div>
+    </div>
+</div>
+
 <div class="map-tool-wrapper" ng-controller="boundaries_controller">
   <div ng-show="map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
     <div class="panel-heading" ng-bind="map_tools.get_tool_name('boundaries')">
