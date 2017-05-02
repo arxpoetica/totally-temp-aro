@@ -16,6 +16,7 @@ fi
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
 export ETL_LOG_FILE=$DIR/etl.log
 export PGBIN=/usr/bin
+export PSQL="${PGBIN}/psql "
 
 echo '' > ${ETL_LOG_FILE}
 
