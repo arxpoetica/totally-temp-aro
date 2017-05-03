@@ -27,9 +27,9 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     service.locationTypes = []
     // A list of location data sources to show in the locations layer
     service.locationDataSources = {
-      useGlobalBusiness: false,
-      useGlobalHousehold: false,
-      useGlobalCellTower: false,
+      useGlobalBusiness: true,
+      useGlobalHousehold: true,
+      useGlobalCellTower: true,
       useUploaded: []
     }
 
