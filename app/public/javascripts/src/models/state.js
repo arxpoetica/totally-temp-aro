@@ -158,17 +158,17 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
     // Set location types
     var selectedLocationTypes = service.locationTypes.filter((item) => item.checked)
-    optimizationBody.locationTypes = _.pluck(selectedLocationTypes, 'name')
+    optimizationBody.locationTypes = _.pluck(selectedLocationTypes, 'key')
 
     // Set location data sources
     var locationDataSources = {}
-    if (service.useGlobalBusiness) {
+    if (service.locationDataSources.useGlobalBusiness) {
       locationDataSources.business = [1]
     }
-    if (service.useGlobalHousehold) {
+    if (service.locationDataSources.useGlobalHousehold) {
       locationDataSources.household = [1]
     }
-    if (service.useGlobalCellTower) {
+    if (service.locationDataSources.useGlobalCellTower) {
       locationDataSources.celltower = [1]
     }
 

@@ -132,7 +132,7 @@
        ></checkbox>
        {{type.label}}
      </div>
-    <div  ng-show="type.id == 'FiveG' && type.selected" style="display: inline-block">
+    <div ng-show="type.id == 'FiveG' && type.checked" style="display: inline-block">
     <label>
       <span>Polygon Type</span>
       <select class="form-control" ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
@@ -160,13 +160,13 @@
         </span>
       </div>
       <div>
-      <span>Tile System</span>
-      <select class="form-control ng-pristine ng-valid ng-touched"
-        ng-model="tileselected"
-        ng-change="changeTileSelected(tileselected)"
-        ng-options="tile_system.id as tile_system.name for tile_system in tile_systems">
-	  </select>
-	  </div>
+        <span>Tile System</span>
+        <select class="form-control ng-pristine ng-valid ng-touched"
+                ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile"
+                ng-change="changeTileSelected(tileselected)"
+                ng-options="tile_system.name for tile_system in state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles">
+        </select>
+      </div>
     </label>
     </div>
     </label>

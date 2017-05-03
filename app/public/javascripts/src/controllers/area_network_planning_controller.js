@@ -199,7 +199,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   $scope.prerun = () => {
-      console.log(state.getOptimizationBody())
 	  
 	var defer=$q.defer();
 	  
@@ -307,39 +306,39 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       routingMode: $scope.state.optimizationOptions.fiberNetworkConstraints.routingMode
     }
 
-    changes.networkTypes = [];
-    changes.networkTypes = $scope.selectedTechType;
-    if($scope.selectedTechType.indexOf("FiveG")!=-1){
-        if($scope.cellNodeConstraints.cellRadius == ""){
-            $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
-        }
+    // changes.networkTypes = [];
+    // changes.networkTypes = $scope.selectedTechType;
+    // if($scope.selectedTechType.indexOf("FiveG")!=-1){
+    //     if($scope.cellNodeConstraints.cellRadius == ""){
+    //         $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
+    //     }
 
-        changes.fiberNetworkConstraints.cellNodeConstraints = {
-            cellRadius : $scope.cellNodeConstraints.cellRadius,
-            polygonStrategy: $scope.polygonOptions.polygonStrategy,
-            tileSystemId: $scope.tileselected
-        };
-    }
+    //     changes.fiberNetworkConstraints.cellNodeConstraints = {
+    //         cellRadius : $scope.cellNodeConstraints.cellRadius,
+    //         polygonStrategy: $scope.polygonOptions.polygonStrategy,
+    //         tileSystemId: $scope.tileselected
+    //     };
+    // }
 
-    var selectLocationTypes = []
-    if ($scope.optimizationMode === 'targets' && $scope.state.optimizationOptions.algorithm === 'IRR') {
-      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
-        .map((key) => {
-          return $scope.entityTypesTargeted[key]
-            ? $scope.entityTypes.find((type) => type.id === key).name
-            : null
-        })
-        .filter((val) => val)
-    }
+    // var selectLocationTypes = []
+    // if ($scope.optimizationMode === 'targets' && $scope.state.optimizationOptions.algorithm === 'IRR') {
+    //   selectLocationTypes = Object.keys($scope.entityTypesTargeted)
+    //     .map((key) => {
+    //       return $scope.entityTypesTargeted[key]
+    //         ? $scope.entityTypes.find((type) => type.id === key).name
+    //         : null
+    //     })
+    //     .filter((val) => val)
+    // }
 
-    if ($scope.selectedBoundary) {
-      changes.processingLayers = [$scope.selectedBoundary.id]
-    }
+    // if ($scope.selectedBoundary) {
+    //   changes.processingLayers = [$scope.selectedBoundary.id]
+    // }
 
-    $scope.selectLocationTypes = selectLocationTypes
+    // $scope.selectLocationTypes = selectLocationTypes
     
-    var fiberSourceIds = optimization.getFiberSourceIds
-    changes.fiberSourceIds = fiberSourceIds()
+    // var fiberSourceIds = optimization.getFiberSourceIds
+    // changes.fiberSourceIds = fiberSourceIds()
     
     defer.resolve(changes);
     return defer.promise;
