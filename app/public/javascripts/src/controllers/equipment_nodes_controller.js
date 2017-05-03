@@ -568,7 +568,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   function updateOptimizationFiber () {
     var ids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
-    optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(ids))
+    // For now, save fiber source ids in state.js. Later we should store everything in state.js
+    state.optimizationOptions.fiberSourceIds = $scope.selectedExistingFiberIds.concat(ids)
   }
 
   $scope.removeDatasource = (datasource) => {
@@ -593,7 +594,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     })
     var fiberSourceids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
-    optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(fiberSourceids))
+    state.optimizationOptions.fiberSourceIds = $scope.selectedExistingFiberIds.concat(fiberSourceids)
     selectedlayer.toggleVisibility();
   }
   

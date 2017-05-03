@@ -121,22 +121,21 @@
 
   <p><strong>Technology</strong></p>
 
-  <div class="checkbox" ng-repeat="type in technologyTypes">
+  <div class="checkbox" ng-repeat="type in state.optimizationOptions.technologies">
     <label>
      <div style="display: inline-block">
        <checkbox
                class="chk-small"
-               ng-model="type.selected"
+               ng-model="type.checked"
                name="ctype-name"
-               ng-checked="type.selected"
-               ng-change="toggleTechType(type)"
+               ng-checked="type.checked"
        ></checkbox>
        {{type.label}}
      </div>
     <div  ng-show="type.id == 'FiveG' && type.selected" style="display: inline-block">
     <label>
       <span>Polygon Type</span>
-      <select class="form-control" ng-model="polygonOptions.polygonStrategy">
+      <select class="form-control" ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
         <option value="FIXED_RADIUS">Fixed Radius</option>
         <option value="AVERAGE_RADIUS">Average Radius</option>
         <option value="RAY_TRACING">Ray Tracing</option>

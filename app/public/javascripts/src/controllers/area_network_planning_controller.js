@@ -19,11 +19,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     regions.removeAllGeographies()
   }
   // --
-  $scope.technologyTypes = [
-      {id:'Fiber' , label : 'Fiber' , selected : true},
-      {id:'FiveG' , label : '5G'}
-  ]
-
   $scope.cellNodeConstraints = {
       cellGranularityRatio : 0,
       cellRadius: config.ui.map_tools.area_planning.cell_radius,
@@ -61,20 +56,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     });
 
     /* saving technology */
-	$scope.selectedTechType.forEach(function(prevSelectedTechId) {
-		$('#'+prevSelectedTechId).prop('checked', false)
-	})
-	$scope.selectedTechType = []	
-	expertChanges.networkTypes.forEach(function(techId) {
-      $scope.toggleTechType({id : techId , selected : true});
-		$('#'+techId).prop('checked', true)
-		if (techId == 'FiveG') {
-			$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+    // TODO: Fix this
+	// $scope.selectedTechType.forEach(function(prevSelectedTechId) {
+	// 	$('#'+prevSelectedTechId).prop('checked', false)
+	// })
+	// $scope.selectedTechType = []	
+	// expertChanges.networkTypes.forEach(function(techId) {
+	// 	$scope.toggleTechType(techId,true)
+	// 	$('#'+techId).prop('checked', true)
+	// 	if (techId == 'FiveG') {
+	// 		$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
 			
-			/* saving polygon type */
-			$scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy.toUpperCase()
-		}
-	});
+	// 		/* saving polygon type */
+	// 		$scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy.toUpperCase()
+	// 	}
+	// });
 		
 	/* saving network construction */
   $scope.state.optimizationOptions.fiberNetworkConstraints = expertChanges.fiberNetworkConstraints
@@ -134,23 +130,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 		defer.resolve(response); 	  
 	})
 	return defer.promise; 
-  }
-  
-  getTiles()
-  
-  function getTiles () {
-	$http({
-	 url: '/morphology/tiles',
-	 method: 'GET'
-	})
-	.success((response) => {
-	  $scope.tile_systems = response
-	  $scope.tileselected = $scope.tile_systems[0].id;
-	})
-  }
-  
-  $scope.changeTileSelected = (tile_system_id) => {
-	  $scope.tileselected = tile_system_id
   }
   
   $scope.plan = null
@@ -389,18 +368,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
   }
 
-  $rootScope.$on('optimization_started_polling', () => {
-    $scope.calculating = true
-    if ($scope.selectLocationTypes && $scope.selectLocationTypes.length > 0) {
-      $rootScope.$broadcast('select_locations', $scope.selectLocationTypes)
-    }
-  })
-
-  $rootScope.$on('optimization_stopped_polling', () => {
-    $scope.calculating = false
-    $scope.selectLocationTypes = null
-  })
-
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', optimizationModeChanged)
 
@@ -442,18 +409,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.allBoundaries = response
       })
   }
-
-  $scope.selectedTechType = ['Fiber'];
-  $scope.toggleTechType = function (type) {
-    if(type.selected){
-      $scope.selectedTechType.push(type.id);
-    }else{
-      var idx = $scope.selectedTechType.indexOf(type.id);
-      if(idx != -1){
-        $scope.selectedTechType.splice(idx , 1);
-      }
-    }
-  };
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 

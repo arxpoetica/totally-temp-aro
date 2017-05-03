@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'optimization', ($rootScope, map_layers, configuration, regions, optimization) => {
+app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', ($rootScope, $http, map_layers, configuration, regions, optimization) => {
   var key = null
   var state = null;
   var service = {}
@@ -55,13 +55,19 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
       analysisSelectionMode: 'SELECTED_LOCATIONS',
       fiberNetworkConstraints: {
         routingMode: 'DIRECT_ROUTING',
+        cellNodeConstraints: {
+          cellRadius: 300.0,
+          polygonStrategy: 'FIXED_RADIUS',
+          tiles: [],
+          selectedTile: null
+        }
       },
       processLayers: [],
       budget: 10000000,
       preIrrThreshold: 0.1,
       customOptimization: null,
       fiberSourceIds: [],
-      networkTypes: null,
+      networkTypes: [],
       threshold: null,
       routeGenerationOptions: [
         { id: 'T', value: 'A Route', checked: false },
@@ -69,10 +75,11 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
         { id: 'B', value: 'C Route', checked: false },
         { id: 'C', value: 'D Route', checked: false }
       ],
-      technologies: {
-        fiber: false,
-        fiveG: false
-      }
+      technologies: [
+        { id: 'Fiber', label: 'Fiber', checked: true},
+        { id: 'FiveG', label: '5G', checked: false}
+      ],
+      selectedLayer: null
     }
 
     // Iterate over the business segments in the configuration
@@ -117,6 +124,21 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
       }
     }
   }
+
+  // Load tile information from the server
+  $http({
+	 url: '/morphology/tiles',
+	 method: 'GET'
+	})
+	.success((response) => {
+	  service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles = response
+    service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile 
+      = (service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles.length > 0)
+        ? service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles[0]
+        : null
+	})
+
+
   initializeState()
 
   // When configuration is loaded from the server, update it in the state
@@ -135,7 +157,8 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
     var optimizationBody = {}
 
     // Set location types
-    optimizationBody.locationTypes = service.locationTypes.slice()
+    var selectedLocationTypes = service.locationTypes.filter((item) => item.checked)
+    optimizationBody.locationTypes = _.pluck(selectedLocationTypes, 'name')
 
     // Set location data sources
     var locationDataSources = {}
@@ -194,48 +217,32 @@ app.service('state', ['$rootScope', 'map_layers', 'configuration', 'regions', 'o
     optimizationBody.budget = service.optimizationOptions.budget
     optimizationBody.preIrrThreshold = service.optimizationOptions.preIrrThreshold
     optimizationBody.selectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
-    optimizationBody.fiberNetworkConstraints = service.optimizationOptions.fiberNetworkConstraints
 
-    if ()
+    // Set cell node constraints
+    optimizationBody.fiberNetworkConstraints = {}
+    optimizationBody.fiberNetworkConstraints.routingMode = service.optimizationOptions.fiberNetworkConstraints.routingMode
+    optimizationBody.fiberNetworkConstraints.cellNodeConstraints = {}
+    optimizationBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+    optimizationBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
+    var selectedTile = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile
+    if (selectedTile) {
+      optimizationBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
+    }
+    optimizationBody.networkTypes = []
+    service.optimizationOptions.technologies.forEach((technology) => {
+      if (technology.checked) {
+        optimizationBody.networkTypes.push(technology.id)
+      }
+    })
+    if (service.optimizationOptions.selectedLayer) {
+      optimizationBody.processingLayers = [service.optimizationOptions.selectedLayer.id]
+    }
+
+
+    optimizationBody.fiberSourceIds = service.optimizationOptions.fiberSourceIds
 
     // TODO: USER DEFINED BOUNDARIES
     return optimizationBody
-
-    // changes.networkTypes = [];
-    // changes.networkTypes = $scope.selectedTechType;
-    // if ($scope.selectedTechType.indexOf("FiveG") != -1) {
-    //   if ($scope.cellNodeConstraints.cellRadius == "") {
-    //     $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
-    //   }
-
-    //   changes.fiberNetworkConstraints.cellNodeConstraints = {
-    //     cellRadius: $scope.cellNodeConstraints.cellRadius,
-    //     polygonStrategy: $scope.polygonOptions.polygonStrategy,
-    //     tileSystemId: $scope.tileselected
-    //   };
-    // }
-
-    // var selectLocationTypes = []
-    // if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
-    //   selectLocationTypes = Object.keys($scope.entityTypesTargeted)
-    //     .map((key) => {
-    //       return $scope.entityTypesTargeted[key]
-    //         ? $scope.entityTypes.find((type) => type.id === key).name
-    //         : null
-    //     })
-    //     .filter((val) => val)
-    // }
-
-    // if ($scope.selectedBoundary) {
-    //   changes.processingLayers = [$scope.selectedBoundary.id]
-    // }
-
-    // $scope.selectLocationTypes = selectLocationTypes
-    // changes.entityDataSources = optimization.datasources
-
-    // var fiberSourceIds = optimization.getFiberSourceIds
-    // changes.fiberSourceIds = fiberSourceIds()
-
   }
 
 
