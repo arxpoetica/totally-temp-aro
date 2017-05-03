@@ -4,6 +4,9 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
   var state = null;
   var service = {}
   service.INVALID_PLAN_ID = -1;
+  service.DS_GLOBAL_BUSINESSES = -3;
+  service.DS_GLOBAL_HOUSEHOLDS = -2;
+  service.DS_GLOBAL_CELLTOWER = -1;
 
   ;['dragend', 'zoom_changed'].forEach((event_name) => {
     $rootScope.$on('map_' + event_name, () => {
@@ -29,27 +32,22 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     //location datasources for dropdown
     service.defaultDataSources = [
       {
-        dataSourceId: -3,
+        dataSourceId: service.DS_GLOBAL_BUSINESSES,
         name: "Global Businesses",
       },
       {
-        dataSourceId: -2,
+        dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
         name: "Global Households",
       },
       {
-        dataSourceId: -1,
+        dataSourceId: service.DS_GLOBAL_CELLTOWER,
         name: "Global CellTower",
       },
 
     ];
 
     // A list of location data sources to show in the locations layer
-    service.locationDataSources = {
-      useGlobalBusiness: true,
-      useGlobalHousehold: true,
-      useGlobalCellTower: true,
-      useUploaded: service.defaultDataSources
-    }
+    service.locationDataSources = service.defaultDataSources
 
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
@@ -132,17 +130,10 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     return state[attr] || def
   }
 
-  //watch the uploadedDS On change update globalDatasources
-  $rootScope.$watch(function () {
-    return service.locationDataSources.useUploaded;
-  } , function (newVal, oldVal) {
-    if(newVal){
-      var selectedDS = _.pluck(service.locationDataSources.useUploaded , 'dataSourceId');
-      service.locationDataSources.useGlobalBusiness = selectedDS.indexOf(-3) != -1
-      service.locationDataSources.useGlobalHousehold = selectedDS.indexOf(-2) != -1
-      service.locationDataSources.useGlobalCellTower = selectedDS.indexOf(-1) != -1
-    }
-  },true);
+  service.isDataSourceSelected = function (ds) {
+      var existingDataSources = _.pluck(service.locationDataSources , 'dataSourceId');
+      return existingDataSources.indexOf(ds) != -1;
+  }
 
   return service
 }])

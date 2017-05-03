@@ -167,10 +167,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       businessCategories: businessCategories,
       householdCategories: householdCategories,
       showTowers: showTowers,
-      useGlobalBusinessDataSource: $scope.planState.locationDataSources.useGlobalBusiness,
-      useGlobalHouseholdDataSource: $scope.planState.locationDataSources.useGlobalHousehold,
-      useGlobalCellTowerDataSource: $scope.planState.locationDataSources.useGlobalCellTower,
-      uploadedDataSources: _.pluck($scope.planState.locationDataSources.useUploaded, 'dataSourceId')
+      useGlobalBusinessDataSource: state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES),
+      useGlobalHouseholdDataSource:state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS),
+      useGlobalCellTowerDataSource:state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER),
+      uploadedDataSources: _.pluck($scope.planState.locationDataSources, 'dataSourceId')
     }
     locationsLayer.setApiEndpoint('/locations', options)
     locationsLayer.show()
@@ -269,7 +269,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
   $rootScope.$on('uploaded_data_sources', (e, info) => {
     reloadDatasources()
-    $scope.planState.locationDataSources.useUploaded.push(info);
+    $scope.planState.locationDataSources.push(info);
   })
 
   $scope.overlay_is_loading = () => {
