@@ -104,7 +104,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
-    api_endpoint: '/locations/:plan_id',
+    api_endpoint: '/locations',
     style_options: locationStyles,
     threshold: 15,
     reload: 'always',
