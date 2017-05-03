@@ -4,6 +4,9 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
   var state = null;
   var service = {}
   service.INVALID_PLAN_ID = -1;
+  service.DS_GLOBAL_BUSINESSES = -3;
+  service.DS_GLOBAL_HOUSEHOLDS = -2;
+  service.DS_GLOBAL_CELLTOWER = -1;
 
   ;['dragend', 'zoom_changed'].forEach((event_name) => {
     $rootScope.$on('map_' + event_name, () => {
@@ -25,13 +28,26 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
 
     // A list of location types to show in the locations layer
     service.locationTypes = []
+
+    //location datasources for dropdown
+    service.defaultDataSources = [
+      {
+        dataSourceId: service.DS_GLOBAL_BUSINESSES,
+        name: "Global Businesses",
+      },
+      {
+        dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
+        name: "Global Households",
+      },
+      {
+        dataSourceId: service.DS_GLOBAL_CELLTOWER,
+        name: "Global CellTower",
+      },
+
+    ];
+
     // A list of location data sources to show in the locations layer
-    service.locationDataSources = {
-      useGlobalBusiness: false,
-      useGlobalHousehold: false,
-      useGlobalCellTower: false,
-      useUploaded: []
-    }
+    service.locationDataSources = service.defaultDataSources
 
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
@@ -112,6 +128,11 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
   service.get = (attr, value, def) => {
     if (state.planId === service.INVALID_PLAN_ID) return def
     return state[attr] || def
+  }
+
+  service.isDataSourceSelected = function (ds) {
+      var existingDataSources = _.pluck(service.locationDataSources , 'dataSourceId');
+      return existingDataSources.indexOf(ds) != -1;
   }
 
   return service

@@ -282,7 +282,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
         return;
       }
 
-      if ((!this.data_loaded || this.dirty) && (plan && plan.id)) {
+      if ((!this.data_loaded || this.dirty)) {
         this.dirty = false
         if (this.data) {
           this.addGeoJson(this.data)
@@ -303,7 +303,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
           _.extend(params, this.http_params || {})
           this.is_loading = true
           var api_endpoint = this.api_endpoint
-                                .replace(/\:plan_id/g, (plan && plan.id) || 'none')
+                                .replace(/\:plan_id/g, (plan && plan.id) || '')
 
           if (this._canceler) {
             this._canceler.promise.canceled = true

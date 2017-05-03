@@ -104,7 +104,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
-    api_endpoint: '/locations/:plan_id',
+    api_endpoint: '/locations',
     style_options: locationStyles,
     threshold: 15,
     reload: 'always',
@@ -167,10 +167,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       businessCategories: businessCategories,
       householdCategories: householdCategories,
       showTowers: showTowers,
-      useGlobalBusinessDataSource: $scope.planState.locationDataSources.useGlobalBusiness,
-      useGlobalHouseholdDataSource: $scope.planState.locationDataSources.useGlobalHousehold,
-      useGlobalCellTowerDataSource: $scope.planState.locationDataSources.useGlobalCellTower,
-      uploadedDataSources: _.pluck($scope.planState.locationDataSources.useUploaded, 'dataSourceId')
+      useGlobalBusinessDataSource: state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES),
+      useGlobalHouseholdDataSource:state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS),
+      useGlobalCellTowerDataSource:state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER),
+      uploadedDataSources: _.pluck($scope.planState.locationDataSources, 'dataSourceId')
     }
     locationsLayer.setApiEndpoint('/locations', options)
     locationsLayer.show()
@@ -261,13 +261,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   function reloadDatasources (callback) {
     $http.get('/datasources').success((response) => {
       $scope.datasources = response
-      $scope.allUploadedDataSources = response
+      var defaultSources = $scope.planState.defaultDataSources;
+      $scope.allUploadedDataSources = defaultSources.concat(response);
       callback && callback(response)
     })
   }
 
   $rootScope.$on('uploaded_data_sources', (e, info) => {
     reloadDatasources()
+    $scope.planState.locationDataSources.push(info);
   })
 
   $scope.overlay_is_loading = () => {

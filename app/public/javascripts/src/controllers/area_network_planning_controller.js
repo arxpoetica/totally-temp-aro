@@ -274,17 +274,20 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     // Set location data sources
     var locationDataSources = {}
 
-    if (state.locationDataSources.useGlobalBusiness) {
+    if (state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)) {
       locationDataSources.business = [1]
     }
-    if (state.locationDataSources.useGlobalHousehold) {
+    if (state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)) {
       locationDataSources.household = [1]
     }
-    if (state.locationDataSources.useGlobalCellTower) {
+    if (state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)) {
       locationDataSources.celltower = [1]
     }
-    if (state.locationDataSources.useUploaded.length > 0) {
-      var uploadedDataSourceIds = _.pluck(state.locationDataSources.useUploaded, 'dataSourceId')
+    if (state.locationDataSources.length > 0) {
+      var uploadedDataSourceIds = _.pluck(state.locationDataSources, 'dataSourceId')
+
+      //remove default datasources from selected datasources..
+      uploadedDataSourceIds = _.filter(uploadedDataSourceIds, function(d) { return d != -3 && d != -2 && d != -1});
 
       locationDataSources.business = locationDataSources.business || []
       locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)
@@ -410,9 +413,25 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
 
   $scope.run = () => {
-	  $scope.prerun().then(function(changes){
-		  canceler = optimization.optimize($scope.plan, changes)
-	  });
+    // Check if at least one data source is selected
+    var isAnyDataSourceSelected = state.locationDataSources.length > 0
+	  // A location is selected if the "checked" property is true
+    var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
+    var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
+    if (validSelection) {
+      $scope.prerun().then(function(changes){
+        canceler = optimization.optimize($scope.plan, changes)
+      })
+    } else {
+      swal({
+        title: 'Incomplete input',
+        text: 'Please select one or more locations and data sources before running optimization',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+    }
   }
 
   $rootScope.$on('optimization_started_polling', () => {

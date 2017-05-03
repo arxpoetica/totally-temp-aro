@@ -209,7 +209,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.prerun = () => {
 	  
 	var defer=$q.defer()  
-    var locationTypes = []
     var scope = config.ui.eye_checkboxes ? $rootScope : $scope
 
     if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
@@ -223,17 +222,20 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     // Set location data sources
     var locationDataSources = {}
 
-    if (state.locationDataSources.useGlobalBusiness) {
+    if (state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)) {
       locationDataSources.business = [1]
     }
-    if (state.locationDataSources.useGlobalHousehold) {
+    if (state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)) {
       locationDataSources.household = [1]
     }
-    if (state.locationDataSources.useGlobalCellTower) {
+    if (state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)) {
       locationDataSources.celltower = [1]
     }
-    if (state.locationDataSources.useUploaded.length > 0) {
-      var uploadedDataSourceIds = _.pluck(state.locationDataSources.useUploaded, 'dataSourceId')
+    if (state.locationDataSources.length > 0) {
+      var uploadedDataSourceIds = _.pluck(state.locationDataSources, 'dataSourceId')
+
+      //remove default datasources from selected datasources..
+      uploadedDataSourceIds = _.filter(uploadedDataSourceIds, function(d) { return d != -3 && d != -2 && d != -1});
 
       locationDataSources.business = locationDataSources.business || []
       locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)

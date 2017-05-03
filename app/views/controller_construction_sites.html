@@ -25,31 +25,21 @@
       <div class="customer-type shaded">
         <label>Location data sources</label>
       </div>
+      <!-- Uploaded data sources -->
       <div class="customer-type">
-        <label class="pull-right">
-          <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalBusiness"
-                 ng-change="changeLocationsLayer()">
-        </label>
-        <label>Global Businesses</label>
-      </div>
-      <!-- Global residential -->
-      <div class="customer-type">
-        <label class="pull-right">
-          <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalHousehold"
-                 ng-change="changeLocationsLayer()">
-        </label>
-        <label>Global Households</label>
-      </div>
-      <!-- Global towers -->
-      <div class="customer-type">
-        <label class="pull-right">
-          <input type="checkbox"
-                 ng-model="planState.locationDataSources.useGlobalCellTower"
-                 ng-change="changeLocationsLayer()">
-        </label>
-        <label>Global Towers</label>
+        <ui-select multiple ng-model="planState.locationDataSources"
+                   theme="bootstrap"
+                   close-on-select="true"
+                   on-select="changeLocationsLayer()"
+                   on-remove="changeLocationsLayer()">
+          <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.dataSourceId}}]</ui-select-match>
+          <ui-select-choices class="ui-select-width-300" repeat="uploadedDataSource in allUploadedDataSources">
+            <div>{{uploadedDataSource.name}}</div>
+          </ui-select-choices>
+        </ui-select>
+        <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addCustomers()">
+          <span class="fa fa-plus"></span> Add data sources...
+        </button>
       </div>
     </form>
 
