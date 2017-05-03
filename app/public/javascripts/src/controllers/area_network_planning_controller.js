@@ -410,9 +410,28 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
 
   $scope.run = () => {
-	  $scope.prerun().then(function(changes){
-		  canceler = optimization.optimize($scope.plan, changes)
-	  });
+    // Check if at least one data source is selected
+    var isAnyDataSourceSelected = state.locationDataSources.useGlobalBusiness
+                                  || state.locationDataSources.useGlobalHousehold
+                                  || state.locationDataSources.useGlobalCellTower
+                                  || (state.locationDataSources.useUploaded.length > 0)
+	  // A location is selected if the "checked" property is true
+    var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
+    var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
+    if (validSelection) {
+      $scope.prerun().then(function(changes){
+        canceler = optimization.optimize($scope.plan, changes)
+      })
+    } else {
+      swal({
+        title: 'Incomplete input',
+        text: 'Please select one or more locations and data sources before running optimization',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+    }
   }
 
   $rootScope.$on('optimization_started_polling', () => {
