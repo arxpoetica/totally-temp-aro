@@ -237,7 +237,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     if (service.optimizationOptions.selectedLayer) {
       optimizationBody.processingLayers = [service.optimizationOptions.selectedLayer.id]
     }
-
+    optimizationBody.threshold = service.optimizationOptions.coverageThreshold
 
     optimizationBody.fiberSourceIds = service.optimizationOptions.fiberSourceIds
 
