@@ -50,7 +50,7 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
     })
     xhr.addEventListener('load', function (e) {
       try {
-        var data = JSON.parse(this.responseText)
+        var data = JSON.parse(JSON.parse(this.responseText));
         if (data.error) return swal('Error', data.error, 'error')
       } catch (e) {
         console.log(e, e)
@@ -59,9 +59,13 @@ app.controller('upload_customers_controller', ['$scope', '$rootScope', '$http', 
       if (this.status !== 200) {
         return swal('Error', data.error || 'Unknown error', 'error')
       }
-      $scope.editingDataset.id = data.id
+      $scope.editingDataset.id = data.libraryId
+      $scope.editingDataset.name = data.name
+      $scope.editingDataset.dataSourceId = data.systemId
+
       $rootScope.$broadcast('uploaded_data_sources', $scope.editingDataset)
       $('#upload_customers_modal').modal('hide')
+      initialValues();
     })
     xhr.send(formData)
   }

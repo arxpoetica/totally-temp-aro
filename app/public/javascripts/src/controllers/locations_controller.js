@@ -261,13 +261,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   function reloadDatasources (callback) {
     $http.get('/datasources').success((response) => {
       $scope.datasources = response
-      $scope.allUploadedDataSources = response
+      var defaultSources = $scope.planState.defaultDataSources;
+      $scope.allUploadedDataSources = defaultSources.concat(response);
       callback && callback(response)
     })
   }
 
   $rootScope.$on('uploaded_data_sources', (e, info) => {
     reloadDatasources()
+    $scope.planState.locationDataSources.useUploaded.push(info);
   })
 
   $scope.overlay_is_loading = () => {

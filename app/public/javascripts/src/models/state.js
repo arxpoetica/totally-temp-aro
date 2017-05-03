@@ -25,12 +25,30 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
 
     // A list of location types to show in the locations layer
     service.locationTypes = []
+
+    //location datasources for dropdown
+    service.defaultDataSources = [
+      {
+        dataSourceId: -3,
+        name: "Global Businesses",
+      },
+      {
+        dataSourceId: -2,
+        name: "Global Households",
+      },
+      {
+        dataSourceId: -1,
+        name: "Global CellTower",
+      },
+
+    ];
+
     // A list of location data sources to show in the locations layer
     service.locationDataSources = {
       useGlobalBusiness: true,
       useGlobalHousehold: true,
       useGlobalCellTower: true,
-      useUploaded: []
+      useUploaded: service.defaultDataSources
     }
 
     // Iterate over the business segments in the configuration
@@ -113,6 +131,18 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     if (state.planId === service.INVALID_PLAN_ID) return def
     return state[attr] || def
   }
+
+  //watch the uploadedDS On change update globalDatasources
+  $rootScope.$watch(function () {
+    return service.locationDataSources.useUploaded;
+  } , function (newVal, oldVal) {
+    if(newVal){
+      var selectedDS = _.pluck(service.locationDataSources.useUploaded , 'dataSourceId');
+      service.locationDataSources.useGlobalBusiness = selectedDS.indexOf(-3) != -1
+      service.locationDataSources.useGlobalHousehold = selectedDS.indexOf(-2) != -1
+      service.locationDataSources.useGlobalCellTower = selectedDS.indexOf(-1) != -1
+    }
+  },true);
 
   return service
 }])
