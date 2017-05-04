@@ -2,10 +2,14 @@
   <div class="row">
     <div class="col-md-12">
       <div class="panel-group" id="serviceLayersAccordion" role="tablist" aria-multiselectable="true" style="margin-top: 9px">
-        <div ng-class="{'panel panel-default': true, 'disabled': (serviceLayer.needsPlan && (planState.planId === planState.INVALID_PLAN_ID))}" ng-repeat="serviceLayer in serviceLayers" ng-if="!serviceLayer.hidden">
+        <div ng-class="{'panel panel-default': true, 'div-blocked': (serviceLayer.needsPlan && (planState.planId === planState.INVALID_PLAN_ID))}" ng-repeat="serviceLayer in serviceLayers" ng-if="!serviceLayer.hidden">
           <div class="panel-heading" role="tab">
             <p class="panel-title" style="background-color:#eee; padding-left:10px">
-              <input type="checkbox" ng-model="serviceLayer.enabled" ng-change="serviceLayer.changedAvailability()">
+              <checkbox
+                      class="chk-small"
+                      ng-model="serviceLayer.enabled"
+                      ng-change="serviceLayer.changedAvailability()"
+              ></checkbox>
               <a role="button" data-toggle="collapse" data-parent="#serviceLayersAccordion" ng-href="#serviceLayer{{serviceLayer.id}}">
                 <span class="fa fa-caret-down pull-right" style="padding-right: 10px; padding-top: 3px;"></span>
                 <span class="fa fa-caret-up pull-right" style="padding-right: 10px; padding-top: 3px;"></span>
@@ -18,7 +22,12 @@
               <div ng-repeat="nodeType in serviceLayer.nodeTypes">
                 <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/composite/{{serviceLayer.name}}_{{nodeType.name}}.png" style="width:16px"></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-model="nodeType.visible" ng-change="serviceLayer.changeNodeTypesVisibility(nodeType)" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <checkbox
+                          class="chk-small"
+                          ng-model="nodeType.visible"
+                          ng-change="serviceLayer.changeNodeTypesVisibility(nodeType)"
+                          ng-disabled="!vztfttp || !serviceLayer.enabled"
+                  ></checkbox>
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
@@ -29,7 +38,12 @@
                 <div ng-if="serviceLayer.name == 'all' && nodeType.name =='cell_5g'">
                   <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/service_layer_cran.png" style="width:16px"></div>
                   <div class="pull-right">
-                    <input type="checkbox" ng-model="nodeType.coverage_visible" ng-change="serviceLayer.fixedWirelessVisibilityChanged(serviceLayer , nodeType)" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                    <checkbox
+                            class="chk-small"
+                            ng-model="nodeType.coverage_visible"
+                            ng-change="serviceLayer.fixedWirelessVisibilityChanged(serviceLayer , nodeType)"
+                            ng-disabled="!vztfttp || !serviceLayer.enabled"
+                    ></checkbox>
                   </div>
                   <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                     <label style="font-weight:normal">
@@ -43,7 +57,12 @@
               <div ng-if="serviceLayer.id === 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color:blue; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-model="serviceLayer.showFeederFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <checkbox
+                          class="chk-small"
+                          ng-model="serviceLayer.showFeederFiber"
+                          ng-change="serviceLayer.changedFiberVisibility()"
+                          ng-disabled="!vztfttp || !serviceLayer.enabled"
+                  ></checkbox>
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
@@ -55,7 +74,12 @@
               <div ng-if="serviceLayer.id === 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color:red; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-model="serviceLayer.showDistributionFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <checkbox
+                          class="chk-small"
+                          ng-model="serviceLayer.showDistributionFiber"
+                          ng-change="serviceLayer.changedFiberVisibility()"
+                          ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  </checkbox>
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
@@ -67,7 +91,12 @@
               <div ng-if="serviceLayer.id === 'all'">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color:black; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-model="serviceLayer.showBackhaulFiber" ng-change="serviceLayer.changedFiberVisibility()" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <checkbox
+                          class="chk-small"
+                          ng-model="serviceLayer.showBackhaulFiber"
+                          ng-change="serviceLayer.changedFiberVisibility()"
+                          ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  </checkbox>
                 </div>
                 <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
@@ -76,21 +105,15 @@
                 </div>
               </div>
 
-              <!--
-              <div class="disabled" ng-if="!serviceLayer.userDefined">
-                <div class="pull-right">
-                  <input type="checkbox" disabled>
-                </div>
-                <label style="font-weight:normal">
-                  Poles
-                </label>
-              </div>
-              -->
-
               <div ng-repeat="layer in serviceLayer.layers">
                 <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
                 <div class="pull-right">
-                  <input type="checkbox" ng-click="setVisibleFibers(serviceLayer,layer)" ng-checked="layer.visible" ng-disabled="!vztfttp || !serviceLayer.enabled">
+                  <checkbox
+                          class="chk-small btn-primary"
+                          ng-model="layer.visible"
+                          ng-click="setVisibleFibers(serviceLayer,layer)"
+                          ng-disabled="!vztfttp || !serviceLayer.enabled"
+                  ></checkbox>
                 </div>
                 <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                   <label style="font-weight:normal">
@@ -107,7 +130,12 @@
                       <a href="javascript:;" ng-click="removeDatasource(datasource)" ng-if="datasource.libraryId">
                         <span class="fa fa-trash-o"></span>
                       </a>
-                      <input type="checkbox" ng-model="datasource.visible" ng-change="datasource.toggleVisibility()">
+                      <checkbox
+                              class="chk-small btn-primary"
+                              ng-model="datasource.visible"
+                              ng-change="datasource.toggleVisibility()"
+                              ng-disabled="!vztfttp || !serviceLayer.enabled"
+                      ></checkbox>
                     </div>
                     <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
                       <label style="font-weight:normal" class="fiber-label">

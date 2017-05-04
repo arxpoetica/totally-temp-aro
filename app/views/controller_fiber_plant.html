@@ -1,13 +1,18 @@
 <div id="fiber_plant_controller">
   <h2>Fiber Routes</h2>
   <div>
-    <div class="checkbox">
-      <label class="eye-control">
-        <input type="checkbox" ng-change="toggleAllCompetitors()" ng-model="showAllCompetitors" ng-disabled="overlay !== 'none'"> All competitors
-        <div class="eye-indicator"></div>
-      </label>
+    <div class="fiber_select_all">
+      <checkbox
+              class="chk-small"
+              ng-model="showAllCompetitors"
+              name="ctype-name"
+              ng-change="toggleAllCompetitors()">
+      </checkbox>
+      <span style="padding:5px 5px">All competitors</span>
     </div>
-    <input class="form-control" ng-model="selected_carriers" ng-change="carriersChanged()"></input>
+    <div class="fiber_select_many">
+      <input class="form-control" ng-model="selected_carriers" ng-change="carriersChanged()"/>
+    </div>
   </div>
   <hr>
 

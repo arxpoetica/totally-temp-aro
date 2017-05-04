@@ -7,7 +7,13 @@
     <div ng-repeat="layer in areaLayers">
       <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
         <div class="pull-right">
-          <input type="checkbox" ng-click="toggleVisibility(layer)" ng-disabled="layer.disabled">
+          <checkbox
+                  class="chk-small"
+                  ng-model="locationType.checked"
+                  name="ctype-name"
+                  ng-change="toggleVisibility(layer)"
+                  ng-disabled="layer.disabled"
+          ></checkbox>
         </div>
         <div class="pull-right" style="margin-right: 30px">
           <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
@@ -47,7 +53,14 @@
           <% } %>
         </div>
         <label>
-          <input type="checkbox" ng-click="toggleBoundary(boundary)" ng-checked="boundary.overlay.getMap()"> {{boundary.name}}
+          <checkbox
+                  class="chk-small"
+                  ng-model="locationType.checked"
+                  name="ctype-name"
+                  ng-change="toggleBoundary(boundary)"
+                  ng-checked="boundary.overlay.getMap()"
+          ></checkbox>
+           {{boundary.name}}
         </label>
       </div>
     </div>

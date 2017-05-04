@@ -523,6 +523,36 @@ footer nav {
   text-shadow: none;
 }
 
+.btn.chk-small {
+  padding: 1px 3px;
+  font-size: 10px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+.btn.chk-small.checked {
+  background: #1a79db;
+  color: white;
+  border-color: #217fdf;
+}
+
+ul.customer-type li{
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+ul.customer-type .ctype-icon {
+  flex: 0 ;
+}
+ul.customer-type .ctype-checkbox {
+  flex: 0;
+}
+ul.customer-type .ctype-name {
+  flex:1;
+}
+
+
 
 [ng-controller=locations_controller] .panel-body {
   padding-left: 0;
@@ -931,4 +961,20 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .btn_remove_imp {
   margin-right: 5px;
+}
+
+.div-blocked {
+  pointer-events: none;
+}
+
+.div-blocked .panel-title {
+  background-color: #c5c5c5 !important;
+}
+
+.fiber_select_all {
+  margin-bottom: 10px;
+}
+
+.fiber_select_many {
+
 }

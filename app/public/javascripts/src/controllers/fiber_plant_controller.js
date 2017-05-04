@@ -271,7 +271,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
     })
   }
 
-  ;['dragend', 'zoom_changed'].forEach((eventName) => {
+  ['dragend', 'zoom_changed' ,'loaded'].forEach((eventName) => {
     $rootScope.$on(`map_${eventName}`, () => {
       refreshAllCarriers()
     })
