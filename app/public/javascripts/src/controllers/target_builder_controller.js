@@ -234,8 +234,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     if (state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)) {
       locationDataSources.celltower = [1]
     }
-    if (state.locationDataSources.length > 0) {
-      var uploadedDataSourceIds = _.pluck(state.locationDataSources, 'dataSourceId')
+    if (state.selectedDatasources.length > 0) {
+      var uploadedDataSourceIds = _.pluck(state.selectedDatasources, 'dataSourceId')
 
       //remove default datasources from selected datasources..
       uploadedDataSourceIds = _.filter(uploadedDataSourceIds, function(d) { return d != -3 && d != -2 && d != -1});

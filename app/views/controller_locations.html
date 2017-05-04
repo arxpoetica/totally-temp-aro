@@ -96,13 +96,14 @@
       </div>
       <!-- Uploaded data sources -->
       <div class="customer-type">
-        <ui-select multiple ng-model="planState.locationDataSources"
+        <ui-select multiple ng-model="planState.selectedDataSources"
                    theme="bootstrap"
                    close-on-select="true"
                    on-select="changeLocationsLayer()"
                    on-remove="changeLocationsLayer()">
-          <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.dataSourceId}}]</ui-select-match>
-          <ui-select-choices class="ui-select-width-300" repeat="uploadedDataSource in allUploadedDataSources">
+          <!-- We will only show data source ids for uploaded data sources -->
+          <ui-select-match placeholder="Select data sources...">{{$item.name}} {{$item.dataSourceId >= 0 ? '[id ' + $item.dataSourceId + ']' : ''}}</ui-select-match>
+          <ui-select-choices class="ui-select-width-300" repeat="uploadedDataSource in planState.allDataSources">
             <div>{{uploadedDataSource.name}}</div>
           </ui-select-choices>
         </ui-select>

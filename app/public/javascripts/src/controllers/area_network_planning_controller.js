@@ -25,7 +25,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
   
   function saveExpertMode (expertModeChanges) {
-    console.log(expertModeChanges)
+    state.loadOptimizationOptionsFromJSON(expertModeChanges)
+    return
 
 	var expertChanges = JSON.parse(expertModeChanges)
 
@@ -95,21 +96,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 	  }
   })
   
-  $scope.fetchWirecentersInfo = (expertSelectedWirecenters) => { 
-	var defer=$q.defer();	
-	var params = {
-		expertSelectedWirecenters: expertSelectedWirecenters
-	}
-	$http({
-		url: '/boundary/info',
-		method: 'POST',
-        data: params
-    })
-	.success((response) => {
-		defer.resolve(response); 	  
-	})
-	return defer.promise; 
-  }
+  // $scope.fetchWirecentersInfo = (expertSelectedWirecenters) => { 
+	// var defer=$q.defer();	
+	// var params = {
+	// 	expertSelectedWirecenters: expertSelectedWirecenters
+	// }
+	// $http({
+	// 	url: '/boundary/info',
+	// 	method: 'POST',
+  //       data: params
+  //   })
+	// .success((response) => {
+	// 	defer.resolve(response); 	  
+	// })
+	// return defer.promise; 
+  // }
   
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -174,7 +175,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.run = () => {
     // Check if at least one data source is selected
-    var isAnyDataSourceSelected = state.locationDataSources.length > 0
+    var isAnyDataSourceSelected = state.selectedDataSources.length > 0
 	  // A location is selected if the "checked" property is true
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected

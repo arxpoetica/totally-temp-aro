@@ -2,11 +2,12 @@
 app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', ($rootScope, $http, map_layers, configuration, regions, optimization) => {
   var key = null
   var state = null;
+  var OPTIMIZATION_DATA_SOURCE_GLOBAL = 1
   var service = {}
-  service.INVALID_PLAN_ID = -1;
-  service.DS_GLOBAL_BUSINESSES = -3;
-  service.DS_GLOBAL_HOUSEHOLDS = -2;
-  service.DS_GLOBAL_CELLTOWER = -1;
+  service.INVALID_PLAN_ID = -1
+  service.DS_GLOBAL_BUSINESSES = -3
+  service.DS_GLOBAL_HOUSEHOLDS = -2
+  service.DS_GLOBAL_CELLTOWER = -1
 
   ;['dragend', 'zoom_changed'].forEach((event_name) => {
     $rootScope.$on('map_' + event_name, () => {
@@ -24,7 +25,6 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
   var initializeState = function () {
 
     service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
-    service.GLOBAL_DATASOURCE_ID = 1
 
     // A list of location types to show in the locations layer
     service.locationTypes = []
@@ -42,17 +42,16 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
       {
         dataSourceId: service.DS_GLOBAL_CELLTOWER,
         name: "Global CellTower",
-      },
-
-    ];
+      }
+    ]
+    service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
-    service.locationDataSources = service.defaultDataSources
+    service.selectedDataSources = service.defaultDataSources.slice()
 
     // Optimization options
     service.optimizationOptions = {
       algorithm: 'UNCONSTRAINED',
-      analysisSelectionMode: 'SELECTED_LOCATIONS',
       fiberNetworkConstraints: {
         routingMode: 'DIRECT_ROUTING',
         cellNodeConstraints: {
@@ -138,7 +137,6 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
         : null
 	})
 
-
   initializeState()
 
   // When configuration is loaded from the server, update it in the state
@@ -146,9 +144,15 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     initializeState()
   })
 
-
-
-
+  // Reload uploaded data sources
+  service.reloadDatasources = (callback) => {
+    $http.get('/datasources').success((response) => {
+      service.allDataSources = service.defaultDataSources.slice()
+      service.selectedDataSources = service.defaultDataSources.slice()   // Always keep the global data sources selected
+      service.allDataSources = service.allDataSources.concat(response)
+      callback && callback(response)
+    })
+  }
 
 
   // Get a POST body that we will send to aro-service for performing optimization
@@ -162,22 +166,23 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
     // Set location data sources
     var locationDataSources = {}
-    if (service.locationDataSources.useGlobalBusiness) {
-      locationDataSources.business = [1]
+    if (service.isDataSourceSelected(service.DS_GLOBAL_BUSINESSES)) {
+      locationDataSources.business = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
     }
-    if (service.locationDataSources.useGlobalHousehold) {
-      locationDataSources.household = [1]
+    if (service.isDataSourceSelected(service.DS_GLOBAL_HOUSEHOLDS)) {
+      locationDataSources.household = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
     }
-    if (service.locationDataSources.useGlobalCellTower) {
-      locationDataSources.celltower = [1]
+    if (service.isDataSourceSelected(service.DS_GLOBAL_CELLTOWER)) {
+      locationDataSources.celltower = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
     }
 
-    // Set uploaded location data sources
-    var uploadedDataSourceIds = _.pluck(service.locationDataSources.useUploaded, 'dataSourceId')
+    // Get all uploaded data sources except the global data sources
+    var uploadedDataSources = service.selectedDataSources.filter((item) => (item.dataSourceId != service.DS_GLOBAL_BUSINESSES)
+                                                                           && (item.dataSourceId != service.DS_GLOBAL_HOUSEHOLDS)
+                                                                           && (item.dataSourceId != service.DS_GLOBAL_CELLTOWER))
+    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'dataSourceId')
 
-    if (service.locationDataSources.useUploaded.length > 0) {
-      var uploadedDataSourceIds = _.pluck(service.locationDataSources.useUploaded, 'dataSourceId');
-
+    if (uploadedDataSourceIds.length > 0) {
       locationDataSources.business = locationDataSources.business || [];
       locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds);
 
@@ -245,10 +250,83 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     return optimizationBody
   }
 
+  // Load optimization options from a JSON string
+  service.loadOptimizationOptionsFromJSON = (json) => {
+    var inputOptimization = JSON.parse(json)
 
+    // Set location types
+    service.locationTypes.forEach((locationType) => locationType.checked = false)
+    inputOptimization.locationTypes.forEach((locationType) => {
+      var serviceLocationTypeObj = service.locationTypes.filter((item) => item.key === locationType)[0]
+      if (serviceLocationTypeObj) {
+        serviceLocationTypeObj.checked = true
+      }
+    })
 
+    // Set global data sources
+    service.selectedDataSources = []
+    var setOfUploadedDataSources = new Set()
+    if (inputOptimization.locationDataSources.business) {
+      inputOptimization.locationDataSources.business.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
+      if (inputOptimization.locationDataSources.business.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
+        var globalBusinessesDataSource = service.defaultDataSources.filter((item) => item.dataSourceId === service.DS_GLOBAL_BUSINESSES)[0]
+        service.selectedDataSources.push(globalBusinessesDataSource)
+      }
+    }
+    if (inputOptimization.locationDataSources.household) {
+      inputOptimization.locationDataSources.household.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
+      if (inputOptimization.locationDataSources.household.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
+        var globalHouseholdsDataSource = service.defaultDataSources.filter((item) => item.dataSourceId === service.DS_GLOBAL_HOUSEHOLDS)[0]
+        service.selectedDataSources.push(globalHouseholdsDataSource)
+      }
+    }
+    if (inputOptimization.locationDataSources.celltower) {
+      inputOptimization.locationDataSources.celltower.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
+      if (inputOptimization.locationDataSources.celltower.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
+        var globalCellTowerDataSource = service.defaultDataSources.filter((item) => item.dataSourceId === service.DS_GLOBAL_CELLTOWER)[0]
+        service.selectedDataSources.push(globalCellTowerDataSource)
+      }
+    }
 
+    // At this point, the setOfUploadedDataSources will have all data sources selected. Remove the global data source from the list.
+    // Note that the "global businesses" data source has id of DS_GLOBAL_BUSINESSES but this is not the same as the global data source.
+    // This is because all "global" data sources go in as id 1 to the optimization engine.
+    setOfUploadedDataSources.delete(OPTIMIZATION_DATA_SOURCE_GLOBAL)
+    // And then add the uploaded data sources to the list
+    setOfUploadedDataSources.forEach((uploadedDataSourceId) => {
+      var uploadedDataSource = service.allDataSources.filter((item) => item.dataSourceId === uploadedDataSourceId)[0]
+      if (uploadedDataSource) {
+        service.selectedDataSources.push(uploadedDataSource)
+      }
+    })
 
+    service.optimizationOptions.algorithm = inputOptimization.algorithm
+    
+    // Select geographies
+    var geographyIds = []
+    inputOptimization.geographies.forEach((geography) => geographyIds.push(geography.id))
+    regions.selectGeographyFromIds(geographyIds)
+
+    service.optimizationOptions.budget = inputOptimization.budget
+    service.optimizationOptions.preIrrThreshold = inputOptimization.preIrrThreshold
+    if (inputOptimization.selectionMode === 'SELECTED_AREAS') {
+      optimization.setMode('boundaries')
+    } else if (inputOptimization.selectionMode === 'SELECTED_LOCATIONS') {
+      optimization.setMode('targets')
+    }
+
+    // Set fiber network constraints
+    var cellNodeConstraintsObj = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints
+    cellNodeConstraintsObj.cellRadius = inputOptimization.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+    cellNodeConstraintsObj.polygonStrategy = inputOptimization.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
+    var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === inputOptimization.fiberNetworkConstraints.cellNodeConstraints.tileSystemId)
+    if (selectedTile.length === 1) {
+      cellNodeConstraintsObj.selectedTile = selectedTile[0]
+    }
+
+    service.optimizationOptions.networkTypes = inputOptimization.networkTypes.slice()
+    service.optimizationOptions.fiberSourceIds = inputOptimization.fiberSourceIds.slice()
+  }
 
   service.clearPlan = (plan) => {
     key = null
@@ -283,7 +361,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
   }
 
   service.isDataSourceSelected = function (ds) {
-      var existingDataSources = _.pluck(service.locationDataSources , 'dataSourceId');
+      var existingDataSources = _.pluck(service.selectedDataSources , 'dataSourceId');
       return existingDataSources.indexOf(ds) != -1;
   }
 

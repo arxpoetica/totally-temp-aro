@@ -1,5 +1,5 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
-app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
+app.service('regions', ['$rootScope', '$timeout', '$http', 'map_tools', 'optimization', ($rootScope, $timeout, $http, map_tools, optimization) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
 
@@ -90,6 +90,20 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
     })
     $rootScope.$broadcast('regions_changed')
     optimization.setMode('boundaries')
+  }
+
+  // Select multiple geography using geography ids
+  regions.selectGeographyFromIds = (geographyIds) => {
+    // Get geometry information for all geography ids
+    $http({
+      url: '/boundary/info',
+      method: 'POST',
+      data: geographyIds
+    })
+    .success((response) => {
+      // Go through all ids
+      console.log(geographyIds)
+    })
   }
 
   var configureSearch = () => {
@@ -226,4 +240,4 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
   }
 
   return regions
-})
+}])
