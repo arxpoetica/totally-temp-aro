@@ -27,7 +27,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
 		  state.loadOptimizationOptionsFromJSON(changes)
-		  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
+		  canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
 		  $('#selected_expert_mode').modal('hide')
 	  }	  
   })
@@ -107,10 +107,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      $scope.prerun().then(function(changes){
-        var optimizationBody = state.getOptimizationBody()
-        canceler = optimization.optimize($scope.plan, optimizationBody)
-      })
+      canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
     } else {
       swal({
         title: 'Incomplete input',
