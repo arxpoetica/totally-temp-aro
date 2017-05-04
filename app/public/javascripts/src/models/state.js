@@ -1,8 +1,7 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', ($rootScope, $http, map_layers, configuration, regions, optimization) => {
+app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
   var key = null
-  var state = null;
-  var OPTIMIZATION_DATA_SOURCE_GLOBAL = 1
+  var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
   service.DS_GLOBAL_BUSINESSES = -3
@@ -153,227 +152,16 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     })
   }
 
-  // Add location types to a POST body that we will send to aro-service for performing optimization
-  var addLocationTypesToBody = (postBody) => {
-    var selectedLocationTypes = service.locationTypes.filter((item) => item.checked)
-    postBody.locationTypes = _.pluck(selectedLocationTypes, 'key')
-  }
-
-  // Add global data sources to a POST body that we will send to aro-service for performing optimization
-  var addGlobalDataSourcesToBody = (postBody) => {
-    postBody.locationDataSources = postBody.locationDataSources || {}
-    if (service.isDataSourceSelected(service.DS_GLOBAL_BUSINESSES)) {
-      postBody.locationDataSources.business = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
-    }
-    if (service.isDataSourceSelected(service.DS_GLOBAL_HOUSEHOLDS)) {
-      postBody.locationDataSources.household = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
-    }
-    if (service.isDataSourceSelected(service.DS_GLOBAL_CELLTOWER)) {
-      postBody.locationDataSources.celltower = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
-    }
-  }
-
-  // Add user uploaded data sources to a POST body that we will send to aro-service for performing optimization
-  var addUserUploadedDataSourcesToBody = (postBody) => {
-    postBody.locationDataSources = postBody.locationDataSources || {}
-    // Get all uploaded data sources except the global data sources
-    var uploadedDataSources = service.selectedDataSources.filter((item) => (item.dataSourceId != service.DS_GLOBAL_BUSINESSES)
-                                                                           && (item.dataSourceId != service.DS_GLOBAL_HOUSEHOLDS)
-                                                                           && (item.dataSourceId != service.DS_GLOBAL_CELLTOWER))
-    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'dataSourceId')
-
-    if (uploadedDataSourceIds.length > 0) {
-      postBody.locationDataSources.business = postBody.locationDataSources.business || [];
-      postBody.locationDataSources.business = postBody.locationDataSources.business.concat(uploadedDataSourceIds);
-
-      postBody.locationDataSources.household = postBody.locationDataSources.household || [];
-      postBody.locationDataSources.household = postBody.locationDataSources.household.concat(uploadedDataSourceIds);
-
-      postBody.locationDataSources.celltower = postBody.locationDataSources.celltower || [];
-      postBody.locationDataSources.celltower = postBody.locationDataSources.celltower.concat(uploadedDataSourceIds);
-    }
-  }
-
-  // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization
-  var addAlgorithmParametersToBody = (postBody) => {
-    postBody.algorithm = service.optimizationOptions.algorithm
-    if (service.optimizationOptions.algorithm === 'TABC') {
-      var generations = service.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
-      postBody.customOptimization = {
-        name: 'TABC',
-        map: { generations: generations.join(',') }
-      }
-    }
-    postBody.budget = service.optimizationOptions.budget
-    postBody.preIrrThreshold = service.optimizationOptions.preIrrThreshold
-    postBody.threshold = service.optimizationOptions.coverageThreshold
-  }
-
-  // Add regions to a POST body that we will send to aro-service for performing optimization
-  var addRegionsToBody = (postBody) => {
-    var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined', 'wirecenter', 'cran', 'directional_facility']
-    postBody.geographies = regions.selectedRegions.map((i) => {
-      var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-      // geography information may be too large so we avoid to send it for known region types
-      if (standardTypes.indexOf(i.type) === -1) {
-        info.geog = i.geog
-      }
-      if (i.layerId) {
-        processingLayers.push(i.layerId)
-      }
-      return info
-    })
-    postBody.selectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
-    if (service.optimizationOptions.selectedLayer) {
-      postBody.processingLayers = [service.optimizationOptions.selectedLayer.id]
-    }
-  }
-
-  // Add fiber network constraints to a POST body that we will send to aro-service for optimization
-  var addFiberNetworkConstraintsToBody = (postBody) => {
-    postBody.fiberNetworkConstraints = {}
-    postBody.fiberNetworkConstraints.routingMode = service.optimizationOptions.fiberNetworkConstraints.routingMode
-    postBody.fiberNetworkConstraints.cellNodeConstraints = {}
-    postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-    postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
-    var selectedTile = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile
-    if (selectedTile) {
-      postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
-    }
-  }
-
-  // Add technologies to a POST body that we will send to aro-service for optimization
-  var addTechnologiesToBody = (postBody) => {
-    postBody.networkTypes = []
-    service.optimizationOptions.technologies.forEach((technology) => {
-      if (technology.checked) {
-        postBody.networkTypes.push(technology.id)
-      }
-    })
-  }
-
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
-
-    var optimizationBody = {}
-
-    addLocationTypesToBody(optimizationBody)
-    addGlobalDataSourcesToBody(optimizationBody)
-    addUserUploadedDataSourcesToBody(optimizationBody)
-    addAlgorithmParametersToBody(optimizationBody)
-    addRegionsToBody(optimizationBody)
-    addFiberNetworkConstraintsToBody(optimizationBody)
-    addTechnologiesToBody(optimizationBody)
-
-    optimizationBody.fiberSourceIds = service.optimizationOptions.fiberSourceIds
-
-    return optimizationBody
-  }
-
-  // Load location types from a POST body object that is sent to the optimization engine
-  var loadLocationTypesFromBody = (postBody) => {
-    service.locationTypes.forEach((locationType) => locationType.checked = false)
-    postBody.locationTypes.forEach((locationType) => {
-      var serviceLocationTypeObj = service.locationTypes.filter((item) => item.key === locationType)[0]
-      if (serviceLocationTypeObj) {
-        serviceLocationTypeObj.checked = true
-      }
-    })
-  }
-
-  // Load data sources from a POST body object that is sent to the optimization engine
-  var loadDataSourcesFromBody = (postBody) => {
-    service.selectedDataSources = []
-    var setOfUploadedDataSources = new Set()
-    if (postBody.locationDataSources.business) {
-      postBody.locationDataSources.business.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
-      if (postBody.locationDataSources.business.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
-        var globalBusinessesDataSource = service.defaultDataSources.filter((item) => item.dataSourceId === service.DS_GLOBAL_BUSINESSES)[0]
-        service.selectedDataSources.push(globalBusinessesDataSource)
-      }
-    }
-    if (postBody.locationDataSources.household) {
-      postBody.locationDataSources.household.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
-      if (postBody.locationDataSources.household.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
-        var globalHouseholdsDataSource = service.defaultDataSources.filter((item) => item.dataSourceId === service.DS_GLOBAL_HOUSEHOLDS)[0]
-        service.selectedDataSources.push(globalHouseholdsDataSource)
-      }
-    }
-    if (postBody.locationDataSources.celltower) {
-      postBody.locationDataSources.celltower.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
-      if (postBody.locationDataSources.celltower.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
-        var globalCellTowerDataSource = service.defaultDataSources.filter((item) => item.dataSourceId === service.DS_GLOBAL_CELLTOWER)[0]
-        service.selectedDataSources.push(globalCellTowerDataSource)
-      }
-    }
-
-    // At this point, the setOfUploadedDataSources will have all data sources selected. Remove the global data source from the list.
-    // Note that the "global businesses" data source has id of DS_GLOBAL_BUSINESSES but this is not the same as the global data source.
-    // This is because all "global" data sources go in as id 1 to the optimization engine.
-    setOfUploadedDataSources.delete(OPTIMIZATION_DATA_SOURCE_GLOBAL)
-    // And then add the uploaded data sources to the list
-    setOfUploadedDataSources.forEach((uploadedDataSourceId) => {
-      var uploadedDataSource = service.allDataSources.filter((item) => item.dataSourceId === uploadedDataSourceId)[0]
-      if (uploadedDataSource) {
-        service.selectedDataSources.push(uploadedDataSource)
-      }
-    })
-  }
-
-  // Load algorithm parameters from a POST body object that is sent to the optimization engine
-  var loadAlgorithmParametersFromBody = (postBody) => {
-    service.optimizationOptions.algorithm = postBody.algorithm
-
-    service.optimizationOptions.budget = postBody.budget
-    service.optimizationOptions.preIrrThreshold = postBody.preIrrThreshold
-    if (postBody.selectionMode === 'SELECTED_AREAS') {
-      optimization.setMode('boundaries')
-    } else if (postBody.selectionMode === 'SELECTED_LOCATIONS') {
-      optimization.setMode('targets')
-    }
-  }
-
-  // Load fiber network constraints from a POST body object that is sent to the optimization engine
-  var loadFiberNetworkConstraintsFromBody = (postBody) => {
-    var cellNodeConstraintsObj = service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints
-    cellNodeConstraintsObj.cellRadius = postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-    cellNodeConstraintsObj.polygonStrategy = postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
-    var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId)
-    if (selectedTile.length === 1) {
-      cellNodeConstraintsObj.selectedTile = selectedTile[0]
-    }
-  }
-
-  // Load technologies from a POST body object that is sent to the optimization engine
-  var loadTechnologiesFromBody = (postBody) => {
-    service.optimizationOptions.technologies.forEach((technology) => technology.checked = false)
-    postBody.networkTypes.forEach((networkType) => {
-      var matchedTechnology = service.optimizationOptions.technologies.filter((technology) => technology.id.toUpperCase() === networkType.toUpperCase())
-      if (matchedTechnology && matchedTechnology.length === 1) {
-        matchedTechnology[0].checked = true
-      }
-    })
+    return stateSerializationHelper.getOptimizationBody(service, optimization, regions)
   }
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
-
-    var postBody = JSON.parse(json)
-
-    loadLocationTypesFromBody(postBody)
-    loadDataSourcesFromBody(postBody)
-    loadAlgorithmParametersFromBody(postBody)
-    loadFiberNetworkConstraintsFromBody(postBody)
-    loadTechnologiesFromBody(postBody)
-
-    service.optimizationOptions.fiberSourceIds = postBody.fiberSourceIds.slice()
-
-    // Select geographies
-    regions.removeAllGeographies()
-    var geographyIds = []
-    postBody.geographies.forEach((geography) => geographyIds.push(geography.id))
-    // Note that we are returning a promise that will be resolved when the UI loads all selected regions
-    return regions.selectGeographyFromIds(geographyIds)
+    // Note that we are NOT returning the state (the state is set after the call), but a promise
+    // that resolves once all the geographies have been loaded
+    return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
   }
 
   service.clearPlan = (plan) => {
