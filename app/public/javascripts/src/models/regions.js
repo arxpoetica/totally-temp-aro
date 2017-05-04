@@ -1,5 +1,5 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
-app.service('regions', ['$rootScope', '$timeout', '$http', 'map_tools', 'optimization', ($rootScope, $timeout, $http, map_tools, optimization) => {
+app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, optimization) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
 
@@ -94,8 +94,10 @@ app.service('regions', ['$rootScope', '$timeout', '$http', 'map_tools', 'optimiz
     }
   }
 
-  // Select multiple geography using geography ids
+  // Select multiple geography using geography ids. Returns a promise that resolves after all boundaries have been selected.
   regions.selectGeographyFromIds = (geographyIds) => {
+    var defer = $q.defer()
+
     // Get geometry information for all geography ids
     $http.post('/boundary/info', { expertSelectedWirecenters: geographyIds })
     .success((response) => {
@@ -113,7 +115,11 @@ app.service('regions', ['$rootScope', '$timeout', '$http', 'map_tools', 'optimiz
         // Select geography, and suppress events for all but the last boundary
         regions.selectGeography(geographyObj, index < response.length - 1)
       })
+      defer.resolve()
     })
+    .error((err) => defer.reject(err))
+
+    return defer.promise
   }
 
   var configureSearch = () => {

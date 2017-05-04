@@ -66,7 +66,6 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
       preIrrThreshold: 0.1,
       customOptimization: null,
       fiberSourceIds: [],
-      networkTypes: [],
       threshold: null,
       routeGenerationOptions: [
         { id: 'T', value: 'A Route', checked: false },
@@ -301,12 +300,6 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     })
 
     service.optimizationOptions.algorithm = inputOptimization.algorithm
-    
-    // Select geographies
-    regions.removeAllGeographies()
-    var geographyIds = []
-    inputOptimization.geographies.forEach((geography) => geographyIds.push(geography.id))
-    regions.selectGeographyFromIds(geographyIds)
 
     service.optimizationOptions.budget = inputOptimization.budget
     service.optimizationOptions.preIrrThreshold = inputOptimization.preIrrThreshold
@@ -325,8 +318,23 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
       cellNodeConstraintsObj.selectedTile = selectedTile[0]
     }
 
-    service.optimizationOptions.networkTypes = inputOptimization.networkTypes.slice()
+    // Select technologies (Fiber, FiveG, etc)
+    service.optimizationOptions.technologies.forEach((technology) => technology.checked = false)
+    inputOptimization.networkTypes.forEach((networkType) => {
+      var matchedTechnology = service.optimizationOptions.technologies.filter((technology) => technology.id.toUpperCase() === networkType.toUpperCase())
+      if (matchedTechnology && matchedTechnology.length === 1) {
+        matchedTechnology[0].checked = true
+      }
+    })
+
     service.optimizationOptions.fiberSourceIds = inputOptimization.fiberSourceIds.slice()
+
+    // Select geographies
+    regions.removeAllGeographies()
+    var geographyIds = []
+    inputOptimization.geographies.forEach((geography) => geographyIds.push(geography.id))
+    // Note that we are returning a promise
+    return regions.selectGeographyFromIds(geographyIds)
   }
 
   service.clearPlan = (plan) => {
