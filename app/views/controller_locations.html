@@ -73,19 +73,22 @@
       <div class="customer-type shaded">
         <label>Locations</label>
       </div>
-      <div ng-repeat="locationType in planState.locationTypes" style="clear:both" class="customer-type">
-        <label class="pull-right">
-          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-locations" ng-show="business_categories_selected[locationType.key]"></span>
-          <input type="checkbox"
-                 ng-model="locationType.checked"
-                 ng-change="changeLocationsLayer()">
-        </label>
-        <div class="pull-left">
-          <img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px">
-        </div>
-        <label>{{locationType.label}}</label>
-      </div>
-
+      <ul class="customer-type">
+        <li ng-repeat="locationType in planState.locationTypes">
+          <div class="ctype-icon"><img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px"></div>
+          <div class="ctype-name">
+            {{locationType.label}}
+          </div>
+          <div class="ctype-checkbox">
+            <checkbox
+                    class="chk-small"
+                    ng-model="locationType.checked"
+                    name="ctype-name"
+                    ng-change="changeLocationsLayer()"
+            ></checkbox>
+          </div>
+        </li>
+      </ul>
       <!-- Data sources -->
       <!-- Global businesses -->
       <div class="customer-type shaded">

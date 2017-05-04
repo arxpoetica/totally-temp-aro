@@ -64,7 +64,13 @@
       <p><strong>Non-Targeted Customers</strong></p>
       <div class="checkbox" ng-repeat="entity in entityTypes">
         <label>
-          <input type="checkbox" ng-model="entityTypesTargeted[entity.id]"> {{ entity.value }}
+          <checkbox
+                  class="chk-small"
+                  ng-model="entityTypesTargeted[entity.id]"
+                  name="ctype-name"
+                  ng-change="changeLocationsLayer()"
+          ></checkbox>
+          {{ entity.value }}
         </label>
       </div>
     </div>
@@ -118,13 +124,15 @@
   <div class="checkbox" ng-repeat="type in technologyTypes">
     <label>
      <div style="display: inline-block">
-         <input
-                 type="checkbox"
-                 ng-model="isChecked"
-                 ng-checked="type.selected"
-                 ng-click="toggleTechType(type.id , isChecked)"
-                 id="{{ type.id }}"
-         > {{type.label}}
+       <checkbox
+               class="chk-small"
+               ng-model="isChecked"
+               name="ctype-name"
+               ng-checked="type.selected"
+               ng-click="toggleTechType(type.id , isChecked)"
+               id="{{ type.id }}"
+       ></checkbox>
+       {{type.label}}
      </div>
     <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
     <label>
@@ -135,7 +143,12 @@
         <option value="RAY_TRACING">Ray Tracing</option>
       </select>
       <div style="display: inline-block">
-          <input type="checkbox"> Fiber Proximity Placement
+        <checkbox
+                class="chk-small"
+                ng-model="isChecked2"
+                name="ctype-name"
+        ></checkbox>
+        Fiber Proximity Placement
       </div>
       <div style="display: inline-block"> Radius
         <span>

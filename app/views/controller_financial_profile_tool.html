@@ -141,9 +141,13 @@
             </div>
             <form class="form-inline">
               <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-                <label>
-                  <input type="checkbox" ng-model="connectCapexFilterEntityTypes[entityType]" ng-change="showConnectCapexChart(true)"> {{ entityName }}
-                </label>
+                  <checkbox
+                          class="chk-small"
+                          ng-model="connectCapexFilterEntityTypes[entityType]"
+                          name="ctype-name"
+                          ng-change="showConnectCapexChart(true)"
+                  ></checkbox>
+                  <span style="padding-left: 5px">{{ entityName }}</span>
               </div>
             </form>
           </form>
@@ -193,14 +197,12 @@
           <div class="pull-right">
             <form class="form-inline">
               <div class="radio">
-                <label>
-                  <input type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Count
-                </label>
+                  <input id="radio-count" type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)">
+                  <label for="radio-count" class="radio-label">Count</label>
               </div>
               <div class="radio" style="margin-left: 10px">
-                <label>
-                  <input type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="showPremisesChart(true)"> Percentage
-                </label>
+                  <input  id="radio-percent" type="radio" name="percentage" value="true" ng-model="premisesPercentage" ng-change="showPremisesChart(true)">
+                  <label for="radio-percent" class="radio-label">Percentage</label>
               </div>
             </form>
           </div>
@@ -217,9 +219,13 @@
             <!-- Checkboxes for business/household/celltower categories -->
             <div ng-show="!isLoadingConfiguration">
               <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-                <label>
-                  <input type="checkbox" ng-model="premisesFilterEntityTypes[entityType]" ng-change="showPremisesChart(true)"> {{ entityName }}
-                </label>
+                  <checkbox
+                          class="chk-small"
+                          ng-model="premisesFilterEntityTypes[entityType]"
+                          name="ctype-name"
+                          ng-change="showPremisesChart(true)"
+                  ></checkbox>
+                  <span style="padding-left: 5px">{{ entityName }}</span>
               </div>
             </div>
             <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
@@ -260,10 +266,13 @@
           <form class="form-inline">
             <!-- Checkboxes for business/household/celltower categories -->
             <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-              <label>
-                <input name="entityType" type="checkbox"
-                ng-model="subscribersFilterEntityTypes[entityType]" ng-change="showSubscribersChart(true)"> {{ entityName }}
-              </label>
+                <checkbox
+                        class="chk-small"
+                        ng-model="subscribersFilterEntityTypes[entityType]"
+                        name="ctype-name"
+                        ng-change="showSubscribersChart(true)"
+                ></checkbox>
+                <span style="padding-left: 5px">{{ entityName }}</span>
             </div>
             <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
             <div ng-if="isLoadingConfiguration" class="ng-scope">
@@ -287,10 +296,9 @@
           <form class="form-inline">
             <!-- Radio buttons for business/household/celltower categories -->
             <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-              <label>
-                <input name="entityType" type="radio"
-                  ng-model="penetrationFilter.entityType" ng-change="showPenetrationChart(true)" value="{{entityType}}"> {{ entityName }}
-              </label>
+                <input id="radio-{{ entityName }}" name="entityType" type="radio"
+                       ng-model="penetrationFilter.entityType" ng-change="showPenetrationChart(true)" value="{{entityType}}">
+                <label for="radio-{{ entityName }}">{{ entityName }}</label>
             </div>
             <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
             <div ng-if="isLoadingConfiguration" class="ng-scope">
@@ -316,9 +324,13 @@
         <form class="form-inline">
           <!-- Checkboxes for business/household/celltower categories -->
           <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-            <label>
-              <input type="checkbox" ng-model="opexRecurringFilterEntityTypes[entityType]" ng-change="showOpexRecurringChart(true)"> {{ entityName }}
-            </label>
+              <checkbox
+                      class="chk-small"
+                      ng-model="opexRecurringFilterEntityTypes[entityType]"
+                      name="ctype-name"
+                      ng-change="showOpexRecurringChart(true)"
+              ></checkbox>
+              <span style="padding-left: 5px">{{ entityName }}</span>
           </div>
           <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
           <div ng-if="isLoadingConfiguration" class="ng-scope">
