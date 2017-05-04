@@ -3,7 +3,7 @@
  * This service helps us to convert the "state" object to and from this POST body.
  * Services like "state" and "region" are intentionally not injected into this, instead we send them in as parameters.
  */
-app.service('stateSerializationHelper', () => {
+app.service('stateSerializationHelper', ['$q', ($q) => {
 
   var OPTIMIZATION_DATA_SOURCE_GLOBAL = 1
   var stateSerializationHelper = {}
@@ -151,10 +151,17 @@ app.service('stateSerializationHelper', () => {
 
     // Select geographies
     regions.removeAllGeographies()
-    var geographyIds = []
-    postBody.geographies.forEach((geography) => geographyIds.push(geography.id))
-    // Note that we are returning a promise that will be resolved when the UI loads all selected regions
-    return regions.selectGeographyFromIds(geographyIds)
+    if (postBody.selectionMode === 'SELECTED_AREAS') {
+      var geographyIds = []
+      postBody.geographies.forEach((geography) => geographyIds.push(geography.id))
+      // Note that we are returning a promise that will be resolved when the UI loads all selected regions
+      return regions.selectGeographyFromIds(geographyIds)
+    } else if (postBody.selectionMode === 'SELECTED_LOCATIONS') {
+      // Immediately resolve and return a promise. Nothing to do when we are in target builder mode
+      return $q.when()
+    } else {
+      throw 'Unexpected selection mode in stateSerializationHelper.js'
+    }
   }
 
   // Load location types from a POST body object that is sent to the optimization engine
@@ -247,4 +254,4 @@ app.service('stateSerializationHelper', () => {
   // ------------------------------------------------------------------------------------------------------------------
 
   return stateSerializationHelper
-})
+}])

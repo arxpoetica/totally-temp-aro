@@ -93,73 +93,27 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   })
   
   $('.map-tool-wrapper').css('max-height', $window.innerHeight - 100)
-  
+
   $scope.runExpertMode = () => {
-	$scope.prerun().then(function(changes){
-	  $rootScope.isNetworkPlanning = false
-	  $('#selected_expert_mode').modal('show')
-	  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
-	});
+    $rootScope.isNetworkPlanning = false
+    $('#selected_expert_mode').modal('show')
+    $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
   }
-  
-  function saveExpertMode (expertModeChanges) {
-	  var expertChanges = JSON.parse(expertModeChanges)
-	  
-	/* saving technology */
-	$scope.selectedTechType.forEach(function(prevSelectedTechId) {
-		$('#'+ 'T' +prevSelectedTechId).prop('checked', false)
-	})
-	$scope.selectedTechType = []	
-	expertChanges.networkTypes.forEach(function(techId) {
-		$scope.toggleTechType({id : techId , selected : true});
-		$('#'+ 'T' +techId).prop('checked', true)
-		if (techId == 'FiveG') {
-			$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-			
-			/* saving polygon type */
-			$scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy.toUpperCase()
-		}
-	});
-	  
-	/* saving network construction */
-	switch (expertChanges.fiberNetworkConstraints.routingMode.toUpperCase()){
-	   case "DIRECT_ROUTING" :  $scope.technology = "direct_routing";
-	       break;
-	   case "ODN_1": $scope.technology = "odn1";
-	       break;
-	   case "ODN_2": $scope.technology = "odn2";
-	       break;
-	}  
-	
-	/* saving optimization type */
-	if (expertChanges.algorithm === 'UNCONSTRAINED')
-		$scope.optimizationType = 'CAPEX'
-	else
-		$scope.optimizationType = expertChanges.algorithm	
-	  
-	/* saving Optimization Process Layer */
-	$scope.selectedBoundary = null
-	if (expertChanges.processingLayers) {
-		$scope.allBoundaries.forEach((boundary) => {
-			if (boundary.id == expertChanges.processingLayers)
-				$scope.selectedBoundary = boundary
-		})
-	}
-  }	  
-  
   $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
-	if(!isNetworkPlanning) {
-		saveExpertMode(changes)
-		canceler = optimization.optimize($scope.plan, JSON.parse(changes))
-		$('#selected_expert_mode').modal('hide')
-	}	
+    if(!isNetworkPlanning) {
+      state.loadOptimizationOptionsFromJSON(changes)
+      .then(() => {
+        $scope.run()
+      })
+      $('#selected_expert_mode').modal('hide')
+    }	
   })
   
   $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, isNetworkPlanning) => {
-	if (!isNetworkPlanning) {
-	  saveExpertMode(expertModeChanges)
-	  $('#selected_expert_mode').modal('hide')  
-	}
+    if (!isNetworkPlanning) {
+      state.loadOptimizationOptionsFromJSON(expertModeChanges)
+      $('#selected_expert_mode').modal('hide')  
+    }
   })
 
   $scope.irrThresholdRangeChanged = () => {
@@ -208,133 +162,25 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 	      changeSelectionForFeaturesMatching(dataSources)
 	  }
   }
-
-  $scope.prerun = () => {
-	  
-	var defer=$q.defer()  
-    var scope = config.ui.eye_checkboxes ? $rootScope : $scope
-
-    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
-      scope = $scope.entityTypesTargeted
-    }
-
-    // Set location types
-    var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)  // Get all location types that are checked
-    var locationTypes = _.pluck(selectedLocationTypes, 'key')   // Get the 'key' property of all checked location types
-
-    // Set location data sources
-    var locationDataSources = {}
-
-    if (state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)) {
-      locationDataSources.business = [1]
-    }
-    if (state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)) {
-      locationDataSources.household = [1]
-    }
-    if (state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)) {
-      locationDataSources.celltower = [1]
-    }
-    if (state.selectedDatasources.length > 0) {
-      var uploadedDataSourceIds = _.pluck(state.selectedDatasources, 'dataSourceId')
-
-      //remove default datasources from selected datasources..
-      uploadedDataSourceIds = _.filter(uploadedDataSourceIds, function(d) { return d != -3 && d != -2 && d != -1});
-
-      locationDataSources.business = locationDataSources.business || []
-      locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)
-
-      locationDataSources.household = locationDataSources.household || []
-      locationDataSources.household = locationDataSources.household.concat(uploadedDataSourceIds)
-
-      locationDataSources.celltower = locationDataSources.celltower || []
-      locationDataSources.celltower = locationDataSources.celltower.concat(uploadedDataSourceIds)
-    }
-
-    var processingLayers = []
-    var algorithm = $scope.optimizationType
-    var changes = {
-      locationTypes: locationTypes,
-      locationDataSources: locationDataSources,
-      algorithm: $scope.optimizationType,
-      budget: parseBudget(),
-      irrThreshold: $scope.irrThreshold / 100,
-      selectionMode: 'SELECTED_LOCATIONS'
-    }
-    if ($rootScope.selectedUserDefinedBoundary) {
-      processingLayers.push($rootScope.selectedUserDefinedBoundary.id)
-    }
-    if (processingLayers.length > 0) {
-      changes.processingLayers = _.uniq(processingLayers)
-    }
-
-    if (algorithm === 'CAPEX') {
-      algorithm = 'UNCONSTRAINED'
-      changes.algorithm = algorithm	  
-      delete changes.budget
-      delete changes.irrThreshold
-    } else if (algorithm === 'MAX_IRR') {
-      delete changes.budget
-      delete changes.irrThreshold
-    } else if (algorithm === 'IRR') {
-      delete changes.irrThreshold
-    } else if (algorithm === 'BUDGET_IRR') {
-    }
-
-    /*changes.fiberNetworkConstraints = {
-      useDirectRouting: $scope.technology === 'direct_routing'
-    }*/
-    changes.fiberNetworkConstraints={};
-    
-    switch ($scope.technology){
-	    case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
-	        break;
-	    case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
-	        break;
-	    case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
-	        break;
-    }
-
-    changes.networkTypes = $scope.selectedTechType;
-    if($scope.selectedTechType.indexOf("FiveG")!=-1){
-        if($scope.cellNodeConstraints.cellRadius == ""){
-            $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
-        }
-
-        changes.fiberNetworkConstraints.cellNodeConstraints = {
-            cellRadius : $scope.cellNodeConstraints.cellRadius,
-            polygonStrategy: $scope.polygonOptions.polygonStrategy
-        }
-    }
-    
-    var selectLocationTypes = []
-    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
-      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
-        .map((key) => {
-          return $scope.entityTypesTargeted[key]
-            ? $scope.entityTypes.find((type) => type.id === key).name
-            : null
-        })
-        .filter((val) => val)
-    }
-
-    if ($scope.selectedBoundary) {
-      changes.processingLayers = [$scope.selectedBoundary.id]
-    }
-
-    $scope.selectLocationTypes = selectLocationTypes
-    
-    var fiberSourceIds = optimization.getFiberSourceIds
-    changes.fiberSourceIds = fiberSourceIds()
-    
-    defer.resolve(changes)
-    return defer.promise
-    //canceler = optimization.optimize($scope.plan, changes)
-  }
   
   $scope.run = () => {
-	$scope.prerun().then(function(changes){
-	  canceler = optimization.optimize($scope.plan, changes)
-    });
+    // Check if at least one data source is selected
+    var isAnyDataSourceSelected = state.selectedDataSources.length > 0
+	  // A location is selected if the "checked" property is true
+    var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
+    var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
+    if (validSelection) {
+      canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
+    } else {
+      swal({
+        title: 'Incomplete input',
+        text: 'Please select one or more locations and data sources before running optimization',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+    }
   }
 
   $rootScope.$on('optimization_started_polling', () => {
