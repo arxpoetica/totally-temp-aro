@@ -75,7 +75,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', 'map_tools', 'optimiz
     }
   })
 
-  function selectGeography (geography) {
+  function selectGeography (geography, suppressEvents = false) {
     geography.id = String(geography.id)
     if (regions.selectedRegions.find((geog) => geog.id === geography.id && geog.type === geography.type)) return
     regions.selectedRegions.push(geography)
@@ -88,21 +88,31 @@ app.service('regions', ['$rootScope', '$timeout', '$http', 'map_tools', 'optimiz
         type: geography.type
       }
     })
-    $rootScope.$broadcast('regions_changed')
-    optimization.setMode('boundaries')
+    if (!suppressEvents) {
+      $rootScope.$broadcast('regions_changed')
+      optimization.setMode('boundaries')
+    }
   }
 
   // Select multiple geography using geography ids
   regions.selectGeographyFromIds = (geographyIds) => {
     // Get geometry information for all geography ids
-    $http({
-      url: '/boundary/info',
-      method: 'POST',
-      data: geographyIds
-    })
+    $http.post('/boundary/info', { expertSelectedWirecenters: geographyIds })
     .success((response) => {
-      // Go through all ids
-      console.log(geographyIds)
+      // Go through all elements of the response and select each element
+      response.forEach((boundary, index) => {
+        var idSplit = boundary.id.split(':')
+        var type = idSplit[0]
+        var id = idSplit[1]
+        var geographyObj = {
+          id: id,
+          name: boundary.name,
+          geog: boundary.geog,
+          type: type
+        }
+        // Select geography, and suppress events for all but the last boundary
+        regions.selectGeography(geographyObj, index < response.length - 1)
+      })
     })
   }
 

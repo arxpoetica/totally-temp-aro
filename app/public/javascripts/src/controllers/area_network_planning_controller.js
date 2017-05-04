@@ -24,66 +24,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
   }
   
-  function saveExpertMode (expertModeChanges) {
-    state.loadOptimizationOptionsFromJSON(expertModeChanges)
-    return
-
-	var expertChanges = JSON.parse(expertModeChanges)
-
-    var locationStateTypes = state.locationTypes;
-    locationStateTypes.map(function (locTypes) {
-      locTypes.checked = expertChanges.locationTypes.indexOf(locTypes.key) != -1;
-    });
-
-    /* saving technology */
-    // TODO: Fix this
-	// $scope.selectedTechType.forEach(function(prevSelectedTechId) {
-	// 	$('#'+prevSelectedTechId).prop('checked', false)
-	// })
-	// $scope.selectedTechType = []	
-	// expertChanges.networkTypes.forEach(function(techId) {
-	// 	$scope.toggleTechType(techId,true)
-	// 	$('#'+techId).prop('checked', true)
-	// 	if (techId == 'FiveG') {
-	// 		$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-			
-	// 		/* saving polygon type */
-	// 		$scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy.toUpperCase()
-	// 	}
-	// });
-		
-	/* saving network construction */
-  $scope.state.optimizationOptions.fiberNetworkConstraints = expertChanges.fiberNetworkConstraints
-
-	/* saving optimization type */
-  $scope.state.optimizationOptions.algorithm = expertChanges.algorithm
-			
-	/* saving regions */		
-	regions.removeAllGeographies()
-	var expertSelectedWirecenters = []
-	expertChanges.geographies.forEach((wirecenter) => {
-		expertSelectedWirecenters.push(wirecenter.id)
-	})
-		
-	$scope.fetchWirecentersInfo(expertSelectedWirecenters).then(function(wirecentersInfo){
-		wirecentersInfo.map((boundary) => {
-		    var n = boundary.id.indexOf(':')
-		    var type = boundary.id.substring(0, n)
-		    var id = boundary.id.substring(n + 1)
-
-	           regions.selectGeography({
-	               id: id,
-	               name: boundary.name,
-	               geog: boundary.geog,
-	               type: type
-	           })
-	       })
-	});
-  }	  
-  
   $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-		  saveExpertMode(changes)
+		  state.loadOptimizationOptionsFromJSON(changes)
 		  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
 		  $('#selected_expert_mode').modal('hide')
 	  }	  
@@ -91,26 +34,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-		  saveExpertMode(expertModeChanges)
+		  state.loadOptimizationOptionsFromJSON(expertModeChanges)
 		  $('#selected_expert_mode').modal('hide')  
 	  }
   })
-  
-  // $scope.fetchWirecentersInfo = (expertSelectedWirecenters) => { 
-	// var defer=$q.defer();	
-	// var params = {
-	// 	expertSelectedWirecenters: expertSelectedWirecenters
-	// }
-	// $http({
-	// 	url: '/boundary/info',
-	// 	method: 'POST',
-  //       data: params
-  //   })
-	// .success((response) => {
-	// 	defer.resolve(response); 	  
-	// })
-	// return defer.promise; 
-  // }
   
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {

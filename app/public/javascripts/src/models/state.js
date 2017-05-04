@@ -303,6 +303,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     service.optimizationOptions.algorithm = inputOptimization.algorithm
     
     // Select geographies
+    regions.removeAllGeographies()
     var geographyIds = []
     inputOptimization.geographies.forEach((geography) => geographyIds.push(geography.id))
     regions.selectGeographyFromIds(geographyIds)
