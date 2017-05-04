@@ -101,8 +101,8 @@
   <br>
   <form id="target-builder-upload">
     <p>
-     <button class="btn btn-primary btn-sm"
-       ng-class="{'btn-success': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
+     <button class="btn btn-sm"
+       ng-class="{'btn-primary' : !isToolSelected('single') ,'btn-selected': isToolSelected('single') && !deselectMode, 'btn-danger active': isToolSelected('single') && deselectMode}"
        ng-click="toggleSelectedTool('single')">Building Select</button>
      <button class="btn btn-primary btn-sm"
        ng-class="{'btn-success': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselect_mode}"

@@ -1015,3 +1015,9 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .radio input[type="radio"] + .radio-label:empty:before {
   margin-right: 0;
 }
+
+.btn.btn-selected {
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
