@@ -126,15 +126,14 @@
      <div style="display: inline-block">
        <checkbox
                class="chk-small"
-               ng-model="isChecked"
+               ng-model="type.selected"
                name="ctype-name"
                ng-checked="type.selected"
-               ng-click="toggleTechType(type.id , isChecked)"
-               id="{{ type.id }}"
+               ng-change="toggleTechType(type)"
        ></checkbox>
        {{type.label}}
      </div>
-    <div  ng-show="type.id == 'FiveG' && isChecked" style="display: inline-block">
+    <div  ng-show="type.id == 'FiveG' && type.selected" style="display: inline-block">
     <label>
       <span>Polygon Type</span>
       <select class="form-control" ng-model="polygonOptions.polygonStrategy">

@@ -35,15 +35,18 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     cellRadius: config.ui.map_tools.area_planning.cell_radius,
     polygonStrategy: 'FIXED_RADIUS'
   }
-  
+
   $scope.selectedTechType = ['Fiber'];
-  $scope.toggleTechType = function (type , checked) {
-    if(checked){
-      $scope.selectedTechType.push(type);
+  $scope.toggleTechType = function (type) {
+    if(type.selected){
+      $scope.selectedTechType.push(type.id);
     }else{
-      $scope.selectedTechType.splice($scope.selectedTechType.indexOf(type) , 1);
+      var idx = $scope.selectedTechType.indexOf(type.id);
+      if(idx != -1){
+        $scope.selectedTechType.splice(idx , 1);
+      }
     }
-  }
+  };
   
   $scope.entityTypesTargeted = {}
 
@@ -108,7 +111,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 	})
 	$scope.selectedTechType = []	
 	expertChanges.networkTypes.forEach(function(techId) {
-		$scope.toggleTechType(techId,true)
+		$scope.toggleTechType({id : techId , selected : true});
 		$('#'+ 'T' +techId).prop('checked', true)
 		if (techId == 'FiveG') {
 			$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
