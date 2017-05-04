@@ -27,8 +27,10 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
 		  state.loadOptimizationOptionsFromJSON(changes)
-		  canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
-		  $('#selected_expert_mode').modal('hide')
+      .then(() => {
+        $scope.run()
+      })
+      $('#selected_expert_mode').modal('hide')
 	  }	  
   })
 
