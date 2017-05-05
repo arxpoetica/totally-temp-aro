@@ -123,48 +123,21 @@
               </div>
 
               <div ng-if="serviceLayer.id === 'existing_fiber'">
-                <div id="fiberDatasources">
-                  <div ng-repeat="datasource in showingDatasources" ng-attr-id="fiberDatasources-{{datasource.systemId}}">
-                    <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
-                    <div class="pull-right">
-                      <a href="javascript:;" ng-click="removeDatasource(datasource)" ng-if="datasource.libraryId">
-                        <span class="fa fa-trash-o"></span>
-                      </a>
-                      <checkbox
-                              class="chk-small btn-primary"
-                              ng-model="datasource.visible"
-                              ng-change="datasource.toggleVisibility()"
-                              ng-disabled="!vztfttp || !serviceLayer.enabled"
-                      ></checkbox>
-                    </div>
-                    <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                      <label style="font-weight:normal" class="fiber-label">
-                        {{datasource.name}}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
+                <div style="clear: both"></div>
                 <% if (user.rol === 'admin' || user.rol === 'biz-dev') { %>
-                <div style="width: 250px">
+                <div style="width: 250px;margin: 5px">
                   <ui-select multiple ng-model="fibers"
                              theme="bootstrap"
                              close-on-select="true"
                              on-select="changeSelectedFiberDatasource($item , $model)"
                              on-remove="removeSelectedFiberDatasource($item , $model)">
-                    <ui-select-match placeholder="Select a datasource to see it">{{$item.name}}</ui-select-match>
+                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.dataSourceId}}]</ui-select-match>
                     <ui-select-choices class="ui-select-width-250" repeat="datasource in remainingDatasources">
                       <div>{{datasource.name}}</div>
                     </ui-select-choices>
                   </ui-select>
                 </div>
 
-
-                <!--<select class="form-control" ng-model="fiber.selected"-->
-                  <!--ng-change="changeSelectedFiberDatasource()"-->
-                  <!--ng-options="datasource as datasource.name for datasource in remainingDatasources track by datasource.systemId">-->
-                  <!--<option value="">Select a datasource to see it</option>-->
-                <!--</select>-->
                 <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
                   <span class="fa fa-plus"></span> Add fiber
                 </button>

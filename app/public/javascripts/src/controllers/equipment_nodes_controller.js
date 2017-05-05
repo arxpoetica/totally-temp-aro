@@ -559,27 +559,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       fiberLayers[String(datasource.systemId)].hide()
       datasource.visible = false
     }
-
     updateOptimizationFiber()
-
-    $('#fiberDatasources').sortable({
-      update: () => {
-        var arr = []
-        $('#fiberDatasources > div').each(function () {
-          var id = $(this).attr('id')
-          var systemId = id.substring('fiberDatasources-'.length)
-          var ds = $scope.showingDatasources.find((ds) => String(ds.systemId) === systemId)
-          if (ds) arr.push(ds)
-        })
-        $scope.showingDatasources = arr
-        updateOptimizationFiber()
-      }
-    })
-    $('#fiberDatasources').disableSelection()
   }
 
   function updateOptimizationFiber () {
-    var ids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
+   var ids = _.pluck($scope.fibers , 'systemId');
     optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(ids))
   }
 
@@ -595,7 +579,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     	$scope.selectedExistingFiberIds.push(fiberSourceIdsMap[layer.name])
       }
     })
-    var fiberSourceids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
+    var fiberSourceids = _.pluck($scope.fibers , 'systemId');;
     optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(fiberSourceids))
     selectedlayer.toggleVisibility();
   }
