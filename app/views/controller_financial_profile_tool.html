@@ -295,10 +295,9 @@
           <p class="text-center"><strong>Penetration</strong></p>
           <form class="form-inline">
             <!-- Radio buttons for business/household/celltower categories -->
-            <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-                <input id="radio-{{ entityName }}" name="entityType" type="radio"
-                       ng-model="penetrationFilter.entityType" ng-change="showPenetrationChart(true)" value="{{entityType}}">
-                <label for="radio-{{ entityName }}">{{ entityName }}</label>
+            <div class="radio" ng-repeat="(entityType, entityName) in entityTypes">
+              <input id="radio-{{ entityType }}" name="entityType" type="radio" ng-model="penetrationFilter.entityType" ng-change="showPenetrationChart(true)" value="{{entityType}}">
+              <label for="radio-{{ entityType }}" class="radio-label">{{ entityName }}</label>
             </div>
             <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
             <div ng-if="isLoadingConfiguration" class="ng-scope">
