@@ -15,7 +15,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
 
   $scope.calculating = false
-  $scope.irrThresholdRange = state.optimizationOptions.preIrrThreshold
+  $scope.irrThresholdRange = state.optimizationOptions.financialConstraints.preIrrThreshold
   
   $scope.runExpertMode = () => {
     $rootScope.isNetworkPlanning = true
@@ -73,11 +73,11 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   }
 
   $scope.irrThresholdRangeChanged = () => {
-    $scope.state.optimizationOptions.preIrrThreshold = +$scope.irrThresholdRange
+    $scope.state.optimizationOptions.financialConstraints.preIrrThreshold = +$scope.irrThresholdRange
   }
 
   $scope.irrThresholdChanged = () => {
-    $scope.irrThresholdRange = $scope.state.optimizationOptions.preIrrThreshold
+    $scope.irrThresholdRange = $scope.state.optimizationOptions.financialConstraints.preIrrThreshold
   }
 
   var canceler = null

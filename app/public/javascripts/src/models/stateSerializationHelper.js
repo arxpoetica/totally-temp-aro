@@ -82,9 +82,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         map: { generations: generations.join(',') }
       }
     }
-    postBody.budget = state.optimizationOptions.budget
-    postBody.preIrrThreshold = state.optimizationOptions.preIrrThreshold
-    postBody.threshold = state.optimizationOptions.coverageThreshold
+
+    postBody.financialConstraints = state.optimizationOptions.financialConstraints
+    postBody.threshold = state.optimizationOptions.threshold
   }
 
   // Add regions to a POST body that we will send to aro-service for performing optimization
@@ -97,13 +97,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         info.geog = i.geog
       }
       if (i.layerId) {
-        processingLayers.push(i.layerId)
+        processLayers.push(i.layerId)
       }
       return info
     })
-    postBody.selectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
+    postBody.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     if (state.optimizationOptions.selectedLayer) {
-      postBody.processingLayers = [state.optimizationOptions.selectedLayer.id]
+      postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
     }
   }
 
@@ -153,12 +153,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     // Select geographies
     regions.removeAllGeographies()
-    if (postBody.selectionMode === 'SELECTED_AREAS') {
+    if (postBody.analysisSelectionMode === 'SELECTED_AREAS') {
       var geographyIds = []
       postBody.geographies.forEach((geography) => geographyIds.push(geography.id))
       // Note that we are returning a promise that will be resolved when the UI loads all selected regions
       return regions.selectGeographyFromIds(geographyIds)
-    } else if (postBody.selectionMode === 'SELECTED_LOCATIONS') {
+    } else if (postBody.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       // Immediately resolve and return a promise. Nothing to do when we are in target builder mode
       return $q.when()
     } else {
@@ -225,11 +225,19 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
 
-    state.optimizationOptions.budget = postBody.budget
-    state.optimizationOptions.preIrrThreshold = postBody.preIrrThreshold
-    if (postBody.selectionMode === 'SELECTED_AREAS') {
+    if (postBody.financialConstraints.years) {
+      state.optimizationOptions.financialConstraints.years = postBody.financialConstraints.years
+    }
+    if (postBody.financialConstraints.budget) {
+      state.optimizationOptions.financialConstraints.budget = postBody.financialConstraints.budget
+    }
+    if (postBody.financialConstraints.preIrrThreshold) {
+      state.optimizationOptions.financialConstraints.preIrrThreshold = postBody.financialConstraints.preIrrThreshold
+    }
+    state.optimizationOptions.threshold = postBody.threshold
+    if (postBody.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
-    } else if (postBody.selectionMode === 'SELECTED_LOCATIONS') {
+    } else if (postBody.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       optimization.setMode('targets')
     }
   }

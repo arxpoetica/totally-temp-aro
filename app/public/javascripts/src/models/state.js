@@ -34,11 +34,14 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
       }
     },
     processLayers: [],
-    budget: 10000000,
-    preIrrThreshold: 0.1,
+    financialConstraints: {
+      years: 10,
+      budget: 10000000,
+      preIrrThreshold: 0.1
+    },
+    threshold: 0,
     customOptimization: null,
     fiberSourceIds: [],
-    threshold: null,
     routeGenerationOptions: [
       { id: 'T', value: 'A Route', checked: false },
       { id: 'A', value: 'B Route', checked: false },

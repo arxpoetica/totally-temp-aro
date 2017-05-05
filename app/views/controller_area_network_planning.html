@@ -14,7 +14,7 @@
       <div class="col-md-5">
         <div class="form-group form-group-sm">
           <div class="input-group input-group-sm">
-            <input type="number" min="0" max="100" step="1" ng-model="state.optimizationOptions.preIrrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+            <input type="number" min="0" max="100" step="1" ng-model="state.optimizationOptions.financialConstraints.preIrrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
             <div class="input-group-addon">%</div>
           </div>
         </div>
@@ -30,7 +30,7 @@
           <div class="form-group form-group-sm">
             <div class="input-group input-group-sm">
               <div class="input-group-addon"><%- config.currency_symbol %></div>
-              <input type="text" class="form-control text-right" placeholder="Amount" ng-model="state.optimizationOptions.budget">
+              <input type="text" class="form-control text-right" placeholder="Amount" ng-model="state.optimizationOptions.financialConstraints.budget">
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@
         <div class="form-group form-group-sm">
           <div class="input-group input-group-sm">
             <div class="input-group-addon">%</div>
-            <input type="text" class="form-control text-right" placeholder="Percentage" ng-model="state.optimizationOptions.coverageThreshold" name="coverage_target">
+            <input type="text" class="form-control text-right" placeholder="Percentage" ng-model="state.optimizationOptions.threshold" name="coverage_target">
           </div>
         </div>
       </div>
