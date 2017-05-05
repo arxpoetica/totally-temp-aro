@@ -279,8 +279,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $http({ url: `/financial_profile/${plan_id}/${key}`, params: params })
       .success((response) => {
         $scope.financialData[key] = response
-        console.log('Requested', key)
-        console.table && console.table(response)
+        // console.log('Requested', key)
+        // console.table && console.table(response)
         callback(response)
       })
   }

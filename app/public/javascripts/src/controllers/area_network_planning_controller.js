@@ -16,7 +16,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   $scope.calculating = false
   $scope.irrThresholdRange = state.optimizationOptions.preIrrThreshold
-  $scope.optimizationTypeOptions = []
   
   $scope.runExpertMode = () => {
     $rootScope.isNetworkPlanning = true
@@ -127,29 +126,25 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   function optimizationModeChanged (e, mode) {
     $scope.optimizationMode = mode
-    $scope.state.optimizationOptions.algorithm = 'UNCONSTRAINED'
     if (mode === 'targets') {
-      $scope.optimizationTypeOptions = [
-        { id: 'UNCONSTRAINED', label: 'Full Coverage' },
-        { id: 'IRR', label: 'Budget' }
+      state.optimizationOptions.uiAlgorithms = [
+        { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+        { id: 'IRR', algorithm: 'IRR', label: 'Budget' }
       ]
     } else {
-      $scope.optimizationTypeOptions = [
-        { id: 'UNCONSTRAINED', label: 'Full Coverage' },
-        { id: 'MAX_IRR', label: 'Maximum IRR' },
-        { id: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', label: 'IRR Target' },
-        { id: 'IRR_THRESH', label: 'IRR Threshold'}
-
-    ]
+      state.optimizationOptions.uiAlgorithms = [
+        { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+        { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
+        { id: 'IRR', algorithm: 'IRR', label: 'Budget' },
+        { id: 'BUDGET_IRR', algorithm: 'IRR', label: 'IRR Target' },
+        { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
+      ]
       if (config.ARO_CLIENT === 'verizon') {
-        $scope.optimizationTypeOptions.push({ id: 'TABC', label: 'ABCD analysis' })
+        state.optimizationOptions.uiAlgorithms.push({ id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' })
       }
-      // { id: 'TARGET_IRR', label: 'IRR Target' },
-      // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
-
-    $scope.optimizationTypeOptions.push({ id: 'COVERAGE', label: 'Coverage Target' });
+    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'UNCONSTRAINED', label: 'Coverage Target' })
+    state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   }
   optimizationModeChanged(null, optimization.getMode())
 

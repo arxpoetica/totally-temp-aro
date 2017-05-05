@@ -14,6 +14,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.showHeatmapAlert = false
   $scope.targets = []
   $scope.targetsTotal = 0
+  $scope.state = state
 
   // ARO version
   $scope.optimizationMode = 'targets'
@@ -24,30 +25,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
     { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
   ]
-  
-  $scope.technologyTypes = [
-    {id:'Fiber' , label : 'Fiber' , selected :true},
-    {id:'FiveG' , label : '5G'}
-  ]
-  
-  $scope.cellNodeConstraints = {
-    cellGranularityRatio : 0,
-    cellRadius: config.ui.map_tools.area_planning.cell_radius,
-    polygonStrategy: 'FIXED_RADIUS'
-  }
 
-  $scope.selectedTechType = ['Fiber'];
-  $scope.toggleTechType = function (type) {
-    if(type.selected){
-      $scope.selectedTechType.push(type.id);
-    }else{
-      var idx = $scope.selectedTechType.indexOf(type.id);
-      if(idx != -1){
-        $scope.selectedTechType.splice(idx , 1);
-      }
-    }
-  };
-  
   $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
@@ -58,19 +36,18 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.optimizeTowers = true
   $scope.optimizeUploaded = false
 
-  $scope.optimizationType = 'CAPEX'
   $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
-  $scope.technology = 'direct_routing' // 'odn1'
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
   $scope.polygonOptions = {
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
-  $scope.optimizationTypeOptions = [
-    { id: 'CAPEX', label: 'Full Coverage' },
-    { id: 'IRR', label: 'ROI Routing' },
-    { id: 'MAX_IRR', label: 'Maximum IRR' }
+  state.optimizationOptions.uiAlgorithms = [
+    { id: 'CAPEX', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+    { id: 'IRR', algorithm: 'IRR', label: 'ROI Routing' },
+    { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' }
   ]
+  state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   var budgetInput = $('#target_builder_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
 

@@ -72,8 +72,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization
   var addAlgorithmParametersToBody = (state, postBody) => {
-    postBody.algorithm = state.optimizationOptions.algorithm
-    if (state.optimizationOptions.algorithm === 'TABC') {
+    // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
+    postBody.algorithm = state.optimizationOptions.uiSelectedAlgorithm.algorithm
+    postBody.uiSelectedAlgorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
+    if (state.optimizationOptions.uiSelectedAlgorithm.algorithm === 'TABC') {
       var generations = state.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
       postBody.customOptimization = {
         name: 'TABC',
@@ -216,7 +218,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   var loadAlgorithmParametersFromBody = (state, optimization, postBody) => {
-    state.optimizationOptions.algorithm = postBody.algorithm
+    // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
+    state.optimizationOptions.uiAlgorithms.forEach((uiAlgorithm) => {
+      if (uiAlgorithm.id === postBody.uiSelectedAlgorithmId) {
+        state.optimizationOptions.uiSelectedAlgorithm = uiAlgorithm
+      }
+    })
 
     state.optimizationOptions.budget = postBody.budget
     state.optimizationOptions.preIrrThreshold = postBody.preIrrThreshold

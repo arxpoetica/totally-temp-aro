@@ -1,10 +1,10 @@
 <div id="area_network_planning_controller">
   <p><strong>Optimization Type</strong></p>
   <select class="form-control"
-    ng-model="state.optimizationOptions.algorithm"
-    ng-options="item.id as item.label for item in optimizationTypeOptions">
+    ng-model="state.optimizationOptions.uiSelectedAlgorithm"
+    ng-options="item as item.label for item in state.optimizationOptions.uiAlgorithms">
   </select>
-  <div ng-show="state.optimizationOptions.algorithm === 'TARGET_IRR' || state.optimizationOptions.algorithm === 'BUDGET_IRR' || state.optimizationOptions.algorithm === 'IRR_THRESH'">
+  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'TARGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
     <br>
     <p><strong>IRR Threshold</strong></p>
     <div class="row">
@@ -21,9 +21,9 @@
       </div>
     </div>
   </div>
-  <div ng-show="state.optimizationOptions.algorithm === 'BUDGET_IRR' || state.optimizationOptions.algorithm === 'IRR' || state.optimizationOptions.algorithm === 'IRR_THRESH'">
+  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
     <br>
-    <div ng-hide="state.optimizationOptions.algorithm === 'IRR_THRESH'">
+    <div ng-hide="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
       <p><strong>Target Capital</strong></p>
       <div class="row">
         <div class="col-md-12">
@@ -59,7 +59,7 @@
         <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
       </div>
     </div>
-    <div ng-show="optimizationMode === 'targets' && state.optimizationOptions.algorithm === 'IRR'">
+    <div ng-show="optimizationMode === 'targets' && state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR'">
       <br>
       <p><strong>Non-Targeted Customers</strong></p>
       <div class="checkbox" ng-repeat="entity in entityTypes">
@@ -75,7 +75,7 @@
       </div>
     </div>
   </div>
-  <div ng-show="state.optimizationOptions.algorithm === 'COVERAGE'">
+  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">
     <br>
     <p><strong>Coverage Target</strong></p>
     <div class="row">
@@ -192,7 +192,7 @@
 
   <% if (config.ARO_CLIENT === 'verizon') { %>
 
-  <div ng-show="state.optimizationOptions.algorithm === 'TABC'">
+  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'TABC'">
     <p><strong>Route Generation Options</strong></p>
     <form>
       <div class="checkbox" ng-repeat="option in state.optimizationOptions.routeGenerationOptions">

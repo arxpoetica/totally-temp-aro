@@ -20,64 +20,66 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     })
   })
 
-  // Initialize the state of the application
+  // Optimization options - initialize once
+  service.optimizationOptions = {
+    uiAlgorithms: [],
+    uiSelectedAlgorithm: null,
+    fiberNetworkConstraints: {
+      routingMode: 'DIRECT_ROUTING',
+      cellNodeConstraints: {
+        cellRadius: 300.0,
+        polygonStrategy: 'FIXED_RADIUS',
+        tiles: [],
+        selectedTile: null
+      }
+    },
+    processLayers: [],
+    budget: 10000000,
+    preIrrThreshold: 0.1,
+    customOptimization: null,
+    fiberSourceIds: [],
+    threshold: null,
+    routeGenerationOptions: [
+      { id: 'T', value: 'A Route', checked: false },
+      { id: 'A', value: 'B Route', checked: false },
+      { id: 'B', value: 'C Route', checked: false },
+      { id: 'C', value: 'D Route', checked: false }
+    ],
+    technologies: [
+      { id: 'Fiber', label: 'Fiber', checked: true},
+      { id: 'FiveG', label: '5G', checked: false}
+    ],
+    selectedLayer: null
+  }
+
+
+  // Default data sources - define once
+  service.defaultDataSources = [
+    {
+      dataSourceId: service.DS_GLOBAL_BUSINESSES,
+      name: "Global Businesses"
+    },
+    {
+      dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
+      name: "Global Households"
+    },
+    {
+      dataSourceId: service.DS_GLOBAL_CELLTOWER,
+      name: "Global CellTower"
+    }
+  ]
+
+  // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
 
     service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
 
     // A list of location types to show in the locations layer
     service.locationTypes = []
-
-    //location datasources for dropdown
-    service.defaultDataSources = [
-      {
-        dataSourceId: service.DS_GLOBAL_BUSINESSES,
-        name: "Global Businesses"
-      },
-      {
-        dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
-        name: "Global Households"
-      },
-      {
-        dataSourceId: service.DS_GLOBAL_CELLTOWER,
-        name: "Global CellTower"
-      }
-    ]
     service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
     service.selectedDataSources = service.defaultDataSources.slice()
-
-    // Optimization options
-    service.optimizationOptions = {
-      algorithm: 'UNCONSTRAINED',
-      fiberNetworkConstraints: {
-        routingMode: 'DIRECT_ROUTING',
-        cellNodeConstraints: {
-          cellRadius: 300.0,
-          polygonStrategy: 'FIXED_RADIUS',
-          tiles: [],
-          selectedTile: null
-        }
-      },
-      processLayers: [],
-      budget: 10000000,
-      preIrrThreshold: 0.1,
-      customOptimization: null,
-      fiberSourceIds: [],
-      threshold: null,
-      routeGenerationOptions: [
-        { id: 'T', value: 'A Route', checked: false },
-        { id: 'A', value: 'B Route', checked: false },
-        { id: 'B', value: 'C Route', checked: false },
-        { id: 'C', value: 'D Route', checked: false }
-      ],
-      technologies: [
-        { id: 'Fiber', label: 'Fiber', checked: true},
-        { id: 'FiveG', label: '5G', checked: false}
-      ],
-      selectedLayer: null
-    }
 
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
