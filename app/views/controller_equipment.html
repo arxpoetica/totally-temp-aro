@@ -146,11 +146,25 @@
                 </div>
 
                 <% if (user.rol === 'admin' || user.rol === 'biz-dev') { %>
-                <select class="form-control" ng-model="fiber.selected"
-                  ng-change="changeSelectedFiberDatasource()"
-                  ng-options="datasource as datasource.name for datasource in remainingDatasources track by datasource.systemId">
-                  <option value="">Select a datasource to see it</option>
-                </select>
+                <div>
+                  <ui-select multiple ng-model="fibers"
+                             theme="bootstrap"
+                             close-on-select="true"
+                             on-select="changeSelectedFiberDatasource($item , $model)"
+                             on-remove="removeSelectedFiberDatasource($item , $model)">
+                    <ui-select-match placeholder="Select a datasource to see it">{{$item.name}}</ui-select-match>
+                    <ui-select-choices class="ui-select-width-300" repeat="datasource in remainingDatasources">
+                      <div>{{datasource.name}}</div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+
+
+                <!--<select class="form-control" ng-model="fiber.selected"-->
+                  <!--ng-change="changeSelectedFiberDatasource()"-->
+                  <!--ng-options="datasource as datasource.name for datasource in remainingDatasources track by datasource.systemId">-->
+                  <!--<option value="">Select a datasource to see it</option>-->
+                <!--</select>-->
                 <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
                   <span class="fa fa-plus"></span> Add fiber
                 </button>

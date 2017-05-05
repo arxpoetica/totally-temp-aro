@@ -534,19 +534,30 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     info.toggleVisibility()
   })
 
-  $scope.fiber = { selected: null }
-  $scope.changeSelectedFiberDatasource = () => {
-    selectFiberDatasource($scope.fiber.selected, true)
-    $scope.fiber.selected = null
+  $scope.fibers = []
+  $scope.changeSelectedFiberDatasource = (a,b) => {
+    $scope.fibers.push(a);
+
+    $scope.fibers.map(function (dataSource) {
+      selectFiberDatasource(dataSource , true);
+    })
   }
 
+  $scope.removeSelectedFiberDatasource = (a,b) => {
+    var idx = $scope.fibers.indexOf(a);
+    $scope.fibers.splice(idx , 1);
+
+    selectFiberDatasource(a , false);
+  }
+
+
   function selectFiberDatasource (datasource, show) {
-    var index = $scope.remainingDatasources.indexOf(datasource)
-    $scope.remainingDatasources.splice(index, 1)
-    $scope.showingDatasources.push(datasource)
     if (show) {
       fiberLayers[String(datasource.systemId)].show()
       datasource.visible = true
+    }else{
+      fiberLayers[String(datasource.systemId)].hide()
+      datasource.visible = false
     }
     updateOptimizationFiber()
 
