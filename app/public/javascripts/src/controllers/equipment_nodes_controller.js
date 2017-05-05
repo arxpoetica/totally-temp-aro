@@ -547,7 +547,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var idx = $scope.fibers.indexOf(a);
     $scope.fibers.splice(idx , 1);
 
-    $scope.removeDatasource(a);
+    selectFiberDatasource(a , false);
   }
 
 
@@ -555,6 +555,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if (show) {
       fiberLayers[String(datasource.systemId)].show()
       datasource.visible = true
+    }else {
+      fiberLayers[String(datasource.systemId)].hide()
+      datasource.visible = false
     }
 
     updateOptimizationFiber()
@@ -578,12 +581,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function updateOptimizationFiber () {
     var ids = $scope.showingDatasources.filter((ds) => ds.visible).map((ds) => ds.systemId)
     optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(ids))
-  }
-
-  $scope.removeDatasource = (datasource) => {
-    var layer = fiberLayers[String(datasource.systemId)]
-    layer.remove()
-    updateOptimizationFiber()
   }
 
   $scope.selectedExistingFiberIds = []
