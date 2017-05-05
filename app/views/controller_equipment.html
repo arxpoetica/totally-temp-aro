@@ -105,23 +105,6 @@
                 </div>
               </div>
 
-              <div ng-repeat="layer in serviceLayer.layers">
-                <div class="pull-left" style="margin-right: 5px"><span style="background-color: <%- config.ui.colors.fiber %>; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
-                <div class="pull-right">
-                  <checkbox
-                          class="chk-small btn-primary"
-                          ng-model="layer.visible"
-                          ng-click="setVisibleFibers(serviceLayer,layer)"
-                          ng-disabled="!vztfttp || !serviceLayer.enabled"
-                  ></checkbox>
-                </div>
-                <div ng-attr-id="map_layers_toggle_{{layer.key}}" ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                  <label style="font-weight:normal">
-                    {{layer.name}}
-                  </label>
-                </div>
-              </div>
-
               <div ng-if="serviceLayer.id === 'existing_fiber'">
                 <div style="clear: both"></div>
                 <% if (user.rol === 'admin' || user.rol === 'biz-dev') { %>
