@@ -84,6 +84,16 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     postBody.financialConstraints = state.optimizationOptions.financialConstraints
+    // Delete items from postBody.financialConstraints based on the type of algorithm we are using.
+    var algorithmId = state.optimizationOptions.uiSelectedAlgorithm
+    if (algorithmId === 'CAPEX' || algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR' || algorithmId === 'TABC') {
+      delete postbody.financialConstraints.budget
+      delete postBody.financialConstraints.preIrrThreshold
+    } else if (algorithmId === 'IRR') {
+      delete postBody.financialConstraints.preIrrThreshold
+    }
+
+
     postBody.threshold = state.optimizationOptions.threshold
   }
 
