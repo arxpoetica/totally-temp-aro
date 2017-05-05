@@ -13,3 +13,7 @@
 .ui-select-width-300 {
   width: 300px!important; /* Hate to use !important but don't see a way out for now */
 }
+
+.ui-select-width-250 {
+  width: 250px!important; /* Hate to use !important but don't see a way out for now */
+}
