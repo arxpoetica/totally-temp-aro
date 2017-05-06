@@ -321,47 +321,16 @@ module.exports = class Network {
   }
 
   static recalculateNodes (plan_id, options) {
-    var optimizationType = options.algorithm
-    var algorithms = {
-      'MAX_IRR': 'IRR',
-      'TARGET_IRR': 'IRR',
-      'BUDGET_IRR': 'IRR',
-      'IRR': 'IRR',
-      'IRR_THRESH':'IRR',
-      'TABC': 'CUSTOM'
-    }
-    var algorithm = options.algorithm;
-    options.algorithm = algorithms[algorithm] || algorithm;
-    options.locationTypes = Array.isArray(options.locationTypes) ? options.locationTypes : []
-    var body = {
-      planId: plan_id,
-      locationTypes: options.locationTypes,
-      algorithm: options.algorithm,
-      analysisSelectionMode: options.selectionMode,
-      fiberNetworkConstraints: options.fiberNetworkConstraints,
-      processLayers: options.processingLayers,
-      customOptimization: options.customOptimization,
-      locationDataSources: options.locationDataSources,
-      fiberSourceIds: options.fiberSourceIds,
-      networkTypes:options.networkTypes,
-      threshold : options.threshold
-    }
-    if (config.hardcodeFiberSourceId) {
-      body.fiberSourceIds = [1]
-    }
+
+    // Add plan id to optimization options
+    options.planId = plan_id
+
     var req = {
       method: 'POST',
       url: `${config.aro_service_url}/optimize/masterplan`,
       json: true,
-      body: body
+      body: options
     }
-    var financialConstraints = body.financialConstraints = { years: 10 }
-    if (options.budget) financialConstraints.budget = options.budget
-    if (options.discountRate) financialConstraints.discountRate = options.discountRate
-    if (options.irrThreshold) body.threshold = options.irrThreshold
-    if (options.preIrrThreshold) financialConstraints.preIrrThreshold = options.preIrrThreshold
-
-
 
     return Promise.all([
       database.findOne('SELECT * FROM client.plan_links WHERE plan_id = $1 LIMIT 1', [plan_id]),
@@ -369,10 +338,10 @@ module.exports = class Network {
       database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
       database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id]),
       database.execute('UPDATE client.plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
-        [plan_id, options.locationTypes, optimizationType])
+        [plan_id, options.locationTypes, options.algorithm])
     ])
     .then((results) => {
-      body.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
+      options.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
       if (options.geographies) {
         var promises = []
         options.geographies.forEach((geography) => {

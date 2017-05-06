@@ -34,7 +34,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     threshold: 12,
     reload: 'always'
   })
-  reloadDatasources() // Reload data sources even without a plan
+  state.reloadDatasources() // Reload data sources even without a plan
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
@@ -150,7 +150,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     var businessCategories = []
     var householdCategories = []
     var showTowers = false
-    var dataSources = new Set()
     $scope.planState.locationTypes.forEach((locationType) => {
       if ((locationType.type === 'business') && locationType.checked) {
         businessCategories.push(locationType.key)
@@ -170,7 +169,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       useGlobalBusinessDataSource: state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES),
       useGlobalHouseholdDataSource:state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS),
       useGlobalCellTowerDataSource:state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER),
-      uploadedDataSources: _.pluck($scope.planState.locationDataSources, 'dataSourceId')
+      uploadedDataSources: _.pluck($scope.planState.selectedDataSources, 'dataSourceId')
     }
     locationsLayer.setApiEndpoint('/locations', options)
     locationsLayer.show()
@@ -239,11 +238,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
   })
 
-  $scope.allUploadedDataSources =[]
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     if (!$scope.heatmapOn) $scope.toggleHeatmap()
-    $scope.allUploadedDataSources = []
     optimization.datasources = []
 
     if (plan) {
@@ -254,22 +251,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
       })
     }
 
-    reloadDatasources()
+    state.reloadDatasources()
     $scope.changeLocationsLayer()
   })
 
-  function reloadDatasources (callback) {
-    $http.get('/datasources').success((response) => {
-      $scope.datasources = response
-      var defaultSources = $scope.planState.defaultDataSources;
-      $scope.allUploadedDataSources = defaultSources.concat(response);
-      callback && callback(response)
-    })
-  }
-
   $rootScope.$on('uploaded_data_sources', (e, info) => {
-    reloadDatasources()
-    $scope.planState.locationDataSources.push(info);
+    state.reloadDatasources()
+    $scope.planState.selectedDataSources.push(info);
   })
 
   $scope.overlay_is_loading = () => {

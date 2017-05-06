@@ -3,7 +3,6 @@ app.service('optimization', ($rootScope, $http, $q) => {
   var optimization = {}
 
   var mode = null
-  var fiberSourceIds = []
   var interval
   var currentPlan = null
   optimization.setMode = (_mode) => {
@@ -15,14 +14,6 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
   optimization.getMode = () => {
     return mode
-  }
-
-  optimization.setFiberSourceIds = (ids) => {
-	  fiberSourceIds = ids || []
-  }
-  
-  optimization.getFiberSourceIds = () => {
-	  return fiberSourceIds
   }
 
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -91,8 +82,6 @@ app.service('optimization', ($rootScope, $http, $q) => {
     if (changes.entityDataSources.length > 0) {
       changes.locationTypes = _.uniq((changes.locationTypes || []))  //.concat(['celltower']))
     }
-
-    changes.fiberSourceIds = fiberSourceIds
 
     function run (hideProgressBar) {
       var url = '/network_plan/' + plan.id + '/edit'

@@ -1,5 +1,5 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
-app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
+app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, optimization) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
 
@@ -75,7 +75,7 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
     }
   })
 
-  function selectGeography (geography) {
+  function selectGeography (geography, suppressEvents = false) {
     geography.id = String(geography.id)
     if (regions.selectedRegions.find((geog) => geog.id === geography.id && geog.type === geography.type)) return
     regions.selectedRegions.push(geography)
@@ -88,8 +88,38 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
         type: geography.type
       }
     })
-    $rootScope.$broadcast('regions_changed')
-    optimization.setMode('boundaries')
+    if (!suppressEvents) {
+      $rootScope.$broadcast('regions_changed')
+      optimization.setMode('boundaries')
+    }
+  }
+
+  // Select multiple geography using geography ids. Returns a promise that resolves after all boundaries have been selected.
+  regions.selectGeographyFromIds = (geographyIds) => {
+    var defer = $q.defer()
+
+    // Get geometry information for all geography ids
+    $http.post('/boundary/info', { expertSelectedWirecenters: geographyIds })
+    .success((response) => {
+      // Go through all elements of the response and select each element
+      response.forEach((boundary, index) => {
+        var idSplit = boundary.id.split(':')
+        var type = idSplit[0]
+        var id = idSplit[1]
+        var geographyObj = {
+          id: id,
+          name: boundary.name,
+          geog: boundary.geog,
+          type: type
+        }
+        // Select geography, and suppress events for all but the last boundary
+        regions.selectGeography(geographyObj, index < response.length - 1)
+      })
+      defer.resolve()
+    })
+    .error((err) => defer.reject(err))
+
+    return defer.promise
   }
 
   var configureSearch = () => {
@@ -226,4 +256,4 @@ app.service('regions', ($rootScope, $timeout, map_tools, optimization) => {
   }
 
   return regions
-})
+}])

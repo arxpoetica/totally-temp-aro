@@ -563,8 +563,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   function updateOptimizationFiber () {
-   var ids = _.pluck($scope.fibers , 'systemId');
-    optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(ids))
+    var ids = _.pluck($scope.fibers , 'systemId')
+    // For now, save fiber source ids in state.js. Later we should store everything in state.js
+    state.optimizationOptions.fiberSourceIds = $scope.selectedExistingFiberIds.concat(ids)
   }
 
   $scope.selectedExistingFiberIds = []
@@ -580,7 +581,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     })
     var fiberSourceids = _.pluck($scope.fibers , 'systemId');;
-    optimization.setFiberSourceIds($scope.selectedExistingFiberIds.concat(fiberSourceids))
+    state.optimizationOptions.fiberSourceIds = $scope.selectedExistingFiberIds.concat(fiberSourceids)
     selectedlayer.toggleVisibility();
   }
   

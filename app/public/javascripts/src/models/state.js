@@ -1,12 +1,12 @@
 /* global app localStorage map */
-app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, map_layers, configuration) => {
+app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
   var key = null
-  var state = null;
+  var state = null
   var service = {}
-  service.INVALID_PLAN_ID = -1;
-  service.DS_GLOBAL_BUSINESSES = -3;
-  service.DS_GLOBAL_HOUSEHOLDS = -2;
-  service.DS_GLOBAL_CELLTOWER = -1;
+  service.INVALID_PLAN_ID = -1
+  service.DS_GLOBAL_BUSINESSES = -3
+  service.DS_GLOBAL_HOUSEHOLDS = -2
+  service.DS_GLOBAL_CELLTOWER = -1
 
   ;['dragend', 'zoom_changed'].forEach((event_name) => {
     $rootScope.$on('map_' + event_name, () => {
@@ -20,34 +20,69 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
     })
   })
 
-  // Initialize the state of the application
-  var initializeState = function() {
+  // Optimization options - initialize once
+  service.optimizationOptions = {
+    uiAlgorithms: [],
+    uiSelectedAlgorithm: null,
+    fiberNetworkConstraints: {
+      routingMode: 'DIRECT_ROUTING',
+      cellNodeConstraints: {
+        cellRadius: 300.0,
+        polygonStrategy: 'FIXED_RADIUS',
+        tiles: [],
+        selectedTile: null
+      }
+    },
+    processLayers: [],
+    financialConstraints: {
+      years: 10,
+      budget: 10000000,
+      preIrrThreshold: 0.1
+    },
+    threshold: 0,
+    customOptimization: null,
+    fiberSourceIds: [],
+    routeGenerationOptions: [
+      { id: 'T', value: 'A Route', checked: false },
+      { id: 'A', value: 'B Route', checked: false },
+      { id: 'B', value: 'C Route', checked: false },
+      { id: 'C', value: 'D Route', checked: false }
+    ],
+    technologies: [
+      { id: 'Fiber', label: 'Fiber', checked: true},
+      { id: 'FiveG', label: '5G', checked: false}
+    ],
+    selectedLayer: null
+  }
+
+
+  // Default data sources - define once
+  service.defaultDataSources = [
+    {
+      dataSourceId: service.DS_GLOBAL_BUSINESSES,
+      name: "Global Businesses"
+    },
+    {
+      dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
+      name: "Global Households"
+    },
+    {
+      dataSourceId: service.DS_GLOBAL_CELLTOWER,
+      name: "Global CellTower"
+    }
+  ]
+
+  // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
+  var initializeState = function () {
 
     service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
-    service.GLOBAL_DATASOURCE_ID = 1
 
     // A list of location types to show in the locations layer
     service.locationTypes = []
-
-    //location datasources for dropdown
-    service.defaultDataSources = [
-      {
-        dataSourceId: service.DS_GLOBAL_BUSINESSES,
-        name: "Global Businesses",
-      },
-      {
-        dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
-        name: "Global Households",
-      },
-      {
-        dataSourceId: service.DS_GLOBAL_CELLTOWER,
-        name: "Global CellTower",
-      },
-
-    ];
+    service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
-    service.locationDataSources = service.defaultDataSources
+    service.selectedDataSources = service.defaultDataSources.slice()
 
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
@@ -90,13 +125,49 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
         })
       }
     }
-}
+  }
+
+  // Load tile information from the server
+  $http({
+	 url: '/morphology/tiles',
+	 method: 'GET'
+	})
+	.success((response) => {
+	  service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles = response
+    service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile 
+      = (service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles.length > 0)
+        ? service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles[0]
+        : null
+	})
+
   initializeState()
 
   // When configuration is loaded from the server, update it in the state
   $rootScope.$on('configuration_loaded', () => {
     initializeState()
   })
+
+  // Reload uploaded data sources
+  service.reloadDatasources = (callback) => {
+    $http.get('/datasources').success((response) => {
+      service.allDataSources = service.defaultDataSources.slice()
+      service.selectedDataSources = service.defaultDataSources.slice()   // Always keep the global data sources selected
+      service.allDataSources = service.allDataSources.concat(response)
+      callback && callback(response)
+    })
+  }
+
+  // Get a POST body that we will send to aro-service for performing optimization
+  service.getOptimizationBody = () => {
+    return stateSerializationHelper.getOptimizationBody(service, optimization, regions)
+  }
+
+  // Load optimization options from a JSON string
+  service.loadOptimizationOptionsFromJSON = (json) => {
+    // Note that we are NOT returning the state (the state is set after the call), but a promise
+    // that resolves once all the geographies have been loaded
+    return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
+  }
 
   service.clearPlan = (plan) => {
     key = null
@@ -131,8 +202,8 @@ app.service('state',['$rootScope', 'map_layers', 'configuration', ($rootScope, m
   }
 
   service.isDataSourceSelected = function (ds) {
-      var existingDataSources = _.pluck(service.locationDataSources , 'dataSourceId');
-      return existingDataSources.indexOf(ds) != -1;
+    var existingDataSources = _.pluck(service.selectedDataSources , 'dataSourceId');
+    return existingDataSources.indexOf(ds) != -1;
   }
 
   return service

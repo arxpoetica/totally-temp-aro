@@ -5,185 +5,40 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.map_tools = map_tools
   $scope.regions = regions
   $scope.ARO_CLIENT = config.ARO_CLIENT
+  $scope.state = state
 
-  // selected regions
-  $scope.selectedRegions = []
-  $rootScope.$on('regions_changed', () => {
-    $scope.selectedRegions = regions.selectedRegions.slice(0)
-  })
   $scope.removeGeography = (geography) => {
     regions.removeGeography(geography)
   }
   $scope.removeAllGeographies = () => {
     regions.removeAllGeographies()
   }
-  // --
-  $scope.technologyTypes = [
-      {id:'Fiber' , label : 'Fiber' , selected : true},
-      {id:'FiveG' , label : '5G'}
-  ]
-
-  $scope.cellNodeConstraints = {
-      cellGranularityRatio : 0,
-      cellRadius: config.ui.map_tools.area_planning.cell_radius,
-      polygonStrategy: 'FIXED_RADIUS'
-  }
-  $scope.coverageThreshold = config.ui.map_tools.area_planning.coverage_threshold;
-  $scope.entityTypesTargeted = {}
 
   $scope.calculating = false
-
-  $scope.optimizationType = 'CAPEX'
-  $scope.irrThreshold = $scope.irrThresholdRange = 10
-  $scope.budget = 10000000
-  $scope.technology = 'direct_routing' // 'odn1'
-  // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
-  $scope.polygonOptions = {
-    polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
-  }
-
-  $scope.routeGenerationOptions = [
-    { id: 'T', value: 'A Route' },
-    { id: 'A', value: 'B Route' },
-    { id: 'B', value: 'C Route' },
-    { id: 'C', value: 'D Route' }
-  ]
-  $scope.routeGenerationOptionsValues = {}
-
-  $scope.optimizationTypeOptions = []
-
-  var budgetInput = $('#area_network_planning_controller input[name=budget]')
-  budgetInput.val($scope.budget.toLocaleString())
-
-  const parseBudget = () => +(budgetInput.val() || '0').match(/\d+/g).join('') || 0
-
-  budgetInput.on('focus', () => {
-    budgetInput.val(String(parseBudget()))
-  })
-
-  budgetInput.on('blur', () => {
-    budgetInput.val(parseBudget().toLocaleString())
-  })
+  $scope.irrThresholdRange = state.optimizationOptions.financialConstraints.preIrrThreshold
   
   $scope.runExpertMode = () => {
-	  $scope.prerun().then(function(changes){
-		  $rootScope.isNetworkPlanning = true
-		  $('#selected_expert_mode').modal('show')
-		  $('#expert_mode_body').val(JSON.stringify(changes, undefined, 4))
-	  });
+    $rootScope.isNetworkPlanning = true
+    $('#selected_expert_mode').modal('show')
+    $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
   }
-  
-  function saveExpertMode (expertModeChanges) {
-
-	var expertChanges = JSON.parse(expertModeChanges)
-
-    var locationStateTypes = state.locationTypes;
-    locationStateTypes.map(function (locTypes) {
-      locTypes.checked = expertChanges.locationTypes.indexOf(locTypes.key) != -1;
-    });
-
-    /* saving technology */
-	$scope.selectedTechType.forEach(function(prevSelectedTechId) {
-		$('#'+prevSelectedTechId).prop('checked', false)
-	})
-	$scope.selectedTechType = []	
-	expertChanges.networkTypes.forEach(function(techId) {
-      $scope.toggleTechType({id : techId , selected : true});
-		$('#'+techId).prop('checked', true)
-		if (techId == 'FiveG') {
-			$scope.cellNodeConstraints.cellRadius = expertChanges.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-			
-			/* saving polygon type */
-			$scope.polygonOptions.polygonStrategy = expertChanges.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy.toUpperCase()
-		}
-	});
-		
-	/* saving network construction */
-	switch (expertChanges.fiberNetworkConstraints.routingMode.toUpperCase()){
-	   case "DIRECT_ROUTING" :  $scope.technology = "direct_routing";
-	       break;
-	   case "ODN_1": $scope.technology = "odn1";
-	       break;
-	   case "ODN_2": $scope.technology = "odn2";
-	       break;
-	}
-
-	/* saving optimization type */
-	if (expertChanges.algorithm === 'UNCONSTRAINED')
-		$scope.optimizationType = 'CAPEX'
-	else
-		$scope.optimizationType = expertChanges.algorithm
-			
-	/* saving regions */		
-	regions.removeAllGeographies()
-	var expertSelectedWirecenters = []
-	expertChanges.geographies.forEach((wirecenter) => {
-		expertSelectedWirecenters.push(wirecenter.id)
-	})
-		
-	$scope.fetchWirecentersInfo(expertSelectedWirecenters).then(function(wirecentersInfo){
-		wirecentersInfo.map((boundary) => {
-		    var n = boundary.id.indexOf(':')
-		    var type = boundary.id.substring(0, n)
-		    var id = boundary.id.substring(n + 1)
-
-	           regions.selectGeography({
-	               id: id,
-	               name: boundary.name,
-	               geog: boundary.geog,
-	               type: type
-	           })
-	       })
-	});
-  }	  
   
   $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-		  saveExpertMode(changes)
-		  canceler = optimization.optimize($scope.plan, JSON.parse(changes))
-		  $('#selected_expert_mode').modal('hide')
+		  state.loadOptimizationOptionsFromJSON(changes)
+      .then(() => {
+        $scope.run()
+      })
+      $('#selected_expert_mode').modal('hide')
 	  }	  
   })
-  
+
   $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-		  saveExpertMode(expertModeChanges)
+		  state.loadOptimizationOptionsFromJSON(expertModeChanges)
 		  $('#selected_expert_mode').modal('hide')  
 	  }
   })
-  
-  $scope.fetchWirecentersInfo = (expertSelectedWirecenters) => { 
-	var defer=$q.defer();	
-	var params = {
-		expertSelectedWirecenters: expertSelectedWirecenters
-	}
-	$http({
-		url: '/boundary/info',
-		method: 'POST',
-        data: params
-    })
-	.success((response) => {
-		defer.resolve(response); 	  
-	})
-	return defer.promise; 
-  }
-  
-  getTiles()
-  
-  function getTiles () {
-	$http({
-	 url: '/morphology/tiles',
-	 method: 'GET'
-	})
-	.success((response) => {
-	  $scope.tile_systems = response
-	  $scope.tileselected = $scope.tile_systems[0].id;
-	})
-  }
-  
-  $scope.changeTileSelected = (tile_system_id) => {
-	  $scope.tileselected = tile_system_id
-  }
   
   $scope.plan = null
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -191,14 +46,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
     if (plan) {
       $scope.reportName = plan.name
-      var optimizationType = plan.optimization_type
-      if (!optimizationType || optimizationType === 'UNCONSTRAINED') optimizationType = 'CAPEX'
-      $scope.optimizationType = optimizationType
+      $scope.state.optimizationOptions.algorithm = plan.optimization_type ? plan.optimization_type : 'UNCONSTRAINED'
     }
-
-    $scope.routeGenerationOptions.forEach((option) => {
-      $scope.routeGenerationOptionsValues[option.id] = true
-    })
 
     $scope.entityTypes.forEach((entity) => {
       $scope.entityTypesTargeted[entity.id] = true
@@ -206,29 +55,29 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   })
 
   $scope.routeGenerationOptionsChanged = (id) => {
-    if ($scope.routeGenerationOptionsValues[id]) {
+    if ($scope.state.routeGenerationOptions[id]) {
       // check all above
-      $scope.routeGenerationOptions.some((option) => {
+      $scope.state.optimizationOptions.routeGenerationOptions.some((option) => {
         if (option.id === id) return true
-        $scope.routeGenerationOptionsValues[option.id] = true
+        $scope.state.optimizationOptions.routeGenerationOptions[option.id].checked = true
         return false
       })
     } else {
       // uncheck all below
-      $scope.routeGenerationOptions.slice(0).reverse().some((option) => {
+      $scope.state.optimizationOptions.routeGenerationOptions.slice(0).reverse().some((option) => {
         if (option.id === id) return true
-        $scope.routeGenerationOptionsValues[option.id] = false
+        $scope.state.optimizationOptions.routeGenerationOptions[option.id].checked = false
         return false
       })
     }
   }
 
   $scope.irrThresholdRangeChanged = () => {
-    $scope.irrThreshold = +$scope.irrThresholdRange
+    $scope.state.optimizationOptions.financialConstraints.preIrrThreshold = +$scope.irrThresholdRange
   }
 
   $scope.irrThresholdChanged = () => {
-    $scope.irrThresholdRange = $scope.irrThreshold
+    $scope.irrThresholdRange = $scope.state.optimizationOptions.financialConstraints.preIrrThreshold
   }
 
   var canceler = null
@@ -252,176 +101,14 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     })
   }
 
-  var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined']
-  globalServiceLayers.forEach((layer) => {
-    standardTypes.push(layer.name)
-  })
-
-  $scope.prerun = () => {
-	  
-	var defer=$q.defer();
-	  
-    var scope = config.ui.eye_checkboxes ? $rootScope : $scope
-
-    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
-      scope = $scope.entityTypesTargeted
-    }
-
-    // Set location types
-    var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)  // Get all location types that are checked
-    var locationTypes = _.pluck(selectedLocationTypes, 'key')   // Get the 'key' property of all checked location types
-
-    // Set location data sources
-    var locationDataSources = {}
-
-    if (state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)) {
-      locationDataSources.business = [1]
-    }
-    if (state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)) {
-      locationDataSources.household = [1]
-    }
-    if (state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)) {
-      locationDataSources.celltower = [1]
-    }
-    if (state.locationDataSources.length > 0) {
-      var uploadedDataSourceIds = _.pluck(state.locationDataSources, 'dataSourceId')
-
-      //remove default datasources from selected datasources..
-      uploadedDataSourceIds = _.filter(uploadedDataSourceIds, function(d) { return d != -3 && d != -2 && d != -1});
-
-      locationDataSources.business = locationDataSources.business || []
-      locationDataSources.business = locationDataSources.business.concat(uploadedDataSourceIds)
-
-      locationDataSources.household = locationDataSources.household || []
-      locationDataSources.household = locationDataSources.household.concat(uploadedDataSourceIds)
-
-      locationDataSources.celltower = locationDataSources.celltower || []
-      locationDataSources.celltower = locationDataSources.celltower.concat(uploadedDataSourceIds)
-    }
-
-    var processingLayers = []
-    var algorithm = $scope.optimizationType
-    var changes = {
-      locationTypes: locationTypes,
-      locationDataSources: locationDataSources,
-      geographies: regions.selectedRegions.map((i) => {
-        var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-        // geography information may be too large so we avoid to send it for known region types
-        // if (standardTypes.indexOf(i.type) === -1) {
-        //   info.geog = i.geog
-        // }
-        if(!i.id){
-          info.geog = i.geog
-        }
-        if (i.layerId) {
-          processingLayers.push(i.layerId)
-        }
-        return info
-      }),
-      algorithm: $scope.optimizationType,
-      budget: parseBudget(),
-      irrThreshold: $scope.irrThreshold / 100,
-      selectionMode: $scope.optimizationMode === 'boundaries' ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
-    }
-    if ($rootScope.selectedUserDefinedBoundary) {
-      processingLayers.push($rootScope.selectedUserDefinedBoundary.id)
-    }
-    if (processingLayers.length > 0) {
-      changes.processingLayers = _.uniq(processingLayers)
-    }
-
-    if (algorithm === 'CAPEX') {
-      algorithm = 'UNCONSTRAINED'
-      changes.algorithm = algorithm
-      delete changes.budget
-      delete changes.irrThreshold
-    } else if (algorithm === 'MAX_IRR') {
-      delete changes.budget
-      delete changes.irrThreshold
-    } else if (algorithm === 'IRR') {
-      delete changes.irrThreshold
-    } else if (algorithm === 'BUDGET_IRR') {
-    } else if (algorithm === 'TABC') {
-      delete changes.budget
-      delete changes.irrThreshold
-      var values = $scope.routeGenerationOptionsValues
-      var generations = Object.keys(values).filter((id) => values[id])
-      changes.customOptimization = {
-        name: 'TABC',
-        map: {
-          generations: generations.join(',')
-        }
-      }
-    }else if(algorithm === "COVERAGE"){
-      delete changes.budget
-      delete changes.irrThreshold
-      changes.threshold = $scope.coverageThreshold / 100;
-    }else if (algorithm === "IRR_THRESH") {
-        delete  changes.budget;
-        changes.preIrrThreshold = changes.irrThreshold;
-        delete changes.irrThreshold;
-    }
-
-      changes.fiberNetworkConstraints={};
-      changes.networkTypes = [];
-
-      switch ($scope.technology){
-          case "direct_routing" :  changes.fiberNetworkConstraints.routingMode = "DIRECT_ROUTING";
-              break;
-          case "odn1": changes.fiberNetworkConstraints.routingMode = "ODN_1";
-              break;
-          case "odn2": changes.fiberNetworkConstraints.routingMode = "ODN_2";
-              break;
-      }
-
-     changes.networkTypes = $scope.selectedTechType;
-    if($scope.selectedTechType.indexOf("FiveG")!=-1){
-        if($scope.cellNodeConstraints.cellRadius == ""){
-            $scope.cellNodeConstraints.cellRadius = config.ui.map_tools.area_planning.cell_radius;
-        }
-
-        changes.fiberNetworkConstraints.cellNodeConstraints = {
-            cellRadius : $scope.cellNodeConstraints.cellRadius,
-            polygonStrategy: $scope.polygonOptions.polygonStrategy,
-            tileSystemId: $scope.tileselected
-        };
-    }
-
-    var selectLocationTypes = []
-    if ($scope.optimizationMode === 'targets' && $scope.optimizationType === 'IRR') {
-      selectLocationTypes = Object.keys($scope.entityTypesTargeted)
-        .map((key) => {
-          return $scope.entityTypesTargeted[key]
-            ? $scope.entityTypes.find((type) => type.id === key).name
-            : null
-        })
-        .filter((val) => val)
-    }
-
-    if ($scope.selectedBoundary) {
-      changes.processingLayers = [$scope.selectedBoundary.id]
-    }
-
-    $scope.selectLocationTypes = selectLocationTypes
-    
-    var fiberSourceIds = optimization.getFiberSourceIds
-    changes.fiberSourceIds = fiberSourceIds()
-    
-    defer.resolve(changes);
-    return defer.promise;
-    /*canceler = optimization.optimize($scope.plan, changes)*/
-  }
-
   $scope.run = () => {
     // Check if at least one data source is selected
-    var isAnyDataSourceSelected = state.locationDataSources.length > 0
+    var isAnyDataSourceSelected = state.selectedDataSources.length > 0
 	  // A location is selected if the "checked" property is true
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      $scope.prerun().then(function(changes){
-        canceler = optimization.optimize($scope.plan, changes)
-      })
+      canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
     } else {
       swal({
         title: 'Incomplete input',
@@ -434,46 +121,30 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
   }
 
-  $rootScope.$on('optimization_started_polling', () => {
-    $scope.calculating = true
-    if ($scope.selectLocationTypes && $scope.selectLocationTypes.length > 0) {
-      $rootScope.$broadcast('select_locations', $scope.selectLocationTypes)
-    }
-  })
-
-  $rootScope.$on('optimization_stopped_polling', () => {
-    $scope.calculating = false
-    $scope.selectLocationTypes = null
-  })
-
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', optimizationModeChanged)
 
   function optimizationModeChanged (e, mode) {
     $scope.optimizationMode = mode
-    $scope.optimizationType = 'CAPEX'
     if (mode === 'targets') {
-      $scope.optimizationTypeOptions = [
-        { id: 'CAPEX', label: 'Full Coverage' },
-        { id: 'IRR', label: 'Budget' }
+      state.optimizationOptions.uiAlgorithms = [
+        { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+        { id: 'IRR', algorithm: 'IRR', label: 'Budget' }
       ]
     } else {
-      $scope.optimizationTypeOptions = [
-        { id: 'CAPEX', label: 'Full Coverage' },
-        { id: 'MAX_IRR', label: 'Maximum IRR' },
-        { id: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', label: 'IRR Target' },
-        { id: 'IRR_THRESH', label: 'IRR Threshold'}
-
-    ]
+      state.optimizationOptions.uiAlgorithms = [
+        { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+        { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
+        { id: 'IRR', algorithm: 'IRR', label: 'Budget' },
+        { id: 'BUDGET_IRR', algorithm: 'IRR', label: 'IRR Target' },
+        { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
+      ]
       if (config.ARO_CLIENT === 'verizon') {
-        $scope.optimizationTypeOptions.push({ id: 'TABC', label: 'ABCD analysis' })
+        state.optimizationOptions.uiAlgorithms.push({ id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' })
       }
-      // { id: 'TARGET_IRR', label: 'IRR Target' },
-      // { id: 'BUDGET_IRR', label: 'Budget and IRR Floor' }
     }
-
-    $scope.optimizationTypeOptions.push({ id: 'COVERAGE', label: 'Coverage Target' });
+    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'UNCONSTRAINED', label: 'Coverage Target' })
+    state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   }
   optimizationModeChanged(null, optimization.getMode())
 
@@ -487,18 +158,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         $scope.allBoundaries = response
       })
   }
-
-  $scope.selectedTechType = ['Fiber'];
-  $scope.toggleTechType = function (type) {
-    if(type.selected){
-      $scope.selectedTechType.push(type.id);
-    }else{
-      var idx = $scope.selectedTechType.indexOf(type.id);
-      if(idx != -1){
-        $scope.selectedTechType.splice(idx , 1);
-      }
-    }
-  };
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
 
