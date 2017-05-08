@@ -223,4 +223,12 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       })
   })
 
+  $rootScope.$on('optimization_stopped_polling', (e, layer, features) => {
+      $scope.calculating = false;
+  })
+
+  $rootScope.$on('optimization_started_polling', (e, layer, features) => {
+      $scope.calculating = true;
+  })
+
 }])
