@@ -241,20 +241,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     coverageLayer.is_coverage = true;
     layer.fixedWirelessCoverage = coverageLayer
 
-    /*layer.fixedWirelessVisibilityChanged = (serviceLayer , node) => {
-      if(node.coverage_visible){
-        coverageLayer.show()
-        coverageLayer.is_coverage = true;
-        coverageLayer.setApiEndpoint(`/network/nodes/:plan_id/find/${layer.id}`, {
-          node_types: [node.id].join(',')
-        })
-      }else {
-        coverageLayer.clearData();
-        coverageLayer.hide();
-
-      }
-    }*/
-    
     layer.fixedWirelessVisibilityChanged = () => {
         var types = []
         layer.nodeTypes.forEach((nodeType) => {
@@ -489,11 +475,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     fiberLayers = []
 
     $http.get('/user_fiber/list').success((response) => {
-      $scope.showingDatasources = $scope.showingDatasources
-        .map((ds) => response.find((item) => item.libraryId && item.systemId === ds.systemId))
-        .filter(Boolean)
-        .concat(response.filter((ds) => !ds.libraryId))
-      $scope.remainingDatasources = response.filter((ds) => $scope.showingDatasources.indexOf(ds) === -1)
+      response.map(function (ds) {
+        $scope.remainingDatasources.push(ds);
+      })
       response.forEach(initDatasource)
       updateOptimizationFiber()
     })
@@ -530,8 +514,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('uploaded_fiber', (e, info) => {
     initDatasource(info)
-    $scope.showingDatasources.push(info)
     info.toggleVisibility()
+    reloadDatasources();
   })
 
   $scope.fibers = []
