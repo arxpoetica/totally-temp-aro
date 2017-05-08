@@ -16,10 +16,11 @@ app.directive('percentageInput', function () {
 
       ngModel.$formatters.push(function toView(input) {
         // Multiply the value by 100 to display it in the view
-        console.log(typeof input)
         input = input || '0'
         var inputTransformed = (+input) * 100.0
-        return inputTransformed.toFixed(2)
+
+        // toFixed() converts it to a string, and + converts it back to a number before returning
+        return +inputTransformed.toFixed(2)
       })
     }
   }
