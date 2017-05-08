@@ -36,7 +36,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.optimizeTowers = true
   $scope.optimizeUploaded = false
 
-  $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
   $scope.polygonOptions = {
@@ -92,14 +91,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       $('#selected_expert_mode').modal('hide')  
     }
   })
-
-  $scope.irrThresholdRangeChanged = () => {
-    $scope.irrThreshold = +$scope.irrThresholdRange
-  }
-
-  $scope.irrThresholdChanged = () => {
-    $scope.irrThresholdRange = $scope.irrThreshold
-  }
 
   var canceler = null
   $scope.cancel = () => {

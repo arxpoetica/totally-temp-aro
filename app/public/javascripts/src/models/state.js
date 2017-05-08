@@ -37,9 +37,9 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     financialConstraints: {
       years: 10,
       budget: 10000000,
-      preIrrThreshold: 0.1
+      preIrrThreshold: 0.1 // This will be converted to a precentage when sending to the UI
     },
-    threshold: 0,
+    threshold: 0, // This will be converted to a precentage when sending to the UI
     customOptimization: null,
     fiberSourceIds: [],
     routeGenerationOptions: [
