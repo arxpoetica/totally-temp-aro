@@ -191,10 +191,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
   $scope.create_location = () => {
     $http.post('/locations/create', $scope.new_location_data)
-      .success((response) => {
+      .then((response) => {
         $('#create-location').modal('hide')
         $scope.new_location_data = {}
-        locationsLayer.data_layer.addGeoJson(response)
+        locationsLayer.data_layer.addGeoJson(response.data)
       })
   }
 
@@ -219,8 +219,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
     $('#create-location').modal('show')
     $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
-      .success((response) => {
-        var results = response.results
+      .then((response) => {
+        var results = response.data.results
         var result = results[0]
         if (!result) return
         $scope.new_location_data.address = result.formatted_address
@@ -266,8 +266,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
   var overlays = []
   $http.get('/customer_profile/all_cities')
-    .success((response) => {
-      overlays = response.map((city) => {
+    .then((response) => {
+      overlays = response.data.map((city) => {
         var id = 'customer_profile_' + city.id
         var chart = document.createElement('canvas')
         chart.setAttribute('id', id)

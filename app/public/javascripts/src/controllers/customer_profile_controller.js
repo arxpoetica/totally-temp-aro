@@ -51,12 +51,14 @@ app.controller('customer_profile_controller', ['$scope', '$rootScope', '$http', 
     }
     $scope.loading = true
     chart && chart.destroy()
-    $http.get('/customer_profile/' + $scope.plan.id + '/boundary', args).success((response) => {
-      $scope.data = response
-      calculateColors()
-      show_chart()
-    }).error(() => {
-      $scope.loading = false
+    $http.get('/customer_profile/' + $scope.plan.id + '/boundary', args).then((response) => {
+      if (response.status >= 200 && response.status <= 299) {
+        $scope.data = response.data
+        calculateColors()
+        show_chart()
+      } else {
+        $scope.loading = false
+      }
     })
   }
 

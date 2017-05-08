@@ -23,8 +23,8 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
 
   function loadUsers () {
     $http.get('/admin/users')
-      .success((response) => {
-        $scope.users = response
+      .then((response) => {
+        $scope.users = response.data
         $scope.sortBy('first_name', false)
       })
   }
@@ -65,7 +65,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
       })
     }
     $http.post('/admin/users/register', $scope.new_user)
-      .success((response) => {
+      .then((response) => {
         $scope.new_user = {}
         swal({ title: 'User registered', type: 'success' })
         $('#new-user').modal('hide')
@@ -83,7 +83,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      $http.post('/admin/users/resend', { user: user.id }).success((response) => {
+      $http.post('/admin/users/resend', { user: user.id }).then((response) => {
         loadUsers()
       })
     })
@@ -99,7 +99,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      $http.post('/admin/users/delete', { user: user.id }).success((response) => {
+      $http.post('/admin/users/delete', { user: user.id }).then((response) => {
         loadUsers()
       })
     })
@@ -115,7 +115,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
       closeOnConfirm: true
     }, (confirmation) => {
       if (!confirmation) return loadUsers()
-      $http.post('/admin/users/change_rol', { user: user.id, rol: user.rol }).success((response) => {
+      $http.post('/admin/users/change_rol', { user: user.id, rol: user.rol }).then((response) => {
         loadUsers()
       })
     })
@@ -132,7 +132,7 @@ app.controller('admin_users_controller', ($scope, $http, $timeout) => {
 
   $scope.sendMail = () => {
     $http.post('/admin/users/mail', { subject: $scope.mailSubject, text: $scope.mailBody })
-      .success((response) => {
+      .then((response) => {
         swal({ title: 'Emails sent', type: 'success' })
         $('#send-mail').modal('hide')
         $('#manage-users').modal('show')

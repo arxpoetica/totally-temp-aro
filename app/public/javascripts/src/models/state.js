@@ -132,8 +132,8 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 	 url: '/morphology/tiles',
 	 method: 'GET'
 	})
-	.success((response) => {
-	  service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles = response
+	.then((response) => {
+	  service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles = response.data
     service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile 
       = (service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles.length > 0)
         ? service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles[0]
@@ -149,11 +149,11 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
   // Reload uploaded data sources
   service.reloadDatasources = (callback) => {
-    $http.get('/datasources').success((response) => {
+    $http.get('/datasources').then((response) => {
       service.allDataSources = service.defaultDataSources.slice()
       service.selectedDataSources = service.defaultDataSources.slice()   // Always keep the global data sources selected
-      service.allDataSources = service.allDataSources.concat(response)
-      callback && callback(response)
+      service.allDataSources = service.allDataSources.concat(response.data)
+      callback && callback(response.data)
     })
   }
 

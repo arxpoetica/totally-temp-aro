@@ -292,8 +292,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     })
 
-    $http.get('/network_plan/' + plan.id).success((response) => {
-      redrawRoute(response)
+    $http.get('/network_plan/' + plan.id).then((response) => {
+      redrawRoute(response.data)
     })
     reloadDatasources()
   })
@@ -307,7 +307,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $scope.save_nodes = () => {
-    $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).success((response) => {
+    $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).then((response) => {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
         $scope.serviceLayers.forEach((layer) => {
@@ -401,14 +401,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $rootScope.$on('equipment_nodes_changed', () => {
-    $http.get('/network_plan/' + $scope.plan.id + '/metadata').success((response) => {
-      redrawRoute(response, true)
+    $http.get('/network_plan/' + $scope.plan.id + '/metadata').then((response) => {
+      redrawRoute(response.data, true)
     })
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    $http.get('/network_plan/' + $scope.plan.id).success((response) => {
-      redrawRoute(response, false)
+    $http.get('/network_plan/' + $scope.plan.id).then((response) => {
+      redrawRoute(response.data, false)
     })
   })
 
@@ -474,11 +474,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     fiberLayers = []
 
-    $http.get('/user_fiber/list').success((response) => {
-      response.map(function (ds) {
+    $http.get('/user_fiber/list').then((response) => {
+      response.data.map(function (ds) {
         $scope.remainingDatasources.push(ds);
       })
-      response.forEach(initDatasource)
+      response.data.forEach(initDatasource)
       updateOptimizationFiber()
     })
   }
@@ -570,8 +570,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   
   $scope.fiberSourceIdsMapping = {}
-  $http.get('/network/fiber_plant/sourceid_mapping').success((response) => {
-    response.forEach((fibdetails) => {
+  $http.get('/network/fiber_plant/sourceid_mapping').then((response) => {
+    response.data.forEach((fibdetails) => {
       $scope.fiberSourceIdsMapping[fibdetails.source_name] = fibdetails.fiber_source_id
     });
   })

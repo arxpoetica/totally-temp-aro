@@ -28,8 +28,8 @@ app.controller('upload_morphology_controller', ['$scope', '$rootScope', '$http',
 		url: '/morphology/tiles',
 		method: 'GET'
 	  })
-	  .success((response) => {
-		  $scope.tile_systems = response
+	  .then((response) => {
+		  $scope.tile_systems = response.data
 		  $scope.tileselected = $scope.tile_systems[0].id;
    	  })
   }

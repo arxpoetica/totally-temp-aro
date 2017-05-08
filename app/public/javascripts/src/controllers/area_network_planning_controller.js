@@ -95,7 +95,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       canceler && canceler.resolve()
       canceler = null
       $http.post(`/optimization/stop/${$scope.plan.id}`)
-        .success((response) => {
+        .then((response) => {
           console.log('stopped')
         })
     })
@@ -154,8 +154,8 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
 
   function loadBoundaries () {
     $http.get('/boundary/all')
-      .success((response) => {
-        $scope.allBoundaries = response
+      .then((response) => {
+        $scope.allBoundaries = response.data
       })
   }
   loadBoundaries()

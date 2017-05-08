@@ -7,8 +7,8 @@ app.controller('selected_census_block_controller', ['$scope', '$rootScope', '$ht
     var id = e.feature.getProperty('id')
     if (!id) return
     $http.get(`/census_blocks/${id}/info`)
-      .success((response) => {
-        $scope.carriers = response
+      .then((response) => {
+        $scope.carriers = response.data
         $scope.selectedId = e.feature.getProperty('tabblock_id')
         selectedFeature = e.feature
         $('#modal-census-block').modal('show')

@@ -35,8 +35,8 @@ app.service('optimization', ($rootScope, $http, $q) => {
         .addClass(success ? 'progress-bar-success' : 'progress-bar-danger')
       if (success) {
         if (currentPlan) {
-          $http.get('/network_plan/' + currentPlan.id).success((response) => {
-            $rootScope.$broadcast('route_planning_changed', response)
+          $http.get('/network_plan/' + currentPlan.id).then((response) => {
+            $rootScope.$broadcast('route_planning_changed', response.data)
           })
         }
       } else {
@@ -60,14 +60,14 @@ app.service('optimization', ($rootScope, $http, $q) => {
       .removeClass('progress-bar-success')
       .removeClass('progress-bar-danger')
     interval = setInterval(() => {
-      $http.get('/optimization/processes/' + optimizationIdentifier).success((response) => {
-        if (response.optimizationState === 'COMPLETED') return stopPolling(true)
-        if (response.optimizationState === 'CANCELED') return stopPolling(false, 'Cancelled')
-        if (response.optimizationState === 'FAILED') return stopPolling(false, 'Failed')
-        var diff = (Date.now() - new Date(response.startDate).getTime()) / 1000
+      $http.get('/optimization/processes/' + optimizationIdentifier).then((response) => {
+        if (response.data.optimizationState === 'COMPLETED') return stopPolling(true)
+        if (response.data.optimizationState === 'CANCELED') return stopPolling(false, 'Cancelled')
+        if (response.data.optimizationState === 'FAILED') return stopPolling(false, 'Failed')
+        var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
         var min = Math.floor(diff / 60)
         var sec = Math.ceil(diff % 60)
-        var per = response.progress * 100
+        var per = response.data.progress * 100
         $('#plan-saving-progress .progress-bar').css('width', per + '%').text(`${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`)
       })
     }, 400)
@@ -93,19 +93,22 @@ app.service('optimization', ($rootScope, $http, $q) => {
         timeout: canceler.promise
       }
       $http(options)
-        .success((response) => {
-          if (plan) {
-            if (!changes.lazy) plan.ranOptimization = true
-            if (!hideProgressBar && !changes.lazy && currentPlan && plan.id === currentPlan.id) {
-              startPolling(response.optimizationIdentifier)
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            if (plan) {
+              if (!changes.lazy) plan.ranOptimization = true
+              if (!hideProgressBar && !changes.lazy && currentPlan && plan.id === currentPlan.id) {
+                startPolling(response.data.optimizationIdentifier)
+              }
+              if (currentPlan) {
+                $rootScope.$broadcast('route_planning_changed', response.data)
+              }
+              success && success()
             }
-            if (currentPlan) {
-              $rootScope.$broadcast('route_planning_changed', response)
-            }
-            success && success()
+          } else {
+            error()
           }
         })
-        .error(error)
     }
 
     function checkNumberOfAreas () {
@@ -169,11 +172,14 @@ app.service('optimization', ($rootScope, $http, $q) => {
             }
           }
           $http(options)
-            .success((plan) => {
-              $rootScope.$broadcast('plan_selected', plan)
-              checkNumberOfAreas()
+            .then((plan) => {
+              if (plan.status >= 200 && plan.status <= 299) {
+                $rootScope.$broadcast('plan_selected', plan.data)
+                checkNumberOfAreas()
+              } else {
+                error()
+              }
             })
-            .error(error)
         })
       })
     }

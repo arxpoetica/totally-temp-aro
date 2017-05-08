@@ -52,9 +52,9 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   })
 
   function openLocation (id) {
-    $http.get(`/locations/${$scope.plan.id}/${id}/show`).success((response) => {
-      response.id = id
-      setSelectedLocation(response)
+    $http.get(`/locations/${$scope.plan.id}/${id}/show`).then((response) => {
+      response.data.id = id
+      setSelectedLocation(response.data)
       $('#selected_location_controller').modal('show')
       $('#selected_location_market_profile select[multiple]').select2('val', [])
       $scope.market_size = null
@@ -77,7 +77,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     var location_id = location.location_id
     $http.post('/locations/' + location_id + '/update', {
       number_of_households: location.number_of_households
-    }).success((response) => {
+    }).then((response) => {
       $('#selected_location_controller').modal('hide')
     })
   }
@@ -105,9 +105,9 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     preserveBusinessDetail()
     $scope.businesses = []
     $scope.selected_business = null
-    $http.get('/locations/businesses/' + location.id).success((response) => {
+    $http.get('/locations/businesses/' + location.id).then((response) => {
       preserveBusinessDetail()
-      $scope.businesses = response
+      $scope.businesses = response.data
       if (!location.address) {
         var business = $scope.businesses.filter((business) => {
           return business.address
@@ -116,9 +116,9 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
       }
     })
     $scope.towers = []
-    $http.get('/locations/towers/' + location.id).success((response) => {
+    $http.get('/locations/towers/' + location.id).then((response) => {
       preserveBusinessDetail()
-      $scope.towers = response
+      $scope.towers = response.data
     })
     $scope.households = []
   }
@@ -133,8 +133,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     tracker.track('Location selected / ' + $(this).text())
   })
 
-  $http.get('/market_size/filters').success((response) => {
-    $scope.filters = response
+  $http.get('/market_size/filters').then((response) => {
+    $scope.filters = response.data
     $('#selected_location_controller select[multiple]').each(function () {
       var self = $(this)
       self.select2({
@@ -155,10 +155,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     var args = {
       params: params
     }
-    $http.get('/market_size/location/' + $scope.location.id, args).success((response) => {
-      $scope.market_size = response.market_size
-      $scope.fair_share = response.fair_share
-      $scope.share = response.share
+    $http.get('/market_size/location/' + $scope.location.id, args).then((response) => {
+      $scope.market_size = response.data.market_size
+      $scope.fair_share = response.data.fair_share
+      $scope.share = response.data.share
       $scope.loading = false
       destroyCharts()
       showCurrentChart()
@@ -195,7 +195,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
         method: 'GET',
         params: params
       })
-      .success((response) => {
+      .then((response) => {
         swal('Exported file now available')
         location.href = '/exported_file?filename=' + encodeURIComponent(name)
       })
@@ -382,8 +382,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     var args = {
       params: params
     }
-    $http.get('/market_size/business/' + $scope.selected_business.id, args).success((response) => {
-      $scope.business_market_size = response.market_size
+    $http.get('/market_size/business/' + $scope.selected_business.id, args).then((response) => {
+      $scope.business_market_size = response.data.market_size
       showBusinessChart()
     })
   }

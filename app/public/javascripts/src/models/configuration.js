@@ -8,11 +8,14 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     configurationPromises.push(
       new Promise((resolve, reject) => {
         $http.get(configBaseUrl + '/uiConfiguration/locationCategories')
-          .success((response) => {
-            config.locationCategories = response
-            resolve()
+          .then((response) => {
+            if (response.status >= 200 && response.status <= 299) {
+              config.locationCategories = response.data
+              resolve()
+            } else {
+              reject()
+            }
           })
-          .error(reject)
       })
     )
 

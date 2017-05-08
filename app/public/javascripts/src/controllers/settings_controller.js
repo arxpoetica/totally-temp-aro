@@ -4,8 +4,8 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
 
   function fetchApplicationSettings () {
     $http.get('/admin/settings')
-      .success((response) => {
-        $scope.applicationSettings = response
+      .then((response) => {
+        $scope.applicationSettings = response.data
         $scope.changes = {}
 
         $timeout(() => {
@@ -46,7 +46,7 @@ app.controller('settings_controller', ['$scope', '$rootScope', '$http', '$filter
   $('#application-settings').on('shown.bs.modal', fetchApplicationSettings)
 
   $scope.updateSettings = (close) => {
-    $http.post('/admin/settings', $scope.changes).success((response) => {
+    $http.post('/admin/settings', $scope.changes).then((response) => {
       $scope.changes = {}
       swal({ title: 'Settings saved', type: 'success' })
       if (close) {

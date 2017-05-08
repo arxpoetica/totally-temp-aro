@@ -179,8 +179,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   function loadBoundaries () {
     $http.get('/boundary/all')
-      .success((response) => {
-        $scope.allBoundaries = response
+      .then((response) => {
+        $scope.allBoundaries = response.data
       })
   }
 
@@ -207,8 +207,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
         }
       }
       $http(config)
-        .success((response) => {
-          response.feature_collection.features.forEach((feature) => {
+        .then((response) => {
+          response.data.feature_collection.features.forEach((feature) => {
             var prop = feature.properties
 
             var type = layer.changes || layer.type
@@ -229,9 +229,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   function loadTargets () {
     $http.get(`/locations/${$scope.plan.id}/targets`)
-      .success((response) => {
-        $scope.targets = response.targets
-        $scope.targetsTotal = response.total
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
         if ($scope.targetsTotal > 0) optimization.setMode('targets')
       })
   }
@@ -418,9 +418,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       }
     }
     $http(config)
-      .success((response) => {
-        $scope.targets = response.targets
-        $scope.targetsTotal = response.total
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
         if ($scope.targetsTotal > 0) optimization.setMode('targets')
         map_layers.getFeatureLayer('locations').reloadData(true)
         map_layers.getFeatureLayer('selected_locations').reloadData(true)
@@ -451,9 +451,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       data: {}
     }
     $http(config)
-      .success((response) => {
-        $scope.targets = response.targets
-        $scope.targetsTotal = response.total
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
         map_layers.getFeatureLayer('locations').reloadData()
         map_layers.getFeatureLayer('selected_locations').reloadData()
       })

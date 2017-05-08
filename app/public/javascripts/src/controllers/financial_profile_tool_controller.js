@@ -277,11 +277,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     else if ($scope.financialData[key]) return $scope.financialData[key]
     var plan_id = $scope.mode === 'global' ? $scope.plan.id : $scope.selectedArea.id
     $http({ url: `/financial_profile/${plan_id}/${key}`, params: params })
-      .success((response) => {
-        $scope.financialData[key] = response
-        // console.log('Requested', key)
-        // console.table && console.table(response)
-        callback(response)
+      .then((response) => {
+        $scope.financialData[key] = response.data
+        callback(response.data)
       })
   }
 
@@ -314,8 +312,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
 
   function showDistanceToFiber () {
     $http.get(`/financial_profile/${$scope.plan.id}/fiber_details`)
-      .success((response) => {
-        $scope.fiberDetailsAdditional = response
+      .then((response) => {
+        $scope.fiberDetailsAdditional = response.data
       })
   }
 
@@ -580,11 +578,11 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       return '/network_plan/' + $scope.plan.id + '/' + $scope.selectedArea.id
     }
     var url = calculateURL()
-    $http.get(url).success((response) => {
+    $http.get(url).then((response) => {
       // Check if the user has changed to another wirectenter, to global mode or to another plan
       if (url === calculateURL() && $scope.mode === 'area') {
         console.log('loaded wirecenter data')
-        updateMetadataLabels(response.metadata);
+        updateMetadataLabels(response.data.metadata);
       }
     })
   }
@@ -599,8 +597,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       method: 'GET',
       params: params
     })
-    .success((response) => {
-      $scope.routeOpportunities = response
+    .then((response) => {
+      $scope.routeOpportunities = response.data
     })
   }
 
