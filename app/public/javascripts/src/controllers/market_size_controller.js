@@ -15,9 +15,9 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   var geo_json
 
-  $http.get('/market_size/filters').success((response) => {
-    $scope.filters = response
-    $scope.customer_type = response.customer_types[1]
+  $http.get('/market_size/filters').then((response) => {
+    $scope.filters = response.data
+    $scope.customer_type = response.data.customer_types[1]
     $('#market-size select[multiple]').each(function () {
       var self = $(this)
       self.select2({
@@ -97,21 +97,23 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
     $scope.loading = true
     destroyCharts()
     var endpoint = onlyFairShare ? '/fair_share' : '/calculate'
-    $http.get('/market_size/plan/' + $scope.plan.id + endpoint, args).success((market_profile) => {
-      $scope.loading = false
-      if (onlyFairShare) {
-        $scope.fair_share = market_profile
-        destroyFairShareChart()
-        showFairShareChart()
+    $http.get('/market_size/plan/' + $scope.plan.id + endpoint, args).then((market_profile) => {
+      if (market_profile.status >= 200 && market_profile.status < 299) {
+        $scope.loading = false
+        if (onlyFairShare) {
+          $scope.fair_share = market_profile.data
+          destroyFairShareChart()
+          showFairShareChart()
+        } else {
+          $scope.market_size = market_profile.data.market_size
+          $scope.fair_share = market_profile.data.fair_share
+          $scope.share = market_profile.data.share
+          destroyCharts()
+          showChart()
+        }
       } else {
-        $scope.market_size = market_profile.market_size
-        $scope.fair_share = market_profile.fair_share
-        $scope.share = market_profile.share
-        destroyCharts()
-        showChart()
+        $scope.loading = false
       }
-    }).error(() => {
-      $scope.loading = false
     })
   }
 
@@ -172,7 +174,7 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
         method: 'GET',
         params: params
       })
-      .success((response) => {
+      .then((response) => {
         swal('Exported file now available')
         location.href = '/exported_file?filename=' + encodeURIComponent(name)
       })

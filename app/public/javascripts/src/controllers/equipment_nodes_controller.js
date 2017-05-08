@@ -169,7 +169,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         var scale = zoom /(156543.03392 * Math.cos(13.0373668 * Math.PI / 180) / Math.pow(2, zoom));
         var name = feature.getProperty('name')
         var iconW = zoom * scale;
-        iconW = iconW > 35 ? 35 : iconW;
+        iconW = zoom > 14 ? 35 : iconW;
         if (name) {
           styles.icon = {
             anchor: new google.maps.Point(iconW /2, iconW/2),
@@ -241,20 +241,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     coverageLayer.is_coverage = true;
     layer.fixedWirelessCoverage = coverageLayer
 
-    /*layer.fixedWirelessVisibilityChanged = (serviceLayer , node) => {
-      if(node.coverage_visible){
-        coverageLayer.show()
-        coverageLayer.is_coverage = true;
-        coverageLayer.setApiEndpoint(`/network/nodes/:plan_id/find/${layer.id}`, {
-          node_types: [node.id].join(',')
-        })
-      }else {
-        coverageLayer.clearData();
-        coverageLayer.hide();
-
-      }
-    }*/
-    
     layer.fixedWirelessVisibilityChanged = () => {
         var types = []
         layer.nodeTypes.forEach((nodeType) => {
@@ -306,8 +292,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     })
 
-    $http.get('/network_plan/' + plan.id).success((response) => {
-      redrawRoute(response)
+    $http.get('/network_plan/' + plan.id).then((response) => {
+      redrawRoute(response.data)
     })
     reloadDatasources()
   })
@@ -321,7 +307,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   })
 
   $scope.save_nodes = () => {
-    $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).success((response) => {
+    $http.post('/network/nodes/' + $scope.plan.id + '/edit', changes).then((response) => {
       if (changes.insertions.length > 0 || changes.deletions.length > 0) {
         // For insertions we need to get the ids so they can be selected
         $scope.serviceLayers.forEach((layer) => {
@@ -415,14 +401,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $rootScope.$on('equipment_nodes_changed', () => {
-    $http.get('/network_plan/' + $scope.plan.id + '/metadata').success((response) => {
-      redrawRoute(response, true)
+    $http.get('/network_plan/' + $scope.plan.id + '/metadata').then((response) => {
+      redrawRoute(response.data, true)
     })
   })
 
   $rootScope.$on('route_planning_changed', () => {
-    $http.get('/network_plan/' + $scope.plan.id).success((response) => {
-      redrawRoute(response, false)
+    $http.get('/network_plan/' + $scope.plan.id).then((response) => {
+      redrawRoute(response.data, false)
     })
   })
 
@@ -488,13 +474,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     fiberLayers = []
 
-    $http.get('/user_fiber/list').success((response) => {
-      $scope.showingDatasources = $scope.showingDatasources
-        .map((ds) => response.find((item) => item.libraryId && item.systemId === ds.systemId))
-        .filter(Boolean)
-        .concat(response.filter((ds) => !ds.libraryId))
-      $scope.remainingDatasources = response.filter((ds) => $scope.showingDatasources.indexOf(ds) === -1)
-      response.forEach(initDatasource)
+    $http.get('/user_fiber/list').then((response) => {
+      response.data.map(function (ds) {
+        $scope.remainingDatasources.push(ds);
+      })
+      response.data.forEach(initDatasource)
       updateOptimizationFiber()
     })
   }
@@ -530,8 +514,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('uploaded_fiber', (e, info) => {
     initDatasource(info)
-    $scope.showingDatasources.push(info)
     info.toggleVisibility()
+    reloadDatasources();
   })
 
   $scope.fibers = []
@@ -586,8 +570,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   
   $scope.fiberSourceIdsMapping = {}
-  $http.get('/network/fiber_plant/sourceid_mapping').success((response) => {
-    response.forEach((fibdetails) => {
+  $http.get('/network/fiber_plant/sourceid_mapping').then((response) => {
+    response.data.forEach((fibdetails) => {
       $scope.fiberSourceIdsMapping[fibdetails.source_name] = fibdetails.fiber_source_id
     });
   })

@@ -9,12 +9,22 @@
     <p><strong>IRR Threshold</strong></p>
     <div class="row">
       <div class="col-md-7">
-        <input type="range" min="0" max="100" step="1" value="10" ng-model="irrThresholdRange" style="margin-top: 10px" ng-change="irrThresholdRangeChanged()">
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          ng-model="state.optimizationOptions.financialConstraints.preIrrThreshold"
+          style="margin-top: 10px">
       </div>
       <div class="col-md-5">
         <div class="form-group form-group-sm">
           <div class="input-group input-group-sm">
-            <input type="number" min="0" max="100" step="1" ng-model="state.optimizationOptions.financialConstraints.preIrrThreshold" class="form-control text-right" ng-change="irrThresholdChanged()">
+            <input
+              type="number"
+              ng-model="state.optimizationOptions.financialConstraints.preIrrThreshold"
+              class="form-control text-right"
+              percentage-input>
             <div class="input-group-addon">%</div>
           </div>
         </div>
@@ -30,7 +40,13 @@
           <div class="form-group form-group-sm">
             <div class="input-group input-group-sm">
               <div class="input-group-addon"><%- config.currency_symbol %></div>
-              <input type="text" class="form-control text-right" placeholder="Amount" ng-model="state.optimizationOptions.financialConstraints.budget">
+              <input type="text"
+                     class="form-control text-right"
+                     placeholder="Amount"
+                     ng-model="state.optimizationOptions.financialConstraints.budget"
+                     ng-currency
+                     currency-symbol=""
+                     fraction="0">
             </div>
           </div>
         </div>
@@ -83,7 +99,7 @@
         <div class="form-group form-group-sm">
           <div class="input-group input-group-sm">
             <div class="input-group-addon">%</div>
-            <input type="text" class="form-control text-right" placeholder="Percentage" ng-model="state.optimizationOptions.threshold" name="coverage_target">
+            <input percentage-input type="text" class="form-control text-right" placeholder="Percentage" ng-model="state.optimizationOptions.threshold" name="coverage_target">
           </div>
         </div>
       </div>

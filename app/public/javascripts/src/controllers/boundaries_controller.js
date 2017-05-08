@@ -229,16 +229,16 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
     if (plan && (countySubdivisionsLayer || censusBlocksLayer)) {
       $http.get(`/network_plan/${plan.id}/area_data`)
-        .success((response) => {
-          countySubdivisionsLayer && countySubdivisionsLayer.setApiEndpoint('/county_subdivisions/' + response.statefp)
-          censusBlocksLayer && censusBlocksLayer.setApiEndpoint(`/census_blocks/${response.statefp}/${response.countyfp}`)
+        .then((response) => {
+          countySubdivisionsLayer && countySubdivisionsLayer.setApiEndpoint('/county_subdivisions/' + response.data.statefp)
+          censusBlocksLayer && censusBlocksLayer.setApiEndpoint(`/census_blocks/${response.data.statefp}/${response.data.countyfp}`)
         })
     }
 
     $http.get(`/boundary/${plan.id}/find`)
-      .success((boundaries) => {
-        $scope.boundaries = boundaries
-        boundaries.forEach((boundary) => {
+      .then((boundaries) => {
+        $scope.boundaries = boundaries.data
+        boundaries.data.forEach((boundary) => {
           var paths = []
           boundary.geom.coordinates[0][0].forEach((p) => {
             paths.push(new google.maps.LatLng(p[1], p[0]))
@@ -257,8 +257,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     $scope.selectedUserDefinedBoundary = null
     $rootScope.selectedUserDefinedBoundary = null
     $http.get('/boundary/user_defined')
-      .success((response) => {
-        $scope.userDefinedBoundaries = response
+      .then((response) => {
+        $scope.userDefinedBoundaries = response.data
       })
   })
 
@@ -331,10 +331,10 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       }
 
       $http.post('/boundary/' + $scope.plan.id + '/create', data)
-        .success((boundary) => {
-          $scope.boundaries.push(boundary)
-          boundary.overlay = overlay
-          makeBoundaryEditable(boundary)
+        .then((boundary) => {
+          $scope.boundaries.push(boundary.data)
+          boundary.data.overlay = overlay
+          makeBoundaryEditable(boundary.data)
           updateTooltips()
         })
     })
@@ -380,7 +380,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
         geom: JSON.stringify(toGeoJson(overlay))
       }
       $http.post('/boundary/' + $scope.plan.id + '/edit/' + boundary.id, data)
-        .success((response) => {
+        .then((response) => {
           // yay!
         })
     }
@@ -470,7 +470,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       }
 
       $http.post('/boundary/' + $scope.plan.id + '/edit/' + boundary.id, data)
-        .success((response) => {
+        .then((response) => {
           boundary.name = name
         })
     })
@@ -484,7 +484,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       saving_plan: true,
       data: data
     }
-    $http(config).success((response) => {
+    $http(config).then((response) => {
       $rootScope.$broadcast('route_planning_changed')
     })
   }
@@ -501,7 +501,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       closeOnConfirm: true
     }, () => {
       $http.post('/boundary/' + $scope.plan.id + '/delete/' + boundary.id)
-        .success((response) => {
+        .then((response) => {
           boundary.overlay.setMap(null)
           $scope.boundaries = _.reject($scope.boundaries, (b) => boundary.id === b.id)
         })
@@ -549,8 +549,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   $scope.selectAllInLayer = () => {
     $http.get(`/service_areas/${$scope.selectedUserDefinedBoundary.name}/all`)
-      .success((response) => {
-        response.feature_collection.features.forEach((boundary) => {
+      .then((response) => {
+        response.data.feature_collection.features.forEach((boundary) => {
           regions.selectGeography({
             id: boundary.properties.id,
             name: boundary.properties.name,

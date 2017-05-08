@@ -22,26 +22,35 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
 
   function loadUserEntities () {
     $http.get('/user_entities/list')
-      .success((response) => {
-        $scope.userEntities = response
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          $scope.userEntities = response.data
+        } else {
+          errorHandler()
+        }
       })
-      .error(errorHandler)
   }
 
   function loadCustomBoundaries () {
     $http.get('/user_boundaries/list')
-      .success((response) => {
-        $scope.userBoundaries = response
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          $scope.userBoundaries = response.data
+        } else {
+          errorHandler()
+        }
       })
-      .error(errorHandler)
   }
 
   function loadUserFiber () {
     $http.get('/user_fiber/list')
-      .success((response) => {
-        $scope.userFiber = response
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          $scope.userFiber = response.data
+        } else {
+          errorHandler()
+        }
       })
-      .error(errorHandler)
   }
 
   $('#data-management').on('shown.bs.modal', reloadAll)
@@ -56,10 +65,13 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      $http.post('/user_entities/delete', { userEntities: userEntities.id }).success((response) => {
-        reloadAll()
+      $http.post('/user_entities/delete', { userEntities: userEntities.id }).then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          reloadAll()
+        } else {
+          errorHandler()
+        }
       })
-      .error(errorHandler)
     })
   }
 
@@ -73,10 +85,13 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      $http.post('/user_boundaries/delete', { userBoundaries: userBoundaries.id }).success((response) => {
-        reloadAll()
+      $http.post('/user_boundaries/delete', { userBoundaries: userBoundaries.id }).then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          reloadAll()
+        } else {
+          errorHandler()
+        }
       })
-      .error(errorHandler)
     })
   }
 
@@ -91,10 +106,13 @@ app.controller('data_management_controller', ['$scope', '$rootScope', '$http', (
       closeOnConfirm: true
     }, () => {
       $http.post('/user_fiber/delete', { userFiber: userFiber.systemId })
-        .success((response) => {
-          reloadAll()
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            reloadAll()
+          } else {
+            errorHandler()
+          }
         })
-        .error(errorHandler)
     })
   }
   

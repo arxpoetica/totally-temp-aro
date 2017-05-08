@@ -100,24 +100,27 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'o
 
     // Get geometry information for all geography ids
     $http.post('/boundary/info', { expertSelectedWirecenters: geographyIds })
-    .success((response) => {
-      // Go through all elements of the response and select each element
-      response.forEach((boundary, index) => {
-        var idSplit = boundary.id.split(':')
-        var type = idSplit[0]
-        var id = idSplit[1]
-        var geographyObj = {
-          id: id,
-          name: boundary.name,
-          geog: boundary.geog,
-          type: type
-        }
-        // Select geography, and suppress events for all but the last boundary
-        regions.selectGeography(geographyObj, index < response.length - 1)
-      })
-      defer.resolve()
+    .then((response) => {
+      if (response.status >= 200 && response.status <= 299) {
+        // Go through all elements of the response and select each element
+        response.data.forEach((boundary, index) => {
+          var idSplit = boundary.id.split(':')
+          var type = idSplit[0]
+          var id = idSplit[1]
+          var geographyObj = {
+            id: id,
+            name: boundary.name,
+            geog: boundary.geog,
+            type: type
+          }
+          // Select geography, and suppress events for all but the last boundary
+          regions.selectGeography(geographyObj, index < response.data.length - 1)
+        })
+        defer.resolve()
+      } else {
+        defer.reject(response.data)
+      }
     })
-    .error((err) => defer.reject(err))
 
     return defer.promise
   }

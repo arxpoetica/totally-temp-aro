@@ -26,9 +26,9 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
     cleanMarkers()
     recalculateLines()
     if (!plan) return
-    $http.get(`/backhaul/${plan.id}/links`).success((response) => {
+    $http.get(`/backhaul/${plan.id}/links`).then((response) => {
       var m = map_tools.is_visible('backhaul') ? map : null
-      response.forEach((item, i) => {
+      response.data.forEach((item, i) => {
         var from = item.from_geom.coordinates
         var to = item.to_geom.coordinates
         var pointFrom = { lat: from[1], lng: from[0] }
@@ -92,8 +92,8 @@ app.controller('backhaul-controller', ['$scope', '$rootScope', '$http', 'map_too
       from_ids: $scope.selectedEquipment.map((equipment) => equipment.from_link_id),
       to_ids: $scope.selectedEquipment.map((equipment) => equipment.to_link_id)
     }
-    $http.post(`/backhaul/${$scope.plan.id}/links`, data).success((response) => {
-      console.log('response', response)
+    $http.post(`/backhaul/${$scope.plan.id}/links`, data).then((response) => {
+      console.log('response', response.data)
     })
   }
 

@@ -153,17 +153,18 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         }
       }
       $http.get('/market_size/plan/' + $scope.plan.id + '/calculate', args)
-        .success((response) => {
-          $scope.market_profile = response
-          $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() })
-          if ($scope.market_profile_current_year) {
-            $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.share
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            $scope.market_profile = response.data
+            $scope.market_profile_current_year = _.findWhere($scope.market_profile.market_size, { year: new Date().getFullYear() })
+            if ($scope.market_profile_current_year) {
+              $scope.market_profile_fair_share_current_year_total = $scope.market_profile_current_year.total * response.data.share
+            }
+            $scope.market_profile_calculating = false
+            $scope.market_profile_share = response.data.share
+          } else {
+            $scope.market_profile_calculating = false
           }
-          $scope.market_profile_calculating = false
-          $scope.market_profile_share = response.share
-        })
-        .error(() => {
-          $scope.market_profile_calculating = false
         })
     })
   }
@@ -197,7 +198,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('plan_selected', null)
         delete $rootScope.currentPlan;
       }
-      $http.post('/network_plan/' + plan.id + '/delete').success((response) => {
+      $http.post('/network_plan/' + plan.id + '/delete').then((response) => {
         $scope.loadPlans()
       })
     })
@@ -226,10 +227,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
           allPlans: $scope.allPlans
         }
       }
-      $http(options).success((response) => {
-        $http.get('/optimization/processes').success((running) => {
-          response.plans.forEach((plan) => {
-            var info = running.find((status) => status.planId === +plan.id)
+      $http(options).then((response) => {
+        $http.get('/optimization/processes').then((running) => {
+          response.data.plans.forEach((plan) => {
+            var info = running.data.find((status) => status.planId === +plan.id)
             if (info) {
               var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
               var min = Math.floor(diff / 60)
@@ -240,8 +241,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
               plan.optimizationState = info.optimizationState
             }
           })
-          $scope.plans = response.plans
-          $scope.pages = response.pages
+          $scope.plans = response.data.plans
+          $scope.pages = response.data.pages
           callback && callback()
         })
       })
@@ -254,8 +255,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path()
   if (path.indexOf('/plan/') === 0) {
     var plan_id = path.substring('/plan/'.length)
-    $http.get('/network_plan/' + plan_id).success((response) => {
-      $scope.selectPlan(response)
+    $http.get('/network_plan/' + plan_id).then((response) => {
+      $scope.selectPlan(response.data)
     })
   }
 
@@ -321,9 +322,9 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }
 
 
-    $http.post('/network_plan/create', params).success((response) => {
-      state.clearPlan(response)
-      $scope.selectPlan(response)
+    $http.post('/network_plan/create', params).then((response) => {
+      state.clearPlan(response.data)
+      $scope.selectPlan(response.data)
       $('#new-plan').modal('hide')
       $('#plan-combo').modal('hide')
       $scope.loadPlans()
@@ -344,7 +345,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.save_changes = () => {
     $scope.plan.name = $scope.edit_plan_name
-    $http.post('/network_plan/' + $scope.plan.id + '/save', { name: $scope.plan.name }).success((response) => {
+    $http.post('/network_plan/' + $scope.plan.id + '/save', { name: $scope.plan.name }).then((response) => {
       $('#edit-plan').modal('hide')
     })
   }
@@ -359,7 +360,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      $http.post('/network_plan/' + $scope.plan.id + '/clear').success((response) => {
+      $http.post('/network_plan/' + $scope.plan.id + '/clear').then((response) => {
         $rootScope.$broadcast('plan_cleared', $scope.plan)
       })
     })
@@ -390,7 +391,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.stopOptimization = (plan) => {
     $http.post(`/optimization/stop/${plan.id}`)
-      .success((response) => {
+      .then((response) => {
         $scope.loadPlans($scope.currentPage)
       })
   }
@@ -401,7 +402,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       user_id: +$('#share-plan-search').select2('val'), // will be removed in select2 4.1
       message: $('#share-plan textarea').val()
     }
-    $http.post('/permissions/' + $scope.shared_plan.id + '/grant', params).success((response) => {
+    $http.post('/permissions/' + $scope.shared_plan.id + '/grant', params).then((response) => {
       swal({
         title: 'Network plan shared successfully',
         type: 'success'

@@ -23,7 +23,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
     latestModal = modal
     $scope.plan = plan
     $scope.analysis = []
-    $http.get(`/reports/tabc/${plan.id}/list`).success((response) => {
+    $http.get(`/reports/tabc/${plan.id}/list`).then((response) => {
       if ($scope.plan.id !== plan.id) return
       var twoDigits = (d) => d > 9 ? String(d) : '0' + d
       var date = new Date()
@@ -43,7 +43,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         }
       ]
       var kml = tabcNames
-        .filter((tabcName) => response.indexOf(tabcName.name) >= 0)
+        .filter((tabcName) => response.data.indexOf(tabcName.name) >= 0)
         .map((tabcName) => {
           return {
             name: `${prefix(tabcName.id)}_${tabcName.description}`,

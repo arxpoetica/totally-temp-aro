@@ -36,7 +36,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.optimizeTowers = true
   $scope.optimizeUploaded = false
 
-  $scope.irrThreshold = $scope.irrThresholdRange = 10
   $scope.budget = 10000000
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
   $scope.polygonOptions = {
@@ -92,14 +91,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       $('#selected_expert_mode').modal('hide')  
     }
   })
-
-  $scope.irrThresholdRangeChanged = () => {
-    $scope.irrThreshold = +$scope.irrThresholdRange
-  }
-
-  $scope.irrThresholdChanged = () => {
-    $scope.irrThresholdRange = $scope.irrThreshold
-  }
 
   var canceler = null
   $scope.cancel = () => {
@@ -179,8 +170,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   function loadBoundaries () {
     $http.get('/boundary/all')
-      .success((response) => {
-        $scope.allBoundaries = response
+      .then((response) => {
+        $scope.allBoundaries = response.data
       })
   }
 
@@ -207,8 +198,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
         }
       }
       $http(config)
-        .success((response) => {
-          response.feature_collection.features.forEach((feature) => {
+        .then((response) => {
+          response.data.feature_collection.features.forEach((feature) => {
             var prop = feature.properties
 
             var type = layer.changes || layer.type
@@ -229,9 +220,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   function loadTargets () {
     $http.get(`/locations/${$scope.plan.id}/targets`)
-      .success((response) => {
-        $scope.targets = response.targets
-        $scope.targetsTotal = response.total
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
         if ($scope.targetsTotal > 0) optimization.setMode('targets')
       })
   }
@@ -418,9 +409,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       }
     }
     $http(config)
-      .success((response) => {
-        $scope.targets = response.targets
-        $scope.targetsTotal = response.total
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
         if ($scope.targetsTotal > 0) optimization.setMode('targets')
         map_layers.getFeatureLayer('locations').reloadData(true)
         map_layers.getFeatureLayer('selected_locations').reloadData(true)
@@ -451,9 +442,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       data: {}
     }
     $http(config)
-      .success((response) => {
-        $scope.targets = response.targets
-        $scope.targetsTotal = response.total
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
         map_layers.getFeatureLayer('locations').reloadData()
         map_layers.getFeatureLayer('selected_locations').reloadData()
       })

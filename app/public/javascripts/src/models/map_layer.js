@@ -319,69 +319,70 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
             params: params,
             timeout: this._canceler.promise
           })
-          .error(() => {
-            spinner.removeClass('spin')
-          })
-          .success((response) => {
-            spinner.removeClass('spin')
-            this.is_loading = false
-            var data = response
-            // hide layer to change styles "in background"
-            var visible = this.visible
-            this.hide()
-            this.clearData()
-            if (this.heatmapLayer && params.zoom <= params.threshold) {
-              this.heatmapLayer.setData(
-                data.feature_collection.features.map((feature) => {
-                  var coordinates = feature.geometry.coordinates
-                  var density = feature.properties.density
-                  return {
-                    location: new google.maps.LatLng(coordinates[1], coordinates[0]),
-                    weight: density
-                  }
-                })
-              )
-              this.heatmapLayer.setMap(map)
-            } else {
-              var covArr = [];
-
-              var featureCollection = data.feature_collection;
-              //handle coverage_geom in the api call if needed
-              if(this.is_coverage){
-
-                //iterate through features
-                featureCollection.features.map((feature) => {
-                  var temp = {};
-                  //copy the actual data in case #passbyreference
-                  angular.copy(feature , temp);
-
-                  //extract the coverage_geom
-                  var geom = temp.properties.coverage_geom;
-                  delete temp.properties.coverage_geom;
-
-                  if(geom){
-                    var _fet = {
-                        geometry : geom,
-                        properties: temp.properties,
-                        type: 'Feature'
+          .then((response) => {
+            if (response.status >= 200 && response.status <= 299) {
+              spinner.removeClass('spin')
+              this.is_loading = false
+              var data = response.data
+              // hide layer to change styles "in background"
+              var visible = this.visible
+              this.hide()
+              this.clearData()
+              if (this.heatmapLayer && params.zoom <= params.threshold) {
+                this.heatmapLayer.setData(
+                  data.feature_collection.features.map((feature) => {
+                    var coordinates = feature.geometry.coordinates
+                    var density = feature.properties.density
+                    return {
+                      location: new google.maps.LatLng(coordinates[1], coordinates[0]),
+                      weight: density
                     }
-                    covArr.push(_fet);
-                  }
-                })
-                // create a geoJSON for secondary geometry
-                featureCollection = {features : covArr , type : "FeatureCollection"}
+                  })
+                )
+                this.heatmapLayer.setMap(map)
+              } else {
+                var covArr = [];
+
+                var featureCollection = data.feature_collection;
+                //handle coverage_geom in the api call if needed
+                if(this.is_coverage){
+
+                  //iterate through features
+                  featureCollection.features.map((feature) => {
+                    var temp = {};
+                    //copy the actual data in case #passbyreference
+                    angular.copy(feature , temp);
+
+                    //extract the coverage_geom
+                    var geom = temp.properties.coverage_geom;
+                    delete temp.properties.coverage_geom;
+
+                    if(geom){
+                      var _fet = {
+                          geometry : geom,
+                          properties: temp.properties,
+                          type: 'Feature'
+                      }
+                      covArr.push(_fet);
+                    }
+                  })
+                  // create a geoJSON for secondary geometry
+                  featureCollection = {features : covArr , type : "FeatureCollection"}
+                }
+                this.addGeoJson(featureCollection)
+                this.heatmapLayer && this.heatmapLayer.setMap(null)
               }
-              this.addGeoJson(featureCollection)
-              this.heatmapLayer && this.heatmapLayer.setMap(null)
+              this.metadata = data.metadata
+              this.data_loaded = true
+              this._createHovers()
+              this.onDataLoaded && this.onDataLoaded(this)
+              $rootScope.$broadcast('map_layer_loaded_data', this)
+              this.configureFeatureStyles()
+              // set the layer visible or not again
+              this.setVisible(visible)
+            } else {
+              spinner.removeClass('spin')
             }
-            this.metadata = data.metadata
-            this.data_loaded = true
-            this._createHovers()
-            this.onDataLoaded && this.onDataLoaded(this)
-            $rootScope.$broadcast('map_layer_loaded_data', this)
-            this.configureFeatureStyles()
-            // set the layer visible or not again
-            this.setVisible(visible)
           })
         }
       }

@@ -191,13 +191,13 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       zoom: map.getZoom()
     }
     var url = '/network/carriers/viewport?fiberType=ilec'
-    $http({ url: url, params: params }).success((carriers) => {
+    $http({ url: url, params: params }).then((carriers) => {
       var all = {
         id: 'all',
         name: 'All carriers',
         color: 'blue'
       }
-      $scope.nbmCarriers = [all].concat(carriers).filter((carrier) => {
+      $scope.nbmCarriers = [all].concat(carriers.data).filter((carrier) => {
         return carrier.name !== config.client_carrier_name
       })
     })
@@ -213,8 +213,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$http', 'map_
       zoom: map.getZoom()
     }
     var url = '/network/carriers/viewport?fiberType=fiber'
-    $http({ url: url, params: params }).success((carriers) => {
-      $scope.carriers = carriers.map((carrier) => {
+    $http({ url: url, params: params }).then((carriers) => {
+      $scope.carriers = carriers.data.map((carrier) => {
         return {
           id: carrier.name,
           name: carrier.name,
