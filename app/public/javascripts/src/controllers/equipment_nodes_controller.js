@@ -169,7 +169,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         var scale = zoom /(156543.03392 * Math.cos(13.0373668 * Math.PI / 180) / Math.pow(2, zoom));
         var name = feature.getProperty('name')
         var iconW = zoom * scale;
-        iconW = iconW > 35 ? 35 : iconW;
+        iconW = zoom > 14 ? 35 : iconW;
         if (name) {
           styles.icon = {
             anchor: new google.maps.Point(iconW /2, iconW/2),
