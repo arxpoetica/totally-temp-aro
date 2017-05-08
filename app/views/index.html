@@ -342,7 +342,7 @@
   <script src="https://maps.googleapis.com/maps/api/js?v=3.exp<%- googleMapsKey ? '&amp;key=' + googleMapsKey : '' %>&amp;libraries=visualization,drawing"></script>
 
   <script>
-    var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select','ui.checkbox']);
+    var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select','ui.checkbox', 'ng-currency']);
     app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
       NotificationProvider.setOptions({
         maxCount : 1
@@ -406,6 +406,7 @@
   <script src="javascripts/vendors/nouislider.min.js"></script>
   <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
   <script src="javascripts/vendors/angular-bootstrap-checkbox.js"></script>
+  <script src="javascripts/vendors/ng-currency.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>

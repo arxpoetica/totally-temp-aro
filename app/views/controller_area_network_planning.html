@@ -30,7 +30,13 @@
           <div class="form-group form-group-sm">
             <div class="input-group input-group-sm">
               <div class="input-group-addon"><%- config.currency_symbol %></div>
-              <input type="text" class="form-control text-right" placeholder="Amount" ng-model="state.optimizationOptions.financialConstraints.budget">
+              <input type="text"
+                     class="form-control text-right"
+                     placeholder="Amount"
+                     ng-model="state.optimizationOptions.financialConstraints.budget"
+                     ng-currency
+                     currency-symbol=""
+                     fraction="0">
             </div>
           </div>
         </div>
