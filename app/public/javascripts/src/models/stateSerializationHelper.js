@@ -100,6 +100,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Add regions to a POST body that we will send to aro-service for performing optimization
   var addRegionsToBody = (state, optimization, regions, postBody) => {
     var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined', 'wirecenter', 'cran', 'directional_facility']
+    postBody.processLayers = []
     postBody.geographies = regions.selectedRegions.map((i) => {
       var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
       // geography information may be too large so we avoid to send it for known region types
@@ -107,7 +108,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         info.geog = i.geog
       }
       if (i.layerId) {
-        processLayers.push(i.layerId)
+        postBody.processLayers.push(i.layerId)
       }
       return info
     })
