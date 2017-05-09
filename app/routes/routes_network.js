@@ -131,6 +131,18 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var serviceLayer = request.params.serviceLayer
     models.Network.viewFiber(plan_id, serviceLayer, viewport)
+    .then((response) => console.log(response))
+    models.Network.viewFiber(plan_id, serviceLayer, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Get the upward route (list of fiber segments) from a given fiber segment
+  api.get('/network/fiber/findUpwardRoute/:planId/:fiberSegmentId', check_loggedin, middleware.viewport, (request, response, next) => {
+    var viewport = request.viewport
+    var planId = request.params.planId
+    var fiberSegmentId = request.params.fiberSegmentId
+    models.Network.findUpwardRoute(planId, fiberSegmentId, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

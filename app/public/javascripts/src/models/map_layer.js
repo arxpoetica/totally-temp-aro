@@ -124,6 +124,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
         if (this.highlighteable && event.feature) {
           event.feature.setProperty('highlighted', false)
         }
+        $rootScope.$broadcast('map_layer_mouseout_feature', event, this)
       })
 
       data_layer.addListener('rightclick', (event) => {

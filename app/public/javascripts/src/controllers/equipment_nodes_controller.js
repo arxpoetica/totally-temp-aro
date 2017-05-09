@@ -118,6 +118,42 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   })
 
+  // Create a map layer for showing the "Upward route", i.e. the route from a given fiber
+  // strand to the central office
+  $scope.upwardRouteLayer = new MapLayer({
+    name: name,
+    type: 'upward_route_layer',
+    short_name: 'U',
+    api_endpoint: '',
+    style_options: {
+      normal: {
+        strokeColor: 'red',
+        strokeWeight: 10,
+        zIndex: 4
+      }
+    },
+    threshold: 0,
+    reload: 'always'
+  })
+
+  // When the mouse moves out of a upward route, hide the upward routes layer
+  $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
+    if (args.feature.f.fiber_strands) {
+      // This means the mouseout is for a upward route
+      $scope.upwardRouteLayer.hide()
+    }
+  })
+
+  // When we mouseover on a fiber strand, find the upward route from that strand and show it in the upward route layer
+  $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
+    var fiberStrandId = args.feature.f.id
+    if (fiberStrandId) {
+      // The mouseover is on a fiber strand feature. Set the API endpoint and show the upward route layer
+      $scope.upwardRouteLayer.setApiEndpoint('/network/fiber/findUpwardRoute/' + $scope.plan.id + '/' + fiberStrandId)
+      $scope.upwardRouteLayer.show()
+    }
+  })
+
   function configureServiceLayer (layer) {
     layer.showFeederFiber = false
     layer.showDistributionFiber = false
@@ -133,6 +169,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           strokeColor: 'red'
         }
       },
+      highlighteable: true,
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
       declarativeStyles: routeStyles(layer),
       threshold: 0,
