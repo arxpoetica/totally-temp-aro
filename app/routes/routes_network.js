@@ -131,8 +131,6 @@ exports.configure = (api, middleware) => {
     var plan_id = request.params.plan_id
     var serviceLayer = request.params.serviceLayer
     models.Network.viewFiber(plan_id, serviceLayer, viewport)
-    .then((response) => console.log(response))
-    models.Network.viewFiber(plan_id, serviceLayer, viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
