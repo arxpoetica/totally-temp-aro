@@ -459,6 +459,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
         styles.strokeWeight = 4
+        styles.zIndex = 3
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
