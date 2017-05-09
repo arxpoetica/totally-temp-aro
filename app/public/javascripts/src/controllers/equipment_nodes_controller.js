@@ -129,7 +129,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       normal: {
         strokeColor: 'red',
         strokeWeight: 10,
-        zIndex: 4
+        zIndex: MapLayer.Z_INDEX_UPWARD_FIBER_STRANDS
       }
     },
     threshold: 0,
@@ -456,10 +456,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function routeStyles (serviceLayer) {
     return (feature, styles) => {
       var type = feature.getProperty('fiber_type')
+      styles.zIndex = MapLayer.Z_INDEX_FIBER_STRANDS
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
         styles.strokeWeight = 4
-        styles.zIndex = 3
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
