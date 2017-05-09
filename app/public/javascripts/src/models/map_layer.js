@@ -11,6 +11,18 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
 
   return class MapLayer {
 
+    // Keep all Z indices of map layers in one place.
+    // This is the region (e.g. wirecenter boundary) that is *selected*. This was created so that the selected
+    // wirecenter boundary always appears on top of other boundaries without z-fighting
+    static get Z_INDEX_SELECTED_REGION() { return 2 }
+
+    // Fiber strands have a higher z index because we want their events (e.g. mouseover) to fire even when 
+    // a wirecenter boundary is selected
+    static get Z_INDEX_FIBER_STRANDS() { return 3 }
+
+    // The "upward route" fiber strands have a higher z index because they should appear on top of the other fiber strands.
+    static get Z_INDEX_UPWARD_FIBER_STRANDS() { return 4 }
+
     static isEquipmentVisible () {
       return all.some((layer) => {
         return layer.type === 'network_nodes' && layer.visible && layer.http_params
@@ -124,6 +136,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
         if (this.highlighteable && event.feature) {
           event.feature.setProperty('highlighted', false)
         }
+        $rootScope.$broadcast('map_layer_mouseout_feature', event, this)
       })
 
       data_layer.addListener('rightclick', (event) => {

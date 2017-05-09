@@ -1,5 +1,5 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
-app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, optimization) => {
+app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'MapLayer', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, MapLayer, optimization) => {
   var regions = { selectedRegions: [] }
   var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
 
@@ -9,7 +9,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'o
     selectionLayer = new google.maps.Data()
     selectionLayer.setStyle({
       fillColor: 'green',
-      zIndex: 2
+      zIndex: MapLayer.Z_INDEX_SELECTED_REGION  // We want the selected region to appear on top of non-selected regions
     })
     configureSelectionVisibility()
   }
