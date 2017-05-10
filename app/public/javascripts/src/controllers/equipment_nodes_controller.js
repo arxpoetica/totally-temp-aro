@@ -148,8 +148,25 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
     var fiberStrandId = args.feature.f.id
     if (fiberStrandId) {
-      // The mouseover is on a fiber strand feature. Set the API endpoint and show the upward route layer
-      $scope.upwardRouteLayer.setApiEndpoint('/network/fiber/findUpwardRoute/' + $scope.plan.id + '/' + fiberStrandId)
+
+      var edgeForFiber = $scope.fiberGraph.edge(fiberStrandId)
+      var edgesToCO = [edgeForFiber]
+      var startNode = edgeForFiber.toNode
+      var idx = 0
+      while (startNode && ++idx < 100) {
+        if (startNode.outEdges.length > 1) throw 'Multiple inedges for node'
+        if (startNode.outEdges.length === 0) {
+          break
+        }
+        var outgoingEdge = startNode.outEdges[0]
+        edgesToCO.push(outgoingEdge)
+        startNode = outgoingEdge.toNode
+      }
+
+      $scope.upwardRouteLayer.clearData()
+      edgesToCO.forEach((edge) => {
+        $scope.upwardRouteLayer.data_layer.add(edge.edgeFeature)
+      })
       $scope.upwardRouteLayer.show()
     }
   })
@@ -176,6 +193,71 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       reload: 'always'
     })
     layer.routeLayer = routeLayer
+
+    // Class to represent a node in a graph
+    class Node {
+      constructor(nodeId) {
+        this.nodeId = nodeId
+        this.inEdges = []
+        this.outEdges = []
+      }
+
+      addInEdge(inEdge) {
+        this.inEdges.push(inEdge)
+      }
+
+      addOutEdge(outEdge) {
+        this.outEdges.push(outEdge)
+      }
+    }
+
+    // Class to represent and edge in a graph
+    class Edge {
+      constructor(edgeId, fromNode, toNode, edgeFeature) {
+        this.edgeId = edgeId
+        this.fromNode = fromNode
+        this.toNode = toNode
+        this.edgeFeature = edgeFeature
+      }
+    }
+    class Graph {
+      constructor() {
+        this.nodes = {}
+        this.edges = {}
+      }
+
+      edge(edgeId) {
+        return this.edges[edgeId]
+      }
+
+      addNode(nodeId) {
+        if (!this.nodes[nodeId]) {
+          this.nodes[nodeId] = new Node(nodeId)
+        }
+      }
+
+      addEdge(edgeId, fromNodeId, toNodeId, edgeFeature) {
+        this.addNode(fromNodeId)
+        this.addNode(toNodeId)
+        if (!this.edges[edgeId]) {
+          this.edges[edgeId] = new Edge(edgeId, this.nodes[fromNodeId], this.nodes[toNodeId], edgeFeature)
+          this.nodes[fromNodeId].addOutEdge(this.edges[edgeId])
+          this.nodes[toNodeId].addInEdge(this.edges[edgeId])
+        }
+      }
+    }
+
+    $scope.fiberGraph = new Graph()
+
+    $rootScope.$on('map_layer_loaded_data', (event, mapLayer) => {
+      if (mapLayer.name !== 'Route') return
+
+      // Create a graph from the fiber edges
+      mapLayer.features.forEach((feature) => {
+        $scope.fiberGraph.addEdge(feature.f.id, feature.f.from_node_id, feature.f.to_node_id, feature)
+      })
+    })
+
 
     layer.changedFiberVisibility = () => {
       routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))
