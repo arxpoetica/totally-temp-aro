@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -148,29 +148,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
     var fiberStrandId = args.feature.f.id
     if (fiberStrandId) {
-
-      var edgeForFiber = $scope.fiberGraph.edge(fiberStrandId)
-      var edgesToCO = [edgeForFiber]
-      var startNode = edgeForFiber.toNode
-      var idx = 0
-      while (startNode && ++idx < 100) {
-        if (startNode.outEdges.length > 1) throw 'Multiple inedges for node'
-        if (startNode.outEdges.length === 0) {
-          break
-        }
-        var outgoingEdge = startNode.outEdges[0]
-        edgesToCO.push(outgoingEdge)
-        startNode = outgoingEdge.toNode
-      }
-
+      var upwardRouteFeatures = $scope.fiberGraph.getSuccessorEdgeFeatures(fiberStrandId)
       $scope.upwardRouteLayer.clearData()
-      edgesToCO.forEach((edge) => {
-        $scope.upwardRouteLayer.data_layer.add(edge.edgeFeature)
+      upwardRouteFeatures.forEach((feature) => {
+        $scope.upwardRouteLayer.data_layer.add(feature)
       })
       $scope.upwardRouteLayer.show()
     }
   })
 
+  const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {
     layer.showFeederFiber = false
     layer.showDistributionFiber = false
@@ -179,7 +166,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     var routeLayer = new MapLayer({
       short_name: 'RT',
-      name: 'Route',
+      name: ROUTE_LAYER_NAME,
       type: 'route',
       style_options: {
         normal: {
@@ -194,66 +181,18 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     layer.routeLayer = routeLayer
 
-    // Class to represent a node in a graph
-    class Node {
-      constructor(nodeId) {
-        this.nodeId = nodeId
-        this.inEdges = []
-        this.outEdges = []
-      }
-
-      addInEdge(inEdge) {
-        this.inEdges.push(inEdge)
-      }
-
-      addOutEdge(outEdge) {
-        this.outEdges.push(outEdge)
-      }
-    }
-
-    // Class to represent and edge in a graph
-    class Edge {
-      constructor(edgeId, fromNode, toNode, edgeFeature) {
-        this.edgeId = edgeId
-        this.fromNode = fromNode
-        this.toNode = toNode
-        this.edgeFeature = edgeFeature
-      }
-    }
-    class Graph {
-      constructor() {
-        this.nodes = {}
-        this.edges = {}
-      }
-
-      edge(edgeId) {
-        return this.edges[edgeId]
-      }
-
-      addNode(nodeId) {
-        if (!this.nodes[nodeId]) {
-          this.nodes[nodeId] = new Node(nodeId)
-        }
-      }
-
-      addEdge(edgeId, fromNodeId, toNodeId, edgeFeature) {
-        this.addNode(fromNodeId)
-        this.addNode(toNodeId)
-        if (!this.edges[edgeId]) {
-          this.edges[edgeId] = new Edge(edgeId, this.nodes[fromNodeId], this.nodes[toNodeId], edgeFeature)
-          this.nodes[fromNodeId].addOutEdge(this.edges[edgeId])
-          this.nodes[toNodeId].addInEdge(this.edges[edgeId])
-        }
-      }
-    }
-
-    $scope.fiberGraph = new Graph()
+    $scope.fiberGraph = fiberGraph
 
     $rootScope.$on('map_layer_loaded_data', (event, mapLayer) => {
-      if (mapLayer.name !== 'Route') return
+      if (mapLayer.name !== ROUTE_LAYER_NAME) {
+        // We only want to build a fiber graph for the route layer
+        return
+      }
 
       // Create a graph from the fiber edges
+      $scope.fiberGraph = fiberGraph
       mapLayer.features.forEach((feature) => {
+        // Add an edge with id, from_node_id, to_node_id and with the actual feature object
         $scope.fiberGraph.addEdge(feature.f.id, feature.f.from_node_id, feature.f.to_node_id, feature)
       })
     })
