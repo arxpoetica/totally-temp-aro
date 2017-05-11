@@ -135,16 +135,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  // Get the upward route (list of fiber segments) from a given fiber segment
-  api.get('/network/fiber/findUpwardRoute/:planId/:fiberSegmentId', check_loggedin, middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    var planId = request.params.planId
-    var fiberSegmentId = request.params.fiberSegmentId
-    models.Network.findUpwardRoute(planId, fiberSegmentId, viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   // Edit network nodes in a route
   api.post('/network/nodes/:plan_id/edit', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id

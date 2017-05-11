@@ -247,38 +247,13 @@ module.exports = class Network {
       `
     }
     var sql = `
-      SELECT s.id, s.geom, f.name as fiber_type
+      SELECT s.id, s.geom, f.name as fiber_type, s.from_node_id, s.to_node_id
       FROM client.subnet_link s
       JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
       JOIN client.fiber_route_type f ON f.id = ps.fiber_type_id
       WHERE ps.plan_id IN (${condition})
       AND NOT ST_IsEmpty(s.geom)
       ${database.intersects(viewport, 's.geom', 'AND')}
-    `
-    return database.lines(sql, params, true, viewport)
-  }
-
-  static findUpwardRoute(planId, fiberSegmentId, viewport) {
-
-    var params = [planId, fiberSegmentId]
-
-    var sql = `
-      WITH RECURSIVE included_links (from_node_id, to_node_id, fiber_strands) AS (
-        SELECT from_node_id, to_node_id, fiber_strands, geom
-          FROM client.subnet_link s
-          JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
-          JOIN client.plan p ON p.id = ps.plan_id
-            WHERE s.id = $2
-            AND p.id IN (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-              (SELECT id FROM client.plan WHERE parent_plan_id = $1)
-            ))
-        UNION ALL
-        SELECT s.from_node_id, s.to_node_id, s.fiber_strands, s.geom
-          FROM client.subnet_link s, included_links i
-          WHERE i.to_node_id = s.from_node_id
-      )
-      SELECT from_node_id, to_node_id, fiber_strands, geom
-      FROM included_links
     `
     return database.lines(sql, params, true, viewport)
   }

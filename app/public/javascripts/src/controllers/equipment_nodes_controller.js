@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -148,12 +148,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
     var fiberStrandId = args.feature.f.id
     if (fiberStrandId) {
-      // The mouseover is on a fiber strand feature. Set the API endpoint and show the upward route layer
-      $scope.upwardRouteLayer.setApiEndpoint('/network/fiber/findUpwardRoute/' + $scope.plan.id + '/' + fiberStrandId)
+      var upwardRouteFeatures = $scope.fiberGraph.getSuccessorEdgeFeatures(fiberStrandId)
+      $scope.upwardRouteLayer.clearData()
+      upwardRouteFeatures.forEach((feature) => {
+        $scope.upwardRouteLayer.data_layer.add(feature)
+      })
       $scope.upwardRouteLayer.show()
     }
   })
 
+  const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {
     layer.showFeederFiber = false
     layer.showDistributionFiber = false
@@ -162,7 +166,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     var routeLayer = new MapLayer({
       short_name: 'RT',
-      name: 'Route',
+      name: ROUTE_LAYER_NAME,
       type: 'route',
       style_options: {
         normal: {
@@ -176,6 +180,23 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       reload: 'always'
     })
     layer.routeLayer = routeLayer
+
+    $scope.fiberGraph = fiberGraph
+
+    $rootScope.$on('map_layer_loaded_data', (event, mapLayer) => {
+      if (mapLayer.name !== ROUTE_LAYER_NAME) {
+        // We only want to build a fiber graph for the route layer
+        return
+      }
+
+      // Create a graph from the fiber edges
+      $scope.fiberGraph = fiberGraph
+      mapLayer.features.forEach((feature) => {
+        // Add an edge with id, from_node_id, to_node_id and with the actual feature object
+        $scope.fiberGraph.addEdge(feature.f.id, feature.f.from_node_id, feature.f.to_node_id, feature)
+      })
+    })
+
 
     layer.changedFiberVisibility = () => {
       routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))
