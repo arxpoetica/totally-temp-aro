@@ -135,6 +135,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/network/fiber/connectivityForPlan/:planId', check_loggedin, (request, response, next) => {
+    var planId = request.params.planId
+    models.Network.getConnectivityForPlan(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Edit network nodes in a route
   api.post('/network/nodes/:plan_id/edit', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id

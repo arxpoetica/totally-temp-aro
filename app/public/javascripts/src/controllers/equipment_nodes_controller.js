@@ -136,6 +136,29 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reload: 'always'
   })
 
+  var fiberGraphForPlan = fiberGraph
+  // reload fiber graph when plan changes
+  var reloadFiberGraph = () => {
+    // Get the data again from the server. This is because some geometries are empty and are not
+    // put into the map, so we cant get it from mapLayer.features
+    fiberGraphForPlan = fiberGraph
+    if (state.planId !== state.INVALID_PLAN_ID) {
+      $http.get(`/network/fiber/connectivityForPlan/${state.planId}`)
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            var links = response.data
+            links.forEach((link) => {
+              // Add an edge with id, from_node_id, to_node_id and with the actual feature object
+              fiberGraphForPlan.addEdge(link.id, link.from_node_id, link.to_node_id, link.geo_json)
+            })
+          }
+        })
+    }
+  }
+  // Subscribe to different plan events
+  $rootScope.$on('plan_selected', (e, plan) => reloadFiberGraph())
+  $rootScope.$on('plan_cleared', (e, plan) => reloadFiberGraph())
+
   // When the mouse moves out of a upward route, hide the upward routes layer
   $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
     if (args.feature.f.fiber_strands) {
@@ -148,10 +171,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
     var fiberStrandId = args.feature.f.id
     if (fiberStrandId) {
-      var upwardRouteFeatures = $scope.fiberGraph.getSuccessorEdgeFeatures(fiberStrandId)
+      var upwardRouteFeatures = fiberGraphForPlan.getSuccessorEdgeFeatures(fiberStrandId)
       $scope.upwardRouteLayer.clearData()
       upwardRouteFeatures.forEach((feature) => {
-        $scope.upwardRouteLayer.data_layer.add(feature)
+        $scope.upwardRouteLayer.data_layer.addGeoJson({ type: 'Feature', geometry: JSON.parse(feature)})
       })
       $scope.upwardRouteLayer.show()
     }
@@ -180,23 +203,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       reload: 'always'
     })
     layer.routeLayer = routeLayer
-
-    $scope.fiberGraph = fiberGraph
-
-    $rootScope.$on('map_layer_loaded_data', (event, mapLayer) => {
-      if (mapLayer.name !== ROUTE_LAYER_NAME) {
-        // We only want to build a fiber graph for the route layer
-        return
-      }
-
-      // Create a graph from the fiber edges
-      $scope.fiberGraph = fiberGraph
-      mapLayer.features.forEach((feature) => {
-        // Add an edge with id, from_node_id, to_node_id and with the actual feature object
-        $scope.fiberGraph.addEdge(feature.f.id, feature.f.from_node_id, feature.f.to_node_id, feature)
-      })
-    })
-
 
     layer.changedFiberVisibility = () => {
       routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))

@@ -258,6 +258,21 @@ module.exports = class Network {
     return database.lines(sql, params, true, viewport)
   }
 
+  static getConnectivityForPlan(planId) {
+    // Note that the "geometry" for some subnet_link rows can be empty
+    var sql = `
+      SELECT s.id, s.from_node_id, s.to_node_id, st_asgeojson(s.geom) as geo_json
+      FROM client.subnet_link s
+      JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
+      JOIN client.fiber_route_type f ON f.id = ps.fiber_type_id
+      WHERE ps.plan_id IN (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+              (SELECT id FROM client.plan WHERE parent_plan_id = $1)
+            ))
+    `
+    var params = [planId]
+    return database.query(sql, params)
+  }
+
   static _addNodes (plan_id, insertions) {
     return Promise.resolve()
       .then(() => {
