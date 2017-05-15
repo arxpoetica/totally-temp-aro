@@ -16,7 +16,7 @@ if (args.env_type.lower() != 'staging') and (args.env_type.lower() != 'qa'):
 environment = args.env_type.upper()
 PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
                      'PRODUCTION': 'P-ARO-',
-                     'STAGING': 'S-ARO-'}
+                     'STAGING': 'S-ARO-APP-'}
 branch_name = os.environ['CIRCLE_BRANCH']
 cloudformation_stack_name = PROJECT_BASE_NAME[environment] + branch_name
 
