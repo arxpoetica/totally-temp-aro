@@ -26,9 +26,9 @@ if action not in {'CREATE', 'UPDATE'}:
     raise StandardError('%s is not a valid action to take.' % action)
 
 PROJECT_TAG = 'AIT:ARO'
-PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
-                     'PRODUCTION': 'P-ARO-',
-                     'STAGING': 'S-ARO-'}
+PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-APP-',
+                     'PRODUCTION': 'P-ARO-APP-',
+                     'STAGING': 'S-ARO-APP-'}
 SERVICE_TAG = 'APP'
 TEMPLATE_URLS = {
     'QA': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
