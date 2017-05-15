@@ -27,8 +27,8 @@ if action not in {'CREATE', 'UPDATE'}:
 
 PROJECT_TAG = 'AIT:ARO'
 PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
-                     'PRODUCTION': 'P-ARO-APP-',
-                     'STAGING': 'S-ARO-APP-'}
+                     'PRODUCTION': 'P-ARO-',
+                     'STAGING': 'S-ARO-'}
 SERVICE_TAG = 'APP'
 TEMPLATE_URLS = {
     'QA': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
