@@ -18,34 +18,27 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   // ARO version
   $scope.optimizationMode = 'targets'
-  $scope.entityTypes = [
-    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
-    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
-    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
-    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
-    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
-  ]
-
-  $scope.entityTypesTargeted = {}
-
   $scope.calculating = false
 
   $scope.optimizeHouseholds = true
   $scope.optimizeBusinesses = true
   $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
-  $scope.optimizeUploaded = false
 
   $scope.budget = 10000000
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
   $scope.polygonOptions = {
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
-  state.optimizationOptions.uiAlgorithms = [
-    { id: 'CAPEX', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-    { id: 'IRR', algorithm: 'IRR', label: 'ROI Routing' },
-    { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' }
-  ]
+  if (state.optimizationOptions.uiAlgorithms.length === 0) {
+    state.optimizationOptions.uiAlgorithms = [
+      { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+      { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
+      { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
+      { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
+      { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
+    ]
+  }
   state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   var budgetInput = $('#target_builder_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
@@ -59,14 +52,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   budgetInput.on('blur', () => {
     budgetInput.val(parseBudget().toLocaleString())
   })
-
-  $rootScope.$on('plan_selected', (e, plan) => {
-    if (plan) {
-      $scope.entityTypes.forEach((entity) => {
-        $scope.entityTypesTargeted[entity.id] = true
-      })
-    }
-  })
   
   $('.map-tool-wrapper').css('max-height', $window.innerHeight - 100)
 
@@ -75,12 +60,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     $('#selected_expert_mode').modal('show')
     $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
   }
-  $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
+  $rootScope.$on('expert-mode-plan-edited', (e, optimizationBody, isNetworkPlanning) => {
     if(!isNetworkPlanning) {
-      state.loadOptimizationOptionsFromJSON(changes)
-      .then(() => {
-        $scope.run()
-      })
+      $scope.run(optimizationBody)
       $('#selected_expert_mode').modal('hide')
     }	
   })
@@ -118,27 +100,14 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     }
   })
   
-  $scope.changeDatasource = () => {
-	  if($scope.optimizeUploaded){
-	      var uploadedCustomersSelect = $('.uploadCustomersTargetBuilding')
-	      var selectedDatasources = uploadedCustomersSelect.select2('val')
-	
-	      var dataSources = [];
-	      dataSources = dataSources.concat(selectedDatasources)
-	      var posSources = dataSources.map((id) => +id);
-	      optimization.datasources = _.uniq(posSources);
-	      changeSelectionForFeaturesMatching(dataSources)
-	  }
-  }
-  
-  $scope.run = () => {
+  $scope.run = (optimizationBody) => {
     // Check if at least one data source is selected
     var isAnyDataSourceSelected = state.selectedDataSources.length > 0
 	  // A location is selected if the "checked" property is true
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
+      canceler = optimization.optimize($scope.plan, optimizationBody)
     } else {
       swal({
         title: 'Incomplete input',

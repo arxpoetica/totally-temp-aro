@@ -9,7 +9,7 @@
       ng-model="state.optimizationOptions.uiSelectedAlgorithm"
       ng-options="item as item.label for item in state.optimizationOptions.uiAlgorithms">
     </select>
-    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'TARGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET_IRR'">
+    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'TARGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET'">
       <br>
       <p><strong>IRR Threshold</strong></p>
       <div class="row">
@@ -36,7 +36,7 @@
         </div>
       </div>
     </div>
-    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR'">
+    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || state.optimizationOptions.uiSelectedAlgorithm.id === 'ROI'">
       <br>
       <p><strong>Target Capital</strong></p>
       <div class="row">
@@ -55,66 +55,11 @@
           </div>
         </div>
       </div>
-      <p><strong>Budget Allocation</strong></p>
-      <div class="clearfix">
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 1</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="100%">
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 2</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 3</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 4</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 5</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-      </div>
-      <div ng-show="optimizationMode === 'targets' && state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR'">
-        <br>
-        <p><strong>Non-Targeted Customers</strong></p>
-        <div class="checkbox" ng-repeat="entity in entityTypes">
-          <label>
-            <checkbox
-                    class="chk-small"
-                    ng-model="entityTypesTargeted[entity.id]"
-                    name="ctype-name"
-            ></checkbox>
-          </label>
-        </div>
-      </div>
     </div>
     <br>
   <% } %>
 
   <p><strong>Select Targets</strong></p>
-  <input class="form-control select2" type="text" placeholder="Business Name">
-  <br>
-  <div class="checkbox">
-    <label>
-      <checkbox
-              class="chk-small"
-              ng-model="optimizeUploaded"
-              name="ctype-name"
-      ></checkbox>
-       Uploaded Locations
-
-      <div ng-show="optimizeUploaded" style="width: 200px">
-        <input class="form-control uploadedCustomersSelect uploadCustomersTargetBuilding" class="uploadedCustomersSelect"
-        	   ng-change="changeDatasource()"
-               ng-model="selectedDatasource">
-      </div>
-    </label>
-  </div>
-  <br>
   <form id="target-builder-upload">
     <p>
      <button class="btn btn-sm"
@@ -238,11 +183,13 @@
     </div>
 
     <div>
+    	<% if (user.rol === 'admin') { %>
       <p class="pull-left">
         <button class="btn btn-primary" ng-click="runExpertMode()">Expert Mode</button>
       </p>
+      <% } %>
       <p class="pull-right">
-        <button class="btn btn-primary" ng-hide="calculating" ng-click="run()">Get Results</button>
+        <button class="btn btn-primary" ng-hide="calculating" ng-click="run(state.getOptimizationBody())">Get Results</button>
         <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
       </p>
     </div>

@@ -22,12 +22,9 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
   }
   
-  $rootScope.$on('expert-mode-plan-edited', (e, changes, isNetworkPlanning) => {
+  $rootScope.$on('expert-mode-plan-edited', (e, optimizationBody, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-		  state.loadOptimizationOptionsFromJSON(changes)
-      .then(() => {
-        $scope.run()
-      })
+      $scope.run(optimizationBody)
       $('#selected_expert_mode').modal('hide')
 	  }	  
   })
@@ -47,10 +44,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       $scope.reportName = plan.name
       $scope.state.optimizationOptions.algorithm = plan.optimization_type ? plan.optimization_type : 'UNCONSTRAINED'
     }
-
-    $scope.entityTypes.forEach((entity) => {
-      $scope.entityTypesTargeted[entity.id] = true
-    })
   })
 
   $scope.routeGenerationOptionsChanged = (id) => {
@@ -92,14 +85,14 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     })
   }
 
-  $scope.run = () => {
+  $scope.run = (optimizationBody) => {
     // Check if at least one data source is selected
     var isAnyDataSourceSelected = state.selectedDataSources.length > 0
 	  // A location is selected if the "checked" property is true
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      canceler = optimization.optimize($scope.plan, state.getOptimizationBody())
+      canceler = optimization.optimize($scope.plan, optimizationBody)
     } else {
       swal({
         title: 'Incomplete input',
@@ -120,21 +113,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (mode === 'targets') {
       state.optimizationOptions.uiAlgorithms = [
         { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-        { id: 'IRR', algorithm: 'IRR', label: 'Budget' }
+        { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' }
       ]
     } else {
       state.optimizationOptions.uiAlgorithms = [
         { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
         { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
-        { id: 'IRR', algorithm: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', algorithm: 'IRR', label: 'IRR Target' },
+        { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
+        { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
         { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
       ]
       if (config.ARO_CLIENT === 'verizon') {
         state.optimizationOptions.uiAlgorithms.push({ id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' })
       }
     }
-    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'UNCONSTRAINED', label: 'Coverage Target' })
+    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' })
     state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   }
   optimizationModeChanged(null, optimization.getMode())
