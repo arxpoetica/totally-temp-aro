@@ -18,16 +18,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   // ARO version
   $scope.optimizationMode = 'targets'
-  $scope.entityTypes = [
-    { id: 'optimizeSMB', value: 'SMB', name: 'small' },
-    { id: 'optimizeMedium', value: 'Mid-tier', name: 'medium' },
-    { id: 'optimizeLarge', value: 'Large Enterprise', name: 'large' },
-    { id: 'optimizeHouseholds', value: 'Residential', name: 'household' },
-    { id: 'optimizeTowers', value: 'Cell Sites', name: 'celltower' }
-  ]
-
-  $scope.entityTypesTargeted = {}
-
   $scope.calculating = false
 
   $scope.optimizeHouseholds = true
@@ -57,14 +47,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   budgetInput.on('blur', () => {
     budgetInput.val(parseBudget().toLocaleString())
-  })
-
-  $rootScope.$on('plan_selected', (e, plan) => {
-    if (plan) {
-      $scope.entityTypes.forEach((entity) => {
-        $scope.entityTypesTargeted[entity.id] = true
-      })
-    }
   })
   
   $('.map-tool-wrapper').css('max-height', $window.innerHeight - 100)

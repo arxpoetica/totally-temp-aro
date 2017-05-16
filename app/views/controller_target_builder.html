@@ -55,42 +55,6 @@
           </div>
         </div>
       </div>
-      <p><strong>Budget Allocation</strong></p>
-      <div class="clearfix">
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 1</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="100%">
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 2</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 3</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 4</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-        <div style="float:left; width:20%">
-          <label class="text-right" style="display:block">Year 5</label>
-          <input type="text" style="padding:5px" class="form-control text-right input-sm" placeholder="Percentage" value="0%" disabled>
-        </div>
-      </div>
-      <div ng-show="optimizationMode === 'targets' && state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR'">
-        <br>
-        <p><strong>Non-Targeted Customers</strong></p>
-        <div class="checkbox" ng-repeat="entity in entityTypes">
-          <label>
-            <checkbox
-                    class="chk-small"
-                    ng-model="entityTypesTargeted[entity.id]"
-                    name="ctype-name"
-            ></checkbox>
-          </label>
-        </div>
-      </div>
     </div>
     <br>
   <% } %>

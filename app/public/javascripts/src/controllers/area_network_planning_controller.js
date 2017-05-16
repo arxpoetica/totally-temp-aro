@@ -47,10 +47,6 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       $scope.reportName = plan.name
       $scope.state.optimizationOptions.algorithm = plan.optimization_type ? plan.optimization_type : 'UNCONSTRAINED'
     }
-
-    $scope.entityTypes.forEach((entity) => {
-      $scope.entityTypesTargeted[entity.id] = true
-    })
   })
 
   $scope.routeGenerationOptionsChanged = (id) => {
