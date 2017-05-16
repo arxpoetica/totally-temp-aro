@@ -34,7 +34,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.optimizeBusinesses = true
   $scope.optimizeSMB = true // special case
   $scope.optimizeTowers = true
-  $scope.optimizeUploaded = false
 
   $scope.budget = 10000000
   // Using polygonOptions as the HTML select is under a ng-repeat and will create a child scope that will not update
@@ -117,19 +116,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 	    optimization.datasources = _.uniq(posSources);
     }
   })
-  
-  $scope.changeDatasource = () => {
-	  if($scope.optimizeUploaded){
-	      var uploadedCustomersSelect = $('.uploadCustomersTargetBuilding')
-	      var selectedDatasources = uploadedCustomersSelect.select2('val')
-	
-	      var dataSources = [];
-	      dataSources = dataSources.concat(selectedDatasources)
-	      var posSources = dataSources.map((id) => +id);
-	      optimization.datasources = _.uniq(posSources);
-	      changeSelectionForFeaturesMatching(dataSources)
-	  }
-  }
   
   $scope.run = () => {
     // Check if at least one data source is selected

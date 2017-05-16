@@ -96,25 +96,6 @@
   <% } %>
 
   <p><strong>Select Targets</strong></p>
-  <input class="form-control select2" type="text" placeholder="Business Name">
-  <br>
-  <div class="checkbox">
-    <label>
-      <checkbox
-              class="chk-small"
-              ng-model="optimizeUploaded"
-              name="ctype-name"
-      ></checkbox>
-       Uploaded Locations
-
-      <div ng-show="optimizeUploaded" style="width: 200px">
-        <input class="form-control uploadedCustomersSelect uploadCustomersTargetBuilding" class="uploadedCustomersSelect"
-        	   ng-change="changeDatasource()"
-               ng-model="selectedDatasource">
-      </div>
-    </label>
-  </div>
-  <br>
   <form id="target-builder-upload">
     <p>
      <button class="btn btn-sm"
