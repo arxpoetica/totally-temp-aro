@@ -14,7 +14,7 @@ exports.configure = (api, middleware) => {
     var statefp = request.params.statefp
     var countyfp = request.params.countyfp
     var viewport = request.viewport
-    models.CensusBlock.findByStatefpAndCountyfp(statefp, countyfp, viewport)
+    models.CensusBlock.findByStatefpAndCountyfp(viewport)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
