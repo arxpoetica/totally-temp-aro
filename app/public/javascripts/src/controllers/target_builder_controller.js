@@ -32,7 +32,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   }
   state.optimizationOptions.uiAlgorithms = [
     { id: 'CAPEX', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-    { id: 'IRR', algorithm: 'IRR', label: 'ROI Routing' },
+    { id: 'ROI', algorithm: 'IRR', label: 'ROI Routing' },
     { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' }
   ]
   state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]

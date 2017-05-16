@@ -9,7 +9,7 @@
       ng-model="state.optimizationOptions.uiSelectedAlgorithm"
       ng-options="item as item.label for item in state.optimizationOptions.uiAlgorithms">
     </select>
-    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'TARGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET_IRR'">
+    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'TARGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET'">
       <br>
       <p><strong>IRR Threshold</strong></p>
       <div class="row">
@@ -36,7 +36,7 @@
         </div>
       </div>
     </div>
-    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET_IRR' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR'">
+    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || state.optimizationOptions.uiSelectedAlgorithm.id === 'ROI'">
       <br>
       <p><strong>Target Capital</strong></p>
       <div class="row">

@@ -116,21 +116,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     if (mode === 'targets') {
       state.optimizationOptions.uiAlgorithms = [
         { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-        { id: 'IRR', algorithm: 'IRR', label: 'Budget' }
+        { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' }
       ]
     } else {
       state.optimizationOptions.uiAlgorithms = [
         { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
         { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
-        { id: 'IRR', algorithm: 'IRR', label: 'Budget' },
-        { id: 'BUDGET_IRR', algorithm: 'IRR', label: 'IRR Target' },
+        { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
+        { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
         { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
       ]
       if (config.ARO_CLIENT === 'verizon') {
         state.optimizationOptions.uiAlgorithms.push({ id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' })
       }
     }
-    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'UNCONSTRAINED', label: 'Coverage Target' })
+    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' })
     state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   }
   optimizationModeChanged(null, optimization.getMode())

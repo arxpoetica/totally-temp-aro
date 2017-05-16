@@ -83,18 +83,24 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     }
 
-    postBody.financialConstraints = state.optimizationOptions.financialConstraints
-    // Delete items from postBody.financialConstraints based on the type of algorithm we are using.
-    var algorithmId = state.optimizationOptions.uiSelectedAlgorithm
-    if (algorithmId === 'CAPEX' || algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR' || algorithmId === 'TABC') {
-      delete postbody.financialConstraints.budget
-      delete postBody.financialConstraints.preIrrThreshold
-    } else if (algorithmId === 'IRR') {
-      delete postBody.financialConstraints.preIrrThreshold
-    }
-
-
+    postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
     postBody.threshold = state.optimizationOptions.threshold
+
+    // Delete items from postBody.financialConstraints based on the type of algorithm we are using.
+    var algorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
+    if (algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR' || algorithmId === 'COVERAGE') {
+      delete postBody.financialConstraints.budget
+      delete postBody.financialConstraints.preIrrThreshold
+      delete postBody.threshold
+    } else if (algorithmId === 'BUDGET') {
+      delete postBody.financialConstraints.preIrrThreshold
+      delete postBody.threshold
+    } else if (algorithmId === 'IRR_TARGET') {
+      delete postBody.financialConstraints.preIrrThreshold
+    } else if (algorithmId === 'IRR_THRESH') {
+      delete postBody.financialConstraints.budget
+      delete postBody.threshold
+    }
   }
 
   // Add regions to a POST body that we will send to aro-service for performing optimization
@@ -122,12 +128,21 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.fiberNetworkConstraints = {}
     postBody.fiberNetworkConstraints.routingMode = state.optimizationOptions.fiberNetworkConstraints.routingMode
-    postBody.fiberNetworkConstraints.cellNodeConstraints = {}
-    postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-    postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
-    var selectedTile = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile
-    if (selectedTile) {
-      postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
+
+    var fiveGEnabled = false
+    state.optimizationOptions.technologies.forEach((technology) => {
+      if (technology.id === 'FiveG' && technology.checked) {
+        fiveGEnabled = true
+      }
+    })
+    if (fiveGEnabled) {
+      postBody.fiberNetworkConstraints.cellNodeConstraints = {}
+      postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+      postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
+      var selectedTile = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile
+      if (selectedTile) {
+        postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
+      }
     }
   }
 
