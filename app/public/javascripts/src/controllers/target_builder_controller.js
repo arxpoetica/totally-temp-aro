@@ -30,11 +30,15 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.polygonOptions = {
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
-  state.optimizationOptions.uiAlgorithms = [
-    { id: 'CAPEX', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-    { id: 'ROI', algorithm: 'IRR', label: 'ROI Routing' },
-    { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' }
-  ]
+  if (state.optimizationOptions.uiAlgorithms.length === 0) {
+    state.optimizationOptions.uiAlgorithms = [
+      { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+      { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
+      { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
+      { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
+      { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
+    ]
+  }
   state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
   var budgetInput = $('#target_builder_controller input[name=budget]')
   budgetInput.val($scope.budget.toLocaleString())
