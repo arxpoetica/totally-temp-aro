@@ -8,14 +8,14 @@ var database = helpers.database
 
 module.exports = class CensusBlock {
 
-  static findByStatefpAndCountyfp (statefp, countyfp, viewport) {
+  static findByStatefpAndCountyfp (viewport) {
     var sql = `
       SELECT gid as id, name, geom, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
       FROM aro.census_blocks
-      WHERE statefp = $1 AND countyfp = $2
-      ${database.intersects(viewport, 'geom', 'AND')}
+      WHERE
+      ${database.intersects(viewport, 'geom', '')}
     `
-    var params = [statefp, countyfp]
+    var params = []
     return database.polygons(sql, params, true, viewport)
   }
 
