@@ -158,6 +158,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Subscribe to different plan events
   $rootScope.$on('plan_selected', (e, plan) => reloadFiberGraph())
   $rootScope.$on('plan_cleared', (e, plan) => reloadFiberGraph())
+  $rootScope.$on('route_planning_changed', (e, plan) => reloadFiberGraph())
 
   // When the mouse moves out of a upward route, hide the upward routes layer
   $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
