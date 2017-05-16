@@ -251,16 +251,21 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
 
-    if (postBody.financialConstraints.years) {
+    if (postBody.financialConstraints
+        && postBody.financialConstraints.years) {
       state.optimizationOptions.financialConstraints.years = postBody.financialConstraints.years
     }
-    if (postBody.financialConstraints.budget) {
+    if (postBody.financialConstraints
+        && postBody.financialConstraints.budget) {
       state.optimizationOptions.financialConstraints.budget = postBody.financialConstraints.budget
     }
-    if (postBody.financialConstraints.preIrrThreshold) {
+    if (postBody.financialConstraints
+        && postBody.financialConstraints.preIrrThreshold) {
       state.optimizationOptions.financialConstraints.preIrrThreshold = postBody.financialConstraints.preIrrThreshold
     }
-    state.optimizationOptions.threshold = postBody.threshold
+    if (postBody.threshold) {
+      state.optimizationOptions.threshold = postBody.threshold
+    }
     if (postBody.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
     } else if (postBody.analysisSelectionMode === 'SELECTED_LOCATIONS') {
@@ -270,12 +275,21 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load fiber network constraints from a POST body object that is sent to the optimization engine
   var loadFiberNetworkConstraintsFromBody = (state, postBody) => {
-    var cellNodeConstraintsObj = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints
-    cellNodeConstraintsObj.cellRadius = postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-    cellNodeConstraintsObj.polygonStrategy = postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
-    var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId)
-    if (selectedTile.length === 1) {
-      cellNodeConstraintsObj.selectedTile = selectedTile[0]
+    if (postBody.fiberNetworkConstraints
+        && postBody.fiberNetworkConstraints.cellNodeConstraints) {
+      var cellNodeConstraintsObj = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints
+      if (postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius) {
+        cellNodeConstraintsObj.cellRadius = postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+      }
+      if (postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy) {
+        cellNodeConstraintsObj.polygonStrategy = postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
+      }
+      if (postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId) {
+        var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId)
+        if (selectedTile.length === 1) {
+          cellNodeConstraintsObj.selectedTile = selectedTile[0]
+        }
+      }
     }
   }
 
