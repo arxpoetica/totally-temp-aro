@@ -238,9 +238,11 @@
     </div>
 
     <div>
+    	<% if (user.rol === 'admin') { %>
       <p class="pull-left">
         <button class="btn btn-primary" ng-click="runExpertMode()">Expert Mode</button>
       </p>
+      <% } %>
       <p class="pull-right">
         <button class="btn btn-primary" ng-hide="calculating" ng-click="run()">Get Results</button>
         <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
