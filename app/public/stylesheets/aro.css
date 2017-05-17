@@ -1026,3 +1026,24 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .ui-select-multiple input.ui-select-search:not(.ng-touched) {
   width: 100% !important;
 }
+
+/*View Settings*/
+.map_settings_container .settings_items {
+  padding-left: 10px;
+}
+.map_settings_container .settings_items li{
+  list-style: none;
+}
+
+.map_settings_container .settings_items li > .settings_item{
+  display: flex;
+  flex-direction: row;
+  clear: both;
+  padding: 3px 3px ;
+}
+.map_settings_container .settings_items li > .settings_item .settings_label{
+  flex: 1;
+}
+.map_settings_container .settings_items li > .settings_item .settings_object{
+  flex: 0;
+}

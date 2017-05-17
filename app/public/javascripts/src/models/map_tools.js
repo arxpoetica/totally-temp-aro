@@ -120,6 +120,12 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       icon: 'fa fa-th fa-2x'
     },
     {
+      id: 'map_settings',
+      name: 'View Settings',
+      short_name: 'V',
+      icon: 'fa fa-eye fa-2x'
+    },
+    {
       separator: true
     },
     {
