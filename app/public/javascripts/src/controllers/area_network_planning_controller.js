@@ -105,32 +105,22 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     }
   }
 
-  $scope.optimizationMode = optimization.getMode()
-  $rootScope.$on('optimization_mode_changed', optimizationModeChanged)
-
-  function optimizationModeChanged (e, mode) {
-    $scope.optimizationMode = mode
-    if (mode === 'targets') {
+  $rootScope.$on('map_tool_changed_visibility', (event, toolName) => {
+    if (toolName === map_tools.TOOL_IDS.AREA_NETWORK_PLANNING && map_tools.is_visible(toolName)) {
       state.optimizationOptions.uiAlgorithms = [
-        { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-        { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' }
-      ]
-    } else {
-      state.optimizationOptions.uiAlgorithms = [
-        { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
-        { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
-        { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
-        { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
-        { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' }
+        state.OPTIMIZATION_TYPES.UNCONSTRAINED,
+        state.OPTIMIZATION_TYPES.MAX_IRR,
+        state.OPTIMIZATION_TYPES.BUDGET,
+        state.OPTIMIZATION_TYPES.IRR_TARGET,
+        state.OPTIMIZATION_TYPES.IRR_THRESH,
+        state.OPTIMIZATION_TYPES.COVERAGE
       ]
       if (config.ARO_CLIENT === 'verizon') {
-        state.optimizationOptions.uiAlgorithms.push({ id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' })
+        state.optimizationOptions.uiAlgorithms.push(state.OPTIMIZATION_TYPES.TABC)
       }
+      state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
     }
-    state.optimizationOptions.uiAlgorithms.push({ id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' })
-    state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
-  }
-  optimizationModeChanged(null, optimization.getMode())
+  })
 
   // processing layer
   $scope.allBoundaries = []
