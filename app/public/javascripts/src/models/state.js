@@ -8,6 +8,16 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
   service.DS_GLOBAL_HOUSEHOLDS = -2
   service.DS_GLOBAL_CELLTOWER = -1
 
+  service.OPTIMIZATION_TYPES = {
+    UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
+    MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
+    BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
+    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
+    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' },
+    TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
+    COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
+  }
+
   ;['dragend', 'zoom_changed'].forEach((event_name) => {
     $rootScope.$on('map_' + event_name, () => {
       if (!key) return

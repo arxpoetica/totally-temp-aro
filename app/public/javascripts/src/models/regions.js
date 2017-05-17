@@ -1,7 +1,7 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
 app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'MapLayer', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, MapLayer, optimization) => {
   var regions = { selectedRegions: [] }
-  var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : 'area_network_planning'
+  var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : map_tools.TOOL_IDS.AREA_NETWORK_PLANNING
 
   var selectionLayer
   function initSelectionLayer () {

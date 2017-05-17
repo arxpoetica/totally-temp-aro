@@ -77,30 +77,34 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         needsPlan : true
       }
       $scope.serviceLayers.push(additionalLayer)
+      $scope.existingFibers = globalExistingFiberSourceNames.map((name) => {
+        return new MapLayer({
+          name: name,
+          type: 'fiber_plant',
+          id :Math.random().toString(36).substr(2 , 10), //random id works
+          short_name: 'F',
+          api_endpoint: `/network/fiber_plant/current_carrier/${name}`,
+          style_options: {
+            normal: {
+              strokeColor: config.ui.colors.fiber,
+              strokeWeight: 2,
+              fillColor: config.ui.colors.fiber
+            }
+          },
+          threshold: 0,
+          reload: 'always'
+        })
+      });
+
       var existingFiberLayer = {
         id: 'existing_fiber',
         name: 'existing_fiber',
         description: 'Existing Fiber',
         equipment_description: 'Existing Fiber',
         additional: true,
-        layers: globalExistingFiberSourceNames.map((name) => {
-          return new MapLayer({
-            name: name,
-            type: 'fiber_plant',
-            short_name: 'F',
-            api_endpoint: `/network/fiber_plant/current_carrier/${name}`,
-            style_options: {
-              normal: {
-                strokeColor: config.ui.colors.fiber,
-                strokeWeight: 2,
-                fillColor: config.ui.colors.fiber
-              }
-            },
-            threshold: 0,
-            reload: 'always'
-          })
-        })
+        layers: $scope.existingFibers
       }
+
       $scope.serviceLayers.push(existingFiberLayer)
       if ($scope.serviceLayers.length > 0) {
         var layer = $scope.serviceLayers[0]
@@ -230,11 +234,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       scaleIcon : true,
       declarativeStyles: (feature, styles) => {
         var zoom  = map.getZoom();
+        var pos = feature.getGeometry("coordinates").get("Point")
         //https://gis.stackexchange.com/questions/108763/how-to-calculate-pixels-per-meter-ratio-according-to-google-or-bing-map-zoom-le
-        var scale = zoom /(156543.03392 * Math.cos(13.0373668 * Math.PI / 180) / Math.pow(2, zoom));
+        var scale = getScale(pos ,zoom)
         var name = feature.getProperty('name')
-        var iconW = zoom * scale;
-        iconW = zoom > 14 ? 35 : iconW;
+        var iconW = 30 / scale;
+
+         if(zoom > 16){
+             iconW = 35
+         }
+
         if (name) {
           styles.icon = {
             anchor: new google.maps.Point(iconW /2, iconW/2),
@@ -246,6 +255,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       }
     })
+
+    function getScale(latLng,zoom){
+      return 156543.03392 * Math.cos(latLng.lat() * Math.PI / 180) / Math.pow(2, zoom)
+    }
+
     networkNodesLayer.flat_color = true
     layer.networkNodesLayer = networkNodesLayer
 
@@ -547,6 +561,17 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       response.data.forEach(initDatasource)
       updateOptimizationFiber()
     })
+
+    //load existing fibers to fiberLayer
+    $scope.existingFibers.map(function (fib) {
+       $scope.remainingDatasources.push({
+         dataSourceId : fib.id,
+         name : fib.name
+       })
+
+      fiberLayers[fib.id] = fib;
+    })
+
   }
 
   function initDatasource (datasource) {
@@ -645,4 +670,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.addFiber = () => {
     $('#upload_fiber_modal').modal('show')
   }
+
+  $scope.$on("map_loaded" , ()=>{
+    reloadDatasources();
+  })
 }])

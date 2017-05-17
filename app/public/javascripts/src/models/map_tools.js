@@ -88,6 +88,11 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     }
   }
 
+  tools.TOOL_IDS = {
+    AREA_NETWORK_PLANNING: 'area_network_planning',
+    TARGET_BUILDER: 'target_builder'
+  }
+
   tools.available_tools = [
     {
       id: 'locations',
@@ -120,10 +125,16 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       icon: 'fa fa-th fa-2x'
     },
     {
+      id: 'map_settings',
+      name: 'View Settings',
+      short_name: 'V',
+      icon: 'fa fa-eye fa-2x'
+    },
+    {
       separator: true
     },
     {
-      id: 'area_network_planning',
+      id: tools.TOOL_IDS.AREA_NETWORK_PLANNING,
       name: 'Area Network Planning',
       short_name: 'A',
       icon: 'fa fa-legal fa-2x',
@@ -133,7 +144,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
 
   if (!config.ui.map_tools.target_builder.disabled) {
     tools.available_tools.push({
-      id: 'target_builder',
+      id: tools.TOOL_IDS.TARGET_BUILDER,
       name: 'Target builder',
       short_name: 'TB',
       icon: 'fa fa-bullseye fa-2x',
@@ -159,7 +170,7 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   })
 
   if (config.ARO_CLIENT === 'demo') {
-    var tool = tools.available_tools.find((item) => item.id === 'area_network_planning')
+    var tool = tools.available_tools.find((item) => item.id === tools.TOOL_IDS.AREA_NETWORK_PLANNING)
     tools.available_tools.splice(tools.available_tools.indexOf(tool), 1)
   }
 

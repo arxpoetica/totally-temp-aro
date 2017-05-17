@@ -18,8 +18,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
   ]
   $scope.overlay = 'none'
-  $scope.heatmapVisible = false
-  $scope.heatmapOn = true
   $scope.roadLayer = new MapLayer({
     short_name: 'RS',
     name: 'Road Segments',
@@ -100,7 +98,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     }
   }
 
-  var locationsLayer = $scope.locations_layer = new MapLayer({
+  var locationsLayer = state.locations_layer = $scope.locations_layer = new MapLayer({
     type: 'locations',
     name: 'Locations',
     short_name: 'L',
@@ -240,7 +238,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
-    if (!$scope.heatmapOn) $scope.toggleHeatmap()
     optimization.datasources = []
 
     if (plan) {
@@ -310,21 +307,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
   }
 
   $rootScope.$on('map_zoom_changed', configure_overlays_visibility)
-
-  $rootScope.$on('map_layer_loaded_data', (e, layer) => {
-    if (layer === locationsLayer) {
-      $scope.heatmapVisible = layer.heatmapIsVisible()
-    }
-  })
-
-  $scope.toggleHeatmap = () => {
-    $scope.heatmapOn = !$scope.heatmapOn
-    if (!$scope.heatmapOn) {
-      locationsLayer.setThreshold(0)
-    } else {
-      locationsLayer.setThreshold(15)
-    }
-  }
 
   $scope.selectedFilter = null
   $scope.toggleFilter = (filter) => {

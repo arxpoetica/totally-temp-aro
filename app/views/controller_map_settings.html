@@ -1,0 +1,25 @@
+<div class="map_settings_container">
+  <ul class="settings_items">
+      <li>
+
+        <div class="settings_item">
+          <div class="settings_label">Location Heatmap</div>
+          <div class="settings_object">
+            <checkbox
+                    class="chk-small"
+                    ng-model="heatmapOn"
+                    name="ctype-name"
+                    ng-change="toggleHeatmap()">
+            </checkbox>
+          </div>
+        </div>
+
+        <div class="settings_item">
+          <div class="settings_label">Fiber Width</div>
+          <div class="settings_object">
+            <select ng-model="selectedFO" ng-options="option as option.name for option in fiberOptions track by option.id"></select>
+          </div>
+        </div>
+      </li>
+  </ul>
+</div>
