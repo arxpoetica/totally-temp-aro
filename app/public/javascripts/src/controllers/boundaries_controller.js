@@ -535,6 +535,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.toggleVisibility = (layer) => {
+    layer.visible = layer.visible_check;
+
     layer.configureVisibility()
     regions.setSearchOption(layer.type, layer.visible)
   }

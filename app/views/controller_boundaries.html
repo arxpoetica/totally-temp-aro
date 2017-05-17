@@ -9,9 +9,9 @@
         <div class="pull-right">
           <checkbox
                   class="chk-small"
-                  ng-model="layer.visible"
+                  ng-model="layer.visible_check"
                   name="ctype-name"
-                  ng-click="toggleVisibility(layer)"
+                  ng-change="toggleVisibility(layer)"
                   ng-disabled="layer.disabled"
           ></checkbox>
         </div>
