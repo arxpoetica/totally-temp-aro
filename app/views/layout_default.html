@@ -137,16 +137,16 @@
 </div>
 
 <div class="map-tool-wrapper" ng-controller="area-network-planning-controller">
-  <div ng-show="map_tools.is_visible('area_network_planning')" class="map-tool panel panel-primary">
-    <div class="panel-heading" ng-bind="map_tools.get_tool_name('area_network_planning')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('area_network_planning')" ng-click="map_tools.collapse('area_network_planning')">
+  <div ng-show="map_tools.is_visible(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)" class="map-tool panel panel-primary">
+    <div class="panel-heading" ng-bind="map_tools.get_tool_name(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
+      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)" ng-click="map_tools.collapse(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
         <span style="color:white" class="fa fa-chevron-up"></span>
       </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('area_network_planning')" ng-click="map_tools.expand('area_network_planning')">
+      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)" ng-click="map_tools.expand(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
         <span style="color:white" class="fa fa-chevron-down"></span>
       </a>
     </div>
-    <div class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded('area_network_planning')">
+    <div class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
       <% include controller_area_network_planning.html %>
     </div>
   </div>

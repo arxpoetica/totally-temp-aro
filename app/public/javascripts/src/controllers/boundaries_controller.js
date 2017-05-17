@@ -353,7 +353,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
-    if (map_tools.is_visible('area_network_planning')) return
+    if (map_tools.is_visible(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)) return
     if (true) return
 
     var name = event.feature.getProperty('name')
