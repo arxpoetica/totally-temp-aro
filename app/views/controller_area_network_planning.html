@@ -4,7 +4,7 @@
     ng-model="state.optimizationOptions.uiSelectedAlgorithm"
     ng-options="item as item.label for item in state.optimizationOptions.uiAlgorithms">
   </select>
-  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
+  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
     <br>
     <p><strong>IRR Threshold</strong></p>
     <div class="row">
@@ -23,6 +23,33 @@
             <input
               type="number"
               ng-model="state.optimizationOptions.financialConstraints.preIrrThreshold"
+              class="form-control text-right"
+              percentage-input>
+            <div class="input-group-addon">%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
+    <br>
+    <p><strong>IRR Target</strong></p>
+    <div class="row">
+      <div class="col-md-7">
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          ng-model="state.optimizationOptions.threshold"
+          style="margin-top: 10px">
+      </div>
+      <div class="col-md-5">
+        <div class="form-group form-group-sm">
+          <div class="input-group input-group-sm">
+            <input
+              type="number"
+              ng-model="state.optimizationOptions.threshold"
               class="form-control text-right"
               percentage-input>
             <div class="input-group-addon">%</div>
