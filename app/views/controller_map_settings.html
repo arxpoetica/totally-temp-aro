@@ -17,7 +17,7 @@
         <div class="settings_item">
           <div class="settings_label">Fiber Width</div>
           <div class="settings_object">
-            <select ng-model="selectedFO" ng-options="option as option.name for option in fiberOptions track by option.id"></select>
+            <select ng-model="selectedFO" ng-options="option as option.name for option in fiberOptions track by option.id" ng-change="fiberOptionChanged()"></select>
           </div>
         </div>
       </li>
