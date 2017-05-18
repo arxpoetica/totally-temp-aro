@@ -122,6 +122,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   })
 
+  function upWardStyle() {
+    return (feature, styles) => {
+      var isSelected = feature.getProperty("isSelected");
+      styles.strokeColor = isSelected ? 'green' : 'red';
+    }
+  }
+
   // Create a map layer for showing the "Upward route", i.e. the route from a given fiber
   // strand to the central office
   $scope.upwardRouteLayer = new MapLayer({
@@ -136,9 +143,29 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         zIndex: MapLayer.Z_INDEX_UPWARD_FIBER_STRANDS
       }
     },
+    declarativeStyles: upWardStyle(),
     threshold: 0,
     reload: 'always'
+  });
+
+  $scope.hoverLayer = new MapLayer({
+    name: name,
+    type: 'hover_route_layer',
+    short_name: 'U',
+    api_endpoint: '',
+    style_options: {
+      normal: {
+        strokeColor: 'green',
+        strokeWeight: 10,
+      }
+    },
+    threshold: 0,
+    reload: 'always',
+    zIndex: MapLayer.Z_INDEX_UPWARD_FIBER_STRANDS
+
   })
+
+
 
   var fiberGraphForPlan = fiberGraph
   // reload fiber graph when plan changes
@@ -164,26 +191,51 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('plan_cleared', (e, plan) => reloadFiberGraph())
   $rootScope.$on('route_planning_changed', (e, plan) => reloadFiberGraph())
 
-  // When the mouse moves out of a upward route, hide the upward routes layer
-  $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
-    if (args.feature.f.fiber_strands) {
-      // This means the mouseout is for a upward route
-      $scope.upwardRouteLayer.hide()
-    }
-  })
-
   // When we mouseover on a fiber strand, find the upward route from that strand and show it in the upward route layer
-  $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
-    var fiberStrandId = args.feature.f.id
+  $rootScope.$on('map_layer_clicked_feature', (event, args) => {
+    var feature2 = args.feature;
+    var fiberStrandId = feature2.f.id
+
+    var isupwardRoute = feature2.getProperty("isUpwardRoute");
+    var isSelected = feature2.getProperty("isSelected");
+
     if (fiberStrandId) {
-      var upwardRouteFeatures = fiberGraphForPlan.getSuccessorEdgeFeatures(fiberStrandId)
-      $scope.upwardRouteLayer.clearData()
+      var upwardRouteFeatures = fiberGraphForPlan.getBranchFromEdge(fiberStrandId)
+      clearUpwardPath();
+
       upwardRouteFeatures.forEach((feature) => {
-        $scope.upwardRouteLayer.data_layer.addGeoJson({ type: 'Feature', geometry: JSON.parse(feature)})
+        feature.properties.isSelected = fiberStrandId == feature.properties.id;
+        $scope.upwardRouteLayer.data_layer.addGeoJson(feature)
       })
       $scope.upwardRouteLayer.show()
     }
+
   })
+
+  function clearUpwardPath() {
+    $scope.upwardRouteLayer.clearData();
+    $scope.upwardRouteLayer.hide()
+  }
+
+  $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
+    var feature2 = args.feature;
+    var fiberStrandId = feature2.f.id
+
+    $scope.hoverLayer.clearData();
+
+    var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
+    $scope.hoverLayer.data_layer.addGeoJson(feature)
+    $scope.hoverLayer.show();
+  })
+
+  $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
+    var isupwardRoute = args.feature.getProperty("isUpwardRoute");
+    if (isupwardRoute) {
+      // This means the mouseout is for a upward route
+      $scope.hoverLayer.clearData();
+    }
+  })
+
 
   const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {
@@ -674,3 +726,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reloadDatasources();
   })
 }])
+
+function DivPixelOverlay(map) {
+  this.setMap(map);
+}
+DivPixelOverlay.prototype = new google.maps.OverlayView();
+DivPixelOverlay.prototype.onAdd = function()    { /* Nothing to add */    };
+DivPixelOverlay.prototype.onRemove = function() { /* Nothing to remove */ };
+DivPixelOverlay.prototype.draw = function()     { /* Nothing to draw */   };
+DivPixelOverlay.prototype.fromPixelToLatLng = function(x, y) {
+  var offset = divOffset(map.getDiv());
+  return this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(x - offset.x, y - offset.y));
+}

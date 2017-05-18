@@ -12,18 +12,23 @@ app.factory('fiberGraph', () => {
     }
 
     // Adds an edge that points in to this node
-    addInEdge(inEdge) {
+    addInEdges(inEdge) {
       this._inEdges.push(inEdge)
     }
 
     // Adds an edge that points out of this node
-    addOutEdge(outEdge) {
+    addOutEdges(outEdge) {
       this._outEdges.push(outEdge)
     }
 
     // Gets the edges that point out of this node
     getOutEdges() {
       return this._outEdges
+    }
+
+    // Gets the edges that point towards  this node
+    getInEdges() {
+      return this._inEdges
     }
   }
 
@@ -33,12 +38,27 @@ app.factory('fiberGraph', () => {
       this._edgeId = edgeId
       this._fromNode = fromNode
       this._toNode = toNode
-      this._feature = feature
+      this._feature = { type: 'Feature', geometry: JSON.parse(feature)};
+
+      this._feature.properties = {
+        isUpwardRoute : true,
+        id: this._edgeId
+      }
+
     }
 
     // Returns the 'to' node for this edge
     getToNode() {
       return this._toNode
+    }
+
+    // Returns the 'from' node for this edge
+    getFromNode() {
+      return this._fromNode
+    }
+
+    getEdgeId(){
+      return this._edgeId;
     }
 
     // Returns the google maps feature object associated with this edge
@@ -78,8 +98,8 @@ app.factory('fiberGraph', () => {
       this.addNode(toNodeId)
       if (!this._edges[edgeId]) {
         this._edges[edgeId] = new Edge(edgeId, this._nodes[fromNodeId], this._nodes[toNodeId], feature)
-        this._nodes[fromNodeId].addOutEdge(this._edges[edgeId])
-        this._nodes[toNodeId].addInEdge(this._edges[edgeId])
+        this._nodes[fromNodeId].addOutEdges(this._edges[edgeId])
+        this._nodes[toNodeId].addInEdges(this._edges[edgeId])
       }
     }
   }
@@ -102,32 +122,71 @@ app.factory('fiberGraph', () => {
       this._graph.addEdge(edgeId, fromNodeId, toNodeId, feature)
     }
 
-    // Given an edgeId, find the successor edges that are connected to it, and then returns the 
-    // features associated with those successor edges. Used to find a list of all edges that 
+    // Given an edgeId, find the successor edges that are connected to it, and then returns the
+    // features associated with those successor edges. Used to find a list of all edges that
     // connect a given edgeId to the central office.
     // Assumes that there is exactly one edge between any two nodes
-    getSuccessorEdgeFeatures(edgeId) {
+    getAncestorEdgeFeatures(edgeId) {
       var edgeForFiber = this._graph.edge(edgeId)
       if (!edgeForFiber) {
         return []
       }
       var successorEdgeFeatures = [edgeForFiber.getFeature()]
       var startNode = edgeForFiber.getToNode()
-      var iLoop = 0, maxLoops = this._graph.getNumEdges()
-      while (startNode && ++iLoop <= maxLoops) {  // Make sure we do not get into an infinite loop
-        var outEdges = startNode.getOutEdges()
-        if (outEdges.length > 1) {
-          console.log('Multiple outEdges for node')
-          break
-        }
-        if (outEdges.length === 0) {
-          break // We are done here...
-        }
-        var outgoingEdge = outEdges[0]
-        successorEdgeFeatures.push(outgoingEdge.getFeature())
-        startNode = outgoingEdge.getToNode()
+
+      return this.walkThroughAncestorsFrom(startNode , successorEdgeFeatures);
+    }
+
+    walkThroughAncestorsFrom(node , features){
+      var outEdges = node.getOutEdges();
+      if(outEdges.length == 0){
+        return features;
       }
-      return successorEdgeFeatures
+      outEdges.map((outEdge) => {
+        features[outEdge.getEdgeId()] = outEdge.getFeature();
+        this.walkThroughAncestorsFrom(outEdge.getToNode() , features);
+      })
+
+      return features;
+    }
+
+
+    // Given an edgeId, find the decendant edges that are connected to it, and then returns the
+    // features associated with those decendant edges. Used to find a list of all edges that
+    getDecendantEdgeFeatures(edgeId) {
+      var edgeForFiber = this._graph.edge(edgeId)
+      if (!edgeForFiber) {
+        return []
+      }
+      var successorEdgeFeatures = [edgeForFiber.getFeature()]
+      var startNode = edgeForFiber.getFromNode()
+
+      return this.walkThroughDecendentsFrom(startNode , successorEdgeFeatures);
+    }
+
+    walkThroughDecendentsFrom(node , features){
+      var InEdges = node.getInEdges();
+      if(InEdges.length == 0){
+        return features;
+      }
+      InEdges.map((inEdge) => {
+        features[inEdge.getEdgeId()] = inEdge.getFeature();
+        this.walkThroughDecendentsFrom(inEdge.getFromNode() , features);
+      })
+
+      return features;
+    }
+
+
+    getBranchFromEdge(edgeId){
+        var ans =  this.getAncestorEdgeFeatures(edgeId);
+        var desc = this.getDecendantEdgeFeatures(edgeId);
+
+       return ans.concat(desc);
+    }
+
+    getEdge( edgeId ){
+      return this._graph.edge(edgeId)
     }
   }
 
