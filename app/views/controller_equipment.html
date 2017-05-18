@@ -114,7 +114,7 @@
                              close-on-select="true"
                              on-select="changeSelectedFiberDatasource($item , $model)"
                              on-remove="removeSelectedFiberDatasource($item , $model)">
-                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.dataSourceId}}]</ui-select-match>
+                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.libraryId}}]</ui-select-match>
                     <ui-select-choices class="ui-select-width-250" repeat="datasource in remainingDatasources">
                       <div>{{datasource.name}}</div>
                     </ui-select-choices>
