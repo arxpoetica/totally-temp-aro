@@ -555,23 +555,22 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     fiberLayers = []
 
     $http.get('/user_fiber/list').then((response) => {
+      $scope.remainingDatasources = []
       response.data.map(function (ds) {
         $scope.remainingDatasources.push(ds);
       })
+      //load existing fibers to fiberLayer
+      $scope.existingFibers.map(function (fib) {
+        $scope.remainingDatasources.push({
+          libraryId : 1,  // Existing fiber always has an ID of 1
+          name : fib.name
+        })
+        fiberLayers[fib.id] = fib;
+      })
+
       response.data.forEach(initDatasource)
       updateOptimizationFiber()
     })
-
-    //load existing fibers to fiberLayer
-    $scope.existingFibers.map(function (fib) {
-       $scope.remainingDatasources.push({
-         dataSourceId : fib.id,
-         name : fib.name
-       })
-
-      fiberLayers[fib.id] = fib;
-    })
-
   }
 
   function initDatasource (datasource) {
@@ -640,7 +639,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function updateOptimizationFiber () {
     var ids = _.pluck($scope.fibers , 'systemId')
     // For now, save fiber source ids in state.js. Later we should store everything in state.js
-    state.optimizationOptions.fiberSourceIds = $scope.selectedExistingFiberIds.concat(ids)
+    state.optimizationOptions.fiberSourceIds = _.pluck($scope.fibers, 'libraryId').sort()
   }
 
   $scope.selectedExistingFiberIds = []
