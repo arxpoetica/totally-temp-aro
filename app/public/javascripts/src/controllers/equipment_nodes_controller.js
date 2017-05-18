@@ -10,7 +10,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
   $scope.planState = state;
   $scope.serviceLayers = []
-
+  $scope.existingFibers=[];
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('network_nodes')) {
       $scope.serviceLayers.forEach((layer) => {
@@ -159,6 +159,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         })
     }
   }
+
+  var reloadFiberStyles = ()=>{
+    $scope.serviceLayers.forEach((layer) => {
+      layer.routeLayer.revertStyles();
+    })
+  }
+
   // Subscribe to different plan events
   $rootScope.$on('plan_selected', (e, plan) => reloadFiberGraph())
   $rootScope.$on('plan_cleared', (e, plan) => reloadFiberGraph())
@@ -166,7 +173,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   // When the mouse moves out of a upward route, hide the upward routes layer
   $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
-    if (args.feature.f.fiber_strands) {
+    var isupwardRoute = args.feature.getProperty("isUpwardRoute");
+    if (isupwardRoute) {
       // This means the mouseout is for a upward route
       $scope.upwardRouteLayer.hide()
     }
@@ -175,11 +183,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // When we mouseover on a fiber strand, find the upward route from that strand and show it in the upward route layer
   $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
     var fiberStrandId = args.feature.f.id
+    var feature = args.feature;
+
     if (fiberStrandId) {
       var upwardRouteFeatures = fiberGraphForPlan.getSuccessorEdgeFeatures(fiberStrandId)
       $scope.upwardRouteLayer.clearData()
       upwardRouteFeatures.forEach((feature) => {
-        $scope.upwardRouteLayer.data_layer.addGeoJson({ type: 'Feature', geometry: JSON.parse(feature)})
+        var featureA = JSON.parse(feature);
+        $scope.upwardRouteLayer.data_layer.addGeoJson({ type: 'Feature', geometry: featureA, properties : {isUpwardRoute : true} })
       })
       $scope.upwardRouteLayer.show()
     }
@@ -235,7 +246,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       declarativeStyles: (feature, styles) => {
         var zoom  = map.getZoom();
         var pos = feature.getGeometry("coordinates").get("Point")
-        //https://gis.stackexchange.com/questions/108763/how-to-calculate-pixels-per-meter-ratio-according-to-google-or-bing-map-zoom-le
         var scale = getScale(pos ,zoom)
         var name = feature.getProperty('name')
         var iconW = 30 / scale;
@@ -257,7 +267,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
 
     function getScale(latLng,zoom){
-      return 156543.03392 * Math.cos(latLng.lat() * Math.PI / 180) / Math.pow(2, zoom)
+        //https://gis.stackexchange.com/questions/108763/how-to-calculate-pixels-per-meter-ratio-according-to-google-or-bing-map-zoom-le
+        return 156543.03392 * Math.cos(latLng.lat() * Math.PI / 180) / Math.pow(2, zoom)
     }
 
     networkNodesLayer.flat_color = true
@@ -501,7 +512,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       styles.zIndex = MapLayer.Z_INDEX_FIBER_STRANDS
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
-        styles.strokeWeight = 4
+        styles.strokeWeight = calcFiberScale(feature);
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
@@ -518,6 +529,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           styles.visible = false
         }
       }
+    }
+  }
+
+  function calcFiberScale(feature) {
+    var currOption = state.selected_fiber_option;
+    if(currOption.id == 1){
+      return 4
+    }else {
+      var scaleVal = feature.f[currOption.field];
+      return scaleVal == 1 ? 0.5 * currOption.multiplier :  Math.log(scaleVal) * currOption.multiplier;
     }
   }
 
@@ -672,5 +693,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.$on("map_loaded" , ()=>{
     reloadDatasources();
+  })
+
+  $scope.$on("map_setting_changed" , (e , settings)=>{
+     if(settings.type == "fiber_option"){
+       reloadFiberStyles();
+     }
   })
 }])
