@@ -2,7 +2,7 @@
  * Created by saneesh on 19/5/17.
  */
 
-app.directive("fiberStrandInfo" , function ($rootScope) {
+app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
     return {
         templateUrl : '/javascripts/src/directives/views/modal_fiber_segment_info.html',
         restrict: 'E',
@@ -39,7 +39,7 @@ app.directive("fiberStrandInfo" , function ($rootScope) {
                 });
                 $scope.fieldItems.push({
                     key : "Total Spend Supported",
-                    value : feature2.getProperty("total_revenue")
+                    value : feature2.getProperty("total_revenue")+config.currency_symbol,
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share",
@@ -47,10 +47,14 @@ app.directive("fiberStrandInfo" , function ($rootScope) {
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share Spend Supported",
-                    value : feature2.getProperty("fairshare_demand").toFixed(1)
+                    value : feature2.getProperty("fairshare_demand").toFixed(1)+config.currency_symbol,
                 });
                 $scope.$apply();
             }
+
+            $scope.filter = function(value, filter) {
+                return $filter(filter)(value);
+            };
 
         }
     }

@@ -125,7 +125,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function upWardStyle() {
     return (feature, styles) => {
       var isSelected = feature.getProperty("isSelected");
-      styles.strokeColor = isSelected ? 'green' : 'red';
+      styles.strokeColor = isSelected ? 'green' : '#419df4';
     }
   }
 
@@ -179,7 +179,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
             var links = response.data
             links.forEach((link) => {
               // Add an edge with id, from_node_id, to_node_id and with the actual feature object
-              fiberGraphForPlan.addEdge(link.id, link.from_node_id, link.to_node_id, link.geo_json)
+              fiberGraphForPlan.addEdge(link.id, link.from_node_id, link.to_node_id, link.geo_json ,link.name)
             })
           }
         })
@@ -283,6 +283,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.routeLayer = routeLayer
 
     layer.changedFiberVisibility = () => {
+      state.showFeederFiber = layer.showFeederFiber
+      state.showDistributionFiber = layer.showDistributionFiber
+      state.showBackhaulFiber = layer.showBackhaulFiber
+
       routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }

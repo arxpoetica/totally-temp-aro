@@ -1,7 +1,7 @@
 /**
  * Holds a graph of the fiber routes displayed in the map (alongwith google maps feature objects)
  */
-app.factory('fiberGraph', () => {
+app.factory('fiberGraph', (state) => {
 
   // Class to represent a node in a graph
   class Node {
@@ -34,11 +34,12 @@ app.factory('fiberGraph', () => {
 
   // Class to represent an edge in a graph
   class Edge {
-    constructor(edgeId, fromNode, toNode, feature) {
+    constructor(edgeId, fromNode, toNode, feature,type) {
       this._edgeId = edgeId
       this._fromNode = fromNode
       this._toNode = toNode
       this._feature = { type: 'Feature', geometry: JSON.parse(feature)};
+      this._type = type;
 
       this._feature.properties = {
         isUpwardRoute : true,
@@ -65,7 +66,13 @@ app.factory('fiberGraph', () => {
     getFeature() {
       return this._feature
     }
+
+    //get type of link "feeder" "distribution
+    getType() {
+      return this._type;
+    }
   }
+
 
   // Class to represent the graph
   class Graph {
@@ -93,11 +100,11 @@ app.factory('fiberGraph', () => {
 
     // Adds an edge with the given id between two nodes with the given id, and saves the feature object in the edge.
     // If the nodes do not exist, they are created
-    addEdge(edgeId, fromNodeId, toNodeId, feature) {
+    addEdge(edgeId, fromNodeId, toNodeId, feature , type) {
       this.addNode(fromNodeId)
       this.addNode(toNodeId)
       if (!this._edges[edgeId]) {
-        this._edges[edgeId] = new Edge(edgeId, this._nodes[fromNodeId], this._nodes[toNodeId], feature)
+        this._edges[edgeId] = new Edge(edgeId, this._nodes[fromNodeId], this._nodes[toNodeId], feature , type)
         this._nodes[fromNodeId].addOutEdges(this._edges[edgeId])
         this._nodes[toNodeId].addInEdges(this._edges[edgeId])
       }
@@ -118,8 +125,8 @@ app.factory('fiberGraph', () => {
     }
 
     // Adds an edge to the fiber graph
-    addEdge(edgeId, fromNodeId, toNodeId, feature) {
-      this._graph.addEdge(edgeId, fromNodeId, toNodeId, feature)
+    addEdge(edgeId, fromNodeId, toNodeId, feature , type) {
+      this._graph.addEdge(edgeId, fromNodeId, toNodeId, feature , type)
     }
 
     // Given an edgeId, find the successor edges that are connected to it, and then returns the
@@ -143,7 +150,13 @@ app.factory('fiberGraph', () => {
         return features;
       }
       outEdges.map((outEdge) => {
-        features[outEdge.getEdgeId()] = outEdge.getFeature();
+        if(outEdge.getType() == "feeder" && state.showFeederFiber) {
+          features[outEdge.getEdgeId()] = outEdge.getFeature();
+        }
+        if(outEdge.getType() == "distribution" && state.showDistributionFiber) {
+          features[outEdge.getEdgeId()] = outEdge.getFeature();
+        }
+
         this.walkThroughAncestorsFrom(outEdge.getToNode() , features);
       })
 
@@ -158,6 +171,7 @@ app.factory('fiberGraph', () => {
       if (!edgeForFiber) {
         return []
       }
+
       var successorEdgeFeatures = [edgeForFiber.getFeature()]
       var startNode = edgeForFiber.getFromNode()
 
@@ -170,7 +184,13 @@ app.factory('fiberGraph', () => {
         return features;
       }
       InEdges.map((inEdge) => {
-        features[inEdge.getEdgeId()] = inEdge.getFeature();
+        if(inEdge.getType() == "feeder" && state.showFeederFiber) {
+          features[inEdge.getEdgeId()] = inEdge.getFeature();
+        }
+        if(inEdge.getType() == "distribution" && state.showDistributionFiber) {
+          features[inEdge.getEdgeId()] = inEdge.getFeature();
+        }
+
         this.walkThroughDecendentsFrom(inEdge.getFromNode() , features);
       })
 
