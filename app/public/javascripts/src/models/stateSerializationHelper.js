@@ -110,7 +110,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addRegionsToBody = (state, optimization, regions, postBody) => {
     var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined', 'wirecenter', 'cran', 'directional_facility']
     postBody.processLayers = []
-    postBody.geographies = regions.selectedRegions.map((i) => {
+    regions.selectedRegions.map((i) => {
       var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
       // geography information may be too large so we avoid to send it for known region types
       if (standardTypes.indexOf(i.type) === -1) {

@@ -18,20 +18,21 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   
   $scope.runExpertMode = () => {
     $rootScope.isNetworkPlanning = true
-    $('#selected_expert_mode').modal('show')
-    $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
+    $rootScope.$broadcast('show_expert_mode_modal')
   }
   
-  $rootScope.$on('expert-mode-plan-edited', (e, optimizationBody, isNetworkPlanning) => {
+  $rootScope.$on('expert-mode-plan-edited', (e, expertModeChanges, geographiesJSON, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-      $scope.run(optimizationBody)
+      $scope.run(JSON.parse(expertModeChanges), JSON.parse(geographiesJSON))
       $('#selected_expert_mode').modal('hide')
 	  }	  
   })
 
-  $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, isNetworkPlanning) => {
+  $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, geographiesJSON, isNetworkPlanning) => {
 	  if (isNetworkPlanning) {
-		  state.loadOptimizationOptionsFromJSON(expertModeChanges)
+      var optimizationOptions = JSON.parse(expertModeChanges)
+      optimizationOptions.geographies = JSON.parse(geographiesJSON)
+      state.loadOptimizationOptionsFromJSON(JSON.stringify(optimizationOptions))
 		  $('#selected_expert_mode').modal('hide')  
 	  }
   })
@@ -85,14 +86,30 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     })
   }
 
-  $scope.run = (optimizationBody) => {
+  $scope.getSelectedGeographies = () => {
+		var selectedRegions = []
+		Object.keys(regions.selectedRegions).forEach((key) => {
+			var regionObj = regions.selectedRegions[key]
+			selectedRegions.push({
+				id: regionObj.id,
+				name: regionObj.name,
+				type: regionObj.type,
+				layerId: regionObj.layerId
+			})
+		})
+    return selectedRegions
+  }
+
+  $scope.run = (optimizationBody, geographies) => {
     // Check if at least one data source is selected
     var isAnyDataSourceSelected = state.selectedDataSources.length > 0
 	  // A location is selected if the "checked" property is true
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      canceler = optimization.optimize($scope.plan, optimizationBody)
+      var optimizationBodyWithGeographies = JSON.parse(JSON.stringify(optimizationBody))
+      optimizationBodyWithGeographies.geographies = geographies
+      canceler = optimization.optimize($scope.plan, optimizationBodyWithGeographies)
     } else {
       swal({
         title: 'Incomplete input',

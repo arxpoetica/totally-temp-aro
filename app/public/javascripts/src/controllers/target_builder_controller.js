@@ -63,14 +63,14 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     $('#selected_expert_mode').modal('show')
     $('#expert_mode_body').val(JSON.stringify(state.getOptimizationBody(), undefined, 4))
   }
-  $rootScope.$on('expert-mode-plan-edited', (e, optimizationBody, isNetworkPlanning) => {
+  $rootScope.$on('expert-mode-plan-edited', (e, optimizationBody, geographies, isNetworkPlanning) => {
     if(!isNetworkPlanning) {
       $scope.run(optimizationBody)
       $('#selected_expert_mode').modal('hide')
     }	
   })
   
-  $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, isNetworkPlanning) => {
+  $rootScope.$on('expert-mode-plan-save', (e, expertModeChanges, geographies, isNetworkPlanning) => {
     if (!isNetworkPlanning) {
       state.loadOptimizationOptionsFromJSON(expertModeChanges)
       $('#selected_expert_mode').modal('hide')  

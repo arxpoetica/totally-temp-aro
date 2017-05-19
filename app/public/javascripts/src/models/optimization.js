@@ -90,6 +90,11 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
     // Add the geographies to the plan
     function addGeographiesToPlan(planId, geographies) {
+      if (!geographies || geographies.length === 0) {
+        // No geographies to select. For example, if this is called from target builder.
+        return Promise.resolve()
+      }
+
       var url = '/network_plan/' + planId + '/addGeographies'
 
       // Split geographies into batches so that our POST body does not become too big

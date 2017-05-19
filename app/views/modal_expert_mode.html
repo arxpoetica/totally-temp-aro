@@ -6,8 +6,18 @@
         <h4 class="modal-title">Expert Mode</h4>
       </div>
       <div class="modal-body">
-      	<textarea rows="20" cols="100" id="expert_mode_body" style="font-family: 'Courier'" spellcheck="false"> 
-        </textarea>
+        <div class="row">
+          <div class="col-md-6">
+            <h4>Optimization Inputs</h4>
+            <textarea rows="20" id="expert_mode_body" style="font-family: 'Courier'; width:100%" spellcheck="false"> 
+            </textarea>
+          </div>
+          <div class="col-md-6">
+            <h4>Optimization Geographies</h4>
+            <textarea rows="20" style="font-family: 'Courier'; width:100%" spellcheck="false" ng-model="geographies">
+            </textarea>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
       	<button class="btn btn-primary" ng-click="saveExpertmode()">Save</button>

@@ -216,7 +216,7 @@
       </p>
       <% } %>
       <p class="pull-right">
-        <button class="btn btn-primary" ng-hide="calculating" ng-click="run(state.getOptimizationBody())">Get Results</button>
+        <button class="btn btn-primary" ng-hide="calculating" ng-click="run(state.getOptimizationBody(), state.optimizationOptions.geographies)">Get Results</button>
         <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
       </p>
     </div>
