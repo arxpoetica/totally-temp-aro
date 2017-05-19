@@ -157,12 +157,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       normal: {
         strokeColor: 'green',
         strokeWeight: 10,
+        zIndex: 98
       }
     },
     threshold: 0,
-    reload: 'always',
-    zIndex: 5
-
+    reload: 'always'
   })
 
 
@@ -215,9 +214,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         $scope.upwardRouteLayer.data_layer.addGeoJson(feature)
       })
       $scope.upwardRouteLayer.show()
+      $rootScope.$broadcast("fiber_strand_selected" , feature2);
     }
-
   })
+
+
+
 
   function clearUpwardPath() {
     $scope.upwardRouteLayer.clearData();
@@ -575,13 +577,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       styles.zIndex = MapLayer.Z_INDEX_FIBER_STRANDS
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
-        styles.strokeWeight = calcFiberScale(feature);
+        styles.strokeWeight = calcFiberScale(feature , "feeder" , 4);
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
       } else if (type === 'distribution') {
         styles.strokeColor = 'red'
-        styles.strokeWeight = 2
+        styles.strokeWeight = calcFiberScale(feature , "dist" , 2);
         if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
@@ -595,10 +597,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
   }
 
-  function calcFiberScale(feature) {
+  function calcFiberScale(feature , fiber_type , defscale) {
     var currOption = state.selected_fiber_option;
     if(currOption.id == 1){
-      return 4
+      return defscale
     }else {
       var scaleVal = feature.f[currOption.field];
       return scaleVal == 1 ? 0.5 * currOption.multiplier :  Math.log(scaleVal) * currOption.multiplier;

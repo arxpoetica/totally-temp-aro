@@ -1,0 +1,17 @@
+<div class="panel panel-primary panel-fiber-details" ng-if="fieldItems.length > 0">
+    <div class="panel-title">
+        <div class="clearfix">
+            <div class="pull-left">
+                Fiber Segment Details
+            </div>
+            <div class="pull-right">
+                x
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+       <div class="item" ng-repeat="item in fieldItems">
+            <div  class="item-label" ng-bind="item.key"></div><div  class="item-value" ng-bind="item.value"></div>
+       </div>
+    </div>
+</div>

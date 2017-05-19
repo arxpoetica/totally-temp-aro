@@ -11,7 +11,7 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
       id : 2,
       name : "Fiber Strand Count",
       field : "fiber_strands",
-      multiplier : 6
+      multiplier : 2.1
     },
     {
       id : 3,
