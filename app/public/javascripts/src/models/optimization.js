@@ -91,7 +91,18 @@ app.service('optimization', ($rootScope, $http, $q) => {
     // Add the geographies to the plan
     function addGeographiesToPlan(planId, geographies) {
       var url = '/network_plan/' + planId + '/addGeographies'
-      return $http.post(url, { geographies: geographies })
+
+      // Split geographies into batches so that our POST body does not become too big
+      const MAX_GEOGRAPHIES_PER_REQUEST = 100
+      var copyOfGeographies = geographies.slice()
+      var addGeographiesPromises = []
+      while (copyOfGeographies.length > 0) {
+        var chunkOfGeographies = copyOfGeographies.splice(0, MAX_GEOGRAPHIES_PER_REQUEST)
+        addGeographiesPromises.push($http.post(url, { geographies: chunkOfGeographies }))
+      }
+
+      // Return a promise that resolves when all geographies have been added
+      return Promise.all(addGeographiesPromises)
     }
 
     function callOptimizationEndpoint(planId) {
