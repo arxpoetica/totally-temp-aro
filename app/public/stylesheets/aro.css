@@ -1047,3 +1047,13 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .map_settings_container .settings_items li > .settings_item .settings_object{
   flex: 0;
 }
+
+/*infobox*/
+.infobox {
+  position: absolute;
+  border: 1px solid #c9c9c9;
+  background: white;
+  padding: 3px;
+  z-index: 9999;
+  border-radius: 5px;
+}

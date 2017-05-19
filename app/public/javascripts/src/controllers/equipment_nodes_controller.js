@@ -161,7 +161,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     },
     threshold: 0,
     reload: 'always',
-    zIndex: MapLayer.Z_INDEX_UPWARD_FIBER_STRANDS
+    zIndex: 5
 
   })
 
@@ -230,17 +230,29 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     $scope.hoverLayer.clearData();
 
-    var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
-    $scope.hoverLayer.data_layer.addGeoJson(feature)
-    $scope.hoverLayer.show();
+    if(fiberStrandId){
+      var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
+      $scope.hoverLayer.data_layer.addGeoJson(feature)
+      $scope.hoverLayer.show();
+    }
+
+    var points = fromLatLngToPoint(args.latLng);
+    $(".infobox").css("top" , points.y + 70).css("left" , points.x).text(feature2.f.fiber_strands);
+    $(".infobox").show();
   })
 
+  function fromLatLngToPoint(latLng) {
+    var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+    var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+    var scale = Math.pow(2, map.getZoom());
+    var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+    return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+  }
+
+
   $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
-    var isupwardRoute = args.feature.getProperty("isUpwardRoute");
-    if (isupwardRoute) {
-      // This means the mouseout is for a upward route
-      $scope.hoverLayer.clearData();
-    }
+    $scope.hoverLayer.clearData();
+    $(".infobox").hide();
   })
 
 
@@ -442,6 +454,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       layer.routeLayer.clearData()
       layer.fixedWirelessCoverage.clearData()
     })
+
+    clearUpwardPath();
+    $scope.hoverLayer.clearData();
   })
 
   $scope.save_nodes = () => {
@@ -623,6 +638,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     fiberLayers = []
 
+    clearUpwardPath();
+    $scope.hoverLayer.clearData();
+
     $http.get('/user_fiber/list').then((response) => {
       $scope.remainingDatasources = []
       response.data.map(function (ds) {
@@ -749,15 +767,3 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
      }
   })
 }])
-
-function DivPixelOverlay(map) {
-  this.setMap(map);
-}
-DivPixelOverlay.prototype = new google.maps.OverlayView();
-DivPixelOverlay.prototype.onAdd = function()    { /* Nothing to add */    };
-DivPixelOverlay.prototype.onRemove = function() { /* Nothing to remove */ };
-DivPixelOverlay.prototype.draw = function()     { /* Nothing to draw */   };
-DivPixelOverlay.prototype.fromPixelToLatLng = function(x, y) {
-  var offset = divOffset(map.getDiv());
-  return this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(x - offset.x, y - offset.y));
-}
