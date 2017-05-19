@@ -536,6 +536,15 @@ module.exports = class NetworkPlan {
       params)
   }
 
+  // Clears all geography selection for a given plan id
+  static clearGeographySelection(plan_id) {
+    return Promise.all([
+      database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
+      database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
+      database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
+    ])
+  }
+
   static editRoute (plan_id, changes) {
     return Promise.resolve()
       .then(() => (

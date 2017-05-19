@@ -55,6 +55,14 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  // Clears the geography selection for an existing network plan
+  api.post('/network_plan/:plan_id/clearGeographySelection', check_owner_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    models.NetworkPlan.clearGeographySelection(plan_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Edits the route of an existing network plan
   api.post('/network_plan/:plan_id/edit', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id

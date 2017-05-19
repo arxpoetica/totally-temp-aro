@@ -83,16 +83,26 @@ app.service('optimization', ($rootScope, $http, $q) => {
       changes.locationTypes = _.uniq((changes.locationTypes || []))  //.concat(['celltower']))
     }
 
-    function run (hideProgressBar) {
-      var url = '/network_plan/' + plan.id + '/edit'
+    function clearGeographySelection(planId) {
+      return $http.post('/network_plan/' + planId + '/clearGeographySelection')
+    }
+
+    function callOptimizationEndpoint(planId) {
+      var url = '/network_plan/' + planId + '/edit'
       var options = {
         url: url,
         method: 'post',
-        // saving_plan: !hideProgressBar && !changes.lazy,
         data: changes,
         timeout: canceler.promise
       }
-      $http(options)
+      return $http(options)
+    }
+
+    function run (hideProgressBar) {
+
+      // First clear any geography selections
+      clearGeographySelection(plan.id)
+        .then(callOptimizationEndpoint.bind(null, plan.id))
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
             if (plan) {
