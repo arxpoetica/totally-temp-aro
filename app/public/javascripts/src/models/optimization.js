@@ -74,7 +74,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
     $rootScope.$broadcast('optimization_started_polling')
   }
 
-  optimization.optimize = (plan, changes, success, error) => {
+  optimization.optimize = (plan, changes, geographies, success, error) => {
     var canceler = $q.defer()
 
     changes.entityDataSources = optimization.datasources
@@ -83,16 +83,50 @@ app.service('optimization', ($rootScope, $http, $q) => {
       changes.locationTypes = _.uniq((changes.locationTypes || []))  //.concat(['celltower']))
     }
 
-    function run (hideProgressBar) {
-      var url = '/network_plan/' + plan.id + '/edit'
+    // Clear the geography selection from the plan
+    function clearGeographySelection(planId) {
+      return $http.post('/network_plan/' + planId + '/clearGeographySelection')
+    }
+
+    // Add the geographies to the plan
+    function addGeographiesToPlan(planId, geographies) {
+      if (!geographies || geographies.length === 0) {
+        // No geographies to select. For example, if this is called from target builder.
+        return Promise.resolve()
+      }
+
+      var url = '/network_plan/' + planId + '/addGeographies'
+
+      // Split geographies into batches so that our POST body does not become too big
+      const MAX_GEOGRAPHIES_PER_REQUEST = 100
+      var copyOfGeographies = geographies.slice()
+      var addGeographiesPromises = []
+      while (copyOfGeographies.length > 0) {
+        var chunkOfGeographies = copyOfGeographies.splice(0, MAX_GEOGRAPHIES_PER_REQUEST)
+        addGeographiesPromises.push($http.post(url, { geographies: chunkOfGeographies }))
+      }
+
+      // Return a promise that resolves when all geographies have been added
+      return Promise.all(addGeographiesPromises)
+    }
+
+    function callOptimizationEndpoint(planId) {
+      var url = '/network_plan/' + planId + '/edit'
       var options = {
         url: url,
         method: 'post',
-        // saving_plan: !hideProgressBar && !changes.lazy,
         data: changes,
         timeout: canceler.promise
       }
-      $http(options)
+      return $http(options)
+    }
+
+    function run (hideProgressBar) {
+
+      // First clear any geography selections
+      clearGeographySelection(plan.id)
+        .then(addGeographiesToPlan.bind(null, plan.id, geographies))
+        .then(callOptimizationEndpoint.bind(null, plan.id))
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
             if (plan) {
