@@ -545,6 +545,87 @@ module.exports = class NetworkPlan {
     ])
   }
 
+  // Adds the specified geographies to the plan
+  static addGeographiesToPlan(plan_id, geographies) {
+
+    var promises = []
+    geographies.forEach((geography) => {
+      var type = geography.type
+      var id = geography.id
+      var params = [plan_id, geography.name, id, type, geography.layerId || null]
+      var queries = {
+        'census_blocks': '(SELECT geom FROM census_blocks WHERE gid=$3::bigint)',
+        'county_subdivisions': '(SELECT geom FROM cousub WHERE gid=$3::bigint)'
+      }
+      var isAnalysisLayer = cache.analysisLayers.find((layer) => layer.name === type)
+      var isServiceLayer = cache.serviceLayers.find((layer) => layer.name === type) || geography.layerId
+      var query
+      if (isAnalysisLayer) {
+        params.push(type)
+        query = `
+          (
+            SELECT geom
+            FROM client.analysis_area
+            JOIN client.analysis_layer
+              ON analysis_area.analysis_layer_id = analysis_layer.id
+            AND analysis_layer.name=$${params.length}
+            WHERE analysis_area.id=$3::bigint
+          )
+        `
+        promises.push(
+          database.execute(`
+            INSERT INTO client.selected_analysis_area (
+              plan_id, analysis_area_id
+            ) VALUES ($1, $2)
+          `, [plan_id, id])
+        )
+      } else if (isServiceLayer) {
+        if (type === 'user_defined') {
+          query = `
+            (
+              SELECT geom
+              FROM client.service_area
+              JOIN client.service_layer
+                ON service_area.service_layer_id = service_layer.id
+              AND service_layer.id=$5::bigint
+              WHERE service_area.id=$3::bigint
+            )
+          `
+        } else {
+          params.push(type)
+          query = `
+            (
+              SELECT geom
+              FROM client.service_area
+              JOIN client.service_layer
+                ON service_area.service_layer_id = service_layer.id
+              AND service_layer.name=$${params.length}
+              WHERE service_area.id=$3::bigint
+            )
+          `
+        }
+        promises.push(
+          database.execute(`
+            INSERT INTO client.selected_service_area (
+              plan_id, service_area_id
+            ) VALUES ($1, $2)
+          `, [plan_id, id])
+        )
+      } else if (geography.geog) {
+        params.push(JSON.stringify(geography.geog))
+        query = `ST_GeomFromGeoJSON($${params.length})`
+      } else {
+        query = queries[type]
+      }
+      promises.push(database.execute(`
+        INSERT INTO client.selected_regions (
+          plan_id, region_name, region_id, region_type, layer_id, geom
+        ) VALUES ($1, $2, $3, $4, $5, ${query})
+      `, params))
+    })
+    return Promise.all(promises)
+  }
+
   static editRoute (plan_id, changes) {
     return Promise.resolve()
       .then(() => (

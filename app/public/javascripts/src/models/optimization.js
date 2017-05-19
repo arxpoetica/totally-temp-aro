@@ -83,8 +83,15 @@ app.service('optimization', ($rootScope, $http, $q) => {
       changes.locationTypes = _.uniq((changes.locationTypes || []))  //.concat(['celltower']))
     }
 
+    // Clear the geography selection from the plan
     function clearGeographySelection(planId) {
       return $http.post('/network_plan/' + planId + '/clearGeographySelection')
+    }
+
+    // Add the geographies to the plan
+    function addGeographiesToPlan(planId, geographies) {
+      var url = '/network_plan/' + planId + '/addGeographies'
+      return $http.post(url, { geographies: geographies })
     }
 
     function callOptimizationEndpoint(planId) {
@@ -102,6 +109,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
       // First clear any geography selections
       clearGeographySelection(plan.id)
+        .then(addGeographiesToPlan.bind(null, plan.id, changes.geographies))
         .then(callOptimizationEndpoint.bind(null, plan.id))
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {

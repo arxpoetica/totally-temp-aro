@@ -63,6 +63,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  // Adds the specified geographies to an existing network plan
+  api.post('/network_plan/:plan_id/addGeographies', check_owner_permission, (request, response, next) => {
+    var plan_id = request.params.plan_id
+    var geographies = request.body.geographies
+    models.NetworkPlan.addGeographiesToPlan(plan_id, geographies)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   // Edits the route of an existing network plan
   api.post('/network_plan/:plan_id/edit', check_owner_permission, (request, response, next) => {
     var plan_id = request.params.plan_id
