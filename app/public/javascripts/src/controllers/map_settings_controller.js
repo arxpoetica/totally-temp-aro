@@ -10,13 +10,13 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
     {
       id : 2,
       name : "Fiber Strand Count",
-      field : "fstrand_count",
-      multiplier : 6
+      field : "fiber_strands",
+      multiplier : 2.1
     },
     {
       id : 3,
       name : "Atomic Unit Demand",
-      field : "aunits_count",
+      field : "atomic_units",
       multiplier: 1
     }
   ];

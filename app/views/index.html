@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="aro">
   <head>
-    <title><%= config.ui.title %></title>
+    <title ng-bind="appTitle"></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
@@ -331,6 +331,8 @@
 
     <div id="loader-wrapper"><div class="loader"></div></div>
     <div growl></div>
+    <div class="infobox" desc="shows fiber strand count">0</div>
+    <fiber-strand-info></fiber-strand-info>
   </body>
 
   <!-- Angular controllers and services -->
@@ -455,8 +457,9 @@
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
   <script src="javascripts/lib/directives/percentageInput.js"></script>
+  <script src="javascripts/lib/directives/dialogs.js"></script>
   <script src="javascripts/lib/factories/fiberGraph.js"></script>
-  <script>app.run(function(loader){})</script>
+  <script>app.run(function($rootScope,loader){$rootScope.appTitle = "<%= config.ui.title %>"})</script>
   <script>
     $(function () {
       var tooltips = $('#left-col [data-toggle="tooltip"]')

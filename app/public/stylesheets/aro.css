@@ -1047,3 +1047,42 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .map_settings_container .settings_items li > .settings_item .settings_object{
   flex: 0;
 }
+
+/*infobox*/
+.infobox {
+  position: absolute;
+  border: 1px solid #c9c9c9;
+  background: white;
+  padding: 3px;
+  z-index: 9999;
+  border-radius: 5px;
+  display: none;
+}
+
+.panel-fiber-details {
+  position: fixed;
+  top: 274px;
+  right: 9px;
+  z-index: 2000;
+  opacity: 0.8;
+  padding: 5px;
+  width: 280px;
+}
+
+.panel-fiber-details .panel-title {
+  border-bottom: 1px solid grey;
+}
+
+.panel-fiber-details .panel-body .item {
+  display: flex;
+  flex-direction: row;
+}
+
+.panel-fiber-details .panel-body .item-label {
+  flex: 1;
+}
+
+.panel-fiber-details .panel-body .item-value {
+  flex: 0;
+}
+

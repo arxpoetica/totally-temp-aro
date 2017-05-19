@@ -1,7 +1,7 @@
 /**
  * Holds a graph of the fiber routes displayed in the map (alongwith google maps feature objects)
  */
-app.factory('fiberGraph', () => {
+app.factory('fiberGraph', (state) => {
 
   // Class to represent a node in a graph
   class Node {
@@ -12,12 +12,12 @@ app.factory('fiberGraph', () => {
     }
 
     // Adds an edge that points in to this node
-    addInEdge(inEdge) {
+    addInEdges(inEdge) {
       this._inEdges.push(inEdge)
     }
 
     // Adds an edge that points out of this node
-    addOutEdge(outEdge) {
+    addOutEdges(outEdge) {
       this._outEdges.push(outEdge)
     }
 
@@ -25,15 +25,27 @@ app.factory('fiberGraph', () => {
     getOutEdges() {
       return this._outEdges
     }
+
+    // Gets the edges that point towards  this node
+    getInEdges() {
+      return this._inEdges
+    }
   }
 
   // Class to represent an edge in a graph
   class Edge {
-    constructor(edgeId, fromNode, toNode, feature) {
+    constructor(edgeId, fromNode, toNode, feature,type) {
       this._edgeId = edgeId
       this._fromNode = fromNode
       this._toNode = toNode
-      this._feature = feature
+      this._feature = { type: 'Feature', geometry: JSON.parse(feature)};
+      this._type = type;
+
+      this._feature.properties = {
+        isUpwardRoute : true,
+        id: this._edgeId
+      }
+
     }
 
     // Returns the 'to' node for this edge
@@ -41,11 +53,26 @@ app.factory('fiberGraph', () => {
       return this._toNode
     }
 
+    // Returns the 'from' node for this edge
+    getFromNode() {
+      return this._fromNode
+    }
+
+    getEdgeId(){
+      return this._edgeId;
+    }
+
     // Returns the google maps feature object associated with this edge
     getFeature() {
       return this._feature
     }
+
+    //get type of link "feeder" "distribution
+    getType() {
+      return this._type;
+    }
   }
+
 
   // Class to represent the graph
   class Graph {
@@ -73,13 +100,13 @@ app.factory('fiberGraph', () => {
 
     // Adds an edge with the given id between two nodes with the given id, and saves the feature object in the edge.
     // If the nodes do not exist, they are created
-    addEdge(edgeId, fromNodeId, toNodeId, feature) {
+    addEdge(edgeId, fromNodeId, toNodeId, feature , type) {
       this.addNode(fromNodeId)
       this.addNode(toNodeId)
       if (!this._edges[edgeId]) {
-        this._edges[edgeId] = new Edge(edgeId, this._nodes[fromNodeId], this._nodes[toNodeId], feature)
-        this._nodes[fromNodeId].addOutEdge(this._edges[edgeId])
-        this._nodes[toNodeId].addInEdge(this._edges[edgeId])
+        this._edges[edgeId] = new Edge(edgeId, this._nodes[fromNodeId], this._nodes[toNodeId], feature , type)
+        this._nodes[fromNodeId].addOutEdges(this._edges[edgeId])
+        this._nodes[toNodeId].addInEdges(this._edges[edgeId])
       }
     }
   }
@@ -98,36 +125,88 @@ app.factory('fiberGraph', () => {
     }
 
     // Adds an edge to the fiber graph
-    addEdge(edgeId, fromNodeId, toNodeId, feature) {
-      this._graph.addEdge(edgeId, fromNodeId, toNodeId, feature)
+    addEdge(edgeId, fromNodeId, toNodeId, feature , type) {
+      this._graph.addEdge(edgeId, fromNodeId, toNodeId, feature , type)
     }
 
-    // Given an edgeId, find the successor edges that are connected to it, and then returns the 
-    // features associated with those successor edges. Used to find a list of all edges that 
+    // Given an edgeId, find the successor edges that are connected to it, and then returns the
+    // features associated with those successor edges. Used to find a list of all edges that
     // connect a given edgeId to the central office.
     // Assumes that there is exactly one edge between any two nodes
-    getSuccessorEdgeFeatures(edgeId) {
+    getAncestorEdgeFeatures(edgeId) {
       var edgeForFiber = this._graph.edge(edgeId)
       if (!edgeForFiber) {
         return []
       }
       var successorEdgeFeatures = [edgeForFiber.getFeature()]
       var startNode = edgeForFiber.getToNode()
-      var iLoop = 0, maxLoops = this._graph.getNumEdges()
-      while (startNode && ++iLoop <= maxLoops) {  // Make sure we do not get into an infinite loop
-        var outEdges = startNode.getOutEdges()
-        if (outEdges.length > 1) {
-          console.log('Multiple outEdges for node')
-          break
-        }
-        if (outEdges.length === 0) {
-          break // We are done here...
-        }
-        var outgoingEdge = outEdges[0]
-        successorEdgeFeatures.push(outgoingEdge.getFeature())
-        startNode = outgoingEdge.getToNode()
+
+      return this.walkThroughAncestorsFrom(startNode , successorEdgeFeatures);
+    }
+
+    walkThroughAncestorsFrom(node , features){
+      var outEdges = node.getOutEdges();
+      if(outEdges.length == 0){
+        return features;
       }
-      return successorEdgeFeatures
+      outEdges.map((outEdge) => {
+        if(outEdge.getType() == "feeder" && state.showFeederFiber) {
+          features[outEdge.getEdgeId()] = outEdge.getFeature();
+        }
+        if(outEdge.getType() == "distribution" && state.showDistributionFiber) {
+          features[outEdge.getEdgeId()] = outEdge.getFeature();
+        }
+
+        this.walkThroughAncestorsFrom(outEdge.getToNode() , features);
+      })
+
+      return features;
+    }
+
+
+    // Given an edgeId, find the decendant edges that are connected to it, and then returns the
+    // features associated with those decendant edges. Used to find a list of all edges that
+    getDecendantEdgeFeatures(edgeId) {
+      var edgeForFiber = this._graph.edge(edgeId)
+      if (!edgeForFiber) {
+        return []
+      }
+
+      var successorEdgeFeatures = [edgeForFiber.getFeature()]
+      var startNode = edgeForFiber.getFromNode()
+
+      return this.walkThroughDecendentsFrom(startNode , successorEdgeFeatures);
+    }
+
+    walkThroughDecendentsFrom(node , features){
+      var InEdges = node.getInEdges();
+      if(InEdges.length == 0){
+        return features;
+      }
+      InEdges.map((inEdge) => {
+        if(inEdge.getType() == "feeder" && state.showFeederFiber) {
+          features[inEdge.getEdgeId()] = inEdge.getFeature();
+        }
+        if(inEdge.getType() == "distribution" && state.showDistributionFiber) {
+          features[inEdge.getEdgeId()] = inEdge.getFeature();
+        }
+
+        this.walkThroughDecendentsFrom(inEdge.getFromNode() , features);
+      })
+
+      return features;
+    }
+
+
+    getBranchFromEdge(edgeId){
+        var ans =  this.getAncestorEdgeFeatures(edgeId);
+        var desc = this.getDecendantEdgeFeatures(edgeId);
+
+       return ans.concat(desc);
+    }
+
+    getEdge( edgeId ){
+      return this._graph.edge(edgeId)
     }
   }
 

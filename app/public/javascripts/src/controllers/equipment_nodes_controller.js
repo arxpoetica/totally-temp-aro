@@ -122,6 +122,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   })
 
+  function upWardStyle() {
+    return (feature, styles) => {
+      var isSelected = feature.getProperty("isSelected");
+      styles.strokeColor = isSelected ? 'green' : '#419df4';
+    }
+  }
+
   // Create a map layer for showing the "Upward route", i.e. the route from a given fiber
   // strand to the central office
   $scope.upwardRouteLayer = new MapLayer({
@@ -136,9 +143,28 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         zIndex: MapLayer.Z_INDEX_UPWARD_FIBER_STRANDS
       }
     },
+    declarativeStyles: upWardStyle(),
+    threshold: 0,
+    reload: 'always'
+  });
+
+  $scope.hoverLayer = new MapLayer({
+    name: name,
+    type: 'hover_route_layer',
+    short_name: 'U',
+    api_endpoint: '',
+    style_options: {
+      normal: {
+        strokeColor: 'green',
+        strokeWeight: 10,
+        zIndex: 98
+      }
+    },
     threshold: 0,
     reload: 'always'
   })
+
+
 
   var fiberGraphForPlan = fiberGraph
   // reload fiber graph when plan changes
@@ -153,7 +179,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
             var links = response.data
             links.forEach((link) => {
               // Add an edge with id, from_node_id, to_node_id and with the actual feature object
-              fiberGraphForPlan.addEdge(link.id, link.from_node_id, link.to_node_id, link.geo_json)
+              fiberGraphForPlan.addEdge(link.id, link.from_node_id, link.to_node_id, link.geo_json ,link.name)
             })
           }
         })
@@ -171,30 +197,66 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('plan_cleared', (e, plan) => reloadFiberGraph())
   $rootScope.$on('route_planning_changed', (e, plan) => reloadFiberGraph())
 
-  // When the mouse moves out of a upward route, hide the upward routes layer
-  $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
-    var isupwardRoute = args.feature.getProperty("isUpwardRoute");
-    if (isupwardRoute) {
-      // This means the mouseout is for a upward route
-      $scope.upwardRouteLayer.hide()
-    }
-  })
-
   // When we mouseover on a fiber strand, find the upward route from that strand and show it in the upward route layer
-  $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
-    var fiberStrandId = args.feature.f.id
-    var feature = args.feature;
+  $rootScope.$on('map_layer_clicked_feature', (event, args) => {
+    var feature2 = args.feature;
+    var fiberStrandId = feature2.f.id
+
+    var isupwardRoute = feature2.getProperty("isUpwardRoute");
+    var isSelected = feature2.getProperty("isSelected");
 
     if (fiberStrandId) {
-      var upwardRouteFeatures = fiberGraphForPlan.getSuccessorEdgeFeatures(fiberStrandId)
-      $scope.upwardRouteLayer.clearData()
+      var upwardRouteFeatures = fiberGraphForPlan.getBranchFromEdge(fiberStrandId)
+      clearUpwardPath();
+
       upwardRouteFeatures.forEach((feature) => {
-        var featureA = JSON.parse(feature);
-        $scope.upwardRouteLayer.data_layer.addGeoJson({ type: 'Feature', geometry: featureA, properties : {isUpwardRoute : true} })
+        feature.properties.isSelected = fiberStrandId == feature.properties.id;
+        $scope.upwardRouteLayer.data_layer.addGeoJson(feature)
       })
       $scope.upwardRouteLayer.show()
+      $rootScope.$broadcast("fiber_strand_selected" , feature2);
     }
   })
+
+
+
+
+  function clearUpwardPath() {
+    $scope.upwardRouteLayer.clearData();
+    $scope.upwardRouteLayer.hide()
+  }
+
+  $rootScope.$on('map_layer_mouseover_feature', (event, args) => {
+    var feature2 = args.feature;
+    var fiberStrandId = feature2.f.id
+
+    $scope.hoverLayer.clearData();
+
+    if(fiberStrandId){
+      var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
+      $scope.hoverLayer.data_layer.addGeoJson(feature)
+      $scope.hoverLayer.show();
+    }
+
+    var points = fromLatLngToPoint(args.latLng);
+    $(".infobox").css("top" , points.y + 70).css("left" , points.x).text(feature2.f.fiber_strands);
+    $(".infobox").show();
+  })
+
+  function fromLatLngToPoint(latLng) {
+    var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+    var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+    var scale = Math.pow(2, map.getZoom());
+    var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+    return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+  }
+
+
+  $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
+    $scope.hoverLayer.clearData();
+    $(".infobox").hide();
+  })
+
 
   const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {
@@ -221,6 +283,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.routeLayer = routeLayer
 
     layer.changedFiberVisibility = () => {
+      state.showFeederFiber = layer.showFeederFiber
+      state.showDistributionFiber = layer.showDistributionFiber
+      state.showBackhaulFiber = layer.showBackhaulFiber
+
       routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
@@ -394,6 +460,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       layer.routeLayer.clearData()
       layer.fixedWirelessCoverage.clearData()
     })
+
+    clearUpwardPath();
+    $scope.hoverLayer.clearData();
   })
 
   $scope.save_nodes = () => {
@@ -512,13 +581,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       styles.zIndex = MapLayer.Z_INDEX_FIBER_STRANDS
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
-        styles.strokeWeight = calcFiberScale(feature);
+        styles.strokeWeight = calcFiberScale(feature , "feeder" , 4);
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
       } else if (type === 'distribution') {
         styles.strokeColor = 'red'
-        styles.strokeWeight = 2
+        styles.strokeWeight = calcFiberScale(feature , "dist" , 2);
         if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
@@ -532,10 +601,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
   }
 
-  function calcFiberScale(feature) {
+  function calcFiberScale(feature , fiber_type , defscale) {
     var currOption = state.selected_fiber_option;
     if(currOption.id == 1){
-      return 4
+      return defscale
     }else {
       var scaleVal = feature.f[currOption.field];
       return scaleVal == 1 ? 0.5 * currOption.multiplier :  Math.log(scaleVal) * currOption.multiplier;
@@ -574,6 +643,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       fiberLayer.remove()
     })
     fiberLayers = []
+
+    clearUpwardPath();
+    $scope.hoverLayer.clearData();
 
     $http.get('/user_fiber/list').then((response) => {
       $scope.remainingDatasources = []

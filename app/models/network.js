@@ -247,7 +247,7 @@ module.exports = class Network {
       `
     }
     var sql = `
-      SELECT s.id, s.geom, f.name as fiber_type, s.from_node_id, s.to_node_id,s.fiber_strands as fstrand_count, s.atomic_units as aunits_count
+      SELECT s.id, s.geom, f.name as fiber_type, s.from_node_id, s.to_node_id,s.fiber_strands, s.atomic_units, s.raw_coverage, s.total_revenue, s.penetration, s.fairshare_demand
       FROM client.subnet_link s
       JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
       JOIN client.fiber_route_type f ON f.id = ps.fiber_type_id
@@ -261,7 +261,7 @@ module.exports = class Network {
   static getConnectivityForPlan(planId) {
     // Note that the "geometry" for some subnet_link rows can be empty
     var sql = `
-      SELECT s.id, s.from_node_id, s.to_node_id, st_asgeojson(s.geom) as geo_json
+      SELECT s.id, s.from_node_id, s.to_node_id, st_asgeojson(s.geom) as geo_json , s.fiber_strands, s.atomic_units,f.name
       FROM client.subnet_link s
       JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
       JOIN client.fiber_route_type f ON f.id = ps.fiber_type_id
