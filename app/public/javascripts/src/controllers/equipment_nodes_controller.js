@@ -251,11 +251,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
   }
 
-
   $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
     $scope.hoverLayer.clearData();
     $(".infobox").hide();
   })
+
+  $rootScope.$on("fiber_segment_dialog_closed" , function () {
+    $scope.upwardRouteLayer.clearData();
+  });
 
 
   const ROUTE_LAYER_NAME = 'Route'

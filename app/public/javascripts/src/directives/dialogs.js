@@ -39,7 +39,7 @@ app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
                 });
                 $scope.fieldItems.push({
                     key : "Total Spend Supported",
-                    value : feature2.getProperty("total_revenue")+config.currency_symbol,
+                    value : feature2.getProperty("total_revenue").toFixed(1)+config.currency_symbol,
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share",
@@ -52,9 +52,10 @@ app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
                 $scope.$apply();
             }
 
-            $scope.filter = function(value, filter) {
-                return $filter(filter)(value);
-            };
+           $scope.panelClose = function () {
+               $rootScope.$broadcast("fiber_segment_dialog_closed")
+               $scope.fieldItems.length = 0
+           }
 
         }
     }
