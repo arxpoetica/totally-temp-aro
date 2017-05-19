@@ -247,7 +247,7 @@ module.exports = class Network {
       `
     }
     var sql = `
-      SELECT s.id, s.geom, f.name as fiber_type, s.from_node_id, s.to_node_id
+      SELECT s.id, s.geom, f.name as fiber_type, s.from_node_id, s.to_node_id,s.fiber_strands as fstrand_count, s.atomic_units as aunits_count
       FROM client.subnet_link s
       JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
       JOIN client.fiber_route_type f ON f.id = ps.fiber_type_id
