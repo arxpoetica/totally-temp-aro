@@ -107,9 +107,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      var optimizationBodyWithGeographies = JSON.parse(JSON.stringify(optimizationBody))
-      optimizationBodyWithGeographies.geographies = geographies
-      canceler = optimization.optimize($scope.plan, optimizationBodyWithGeographies)
+      canceler = optimization.optimize($scope.plan, optimizationBody, geographies)
     } else {
       swal({
         title: 'Incomplete input',

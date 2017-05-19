@@ -110,7 +110,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
-      canceler = optimization.optimize($scope.plan, optimizationBody)
+      canceler = optimization.optimize($scope.plan, optimizationBody, [])
     } else {
       swal({
         title: 'Incomplete input',

@@ -74,7 +74,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
     $rootScope.$broadcast('optimization_started_polling')
   }
 
-  optimization.optimize = (plan, changes, success, error) => {
+  optimization.optimize = (plan, changes, geographies, success, error) => {
     var canceler = $q.defer()
 
     changes.entityDataSources = optimization.datasources
@@ -125,7 +125,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
 
       // First clear any geography selections
       clearGeographySelection(plan.id)
-        .then(addGeographiesToPlan.bind(null, plan.id, changes.geographies))
+        .then(addGeographiesToPlan.bind(null, plan.id, geographies))
         .then(callOptimizationEndpoint.bind(null, plan.id))
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
