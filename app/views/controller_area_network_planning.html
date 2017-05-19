@@ -104,19 +104,19 @@
     <button class="btn btn-sm"
             ng-class="{'btn-primary' : !isToolSelected('polygon') ,'btn-selected': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselectMode}"
             ng-click="toggleSelectedTool('polygon')">Polygon Select</button>
+    <p class="pull-right"><strong ng-show="regions.selectedRegions.length > 5" class="ng-binding;" style="float:right;">Total: {{regions.selectedRegions.length}}</strong></p>
   </div>
   <p ng-hide="regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
-  <ul ng-show="regions.selectedRegions.length > 0" style="list-style-type:none; padding:0">
-    <li ng-repeat="geography in regions.selectedRegions | limitTo:5">
-      <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
-        <span class="fa fa-trash-o"></span>
-      </a>
-      {{ geography.name }}
-    </li>
-  </ul>
-  <p ng-show="regions.selectedRegions.length > 5">
-    {{ regions.selectedRegions.length - 5 }} additional boundaries
-  </p>
+  <div style="margin: 5px;min-height: 0px;max-height: 110px;overflow: auto;">
+    <ul ng-show="regions.selectedRegions.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
+      <li ng-repeat="geography in regions.selectedRegions">
+        <a href="javascript:void(0)" class="text-danger" ng-click="removeGeography(geography)" style="margin-right: 5px">
+          <span class="fa fa-trash-o"></span>
+        </a>
+        {{ geography.name }}
+      </li>
+    </ul>
+  </div>
   <p ng-show="regions.selectedRegions.length > 0">
     <button class="btn btn-primary btn-sm" ng-click="removeAllGeographies()">Remove all boundaries</button>
   </p>
