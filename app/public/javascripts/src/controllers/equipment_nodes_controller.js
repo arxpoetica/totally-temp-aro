@@ -610,7 +610,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       return defscale
     }else {
       var scaleVal = feature.f[currOption.field];
-      return scaleVal == 1 ? 0.5 * currOption.multiplier :  Math.log(scaleVal) * currOption.multiplier;
+      return scaleVal == 1 ? 2  :  Math.log(scaleVal) * currOption.multiplier;
     }
   }
 
