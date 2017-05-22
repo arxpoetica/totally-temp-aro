@@ -2,7 +2,7 @@
  * Created by saneesh on 19/5/17.
  */
 
-app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
+app.directive("fiberStrandInfo" , function ($rootScope,$timeout) {
     return {
         templateUrl : '/javascripts/src/directives/views/modal_fiber_segment_info.html',
         restrict: 'E',
@@ -12,8 +12,8 @@ app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
             $rootScope.$on("fiber_strand_selected" , (e , fiberInfo)=>{
                 $scope.fieldItems.length = 0;
                 generateSegmentDetails(fiberInfo);
+                $($element).find(".panel-fiber-details").draggable();
             })
-
 
             function generateSegmentDetails(feature2) {
                 //send details to fiber strand info

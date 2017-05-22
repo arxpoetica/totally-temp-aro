@@ -1071,6 +1071,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .panel-fiber-details .panel-title {
   border-bottom: 1px solid grey;
+  cursor: move;
 }
 
 .panel-fiber-details .panel-body .item {
