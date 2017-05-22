@@ -117,6 +117,8 @@ app.factory('fiberGraph', (state) => {
     // Constructor
     constructor() {
       this.clear()
+      this.ansCounter = 0;
+      this.desCounter = 0;
     }
 
     // Clear everything in the graph service
@@ -133,9 +135,8 @@ app.factory('fiberGraph', (state) => {
     // features associated with those successor edges. Used to find a list of all edges that
     // connect a given edgeId to the central office.
     // Assumes that there is exactly one edge between any two nodes
-    ansCounter = 0;
     getAncestorEdgeFeatures(edgeId) {
-      ansCounter = 0;
+      this.ansCounter = 0;
       var edgeForFiber = this._graph.edge(edgeId)
       if (!edgeForFiber) {
         return []
@@ -176,8 +177,8 @@ app.factory('fiberGraph', (state) => {
 
     // Given an edgeId, find the decendant edges that are connected to it, and then returns the
     // features associated with those decendant edges. Used to find a list of all edges that
-    desCounter = 0;
     getDecendantEdgeFeatures(edgeId) {
+      this.desCounter = 0;
       var edgeForFiber = this._graph.edge(edgeId)
 
       //check for somewhat malformed or infinite runs
