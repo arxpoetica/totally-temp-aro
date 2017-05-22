@@ -148,32 +148,41 @@ module.exports = class Boundary {
   // Returns the service area IDs of all service areas that contain locations from the given data sources
   static getServiceAreasContainingDataSources(dataSources) {
     var sql = `
-      WITH  business_areas AS (
-      SELECT DISTINCT s.id
-      FROM aro.businesses l
-      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.state = l.state AND s.service_layer_id = 1 AND l.data_source_id IN ($1)
+      WITH all_service_areas AS (
+        SELECT sa.id, sa.geom, sa.state FROM client.service_area sa
+        JOIN client.service_layer sl
+          ON sa.service_layer_id = sl.id
+        WHERE sl.name='wirecenter'
+      ),
+      business_areas AS (
+        SELECT DISTINCT sa.id
+        FROM aro.businesses l
+        JOIN all_service_areas sa
+          ON ST_Contains(sa.geom, l.geom) AND sa.state = l.state AND l.data_source_id IN ($1)
       ),
       tower_areas AS (
-      SELECT DISTINCT s.id
-      FROM aro.towers l
-      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.state = l.parcel_state AND s.service_layer_id = 1 AND l.data_source_id IN ($1)
+        SELECT DISTINCT sa.id
+        FROM aro.towers l
+        JOIN all_service_areas sa
+          ON ST_Contains(sa.geom, l.geom) AND sa.state = l.parcel_state AND l.data_source_id IN ($1)
       ),
       hh_areas AS (
-      SELECT DISTINCT s.id
-      FROM aro.households l
-      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.state = l.state AND s.service_layer_id = 1 AND l.data_source_id IN ($1)
+        SELECT DISTINCT sa.id
+        FROM aro.households l
+        JOIN all_service_areas sa
+          ON ST_Contains(sa.geom, l.geom) AND sa.state = l.state AND l.data_source_id IN ($1)
       )
       SELECT DISTINCT id
       FROM
-      (SELECT *
-      FROM business_areas
-      UNION
-      SELECT *
-      FROM tower_areas
-      UNION
-      SELECT *
-      FROM hh_areas
-      ) a
+        (SELECT *
+          FROM business_areas
+          UNION
+          SELECT *
+          FROM tower_areas
+          UNION
+          SELECT *
+          FROM hh_areas
+        ) a
     `
     return database.query(sql, [dataSources])
   }
