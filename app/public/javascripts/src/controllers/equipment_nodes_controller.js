@@ -615,13 +615,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var maxPixelWidth = +currOption.pixelWidth.max;
       var minPixelWidth = +currOption.pixelWidth.min;
 
-      var divisor =  +currOption.pixelWidth.divisor;
-      var atomicDivisor =  +currOption.pixelWidth.atomicDivisor;
+      var exponent =  +currOption.pixelWidth.divisor; // 1/3 Currently
+      var atomicDivisor =  +currOption.pixelWidth.atomicDivisor; //50 Currently
 
       switch (currOption.field){
-         case "fiber_strands": width = Math.min(Math.pow(optionValue , (divisor)) , 12);
+         case "fiber_strands": width = Math.min(Math.pow(optionValue , (exponent)) , 12);
               break;
-         case "atomic_units" : width = Math.min(Math.pow((optionValue / atomicDivisor + 1) , (divisor)) , 12);
+         case "atomic_units" : width = Math.min(Math.pow((optionValue / atomicDivisor + 1) , (exponent)) , 12);
               break;
        }
 
