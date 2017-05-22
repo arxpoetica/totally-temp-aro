@@ -220,4 +220,24 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       $scope.calculating = true;
   })
 
+  // Selects all the service areas that contain locations in the uploaded data sources
+  $scope.isSelectingServiceAreas = false
+  $scope.selectServiceAreasContainingDataSources = () => {
+    $scope.isSelectingServiceAreas = true
+    var dataSources = _.pluck(state.selectedDataSources, 'dataSourceId')
+    regions.removeAllGeographies()
+    var url = '/boundary/serviceAreasContainingDataSources'
+    $http.post(url, { dataSources: dataSources })
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          var serviceAreaIds = []
+          response.data.forEach((item) => serviceAreaIds.push(item.id))
+          regions.selectGeographyFromIds(serviceAreaIds)
+            .finally(() => $scope.isSelectingServiceAreas = false)
+        } else {
+          $scope.isSelectingServiceAreas = false
+        }
+      })
+  }
+
 }])

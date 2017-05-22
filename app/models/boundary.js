@@ -145,4 +145,36 @@ module.exports = class Boundary {
 	  return database.query(sql, [serviceareas])
   }
 
+  // Returns the service area IDs of all service areas that contain locations from the given data sources
+  static getServiceAreasContainingDataSources(dataSources) {
+    var sql = `
+      WITH  business_areas AS (
+      SELECT DISTINCT s.id
+      FROM aro.businesses l
+      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.state = l.state AND s.service_layer_id = 1 AND l.data_source_id IN ($1)
+      ),
+      tower_areas AS (
+      SELECT DISTINCT s.id
+      FROM aro.towers l
+      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.state = l.parcel_state AND s.service_layer_id = 1 AND l.data_source_id IN ($1)
+      ),
+      hh_areas AS (
+      SELECT DISTINCT s.id
+      FROM aro.households l
+      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.state = l.state AND s.service_layer_id = 1 AND l.data_source_id IN ($1)
+      )
+      SELECT DISTINCT id
+      FROM
+      (SELECT *
+      FROM business_areas
+      UNION
+      SELECT *
+      FROM tower_areas
+      UNION
+      SELECT *
+      FROM hh_areas
+      ) a
+    `
+    return database.query(sql, [dataSources])
+  }
 }
