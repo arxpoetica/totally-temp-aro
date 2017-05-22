@@ -211,10 +211,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
       upwardRouteFeatures.forEach((feature) => {
         feature.properties.isSelected = fiberStrandId == feature.properties.id;
-        $scope.upwardRouteLayer.data_layer.addGeoJson(feature)
+        $scope.upwardRouteLayer.addGeoJson(feature)
       })
       $scope.upwardRouteLayer.show()
-      $rootScope.$broadcast("fiber_strand_selected" , feature2);
+      if($scope.upwardRouteLayer.features.length > 0){
+        $rootScope.$broadcast("fiber_strand_selected" , feature2);
+      }
     }
   })
 
@@ -234,7 +236,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     if(fiberStrandId){
       var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
-      $scope.hoverLayer.data_layer.addGeoJson(feature)
+      $scope.hoverLayer.addGeoJson(feature)
       $scope.hoverLayer.show();
     }
 
