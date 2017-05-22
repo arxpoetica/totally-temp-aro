@@ -2,7 +2,7 @@
  * Created by saneesh on 19/5/17.
  */
 
-app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
+app.directive("fiberStrandInfo" , function ($rootScope,$timeout) {
     return {
         templateUrl : '/javascripts/src/directives/views/modal_fiber_segment_info.html',
         restrict: 'E',
@@ -12,8 +12,8 @@ app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
             $rootScope.$on("fiber_strand_selected" , (e , fiberInfo)=>{
                 $scope.fieldItems.length = 0;
                 generateSegmentDetails(fiberInfo);
+                $($element).find(".panel-fiber-details").draggable();
             })
-
 
             function generateSegmentDetails(feature2) {
                 //send details to fiber strand info
@@ -39,7 +39,7 @@ app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
                 });
                 $scope.fieldItems.push({
                     key : "Total Spend Supported",
-                    value : feature2.getProperty("total_revenue")+config.currency_symbol,
+                    value : feature2.getProperty("total_revenue").toFixed(1)+config.currency_symbol,
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share",
@@ -52,9 +52,10 @@ app.directive("fiberStrandInfo" , function ($rootScope,$filter) {
                 $scope.$apply();
             }
 
-            $scope.filter = function(value, filter) {
-                return $filter(filter)(value);
-            };
+           $scope.panelClose = function () {
+               $rootScope.$broadcast("fiber_segment_dialog_closed")
+               $scope.fieldItems.length = 0
+           }
 
         }
     }

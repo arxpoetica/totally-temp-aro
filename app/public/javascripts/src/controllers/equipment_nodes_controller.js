@@ -251,11 +251,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
   }
 
-
   $rootScope.$on('map_layer_mouseout_feature', (event, args) => {
     $scope.hoverLayer.clearData();
     $(".infobox").hide();
   })
+
+  $rootScope.$on("fiber_segment_dialog_closed" , function () {
+    $scope.upwardRouteLayer.clearData();
+  });
 
 
   const ROUTE_LAYER_NAME = 'Route'
@@ -606,8 +609,23 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if(currOption.id == 1){
       return defscale
     }else {
-      var scaleVal = feature.f[currOption.field];
-      return scaleVal == 1 ? 0.5 * currOption.multiplier :  Math.log(scaleVal) * currOption.multiplier;
+      var optionValue = feature.f[currOption.field];
+
+      var width = 0;
+      var maxPixelWidth = +currOption.pixelWidth.max;
+      var minPixelWidth = +currOption.pixelWidth.min;
+
+      var exponent =  +currOption.pixelWidth.divisor; // 1/3 Currently
+      var atomicDivisor =  +currOption.pixelWidth.atomicDivisor; //50 Currently
+
+      switch (currOption.field){
+         case "fiber_strands": width = Math.min(Math.pow(optionValue , (exponent)) , 12);
+              break;
+         case "atomic_units" : width = Math.min(Math.pow((optionValue / atomicDivisor + 1) , (exponent)) , 12);
+              break;
+       }
+
+       return (width / 12) * (maxPixelWidth -  minPixelWidth) +  minPixelWidth - 1.
     }
   }
 

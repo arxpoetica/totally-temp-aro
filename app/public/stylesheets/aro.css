@@ -1071,6 +1071,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .panel-fiber-details .panel-title {
   border-bottom: 1px solid grey;
+  cursor: move;
 }
 
 .panel-fiber-details .panel-body .item {
@@ -1086,3 +1087,12 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   flex: 0;
 }
 
+.panel-fiber-details .panel-close-icon {
+  padding: 3px;
+  position: relative;
+  bottom: 2px;
+  cursor: pointer;
+}
+.panel-fiber-details .panel-close-icon :hover {
+  color: #c0c0c0;
+}
