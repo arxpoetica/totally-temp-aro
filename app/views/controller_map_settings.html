@@ -20,6 +20,20 @@
             <select ng-model="selectedFO" ng-options="option as option.name for option in fiberOptions track by option.id" ng-change="fiberOptionChanged()"></select>
           </div>
         </div>
+
+        <div class="settings_item" ng-if="selectedFO.pixelWidth">
+          <div class="settings_label">Max Pixel Width</div>
+          <div class="settings_object">
+            <input type="text" ng-model="selectedFO.pixelWidth.max" placeholder="Max Pixel Width">
+          </div>
+        </div>
+
+        <div class="settings_item" ng-if="selectedFO.pixelWidth">
+          <div class="settings_label">Min Pixel Width</div>
+          <div class="settings_object">
+            <input type="text" ng-model="selectedFO.pixelWidth.min" placeholder="Min Pixel Width">
+          </div>
+        </div>
       </li>
   </ul>
 </div>

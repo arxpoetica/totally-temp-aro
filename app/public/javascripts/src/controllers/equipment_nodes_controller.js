@@ -609,8 +609,20 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if(currOption.id == 1){
       return defscale
     }else {
-      var scaleVal = feature.f[currOption.field];
-      return scaleVal == 1 ? 2  :  Math.log(scaleVal) * currOption.multiplier;
+      var optionValue = feature.f[currOption.field];
+
+      var width = 0;
+      var maxPixelWidth = +currOption.pixelWidth.max;
+      var minPixelWidth = +currOption.pixelWidth.min;
+
+      switch (currOption.field){
+         case "fiber_strands": width = Math.min(Math.pow(optionValue , (1/3)) , 12);
+              break;
+         case "atomic_units" : width = Math.min(Math.pow((optionValue / 50 + 1) , (1/3)) , 12);
+              break;
+       }
+
+       return (width / 12) * (maxPixelWidth -  minPixelWidth) +  minPixelWidth - 1.
     }
   }
 
