@@ -220,4 +220,50 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       $scope.calculating = true;
   })
 
+  // Selects all the service areas that contain locations in the uploaded data sources
+  $scope.isSelectingServiceAreas = false
+  $scope.selectServiceAreasContainingDataSources = () => {
+
+    // This feature is valid only if we have [1] no global data sources selected and [2] at least one uploaded data source selected
+    var hasGlobalSources = state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)
+                           || state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)
+                           || state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)
+    if (hasGlobalSources) {
+      swal({
+        title: 'Data source error',
+        text: 'You cannot have a global data source selected in the locations layer when using this feature',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+    } else if (state.selectedDataSources.length === 0) {
+      swal({
+        title: 'Data source error',
+        text: 'Select at least one uploaded data source from the locations layer to use this feature',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+    } else {
+      // We now have at least one uploaded data source selected in the locations layer
+      $scope.isSelectingServiceAreas = true
+      var dataSources = _.pluck(state.selectedDataSources, 'dataSourceId')
+      regions.removeAllGeographies()
+      var url = '/boundary/serviceAreasContainingDataSources'
+      $http.post(url, { dataSources: dataSources })
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            var serviceAreaIds = []
+            response.data.forEach((item) => serviceAreaIds.push(item.id))
+            regions.selectGeographyFromIds(serviceAreaIds)
+              .finally(() => $scope.isSelectingServiceAreas = false)
+          } else {
+            $scope.isSelectingServiceAreas = false
+          }
+        })
+    }
+  }
+
 }])

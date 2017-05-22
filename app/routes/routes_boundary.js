@@ -83,4 +83,11 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.post('/boundary/serviceAreasContainingDataSources', (request, response, next) => {
+    var dataSources = request.body.dataSources
+    models.Boundary.getServiceAreasContainingDataSources(dataSources)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

@@ -471,7 +471,7 @@
 
     $(function () {
       var popovers = $('#left-col [data-toggle="popover"]')
-      popovers.popover()
+      popovers.popover({container: 'body'})
     })
 
     var expander = $('#expander')

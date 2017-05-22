@@ -124,6 +124,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
           defer.reject(response.data)
         }
       })
+      .catch((error) => defer.reject(error))
     }
 
     return defer.promise
