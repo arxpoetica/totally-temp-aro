@@ -14,7 +14,8 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
       multiplier : 2.1,
       pixelWidth : {
         min : 2,
-        max : 12
+        max : 12,
+        divisor : 1/3
       }
     },
     {
@@ -24,7 +25,9 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
       multiplier: 1,
       pixelWidth : {
         min : 2,
-        max : 12
+        max : 12,
+        divisor : 1/3,
+        atomicDivisor: 50
       }
     }
   ];

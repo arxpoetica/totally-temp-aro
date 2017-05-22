@@ -34,6 +34,20 @@
             <input type="text" ng-model="selectedFO.pixelWidth.min" placeholder="Min Pixel Width">
           </div>
         </div>
+
+        <div class="settings_item" ng-if="selectedFO.pixelWidth">
+          <div class="settings_label">Exponent</div>
+          <div class="settings_object">
+            <input type="text" ng-model="selectedFO.pixelWidth.divisor" placeholder="Min Pixel Width">
+          </div>
+        </div>
+
+        <div class="settings_item" ng-if="selectedFO.pixelWidth &&  selectedFO.pixelWidth.atomicDivisor">
+          <div class="settings_label">Atomic Divisor</div>
+          <div class="settings_object">
+            <input type="text" ng-model="selectedFO.pixelWidth.atomicDivisor" placeholder="Min Pixel Width">
+          </div>
+        </div>
       </li>
   </ul>
 </div>
