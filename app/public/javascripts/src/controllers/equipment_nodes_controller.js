@@ -208,11 +208,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if (fiberStrandId) {
       var upwardRouteFeatures = fiberGraphForPlan.getBranchFromEdge(fiberStrandId)
       clearUpwardPath();
-
-      upwardRouteFeatures.forEach((feature) => {
-        feature.properties.isSelected = fiberStrandId == feature.properties.id;
-        $scope.upwardRouteLayer.addGeoJson(feature)
-      })
+      $scope.upwardRouteLayer.addGeoJson({features : upwardRouteFeatures , type :"FeatureCollection"})
       $scope.upwardRouteLayer.show()
       if($scope.upwardRouteLayer.features.length > 0){
         $rootScope.$broadcast("fiber_strand_selected" , feature2);
@@ -235,9 +231,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.hoverLayer.clearData();
 
     if(fiberStrandId){
-      var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
-      $scope.hoverLayer.addGeoJson(feature)
-      $scope.hoverLayer.show();
+      var edge =fiberGraphForPlan.getEdge(fiberStrandId);
+      if(edge){
+        var feature = fiberGraphForPlan.getEdge(fiberStrandId).getFeature();
+        $scope.hoverLayer.addGeoJson(feature)
+        $scope.hoverLayer.show();
+      }
     }
 
     var points = fromLatLngToPoint(args.latLng);

@@ -191,7 +191,8 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
   service.clearPlan = (plan) => {
     key = null
-    initializeState()
+    //dont clear the existing state here
+    //initializeState()
     localStorage.removeItem(`plan_${plan.id}`)
   }
 
