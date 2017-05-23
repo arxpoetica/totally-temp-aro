@@ -132,45 +132,47 @@ module.exports = class Boundary {
       })
   }
   
-  static getBoundariesInfo (serviceareas) {
+  static getBoundariesInfo (serviceAreaIds) {
 	  
 	  var sql = `
-      SELECT 'wirecenter' || ':' || service_area.id AS id, code AS name, ST_AsGeoJSON(geom)::json AS geog
-      FROM client.service_area
-      JOIN client.service_layer
-        ON service_area.service_layer_id = service_layer.id
-      AND service_layer.name='wirecenter'
-      WHERE service_area.id in ($1)
+      SELECT sa.id AS id,
+             sa.code AS name,
+             (CASE WHEN sl.is_user_defined=TRUE THEN 'user_defined' ELSE sl.name END) as type,
+             ST_AsGeoJSON(geom)::json AS geog
+      FROM client.service_area sa
+      JOIN client.service_layer sl
+        ON sa.service_layer_id = sl.id
+      WHERE sa.id in ($1)
 	  `
-	  return database.query(sql, [serviceareas])
+	  return database.query(sql, [serviceAreaIds])
   }
 
   // Returns the service area IDs of all service areas that contain locations from the given data sources
-  static getServiceAreasContainingDataSources(dataSources) {
+  static getServiceAreasContainingDataSources(dataSources, serviceLayerId) {
     var sql = `
       WITH all_service_areas AS (
         SELECT sa.id, sa.geom, sa.state FROM client.service_area sa
         JOIN client.service_layer sl
           ON sa.service_layer_id = sl.id
-        WHERE sl.name='wirecenter'
+        WHERE sl.id=$2
       ),
       business_areas AS (
         SELECT DISTINCT sa.id
         FROM aro.businesses l
         JOIN all_service_areas sa
-          ON ST_Contains(sa.geom, l.geom) AND sa.state = l.state AND l.data_source_id IN ($1)
+          ON ST_Contains(sa.geom, l.geom) AND l.data_source_id IN ($1)
       ),
       tower_areas AS (
         SELECT DISTINCT sa.id
         FROM aro.towers l
         JOIN all_service_areas sa
-          ON ST_Contains(sa.geom, l.geom) AND sa.state = l.parcel_state AND l.data_source_id IN ($1)
+          ON ST_Contains(sa.geom, l.geom) AND l.data_source_id IN ($1)
       ),
       hh_areas AS (
         SELECT DISTINCT sa.id
         FROM aro.households l
         JOIN all_service_areas sa
-          ON ST_Contains(sa.geom, l.geom) AND sa.state = l.state AND l.data_source_id IN ($1)
+          ON ST_Contains(sa.geom, l.geom) AND l.data_source_id IN ($1)
       )
       SELECT DISTINCT id
       FROM
@@ -184,6 +186,6 @@ module.exports = class Boundary {
           FROM hh_areas
         ) a
     `
-    return database.query(sql, [dataSources])
+    return database.query(sql, [dataSources, serviceLayerId])
   }
 }

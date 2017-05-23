@@ -252,7 +252,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       var dataSources = _.pluck(state.selectedDataSources, 'dataSourceId')
       regions.removeAllGeographies()
       var url = '/boundary/serviceAreasContainingDataSources'
-      $http.post(url, { dataSources: dataSources })
+      $http.post(url, { dataSources: dataSources, serviceLayerId: 6 })
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
             var serviceAreaIds = []

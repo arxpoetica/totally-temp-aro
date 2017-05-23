@@ -102,22 +102,13 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
       defer.resolve()
     } else {
       // Get geometry information for all geography ids
-      $http.post('/boundary/info', { expertSelectedWirecenters: geographyIds })
+      $http.post('/boundary/info', { serviceAreaIds: geographyIds })
       .then((response) => {
         if (response.status >= 200 && response.status <= 299) {
           // Go through all elements of the response and select each element
           response.data.forEach((boundary, index) => {
-            var idSplit = boundary.id.split(':')
-            var type = idSplit[0]
-            var id = idSplit[1]
-            var geographyObj = {
-              id: id,
-              name: boundary.name,
-              geog: boundary.geog,
-              type: type
-            }
             // Select geography, and suppress events for all but the last boundary
-            regions.selectGeography(geographyObj, index < response.data.length - 1)
+            regions.selectGeography(boundary, index < response.data.length - 1)
           })
           defer.resolve()
         } else {
