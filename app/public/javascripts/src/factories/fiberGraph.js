@@ -149,6 +149,9 @@ app.factory('fiberGraph', (state) => {
 
     walkThroughAncestorsFrom(node , features){
       var outEdges = node.getOutEdges();
+      if(outEdges.length == 0){
+        return features;
+      }
 
       //check for somewhat malformed or infinite runs
       var totalEdges = this._graph.getNumEdges();
@@ -157,19 +160,15 @@ app.factory('fiberGraph', (state) => {
         console.log(this._graph);
         return [];
       }
-      if(outEdges.length == 0){
-        return features;
-      }
+      this.ansCounter ++;
+
       outEdges.map((outEdge) => {
-        if(outEdge.getType() == "feeder" && state.showFeederFiber) {
-          features[outEdge.getEdgeId()] = outEdge.getFeature();
-        }
-        if(outEdge.getType() == "distribution" && state.showDistributionFiber) {
-          features[outEdge.getEdgeId()] = outEdge.getFeature();
+        if((outEdge.getType() == "feeder" && state.showFeederFiber) || (outEdge.getType() == "distribution" && state.showDistributionFiber)) {
+          features.push(outEdge.getFeature())
         }
 
         this.walkThroughAncestorsFrom(outEdge.getToNode() , features);
-      })
+      });
 
       return features;
     }
@@ -181,20 +180,12 @@ app.factory('fiberGraph', (state) => {
       this.desCounter = 0;
       var edgeForFiber = this._graph.edge(edgeId)
 
-      //check for somewhat malformed or infinite runs
-      var totalEdges = this._graph.getNumEdges();
-      if(this.desCounter > totalEdges){
-        console.log("Malformed Graph");
-        console.log(this._graph);
-        return [];
-      }
       if (!edgeForFiber) {
         return []
       }
 
       var successorEdgeFeatures = [edgeForFiber.getFeature()]
       var startNode = edgeForFiber.getFromNode()
-
       return this.walkThroughDecendentsFrom(startNode , successorEdgeFeatures);
     }
 
@@ -203,14 +194,19 @@ app.factory('fiberGraph', (state) => {
       if(InEdges.length == 0){
         return features;
       }
-      InEdges.map((inEdge) => {
-        if(inEdge.getType() == "feeder" && state.showFeederFiber) {
-          features[inEdge.getEdgeId()] = inEdge.getFeature();
-        }
-        if(inEdge.getType() == "distribution" && state.showDistributionFiber) {
-          features[inEdge.getEdgeId()] = inEdge.getFeature();
-        }
+      //check for somewhat malformed or infinite runs
+      var totalEdges = this._graph.getNumEdges();
+      if(this.desCounter > totalEdges){
+        console.log("Malformed Graph");
+        console.log(this._graph);
+        return [];
+      }
 
+      this.desCounter ++;
+      InEdges.map((inEdge) => {
+        if((inEdge.getType() == "feeder" && state.showFeederFiber) || (inEdge.getType() == "distribution" && state.showDistributionFiber)) {
+          features.push(inEdge.getFeature())
+        }
         this.walkThroughDecendentsFrom(inEdge.getFromNode() , features);
       })
 
@@ -219,10 +215,14 @@ app.factory('fiberGraph', (state) => {
 
 
     getBranchFromEdge(edgeId){
-        var ans =  this.getAncestorEdgeFeatures(edgeId);
-        var desc = this.getDecendantEdgeFeatures(edgeId);
+        var A =  this.getAncestorEdgeFeatures(edgeId);
+        var D = this.getDecendantEdgeFeatures(edgeId);
 
-       return ans.concat(desc);
+        D.map(function (des) {
+          A.push(des);
+        });
+
+      return A;
     }
 
     getEdge( edgeId ){
