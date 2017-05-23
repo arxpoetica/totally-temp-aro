@@ -617,4 +617,9 @@ module.exports = class Network {
 	  return database.query(sql)
   }
 
+  static getFiberSourceIdOfExistingFiber(fiberName) {
+    var sql = `SELECT id FROM client.fiber_source WHERE source = $1`
+    return database.query(sql, [fiberName])
+  }
+
 }

@@ -109,12 +109,12 @@
                 <div style="clear: both"></div>
                 <% if (user.rol === 'admin' || user.rol === 'biz-dev') { %>
                 <div style="width: 250px;margin: 5px">
-                  <ui-select multiple ng-model="fibers"
+                  <ui-select multiple ng-model="fibers.selectedFibers"
                              theme="bootstrap"
                              close-on-select="true"
-                             on-select="changeSelectedFiberDatasource($item , $model)"
-                             on-remove="removeSelectedFiberDatasource($item , $model)">
-                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.libraryId}}]</ui-select-match>
+                             on-select="selectedFibersChanged()"
+                             on-remove="selectedFibersChanged()">
+                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.systemId}}]</ui-select-match>
                     <ui-select-choices class="ui-select-width-250" repeat="datasource in remainingDatasources">
                       <div>{{datasource.name}}</div>
                     </ui-select-choices>

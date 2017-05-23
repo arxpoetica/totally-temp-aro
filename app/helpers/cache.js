@@ -38,7 +38,7 @@ function loadAnalysisLayers () {
 
 function loadExistingFiberSourceNames () {
   
-  return database.query('SELECT DISTINCT(source_name) AS source_name FROM client.existing_fiber')
+  return database.query('SELECT DISTINCT(source_name) AS source_name FROM client.existing_fiber WHERE source_name IS NOT NULL')
     .then((names) => {
       exports.existingFiberSourceNames = names.map((row) => row.source_name)
     })
