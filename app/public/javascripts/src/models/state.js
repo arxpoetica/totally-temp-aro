@@ -65,6 +65,10 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     selectedLayer: null
   }
 
+  // Boundaries layer data - define once
+  service.boundaries = {
+    areaLayers: []
+  }
 
   // Default data sources - define once
   service.defaultDataSources = [
