@@ -215,10 +215,14 @@ app.factory('fiberGraph', (state) => {
 
 
     getBranchFromEdge(edgeId){
-        var ans =  this.getAncestorEdgeFeatures(edgeId);
-        var desc = this.getDecendantEdgeFeatures(edgeId);
+        var A =  this.getAncestorEdgeFeatures(edgeId);
+        var D = this.getDecendantEdgeFeatures(edgeId);
 
-       return ans.concat(desc);
+        D.map(function (des) {
+          A.push(des);
+        });
+
+      return A;
     }
 
     getEdge( edgeId ){
