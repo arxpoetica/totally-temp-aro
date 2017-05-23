@@ -8,15 +8,15 @@
         <label>Locations</label>
       </div>
       <ul class="customer-type">
-        <li ng-repeat="locationType in planState.locationTypes">
-          <div class="ctype-icon"><img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px"></div>
+        <li ng-repeat="constructionSite in planState.constructionSites">
+          <div class="ctype-icon"><img ng-src="{{constructionSite.icon}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">
-            {{locationType.label}}
+            {{constructionSite.label}}
           </div>
           <div class="ctype-checkbox">
             <checkbox
                     class="chk-small"
-                    ng-model="locationType.checked"
+                    ng-model="constructionSite.checked"
                     name="ctype-name"
                     ng-change="changeLocationsLayer()"
             ></checkbox>

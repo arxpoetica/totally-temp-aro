@@ -89,6 +89,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
     // A list of location types to show in the locations layer
     service.locationTypes = []
+
     service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
@@ -109,6 +110,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
         }
       })
     }
+
 
     // Show residential/household units
     if (configuration && configuration.locationCategories && configuration.locationCategories.household) {
@@ -135,6 +137,14 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
         })
       }
     }
+
+    //create construction sites copy locationTypes and then add a isConstructionSite Field
+    service.constructionSites = angular.copy(service.locationTypes);
+    service.constructionSites.map(function (csite) {
+      csite.isConstructionSite = true
+    });
+
+
   }
 
   // Load tile information from the server

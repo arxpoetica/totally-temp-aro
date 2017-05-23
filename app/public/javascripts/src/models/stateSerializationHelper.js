@@ -18,6 +18,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     var optimizationBody = {}
 
     addLocationTypesToBody(state, optimizationBody)
+    addConstructionSitesToBody(state,optimizationBody)
     addGlobalDataSourcesToBody(state, optimizationBody)
     addUserUploadedDataSourcesToBody(state, optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
@@ -33,6 +34,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addLocationTypesToBody = (state, postBody) => {
     var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)
     postBody.locationTypes = _.pluck(selectedLocationTypes, 'key')
+  }
+
+  //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
+  var addConstructionSitesToBody = (state, postBody) => {
+    var selectedConstructionSites = state.constructionSites.filter((item) => item.checked)
+    postBody.locationTypes = _.pluck(selectedConstructionSites, 'key')
   }
 
   // Add global data sources to a POST body that we will send to aro-service for performing optimization

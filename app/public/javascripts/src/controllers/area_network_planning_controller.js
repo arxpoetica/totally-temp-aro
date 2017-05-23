@@ -104,7 +104,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     // Check if at least one data source is selected
     var isAnyDataSourceSelected = state.selectedDataSources.length > 0
 	  // A location is selected if the "checked" property is true
-    var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0)
+    var isAnyLocationTypeSelected = (state.locationTypes.filter((item) => item.checked).length > 0) || (state.constructionSites.filter((item) => item.checked).length > 0)
     var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
     if (validSelection) {
       canceler = optimization.optimize($scope.plan, optimizationBody, geographies)
