@@ -211,21 +211,21 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     state.selectedDataSources = []
     var setOfUploadedDataSources = new Set()
     if (postBody.locationDataSources.business) {
-      postBody.locationDataSources.business.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
+      postBody.locationDataSources.business.forEach((item) => setOfUploadedDataSources.add(item))
       if (postBody.locationDataSources.business.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
         var globalBusinessesDataSource = state.defaultDataSources.filter((item) => item.dataSourceId === state.DS_GLOBAL_BUSINESSES)[0]
         state.selectedDataSources.push(globalBusinessesDataSource)
       }
     }
     if (postBody.locationDataSources.household) {
-      postBody.locationDataSources.household.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
+      postBody.locationDataSources.household.forEach((item) => setOfUploadedDataSources.add(item))
       if (postBody.locationDataSources.household.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
         var globalHouseholdsDataSource = state.defaultDataSources.filter((item) => item.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS)[0]
         state.selectedDataSources.push(globalHouseholdsDataSource)
       }
     }
     if (postBody.locationDataSources.celltower) {
-      postBody.locationDataSources.celltower.forEach((item) => setOfUploadedDataSources.add(item.dataSourceId))
+      postBody.locationDataSources.celltower.forEach((item) => setOfUploadedDataSources.add(item))
       if (postBody.locationDataSources.celltower.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
         var globalCellTowerDataSource = state.defaultDataSources.filter((item) => item.dataSourceId === state.DS_GLOBAL_CELLTOWER)[0]
         state.selectedDataSources.push(globalCellTowerDataSource)
