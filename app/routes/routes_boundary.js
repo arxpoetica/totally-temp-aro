@@ -78,15 +78,16 @@ exports.configure = (api, middleware) => {
   })
   
   api.post('/boundary/info', (request, response, next) => {
-    var serviceareas = request.body.expertSelectedWirecenters
-    models.Boundary.getBoundariesInfo(serviceareas)
+    var serviceAreaIds = request.body.serviceAreaIds
+    models.Boundary.getBoundariesInfo(serviceAreaIds)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   api.post('/boundary/serviceAreasContainingDataSources', (request, response, next) => {
     var dataSources = request.body.dataSources
-    models.Boundary.getServiceAreasContainingDataSources(dataSources)
+    var serviceLayerId = request.body.serviceLayerId
+    models.Boundary.getServiceAreasContainingDataSources(dataSources, serviceLayerId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

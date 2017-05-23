@@ -1,11 +1,12 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization,map_layers) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', 'state', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization, map_layers, state) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
   $scope.selected_tool = false
   $scope.boundaries = []
+  $scope.state = state
 
   $scope.userDefinedBoundaries = []
   $scope.selectedUserDefinedBoundary = null
@@ -123,7 +124,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   map_layers.addFeatureLayer(userDefinedLayer);
 
-  $scope.areaLayers = [
+  state.boundaries.areaLayers = [
     censusBlocksLayer,
     countySubdivisionsLayer,
     cmaBoundariesLayer
@@ -157,7 +158,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       visibilityThreshold : 1,
       isBoundaryLayer : true
     })
-    $scope.areaLayers.push(layer)
+    state.boundaries.areaLayers.push(layer)
     map_layers.addFeatureLayer(layer);
   })
 
@@ -192,11 +193,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       visibilityThreshold : 1,
       isBoundaryLayer : true
     })
-    if (serviceLayer.show_in_boundaries) $scope.areaLayers.push(layer)
+    layer.layerId = serviceLayer.id // Hack to get the id for now
+    if (serviceLayer.show_in_boundaries) state.boundaries.areaLayers.push(layer)
     map_layers.addFeatureLayer(layer);
   })
 
-  $scope.areaLayers.push(userDefinedLayer)
+  state.boundaries.areaLayers.push(userDefinedLayer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -221,7 +223,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     $scope.boundaries = []
-    $scope.areaLayers.forEach((layer) => {
+    state.boundaries.areaLayers.forEach((layer) => {
       layer.hide()
       $(`#map_layers_toggle_${layer.type} input`).prop('checked', false)
     })

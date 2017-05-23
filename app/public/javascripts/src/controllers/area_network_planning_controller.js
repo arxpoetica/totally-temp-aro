@@ -224,11 +224,34 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
   $scope.isSelectingServiceAreas = false
   $scope.selectServiceAreasContainingDataSources = () => {
 
-    // This feature is valid only if we have [1] no global data sources selected and [2] at least one uploaded data source selected
+    // Get the selection status of the boundary layers
+    var isWirecenterBoundarySelected = false, isUserDefinedBoundarySelected = false
+    var selectedServiceLayerId = -1
+    state.boundaries.areaLayers.forEach((areaLayer) => {
+      if (areaLayer.type === 'wirecenter' && areaLayer.visible_check) {
+        isWirecenterBoundarySelected = true
+        selectedServiceLayerId = areaLayer.layerId
+      } else if (areaLayer.type === 'user_defined' && areaLayer.visible_check) {
+        isUserDefinedBoundarySelected = true
+        selectedServiceLayerId = areaLayer.layerId
+      }
+    })
+
+    // Check if any of the global data sources area selected
     var hasGlobalSources = state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)
                            || state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)
                            || state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)
-    if (hasGlobalSources) {
+    if (isWirecenterBoundarySelected === isUserDefinedBoundarySelected) {
+      // This means that either "wirecenter" and "user_defined" are both checked or both unchecked
+      swal({
+        title: 'Boundary layer error',
+        text: 'You must have exactly one of "wirecenter" or "user defined layer" selected in the boundaries layer',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+    } else if (hasGlobalSources) {
       swal({
         title: 'Data source error',
         text: 'You cannot have a global data source selected in the locations layer when using this feature',
@@ -248,11 +271,12 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
       })
     } else {
       // We now have at least one uploaded data source selected in the locations layer
+      console.log(state.boundaries.areaLayers)
       $scope.isSelectingServiceAreas = true
       var dataSources = _.pluck(state.selectedDataSources, 'dataSourceId')
       regions.removeAllGeographies()
       var url = '/boundary/serviceAreasContainingDataSources'
-      $http.post(url, { dataSources: dataSources })
+      $http.post(url, { dataSources: dataSources, serviceLayerId: selectedServiceLayerId })
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
             var serviceAreaIds = []

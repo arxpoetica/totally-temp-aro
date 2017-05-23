@@ -672,11 +672,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
       //load existing fibers to fiberLayer
       $scope.existingFibers.map(function (fib) {
-        $scope.remainingDatasources.push({
-          systemId : 1,  // Existing fiber always has an ID of 1
-          name : fib.name
+        $http.get('/fiberSourceIdOfExistingFiber/' + fib.name)
+          .then((response2) => {
+            var fiberSystemId = response2.data[0].id
+            $scope.remainingDatasources.push({
+              systemId : fiberSystemId,
+              name : fib.name
+            })
+          fiberLayers[fiberSystemId] = fib;
         })
-        fiberLayers[fib.id] = fib;
+          .catch((error) => console.log(error))
       })
 
       response.data.forEach(initDatasource)
@@ -719,62 +724,18 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     reloadDatasources();
   })
 
-  $scope.fibers = []
-  $scope.changeSelectedFiberDatasource = (a,b) => {
-    $scope.fibers.push(a);
+  // Additional variable required ($scope.fibers.selectedFibers) because ui-select creates a new scope via ng-repeat
+  $scope.fibers = { selectedFibers: [] }
+  $scope.selectedFibersChanged = () => {
+    // Set visibility of fiber layers
+    fiberLayers.forEach((fiberLayer) => fiberLayer.hide())
+    $scope.fibers.selectedFibers.forEach((selectedFiber) => fiberLayers[selectedFiber.systemId].show())
 
-    $scope.fibers.map(function (dataSource) {
-      selectFiberDatasource(dataSource , true);
-    })
-  }
-
-  $scope.removeSelectedFiberDatasource = (a,b) => {
-    var idx = $scope.fibers.indexOf(a);
-    $scope.fibers.splice(idx , 1);
-
-    selectFiberDatasource(a , false);
-  }
-
-
-  function selectFiberDatasource (datasource, show) {
-    if (show) {
-      fiberLayers[String(datasource.systemId)].show()
-      datasource.visible = true
-    }else {
-      fiberLayers[String(datasource.systemId)].hide()
-      datasource.visible = false
-    }
-    updateOptimizationFiber()
-  }
-
-  function updateOptimizationFiber () {
     // For now, save fiber source ids in state.js. Later we should store everything in state.js
-    state.optimizationOptions.fiberSourceIds = _.pluck($scope.fibers, 'systemId').sort()
+    state.optimizationOptions.fiberSourceIds = _.pluck($scope.fibers.selectedFibers, 'systemId').sort()
   }
 
-  $scope.selectedExistingFiberIds = []
-  $scope.setVisibleFibers = (servicelayer, selectedlayer) => {
-	$scope.selectedExistingFiberIds = []
-    var fiberSourceIdsMap = $scope.fiberSourceIdsMapping
-    if (!selectedlayer.visible) {
-    	$scope.selectedExistingFiberIds.push(fiberSourceIdsMap[selectedlayer.name])
-    }
-    servicelayer.layers.forEach((layer) => {
-      if (layer.visible && selectedlayer.name !== layer.name) {
-    	$scope.selectedExistingFiberIds.push(fiberSourceIdsMap[layer.name])
-      }
-    })
-    var fiberSourceids = _.pluck($scope.fibers , 'systemId');;
-    state.optimizationOptions.fiberSourceIds = $scope.selectedExistingFiberIds.concat(fiberSourceids)
-    selectedlayer.toggleVisibility();
-  }
-  
-  $scope.fiberSourceIdsMapping = {}
-  $http.get('/network/fiber_plant/sourceid_mapping').then((response) => {
-    response.data.forEach((fibdetails) => {
-      $scope.fiberSourceIdsMapping[fibdetails.source_name] = fibdetails.fiber_source_id
-    });
-  })
+  $scope.selectedExistingFiberIds = []    // For now, save fiber source ids in state.js. Later we should store everything in state.js
 
   $scope.addFiber = () => {
     $('#upload_fiber_modal').modal('show')

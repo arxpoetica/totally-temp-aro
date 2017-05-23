@@ -288,6 +288,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/fiberSourceIdOfExistingFiber/:fiberName', (request, response, next) => {
+    var fiberName = request.params.fiberName
+    models.Network.getFiberSourceIdOfExistingFiber(fiberName)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/user_fiber/list', (request, response, next) => {
     var userId = request.user.id
     var req = {
