@@ -241,7 +241,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
 
     var points = fromLatLngToPoint(args.latLng);
-    $(".infobox").css("top" , points.y + 70).css("left" , points.x).text(feature2.f.fiber_strands);
+    $(".infobox").css("top" , points.y + 60).css("left" , points.x).text(feature2.f.fiber_strands);
     $(".infobox").show();
   })
 
