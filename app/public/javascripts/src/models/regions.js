@@ -108,6 +108,8 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
           // Go through all elements of the response and select each element
           response.data.forEach((boundary, index) => {
             // Select geography, and suppress events for all but the last boundary
+            boundary.layerId = boundary.layer_id
+            delete boundary.layer_id
             regions.selectGeography(boundary, index < response.data.length - 1)
           })
           defer.resolve()

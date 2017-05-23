@@ -138,6 +138,7 @@ module.exports = class Boundary {
       SELECT sa.id AS id,
              sa.code AS name,
              (CASE WHEN sl.is_user_defined=TRUE THEN 'user_defined' ELSE sl.name END) as type,
+             sl.id as layer_id,
              ST_AsGeoJSON(geom)::json AS geog
       FROM client.service_area sa
       JOIN client.service_layer sl
