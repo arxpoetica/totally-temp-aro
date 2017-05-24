@@ -35,6 +35,20 @@
           </div>
         </div>
 
+        <div class="settings_item" ng-if="selectedFO.opacity">
+          <div class="settings_label">Max Opacity</div>
+          <div class="settings_object">
+            <input type="text" ng-model="selectedFO.opacity.max" placeholder="Max Opacity">
+          </div>
+        </div>
+
+        <div class="settings_item" ng-if="selectedFO.opacity">
+          <div class="settings_label">Min Opacity</div>
+          <div class="settings_object">
+            <input type="text" ng-model="selectedFO.opacity.min" placeholder="Min Opacity">
+          </div>
+        </div>
+
         <div class="settings_item" ng-if="selectedFO.pixelWidth">
           <div class="settings_label">Exponent</div>
           <div class="settings_object">

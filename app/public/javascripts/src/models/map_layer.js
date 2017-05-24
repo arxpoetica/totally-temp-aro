@@ -75,6 +75,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
       this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
       this.isBoundaryLayer = options.isBoundaryLayer || false
       this.scaleIcon = options.scaleIcon || false
+      this.onDataLoaded = options.onDataLoaded || false
 
       this.setDeclarativeStyle(options.declarativeStyles)
 
