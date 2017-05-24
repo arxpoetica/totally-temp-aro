@@ -282,8 +282,70 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
       declarativeStyles: routeStyles(layer),
       threshold: 0,
-      reload: 'always'
+      reload: 'always',
+      onDataLoaded:(data)=>{
+        if(data.api_endpoint == "/network/fiber/:plan_id/find/all"){
+          $scope.fiberOverlay = data;
+          //calculate opacity here
+          $scope.calcFiberScale();
+          $scope.calcStrokeOpacity();
+        }
+      }
     })
+
+    $scope.calcStrokeOpacity = function () {
+      var currOption = state.selected_fiber_option;
+      if (currOption.id == 1) {
+        $scope.fiberOverlay.features.map(function (feature) {
+          feature.setProperty("opacity", 1);
+        })
+      } else {
+        var ll = +currOption.opacity.min;
+        var ul = +currOption.opacity.max;
+        var min = _.min($scope.fiberOverlay.features, (o) => { return o.getProperty("width") }).getProperty("width");
+        var max = _.max($scope.fiberOverlay.features, (o) => { return o.getProperty("width") }).getProperty("width");
+
+        $scope.fiberOverlay.features.map(function (feature) {
+          var math = (ul - ll) * (((feature.getProperty("width") - min) / (max - min))) + ll
+          feature.setProperty("opacity", math);
+        })
+      }
+    }
+
+    $scope.calcFiberScale = function () {
+      $scope.fiberOverlay.features.map(function (feature) {
+        var currOption = state.selected_fiber_option;
+        if (currOption.id == 1) {
+          $scope.fiberOverlay.features.map(function (feature) {
+            if (feature.getProperty("fiber_type") == 'distribution') {
+              feature.setProperty("width", 2);
+            } else {
+              feature.setProperty("width", 4);
+            }
+          })
+        } else {
+          var optionValue = feature.f[currOption.field];
+
+          var width = 0;
+          var maxPixelWidth = +currOption.pixelWidth.max
+          var minPixelWidth = +currOption.pixelWidth.min
+
+          var exponent = +currOption.pixelWidth.divisor // 1/3 Currently
+          var atomicDivisor = +currOption.pixelWidth.atomicDivisor; //50 Currently
+
+          switch (currOption.field) {
+            case "fiber_strands": width = Math.min(Math.pow(optionValue, (exponent)), maxPixelWidth)
+              break;
+            case "atomic_units": width = Math.min(Math.pow((optionValue / atomicDivisor + 1), (exponent)), maxPixelWidth)
+              break;
+          }
+
+          var aw = (width / maxPixelWidth) * (maxPixelWidth - minPixelWidth) + minPixelWidth - 1
+          feature.setProperty("width", aw);
+        }
+      })
+    }
+
     layer.routeLayer = routeLayer
 
     layer.changedFiberVisibility = () => {
@@ -582,17 +644,22 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   function routeStyles (serviceLayer) {
     return (feature, styles) => {
       var type = feature.getProperty('fiber_type')
+      feature.setProperty("styles", styles)
       styles.zIndex = MapLayer.Z_INDEX_FIBER_STRANDS
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
-        styles.strokeWeight = calcFiberScale(feature , "feeder" , 4);
+        styles.strokeWeight = feature.getProperty("width") || 4;
+        styles.strokeOpacity = feature.getProperty("opacity") || 1;
+
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
       } else if (type === 'distribution') {
         styles.strokeColor = 'red'
-        styles.strokeWeight = calcFiberScale(feature , "dist" , 2);
-        if (!serviceLayer.showDistributionFiber) {
+        styles.strokeWeight = feature.getProperty("width") || 2;
+        styles.strokeOpacity = feature.getProperty("opacity") || 1;
+
+          if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
       } else if (type === 'backbone') {
@@ -602,31 +669,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           styles.visible = false
         }
       }
-    }
-  }
-
-  function calcFiberScale(feature , fiber_type , defscale) {
-    var currOption = state.selected_fiber_option;
-    if(currOption.id == 1){
-      return defscale
-    }else {
-      var optionValue = feature.f[currOption.field];
-
-      var width = 0;
-      var maxPixelWidth = +currOption.pixelWidth.max;
-      var minPixelWidth = +currOption.pixelWidth.min;
-
-      var exponent =  +currOption.pixelWidth.divisor; // 1/3 Currently
-      var atomicDivisor =  +currOption.pixelWidth.atomicDivisor; //50 Currently
-
-      switch (currOption.field){
-         case "fiber_strands": width = Math.min(Math.pow(optionValue , (exponent)) , 12);
-              break;
-         case "atomic_units" : width = Math.min(Math.pow((optionValue / atomicDivisor + 1) , (exponent)) , 12);
-              break;
-       }
-
-       return (width / 12) * (maxPixelWidth -  minPixelWidth) +  minPixelWidth - 1.
     }
   }
 
@@ -748,6 +790,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.$on("map_setting_changed" , (e , settings)=>{
      if(settings.type == "fiber_option"){
+       //calculate opacity here
+       $scope.calcFiberScale();
+       $scope.calcStrokeOpacity();
+
        reloadFiberStyles();
      }
   })

@@ -16,6 +16,10 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
         min : 2,
         max : 12,
         divisor : 1/3
+      },
+      opacity: {
+        min : 0.66,
+        max : 1
       }
     },
     {
@@ -28,6 +32,10 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
         max : 12,
         divisor : 1/3,
         atomicDivisor: 50
+      },
+      opacity: {
+        min : 0.66,
+        max : 1
       }
     }
   ];
@@ -51,13 +59,13 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
 
   //test codes will be removed later
   $scope.$watch(function () {
-    return $scope.selectedFO.pixelWidth;
+    return $scope.selectedFO;
   } , function (newVal, oldVal) {
     if(newVal && !angular.equals(newVal , oldVal)){
 
       $scope.fiberOptions.map(function (option) {
         var selected =$scope.selectedFO;
-        if(option.id == selected.id){
+        if (option.id == selected.id && option.id !=1) {
           option.pixelWidth.max = selected.pixelWidth.max;
           option.pixelWidth.min = selected.pixelWidth.min;
         }
