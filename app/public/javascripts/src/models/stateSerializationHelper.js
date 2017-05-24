@@ -38,8 +38,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
   var addConstructionSitesToBody = (state, postBody) => {
-    var selectedConstructionSites = state.constructionSites.filter((item) => item.checked)
-    postBody.locationTypes = _.pluck(selectedConstructionSites, 'key')
+    // To be fixed correctly when we implement construction sites
+    // var selectedConstructionSites = state.constructionSites.filter((item) => item.checked)
+    // postBody.locationTypes = _.pluck(selectedConstructionSites, 'key')
   }
 
   // Add global data sources to a POST body that we will send to aro-service for performing optimization
