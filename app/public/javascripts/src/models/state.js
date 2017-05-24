@@ -144,11 +144,6 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
     //create construction sites copy locationTypes and then add a isConstructionSite Field
     service.constructionSites = angular.copy(service.locationTypes);
-    service.constructionSites.map(function (csite) {
-      csite.isConstructionSite = true
-    });
-
-
   }
 
   // Load tile information from the server
