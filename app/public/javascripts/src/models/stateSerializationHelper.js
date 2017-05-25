@@ -129,7 +129,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
       return info
     })
-    postBody.processLayers = Array.from(setOfProcessLayers)
+    // Temporarily setting postBody.processLayers to []. As of now, aro-service does not create routes when
+    // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
+    postBody.processLayers = [] // Array.from(setOfProcessLayers)
     postBody.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     if (state.optimizationOptions.selectedLayer) {
       postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
