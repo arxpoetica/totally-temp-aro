@@ -169,7 +169,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var fiberGraphForPlan = fiberGraph
   // reload fiber graph when plan changes
   var reloadFiberGraph = () => {
-      return  // Disabled due to performance issues
+    return  // Hack to get this working for the demo
     // Get the data again from the server. This is because some geometries are empty and are not
     // put into the map, so we cant get it from mapLayer.features
     fiberGraphForPlan = fiberGraph
@@ -314,7 +314,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
 
     $scope.calcFiberScale = function () {
-      return  // Disabled due to performance issues
+      return  // This causes the browser to hang
       $scope.fiberOverlay.features.map(function (feature) {
         var currOption = state.selected_fiber_option;
         if (currOption.id == 1) {
