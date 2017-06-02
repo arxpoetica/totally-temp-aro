@@ -92,16 +92,18 @@ exports.configure = (api, middleware) => {
 
   // Delete an existing plan
   api.post('/network_plan/:plan_id/delete', check_owner_permission, (request, response, next) => {
+    var userId = request.body.userId
     var plan_id = request.params.plan_id
-    models.NetworkPlan.deletePlan(plan_id)
+    models.NetworkPlan.deletePlan(userId, plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
   // Clear the route of an existing plan
   api.post('/network_plan/:plan_id/clear', check_owner_permission, (request, response, next) => {
+    var userId = request.body.userId
     var plan_id = request.params.plan_id
-    models.NetworkPlan.clearRoute(plan_id)
+    models.NetworkPlan.clearRoute(userId, plan_id)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

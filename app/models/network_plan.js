@@ -420,7 +420,7 @@ module.exports = class NetworkPlan {
       })
       .then((plans) => {
         var params = []
-        var sql = 'SELECT COUNT(*) AS count from client.active_plan'
+        var sql = 'SELECT COUNT(*) AS count from client.active_plan plan'
         if (user) {
           sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$1)'
           params.push(user.id)
@@ -498,11 +498,15 @@ module.exports = class NetworkPlan {
     })
   }
 
-  static deletePlan (plan_id) {
-    return database.execute('TODO-Parag DELETE FROM client.active_plan WHERE id=$1', [plan_id])
+  static deletePlan (userId, plan_id) {
+    var req = {
+      method: 'DELETE',
+      url: `${config.aro_service_url}/user/${userId}/plan/${plan_id}`
+    }
+    return this._callService(req)
   }
 
-  static clearRoute (plan_id) {
+  static clearRoute (userId, plan_id) {
     return Promise.resolve()
       .then(() => (
         database.execute('DELETE FROM client.plan_targets WHERE plan_id=$1', [plan_id])
@@ -510,14 +514,23 @@ module.exports = class NetworkPlan {
       .then(() => (
         database.execute('DELETE FROM client.plan_sources WHERE plan_id=$1', [plan_id])
       ))
-      .then(() => (
-        database.execute('DELETE FROM client.fiber_route WHERE plan_id=$1', [plan_id])
-      ))
+      .then(() => {
+        var sql = `
+          DELETE
+          FROM client.subnet_link s
+          WHERE id in (
+            SELECT s.id
+            FROM client.subnet_link s
+            JOIN client.plan_subnet p
+            ON s.plan_subnet_id = p.id
+              AND p.plan_id IN (SELECT id FROM client.plan
+                                WHERE parent_plan_id IN (SELECT id FROM client.plan WHERE parent_plan_id=${plan_id})))
+        `
+        return database.execute(sql)
+        // database.execute('DELETE FROM client.fiber_route WHERE plan_id=$1', [plan_id])
+      })
       .then(() => (
         database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1', [plan_id])
-      ))
-      .then(() => (
-        database.execute('TODO - Parag DELETE FROM client.active_plan WHERE parent_plan_id=$1', [plan_id])
       ))
   }
 
@@ -946,6 +959,9 @@ module.exports = class NetworkPlan {
       })
   }
 
+  static _callService (req) {
+    return models.AROService.request(req)
+  }
 }
 
 var financialCosts = []
