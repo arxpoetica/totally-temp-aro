@@ -110,7 +110,7 @@ module.exports = class RouteOptimizer {
             nt.id = n.node_type_id
           WHERE
             plan_id IN (
-              SELECT id FROM client.plan WHERE parent_plan_id=$1
+              SELECT id FROM client.active_plan WHERE parent_plan_id=$1
               UNION ALL
               SELECT $1
             )

@@ -145,7 +145,7 @@ module.exports = class MarketSize {
       })
       .then((_industries) => {
         industries = _industries
-        var sql = 'SELECT name, area_name FROM client.plan WHERE id=$1'
+        var sql = 'SELECT name, area_name FROM client.active_plan WHERE id=$1'
         return database.findOne(sql, [plan_id])
       })
       .then((plan) => {
@@ -271,7 +271,7 @@ module.exports = class MarketSize {
               AND cities.buffer_geog && b.geog
               AND cities.id = (
                 SELECT cities.id FROM cities
-                JOIN client.plan r ON r.id = $${params.length}
+                JOIN client.active_plan r ON r.id = $${params.length}
                 ORDER BY r.area_centroid <#> cities.buffer_geog::geometry
                 LIMIT 1
               )

@@ -101,7 +101,7 @@ module.exports = class NetworkPlan {
 
   static copyPlan (plan_id, name, user) {
     return database.findOne(`
-      INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type, location_types, optimization_type)
+      INSERT INTO client.active_plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type, location_types, optimization_type)
       SELECT
         $2 AS name,
         area_name,
@@ -112,7 +112,7 @@ module.exports = class NetworkPlan {
         'R' AS plan_type,
         location_types,
         optimization_type
-      FROM client.plan WHERE id=$1
+      FROM client.active_plan WHERE id=$1
       RETURNING id
     `, [plan_id, name])
     .then((plan) => {
@@ -148,7 +148,7 @@ module.exports = class NetworkPlan {
             users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
             created_at, updated_at
           FROM
-            client.plan
+            client.active_plan plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
           WHERE plan.id=$1
@@ -173,8 +173,8 @@ module.exports = class NetworkPlan {
           plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
           created_at, updated_at, location_types, optimization_type,
-          (SELECT EXISTS(SELECT id FROM client.plan WHERE parent_plan_id=$1 LIMIT 1)) AS "ranOptimization"
-        FROM client.plan
+          (SELECT EXISTS(SELECT id FROM client.active_plan WHERE parent_plan_id=$1 LIMIT 1)) AS "ranOptimization"
+        FROM client.active_plan plan
         LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
         LEFT JOIN auth.users ON users.id = permissions.user_id
         WHERE plan.id=$1
@@ -305,7 +305,7 @@ module.exports = class NetworkPlan {
         output.metadata.customerTypes = customerTypes
 
         database.execute(`
-            UPDATE client.plan SET
+            UPDATE client.active_plan SET
               total_cost=$2,
               total_revenue=$3,
               npv=$4,
@@ -332,7 +332,7 @@ module.exports = class NetworkPlan {
   static findWirecenterPlan (plan_id, wirecenter_id) {
     var params = [plan_id, wirecenter_id]
     return database.findOne(`
-        SELECT id FROM client.plan WHERE parent_plan_id IN (SELECT id from client.plan WHERE parent_plan_id=$1)
+        SELECT id FROM client.active_plan WHERE parent_plan_id IN (SELECT id from client.active_plan WHERE parent_plan_id=$1)
         AND wirecenter_id=$2
       `, params)
       .then((row) => {
@@ -345,10 +345,10 @@ module.exports = class NetworkPlan {
     var params = [plan_id]
     return database.polygons(`
       SELECT p.wirecenter_id AS id, sa.geom AS geom, sa.code AS name, ST_AsGeoJSON(ST_Centroid(sa.geom))::json AS centroid
-        FROM client.plan p
+        FROM client.active_plan p
         JOIN client.service_layer sl ON p.service_layer_id = sl.id
         JOIN client.service_area sa ON p.wirecenter_id = sa.id
-        WHERE plan_type='W' AND parent_plan_id IN (SELECT id from client.plan WHERE parent_plan_id=$1)
+        WHERE plan_type='W' AND parent_plan_id IN (SELECT id from client.active_plan WHERE parent_plan_id=$1)
         ${database.intersects(viewport, 'geom', 'AND')}
     `, params, true, viewport)
   }
@@ -380,8 +380,8 @@ module.exports = class NetworkPlan {
             plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
             users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
             created_at, updated_at,
-            (SELECT EXISTS(SELECT id FROM client.plan p WHERE parent_plan_id=plan.id LIMIT 1)) AS "ranOptimization"
-          FROM client.plan
+            (SELECT EXISTS(SELECT id FROM client.active_plan p WHERE parent_plan_id=plan.id LIMIT 1)) AS "ranOptimization"
+          FROM client.active_plan plan
           LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
           LEFT JOIN auth.users ON users.id = permissions.user_id
           WHERE plan.plan_type='R'
@@ -400,7 +400,7 @@ module.exports = class NetworkPlan {
             OR lower(users.last_name) LIKE lower($${params.length})
             OR plan.id IN (
               SELECT plan.id
-                FROM client.plan
+                FROM client.active_plan plan
                 JOIN client.selected_regions sr
                   ON sr.plan_id = plan.id
                  AND lower(sr.region_name) LIKE lower($${params.length})
@@ -420,7 +420,7 @@ module.exports = class NetworkPlan {
       })
       .then((plans) => {
         var params = []
-        var sql = 'SELECT COUNT(*) AS count from client.plan'
+        var sql = 'SELECT COUNT(*) AS count from client.active_plan'
         if (user) {
           sql += ' WHERE plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$1)'
           params.push(user.id)
@@ -452,7 +452,7 @@ module.exports = class NetworkPlan {
     })
     .then(() => {
       var sql = `
-        INSERT INTO client.plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
+        INSERT INTO client.active_plan (name, area_name, area_centroid, area_bounds, created_at, updated_at, plan_type)
         VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3::text), 4326), ST_Envelope(ST_SetSRID(ST_GeomFromGeoJSON($4::text), 4326)), NOW(), NOW(), 'R') RETURNING id;
       `
       var params = [
@@ -475,7 +475,7 @@ module.exports = class NetworkPlan {
           JOIN client.network_node_types nnt
             ON nnt.name = 'central_office'
            AND network_nodes.node_type_id = nnt.id
-          JOIN client.plan
+          JOIN client.active_plan plan
             ON plan.id = $1
       ORDER BY plan.area_bounds <#> network_nodes.geom LIMIT 1)
       `
@@ -489,7 +489,7 @@ module.exports = class NetworkPlan {
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
           created_at, updated_at
         FROM
-          client.plan
+          client.active_plan plan
         LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
         LEFT JOIN auth.users ON users.id = permissions.user_id
         WHERE plan.id=$1
@@ -499,7 +499,7 @@ module.exports = class NetworkPlan {
   }
 
   static deletePlan (plan_id) {
-    return database.execute('DELETE FROM client.plan WHERE id=$1', [plan_id])
+    return database.execute('TODO-Parag DELETE FROM client.active_plan WHERE id=$1', [plan_id])
   }
 
   static clearRoute (plan_id) {
@@ -517,7 +517,7 @@ module.exports = class NetworkPlan {
         database.execute('DELETE FROM client.network_nodes WHERE plan_id=$1', [plan_id])
       ))
       .then(() => (
-        database.execute('DELETE FROM client.plan WHERE parent_plan_id=$1', [plan_id])
+        database.execute('TODO - Parag DELETE FROM client.active_plan WHERE parent_plan_id=$1', [plan_id])
       ))
   }
 
@@ -532,7 +532,7 @@ module.exports = class NetworkPlan {
     if (fields.length === 0) return Promise.resolve()
 
     params.push(plan_id)
-    return database.execute(`UPDATE client.plan SET ${fields.join(', ')}, updated_at=NOW() WHERE id=$${params.length}`,
+    return database.execute(`UPDATE client.active_plan SET ${fields.join(', ')}, updated_at=NOW() WHERE id=$${params.length}`,
       params)
   }
 
@@ -659,8 +659,8 @@ module.exports = class NetworkPlan {
 
     planQuery = planQuery || `
       p.id IN (
-        (SELECT r.id FROM client.plan r WHERE r.parent_plan_id IN (
-          (SELECT id FROM client.plan WHERE parent_plan_id = $1)
+        (SELECT r.id FROM client.active_plan r WHERE r.parent_plan_id IN (
+          (SELECT id FROM client.active_plan WHERE parent_plan_id = $1)
         ))
       )
     `
@@ -669,7 +669,7 @@ module.exports = class NetworkPlan {
 
     return Promise.resolve()
       .then(() => (
-        database.findOne('SELECT name FROM client.plan WHERE id=$1', [plan_id])
+        database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
       ))
       .then((plan) => {
         kml_output += `<name>${escape(plan.name)}</name>
@@ -713,7 +713,7 @@ module.exports = class NetworkPlan {
             ST_AsKML(seg.geom) AS geom,
             ST_Length(seg.geom::geography) AS length,
             (frt.description || ' ' || cct.description) AS fiber_type
-          FROM client.plan p
+          FROM client.active_plan p
           JOIN client.fiber_route ON fiber_route.plan_id = p.id
           JOIN client.fiber_route_type frt ON frt.id = fiber_route.fiber_route_type
           JOIN client.fiber_route_segment seg ON seg.fiber_route_id = fiber_route.id
@@ -816,7 +816,7 @@ module.exports = class NetworkPlan {
             ST_AsKML(nn.coverage_geom) AS coverage_geom
           FROM client.network_nodes nn
           JOIN client.network_node_types t ON nn.node_type_id = t.id
-          JOIN client.plan p ON nn.plan_id = p.id
+          JOIN client.active_plan p ON nn.plan_id = p.id
           WHERE ${planQuery}
         `
         return database.query(sql, [plan_id])
@@ -867,7 +867,7 @@ module.exports = class NetworkPlan {
     return Promise.resolve()
       .then(() => {
         var sql = `
-          SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM client.plan WHERE id=$1) )) AS distance
+          SELECT statefp, countyfp, MIN(ST_distance(geom, (SELECT area_centroid FROM client.active_plan WHERE id=$1) )) AS distance
           FROM aro.cousub
           GROUP BY statefp, countyfp
           ORDER BY distance

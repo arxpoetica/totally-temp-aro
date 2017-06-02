@@ -126,7 +126,7 @@ module.exports = class CustomerProfile {
   }
 
   static customerProfileForExistingFiber (plan_id, metadata) {
-    return database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM client.plan WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null)
+    return database.findValue('SELECT cbsa FROM fiber_plant ORDER BY ST_Distance(geog, (SELECT area_centroid FROM client.active_plan WHERE id=$1)) LIMIT 1', [plan_id], 'cbsa', null)
       .then((cbsa) => {
         var sql = `
           WITH biz AS (SELECT DISTINCT b.id FROM businesses b JOIN aro.fiber_plant ON fiber_plant.carrier_name = $1 AND fiber_plant.cbsa = $2 AND ST_DWithin(fiber_plant.geom::geography, b.geog, 152.4))

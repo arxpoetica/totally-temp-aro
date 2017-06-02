@@ -440,10 +440,10 @@ exports.configure = (api, middleware) => {
       JOIN client.existing_fiber e ON ST_Intersects (s.geom, e.geom)
       WHERE s.id IN (
         SELECT wirecenter_id
-        FROM client.plan
+        FROM client.active_plan
         WHERE parent_plan_id IN (
           SELECT id
-          FROM client.plan
+          FROM client.active_plan
           WHERE parent_plan_id IN ($1)
         )
       )
