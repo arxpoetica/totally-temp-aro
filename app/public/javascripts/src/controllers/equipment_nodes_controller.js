@@ -650,17 +650,21 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       styles.zIndex = MapLayer.Z_INDEX_FIBER_STRANDS
       if (type === 'feeder') {
         styles.strokeColor = 'blue'
-        styles.strokeWeight = feature.getProperty("width") || 4;
-        styles.strokeOpacity = feature.getProperty("opacity") || 1;
-
+        // styles.strokeWeight = feature.getProperty("width") || 4;
+        // styles.strokeOpacity = feature.getProperty("opacity") || 1;
+        styles.strokeWeight = 4;	
+        styles.strokeOpacity = 1;
+        
         if (!serviceLayer.showFeederFiber) {
           styles.visible = false
         }
       } else if (type === 'distribution') {
         styles.strokeColor = 'red'
-        styles.strokeWeight = feature.getProperty("width") || 2;
-        styles.strokeOpacity = feature.getProperty("opacity") || 1;
-
+        // styles.strokeWeight = feature.getProperty("width") || 2;
+        // styles.strokeOpacity = feature.getProperty("opacity") || 1;
+        styles.strokeWeight = 2;	
+        styles.strokeOpacity = 1;
+        
           if (!serviceLayer.showDistributionFiber) {
           styles.visible = false
         }
