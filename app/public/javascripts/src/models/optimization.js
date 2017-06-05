@@ -137,7 +137,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
               if (currentPlan) {
                 $rootScope.$broadcast('route_planning_changed', response.data)
               }
-              success && success()
+              geographies && geographies()
             }
           } else {
             error()
