@@ -734,7 +734,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
 
       response.data.forEach(initDatasource)
-      updateOptimizationFiber()
     })
   }
 
@@ -763,7 +762,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     datasource.toggleVisibility = () => {
       layer.toggleVisibility()
       datasource.visible = layer.visible
-      updateOptimizationFiber()
     }
   }
 

@@ -107,7 +107,6 @@
 
               <div ng-if="serviceLayer.id === 'existing_fiber'">
                 <div style="clear: both"></div>
-                <% if (user.rol === 'admin' || user.rol === 'biz-dev') { %>
                 <div style="width: 250px;margin: 5px">
                   <ui-select multiple ng-model="fibers.selectedFibers"
                              theme="bootstrap"
@@ -124,7 +123,6 @@
                 <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
                   <span class="fa fa-plus"></span> Add fiber
                 </button>
-                <% } %>
               </div>
 
             </div>
