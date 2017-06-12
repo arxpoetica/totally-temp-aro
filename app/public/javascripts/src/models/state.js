@@ -62,7 +62,10 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
       { id: 'Fiber', label: 'Fiber', checked: true},
       { id: 'FiveG', label: '5G', checked: false}
     ],
-    selectedLayer: null
+    selectedLayer: null,
+    generatedDataRequest: {
+      generatePlanLocationLinks : false
+    }
   }
 
   // Boundaries layer data - define once

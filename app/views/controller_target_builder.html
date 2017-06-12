@@ -150,22 +150,17 @@
        ></checkbox>
        {{type.label}}
      </div>
-    <div  ng-show="type.id == 'FiveG' && type.selected" style="display: inline-block">
+    <div  ng-show="type.id == 'FiveG' && type.checked" style="display: inline-block">
      <label>
+     <div style="display: inline-block">
       <span>Polygon Type</span>
-      <select class="form-control" ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
+      <select class="form-control ng-pristine ng-valid ng-touched" 
+      		  ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
         <option value="FIXED_RADIUS">Fixed Radius</option>
         <option value="AVERAGE_RADIUS">Average Radius</option>
         <option value="RAY_TRACING">Ray Tracing</option>
       </select>
-     <div style="display: inline-block">
-       <checkbox
-               class="chk-small"
-               ng-model="isChecked2"
-               name="ctype-name"
-       ></checkbox>
-        Fiber Proximity Placement
-     </div>
+     </div> 
      <div style="display: inline-block"> Radius
        <span>
            <input
@@ -181,6 +176,18 @@
     </div>
     </label>
 
+  </div>
+  
+  <p><strong>Other Settings</strong></p>
+  <div class="checkbox">
+  	<label>
+	 <checkbox
+		class="chk-small"
+        ng-model="state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
+        name="ctype-name"
+     ></checkbox>
+        Save Routed Locations
+  	</label>      
   </div>
   
   <p><strong>Network Construction</strong></p>

@@ -26,6 +26,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     addTechnologiesToBody(state, optimizationBody)
     optimizationBody.fiberSourceIds = state.optimizationOptions.fiberSourceIds
+    optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
 
     return optimizationBody
   }
