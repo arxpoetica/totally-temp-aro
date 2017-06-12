@@ -169,7 +169,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var fiberGraphForPlan = fiberGraph
   // reload fiber graph when plan changes
   var reloadFiberGraph = () => {
-    return  // Hack to get this working for the demo
+    // return  // Hack to get this working for the demo
     // Get the data again from the server. This is because some geometries are empty and are not
     // put into the map, so we cant get it from mapLayer.features
     fiberGraphForPlan = fiberGraph

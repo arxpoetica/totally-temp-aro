@@ -2,7 +2,7 @@
  * Created by saneesh on 19/5/17.
  */
 
-app.directive("fiberStrandInfo" , function ($rootScope,$timeout) {
+app.directive("fiberStrandInfo" , function ($rootScope,$timeout,$filter) {
     return {
         templateUrl : '/javascripts/src/directives/views/modal_fiber_segment_info.html',
         restrict: 'E',
@@ -23,31 +23,31 @@ app.directive("fiberStrandInfo" , function ($rootScope,$timeout) {
                 });
                 $scope.fieldItems.push({
                     key : "Level",
-                    value : feature2.getProperty("fiber_type")
+                    value : feature2.getProperty("fiber_type").charAt(0).toUpperCase() + feature2.getProperty("fiber_type").substring(1).toLowerCase()
                 });
                 $scope.fieldItems.push({
                     key : "Fiber Strands",
-                    value : feature2.getProperty("fiber_strands")
+                    value : $filter('number')(feature2.getProperty("fiber_strands"), 0)
                 });
                 $scope.fieldItems.push({
-                    key : "Atomic Units Supported",
-                    value : feature2.getProperty("atomic_units")
+                    key : "Atomic Units Downstream",
+                    value : $filter('number')(feature2.getProperty("atomic_units"), 0)
                 });
                 $scope.fieldItems.push({
-                    key : "Entities Supported",
-                    value : feature2.getProperty("raw_coverage")
+                    key : "Entities Downstream",
+                    value : $filter('number')(feature2.getProperty("raw_coverage"), 0)
                 });
                 $scope.fieldItems.push({
-                    key : "Total Spend Supported",
-                    value : feature2.getProperty("total_revenue").toFixed(1)+config.currency_symbol,
+                    key : "Total Spend Downstream",
+                    value : $filter('currency')(feature2.getProperty("total_revenue"), config.currency_symbol, 0),
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share",
                     value : (feature2.getProperty("penetration") * 100).toFixed(1) + "%"
                 });
                 $scope.fieldItems.push({
-                    key : "Fair Share Spend Supported",
-                    value : feature2.getProperty("fairshare_demand").toFixed(1)+config.currency_symbol,
+                    key : "Fair Share Spend",
+                    value : $filter('currency')(feature2.getProperty("monthly_revenue"), config.currency_symbol, 0),
                 });
                 $scope.$apply();
             }
