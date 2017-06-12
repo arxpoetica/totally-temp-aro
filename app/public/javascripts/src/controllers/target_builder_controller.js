@@ -149,6 +149,14 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
+  
+  $scope.setSelectedBoundary = () => {
+	  var selectedProcessLayers = []
+	  if ( $scope.selectedBoundary ) {
+		  selectedProcessLayers.push($scope.selectedBoundary.id)  
+	  }
+	  state.optimizationOptions.processLayers = selectedProcessLayers
+  }
   // --
 
   $rootScope.$on('map_layer_loaded_data', (e, layer) => {

@@ -131,13 +131,14 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     })
     // Temporarily setting postBody.processLayers to []. As of now, aro-service does not create routes when
     // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
-    postBody.processLayers = [] // Array.from(setOfProcessLayers)
+    //postBody.processLayers = [] // Array.from(setOfProcessLayers)
+    postBody.processLayers = state.optimizationOptions.processLayers
     postBody.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     if (state.optimizationOptions.selectedLayer) {
       postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
     }
   }
-
+  
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.fiberNetworkConstraints = {}
