@@ -409,8 +409,8 @@ module.exports = class Location {
             (SELECT ST_Distance(fr.geom::geography, locations.geog)
               FROM client.fiber_route fr
               WHERE fr.plan_id IN (
-                (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-                  (SELECT id FROM client.plan WHERE parent_plan_id=$2)
+                (SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
+                  (SELECT id FROM client.active_plan WHERE parent_plan_id=$2)
                 ))
               )
               ORDER BY fr.geom <#> locations.geom ASC

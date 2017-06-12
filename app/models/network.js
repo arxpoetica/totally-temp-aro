@@ -22,8 +22,8 @@ module.exports = class Network {
         FROM client.fiber_route_segment seg
         JOIN client.fiber_route fr ON seg.fiber_route_id = fr.id
         WHERE fr.plan_id IN (
-          (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-            (SELECT id FROM client.plan WHERE parent_plan_id=$1)
+          (SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
+            (SELECT id FROM client.active_plan WHERE parent_plan_id=$1)
           ))
         )
         AND seg.cable_construction_type_id = (
@@ -148,7 +148,7 @@ module.exports = class Network {
             -- plan_id IS NOT NULL AS draggable,
             t.name <> 'central_office' AS unselectable
           FROM client.network_nodes n
-          ${plan_id ? 'LEFT JOIN client.plan p ON p.id = n.plan_id' : ''}
+          ${plan_id ? 'LEFT JOIN client.active_plan p ON p.id = n.plan_id' : ''}
           JOIN client.network_node_types t
             ON n.node_type_id = t.id
         `
@@ -170,9 +170,9 @@ module.exports = class Network {
               params.push(plan_id)
               constraints.push(`
                 plan_id IN (
-                  SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+                  SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
                     SELECT p.id
-                      FROM client.plan p
+                      FROM client.active_plan p
                       -- JOIN client.service_layer s ON s.id = p.service_layer_id
                       WHERE p.parent_plan_id = $${params.length}
                   )
@@ -182,7 +182,7 @@ module.exports = class Network {
               params.push(serviceLayer)
               constraints.push(`
                 plan_id IN (
-                  SELECT p.id FROM client.plan p
+                  SELECT p.id FROM client.active_plan p
                   JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $${params.length}
                   WHERE p.plan_type = 'H'
                 )
@@ -192,7 +192,7 @@ module.exports = class Network {
             params.push(plan_id)
             constraints.push(`
               (plan_id IS NULL OR plan_id IN (
-                SELECT id FROM client.plan WHERE parent_plan_id=$${params.length}
+                SELECT id FROM client.active_plan WHERE parent_plan_id=$${params.length}
                 UNION ALL
                 SELECT $${params.length}
               ))`)
@@ -218,7 +218,7 @@ module.exports = class Network {
       .then(() => this._updateNodes(plan_id, changes.updates))
       .then(() => this._deleteNodes(plan_id, changes.deletions))
       .then(() => (
-        database.execute('UPDATE client.plan SET updated_at=NOW() WHERE id=$1', [plan_id])
+        database.execute('UPDATE client.active_plan SET updated_at=NOW() WHERE id=$1', [plan_id])
       ))
   }
 
@@ -228,9 +228,9 @@ module.exports = class Network {
     if (serviceLayer === 'all') {
       params.push(plan_id)
       condition = `
-        SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+        SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
           SELECT p.id
-            FROM client.plan p
+            FROM client.active_plan p
             -- JOIN client.service_layer s ON s.id = p.service_layer_id
             WHERE p.parent_plan_id = $1
         )
@@ -241,7 +241,7 @@ module.exports = class Network {
       }
       params.push(serviceLayer)
       condition = `
-        SELECT p.id FROM client.plan p
+        SELECT p.id FROM client.active_plan p
         JOIN client.service_layer s ON s.id = p.service_layer_id AND s.id = $1
         WHERE p.plan_type = 'H'
       `
@@ -265,8 +265,8 @@ module.exports = class Network {
       FROM client.subnet_link s
       JOIN client.plan_subnet ps ON ps.id = s.plan_subnet_id
       JOIN client.fiber_route_type f ON f.id = ps.fiber_type_id
-      WHERE ps.plan_id IN (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-              (SELECT id FROM client.plan WHERE parent_plan_id = $1)
+      WHERE ps.plan_id IN (SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
+              (SELECT id FROM client.active_plan WHERE parent_plan_id = $1)
             ))
     `
     var params = [planId]
@@ -344,7 +344,7 @@ module.exports = class Network {
 
     return Promise.all([
       database.findOne('SELECT * FROM client.plan_links WHERE plan_id = $1 LIMIT 1', [plan_id]),
-      database.execute('UPDATE client.plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
+      database.execute('UPDATE client.active_plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
                        [plan_id, options.locationTypes, options.algorithm])
     ])
       .then((results) => {
@@ -592,7 +592,7 @@ module.exports = class Network {
       FROM client.plan_links
       JOIN client.network_nodes nn1 ON nn1.id = plan_links.from_link_id
       JOIN client.network_nodes nn2 ON nn2.id = plan_links.to_link_id
-      JOIN client.plan p ON p.id = nn1.plan_id
+      JOIN client.active_plan p ON p.id = nn1.plan_id
       WHERE plan_links.plan_id = $1
     `, [plan_id])
   }

@@ -198,7 +198,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('plan_selected', null)
         delete $rootScope.currentPlan;
       }
-      $http.post('/network_plan/' + plan.id + '/delete').then((response) => {
+      $http.post('/network_plan/' + plan.id + '/delete', { userId: $scope.user_id }).then((response) => {
         $scope.loadPlans()
       })
     })
@@ -360,7 +360,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       showCancelButton: true,
       closeOnConfirm: true
     }, () => {
-      $http.post('/network_plan/' + $scope.plan.id + '/clear').then((response) => {
+      $http.post('/network_plan/' + $scope.plan.id + '/clear', { userId: $scope.user_id }).then((response) => {
         $rootScope.$broadcast('plan_cleared', $scope.plan)
       })
     })
