@@ -21,45 +21,45 @@
           </div>
         </div>
 
-        <div class="settings_item" ng-if="selectedFO.pixelWidth">
+        <div class="settings_item" ng-if="state.viewSetting.selectedFiberOption.pixelWidth">
           <div class="settings_label">Max Pixel Width</div>
           <div class="settings_object">
-            <input type="text" ng-model="selectedFO.pixelWidth.max" placeholder="Max Pixel Width">
+            <input type="text" ng-model="state.viewSetting.selectedFiberOption.pixelWidth.max" placeholder="Max Pixel Width">
           </div>
         </div>
 
-        <div class="settings_item" ng-if="selectedFO.pixelWidth">
+        <div class="settings_item" ng-if="state.viewSetting.selectedFiberOption.pixelWidth">
           <div class="settings_label">Min Pixel Width</div>
           <div class="settings_object">
-            <input type="text" ng-model="selectedFO.pixelWidth.min" placeholder="Min Pixel Width">
+            <input type="text" ng-model="state.viewSetting.selectedFiberOption.pixelWidth.min" placeholder="Min Pixel Width">
           </div>
         </div>
 
-        <div class="settings_item" ng-if="selectedFO.opacity">
+        <div class="settings_item" ng-if="state.viewSetting.selectedFiberOption.opacity">
           <div class="settings_label">Max Opacity</div>
           <div class="settings_object">
-            <input type="text" ng-model="selectedFO.opacity.max" placeholder="Max Opacity">
+            <input type="text" ng-model="state.viewSetting.selectedFiberOption.opacity.max" placeholder="Max Opacity">
           </div>
         </div>
 
-        <div class="settings_item" ng-if="selectedFO.opacity">
+        <div class="settings_item" ng-if="state.viewSetting.selectedFiberOption.opacity">
           <div class="settings_label">Min Opacity</div>
           <div class="settings_object">
-            <input type="text" ng-model="selectedFO.opacity.min" placeholder="Min Opacity">
+            <input type="text" ng-model="state.viewSetting.selectedFiberOption.opacity.min" placeholder="Min Opacity">
           </div>
         </div>
 
-        <div class="settings_item" ng-if="selectedFO.pixelWidth">
+        <div class="settings_item" ng-if="state.viewSetting.selectedFiberOption.pixelWidth">
           <div class="settings_label">Exponent</div>
           <div class="settings_object">
-            <input type="text" ng-model="selectedFO.pixelWidth.divisor" placeholder="Exponent">
+            <input type="text" ng-model="state.viewSetting.selectedFiberOption.pixelWidth.divisor" placeholder="Exponent">
           </div>
         </div>
 
-        <div class="settings_item" ng-if="selectedFO.pixelWidth &&  selectedFO.pixelWidth.atomicDivisor">
+        <div class="settings_item" ng-if="state.viewSetting.selectedFiberOption.pixelWidth &&  state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor">
           <div class="settings_label">Atomic Divisor</div>
           <div class="settings_object">
-            <input type="text" ng-model="selectedFO.pixelWidth.atomicDivisor" placeholder="Atomic Divisor">
+            <input type="text" ng-model="state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" placeholder="Atomic Divisor">
           </div>
         </div>
       </li>
