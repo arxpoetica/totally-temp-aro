@@ -2,45 +2,9 @@
 app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','state', ($scope,$rootScope,map_tools,state) => {
   $scope.map_tools = map_tools
   $scope.heatmapOn = true;
-  $scope.fiberOptions = [
-    {
-      id : 1,
-      name : "Uniform width"
-    },
-    {
-      id : 2,
-      name : "Fiber Strand Count",
-      field : "fiber_strands",
-      multiplier : 2.1,
-      pixelWidth : {
-        min : 2,
-        max : 12,
-        divisor : 1/3
-      },
-      opacity: {
-        min : 0.66,
-        max : 1
-      }
-    },
-    {
-      id : 3,
-      name : "Atomic Unit Demand",
-      field : "atomic_units",
-      multiplier: 1,
-      pixelWidth : {
-        min : 2,
-        max : 12,
-        divisor : 1/3,
-        atomicDivisor: 50
-      },
-      opacity: {
-        min : 0.66,
-        max : 1
-      }
-    }
-  ];
+  $scope.state = state
 
-  $scope.selectedFO = state.selected_fiber_option= $scope.fiberOptions[0];
+  state.viewSetting.selectedFiberOption = state.viewFiberOptions[0]
 
   $scope.toggleHeatmap = ()=>{
     var locationsLayer = state.locations_layer;
@@ -52,29 +16,7 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
   }
 
   $scope.fiberOptionChanged = ()=>{
-    state.selected_fiber_option = $scope.selectedFO;
-    $rootScope.$broadcast("map_setting_changed" , {type : "fiber_option" , setting :  state.selected_fiber_option });
+    $rootScope.$broadcast("map_setting_changed" , {type : "fiber_option" , setting :  state.viewSetting.selectedFiberOption });
   }
-
-
-  //test codes will be removed later
-  $scope.$watch(function () {
-    return $scope.selectedFO;
-  } , function (newVal, oldVal) {
-    if(newVal && !angular.equals(newVal , oldVal)){
-
-      $scope.fiberOptions.map(function (option) {
-        var selected =$scope.selectedFO;
-        if (option.id == selected.id && option.id !=1) {
-          option.pixelWidth.max = selected.pixelWidth.max;
-          option.pixelWidth.min = selected.pixelWidth.min;
-        }
-      });
-
-      state.selected_fiber_option = $scope.selectedFO;
-      $rootScope.$broadcast("map_setting_changed" , {type : "fiber_option" , setting : state.selected_fiber_option});
-    }
-  } , true)
-
 
 }]);

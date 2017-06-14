@@ -17,6 +17,44 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
+  
+  service.viewFiberOptions = [
+    {
+      id: 1,
+      name: "Uniform width"
+    },
+    {
+      id: 2,
+      name: "Fiber Strand Count",
+      field: "fiber_strands",
+      multiplier: 2.1,
+      pixelWidth: {
+        min: 2,
+        max: 12,
+        divisor: 1 / 3
+      },
+      opacity: {
+        min: 0.66,
+        max: 1
+      }
+    },
+    {
+      id: 3,
+      name: "Atomic Unit Demand",
+      field: "atomic_units",
+      multiplier: 1,
+      pixelWidth: {
+        min: 2,
+        max: 12,
+        divisor: 1 / 3,
+        atomicDivisor: 50
+      },
+      opacity: {
+        min: 0.66,
+        max: 1
+      }
+    }
+  ]
 
   ;['dragend', 'zoom_changed'].forEach((event_name) => {
     $rootScope.$on('map_' + event_name, () => {
@@ -71,6 +109,11 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
   // Boundaries layer data - define once
   service.boundaries = {
     areaLayers: []
+  }
+  
+  // View Settings layer - define once
+  service.viewSetting = {
+    selectedFiberOption: null
   }
 
   // Default data sources - define once

@@ -295,8 +295,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
 
     $scope.calcStrokeOpacity = function () {
-      var currOption = state.selected_fiber_option;
-      if (currOption.id == 1) {
+      var currOption = state.viewSetting.selectedFiberOption;
+      if (currOption.id === state.viewFiberOptions[0].id) {
         $scope.fiberOverlay.features.map(function (feature) {
           feature.setProperty("opacity", 1);
         })
@@ -315,28 +315,17 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     $scope.calcFiberScale = function () {
       // return  // This causes the browser to hang
-      // $scope.fiberOverlay.features.map(function (feature) {
-        var currOption = state.selected_fiber_option;
-        if (currOption.id == 1) {
-          /*$scope.fiberOverlay.features.map(function (feature) {
-            if (feature.getProperty("fiber_type") == 'distribution') {
-              feature.setProperty("width", 2);
-            } else {
-              feature.setProperty("width", 4);
-            }
-          })*/
+        var currOption = state.viewSetting.selectedFiberOption;
+        if (currOption.id === state.viewFiberOptions[0].id) {
           var featuresBucket = _.groupBy($scope.fiberOverlay.features,function(feature) { return feature.getProperty("fiber_type") } )	
           var featuresBucketKeys = _.keys(featuresBucket)
-          _.each(featuresBucketKeys, function(key) {
-        	if(key == 'distribution') {
-        	  _.each(featuresBucket[key], function(feature){feature.setProperty("width", 2)})
-        	} else {
-        	  _.each(featuresBucket[key], function(feature){feature.setProperty("width", 4)})
-        	}
+          _.each(featuresBucketKeys, function (key) {
+            if (key == 'distribution') {
+              _.each(featuresBucket[key], function (feature) { feature.setProperty("width", 2) })
+            } else {
+              _.each(featuresBucket[key], function (feature) { feature.setProperty("width", 4) })
+            }
           })
-          //_.each(featuresBucket.distribution, function(feature){feature.setProperty("width", 2)})
-          //_.each(featuresBucket.feeder, function(feature){feature.setProperty("width", 4)})
-          
         } else {
           $scope.fiberOverlay.features.map(function (feature) {
 	        var optionValue = feature.f[currOption.field];
@@ -359,7 +348,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 	        feature.setProperty("width", aw);
           })
         }
-      //})
     }
 
     layer.routeLayer = routeLayer

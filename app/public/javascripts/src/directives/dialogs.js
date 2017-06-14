@@ -39,7 +39,7 @@ app.directive("fiberStrandInfo" , function ($rootScope,$timeout,$filter) {
                 });
                 $scope.fieldItems.push({
                     key : "Total Spend Downstream",
-                    value : $filter('currency')(feature2.getProperty("total_revenue"), config.currency_symbol, 0),
+                    value : $filter('currency')(feature2.getProperty("total_revenue")/1000, config.currency_symbol, 0) + 'K',
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share",
@@ -47,7 +47,7 @@ app.directive("fiberStrandInfo" , function ($rootScope,$timeout,$filter) {
                 });
                 $scope.fieldItems.push({
                     key : "Fair Share Spend",
-                    value : $filter('currency')(feature2.getProperty("monthly_revenue"), config.currency_symbol, 0),
+                    value : $filter('currency')(feature2.getProperty("monthly_revenue")/1000, config.currency_symbol, 0) + 'K',
                 });
                 $scope.$apply();
             }
