@@ -270,6 +270,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     layer.showBackhaulFiber = false
     layer.enabled = true
 
+    // Limit the number of segments we receive from the server. It takes a long time to
+    // display segments, especially when they have different widths and opacity. Also,
+    // each fiber segment takes 70 bytes zipped to transfer from the server.
+    // So 1000 segments = approx 70 kb zipped
+    var maxFiberSegments = 3000
+
     var routeLayer = new MapLayer({
       short_name: 'RT',
       name: ROUTE_LAYER_NAME,
@@ -280,12 +286,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
       },
       highlighteable: true,
-      api_endpoint: `/network/fiber/:plan_id/find/${layer.id}`,
+      api_endpoint: `/network/fiber/:plan_id/find/${layer.id}/${maxFiberSegments}`,
       declarativeStyles: routeStyles(layer),
       threshold: 0,
       reload: 'always',
       onDataLoaded:(data)=>{
-        if(data.api_endpoint == "/network/fiber/:plan_id/find/all"){
+        if(data.api_endpoint == `/network/fiber/:plan_id/find/all/${maxFiberSegments}`){
           $scope.fiberOverlay = data;
           //calculate opacity here
           $scope.calcFiberScale();
