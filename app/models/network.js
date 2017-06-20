@@ -222,7 +222,7 @@ module.exports = class Network {
       ))
   }
 
-  static viewFiber (plan_id, serviceLayer, viewport) {
+  static viewFiber (plan_id, serviceLayer, limitNumberOfSegments, viewport) {
     var params = []
     var condition = ''
     if (serviceLayer === 'all') {
@@ -246,6 +246,11 @@ module.exports = class Network {
         WHERE p.plan_type = 'H'
       `
     }
+
+    // If the user has asked to limit the number of segments, add a 'LIMIT' clause.
+    // We transfer roughly 70 bytes per fiber segment (zipped) when last checked in June 2017
+    var limitClause = limitNumberOfSegments ? `LIMIT ${limitNumberOfSegments}` : ''
+
     var sql = `
       SELECT s.id, s.geom, f.name as fiber_type, s.from_node_id, s.to_node_id,s.fiber_strands, s.atomic_units, s.raw_coverage, s.total_revenue, s.penetration, s.monthly_revenue
       FROM client.subnet_link s
@@ -254,6 +259,8 @@ module.exports = class Network {
       WHERE ps.plan_id IN (${condition})
       AND NOT ST_IsEmpty(s.geom)
       ${database.intersects(viewport, 's.geom', 'AND')}
+      ORDER BY s.atomic_units DESC  -- We are limiting the segments sent back, and want to sort by the "fattest" ones
+      ${limitClause}
     `
     return database.lines(sql, params, true, viewport)
   }
