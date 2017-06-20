@@ -243,10 +243,9 @@ module.exports = class NetworkPlan {
 
         var equipmentCosts = priceModel.equipmentCosts || []
         output.metadata.equipment_summary = equipmentCosts.map((item) => {
-          var cost = financialCosts.find((i) => i.name === item.nodeType)
           return {
             totalCost: item.total,
-            description: (cost && cost.description) || item.nodeType,
+            description: item.nodeType,
             quantity: item.quantity
           }
         })
@@ -963,9 +962,6 @@ module.exports = class NetworkPlan {
     return models.AROService.request(req)
   }
 }
-
-var financialCosts = []
-database.query('SELECT * FROM financial.network_cost_code').then((rows) => { financialCosts = rows })
 
 var entityNames = []
 database.query('SELECT * FROM client.entity_category').then((rows) => { entityNames = rows })
