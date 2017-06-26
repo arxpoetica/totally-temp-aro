@@ -353,6 +353,91 @@
     }]);
     var map;
 
+    // *******************************************************************************
+    // Tile Data service
+    // *******************************************************************************
+    var tileDataService = {}
+    tileDataService.tileDataCache = {}
+
+    tileDataService.getTileCacheKey = (zoom, x, y, layerId) => {
+      return `${zoom}-${x}-${y}-${layerId}`
+    }
+
+    tileDataService.getTileData = (zoom, x, y, layerId) => {
+      var tileCacheKey = tileDataService.getTileCacheKey(zoom, x, y, layerId)
+      if (tileDataService.tileDataCache[tileCacheKey]) {
+        // Tile data exists in cache
+        console.log('Tile exists. Returning cached tile')
+        return Promise.resolve(tileDataService.tileDataCache[tileCacheKey])
+      } else {
+        // Tile data does not exist in cache. Get it from a server
+        var tileUrl = `/tile/${zoom}/${x}/${y}/${layerId}?aggregate=true`
+
+        return new Promise((resolve, reject) => {
+          // $http.get(tileUrl)
+          //   .then((response) => {
+          //     if (reponse.status >= 200 && response.status <= 299) {
+          //       tileDataService.tileDataCache[tileCacheKey] = response.data
+          //       resolve(tileDataService.tileDataCache[tileCacheKey])
+          //     } else {
+          //       reject(response)
+          //     }
+          //   })
+          $.ajax({
+            url:tileUrl,
+            success: function(result) {
+              tileDataService.tileDataCache[tileCacheKey] = result
+              resolve(result)
+            }
+          })
+        })
+      }
+    }
+
+    tileDataService.clearCache = () => {
+      tileDataService.tileCache = {}
+    }
+
+    // *******************************************************************************
+    // Map tile implementation
+    // *******************************************************************************
+    function CoordMapType(tileSize) {
+      this.tileSize = tileSize;
+    }
+
+    CoordMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
+      var canvas = ownerDocument.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      
+      // Get tile data from service
+      // console.log(zoom, coord, 'medium')
+      tileDataService.getTileData(zoom, coord.x, coord.y, 'medium')
+        .then((response) => {
+          // Response will be an array of objects 
+          // console.log(response.length)
+          var ctx=canvas.getContext("2d");
+          ctx.fillStyle = '#a0a0ff'
+          ctx.strokeStyle = '#0000ff'
+          ctx.lineWidth = 3
+          // ctx.beginPath();
+          response.forEach((coordObject) => {
+            // Looks like service is returning tiles in 4096x4096 format
+            var x = coordObject.x / 4096 * 256, y = coordObject.y / 4096 * 256
+            // ctx.fillRect(coordObject.x / 4096 * 256, coordObject.y / 4096 * 256, 10, 10);
+            // ctx.strokeRect(coordObject.x / 4096 * 256, coordObject.y / 4096 * 256, 10, 10);
+            ctx.beginPath()
+            ctx.arc(x, y, 7, 0, Math.PI * 2.0, true)
+            ctx.fill()
+            ctx.stroke()
+          })
+          // ctx.stroke();
+      })
+
+      return canvas;
+    };
+
+
     function initialize() {
       var styles = [];
       styles.push({
@@ -374,8 +459,16 @@
         },
         styles: styles,
       });
+        // Insert this overlay map type as the first overlay map type at
+        // position 0. Note that all overlay map types appear on top of
+        // their parent base map.
+        map.overlayMapTypes.insertAt(
+            0, new CoordMapType(new google.maps.Size(256, 256)));        
+
+        // console.log(map.overlayMapTypes.getAt(0))//.setOpacity(.25)
 
       map.ready = function(callback) {
+
         if (map.getBounds()) {
           callback();
         } else {
@@ -409,6 +502,7 @@
   <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
   <script src="javascripts/vendors/angular-bootstrap-checkbox.js"></script>
   <script src="javascripts/vendors/ng-currency.js"></script>
+  <script src="javascripts/lib/components/tiles/tile-service.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
@@ -557,4 +651,5 @@
   for(g=0;g<i.length;g++)f(c,i[g]);b._i.push([a,e,d])};b.__SV=1.2;a=e.createElement("script");a.type="text/javascript";a.async=!0;a.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";f=e.getElementsByTagName("script")[0];f.parentNode.insertBefore(a,f)}})(document,window.mixpanel||[]);
   mixpanel.init("dfbe83f6bce5cb8321654ecde92e6111");</script><!-- end Mixpanel -->
   <% } %>
+  <tile></tile>
 </html>

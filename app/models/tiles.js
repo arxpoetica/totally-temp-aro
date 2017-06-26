@@ -26,10 +26,17 @@ module.exports = class Tiles {
         } else {
           // "body" will be a binary buffer. Use vector-file to de-serialize it into a vector tile
           var tile = new VectorTile(new Protobuf(body))
-          // var feature = tile.layers.aggregate_medium.feature(0)
-          // var geometry = feature.loadGeometry()
-          // console.log(geometry)
-          resolve(tile)
+          var positions = []
+
+          Object.keys(tile.layers).forEach((layerKey) => {
+            var layer = tile.layers[layerKey]
+            for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+              var feature = layer.feature(iFeature)
+              positions.push(feature.loadGeometry()[0][0])  // Super-hack! [0][0]
+            }
+          })
+
+          resolve(positions)
         }
       })    
     })

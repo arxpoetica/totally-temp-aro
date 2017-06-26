@@ -14,13 +14,17 @@ app.service('tileData', ['$http', ($http) => {
       return Promise.resolve(tileDataService[tileCacheKey])
     } else {
       // Tile data does not exist in cache. Get it from a server
-      var tileUrl = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v6/${zoom}/${x}/${y}.vector.pbf?access_token=pk.eyJ1IjoiYWhvY2V2YXIiLCJhIjoiRk1kMWZaSSJ9.E5BkluenyWQMsBLsuByrmg`
+      var tileUrl = `/tile/${zoom}/${x}/${y}/${layerId}?aggregate=true`
 
       return new Promise((resolve, reject) => {
         $http.get(tileUrl)
           .then((response) => {
-            console.log(response)
-            
+            if (reponse.status >= 200 && response.status <= 299) {
+              tileDataService.tileDataCache[tileCacheKey] = response.data
+              resolve(tileDataService.tileDataCache[tileCacheKey])
+            } else {
+              reject(response)
+            }
           })
       })
     }
