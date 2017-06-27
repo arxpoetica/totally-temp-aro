@@ -13,7 +13,12 @@ exports.configure = (api, middleware) => {
     var aggregate = request.query.aggregate ? request.query.aggregate : false
     
     models.Tiles.getTileData(zoom, x, y, layerId, aggregate)
-      .then(jsonSuccess(response, next))
+      .then((binaryData) => {
+        // Send the binary data as-is to the client
+        response.write(binaryData, 'binary')
+        response.end(null, 'binary')
+      })
       .catch(next)
+
   })
 }

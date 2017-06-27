@@ -18,6 +18,9 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= config.ARO_CLIENT %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
+
+    <!-- Include bundles with vendor scripts -->
+    <script src="javascripts/vendors/vendor-bundle.min.js"></script>
   </head>
   <body>
 
@@ -356,6 +359,9 @@
     // *******************************************************************************
     // Tile Data service
     // *******************************************************************************
+    var VectorTile = require('vector-tile').VectorTile
+    var Protobuf = require('pbf')
+
     var tileDataService = {}
     tileDataService.tileDataCache = {}
 
@@ -374,22 +380,32 @@
         var tileUrl = `/tile/${zoom}/${x}/${y}/${layerId}?aggregate=true`
 
         return new Promise((resolve, reject) => {
-          // $http.get(tileUrl)
-          //   .then((response) => {
-          //     if (reponse.status >= 200 && response.status <= 299) {
-          //       tileDataService.tileDataCache[tileCacheKey] = response.data
-          //       resolve(tileDataService.tileDataCache[tileCacheKey])
-          //     } else {
-          //       reject(response)
-          //     }
-          //   })
-          $.ajax({
-            url:tileUrl,
-            success: function(result) {
-              tileDataService.tileDataCache[tileCacheKey] = result
-              resolve(result)
-            }
-          })
+
+          // Getting binary data from the server. Directly use XMLHttpRequest()
+          var oReq = new XMLHttpRequest();
+          oReq.open("GET", tileUrl, true);
+          oReq.responseType = "arraybuffer";
+
+          oReq.onload = function(oEvent) {
+            var arrayBuffer = oReq.response;
+            var tile = new VectorTile(new Protobuf(arrayBuffer))
+            var positions = []
+
+            Object.keys(tile.layers).forEach((layerKey) => {
+              var layer = tile.layers[layerKey]
+              for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+                var feature = layer.feature(iFeature)
+                positions.push(feature.loadGeometry()[0][0])  // Super-hack! [0][0]
+              }
+            })
+            tileDataService.tileDataCache[tileCacheKey] = positions
+
+            resolve(positions)
+          };
+          oReq.onerror = function(error) { reject(error) }
+          oReq.onabort = function() { reject('XMLHttpRequest abort') }
+          oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
+          oReq.send();
         })
       }
     }
@@ -401,6 +417,7 @@
     // *******************************************************************************
     // Map tile implementation
     // *******************************************************************************
+    
     function CoordMapType(tileSize) {
       this.tileSize = tileSize;
     }
@@ -409,29 +426,25 @@
       var canvas = ownerDocument.createElement('canvas');
       canvas.width = 256;
       canvas.height = 256;
+      canvas.style.border = "2px solid";
       
       // Get tile data from service
-      // console.log(zoom, coord, 'medium')
       tileDataService.getTileData(zoom, coord.x, coord.y, 'medium')
         .then((response) => {
+
           // Response will be an array of objects 
-          // console.log(response.length)
           var ctx=canvas.getContext("2d");
           ctx.fillStyle = '#a0a0ff'
           ctx.strokeStyle = '#0000ff'
           ctx.lineWidth = 3
-          // ctx.beginPath();
           response.forEach((coordObject) => {
             // Looks like service is returning tiles in 4096x4096 format
             var x = coordObject.x / 4096 * 256, y = coordObject.y / 4096 * 256
-            // ctx.fillRect(coordObject.x / 4096 * 256, coordObject.y / 4096 * 256, 10, 10);
-            // ctx.strokeRect(coordObject.x / 4096 * 256, coordObject.y / 4096 * 256, 10, 10);
             ctx.beginPath()
             ctx.arc(x, y, 7, 0, Math.PI * 2.0, true)
             ctx.fill()
             ctx.stroke()
           })
-          // ctx.stroke();
       })
 
       return canvas;
