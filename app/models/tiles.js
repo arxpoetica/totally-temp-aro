@@ -9,13 +9,13 @@ var request = require('request')
 
 module.exports = class Tiles {
 
-  static getTileData(zoom, x, y, layerId, aggregate = false) {
+  static getTileData(tileUrl) {
 
     // Construct the tile URL to get data from a server
     // Note that we use "encoding: null" as we are getting binary data from aro-service
     var tileRequest = {
       method: 'GET',
-      url: `${config.aro_service_url}/v1/tiles/locations/${layerId}/${x}/${y}/${zoom}.mvt?aggregate=${aggregate}`,
+      url: `${config.aro_service_url}/${tileUrl}`,
       encoding: null
     }
 

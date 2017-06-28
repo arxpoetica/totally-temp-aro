@@ -12,24 +12,39 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   // Add map layers to state
   $document.ready(() => {
-    $scope.planState.setMapLayer('small', {
+    var showTileExtents = true
+    $scope.planState.setMapLayer('feeder_fiber', {
+      url: '/tile/v1/plan/1075/tiles/fiber/FEEDER/select/',
       drawingOptions: {
         strokeStyle: '#0000ff',
-        fillStyle: '#a0a0ff'
+        fillStyle: '#a0a0ff',
+        showTileExtents: showTileExtents
       }
-    })
-    $scope.planState.setMapLayer('medium', {
-      drawingOptions: {
-        strokeStyle: '#00ff00',
-        fillStyle: '#a0ffa0'
-      }
-    })
-    $scope.planState.setMapLayer('large', {
+    }),
+    $scope.planState.setMapLayer('distribution_fiber', {
+      url: '/tile/v1/plan/1075/tiles/fiber/DISTRIBUTION/select/',
       drawingOptions: {
         strokeStyle: '#ff0000',
-        fillStyle: '#ffa0a0'
+        fillStyle: '#ffa0a0',
+        showTileExtents: showTileExtents
       }
     })
+    // $scope.planState.setMapLayer('medium', {
+    //   url: '/tile/v1/tiles/locations/1/medium/aggregate/entity/',
+    //   drawingOptions: {
+    //     strokeStyle: '#00ff00',
+    //     fillStyle: '#a0ffa0',
+    //     showTileExtents: showTileExtents
+    //   }
+    // })
+    // $scope.planState.setMapLayer('large', {
+    //   url: '/tile/v1/tiles/locations/1/large/aggregate/entity/',
+    //   drawingOptions: {
+    //     strokeStyle: '#ff0000',
+    //     fillStyle: '#ffa0a0',
+    //     showTileExtents: showTileExtents
+    //   }
+    // })
   })
 
   $scope.serviceLayers = []

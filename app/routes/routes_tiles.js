@@ -5,14 +5,12 @@ var config = helpers.config
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  api.get('/tile/:zoom/:x/:y/:layerId', (request, response, next) => {
-    var zoom = request.params.zoom
-    var x = request.params.x
-    var y = request.params.y
-    var layerId = request.params.layerId
-    var aggregate = request.query.aggregate ? request.query.aggregate : false
-    
-    models.Tiles.getTileData(zoom, x, y, layerId, aggregate)
+  api.get('/tile/*', (request, response, next) => {
+
+    // Implemented as a pass-through route to aro-service
+    // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
+    var apiUrl = request.url.substring('/tile/'.length)
+    models.Tiles.getTileData(apiUrl)
       .then((binaryData) => {
         // Send the binary data as-is to the client
         response.write(binaryData, 'binary')

@@ -7,42 +7,30 @@ app.service('tileDataService', ['$http', ($http) => {
   var tileDataService = {}
   tileDataService.tileDataCache = {}
 
-  tileDataService.getTileCacheKey = (zoom, x, y, layerId) => {
-    return `${zoom}-${x}-${y}-${layerId}`
+  tileDataService.getTileCacheKey = (url) => {
+    return url  // Perhaps this should be hashed and shortened? Urls are long
   }
 
-  tileDataService.getTileData = (zoom, x, y, layerId) => {
-    var tileCacheKey = tileDataService.getTileCacheKey(zoom, x, y, layerId)
+  tileDataService.getTileData = (url) => {
+    var tileCacheKey = tileDataService.getTileCacheKey(url)
     if (tileDataService.tileDataCache[tileCacheKey]) {
       // Tile data exists in cache
-      console.log('Tile exists. Returning cached tile')
       return Promise.resolve(tileDataService.tileDataCache[tileCacheKey])
     } else {
       // Tile data does not exist in cache. Get it from a server
-      var tileUrl = `/tile/${zoom}/${x}/${y}/${layerId}?aggregate=true`
-
       return new Promise((resolve, reject) => {
 
         // Getting binary data from the server. Directly use XMLHttpRequest()
         var oReq = new XMLHttpRequest();
-        oReq.open("GET", tileUrl, true);
+        oReq.open("GET", url, true);
         oReq.responseType = "arraybuffer";
 
         oReq.onload = function(oEvent) {
-          var arrayBuffer = oReq.response;
-          var tile = new VectorTile(new Protobuf(arrayBuffer))
-          var positions = []
-
-          Object.keys(tile.layers).forEach((layerKey) => {
-            var layer = tile.layers[layerKey]
-            for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-              var feature = layer.feature(iFeature)
-              positions.push(feature.loadGeometry()[0][0])  // Super-hack! [0][0]
-            }
-          })
-          tileDataService.tileDataCache[tileCacheKey] = positions
-
-          resolve(positions)
+          var arrayBuffer = oReq.response
+          // De-serialize the binary data into a VectorTile object
+          var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
+          tileDataService.tileDataCache[tileCacheKey] = mapboxVectorTile
+          resolve(mapboxVectorTile)
         };
         oReq.onerror = function(error) { reject(error) }
         oReq.onabort = function() { reject('XMLHttpRequest abort') }
