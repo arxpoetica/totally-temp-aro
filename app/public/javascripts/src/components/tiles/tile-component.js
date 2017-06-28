@@ -28,7 +28,7 @@
       
       // Get tile data from service
       var tileObj = this
-      this.tileDataService.getTileData(this.layerProperties.data.url + `${coord.x}/${coord.y}/${zoom}.mvt`)
+      this.tileDataService.getTileData(this.layerProperties.data.url + `${zoom}/${coord.x}/${coord.y}.mvt`)
         .then((mapboxVectorTile) => {
 
           // Response will be an array of objects 
@@ -87,7 +87,6 @@
             ctx.fillStyle = '#000000'
             ctx.font = "15px Arial";
             ctx.fillText(coord.toString() + ', ' + zoom, 50, 50)
-            ctx.fillText('TEST', 10, 10)
           }
       })
       return canvas
