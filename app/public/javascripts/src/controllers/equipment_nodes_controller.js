@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$document', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, $document, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -9,6 +9,29 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.selected_tool = null
   $scope.vztfttp = true
   $scope.planState = state;
+
+  // Add map layers to state
+  $document.ready(() => {
+    $scope.planState.setMapLayer('small', {
+      drawingOptions: {
+        strokeStyle: '#0000ff',
+        fillStyle: '#a0a0ff'
+      }
+    })
+    $scope.planState.setMapLayer('medium', {
+      drawingOptions: {
+        strokeStyle: '#00ff00',
+        fillStyle: '#a0ffa0'
+      }
+    })
+    $scope.planState.setMapLayer('large', {
+      drawingOptions: {
+        strokeStyle: '#ff0000',
+        fillStyle: '#ffa0a0'
+      }
+    })
+  })
+
   $scope.serviceLayers = []
   $scope.existingFibers=[];
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
