@@ -19,22 +19,30 @@
 
     // This method is called by Google Maps. Render a canvas tile and send it back.
     getTile(coord, zoom, ownerDocument) {
+      // We create a div with a parent canvas. This is because the canvas needs to have its top-left
+      // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
+      // regardless of what we give in the style.left/style.top properties
+      var div = ownerDocument.createElement('div')
       var canvas = ownerDocument.createElement('canvas');
+      div.appendChild(canvas)
+      canvas.style.position = 'absolute'
+      canvas.style.left = `-${this.drawMargins}px`
+      canvas.style.top = `-${this.drawMargins}px`
       canvas.width = this.tileSize.width + this.drawMargins * 2;
       canvas.height = this.tileSize.height + this.drawMargins * 2;
+
       if (this.layerProperties.data.drawingOptions.showTileExtents) {
         canvas.style.border = "2px dotted";
       }
       
       // Get tile data from service
-      var tileObj = this
       this.tileDataService.getTileData(this.layerProperties.data.url + `${zoom}/${coord.x}/${coord.y}.mvt`)
         .then((mapboxVectorTile) => {
 
           // Response will be an array of objects 
           var ctx=canvas.getContext("2d");
-          ctx.fillStyle = tileObj.layerProperties.data.drawingOptions.fillStyle
-          ctx.strokeStyle = tileObj.layerProperties.data.drawingOptions.strokeStyle
+          ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
+          ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
           ctx.lineWidth = 3
 
           Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
@@ -51,8 +59,8 @@
                 switch(shape.length) {
                   case 1:
                     // This is a point
-                    var x = tileObj.drawMargins + shape[0].x * scaleFactor
-                    var y = tileObj.drawMargins + shape[0].y * scaleFactor
+                    var x = this.drawMargins + shape[0].x * scaleFactor
+                    var y = this.drawMargins + shape[0].y * scaleFactor
                     ctx.beginPath()
                     ctx.arc(x, y, 7, 0, Math.PI * 2.0, true)
                     ctx.fill()
@@ -61,16 +69,14 @@
 
                   default:
                     // Processing as multiline for now
-                    var x0 = tileObj.drawMargins + shape[0].x * scaleFactor
-                    var y0 = tileObj.drawMargins + shape[0].y * scaleFactor
-                    // console.log(x0 + ', ' +  y0)
+                    var x0 = this.drawMargins + shape[0].x * scaleFactor
+                    var y0 = this.drawMargins + shape[0].y * scaleFactor
                     ctx.beginPath()
                     ctx.moveTo(x0, y0)
                     for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                      var x1 = tileObj.drawMargins + shape[iCoord].x * scaleFactor
-                      var y1 = tileObj.drawMargins + shape[iCoord].y * scaleFactor
+                      var x1 = this.drawMargins + shape[iCoord].x * scaleFactor
+                      var y1 = this.drawMargins + shape[iCoord].y * scaleFactor
                       ctx.lineTo(x1, y1)
-                      // console.log(x1 + ', ' +   y1)
                     }
                     ctx.stroke()
                     break;
@@ -78,18 +84,18 @@
               })
             }
           })
-          if (tileObj.layerProperties.data.drawingOptions.showTileExtents) {
+          if (this.layerProperties.data.drawingOptions.showTileExtents) {
             // Draw a rectangle showing the tile (not the margins)
             ctx.strokeStyle = "#000000"
             ctx.lineWidth = 2
-            ctx.strokeRect(tileObj.drawMargins, tileObj.drawMargins, tileObj.tileSize.width, tileObj.tileSize.height)
+            ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
             // Show the tile coordinates that we pass to aro-service
             ctx.fillStyle = '#000000'
             ctx.font = "15px Arial";
             ctx.fillText(coord.toString() + ', ' + zoom, 50, 50)
           }
       })
-      return canvas
+      return div
     }
   }
 
