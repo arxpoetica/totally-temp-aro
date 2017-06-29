@@ -44,7 +44,6 @@
           ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
           ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
           ctx.lineWidth = 3
-
           Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
             var layer = mapboxVectorTile.layers[layerKey]
             // console.log('layer has ' + layer.length + ' features')
@@ -91,8 +90,14 @@
             ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
             // Show the tile coordinates that we pass to aro-service
             ctx.fillStyle = '#000000'
-            ctx.font = "15px Arial";
-            ctx.fillText(coord.toString() + ', ' + zoom, 50, 50)
+            ctx.strokeStyle = '#ffffff'
+            ctx.lineWidth = 4
+            ctx.font = "15px Arial"
+            ctx.textAlign="center"
+            ctx.textBaseline = "middle"
+            var coordString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
+            ctx.strokeText(coordString, canvas.width / 2, canvas.height /2)
+            ctx.fillText(coordString, canvas.width / 2, canvas.height /2)
           }
       })
       return div
