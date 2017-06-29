@@ -6,6 +6,8 @@ app.service('tileDataService', ['$http', ($http) => {
 
   var tileDataService = {}
   tileDataService.tileDataCache = {}
+  // Hold a map of layer keys to image urls (and image data once it is loaded)
+  tileDataService.layerEntityImages = {}
 
   tileDataService.getTileCacheKey = (url) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
@@ -38,6 +40,31 @@ app.service('tileDataService', ['$http', ($http) => {
         oReq.send();
       })
     }
+  }
+
+  // Adds a layer key and url to the tile data service
+  tileDataService.addEntityImageForLayer = (layerKey, imageUrl) => {
+    // Start loading the data from the server
+    var imageLoadedPromise = new Promise((resolve, reject) => {
+      var img = new Image()
+      img.src = imageUrl
+      img.onload = () => {
+        // Image has been loaded
+        resolve(img)
+      }
+    })
+
+    // Save the mapping
+    tileDataService.layerEntityImages[layerKey] = imageLoadedPromise
+  }
+
+  // Returns a promise for the image associated with a layer key
+  tileDataService.getEntityImageForLayer = (layerKey) => {
+    var entityImagePromise = tileDataService.layerEntityImages[layerKey]
+    if (!entityImagePromise) {
+      throw 'No promise for image with layerKey ' + layerKey
+    }
+    return entityImagePromise
   }
 
   tileDataService.clearCache = () => {

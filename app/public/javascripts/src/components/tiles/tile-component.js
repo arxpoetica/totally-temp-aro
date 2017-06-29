@@ -36,8 +36,15 @@
       }
       
       // Get tile data from service
-      this.tileDataService.getTileData(this.layerProperties.data.url + `${zoom}/${coord.x}/${coord.y}.mvt`)
-        .then((mapboxVectorTile) => {
+      var promises = [
+        this.tileDataService.getTileData(this.layerProperties.data.url + `${zoom}/${coord.x}/${coord.y}.mvt`),
+        this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
+      ]
+      Promise.all(promises)
+        .then((promiseResults) => {
+
+          var mapboxVectorTile = promiseResults[0]
+          var entityImage = promiseResults[1]
 
           // Response will be an array of objects 
           var ctx=canvas.getContext("2d");
@@ -53,17 +60,20 @@
               // console.log(JSON.stringify(geometry))
               // Geometry is an array of shapes
               var scaleFactor = 1.0 / 4096 * 256
+              var imageWidthBy2 = entityImage.width / 2
+              var imageHeightBy2 = entityImage.height / 2
               geometry.forEach((shape) => {
                 // Shape is an array of coordinates
                 switch(shape.length) {
                   case 1:
                     // This is a point
-                    var x = this.drawMargins + shape[0].x * scaleFactor
-                    var y = this.drawMargins + shape[0].y * scaleFactor
-                    ctx.beginPath()
-                    ctx.arc(x, y, 7, 0, Math.PI * 2.0, true)
-                    ctx.fill()
-                    ctx.stroke()
+                    var x = this.drawMargins + shape[0].x * scaleFactor - imageWidthBy2
+                    var y = this.drawMargins + shape[0].y * scaleFactor - imageHeightBy2
+                    // ctx.beginPath()
+                    // ctx.arc(x, y, 7, 0, Math.PI * 2.0, true)
+                    // ctx.fill()
+                    // ctx.stroke()
+                    ctx.drawImage(entityImage, x, y)
                     break;
 
                   default:
@@ -128,6 +138,7 @@ class TileComponentController {
       case this.state.MAP_LAYER_EVENTS.LAYER_CHANGED:
         var layerData = eventData;
         // Create a tile rendered for this layer id
+        this.tileDataService.addEntityImageForLayer(layerData.id, layerData.data.iconUrl)
         var tileRenderer = new MapTileRenderer(new google.maps.Size(256, 256), 1075, layerData, this.tileDataService)
         if (!this.layerIdToMapTilesIndex[layerData.id]) {
           // Tile does not already exist in maps
