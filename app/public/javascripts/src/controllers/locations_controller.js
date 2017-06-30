@@ -1,6 +1,42 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+
+  // Create a new set of map layers
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+  $rootScope.$on('configuration_loaded', (event, data) => {
+    var categories = configuration.locationCategories.v2
+    var showTileExtents = true
+    Object.keys(categories).forEach((categoryKey) => {
+      var category = categories[categoryKey]
+      if (category.show) {
+        state.setMapLayer(categoryKey, {
+          url: category.tileUrl,
+          iconUrl: `${baseUrl}${category.iconUrl}`,
+          label: category.label,
+          isVisible: true,
+          drawingOptions: {
+            strokeStyle: '#00ff00',
+            fillStyle: '#a0ffa0',
+            showTileExtents: showTileExtents
+          }
+        })
+      }
+    })
+  })
+
+  // Allow one-way data flow from state to locationMapLayers
+  $scope.locationMapLayers = {}
+  state.mapLayers
+    .subscribe((newValue) => $scope.locationMapLayers = newValue)
+  // Upward data flow (updating map layer state)
+  $scope.setLayerVisibility = (layerKey, isVisible) => {
+    // Make a copy of the map layers state
+    var newState = angular.copy($scope.locationMapLayers, {})
+    newState[layerKey].isVisible = isVisible
+    state.mapLayers.next(newState)
+  }
+
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [

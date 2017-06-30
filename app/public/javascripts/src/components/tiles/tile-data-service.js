@@ -44,6 +44,10 @@ app.service('tileDataService', ['$http', ($http) => {
 
   // Adds a layer key and url to the tile data service
   tileDataService.addEntityImageForLayer = (layerKey, imageUrl) => {
+    if (tileDataService.layerEntityImages[layerKey]) {
+      // This has already been added. Nothing to do.
+      return
+    }
     // Start loading the data from the server
     var imageLoadedPromise = new Promise((resolve, reject) => {
       var img = new Image()

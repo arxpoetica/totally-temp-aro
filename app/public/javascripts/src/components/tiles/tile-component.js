@@ -34,6 +34,11 @@ class MapTileRenderer {
     canvas.width = this.tileSize.width + this.drawMargins * 2;
     canvas.height = this.tileSize.height + this.drawMargins * 2;
 
+    if (!this.layerProperties.data.isVisible) {
+      // Layer is invisible
+      return div
+    }
+
     if (this.layerProperties.data.drawingOptions.showTileExtents) {
       canvas.style.border = "2px dotted";
     }
@@ -123,11 +128,18 @@ class TileComponentController {
 
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
-      .subscribe((newValue) => this.handleMapEvents(newValue))
+      .pairwise() // This will give us the previous value in addition to the current value
+      .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1]))
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.tileDataService = tileDataService
+
+    this.DELTA = Object.freeze({
+      IGNORE: 0,
+      DELETE: 1,
+      UPDATE: 2
+    })
 
     $document.ready(() => {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
@@ -137,22 +149,74 @@ class TileComponentController {
   }
 
   // Handles map layer events
-  handleMapEvents(mapLayers) {
-    // We have a new set of map layers. Simply rebuild all map layers
-    Object.keys(mapLayers).forEach((key) => {
-      var mapLayer = mapLayers[key]
-      this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
-      var tileRenderer = new MapTileRenderer(new google.maps.Size(256, 256), 1075, {id: key, data: mapLayer}, this.tileDataService)
-      if (!this.layerIdToMapTilesIndex[key]) {
-        // Tile does not already exist in maps
-        this.mapRef.overlayMapTypes.push(tileRenderer)
-        this.layerIdToMapTilesIndex[key] = this.mapRef.overlayMapTypes.length - 1
-      } else {
-        // Tile exists in maps. Replace it
-        var index = this.layerIdToMapTilesIndex[key]
-        this.mapRef.overlayMapTypes.setAt(index, tileRenderer)
+  handleMapEvents(oldMapLayers, newMapLayers) {
+    if (!this.mapRef) {
+      // Map not initialized yet
+      return
+    }
+    // We have a new set of map layers. Determine which ones to update and which ones to delete
+    var mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
+    console.log('-------- Actions')
+    console.log(mapLayerActions)
+
+    // First delete any map layers that we want
+    for (var iOverlay = 0; iOverlay < this.mapRef.overlayMapTypes.length; ++iOverlay) {
+      var overlayId = this.mapRef.overlayMapTypes.getAt(iOverlay).layerProperties.id
+      if (mapLayerActions[overlayId] === this.DELTA.DELETE) {
+        this.mapRef.overlayMapTypes.removeAt(iOverlay)
+        --iOverlay
+      }
+    }
+
+    // Then update any map layers that we want
+    var mapExistingLayers = {}
+    this.mapRef.overlayMapTypes.forEach((overlayMapType, index) => mapExistingLayers[overlayMapType.layerProperties.id] = index)
+    Object.keys(newMapLayers).forEach((key) => {
+      var mapLayer = newMapLayers[key]
+      if (mapLayerActions[key] === this.DELTA.UPDATE) {
+        this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
+        var tileRenderer = new MapTileRenderer(new google.maps.Size(256, 256), 1075, {id: key, data: mapLayer}, this.tileDataService)
+        if (key in mapExistingLayers) {
+          // Tile exists in maps. Replace it
+          var index = mapExistingLayers[key]
+          this.mapRef.overlayMapTypes.setAt(index, tileRenderer)
+        } else {
+          // Tile does not already exist in maps
+          console.log('Added')
+          this.mapRef.overlayMapTypes.push(tileRenderer)
+        }
       }
     })
+  }
+
+  // Compares old and new mapLayers objects and returns the list of layers to be added/updated and removed
+  computeMapLayerActions(oldMapLayers, newMapLayers) {
+
+    // First mark the layers to update
+    var mapLayerActions = {}
+    Object.keys(newMapLayers).forEach((newMapLayerKey) => {
+      mapLayerActions[newMapLayerKey] = this.DELTA.IGNORE
+      if (!oldMapLayers[newMapLayerKey]) {
+        // Map layer key does not exist in old layers. Add it
+        mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
+      } else {
+        var newObj = newMapLayers[newMapLayerKey]
+        var oldObj = oldMapLayers[newMapLayerKey]
+        // Quick check with stringifys. Objects are very small.
+        if (JSON.stringify(newObj) !== JSON.stringify(oldObj)) {
+          mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
+        }
+      }
+    })
+
+    // Then mark the layers to delete
+    Object.keys(oldMapLayers).forEach((oldMapLayerKey) => {
+      if (!newMapLayers[oldMapLayerKey]) {
+        mapLayerActions[oldMapLayerKey] = this.DELTA.DELETE
+      }
+    })
+
+    return mapLayerActions
   }
 }
 
