@@ -1,5 +1,9 @@
 /* global app localStorage map */
 app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
+
+  // Important: RxJS must have been included using browserify before this point
+  var Rx = require('rxjs')
+
   var key = null
   var state = null
   var service = {}
@@ -107,44 +111,47 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
   }
 
   // Map layers data - define once
-  service.mapLayers = {}
+  service.mapLayers = new Rx.BehaviorSubject({})
 
-  service.MAP_LAYER_EVENTS = Object.freeze({
-    LAYER_CHANGED: 0,             // When a layer is added or changed
-    LAYER_REMOVED: 1,             // When a layer is removed
-    LAYER_VISIBILITY_CHANGED: 3   // When the visibility of a particular layer changed
-  })
+  service.mapLayers
+    .subscribe((newValue) => console.log(newValue))
 
-  // Map layers - hold a list of observers to be called when the map layers data changes
-  service.mapLayerChangedObservers = []
+  // service.MAP_LAYER_EVENTS = Object.freeze({
+  //   LAYER_CHANGED: 0,             // When a layer is added or changed
+  //   LAYER_REMOVED: 1,             // When a layer is removed
+  //   LAYER_VISIBILITY_CHANGED: 3   // When the visibility of a particular layer changed
+  // })
+
+  // // Map layers - hold a list of observers to be called when the map layers data changes
+  // service.mapLayerChangedObservers = []
   service.addMapLayerChangedObserver = (callback) => {
-    service.mapLayerChangedObservers.push(callback)
+  //   service.mapLayerChangedObservers.push(callback)
   }
-  // Notify all listeners of map events
-  service.notify = (eventId, eventData) => service.mapLayerChangedObservers.forEach((observer) => observer(eventId, eventData))
+  // // Notify all listeners of map events
+  // service.notify = (eventId, eventData) => service.mapLayerChangedObservers.forEach((observer) => observer(eventId, eventData))
 
   // Sets (or adds) a map layer with the given key
   service.setMapLayer = (layerKey, data) => {
-    service.mapLayers[layerKey] = data
-    service.notify(service.MAP_LAYER_EVENTS.LAYER_CHANGED, {
-      id: layerKey,
-      data: data
-    })
+    // Get a copy of the current maplayers. A little Redux-ey
+    var newMapLayers = angular.copy(service.mapLayers.getValue(), {})
+    // Set the mapLayer (can be a new layer)
+    newMapLayers[layerKey] = data
+    service.mapLayers.next(newMapLayers)
   }
-  // Removes a map layer with the given key
-  service.removeMapLayer = (layerKey, data) => {
-    delete service.mapLayers[layerKey]
-    service.notify(service.LAYER_REMOVED, layerKey)
-  }
-  // Sets the visibliity of a map layer specified by the map key
-  service.setMapLayerVisibility = (layerKey, isVisible) => {
-    if (service.mapLayers[layerKey]) {
-      service.mapLayers[layerKey].isVisible = isVisible
-      service.notify(service.LAYER_VISIBILITY_CHANGED, layerKey)
-    } else {
-      throw 'Map layer with key ' + layerKey + ' does not exist in the list'
-    }
-  }
+  // // Removes a map layer with the given key
+  // service.removeMapLayer = (layerKey, data) => {
+  //   delete service.mapLayers[layerKey]
+  //   service.notify(service.LAYER_REMOVED, layerKey)
+  // }
+  // // Sets the visibliity of a map layer specified by the map key
+  // service.setMapLayerVisibility = (layerKey, isVisible) => {
+  //   if (service.mapLayers[layerKey]) {
+  //     service.mapLayers[layerKey].isVisible = isVisible
+  //     service.notify(service.LAYER_VISIBILITY_CHANGED, layerKey)
+  //   } else {
+  //     throw 'Map layer with key ' + layerKey + ' does not exist in the list'
+  //   }
+  // }
 
   // Boundaries layer data - define once
   service.boundaries = {
