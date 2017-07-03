@@ -118,6 +118,10 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     .pairwise()
     .subscribe((newValue) => console.log(newValue))
 
+  service.hackRaiseEvent = (feature) => {
+    $rootScope.$broadcast('map_layer_clicked_feature', feature, {})
+  }
+
   // Sets (or adds) a map layer with the given key
   service.setMapLayer = (layerKey, data) => {
     // Get a copy of the current maplayers. A little Redux-ey

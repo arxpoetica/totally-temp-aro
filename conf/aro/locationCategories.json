@@ -54,7 +54,7 @@
 			"show": true,
 			"label": "Residential",
 			"tileUrl": "/tile/v1/tiles/locations/1/household/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
+			"aggregateZoomThreshold": "12",
 			"iconUrl": "/images/map_icons/aro/households_default.png"
 		},
 		"celltower_global": {

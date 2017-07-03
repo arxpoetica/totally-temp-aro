@@ -26,6 +26,7 @@ class MapTileRenderer {
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
     var div = ownerDocument.createElement('div')
+    div.id = `map_tile_${zoom}_${coord.x}_${coord.y}`
     var canvas = ownerDocument.createElement('canvas');
     div.appendChild(canvas)
     canvas.style.position = 'absolute'
@@ -67,7 +68,6 @@ class MapTileRenderer {
             var geometry = layer.feature(iFeature).loadGeometry()
             // console.log(JSON.stringify(geometry))
             // Geometry is an array of shapes
-            var scaleFactor = 1.0 / 4096 * 256
             var imageWidthBy2 = entityImage.width / 2
             var imageHeightBy2 = entityImage.height / 2
             geometry.forEach((shape) => {
@@ -75,24 +75,20 @@ class MapTileRenderer {
               switch(shape.length) {
                 case 1:
                   // This is a point
-                  var x = this.drawMargins + shape[0].x * scaleFactor - imageWidthBy2
-                  var y = this.drawMargins + shape[0].y * scaleFactor - imageHeightBy2
-                  // ctx.beginPath()
-                  // ctx.arc(x, y, 7, 0, Math.PI * 2.0, true)
-                  // ctx.fill()
-                  // ctx.stroke()
+                  var x = this.drawMargins + shape[0].x - imageWidthBy2
+                  var y = this.drawMargins + shape[0].y - imageHeightBy2
                   ctx.drawImage(entityImage, x, y)
                   break;
 
                 default:
                   // Processing as multiline for now
-                  var x0 = this.drawMargins + shape[0].x * scaleFactor
-                  var y0 = this.drawMargins + shape[0].y * scaleFactor
+                  var x0 = this.drawMargins + shape[0].x
+                  var y0 = this.drawMargins + shape[0].y
                   ctx.beginPath()
                   ctx.moveTo(x0, y0)
                   for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                    var x1 = this.drawMargins + shape[iCoord].x * scaleFactor
-                    var y1 = this.drawMargins + shape[iCoord].y * scaleFactor
+                    var x1 = this.drawMargins + shape[iCoord].x
+                    var y1 = this.drawMargins + shape[iCoord].y
                     ctx.lineTo(x1, y1)
                   }
                   ctx.stroke()
@@ -125,6 +121,62 @@ class MapTileRenderer {
   setMapTileExtentsVisibility(showMapTileExtents) {
     this.layerProperties.data.drawingOptions.showTileExtents = showMapTileExtents
   }
+
+  // Perform hit detection on features and get the first one (if any) under the mouse
+  performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
+    console.log(`Performing hit detection on tile ${tileZoom}/${tileX}/${tileY}`)
+    console.log(`Coordinates WITHIN tile are ${xWithinTile}, ${yWithinTile}`)
+
+    // Get tile data from service
+    var promises = [
+      this.tileDataService.getTileData(this.layerProperties.data.url + `${tileZoom}/${tileX}/${tileY}.mvt`),
+      this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
+    ]
+    return new Promise((resolve, reject) => {
+      Promise.all(promises)
+        .then((promiseResults) => {
+
+          var mapboxVectorTile = promiseResults[0]
+          var entityImage = promiseResults[1]
+
+          var imageWidthBy2 = entityImage.width / 2
+          var imageHeightBy2 = entityImage.height / 2
+
+          Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+            var layer = mapboxVectorTile.layers[layerKey]
+            // console.log('layer has ' + layer.length + ' features')
+            for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+              // Parse the geometry out.
+              var geometry = layer.feature(iFeature).loadGeometry()
+              // Geometry is an array of shapes
+              var imageWidthBy2 = entityImage.width / 2
+              var imageHeightBy2 = entityImage.height / 2
+              geometry.forEach((shape) => {
+                // Shape is an array of coordinates
+                switch(shape.length) {
+                  case 1:
+                    // This is a point
+                    if (xWithinTile >= shape[0].x - imageWidthBy2
+                        && xWithinTile <= shape[0].x + imageWidthBy2
+                        && yWithinTile >= shape[0].y - imageHeightBy2
+                        && yWithinTile <= shape[0].y + imageHeightBy2) {
+                          console.log('FEATURE DETECTED')
+                          console.log(layer.feature(iFeature).properties)
+                          resolve(layer.feature(iFeature).properties)
+                        }
+                    break;
+
+                  default:
+                    // Not supported yet
+                    break;
+                }
+              })
+            }
+          })
+          resolve(null)
+        })
+    })
+  }
 }
 
 class TileComponentController {
@@ -153,6 +205,45 @@ class TileComponentController {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
       // but don't know how to set it from markup
       this.mapRef = map
+      this.mapRef.addListener('click', (event) => {
+        // Get latitiude and longitude
+        var lat = event.latLng.lat()
+        var lng = event.latLng.lng()
+        console.log(`${lat}, ${lng}`)
+        // Get zoom
+        var zoom = this.mapRef.getZoom()
+        // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+        // https://gis.stackexchange.com/questions/133205/wmts-convert-geolocation-lat-long-to-tile-index-at-a-given-zoom-level
+        var n = Math.pow(2.0, zoom)
+        var tileX = Math.floor((lng + 180.0) / 360.0 * n)
+        var latRad = lat * Math.PI / 180.0
+        var tileY = Math.floor((1.0 - Math.log(Math.tan(latRad) + (1 / Math.cos(latRad))) / Math.PI) / 2.0 * n)
+
+        // The laziest way to get the tile top-left coordinates. Should really compute this.
+        var mapTileDiv = $document[0].getElementById(`map_tile_${zoom}_${tileX}_${tileY}`)
+        var divX = +mapTileDiv.style.left.replace('px', '')
+        var divY = +mapTileDiv.style.top.replace('px', '')
+        var xWithinTile = event.pixel.x - divX
+        var yWithinTile = event.pixel.y - divY
+
+        var hitPromises = []
+        this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+          hitPromises.push(mapOverlay.performHitDetection(zoom, tileX, tileY, xWithinTile, yWithinTile))
+        })
+        Promise.all(hitPromises)
+          .then((results) => {
+            var hitFeature = null
+            results.forEach((result) => {
+              if (result && result.location_id) {
+                hitFeature = result
+              }
+            })
+            if (hitFeature && hitFeature.location_id) {
+              state.hackRaiseEvent(hitFeature)
+            }
+          })
+
+      })
     })
   }
 
