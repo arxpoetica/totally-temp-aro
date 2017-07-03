@@ -120,6 +120,11 @@ class MapTileRenderer {
     })
     return div
   }
+
+  // Show/hide map tile extents
+  setMapTileExtentsVisibility(showMapTileExtents) {
+    this.layerProperties.data.drawingOptions.showTileExtents = showMapTileExtents
+  }
 }
 
 class TileComponentController {
@@ -130,6 +135,9 @@ class TileComponentController {
     state.mapLayers
       .pairwise() // This will give us the previous value in addition to the current value
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1]))
+
+    state.showMapTileExtents
+      .subscribe((showMapTileExtents) => this.handleShowMapTileExtentsChanged(showMapTileExtents))
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
@@ -145,6 +153,22 @@ class TileComponentController {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
       // but don't know how to set it from markup
       this.mapRef = map
+    })
+  }
+
+  // Called when the value of showing map tile extents (for debugging) changes
+  handleShowMapTileExtentsChanged(showMapTileExtents) {
+    if (!this.mapRef) {
+      // Map not initialized yet. Try again after some time
+      setTimeout(() => this.handleShowMapTileExtentsChanged(showMapTileExtents), 100)
+      return
+    }
+
+    this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+      overlayMap.setMapTileExtentsVisibility(showMapTileExtents)
+      // Hacky way to get google maps to redraw the tiles
+      this.mapRef.overlayMapTypes.setAt(index, null)
+      this.mapRef.overlayMapTypes.setAt(index, overlayMap)
     })
   }
 

@@ -112,6 +112,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
 
   // Map layers data - define once
   service.mapLayers = new Rx.BehaviorSubject({})
+  service.showMapTileExtents = new Rx.BehaviorSubject(false)
 
   service.mapLayers
     .pairwise()

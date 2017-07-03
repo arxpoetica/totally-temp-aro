@@ -15,8 +15,15 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
     }
   }
 
-  $scope.fiberOptionChanged = ()=>{
+  $scope.fiberOptionChanged = () => {
     $rootScope.$broadcast("map_setting_changed" , {type : "fiber_option" , setting :  state.viewSetting.selectedFiberOption });
   }
 
+  // Checkbox to show/hide map tile extents. Used for debugging
+  state.showMapTileExtents
+    .subscribe((showMapTileExtents) => $scope.showMapTileExtents = showMapTileExtents)
+
+  $scope.setShowMapTileExtents = (showMapTileExtents) => {
+    state.showMapTileExtents.next(showMapTileExtents)
+  }
 }]);
