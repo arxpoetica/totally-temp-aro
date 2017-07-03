@@ -29,34 +29,39 @@
 		"label": "Cell Sites"
 	},
 	"v2": {
-		"small_businesses": {
+		"small_businesses_global": {
 			"show": true,
 			"label": "Small Businesses",
-			"tileUrl": "/tile/v1/tiles/locations/1/small/aggregate/entity/",
+			"tileUrl": "/tile/v1/tiles/locations/1/small/${tilePointTransform}/entity/",
+			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_small_default.png"
 		},
-		"medium_businesses": {
+		"medium_businesses_global": {
 			"show": true,
 			"label": "Medium Businesses",
-			"tileUrl": "/tile/v1/tiles/locations/1/medium/aggregate/entity/",
+			"tileUrl": "/tile/v1/tiles/locations/1/medium/${tilePointTransform}/entity/",
+			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png"
 		},
-		"large_businesses": {
+		"large_businesses_global": {
 			"show": true,
 			"label": "Large Businesses",
-			"tileUrl": "/tile/v1/tiles/locations/1/large/aggregate/entity/",
+			"tileUrl": "/tile/v1/tiles/locations/1/large/${tilePointTransform}/entity/",
+			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_large_default.png"
 		},
-		"household": {
+		"household_global": {
 			"show": true,
 			"label": "Residential",
-			"tileUrl": "/tile/v1/tiles/locations/1/household/aggregate/entity/",
+			"tileUrl": "/tile/v1/tiles/locations/1/household/${tilePointTransform}/entity/",
+			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/households_default.png"
 		},
-		"celltower": {
+		"celltower_global": {
 			"show": true,
 			"label": "Cell Sites",
-			"tileUrl": "/tile/v1/tiles/locations/1/celltower/aggregate/entity/",
+			"tileUrl": "/tile/v1/tiles/locations/1/celltower/${tilePointTransform}/entity/",
+			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/tower.png"
 		}
 	},

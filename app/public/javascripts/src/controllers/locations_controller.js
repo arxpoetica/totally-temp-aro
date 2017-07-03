@@ -1,17 +1,62 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$document', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $document, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+
+  // Promises for app initialization (configuration loaded, map ready, etc.)
+  var configurationLoadedPromise = new Promise((resolve, reject) => {
+    $rootScope.$on('configuration_loaded', (event, data) => resolve())
+  })
+  var mapReadyPromise = new Promise((resolve, reject) => {
+    $document.ready(() => {
+      // At this point we will have access to the global map variable
+      map.ready(() => resolve())
+    })
+  })
+  var appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
+
+  // Get the point transformation mode with the current zoom level
+  var getPointTransformForLayer = (layerConfig) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > +layerConfig.aggregateZoomThreshold) ? 'select' : 'aggregate'
+  }
+
+  // Updates the tile URL when the zoom level changes
+  var updateTileUrls = () => {
+    var allMapLayers = state.mapLayers.getValue()
+    var allMapLayerKeys = Object.keys(allMapLayers)
+    var locationMapLayerKeys = Object.keys(configuration.locationCategories.v2)
+    allMapLayerKeys.forEach((mapLayerKey) => {
+      var mapLayer = allMapLayers[mapLayerKey]
+      if (locationMapLayerKeys.indexOf(mapLayerKey) >= 0) {
+        // This map layer is a location map layer. Update the tile url
+        var oldUrl = mapLayer.url
+        var layerConfiguration = configuration.locationCategories.v2[mapLayerKey]
+        var newUrl = layerConfiguration.tileUrl.replace('${tilePointTransform}', getPointTransformForLayer(layerConfiguration))
+        if (oldUrl !== newUrl) {
+          // NewURL is different. Update the state
+          console.log('Layer URL changed. Updating state')
+          // Make a copy of the map layers state
+          var newState = angular.copy($scope.locationMapLayers, {})
+          newState[mapLayerKey].url = newUrl
+          state.mapLayers.next(newState)
+        }
+      }
+    })
+  }
+  $rootScope.$on('map_zoom_changed', updateTileUrls)
 
   // Create a new set of map layers
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
-  $rootScope.$on('configuration_loaded', (event, data) => {
+  appReadyPromise.then(() => {
     var categories = configuration.locationCategories.v2
     var showTileExtents = true
     Object.keys(categories).forEach((categoryKey) => {
       var category = categories[categoryKey]
       if (category.show) {
         state.setMapLayer(categoryKey, {
-          url: category.tileUrl,
+          url: category.tileUrl.replace('${tilePointTransform}', getPointTransformForLayer(category)),
           iconUrl: `${baseUrl}${category.iconUrl}`,
           label: category.label,
           isVisible: true,
@@ -21,6 +66,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             showTileExtents: showTileExtents
           }
         })
+        console.log(category.tileUrl.replace('${tilePointTransform}', getPointTransformForLayer(category)))
       }
     })
   })
