@@ -26,7 +26,7 @@ class MapTileRenderer {
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
     var div = ownerDocument.createElement('div')
-    div.id = `map_tile_${zoom}_${coord.x}_${coord.y}`
+    div.id = `map_tile_${this.layerProperties.id}_${zoom}_${coord.x}_${coord.y}`
     var canvas = ownerDocument.createElement('canvas');
     div.appendChild(canvas)
     canvas.style.position = 'absolute'
@@ -198,35 +198,37 @@ class TileComponentController {
       DELETE: 1,
       UPDATE: 2
     })
+    this.TILE_SIZE = 256
 
     $document.ready(() => {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
       // but don't know how to set it from markup
       this.mapRef = map
       this.mapRef.addListener('click', (event) => {
+
         // Get latitiude and longitude
         var lat = event.latLng.lat()
         var lng = event.latLng.lng()
-        console.log(`${lat}, ${lng}`)
+
         // Get zoom
         var zoom = this.mapRef.getZoom()
-        // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
-        // https://gis.stackexchange.com/questions/133205/wmts-convert-geolocation-lat-long-to-tile-index-at-a-given-zoom-level
-        var n = Math.pow(2.0, zoom)
-        var tileX = Math.floor((lng + 180.0) / 360.0 * n)
-        var latRad = lat * Math.PI / 180.0
-        var tileY = Math.floor((1.0 - Math.log(Math.tan(latRad) + (1 / Math.cos(latRad))) / Math.PI) / 2.0 * n)
 
-        // The laziest way to get the tile top-left coordinates. Should really compute this.
-        var mapTileDiv = $document[0].getElementById(`map_tile_${zoom}_${tileX}_${tileY}`)
-        var divX = +mapTileDiv.style.left.replace('px', '')
-        var divY = +mapTileDiv.style.top.replace('px', '')
-        var xWithinTile = event.pixel.x - divX
-        var yWithinTile = event.pixel.y - divY
+        // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+        var tileCoords = this.getTileCoordinates(zoom, lat, lng)
+
+        // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
+        // 1. Get the top left coordinates of the tile in lat lngs
+        var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
+        // 2. Convert to pixels
+        var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
+        // 3. Convert the clicked lat lng to pixels
+        var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+        var xWithinTile = clickedPointPixels.x - nwCornerPixels.x
+        var yWithinTile = clickedPointPixels.y - nwCornerPixels.y
 
         var hitPromises = []
         this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-          hitPromises.push(mapOverlay.performHitDetection(zoom, tileX, tileY, xWithinTile, yWithinTile))
+          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, xWithinTile, yWithinTile))
         })
         Promise.all(hitPromises)
           .then((results) => {
@@ -243,6 +245,52 @@ class TileComponentController {
 
       })
     })
+  }
+
+  // Returns the tile coordinates (x, y) for a given lat/long and zoom level
+  getTileCoordinates(zoom, lat, lng) {
+    // Using Mercator projection.
+    // https://gis.stackexchange.com/questions/133205/wmts-convert-geolocation-lat-long-to-tile-index-at-a-given-zoom-level
+    var n = Math.pow(2.0, zoom)
+    var tileX = Math.floor((lng + 180.0) / 360.0 * n)
+    var latRad = lat * Math.PI / 180.0
+    var tileY = Math.floor((1.0 - Math.log(Math.tan(latRad) + (1 / Math.cos(latRad))) / Math.PI) / 2.0 * n)
+
+    return {
+      x: tileX,
+      y: tileY
+    }
+  }
+
+  // Returns the latitiude and longitude of the northwest corner of a tile
+  // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
+  getNWTileCornerLatLng(tileZoom, tileX, tileY) {
+    var n = Math.pow(2.0, tileZoom)
+    var lon_deg = tileX / n * 360.0 - 180.0
+    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
+    var lat_deg = lat_rad * 180.0 / Math.PI
+    return {
+      lat: lat_deg,
+      lng: lon_deg
+    }
+  }
+
+  // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
+  // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
+  getPixelCoordinatesFromLatLng(latLng, zoom) {
+    var siny = Math.sin(latLng.lat * Math.PI / 180);
+    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+    // about a third of a tile past the edge of the world tile.
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+
+    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
+    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+
+    var scale = Math.pow(2.0, zoom)
+    return {
+      x: Math.floor(xUnscaled * scale),
+      y: Math.floor(yUnscaled * scale)
+    }
   }
 
   // Called when the value of showing map tile extents (for debugging) changes
@@ -288,7 +336,7 @@ class TileComponentController {
       var mapLayer = newMapLayers[key]
       if (mapLayerActions[key] === this.DELTA.UPDATE) {
         this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
-        var tileRenderer = new MapTileRenderer(new google.maps.Size(256, 256), 1075, {id: key, data: mapLayer}, this.tileDataService)
+        var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, {id: key, data: mapLayer}, this.tileDataService)
         if (key in mapExistingLayers) {
           // Tile exists in maps. Replace it
           var index = mapExistingLayers[key]
