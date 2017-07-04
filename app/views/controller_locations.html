@@ -122,23 +122,6 @@
           <span class="fa fa-plus"></span> Add data sources...
         </button>
       </div>
-
-      <!-- New map layer types -->
-      <div class="customer-type shaded">
-        <label>Locations</label>
-      </div>
-      <ul class="customer-type">
-        <li ng-repeat="locationType in planState.locationTypes">
-          <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
-          <div class="ctype-checkbox">
-            {{locationType.label}}
-            <input type="checkbox"
-                   checked="locationType.checked"
-                   ng-click="setLocationTypeVisibility(locationType, !locationType.checked)"
-            >
-          </div>
-        </li>
-      </ul>
     </form>
 
     <div class="alert alert-info text-center" role="alert" ng-show="heatmapVisible">
