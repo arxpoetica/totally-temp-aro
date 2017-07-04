@@ -16,8 +16,8 @@ class MapTileRenderer {
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
-    // be such that the largest rendered feature does not get clipped.
-    this.drawMargins = 10
+    // be such that the largest rendered feature (or heatmap) does not get clipped.
+    this.drawMargins = 50
   }
 
   // This method is called by Google Maps. Render a canvas tile and send it back.
@@ -55,6 +55,9 @@ class MapTileRenderer {
         var mapboxVectorTile = promiseResults[0]
         var entityImage = promiseResults[1]
 
+        var heatMapData = []
+        var maxWeightForHeatMap = 1
+
         // Response will be an array of objects
         var ctx=canvas.getContext("2d");
         ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
@@ -65,7 +68,8 @@ class MapTileRenderer {
           // console.log('layer has ' + layer.length + ' features')
           for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
             // Parse the geometry out.
-            var geometry = layer.feature(iFeature).loadGeometry()
+            var feature = layer.feature(iFeature)
+            var geometry = feature.loadGeometry()
             // console.log(JSON.stringify(geometry))
             // Geometry is an array of shapes
             var imageWidthBy2 = entityImage.width / 2
@@ -77,7 +81,12 @@ class MapTileRenderer {
                   // This is a point
                   var x = this.drawMargins + shape[0].x - imageWidthBy2
                   var y = this.drawMargins + shape[0].y - imageHeightBy2
-                  ctx.drawImage(entityImage, x, y)
+                  if (feature.properties.weight) {
+                    heatMapData.push([x, y, +feature.properties.weight])
+                    maxWeightForHeatMap = Math.max(maxWeightForHeatMap, +feature.properties.weight)
+                  } else {
+                    ctx.drawImage(entityImage, x, y)
+                  }
                   break;
 
                 default:
@@ -97,6 +106,13 @@ class MapTileRenderer {
             })
           }
         })
+        if (heatMapData.length > 0) {
+          var heatMapRenderer = simpleheat(canvas)
+          heatMapRenderer.data(heatMapData)
+          heatMapRenderer.max(maxWeightForHeatMap)
+          heatMapRenderer.radius(20, 20)
+          heatMapRenderer.draw(0.0)
+        }
         if (this.layerProperties.data.drawingOptions.showTileExtents) {
           // Draw a rectangle showing the tile (not the margins)
           ctx.strokeStyle = "#000000"
