@@ -1,18 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$document', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $document, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
-
-  // Promises for app initialization (configuration loaded, map ready, etc.)
-  var configurationLoadedPromise = new Promise((resolve, reject) => {
-    $rootScope.$on('configuration_loaded', (event, data) => resolve())
-  })
-  var mapReadyPromise = new Promise((resolve, reject) => {
-    $document.ready(() => {
-      // At this point we will have access to the global map variable
-      map.ready(() => resolve())
-    })
-  })
-  var appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
@@ -82,7 +70,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$docum
   $rootScope.$on('map_zoom_changed', updateMapLayers)
 
   // Create a new set of map layers
-  appReadyPromise.then(() => {
+  state.appReadyPromise.then(() => {
     updateMapLayers()
   })
 

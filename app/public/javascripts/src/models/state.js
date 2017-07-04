@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
+app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -71,6 +71,19 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
       service.set('mapZoom', map.getZoom())
     })
   })
+
+  // Promises for app initialization (configuration loaded, map ready, etc.)
+  var configurationLoadedPromise = new Promise((resolve, reject) => {
+    $rootScope.$on('configuration_loaded', (event, data) => resolve())
+  })
+  var mapReadyPromise = new Promise((resolve, reject) => {
+    $document.ready(() => {
+      // At this point we will have access to the global map variable
+      map.ready(() => resolve())
+    })
+  })
+  // appReadyPromise will resolve when the map and configuration are loaded
+  service.appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
 
   // Optimization options - initialize once
   service.optimizationOptions = {
