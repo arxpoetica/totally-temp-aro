@@ -163,6 +163,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
 
     // A list of location types to show in the locations layer
+    service.locationTypesV1 = []
     service.locationTypes = []
 
     service.allDataSources = service.defaultDataSources.slice()
@@ -170,28 +171,32 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     // A list of location data sources to show in the locations layer
     service.selectedDataSources = service.defaultDataSources.slice()
 
+    if (configuration && configuration.locationCategories && configuration.locationCategories.v2) {
+      var locations = configuration.locationCategories.v2
+      Object.keys(locations).forEach((locationKey) => {
+        var location = locations[locationKey]
+        location.key = locationKey
+        location.checked = true
+        service.locationTypes.push(location)
+      })
+    }
+
+    // ****************** START old (V1) location Types implementation
     // Iterate over the business segments in the configuration
     if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
       Object.keys(configuration.locationCategories.business.segments).forEach((key) => {
         var segment = configuration.locationCategories.business.segments[key];
         if (segment.show) {
-          service.locationTypes.push({
-            type: 'business',
-            key: key,
-            label: segment.label,
-            checked: false,
-            icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png'
+          service.locationTypesV1.push({type: 'business', key: key, label: segment.label, checked: false, icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png'
           })
         }
       })
     }
 
-
     // Show residential/household units
     if (configuration && configuration.locationCategories && configuration.locationCategories.household) {
       if (configuration.locationCategories.household.show) {
-        service.locationTypes.push({
-          type: 'household',
+        service.locationTypesV1.push({ type: 'household',
           key: 'household',
           label: configuration.locationCategories.household.label,
           checked: false,
@@ -203,7 +208,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
     // Show Towers
     if (configuration && configuration.locationCategories && configuration.locationCategories.celltower) {
       if (configuration.locationCategories.celltower.show) {
-        service.locationTypes.push({
+        service.locationTypesV1.push({
           type: 'celltower',
           key: 'celltower',
           label: configuration.locationCategories.celltower.label,
@@ -212,6 +217,7 @@ app.service('state', ['$rootScope', '$http', 'map_layers', 'configuration', 'reg
         })
       }
     }
+    // ****************** END old (V1) location Types implementation
 
     //create construction sites copy locationTypes and then add a isConstructionSite Field
     service.constructionSites = angular.copy(service.locationTypes);

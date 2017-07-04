@@ -74,7 +74,7 @@
         <label>Locations</label>
       </div>
       <ul class="customer-type">
-        <li ng-repeat="locationType in planState.locationTypes">
+        <li ng-repeat="locationType in planState.locationTypesV1">
           <div class="ctype-icon"><img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">
             {{locationType.label}}
@@ -86,6 +86,16 @@
                     name="ctype-name"
                     ng-change="changeLocationsLayer()"
             ></checkbox>
+          </div>
+        </li>
+        <li ng-repeat="locationType in planState.locationTypes">
+          <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
+          <div class="ctype-name">{{locationType.label}}</div>
+          <div class="ctype-checkbox">
+            <input type="checkbox"
+                   checked="locationType.checked"
+                   ng-click="setLocationTypeVisibility(locationType, !locationType.checked)"
+            >
           </div>
         </li>
       </ul>
@@ -117,13 +127,14 @@
         <label>Locations</label>
       </div>
       <ul class="customer-type">
-        <li ng-repeat="(locationKey, locationValue) in locationMapLayers">
-          <div class="ctype-icon"><img ng-src="{{locationValue.iconUrl}}" style="width:16px;margin-right:10px"></div>
+        <li ng-repeat="locationType in planState.locationTypes">
+          <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-checkbox">
+            {{locationType.label}}
             <input type="checkbox"
-                   checked="locationValue.isVisible"
-                   ng-click="setLayerVisibility(locationKey, !locationValue.isVisible)"
-            >{{locationValue.label}}
+                   checked="locationType.checked"
+                   ng-click="setLocationTypeVisibility(locationType, !locationType.checked)"
+            >
           </div>
         </li>
       </ul>

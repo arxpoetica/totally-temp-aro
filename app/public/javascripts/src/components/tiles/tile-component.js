@@ -124,8 +124,6 @@ class MapTileRenderer {
 
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
-    console.log(`Performing hit detection on tile ${tileZoom}/${tileX}/${tileY}`)
-    console.log(`Coordinates WITHIN tile are ${xWithinTile}, ${yWithinTile}`)
 
     // Get tile data from service
     var promises = [

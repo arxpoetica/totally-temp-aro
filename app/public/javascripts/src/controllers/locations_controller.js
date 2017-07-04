@@ -15,72 +15,79 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$docum
   var appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
 
   // Get the point transformation mode with the current zoom level
-  var getPointTransformForLayer = (layerConfig) => {
+  var getPointTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
     // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
     // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-    return (mapZoom > +layerConfig.aggregateZoomThreshold) ? 'select' : 'aggregate'
+    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
   }
 
-  // Updates the tile URL when the zoom level changes
-  var updateTileUrls = () => {
-    var allMapLayers = state.mapLayers.getValue()
-    var allMapLayerKeys = Object.keys(allMapLayers)
-    var locationMapLayerKeys = Object.keys(configuration.locationCategories.v2)
-    allMapLayerKeys.forEach((mapLayerKey) => {
-      var mapLayer = allMapLayers[mapLayerKey]
-      if (locationMapLayerKeys.indexOf(mapLayerKey) >= 0) {
-        // This map layer is a location map layer. Update the tile url
-        var oldUrl = mapLayer.url
-        var layerConfiguration = configuration.locationCategories.v2[mapLayerKey]
-        var newUrl = layerConfiguration.tileUrl.replace('${tilePointTransform}', getPointTransformForLayer(layerConfiguration))
-        if (oldUrl !== newUrl) {
-          // NewURL is different. Update the state
-          console.log('Layer URL changed. Updating state')
-          // Make a copy of the map layers state
-          var newState = angular.copy($scope.locationMapLayers, {})
-          newState[mapLayerKey].url = newUrl
-          state.mapLayers.next(newState)
-        }
-      }
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+  // Creates map layers based on selection in the UI
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
+
+    // Remove all the map layers previously created by this controller
+    createdMapLayerKeys.forEach((createdMapLayerKey) => {
+      delete oldMapLayers[createdMapLayerKey]
     })
+    createdMapLayerKeys.clear()
+
+    // Add map layers based on the selection
+    state.selectedDataSources.forEach((selectedDataSource) => {
+
+      // Determine the data source id
+      var dataSourceId = state.dataSourceId
+      if (selectedDataSource.dataSourceId === state.DS_GLOBAL_BUSINESSES
+          || selectedDataSource.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS
+          || selectedDataSource.dataSourceId === state.DS_GLOBAL_CELLTOWER) {
+        dataSourceId = 1  // This is the global data source id
+      }
+
+      // Loop through the location types
+      state.locationTypes.forEach((locationType) => {
+        if (locationType.checked) {
+          // Location type is visible
+          var mapLayerKey = `${locationType.key}_${dataSourceId}`
+          var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
+          var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
+          url = url.replace('${dataSourceId}', dataSourceId)
+          oldMapLayers[mapLayerKey] = {
+            url: url,
+            iconUrl: `${baseUrl}${locationType.iconUrl}`,
+            isVisible: true,
+            drawingOptions: {
+              strokeStyle: '#00ff00',
+              fillStyle: '#a0ffa0',
+              showTileExtents: state.showMapTileExtents.getValue()
+            }
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+      })
+    })
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldMapLayers)
   }
-  $rootScope.$on('map_zoom_changed', updateTileUrls)
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
 
   // Create a new set of map layers
-  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
   appReadyPromise.then(() => {
-    var categories = configuration.locationCategories.v2
-    var showTileExtents = true
-    Object.keys(categories).forEach((categoryKey) => {
-      var category = categories[categoryKey]
-      if (category.show) {
-        state.setMapLayer(categoryKey, {
-          url: category.tileUrl.replace('${tilePointTransform}', getPointTransformForLayer(category)),
-          iconUrl: `${baseUrl}${category.iconUrl}`,
-          label: category.label,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: '#00ff00',
-            fillStyle: '#a0ffa0',
-            showTileExtents: showTileExtents
-          }
-        })
-        console.log(category.tileUrl.replace('${tilePointTransform}', getPointTransformForLayer(category)))
-      }
-    })
+    updateMapLayers()
   })
 
-  // Allow one-way data flow from state to locationMapLayers
-  $scope.locationMapLayers = {}
-  state.mapLayers
-    .subscribe((newValue) => $scope.locationMapLayers = newValue)
   // Upward data flow (updating map layer state)
-  $scope.setLayerVisibility = (layerKey, isVisible) => {
-    // Make a copy of the map layers state
-    var newState = angular.copy($scope.locationMapLayers, {})
-    newState[layerKey].isVisible = isVisible
-    state.mapLayers.next(newState)
+  $scope.setLocationTypeVisibility = (locationType, isVisible) => {
+    for (var iLocationType = 0; iLocationType < state.locationTypes.length; ++iLocationType) {
+      if (state.locationTypes[iLocationType].key === locationType.key) {
+        state.locationTypes[iLocationType].checked = isVisible
+        break
+      }
+    }
+    updateMapLayers()
   }
 
   $scope.map_tools = map_tools
@@ -230,7 +237,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$docum
     var businessCategories = []
     var householdCategories = []
     var showTowers = false
-    $scope.planState.locationTypes.forEach((locationType) => {
+    $scope.planState.locationTypesV1.forEach((locationType) => {
       if ((locationType.type === 'business') && locationType.checked) {
         businessCategories.push(locationType.key)
       } else if ((locationType.type === 'household') && locationType.checked) {
