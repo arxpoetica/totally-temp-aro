@@ -39,17 +39,24 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$docum
     // Add map layers based on the selection
     state.selectedDataSources.forEach((selectedDataSource) => {
 
-      // Determine the data source id
-      var dataSourceId = state.dataSourceId
-      if (selectedDataSource.dataSourceId === state.DS_GLOBAL_BUSINESSES
-          || selectedDataSource.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS
-          || selectedDataSource.dataSourceId === state.DS_GLOBAL_CELLTOWER) {
-        dataSourceId = 1  // This is the global data source id
-      }
-
       // Loop through the location types
       state.locationTypes.forEach((locationType) => {
-        if (locationType.checked) {
+
+        // Determine whether we want to add this locationtype + datasource combo
+        var createLayer = true
+        var dataSourceId = selectedDataSource.dataSourceId
+        if (selectedDataSource.dataSourceId === state.DS_GLOBAL_BUSINESSES) {
+          dataSourceId = 1  // This is the global data source id
+          createLayer = locationType.key.indexOf('business') >= 0
+        } else if (selectedDataSource.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS) {
+          dataSourceId = 1  // This is the global data source id
+          createLayer = locationType.key.indexOf('household') >= 0
+        } else if (selectedDataSource.dataSourceId === state.DS_GLOBAL_CELLTOWER) {
+          dataSourceId = 1  // This is the global data source id
+          createLayer = locationType.key.indexOf('tower') >= 0
+        }
+
+        if (locationType.checked && createLayer) {
           // Location type is visible
           var mapLayerKey = `${locationType.key}_${dataSourceId}`
           var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
@@ -78,6 +85,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$docum
   appReadyPromise.then(() => {
     updateMapLayers()
   })
+
+  // Update old and new map layers when data sources change
+  $scope.onSelectedDataSourcesChanged = () => {
+    $scope.changeLocationsLayer() // Old layers
+    updateMapLayers()             // New "tile" layers
+  }
 
   // Upward data flow (updating map layer state)
   $scope.setLocationTypeVisibility = (locationType, isVisible) => {
