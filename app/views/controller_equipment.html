@@ -132,6 +132,31 @@
     </div>
   </div>
 
+  <div class="row">
+    <div class="col-md-12">
+      <div ng-repeat="networkEquipment in planState.networkEquipments">
+        <table class="table table-condensed">
+          <thead>
+            <tr style="background-color:#eee">
+              <td>{{networkEquipment.label}}</td>
+              <td></td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="equipmentLayer in networkEquipment.layers">
+              <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
+              <td><input type="checkbox"
+                         ng-checked="equipmentLayer.checked"
+                         ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
   <% if (env_is_test) { %>
     <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>
     <a href="javascript:void(0)" ng-click="show_number_of_features()">.</a>

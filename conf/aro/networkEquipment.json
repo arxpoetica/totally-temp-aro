@@ -55,7 +55,7 @@
       "planned_5g_coverage": {
         "label": "5G Coverage",
         "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/cell_5g/polygon/{polyTransform}/",
-        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
         "aggregateZoomThreshold": "13",
         "equipmentType": "polygon",
         "drawingOptions": {
@@ -66,7 +66,7 @@
       "planned_feeder_fiber": {
         "label": "Feeder Fiber",
         "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/FEEDER/{lineTransform}/",
-        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "iconUrl": "/images/map_icons/aro/fiber_feeder.png",
         "aggregateZoomThreshold": "13",
         "equipmentType": "line",
         "drawingOptions": {
@@ -76,7 +76,7 @@
       "planned_distribution_fiber": {
         "label": "Distribution Fiber",
         "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/DISTRIBUTION/{lineTransform}/",
-        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "iconUrl": "/images/map_icons/aro/fiber_distribution.png",
         "aggregateZoomThreshold": "13",
         "equipmentType": "line",
         "drawingOptions": {
@@ -86,7 +86,7 @@
       "planned_backhaul_fiber": {
         "label": "Backhaul Fiber",
         "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/BACKBONE/{lineTransform}/",
-        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
         "aggregateZoomThreshold": "13",
         "equipmentType": "line",
         "drawingOptions": {

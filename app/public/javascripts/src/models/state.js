@@ -239,6 +239,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         // First save the label for the category
         var category = configuration.networkEquipment[categoryKey]
         var categoryStateObj = {
+          key: categoryKey,
           label: category.label,
           layers: []
         }

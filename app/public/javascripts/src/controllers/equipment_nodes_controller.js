@@ -74,6 +74,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               isVisible: true,
               drawingOptions: networkEquipment.drawingOptions
             }
+            createdMapLayerKeys.add(networkEquipment.key)
           }
         })
       })
@@ -84,10 +85,22 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   $rootScope.$on('map_zoom_changed', updateMapLayers)
 
+  // Change the visibility of a network equipment layer. layerObj should refer to an object
+  // in state.js --> networkEquipments[x].layers
+  $scope.changeLayerVisibility = (layerObj, isVisible) => {
+    layerObj.checked = isVisible
+    updateMapLayers()
+  }
+
   // Create a new set of map layers
   state.appReadyPromise.then(() => {
     updateMapLayers()
   })
+
+  // Subscribe to different plan events
+  $rootScope.$on('plan_selected', (e, plan) => updateMapLayers())
+  $rootScope.$on('plan_cleared', (e, plan) => updateMapLayers())
+  $rootScope.$on('route_planning_changed', (e, plan) => updateMapLayers())
 
   $scope.serviceLayers = []
   $scope.existingFibers=[];
