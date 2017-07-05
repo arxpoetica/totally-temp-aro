@@ -59,7 +59,7 @@
         "aggregateZoomThreshold": "13",
         "equipmentType": "polygon",
         "drawingOptions": {
-          "strokeStyle": "#00ff00",
+          "strokeStyle": "#00a000",
           "fillStyle": "#a0ffa0"
         }
       },

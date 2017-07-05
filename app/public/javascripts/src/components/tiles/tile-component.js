@@ -90,17 +90,59 @@ class MapTileRenderer {
                   break;
 
                 default:
-                  // Processing as multiline for now
-                  var x0 = this.drawMargins + shape[0].x
-                  var y0 = this.drawMargins + shape[0].y
-                  ctx.beginPath()
-                  ctx.moveTo(x0, y0)
-                  for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                    var x1 = this.drawMargins + shape[iCoord].x
-                    var y1 = this.drawMargins + shape[iCoord].y
-                    ctx.lineTo(x1, y1)
+                  // Check if this is a closed polygon
+                  var firstPoint = shape[0]
+                  var lastPoint = shape[shape.length - 1]
+                  var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
+
+                  if (isClosedPolygon) {
+                    // First draw a filled polygon with the fill color
+                    ctx.globalAlpha = 0.5
+                    var x0 = this.drawMargins + shape[0].x
+                    var y0 = this.drawMargins + shape[0].y
+                    ctx.beginPath()
+                    ctx.moveTo(x0, y0)
+                    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+                      var x1 = this.drawMargins + shape[iCoord].x
+                      var y1 = this.drawMargins + shape[iCoord].y
+                      ctx.lineTo(x1, y1)
+                    }
+                    ctx.fill()
+                    ctx.globalAlpha = 1.0
+                    // Then draw a polyline except for the lines that are along the tile extents
+                    var xPrev = shape[0].x
+                    var yPrev = shape[0].y
+                    ctx.beginPath()
+                    ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+                    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+                      var xNext = shape[iCoord].x
+                      var yNext = shape[iCoord].y
+                      var isAlongXMin = (xPrev === 0 && xNext === 0)
+                      var isAlongXMax = (xPrev === 256 && xNext === 256)
+                      var isAlongYMin = (yPrev === 0 && yNext === 0)
+                      var isAlongYMax = (yPrev === 256 && yNext === 256)
+                      if (!isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax) {
+                        // Segment is not along the tile extents. Draw it.
+                        ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
+                      }
+                      xPrev = xNext
+                      yPrev = yNext
+                      ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+                    }
+                    ctx.stroke()
+                  } else {
+                    // This is not a closed polygon. Draw all the lines
+                    var x0 = this.drawMargins + shape[0].x
+                    var y0 = this.drawMargins + shape[0].y
+                    ctx.beginPath()
+                    ctx.moveTo(x0, y0)
+                    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+                      var x1 = this.drawMargins + shape[iCoord].x
+                      var y1 = this.drawMargins + shape[iCoord].y
+                      ctx.lineTo(x1, y1)
+                    }
+                    ctx.stroke()
                   }
-                  ctx.stroke()
                   break;
               }
             })
