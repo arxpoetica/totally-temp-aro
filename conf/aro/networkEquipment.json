@@ -1,0 +1,35 @@
+{
+  "planned": {
+    "planned_feeder_fiber": {
+      "label": "Feeder Fiber",
+      "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/FEEDER/{lineTransform}/",
+			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+      "aggregateZoomThreshold": "13",
+      "equipmentType": "fiber",
+      "drawingOptions": {
+        "strokeStyle": "#0000ff"
+      }
+    },
+    "planned_distribution_fiber": {
+      "label": "Distribution Fiber",
+      "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/DISTRIBUTION/{lineTransform}/",
+			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+      "aggregateZoomThreshold": "13",
+      "equipmentType": "fiber",
+      "drawingOptions": {
+        "strokeStyle": "#ff0000"
+      }
+    },
+    "planned_5g_coverage": {
+      "label": "5G Coverage",
+      "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/cell_5g/polygon/{polyTransform}/",
+			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+      "aggregateZoomThreshold": "13",
+      "equipmentType": "polygon",
+      "drawingOptions": {
+        "strokeStyle": "#00ff00",
+        "fillStyle": "#a0ffa0"
+      }
+    }
+  }
+}

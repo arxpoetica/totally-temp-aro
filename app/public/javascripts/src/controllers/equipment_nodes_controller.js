@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$document', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, $document, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -10,41 +10,66 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
   $scope.planState = state;
 
-  // Add map layers to state
-  $document.ready(() => {
-    var showTileExtents = true
-    $scope.planState.setMapLayer('feeder_fiber', {
-      url: '/tile/v1/plan/1075/tiles/fiber/FEEDER/select/',
-      drawingOptions: {
-        strokeStyle: '#0000ff',
-        fillStyle: '#a0a0ff',
-        showTileExtents: showTileExtents
-      }
-    }),
-    $scope.planState.setMapLayer('distribution_fiber', {
-      url: '/tile/v1/plan/1075/tiles/fiber/DISTRIBUTION/select/',
-      drawingOptions: {
-        strokeStyle: '#ff0000',
-        fillStyle: '#ffa0a0',
-        showTileExtents: showTileExtents
-      }
+  // Get the line transformation mode with the current zoom level
+  var getLineTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'smooth_absolute'
+  }
+
+  // Get the polygon transformation mode with the current zoom level
+  var getPolygonTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'smooth'
+  }
+
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+  // Creates map layers based on selection in the UI
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
+
+    // Remove all the map layers previously created by this controller
+    createdMapLayerKeys.forEach((createdMapLayerKey) => {
+      delete oldMapLayers[createdMapLayerKey]
     })
-    // $scope.planState.setMapLayer('medium', {
-    //   url: '/tile/v1/tiles/locations/1/medium/aggregate/entity/',
-    //   drawingOptions: {
-    //     strokeStyle: '#00ff00',
-    //     fillStyle: '#a0ffa0',
-    //     showTileExtents: showTileExtents
-    //   }
-    // })
-    // $scope.planState.setMapLayer('large', {
-    //   url: '/tile/v1/tiles/locations/1/large/aggregate/entity/',
-    //   drawingOptions: {
-    //     strokeStyle: '#ff0000',
-    //     fillStyle: '#ffa0a0',
-    //     showTileExtents: showTileExtents
-    //   }
-    // })
+    createdMapLayerKeys.clear()
+
+    // Only add planned equipment if we have a valid plan selected
+    if (state.planId !== state.INVALID_PLAN_ID) {
+      state.plannedEquipments.forEach((plannedEquipment) => {
+        if (plannedEquipment.checked) {
+          var tileUrl = plannedEquipment.tileUrl.replace('{rootPlanId}', state.planId)
+          if (plannedEquipment.equipmentType === 'fiber') {
+            var lineTransform = getLineTransformForLayer(+plannedEquipment.aggregateZoomThreshold)
+            tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+          } else if (plannedEquipment.equipmentType === 'polygon') {
+            var polygonTransform = getPolygonTransformForLayer(+plannedEquipment.aggregateZoomThreshold)
+            tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+          }
+          oldMapLayers[plannedEquipment.key] = {
+            url: tileUrl,
+            iconUrl: plannedEquipment.iconUrl,
+            isVisible: true,
+            drawingOptions: plannedEquipment.drawingOptions
+          }
+        }
+      })
+    }
+
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldMapLayers)
+  }
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
+
+  // Create a new set of map layers
+  state.appReadyPromise.then(() => {
+    updateMapLayers()
   })
 
   $scope.serviceLayers = []

@@ -189,7 +189,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
         location.key = locationKey
-        location.checked = true
+        location.checked = false
         service.locationTypes.push(location)
       })
     }
@@ -232,6 +232,16 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
     // ****************** END old (V1) location Types implementation
 
+    // Network equipment layer
+    service.plannedEquipments = []
+    if (configuration && configuration.networkEquipment) {
+      Object.keys(configuration.networkEquipment.planned).forEach((equipmentKey) => {
+        var equipment = configuration.networkEquipment.planned[equipmentKey]
+        equipment.key = equipmentKey
+        equipment.checked = true
+        service.plannedEquipments.push(equipment)
+      })
+    }
     //create construction sites copy locationTypes and then add a isConstructionSite Field
     service.constructionSites = angular.copy(service.locationTypes);
   }
