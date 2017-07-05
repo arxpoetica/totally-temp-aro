@@ -233,13 +233,23 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     // ****************** END old (V1) location Types implementation
 
     // Network equipment layer
-    service.plannedEquipments = []
+    service.networkEquipments = []
     if (configuration && configuration.networkEquipment) {
-      Object.keys(configuration.networkEquipment.planned).forEach((equipmentKey) => {
-        var equipment = configuration.networkEquipment.planned[equipmentKey]
-        equipment.key = equipmentKey
-        equipment.checked = true
-        service.plannedEquipments.push(equipment)
+      Object.keys(configuration.networkEquipment).forEach((categoryKey) => {
+        // First save the label for the category
+        var category = configuration.networkEquipment[categoryKey]
+        var categoryStateObj = {
+          label: category.label,
+          layers: []
+        }
+        // Then save all the network layers in the category
+        Object.keys(category.layers).forEach((layerKey) => {
+          var networkEquipment = category.layers[layerKey]
+          networkEquipment.key = layerKey
+          networkEquipment.checked = true
+          categoryStateObj.layers.push(networkEquipment)
+        })
+        service.networkEquipments.push(categoryStateObj)
       })
     }
     //create construction sites copy locationTypes and then add a isConstructionSite Field

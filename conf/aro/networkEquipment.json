@@ -1,34 +1,97 @@
 {
   "planned": {
-    "planned_feeder_fiber": {
-      "label": "Feeder Fiber",
-      "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/FEEDER/{lineTransform}/",
-			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
-      "aggregateZoomThreshold": "13",
-      "equipmentType": "fiber",
-      "drawingOptions": {
-        "strokeStyle": "#0000ff"
-      }
-    },
-    "planned_distribution_fiber": {
-      "label": "Distribution Fiber",
-      "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/DISTRIBUTION/{lineTransform}/",
-			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
-      "aggregateZoomThreshold": "13",
-      "equipmentType": "fiber",
-      "drawingOptions": {
-        "strokeStyle": "#ff0000"
-      }
-    },
-    "planned_5g_coverage": {
-      "label": "5G Coverage",
-      "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/cell_5g/polygon/{polyTransform}/",
-			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
-      "aggregateZoomThreshold": "13",
-      "equipmentType": "polygon",
-      "drawingOptions": {
-        "strokeStyle": "#00ff00",
-        "fillStyle": "#a0ffa0"
+    "label": "Optimized Equipment",
+    "layers": {
+      "planned_central_office": {
+        "label": "Central Office",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/central_office/point/{pointTransform}/entity/",
+        "iconUrl": "/images/map_icons/aro/central_office.png",
+        "aggregateZoomThreshold": "7",
+        "equipmentType": "point",
+        "drawingOptions": {
+          "strokeStyle": "#0000ff"
+        }
+      },
+      "planned_fdh": {
+        "label": "FDH",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/fiber_distribution_hub/point/{pointTransform}/entity/",
+        "iconUrl": "/images/map_icons/aro/fiber_distribution_hub.png",
+        "aggregateZoomThreshold": "12",
+        "equipmentType": "point",
+        "drawingOptions": {
+          "strokeStyle": "#0000ff"
+        }
+      },
+      "planned_fdt": {
+        "label": "FDT",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/fiber_distribution_terminal/point/{pointTransform}/entity/",
+        "iconUrl": "/images/map_icons/aro/fiber_distribution_terminal.png",
+        "aggregateZoomThreshold": "14",
+        "equipmentType": "point",
+        "drawingOptions": {
+          "strokeStyle": "#0000ff"
+        }
+      },
+      "planned_bulk_distribution_terminal": {
+        "label": "Bulk Distribution Terminal",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/bulk_distrubution_terminal/point/{pointTransform}/entity/",
+        "iconUrl": "/images/map_icons/aro/bulk_distrubution_terminal.png",
+        "aggregateZoomThreshold": "14",
+        "equipmentType": "point",
+        "drawingOptions": {
+          "strokeStyle": "#0000ff"
+        }
+      },
+      "planned_5g_site": {
+        "label": "5G Site",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/cell_5g/point/{pointTransform}/entity/",
+        "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
+        "aggregateZoomThreshold": "14",
+        "equipmentType": "point",
+        "drawingOptions": {
+          "strokeStyle": "#0000ff"
+        }
+      },
+      "planned_5g_coverage": {
+        "label": "5G Coverage",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/equipment/cell_5g/polygon/{polyTransform}/",
+        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "aggregateZoomThreshold": "13",
+        "equipmentType": "polygon",
+        "drawingOptions": {
+          "strokeStyle": "#00ff00",
+          "fillStyle": "#a0ffa0"
+        }
+      },
+      "planned_feeder_fiber": {
+        "label": "Feeder Fiber",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/FEEDER/{lineTransform}/",
+        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "aggregateZoomThreshold": "13",
+        "equipmentType": "line",
+        "drawingOptions": {
+          "strokeStyle": "#0000ff"
+        }
+      },
+      "planned_distribution_fiber": {
+        "label": "Distribution Fiber",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/DISTRIBUTION/{lineTransform}/",
+        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "aggregateZoomThreshold": "13",
+        "equipmentType": "line",
+        "drawingOptions": {
+          "strokeStyle": "#ff0000"
+        }
+      },
+      "planned_backhaul_fiber": {
+        "label": "Backhaul Fiber",
+        "tileUrl": "/tile/v1/plan/{rootPlanId}/tiles/fiber/BACKBONE/{lineTransform}/",
+        "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+        "aggregateZoomThreshold": "13",
+        "equipmentType": "line",
+        "drawingOptions": {
+          "strokeStyle": "#000000"
+        }
       }
     }
   }

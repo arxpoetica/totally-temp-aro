@@ -10,6 +10,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
   $scope.planState = state;
 
+  // Get the point transformation mode with the current zoom level
+  var getPointTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+  }
+
   // Get the line transformation mode with the current zoom level
   var getLineTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
@@ -42,23 +50,32 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // Only add planned equipment if we have a valid plan selected
     if (state.planId !== state.INVALID_PLAN_ID) {
-      state.plannedEquipments.forEach((plannedEquipment) => {
-        if (plannedEquipment.checked) {
-          var tileUrl = plannedEquipment.tileUrl.replace('{rootPlanId}', state.planId)
-          if (plannedEquipment.equipmentType === 'fiber') {
-            var lineTransform = getLineTransformForLayer(+plannedEquipment.aggregateZoomThreshold)
-            tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
-          } else if (plannedEquipment.equipmentType === 'polygon') {
-            var polygonTransform = getPolygonTransformForLayer(+plannedEquipment.aggregateZoomThreshold)
-            tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+
+      // Loop through all network equipment categories (e.g. "Existing Equipment")
+      state.networkEquipments.forEach((category) => {
+
+        // Loop through all the layers in this category
+        category.layers.forEach((networkEquipment) => {
+          if (networkEquipment.checked) {
+            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.planId)
+            if (networkEquipment.equipmentType === 'point') {
+              var lineTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{pointTransform}', lineTransform)
+            } else if (networkEquipment.equipmentType === 'line') {
+              var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+            } else if (networkEquipment.equipmentType === 'polygon') {
+              var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+            }
+            oldMapLayers[networkEquipment.key] = {
+              url: tileUrl,
+              iconUrl: networkEquipment.iconUrl,
+              isVisible: true,
+              drawingOptions: networkEquipment.drawingOptions
+            }
           }
-          oldMapLayers[plannedEquipment.key] = {
-            url: tileUrl,
-            iconUrl: plannedEquipment.iconUrl,
-            isVisible: true,
-            drawingOptions: plannedEquipment.drawingOptions
-          }
-        }
+        })
       })
     }
 
