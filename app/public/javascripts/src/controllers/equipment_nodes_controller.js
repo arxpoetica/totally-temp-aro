@@ -819,9 +819,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var fiberLayers = []
   function reloadDatasources () {
 
-    // Reload data sources into state
-    state.loadExistingFibersList()
-
     // Remove older fiber layers (if any)
     fiberLayers.forEach((fiberLayer) => {
       fiberLayer.hide()     // Without this, data will be reloaded on map events. Needs to be fixed in map_layer.js.
@@ -884,6 +881,23 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $rootScope.$on('uploaded_fiber', (e, info) => {
+
+    // Reload data sources into state
+    var selectedFiberIds = _.pluck(state.selectedExistingFibers, 'systemId')
+    state.loadExistingFibersList()
+      .then(() => {
+        state.allExistingFibers.forEach((existingFiber) => {
+          // Select the fibers that were selected earlier.
+          if (selectedFiberIds.indexOf(existingFiber.systemId) >= 0) {
+            state.selectedExistingFibers.push(existingFiber)
+          }
+          // Select the currently uploaded fiber
+          if (existingFiber.systemId === info.systemId) {
+            state.selectedExistingFibers.push(existingFiber)
+          }
+        })
+      })
+
     initDatasource(info)
     info.toggleVisibility()
     reloadDatasources();
