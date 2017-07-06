@@ -35,7 +35,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Add location types to a POST body that we will send to aro-service for performing optimization
   var addLocationTypesToBody = (state, postBody) => {
     var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)
-    postBody.locationTypes = _.pluck(selectedLocationTypes, 'key')
+    postBody.locationTypes = _.pluck(selectedLocationTypes, 'plannerKey')
   }
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
@@ -221,7 +221,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var loadLocationTypesFromBody = (state, postBody) => {
     state.locationTypes.forEach((locationType) => locationType.checked = false)
     postBody.locationTypes.forEach((locationType) => {
-      var serviceLocationTypeObj = state.locationTypes.filter((item) => item.key === locationType)[0]
+      var serviceLocationTypeObj = state.locationTypes.filter((item) => item.plannerKey === locationType)[0]
       if (serviceLocationTypeObj) {
         serviceLocationTypeObj.checked = true
       }
