@@ -28,7 +28,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     state.selectedDataSources.forEach((selectedDataSource) => {
 
       // Loop through the location types
-      state.locationTypes.forEach((locationType) => {
+      state.locationTypes.getValue().forEach((locationType) => {
 
         // Determine whether we want to add this locationtype + datasource combo
         var createLayer = true
@@ -82,14 +82,22 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   // Upward data flow (updating map layer state)
   $scope.setLocationTypeVisibility = (locationType, isVisible) => {
-    for (var iLocationType = 0; iLocationType < state.locationTypes.length; ++iLocationType) {
-      if (state.locationTypes[iLocationType].key === locationType.key) {
-        state.locationTypes[iLocationType].checked = isVisible
+    var newLocationTypes = angular.copy(state.locationTypes.getValue())
+    for (var iLocationType = 0; iLocationType < newLocationTypes.length; ++iLocationType) {
+      if (newLocationTypes[iLocationType].key === locationType.key) {
+        newLocationTypes[iLocationType].checked = isVisible
         break
       }
     }
-    updateMapLayers()
+    state.locationTypes.next(newLocationTypes)
   }
+
+  // Watch for changes in the locationTypes and trigger a map layer update when that happens
+  $scope.derivedLocationTypes = []
+  state.locationTypes.subscribe((newValue) => {
+    $scope.derivedLocationTypes = newValue  // For the checkboxes to bind to
+    updateMapLayers()
+  })
 
   $scope.map_tools = map_tools
   $scope.selected_tool = null

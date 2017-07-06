@@ -169,6 +169,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   ]
 
+  service.locationTypes = new Rx.BehaviorSubject([])
+
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
 
@@ -176,22 +178,22 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
     // A list of location types to show in the locations layer
     service.locationTypesV1 = []
-    service.locationTypes = []
-
     service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
     service.selectedDataSources = service.defaultDataSources.slice()
 
+    var locationTypes = []
     if (configuration && configuration.locationCategories && configuration.locationCategories.v2) {
       var locations = configuration.locationCategories.v2
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
         location.key = locationKey
         location.checked = false
-        service.locationTypes.push(location)
+        locationTypes.push(location)
       })
     }
+    service.locationTypes.next(locationTypes)
 
     // ****************** START old (V1) location Types implementation
     // Iterate over the business segments in the configuration

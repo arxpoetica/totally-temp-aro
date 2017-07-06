@@ -89,7 +89,7 @@
           </div>
         </li>-->
         <!-- New (Map Tiles) locations -->
-        <li ng-repeat="locationType in planState.locationTypes">
+        <li ng-repeat="locationType in derivedLocationTypes">
           <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">{{locationType.label}}</div>
           <div class="ctype-checkbox">
