@@ -249,7 +249,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           Object.keys(category.layers).forEach((layerKey) => {
             var networkEquipment = category.layers[layerKey]
             networkEquipment.key = layerKey
-            networkEquipment.checked = true
+            networkEquipment.checked = false
             categoryStateObj.layers.push(networkEquipment)
           })
           service.networkEquipments.push(categoryStateObj)
