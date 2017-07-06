@@ -170,6 +170,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   ]
 
   service.locationTypes = new Rx.BehaviorSubject([])
+  service.constructionSites = new Rx.BehaviorSubject([])
 
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
@@ -194,6 +195,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       })
     }
     service.locationTypes.next(locationTypes)
+    service.constructionSites.next(angular.copy(locationTypes))
 
     // ****************** START old (V1) location Types implementation
     // Iterate over the business segments in the configuration
@@ -258,8 +260,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
       }
     }
-    //create construction sites copy locationTypes and then add a isConstructionSite Field
-    service.constructionSites = angular.copy(service.locationTypes);
   }
 
   // Load tile information from the server

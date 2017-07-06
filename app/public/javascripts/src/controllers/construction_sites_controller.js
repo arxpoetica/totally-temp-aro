@@ -25,6 +25,11 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
 
+  $scope.derivedConstructionSites = []
+  state.constructionSites.subscribe((newValue) => {
+    $scope.derivedConstructionSites = newValue
+  })
+
   $scope.new_location_data = null
 
   $scope.changeLocationsLayer = (majorCategory) => {

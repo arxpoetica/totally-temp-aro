@@ -2,12 +2,10 @@
   <h2>Fiber Routes</h2>
   <div>
     <div class="fiber_select_all">
-      <checkbox
-              class="chk-small"
-              ng-model="showAllCompetitors"
-              name="ctype-name"
-              ng-change="toggleAllCompetitors()">
-      </checkbox>
+      <input type="checkbox"
+             ng-model="showAllCompetitors"
+             name="ctype-name"
+             ng-change="toggleAllCompetitors()">
       <span style="padding:5px 5px">All competitors</span>
     </div>
     <div class="fiber_select_many">
