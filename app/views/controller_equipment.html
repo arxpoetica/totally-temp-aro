@@ -132,6 +132,7 @@
     </div>
   </div>
 
+  <!-- New implementation of network equipments -->
   <div class="row">
     <div class="col-md-12">
       <div ng-repeat="networkEquipment in planState.networkEquipments">
@@ -155,6 +156,25 @@
       </div>
     </div>
   </div>
+
+  <!-- New implementation of existing fiber -->
+    <div style="clear: both"></div>
+    <div style="width: 250px;margin: 5px">
+      <ui-select multiple ng-model="planState.selectedExistingFibers"
+                  theme="bootstrap"
+                  close-on-select="true"
+                  on-select="selectedFibersChanged()"
+                  on-remove="selectedFibersChanged()">
+        <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.systemId}}]</ui-select-match>
+        <ui-select-choices class="ui-select-width-250" repeat="existingFiber in planState.allExistingFibers">
+          <div>{{existingFiber.name}}</div>
+        </ui-select-choices>
+      </ui-select>
+    </div>
+
+    <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
+      <span class="fa fa-plus"></span> Add fiber
+    </button>
 
 
   <% if (env_is_test) { %>

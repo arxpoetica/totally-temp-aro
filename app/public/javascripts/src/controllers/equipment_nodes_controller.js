@@ -80,6 +80,20 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     }
 
+    // Create layers for existing fiber (the ones that are selected for display)
+    var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
+    state.selectedExistingFibers.forEach((selectedExistingFiber) => {
+      var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
+      var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
+      oldMapLayers[mapLayerKey] = {
+        url: `/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`,
+        iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
+        isVisible: true,
+        drawingOptions: state.existingFiberOptions.drawingOptions
+      }
+      createdMapLayerKeys.add(mapLayerKey)
+    })
+
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
@@ -805,6 +819,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var fiberLayers = []
   function reloadDatasources () {
 
+    // Reload data sources into state
+    state.loadExistingFibersList()
+
     // Remove older fiber layers (if any)
     fiberLayers.forEach((fiberLayer) => {
       fiberLayer.hide()     // Without this, data will be reloaded on map events. Needs to be fixed in map_layer.js.
@@ -875,6 +892,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Additional variable required ($scope.fibers.selectedFibers) because ui-select creates a new scope via ng-repeat
   $scope.fibers = { selectedFibers: [] }
   $scope.selectedFibersChanged = () => {
+    updateMapLayers()
     // Set visibility of fiber layers
     fiberLayers.forEach((fiberLayer) => fiberLayer.hide())
     $scope.fibers.selectedFibers.forEach((selectedFiber) => fiberLayers[selectedFiber.systemId].show())

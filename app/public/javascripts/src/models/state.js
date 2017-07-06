@@ -234,24 +234,28 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
     // Network equipment layer
     service.networkEquipments = []
+    service.existingFiberOptions = {}
     if (configuration && configuration.networkEquipment) {
-      Object.keys(configuration.networkEquipment).forEach((categoryKey) => {
-        // First save the label for the category
-        var category = configuration.networkEquipment[categoryKey]
-        var categoryStateObj = {
-          key: categoryKey,
-          label: category.label,
-          layers: []
-        }
-        // Then save all the network layers in the category
-        Object.keys(category.layers).forEach((layerKey) => {
-          var networkEquipment = category.layers[layerKey]
-          networkEquipment.key = layerKey
-          networkEquipment.checked = true
-          categoryStateObj.layers.push(networkEquipment)
+      service.existingFiberOptions = configuration.networkEquipment.existingFiberOptions
+      if (configuration.networkEquipment.equipmentList) {
+        Object.keys(configuration.networkEquipment.equipmentList).forEach((categoryKey) => {
+          // First save the label for the category
+          var category = configuration.networkEquipment.equipmentList[categoryKey]
+          var categoryStateObj = {
+            key: categoryKey,
+            label: category.label,
+            layers: []
+          }
+          // Then save all the network layers in the category
+          Object.keys(category.layers).forEach((layerKey) => {
+            var networkEquipment = category.layers[layerKey]
+            networkEquipment.key = layerKey
+            networkEquipment.checked = true
+            categoryStateObj.layers.push(networkEquipment)
+          })
+          service.networkEquipments.push(categoryStateObj)
         })
-        service.networkEquipments.push(categoryStateObj)
-      })
+      }
     }
     //create construction sites copy locationTypes and then add a isConstructionSite Field
     service.constructionSites = angular.copy(service.locationTypes);
@@ -269,6 +273,20 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         ? service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles[0]
         : null
 	})
+
+  // Load existing fibers list from the server
+  service.allExistingFibers = []
+  service.selectedExistingFibers = []
+  service.loadExistingFibersList = () => {
+    service.selectedExistingFibers = [] // Dont want to hold on to any earlier objects
+    $http.get('/user_fiber/list')
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          service.allExistingFibers = response.data
+        }
+      })
+  }
+  service.loadExistingFibersList()
 
   initializeState()
 
