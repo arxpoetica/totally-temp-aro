@@ -1,136 +1,4 @@
 <div id="equipment_nodes_controller">
-  <div class="row">
-    <div class="col-md-12">
-      <div class="panel-group" id="serviceLayersAccordion" role="tablist" aria-multiselectable="true" style="margin-top: 9px">
-        <div ng-class="{'panel panel-default': true, 'div-blocked': (serviceLayer.needsPlan && (planState.planId === planState.INVALID_PLAN_ID))}" ng-repeat="serviceLayer in serviceLayers" ng-if="!serviceLayer.hidden">
-          <div class="panel-heading" role="tab">
-            <p class="panel-title" style="background-color:#eee; padding-left:10px">
-              <checkbox
-                      class="chk-small"
-                      ng-model="serviceLayer.enabled"
-                      ng-change="serviceLayer.changedAvailability()"
-              ></checkbox>
-              <a role="button" data-toggle="collapse" data-parent="#serviceLayersAccordion" ng-href="#serviceLayer{{serviceLayer.id}}">
-                <span class="fa fa-caret-down pull-right" style="padding-right: 10px; padding-top: 3px;"></span>
-                <span class="fa fa-caret-up pull-right" style="padding-right: 10px; padding-top: 3px;"></span>
-                {{ serviceLayer.equipment_description }}
-              </a>
-            </p>
-          </div>
-          <div id="serviceLayer{{serviceLayer.id}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-            <div class="panel-body" style="border-top: none">
-              <div ng-repeat="nodeType in serviceLayer.nodeTypes">
-                <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/composite/{{serviceLayer.name}}_{{nodeType.name}}.png" style="width:16px"></div>
-                <div class="pull-right">
-                  <checkbox
-                          class="chk-small"
-                          ng-model="nodeType.visible"
-                          ng-change="serviceLayer.changeNodeTypesVisibility(nodeType)"
-                          ng-disabled="!vztfttp || !serviceLayer.enabled"
-                  ></checkbox>
-                </div>
-                <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                  <label style="font-weight:normal">
-                    {{nodeType.service_layer_node_name}}
-                  </label>
-                </div>
-
-                <div ng-if="serviceLayer.name == 'all' && nodeType.name =='cell_5g'">
-                  <div class="pull-left" style="margin-right: 5px"><img ng-attr-src="/images/map_icons/{{ARO_CLIENT}}/service_layer_cran.png" style="width:16px"></div>
-                  <div class="pull-right">
-                    <checkbox
-                            class="chk-small"
-                            ng-model="nodeType.coverage_visible"
-                            ng-change="serviceLayer.fixedWirelessVisibilityChanged(serviceLayer , nodeType)"
-                            ng-disabled="!vztfttp || !serviceLayer.enabled"
-                    ></checkbox>
-                  </div>
-                  <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                    <label style="font-weight:normal">
-                      5G Coverage
-                    </label>
-                  </div>
-                </div>
-
-              </div>
-
-              <div ng-if="serviceLayer.id === 'all'">
-                <div class="pull-left" style="margin-right: 5px"><span style="background-color:blue; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
-                <div class="pull-right">
-                  <checkbox
-                          class="chk-small"
-                          ng-model="serviceLayer.showFeederFiber"
-                          ng-change="serviceLayer.changedFiberVisibility()"
-                          ng-disabled="!vztfttp || !serviceLayer.enabled"
-                  ></checkbox>
-                </div>
-                <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                  <label style="font-weight:normal">
-                    Feeder Fiber
-                  </label>
-                </div>
-              </div>
-
-              <div ng-if="serviceLayer.id === 'all'">
-                <div class="pull-left" style="margin-right: 5px"><span style="background-color:red; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
-                <div class="pull-right">
-                  <checkbox
-                          class="chk-small"
-                          ng-model="serviceLayer.showDistributionFiber"
-                          ng-change="serviceLayer.changedFiberVisibility()"
-                          ng-disabled="!vztfttp || !serviceLayer.enabled">
-                  </checkbox>
-                </div>
-                <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                  <label style="font-weight:normal">
-                    Distribution Fiber
-                  </label>
-                </div>
-              </div>
-
-              <div ng-if="serviceLayer.id === 'all'">
-                <div class="pull-left" style="margin-right: 5px"><span style="background-color:black; width:12px; height:12px; margin-right: 3px; display:inline-block"></span></div>
-                <div class="pull-right">
-                  <checkbox
-                          class="chk-small"
-                          ng-model="serviceLayer.showBackhaulFiber"
-                          ng-change="serviceLayer.changedFiberVisibility()"
-                          ng-disabled="!vztfttp || !serviceLayer.enabled">
-                  </checkbox>
-                </div>
-                <div ng-class="{disabled: !vztfttp || !serviceLayer.enabled}">
-                  <label style="font-weight:normal">
-                    Backhaul Fiber
-                  </label>
-                </div>
-              </div>
-
-              <div ng-if="serviceLayer.id === 'existing_fiber'">
-                <div style="clear: both"></div>
-                <div style="width: 250px;margin: 5px">
-                  <ui-select multiple ng-model="fibers.selectedFibers"
-                             theme="bootstrap"
-                             close-on-select="true"
-                             on-select="selectedFibersChanged()"
-                             on-remove="selectedFibersChanged()">
-                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.systemId}}]</ui-select-match>
-                    <ui-select-choices class="ui-select-width-250" repeat="datasource in remainingDatasources">
-                      <div>{{datasource.name}}</div>
-                    </ui-select-choices>
-                  </ui-select>
-                </div>
-
-                <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
-                  <span class="fa fa-plus"></span> Add fiber
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- New implementation of network equipments -->
   <div class="row">
@@ -158,24 +26,40 @@
   </div>
 
   <!-- New implementation of existing fiber -->
-    <div style="clear: both"></div>
-    <div style="width: 250px;margin: 5px">
-      <ui-select multiple ng-model="planState.selectedExistingFibers"
-                  theme="bootstrap"
-                  close-on-select="true"
-                  on-select="selectedFibersChanged()"
-                  on-remove="selectedFibersChanged()">
-        <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.systemId}}]</ui-select-match>
-        <ui-select-choices class="ui-select-width-250" repeat="existingFiber in planState.allExistingFibers">
-          <div>{{existingFiber.name}}</div>
-        </ui-select-choices>
-      </ui-select>
+  <div class="row">
+    <div class="col-md-12">
+        <table class="table table-condensed">
+          <thead>
+            <tr style="background-color:#eee">
+              <td>Existing Fiber</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="clear: both"></div>
+                <div style="width: 250px;margin: 5px">
+                  <ui-select multiple ng-model="planState.selectedExistingFibers"
+                              theme="bootstrap"
+                              close-on-select="true"
+                              on-select="selectedFibersChanged()"
+                              on-remove="selectedFibersChanged()">
+                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.systemId}}]</ui-select-match>
+                    <ui-select-choices class="ui-select-width-250" repeat="existingFiber in planState.allExistingFibers">
+                      <div>{{existingFiber.name}}</div>
+                    </ui-select-choices>
+                  </ui-select>
+                </div>
+
+                <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
+                  <span class="fa fa-plus"></span> Add fiber
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
     </div>
-
-    <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
-      <span class="fa fa-plus"></span> Add fiber
-    </button>
-
+  </div>
 
   <% if (env_is_test) { %>
     <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>

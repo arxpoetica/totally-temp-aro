@@ -106,7 +106,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     },
     threshold: 0, // This will be converted to a precentage when sending to the UI
     customOptimization: null,
-    fiberSourceIds: [],
     routeGenerationOptions: [
       { id: 'T', value: 'A Route', checked: false },
       { id: 'A', value: 'B Route', checked: false },
@@ -279,12 +278,17 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.selectedExistingFibers = []
   service.loadExistingFibersList = () => {
     service.selectedExistingFibers = [] // Dont want to hold on to any earlier objects
-    $http.get('/user_fiber/list')
-      .then((response) => {
-        if (response.status >= 200 && response.status <= 299) {
-          service.allExistingFibers = response.data
-        }
-      })
+    return new Promise((resolve, reject) => {
+      $http.get('/user_fiber/list')
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            service.allExistingFibers = response.data
+            resolve()
+          } else {
+            reject(response)
+          }
+        })
+    })
   }
   service.loadExistingFibersList()
 

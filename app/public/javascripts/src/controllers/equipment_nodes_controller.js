@@ -896,9 +896,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     // Set visibility of fiber layers
     fiberLayers.forEach((fiberLayer) => fiberLayer.hide())
     $scope.fibers.selectedFibers.forEach((selectedFiber) => fiberLayers[selectedFiber.systemId].show())
-
-    // For now, save fiber source ids in state.js. Later we should store everything in state.js
-    state.optimizationOptions.fiberSourceIds = _.pluck($scope.fibers.selectedFibers, 'systemId').sort()
   }
 
   $scope.selectedExistingFiberIds = []    // For now, save fiber source ids in state.js. Later we should store everything in state.js

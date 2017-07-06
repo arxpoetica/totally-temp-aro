@@ -25,7 +25,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addRegionsToBody(state, optimization, regions, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     addTechnologiesToBody(state, optimizationBody)
-    optimizationBody.fiberSourceIds = state.optimizationOptions.fiberSourceIds
+    optimizationBody.fiberSourceIds = []
+    state.selectedExistingFibers.forEach((selectedExistingFiber) => optimizationBody.fiberSourceIds.push(selectedExistingFiber.systemId))
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
 
     return optimizationBody
@@ -191,7 +192,15 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadFiberNetworkConstraintsFromBody(state, postBody)
     loadTechnologiesFromBody(state, postBody)
 
-    state.optimizationOptions.fiberSourceIds = postBody.fiberSourceIds.slice()
+    state.loadExistingFibersList()
+      .then(() => {
+        // The state will have a list of all fiber source ids
+        state.allExistingFibers.forEach((existingFiber) => {
+          if (postBody.fiberSourceIds.indexOf(existingFiber.systemId) >= 0) {
+            state.selectedExistingFibers.push(existingFiber)
+          }
+        })
+      })
 
     // Select geographies
     regions.removeAllGeographies()
