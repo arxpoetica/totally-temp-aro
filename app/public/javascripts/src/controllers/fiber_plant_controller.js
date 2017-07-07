@@ -59,8 +59,23 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
         }
         createdMapLayerKeys.add(mapLayerKey)
       }
-    })
 
+      // Create fiber routes buffer layer
+      if (state.competition.showFiberRoutesBuffer) {
+        var mapLayerKey = `competitor_fiberRoutesBuffer_${providerType}_${carrierId}`
+        oldMapLayers[mapLayerKey] = {
+          url: `/tile/v1/fiber/competitive/carrier/${carrierId}/tiles/buffer/${polyTransform}/`,
+          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+          isVisible: true,
+          drawingOptions: {
+            strokeStyle: selectedCompetitor.strokeStyle,
+            fillStyle: selectedCompetitor.fillStyle,
+            showTileExtents: state.showMapTileExtents.getValue()
+          }
+        }
+        createdMapLayerKeys.add(mapLayerKey)
+      }
+    })
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
