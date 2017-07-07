@@ -1,8 +1,7 @@
 <div id="fiber_plant_controller">
 
   <form>
-    <p><strong>Competitors</strong></p>
-
+    <p><strong>Competitor Types</strong></p>
     <select class="form-control"
             ng-model="planState.competition.selectedCompetitorType"
             ng-options="item as item.label for item in planState.competition.allCompetitorTypes"
@@ -10,6 +9,7 @@
     </select>
 
     <br>
+    <p><strong>Competitors</strong></p>
     <ui-select multiple ng-model="planState.competition.selectedCompetitors"
                theme="bootstrap"
                close-on-select="true"
@@ -25,6 +25,27 @@
         </div>
       </ui-select-choices>
     </ui-select>
+
+    <br>
+    <p><strong>Survey Data</strong></p>
+    <input type="checkbox"
+           ng-checked="planState.competition.showCensusBlocks"
+           ng-click="toggleShowSurveyData()">
+    Census Blocks
+
+    <br>
+    <br>
+    <p><strong>Fiber Route Data</strong></p>
+    <input type="checkbox"
+           ng-checked="planState.competition.showFiberRoutes"
+           ng-click="toggleShowFiberRoutesData()">
+    Routes
+    <br>
+    <input type="checkbox"
+           ng-checked="planState.competition.showFiberRoutesBuffer"
+           ng-click="toggleShowFiberRoutesBufferData()">
+    Routes Buffer
+
   </form>
 
 </div>

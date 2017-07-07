@@ -23,14 +23,32 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
     // Add map layers based on the selection
     state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
 
+      var carrierId = selectedCompetitor.id
+      var providerType = state.competition.selectedCompetitorType.id
+      var polyTransform = map.getZoom() > 14 ? 'select' : 'smooth'
+      var lineTransform = map.getZoom() > 10 ? 'select' : 'smooth_absolute'
+
       // Create census block layer
       if (state.competition.showCensusBlocks) {
-        var carrierId = selectedCompetitor.id
-        var providerType = state.competition.selectedCompetitorType.id
-        var polyTransform = map.getZoom() > 14 ? 'select' : 'smooth'
         var mapLayerKey = `competitor_censusBlocks_${providerType}_${carrierId}`
         oldMapLayers[mapLayerKey] = {
           url: `/tile/v1/competitive/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`,
+          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+          isVisible: true,
+          drawingOptions: {
+            strokeStyle: selectedCompetitor.strokeStyle,
+            fillStyle: selectedCompetitor.fillStyle,
+            showTileExtents: state.showMapTileExtents.getValue()
+          }
+        }
+        createdMapLayerKeys.add(mapLayerKey)
+      }
+
+      // Create fiber routes layer
+      if (state.competition.showFiberRoutes) {
+        var mapLayerKey = `competitor_fiberRoutes_${providerType}_${carrierId}`
+        oldMapLayers[mapLayerKey] = {
+          url: `/tile/v1/fiber/competitive/carrier/${carrierId}/tiles/line/${lineTransform}/`,
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           isVisible: true,
           drawingOptions: {
@@ -55,6 +73,21 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
   }
 
   $scope.onSelectedCompetitorsChanged = () => {
+    updateMapLayers()
+  }
+
+  $scope.toggleShowSurveyData = () => {
+    state.competition.showCensusBlocks = !state.competition.showCensusBlocks
+    updateMapLayers()
+  }
+
+  $scope.toggleShowFiberRoutesData = () => {
+    state.competition.showFiberRoutes = !state.competition.showFiberRoutes
+    updateMapLayers()
+  }
+
+  $scope.toggleShowFiberRoutesBufferData = () => {
+    state.competition.showFiberRoutesBuffer = !state.competition.showFiberRoutesBuffer
     updateMapLayers()
   }
 
