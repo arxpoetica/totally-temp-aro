@@ -22,6 +22,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
 
     // Add map layers based on the selection
     state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
+
       // Create census block layer
       if (state.competition.showCensusBlocks) {
         var carrierId = selectedCompetitor.id
@@ -33,14 +34,16 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           isVisible: true,
           drawingOptions: {
-            strokeStyle: '#00ff00',
-            fillStyle: '#a0ffa0',
+            strokeStyle: selectedCompetitor.strokeStyle,
+            fillStyle: selectedCompetitor.fillStyle,
             showTileExtents: state.showMapTileExtents.getValue()
           }
         }
         createdMapLayerKeys.add(mapLayerKey)
       }
     })
+
+
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
