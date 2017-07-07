@@ -169,6 +169,43 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   ]
 
+  // Competition display
+  service.competition = {
+    allCompetitorTypes: [
+      {
+        id: 'retail',
+        label: 'Retail'
+      },
+      {
+        id: 'wholesale',
+        label: 'Wholesale'
+      },
+      {
+        id: 'tower',
+        label: 'Cell Towers'
+      }
+    ],
+    selectedCompetitorType: null,
+    allCompetitors: [],
+    selectedCompetitors: [],
+    speedThreshold: 100,
+    showCensusBlocks: true,
+    showFiberRoutes: false,
+    showFiberRoutesBuffer: false
+  }
+  // Select the first entry in the list
+  service.competition.selectedCompetitorType = service.competition.allCompetitorTypes[0]
+  service.reloadCompetitors = () => {
+    $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`)
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          service.competition.selectedCompetitors = []
+          service.competition.allCompetitors = response.data
+        }
+      })
+  }
+  service.reloadCompetitors()
+
   service.locationTypes = new Rx.BehaviorSubject([])
   service.constructionSites = new Rx.BehaviorSubject([])
 

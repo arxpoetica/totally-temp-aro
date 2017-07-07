@@ -30,6 +30,7 @@ require('./routes/routes_ui_configuration').configure(api, middleware)  // No au
 var routes = [
   'status',
   'api',
+  'competitors',
   'user',
   'map',
   'permission',
