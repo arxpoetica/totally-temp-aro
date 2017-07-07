@@ -31,7 +31,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
       // Create census block layer
       if (state.competition.showCensusBlocks) {
         var mapLayerKey = `competitor_censusBlocks_${providerType}_${carrierId}`
-        oldMapLayers[mapLayerKey] = {
+        var mapLayer = {
           url: `/tile/v1/competitive/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`,
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           isVisible: true,
@@ -41,6 +41,14 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
             showTileExtents: state.showMapTileExtents.getValue()
           }
         }
+        if (state.competition.selectedRenderingOption.alphaRender) {
+          // Set additional properties so that the tile uses alpha (transparency) rendering
+          mapLayer.drawingOptions.alphaThreshold = {
+            property: state.competition.selectedRenderingOption.alphaThresholdProperty,
+            maxValue: state.competition.selectedRenderingOption.alphaPropertyMaxValue
+          }
+        }
+        oldMapLayers[mapLayerKey] = mapLayer
         createdMapLayerKeys.add(mapLayerKey)
       }
 
@@ -103,6 +111,10 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
 
   $scope.toggleShowFiberRoutesBufferData = () => {
     state.competition.showFiberRoutesBuffer = !state.competition.showFiberRoutesBuffer
+    updateMapLayers()
+  }
+
+  $scope.onRenderingChanged = () => {
     updateMapLayers()
   }
 

@@ -97,7 +97,19 @@ class MapTileRenderer {
 
                   if (isClosedPolygon) {
                     // First draw a filled polygon with the fill color
-                    ctx.globalAlpha = 0.5
+                    var fillAlpha = 0.5
+                    if (this.layerProperties.data.drawingOptions.alphaThreshold) {
+                      // We want to set the transparency based on a threshold provided in drawing options
+                      var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
+                      var maxValue = this.layerProperties.data.drawingOptions.alphaThreshold.maxValue
+                      if (!maxValue || maxValue === 0) {
+                        maxValue = 1.0  // Prevent any divide-by-zeros
+                      }
+                      if (feature.properties[thresholdProperty]) {
+                        fillAlpha = Math.min(1.0, feature.properties[thresholdProperty] / maxValue)
+                      }
+                    }
+                    ctx.globalAlpha = fillAlpha
                     var x0 = this.drawMargins + shape[0].x
                     var y0 = this.drawMargins + shape[0].y
                     ctx.beginPath()
@@ -108,7 +120,6 @@ class MapTileRenderer {
                       ctx.lineTo(x1, y1)
                     }
                     ctx.fill()
-                    ctx.globalAlpha = 1.0
                     // Then draw a polyline except for the lines that are along the tile extents
                     var xPrev = shape[0].x
                     var yPrev = shape[0].y
@@ -130,6 +141,7 @@ class MapTileRenderer {
                       ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
                     }
                     ctx.stroke()
+                    ctx.globalAlpha = 1.0
                   } else {
                     // This is not a closed polygon. Draw all the lines
                     var x0 = this.drawMargins + shape[0].x

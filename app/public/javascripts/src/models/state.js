@@ -191,7 +191,26 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     speedThreshold: 100,
     showCensusBlocks: true,
     showFiberRoutes: false,
-    showFiberRoutesBuffer: false
+    showFiberRoutesBuffer: false,
+    allRenderingOptions: [
+      {
+        label: 'Presence',
+        alphaRender: false
+      },
+      {
+        label: 'Competitive Strength',
+        alphaRender: true,
+        alphaThresholdProperty: 'strength',
+        alphaPropertyMaxValue: 1.0
+      },
+      {
+        label: 'Speed Intensity',
+        alphaRender: true,
+        alphaThresholdProperty: 'download_speed',
+        alphaPropertyMaxValue: 50.0
+      }
+    ],
+    selectedRenderingOption: null
   }
 
   // Function to convert from hsv to rgb color values.
@@ -239,6 +258,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Select the first entry in the list
   service.competition.selectedCompetitorType = service.competition.allCompetitorTypes[0]
+  service.competition.selectedRenderingOption = service.competition.allRenderingOptions[0]
   service.reloadCompetitors = () => {
     $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`)
       .then((response) => {
