@@ -207,7 +207,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         label: 'Speed Intensity',
         alphaRender: true,
         alphaThresholdProperty: 'download_speed',
-        alphaPropertyMaxValue: 50.0
+        alphaPropertyMaxValue: 100.0
       }
     ],
     selectedRenderingOption: null
@@ -260,7 +260,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.competition.selectedCompetitorType = service.competition.allCompetitorTypes[0]
   service.competition.selectedRenderingOption = service.competition.allRenderingOptions[0]
   service.reloadCompetitors = () => {
-    $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`)
+    return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`)
       .then((response) => {
         if (response.status >= 200 && response.status <= 299) {
           service.competition.selectedCompetitors = []

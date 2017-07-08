@@ -93,6 +93,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
   // Called when the selected competitor type changes
   $scope.onCompetitorTypeChanged = () => {
     state.reloadCompetitors()
+      .then(() => updateMapLayers())
   }
 
   $scope.onSelectedCompetitorsChanged = () => {

@@ -32,7 +32,7 @@
 		"small_businesses": {
 			"show": true,
 			"label": "Small Businesses",
-			"tileUrl": "/tile/v1/tiles/locations/${dataSourceId}/small/${tilePointTransform}/entity/",
+			"tileUrl": "/tile/v1/locations/tiles/${dataSourceId}/small/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
 			"plannerKey": "small"
@@ -40,7 +40,7 @@
 		"medium_businesses": {
 			"show": true,
 			"label": "Medium Businesses",
-			"tileUrl": "/tile/v1/tiles/locations/${dataSourceId}/medium/${tilePointTransform}/entity/",
+			"tileUrl": "/tile/v1/locations/tiles/${dataSourceId}/medium/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
 			"plannerKey": "medium"
@@ -48,7 +48,7 @@
 		"large_businesses": {
 			"show": true,
 			"label": "Large Businesses",
-			"tileUrl": "/tile/v1/tiles/locations/${dataSourceId}/large/${tilePointTransform}/entity/",
+			"tileUrl": "/tile/v1/locations/tiles/${dataSourceId}/large/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_large_default.png",
 			"plannerKey": "large"
@@ -56,7 +56,7 @@
 		"household": {
 			"show": true,
 			"label": "Residential",
-			"tileUrl": "/tile/v1/tiles/locations/${dataSourceId}/household/${tilePointTransform}/entity/",
+			"tileUrl": "/tile/v1/locations/tiles/${dataSourceId}/household/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "12",
 			"iconUrl": "/images/map_icons/aro/households_default.png",
 			"plannerKey": "household"
@@ -64,7 +64,7 @@
 		"celltower": {
 			"show": true,
 			"label": "Cell Sites",
-			"tileUrl": "/tile/v1/tiles/locations/${dataSourceId}/celltower/${tilePointTransform}/entity/",
+			"tileUrl": "/tile/v1/locations/tiles/${dataSourceId}/celltower/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/tower.png",
 			"plannerKey": "celltower"
