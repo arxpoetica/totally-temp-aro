@@ -46,13 +46,13 @@ class MapTileRenderer {
 
     // Get tile data from service
     var promises = [
-      this.tileDataService.getTileData(this.layerProperties.data.url + `${zoom}/${coord.x}/${coord.y}.mvt`),
+      this.tileDataService.getTileData([this.layerProperties.data.url], zoom, coord.x, coord.y),
       this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
     ]
     Promise.all(promises)
       .then((promiseResults) => {
 
-        var mapboxVectorTile = promiseResults[0]
+        var layerToFeatures = promiseResults[0]
         var entityImage = promiseResults[1]
 
         var heatMapData = []
@@ -63,12 +63,11 @@ class MapTileRenderer {
         ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
         ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
         ctx.lineWidth = 3
-        Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
-          var layer = mapboxVectorTile.layers[layerKey]
-          // console.log('layer has ' + layer.length + ' features')
-          for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+        Object.keys(layerToFeatures).forEach((layerKey) => {
+          var features = layerToFeatures[layerKey]
+          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
             // Parse the geometry out.
-            var feature = layer.feature(iFeature)
+            var feature = features[iFeature]
             var geometry = feature.loadGeometry()
             // console.log(JSON.stringify(geometry))
             // Geometry is an array of shapes
@@ -197,25 +196,25 @@ class MapTileRenderer {
 
     // Get tile data from service
     var promises = [
-      this.tileDataService.getTileData(this.layerProperties.data.url + `${tileZoom}/${tileX}/${tileY}.mvt`),
+      this.tileDataService.getTileData([this.layerProperties.data.url], tileZoom, tileX, tileY),
       this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
     ]
     return new Promise((resolve, reject) => {
       Promise.all(promises)
         .then((promiseResults) => {
 
-          var mapboxVectorTile = promiseResults[0]
+          var layerToFeatures = promiseResults[0]
           var entityImage = promiseResults[1]
 
           var imageWidthBy2 = entityImage.width / 2
           var imageHeightBy2 = entityImage.height / 2
 
-          Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
-            var layer = mapboxVectorTile.layers[layerKey]
+          Object.keys(layerToFeatures).forEach((layerKey) => {
+            var features = layerToFeatures[layerKey]
             // console.log('layer has ' + layer.length + ' features')
-            for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+            for (var iFeature = 0; iFeature < features.length; ++iFeature) {
               // Parse the geometry out.
-              var geometry = layer.feature(iFeature).loadGeometry()
+              var geometry = features[iFeature].loadGeometry()
               // Geometry is an array of shapes
               var imageWidthBy2 = entityImage.width / 2
               var imageHeightBy2 = entityImage.height / 2
@@ -229,8 +228,8 @@ class MapTileRenderer {
                         && yWithinTile >= shape[0].y - imageHeightBy2
                         && yWithinTile <= shape[0].y + imageHeightBy2) {
                           console.log('FEATURE DETECTED')
-                          console.log(layer.feature(iFeature).properties)
-                          resolve(layer.feature(iFeature).properties)
+                          console.log(features[iFeature].properties)
+                          resolve(features[iFeature].properties)
                         }
                     break;
 

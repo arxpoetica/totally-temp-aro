@@ -32,7 +32,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
       if (state.competition.showCensusBlocks) {
         var mapLayerKey = `competitor_censusBlocks_${providerType}_${carrierId}`
         var mapLayer = {
-          url: `/tile/v1/competitive/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`,
+          url: `/tile/v1/competitive/nbm/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`,
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           isVisible: true,
           drawingOptions: {

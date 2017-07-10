@@ -13,7 +13,17 @@ app.service('tileDataService', ['$http', ($http) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
   }
 
-  tileDataService.getTileData = (url) => {
+  tileDataService.getTileData = (tileUrls, zoom, tileX, tileY) => {
+    if (tileUrls.length === 1) {
+      // We have a single URL. No need to aggregate anything.
+      return tileDataService.getTileDataSingleUrl(tileUrls[0], zoom, tileX, tileY)
+    } else {
+      // We have multiple URLs where data is coming from. Return the aggregated result
+    }
+  }
+
+  tileDataService.getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
+    url += `${zoom}/${tileX}/${tileY}.mvt`
     var tileCacheKey = tileDataService.getTileCacheKey(url)
     if (tileDataService.tileDataCache[tileCacheKey]) {
       // Tile data exists in cache
@@ -31,8 +41,18 @@ app.service('tileDataService', ['$http', ($http) => {
           var arrayBuffer = oReq.response
           // De-serialize the binary data into a VectorTile object
           var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
-          tileDataService.tileDataCache[tileCacheKey] = mapboxVectorTile
-          resolve(mapboxVectorTile)
+          // Save the features in a per-layer object
+          var layerToFeatures = {}
+          Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+            var layer = mapboxVectorTile.layers[layerKey]
+            var features = []
+            for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+              features.push(layer.feature(iFeature))
+            }
+            layerToFeatures[layerKey] = features
+          })
+          tileDataService.tileDataCache[tileCacheKey] = layerToFeatures
+          resolve(layerToFeatures)
         };
         oReq.onerror = function(error) { reject(error) }
         oReq.onabort = function() { reject('XMLHttpRequest abort') }
