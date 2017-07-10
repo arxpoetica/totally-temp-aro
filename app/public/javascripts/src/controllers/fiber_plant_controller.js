@@ -21,69 +21,38 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
     createdMapLayerKeys.clear()
 
     // Add map layers based on the selection
+    var censusBlockUrls = []
+    var mapLayerKey = `competitor_censusBlocks`
     state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
-
       var carrierId = selectedCompetitor.id
       var providerType = state.competition.selectedCompetitorType.id
-      var polyTransform = map.getZoom() > 14 ? 'select' : 'smooth'
+      var polyTransform = map.getZoom() > 12 ? 'select' : 'smooth'
       var lineTransform = map.getZoom() > 10 ? 'select' : 'smooth_absolute'
 
-      // Create census block layer
       if (state.competition.showCensusBlocks) {
-        var mapLayerKey = `competitor_censusBlocks_${providerType}_${carrierId}`
-        var mapLayer = {
-          url: `/tile/v1/competitive/nbm/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`,
-          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle,
-            showTileExtents: state.showMapTileExtents.getValue()
-          }
-        }
-        if (state.competition.selectedRenderingOption.alphaRender) {
-          // Set additional properties so that the tile uses alpha (transparency) rendering
-          mapLayer.drawingOptions.alphaThreshold = {
-            property: state.competition.selectedRenderingOption.alphaThresholdProperty,
-            maxValue: state.competition.selectedRenderingOption.alphaPropertyMaxValue
-          }
-        }
-        oldMapLayers[mapLayerKey] = mapLayer
-        createdMapLayerKeys.add(mapLayerKey)
-      }
-
-      // Create fiber routes layer
-      if (state.competition.showFiberRoutes) {
-        var mapLayerKey = `competitor_fiberRoutes_${providerType}_${carrierId}`
-        oldMapLayers[mapLayerKey] = {
-          url: `/tile/v1/fiber/competitive/carrier/${carrierId}/tiles/line/${lineTransform}/`,
-          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle,
-            showTileExtents: state.showMapTileExtents.getValue()
-          }
-        }
-        createdMapLayerKeys.add(mapLayerKey)
-      }
-
-      // Create fiber routes buffer layer
-      if (state.competition.showFiberRoutesBuffer) {
-        var mapLayerKey = `competitor_fiberRoutesBuffer_${providerType}_${carrierId}`
-        oldMapLayers[mapLayerKey] = {
-          url: `/tile/v1/fiber/competitive/carrier/${carrierId}/tiles/buffer/${polyTransform}/`,
-          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle,
-            showTileExtents: state.showMapTileExtents.getValue()
-          }
-        }
-        createdMapLayerKeys.add(mapLayerKey)
+        censusBlockUrls.push(`/tile/v1/competitive/nbm/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`)
       }
     })
+    if (censusBlockUrls.length > 0) {
+      var mapLayer = {
+        url: censusBlockUrls,
+        iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+        isVisible: true,
+        drawingOptions: {
+          strokeStyle: state.competition.selectedCompetitors[0].strokeStyle,
+          fillStyle: state.competition.selectedCompetitors[0].fillStyle,
+          showTileExtents: state.showMapTileExtents.getValue()
+        }
+      }
+      if (censusBlockUrls.length > 1) {
+        mapLayer.drawingOptions.alphaThreshold = {
+          property: 'speed_intensity',
+          maxValue: 1.0
+        }
+      }
+      oldMapLayers[mapLayerKey] = mapLayer
+      createdMapLayerKeys.add(mapLayerKey)
+    }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)

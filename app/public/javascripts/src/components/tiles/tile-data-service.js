@@ -19,6 +19,74 @@ app.service('tileDataService', ['$http', ($http) => {
       return tileDataService.getTileDataSingleUrl(tileUrls[0], zoom, tileX, tileY)
     } else {
       // We have multiple URLs where data is coming from. Return the aggregated result
+      return new Promise((resolve, reject) => {
+        var promises = []
+        tileUrls.forEach((tileUrl) => promises.push(tileDataService.getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+        Promise.all(promises)
+          .then((results) => {
+            // We have data from all urls. Perform the aggregation that we want
+
+            // First aggregate
+            // Census Block
+            // -- Geometry
+            // -- layers[]
+            //    1
+            //      -- speed_intensity
+            //    2
+            //      -- speed intensity
+
+            // First, hold a map of properties and geometry per census block
+            var censusBlockData = {}
+            results.forEach((result) => {
+              var tileUrl = result.tileUrl
+              var layerToFeatures = result.layerToFeatures
+              Object.keys(layerToFeatures).forEach((layerKey) => {
+                var features = layerToFeatures[layerKey]
+                features.forEach((feature) => {
+                  // Store the geometry for the census block. This will be overwritten but should be fine since its the same geometry
+                  var censusBlockGID = feature.properties.census_block_gid
+                  if (!censusBlockData[censusBlockGID]) {
+                    censusBlockData[censusBlockGID] = {}
+                  }
+                  censusBlockData[censusBlockGID].geometry = feature.loadGeometry()
+                  // Store the speed intensity in this layer
+                  if (!censusBlockData[censusBlockGID].layers) {
+                    censusBlockData[censusBlockGID].layers =[]
+                  }
+                  censusBlockData[censusBlockGID].layers.push({
+                    download_speed: feature.properties.download_speed
+                  })
+                })
+              })
+            })
+
+            // Now that we have everything per-census-block, find the aggregates and create the output geometries
+            var cbFeatures = []
+            Object.keys(censusBlockData).forEach((censusBlockGID) => {
+              // Find the sum of speed intensities across all layers
+              var sumSpeedIntensity = 0
+              censusBlockData[censusBlockGID].layers.forEach((layer) => sumSpeedIntensity += layer.download_speed)
+              // Find the speed intensity for this census block
+              const MY_SPEED = 7
+              const speedIntensity = 1 - (MY_SPEED / (MY_SPEED + sumSpeedIntensity))
+              // Save it all out in a feature
+              cbFeatures.push({
+                properties: {
+                  speed_intensity: speedIntensity
+                },
+                loadGeometry: () => censusBlockData[censusBlockGID].geometry
+              })
+            })
+
+            // Save it all out and return
+            resolve({
+              tileUrl: 'AGGREGATE',
+              layerToFeatures: {
+                AGGREGATE_LAYER: cbFeatures
+              }
+            })
+          })
+      })
     }
   }
 
@@ -51,8 +119,11 @@ app.service('tileDataService', ['$http', ($http) => {
             }
             layerToFeatures[layerKey] = features
           })
-          tileDataService.tileDataCache[tileCacheKey] = layerToFeatures
-          resolve(layerToFeatures)
+          tileDataService.tileDataCache[tileCacheKey] = {
+            tileUrl: url,
+            layerToFeatures: layerToFeatures
+          }
+          resolve(tileDataService.tileDataCache[tileCacheKey])
         };
         oReq.onerror = function(error) { reject(error) }
         oReq.onabort = function() { reject('XMLHttpRequest abort') }

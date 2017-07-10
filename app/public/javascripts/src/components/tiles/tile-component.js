@@ -46,13 +46,13 @@ class MapTileRenderer {
 
     // Get tile data from service
     var promises = [
-      this.tileDataService.getTileData([this.layerProperties.data.url], zoom, coord.x, coord.y),
+      this.tileDataService.getTileData(this.layerProperties.data.url, zoom, coord.x, coord.y),
       this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
     ]
     Promise.all(promises)
       .then((promiseResults) => {
 
-        var layerToFeatures = promiseResults[0]
+        var layerToFeatures = promiseResults[0].layerToFeatures
         var entityImage = promiseResults[1]
 
         var heatMapData = []
@@ -62,7 +62,7 @@ class MapTileRenderer {
         var ctx=canvas.getContext("2d");
         ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
         ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
-        ctx.lineWidth = 3
+        ctx.lineWidth = 1
         Object.keys(layerToFeatures).forEach((layerKey) => {
           var features = layerToFeatures[layerKey]
           for (var iFeature = 0; iFeature < features.length; ++iFeature) {
@@ -105,7 +105,8 @@ class MapTileRenderer {
                         maxValue = 1.0  // Prevent any divide-by-zeros
                       }
                       if (feature.properties[thresholdProperty]) {
-                        fillAlpha = Math.min(1.0, feature.properties[thresholdProperty] / maxValue)
+                        var maxFillAlpha = 0.75 * Math.min(1.0, feature.properties[thresholdProperty] / maxValue)
+                        fillAlpha = 0.25 + maxFillAlpha // Alpha is 0.25 as a minimum
                       }
                     }
                     ctx.globalAlpha = fillAlpha
@@ -196,14 +197,14 @@ class MapTileRenderer {
 
     // Get tile data from service
     var promises = [
-      this.tileDataService.getTileData([this.layerProperties.data.url], tileZoom, tileX, tileY),
+      this.tileDataService.getTileData(this.layerProperties.data.url, tileZoom, tileX, tileY),
       this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
     ]
     return new Promise((resolve, reject) => {
       Promise.all(promises)
         .then((promiseResults) => {
 
-          var layerToFeatures = promiseResults[0]
+          var layerToFeatures = promiseResults[0].layerToFeatures
           var entityImage = promiseResults[1]
 
           var imageWidthBy2 = entityImage.width / 2

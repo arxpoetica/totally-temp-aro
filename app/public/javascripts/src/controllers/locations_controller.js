@@ -51,7 +51,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
           url = url.replace('${dataSourceId}', dataSourceId)
           oldMapLayers[mapLayerKey] = {
-            url: url,
+            url: [url],
             iconUrl: `${baseUrl}${locationType.iconUrl}`,
             isVisible: true,
             drawingOptions: {

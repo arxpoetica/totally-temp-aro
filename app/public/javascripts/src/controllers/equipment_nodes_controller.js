@@ -69,7 +69,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
             }
             oldMapLayers[networkEquipment.key] = {
-              url: tileUrl,
+              url: [tileUrl],
               iconUrl: networkEquipment.iconUrl,
               isVisible: true,
               drawingOptions: networkEquipment.drawingOptions
@@ -86,7 +86,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
       var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
       oldMapLayers[mapLayerKey] = {
-        url: `/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`,
+        url: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`],
         iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
         isVisible: true,
         drawingOptions: state.existingFiberOptions.drawingOptions
