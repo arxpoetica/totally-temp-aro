@@ -5,6 +5,10 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
   $scope.map_tools = map_tools
   $scope.planState = state
 
+  // Sliders for testing different rendering modes
+  $scope.minAggregatedValue = 0.0
+  $scope.maxAggregatedValue = 1.0
+
   // Update map layers based on the selections in the state object
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
   // Creates map layers based on selection in the UI
@@ -44,14 +48,22 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
           showTileExtents: state.showMapTileExtents.getValue()
         },
         aggregateOptions: {
-          aggregateEntityId: 'census_block_gid',
-          aggregateBy: 'download_speed'
+          // Hacking defaults 'census_block_gid'
+          aggregateEntityId: state.competition.selectedRenderingOption.aggregateEntityId || 'census_block_gid',
+          aggregateBy: state.competition.selectedRenderingOption.aggregateBy || 'census_block_gid'
         }
       }
-      if (censusBlockUrls.length > 1) {
+      if (censusBlockUrls.length > 1 && state.competition.selectedRenderingOption.alphaRender) {
+        // Make sure min/max aggregated values are correct
+        var minAggregatedValue = Math.min($scope.minAggregatedValue, 0.99)
+        var maxAggregatedValue = Math.max(0.01, $scope.maxAggregatedValue)
+        if (maxAggregatedValue < minAggregatedValue) {
+          $scope.maxAggregatedValue = maxAggregatedValue = minAggregatedValue + 0.01
+        }
         mapLayer.drawingOptions.alphaThreshold = {
-          property: 'download_speed',
-          maxValue: 1.0
+          property: state.competition.selectedRenderingOption.alphaThresholdProperty,
+          minValue: minAggregatedValue,
+          maxValue: maxAggregatedValue
         }
       }
       oldMapLayers[mapLayerKey] = mapLayer

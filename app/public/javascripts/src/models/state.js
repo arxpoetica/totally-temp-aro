@@ -201,13 +201,15 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         label: 'Competitive Strength',
         alphaRender: true,
         alphaThresholdProperty: 'strength',
-        alphaPropertyMaxValue: 1.0
+        aggregateEntityId: 'census_block_gid',
+        aggregateBy: 'strength'
       },
       {
         label: 'Speed Intensity',
         alphaRender: true,
         alphaThresholdProperty: 'download_speed',
-        alphaPropertyMaxValue: 100.0
+        aggregateEntityId: 'census_block_gid',
+        aggregateBy: 'download_speed'
       }
     ],
     selectedRenderingOption: null

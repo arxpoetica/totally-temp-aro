@@ -100,13 +100,19 @@ class MapTileRenderer {
                     if (this.layerProperties.data.drawingOptions.alphaThreshold) {
                       // We want to set the transparency based on a threshold provided in drawing options
                       var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
-                      var maxValue = this.layerProperties.data.drawingOptions.alphaThreshold.maxValue
-                      if (!maxValue || maxValue === 0) {
-                        maxValue = 1.0  // Prevent any divide-by-zeros
+                      var minPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.minValue || 0.0
+                      var maxPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.maxValue || 1.0
+                      var range = maxPropertyValue - minPropertyValue
+                      if (range === 0) {
+                        range = 1.0  // Prevent any divide-by-zeros
                       }
                       if (feature.properties[thresholdProperty]) {
-                        var maxFillAlpha = 0.75 * Math.min(1.0, feature.properties[thresholdProperty] / maxValue)
-                        fillAlpha = 0.25 + maxFillAlpha // Alpha is 0.25 as a minimum
+                        // We are interested in features between the minPropertyValue and maxPropertyValue values
+                        var valueToPlot = feature.properties[thresholdProperty]
+                        var minAlpha = 0.2, maxAlpha = 0.8
+                        fillAlpha = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
+                        fillAlpha = Math.max(minAlpha, fillAlpha)
+                        fillAlpha = Math.min(maxAlpha, fillAlpha)
                       }
                     }
                     ctx.globalAlpha = fillAlpha

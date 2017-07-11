@@ -54,7 +54,11 @@
             ng-options="item as item.label for item in planState.competition.allRenderingOptions"
             ng-change="onRenderingChanged()">
     </select>
-
+    <!-- to test different rendering options -->
+    <p>Minimum aggregated value</p>
+    <input type="range" min="0.0" max="1.0" step="0.05" ng-model="minAggregatedValue" ng-change="onRenderingChanged()">
+    <p>Maximum aggregated value</p>
+    <input type="range" min="0.0" max="1.0" step="0.05" ng-model="maxAggregatedValue" ng-change="onRenderingChanged()">
   </form>
 
 </div>
