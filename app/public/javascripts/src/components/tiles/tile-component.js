@@ -46,7 +46,7 @@ class MapTileRenderer {
 
     // Get tile data from service
     var promises = [
-      this.tileDataService.getTileData(this.layerProperties.data.url, zoom, coord.x, coord.y),
+      this.tileDataService.getTileData(this.layerProperties.data.url, zoom, coord.x, coord.y, this.layerProperties.data.aggregateOptions),
       this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
     ]
     Promise.all(promises)

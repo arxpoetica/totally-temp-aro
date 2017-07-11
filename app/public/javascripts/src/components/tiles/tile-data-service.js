@@ -13,7 +13,7 @@ app.service('tileDataService', ['$http', ($http) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
   }
 
-  tileDataService.getTileData = (tileUrls, zoom, tileX, tileY) => {
+  tileDataService.getTileData = (tileUrls, zoom, tileX, tileY, aggregateOptions) => {
     if (tileUrls.length === 1) {
       // We have a single URL. No need to aggregate anything.
       return tileDataService.getTileDataSingleUrl(tileUrls[0], zoom, tileX, tileY)
@@ -24,57 +24,57 @@ app.service('tileDataService', ['$http', ($http) => {
         tileUrls.forEach((tileUrl) => promises.push(tileDataService.getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
         Promise.all(promises)
           .then((results) => {
-            // We have data from all urls. Perform the aggregation that we want
-
-            // First aggregate
-            // Census Block
-            // -- Geometry
-            // -- layers[]
-            //    1
-            //      -- speed_intensity
-            //    2
-            //      -- speed intensity
-
-            // First, hold a map of properties and geometry per census block
-            var censusBlockData = {}
+            // We have data from all urls. First, we create an object that will map the objects
+            // of interest (e.g. census blocks) to their geometry and list of properties.
+            // For e.g. if we are aggregating download speeds for census blocks, we will have
+            // {
+            //   census_block_id_1: {
+            //     geometry: { geom object },
+            //     layers: [download_speed_1, download_speed2, ...]
+            //   },
+            //   census_block_id_2: { ... } ... etc
+            // }
+            var aggregateEntityId = aggregateOptions.aggregateEntityId
+            var aggregateBy = aggregateOptions.aggregateBy
+            var entityData = {}
+            // Loop through each tile result
             results.forEach((result) => {
-              var tileUrl = result.tileUrl
               var layerToFeatures = result.layerToFeatures
+              // Each tile can have multiple layers per the MVT specification. Loop through them
               Object.keys(layerToFeatures).forEach((layerKey) => {
+                // Loop through all the features in this layer
                 var features = layerToFeatures[layerKey]
                 features.forEach((feature) => {
                   // Store the geometry for the census block. This will be overwritten but should be fine since its the same geometry
-                  var censusBlockGID = feature.properties.census_block_gid
-                  if (!censusBlockData[censusBlockGID]) {
-                    censusBlockData[censusBlockGID] = {}
+                  var aggregateEntityGID = feature.properties[aggregateEntityId]
+                  if (!entityData[aggregateEntityGID]) {
+                    entityData[aggregateEntityGID] = {}
                   }
-                  censusBlockData[censusBlockGID].geometry = feature.loadGeometry()
-                  // Store the speed intensity in this layer
-                  if (!censusBlockData[censusBlockGID].layers) {
-                    censusBlockData[censusBlockGID].layers =[]
+                  entityData[aggregateEntityGID].geometry = feature.loadGeometry()
+                  // Store the value to be aggregated (e.g. download_speed) in this layer
+                  if (!entityData[aggregateEntityGID].layers) {
+                    entityData[aggregateEntityGID].layers =[]
                   }
-                  censusBlockData[censusBlockGID].layers.push({
-                    download_speed: feature.properties.download_speed
-                  })
+                  entityData[aggregateEntityGID].layers.push(feature.properties[aggregateBy])
                 })
               })
             })
 
-            // Now that we have everything per-census-block, find the aggregates and create the output geometries
-            var cbFeatures = []
-            Object.keys(censusBlockData).forEach((censusBlockGID) => {
-              // Find the sum of speed intensities across all layers
-              var sumSpeedIntensity = 0
-              censusBlockData[censusBlockGID].layers.forEach((layer) => sumSpeedIntensity += layer.download_speed)
+            // Now that we have everything per-aggregation-entity, find the aggregates and create the output geometries
+            var aggregateFeatures = []
+            Object.keys(entityData).forEach((aggregateEntityGID) => {
+              // Find the sum of the values to be aggregated across all layers
+              var sumValues = 0
+              entityData[aggregateEntityGID].layers.forEach((layer) => sumValues += layer)
               // Find the speed intensity for this census block
               const MY_SPEED = 7
-              const speedIntensity = 1 - (MY_SPEED / (MY_SPEED + sumSpeedIntensity))
+              const aggregateFinalValue = 1 - (MY_SPEED / (MY_SPEED + sumValues))
               // Save it all out in a feature
-              cbFeatures.push({
-                properties: {
-                  speed_intensity: speedIntensity
-                },
-                loadGeometry: () => censusBlockData[censusBlockGID].geometry
+              var properties = {}
+              properties[aggregateBy] = aggregateFinalValue
+              aggregateFeatures.push({
+                properties: properties,
+                loadGeometry: () => entityData[aggregateEntityGID].geometry // Hack because thats how we get the geometry later
               })
             })
 
@@ -82,7 +82,7 @@ app.service('tileDataService', ['$http', ($http) => {
             resolve({
               tileUrl: 'AGGREGATE',
               layerToFeatures: {
-                AGGREGATE_LAYER: cbFeatures
+                AGGREGATE_LAYER: aggregateFeatures
               }
             })
           })

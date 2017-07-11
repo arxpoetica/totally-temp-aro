@@ -42,11 +42,15 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
           strokeStyle: state.competition.selectedCompetitors[0].strokeStyle,
           fillStyle: state.competition.selectedCompetitors[0].fillStyle,
           showTileExtents: state.showMapTileExtents.getValue()
+        },
+        aggregateOptions: {
+          aggregateEntityId: 'census_block_gid',
+          aggregateBy: 'download_speed'
         }
       }
       if (censusBlockUrls.length > 1) {
         mapLayer.drawingOptions.alphaThreshold = {
-          property: 'speed_intensity',
+          property: 'download_speed',
           maxValue: 1.0
         }
       }
