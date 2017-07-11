@@ -8,6 +8,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
   // Sliders for testing different rendering modes
   $scope.minAggregatedValue = 0.0
   $scope.maxAggregatedValue = 1.0
+  $scope.showBlockHeatMap = false
 
   // Update map layers based on the selections in the state object
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
@@ -65,6 +66,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
           minValue: minAggregatedValue,
           maxValue: maxAggregatedValue
         }
+        mapLayer.drawingOptions.blockHeatMap = $scope.showBlockHeatMap
       }
       oldMapLayers[mapLayerKey] = mapLayer
       createdMapLayerKeys.add(mapLayerKey)

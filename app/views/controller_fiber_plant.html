@@ -55,6 +55,7 @@
             ng-change="onRenderingChanged()">
     </select>
     <!-- to test different rendering options -->
+    <p><input type="checkbox" ng-model="showBlockHeatMap" ng-change="onRenderingChanged()"> Show heatmap</p>
     <p>Minimum aggregated value</p>
     <input type="range" min="0.0" max="1.0" step="0.05" ng-model="minAggregatedValue" ng-change="onRenderingChanged()">
     <p>Maximum aggregated value</p>

@@ -96,7 +96,7 @@ class MapTileRenderer {
 
                   if (isClosedPolygon) {
                     // First draw a filled polygon with the fill color
-                    var fillAlpha = 0.5
+                    var fillAlpha = 0.7
                     if (this.layerProperties.data.drawingOptions.alphaThreshold) {
                       // We want to set the transparency based on a threshold provided in drawing options
                       var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
@@ -106,13 +106,35 @@ class MapTileRenderer {
                       if (range === 0) {
                         range = 1.0  // Prevent any divide-by-zeros
                       }
+                      var valueToPlot = feature.properties[thresholdProperty]
                       if (feature.properties[thresholdProperty]) {
                         // We are interested in features between the minPropertyValue and maxPropertyValue values
-                        var valueToPlot = feature.properties[thresholdProperty]
                         var minAlpha = 0.2, maxAlpha = 0.8
                         fillAlpha = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
                         fillAlpha = Math.max(minAlpha, fillAlpha)
                         fillAlpha = Math.min(maxAlpha, fillAlpha)
+                      }
+                      if (this.layerProperties.data.drawingOptions.blockHeatMap) {
+                        fillAlpha = 0.8
+                        var scaledValue = (valueToPlot - minPropertyValue) / range
+                        scaledValue = Math.max(0, scaledValue)
+                        scaledValue = Math.min(1, scaledValue)
+                        var fillColor = {
+                          r: Math.round(scaledValue * 255),
+                          g: Math.round((1 - scaledValue) * 255),
+                          b: 0
+                        }
+                        var componentToHex = (component) => {
+                          var retVal = component.toString(16)
+                          return (retVal.length === 1) ? '0' + retVal : retVal
+                        }
+                        ctx.fillStyle = '#' + componentToHex(fillColor.r) + componentToHex(fillColor.g) + componentToHex(fillColor.b)
+                        var strokeColor = {
+                          r: Math.max(0, fillColor.r - 20),
+                          g: Math.max(0, fillColor.g - 20),
+                          b: Math.max(0, fillColor.b - 20)
+                        }
+                        ctx.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
                       }
                     }
                     ctx.globalAlpha = fillAlpha
