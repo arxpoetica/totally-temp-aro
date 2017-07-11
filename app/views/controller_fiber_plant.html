@@ -28,6 +28,11 @@
 
     <br>
     <p><strong>Survey Data</strong></p>
+    <input type="checkbox" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> NBM
+    <input type="checkbox" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()"> Geotel
+
+    <br>
+    <p><strong>Survey Data</strong></p>
     <input type="checkbox"
            ng-checked="planState.competition.showCensusBlocks"
            ng-click="toggleShowSurveyData()">

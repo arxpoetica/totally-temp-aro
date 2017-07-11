@@ -33,9 +33,17 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
       var providerType = state.competition.selectedCompetitorType.id
       var polyTransform = map.getZoom() > 12 ? 'select' : 'smooth'
       var lineTransform = map.getZoom() > 10 ? 'select' : 'smooth_absolute'
+      var dataSource = null
+      if (state.competition.useNBMDataSource && state.competition.useGeotelDataSource) {
+        dataSource = 'nbm_geotel'
+      } else if (state.competition.useNBMDataSource) {
+        dataSource = 'nbm'
+      } else if (state.competition.useGeotelDataSource) {
+        dataSource = 'geotel'
+      }
 
-      if (state.competition.showCensusBlocks) {
-        censusBlockUrls.push(`/tile/v1/competitive/nbm/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`)
+      if (state.competition.showCensusBlocks && dataSource) {
+        censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`)
       }
     })
     if (censusBlockUrls.length > 0) {
@@ -84,6 +92,10 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
   }
 
   $scope.onSelectedCompetitorsChanged = () => {
+    updateMapLayers()
+  }
+
+  $scope.onDataSourceChanged = () => {
     updateMapLayers()
   }
 

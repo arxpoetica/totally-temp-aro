@@ -188,6 +188,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     selectedCompetitorType: null,
     allCompetitors: [],
     selectedCompetitors: [],
+    useNBMDataSource: true,
+    useGeotelDataSource: false,
     speedThreshold: 100,
     showCensusBlocks: true,
     showFiberRoutes: false,
