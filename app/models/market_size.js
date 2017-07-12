@@ -600,11 +600,10 @@ module.exports = class MarketSize {
           var params = [location_id]
           var sql = `
             SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
-              CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
-              ELSE '#' ||
+              '#' ||
                 to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
                 to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
-              END AS color,
+              AS color,
               (SELECT distance FROM client.locations_distance_to_carrier ldtc
                 WHERE ldtc.carrier_id = c.id
                 AND ldtc.location_id = $1
