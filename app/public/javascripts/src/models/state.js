@@ -188,6 +188,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     selectedCompetitorType: null,
     allCompetitors: [],
     selectedCompetitors: [],
+    useAllCompetitors: false,
     useNBMDataSource: true,
     useGeotelDataSource: false,
     speedThreshold: 100,
@@ -203,15 +204,55 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         label: 'Competitive Strength',
         alphaRender: true,
         alphaThresholdProperty: 'strength',
-        aggregateEntityId: 'census_block_gid',
-        aggregateBy: 'strength'
+        aggregate: {
+          individual: {
+            'census-block': {
+              aggregateEntityId: 'gid',
+              aggregateBy: 'strength'
+            },
+            'census-block-group': {
+              aggregateEntityId: 'cbg_id',
+              aggregateBy: 'strength'
+            }
+          },
+          all: {
+            'census-block': {
+              aggregateEntityId: 'gid',
+              aggregateBy: 'sum_strength'
+            },
+            'census-block-group': {
+              aggregateEntityId: 'cbg_id',
+              aggregateBy: 'sum_strength'
+            }
+          }
+        }
       },
       {
         label: 'Speed Intensity',
         alphaRender: true,
         alphaThresholdProperty: 'download_speed',
-        aggregateEntityId: 'census_block_gid',
-        aggregateBy: 'download_speed'
+        aggregate: {
+          individual: {
+            'census-block': {
+              aggregateEntityId: 'gid',
+              aggregateBy: 'download_speed'
+            },
+            'census-block-group': {
+              aggregateEntityId: 'cbg_id',
+              aggregateBy: 'download_speed'
+            }
+          },
+          all: {
+            'census-block': {
+              aggregateEntityId: 'gid',
+              aggregateBy: 'max_download'
+            },
+            'census-block-group': {
+              aggregateEntityId: 'cbg_id',
+              aggregateBy: 'max_download'
+            }
+          }
+        }
       }
     ],
     selectedRenderingOption: null

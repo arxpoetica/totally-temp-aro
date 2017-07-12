@@ -10,7 +10,12 @@
 
     <br>
     <p><strong>Competitors</strong></p>
+    <input type="checkbox"
+           ng-model="planState.competition.useAllCompetitors"
+           ng-change="onUseAllCompetitorsChanged()"
+    > Use All Competitors
     <ui-select multiple ng-model="planState.competition.selectedCompetitors"
+               ng-disabled="planState.competition.useAllCompetitors"
                theme="bootstrap"
                close-on-select="true"
                on-select="onSelectedCompetitorsChanged()"

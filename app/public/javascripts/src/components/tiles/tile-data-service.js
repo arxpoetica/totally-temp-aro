@@ -14,7 +14,7 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   tileDataService.getTileData = (tileUrls, zoom, tileX, tileY, aggregateOptions) => {
-    if (tileUrls.length === 1) {
+    if (tileUrls.length === 1 && !aggregateOptions) {
       // We have a single URL. No need to aggregate anything.
       return tileDataService.getTileDataSingleUrl(tileUrls[0], zoom, tileX, tileY)
     } else {
