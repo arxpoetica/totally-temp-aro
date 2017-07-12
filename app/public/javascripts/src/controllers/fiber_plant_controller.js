@@ -42,59 +42,91 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     }
     var providerType = state.competition.selectedCompetitorType.id
 
-    var aggregateOptionsType = null
-    if (state.competition.useAllCompetitors) {
-      // Our endpoint uses "all competitors"
-      censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/strength/${providerType}/${blockType}/poly/${polyTransform}/`)
-      aggregateOptionsType = 'all'
-    } else {
-      // We want to use only the selected competitors
-      state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
-        var carrierId = selectedCompetitor.id
-        if (state.competition.showCensusBlocks && dataSource) {
+    if (state.competition.showCensusBlocks && dataSource) {
+      var aggregateOptionsType = null
+      if (state.competition.useAllCompetitors) {
+        // Our endpoint uses "all competitors"
+        censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/strength/${providerType}/${blockType}/poly/${polyTransform}/`)
+        aggregateOptionsType = 'all'
+      } else {
+        // We want to use only the selected competitors
+        state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
+          var carrierId = selectedCompetitor.id
           censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/carrier/${carrierId}/${providerType}/${blockType}/${polyTransform}/`)
+        })
+        aggregateOptionsType = 'individual'
+      }
+      var aggregateOptions = null
+      if (state.competition.selectedRenderingOption.aggregate) {
+        aggregateOptions = {
+          aggregateEntityId: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateEntityId,
+          aggregateBy: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateBy
         }
-      })
-      aggregateOptionsType = 'individual'
-    }
-    var aggregateOptions = null
-    if (state.competition.selectedRenderingOption.aggregate) {
-      aggregateOptions = {
-        aggregateEntityId: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateEntityId,
-        aggregateBy: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateBy
+      }
+
+      if (censusBlockUrls.length > 0) {
+        var mapLayer = {
+          url: censusBlockUrls,
+          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+          isVisible: true,
+          drawingOptions: {
+            strokeStyle: '#5050ff',
+            fillStyle: '#5050af',
+            showTileExtents: state.showMapTileExtents.getValue()
+          }
+        }
+        mapLayer.aggregateOptions = aggregateOptions
+        if (state.competition.selectedRenderingOption.alphaRender) {
+          // Make sure min/max aggregated values are correct
+          var minAggregatedValue = Math.min($scope.minAggregatedValue, 0.99)
+          var maxAggregatedValue = Math.max(0.01, $scope.maxAggregatedValue)
+          if (maxAggregatedValue < minAggregatedValue) {
+            $scope.maxAggregatedValue = maxAggregatedValue = minAggregatedValue + 0.01
+          }
+          mapLayer.drawingOptions.alphaThreshold = {
+            property: aggregateOptions.aggregateBy,
+            minValue: minAggregatedValue,
+            maxValue: maxAggregatedValue
+          }
+          mapLayer.drawingOptions.blockHeatMap = $scope.showBlockHeatMap
+        }
+        oldMapLayers[mapLayerKey] = mapLayer
+        createdMapLayerKeys.add(mapLayerKey)
       }
     }
 
-    if (censusBlockUrls.length > 0) {
-      var mapLayer = {
-        url: censusBlockUrls,
-        iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-        isVisible: true,
-        drawingOptions: {
-          strokeStyle: '#5050ff',
-          fillStyle: '#5050af',
-          showTileExtents: state.showMapTileExtents.getValue()
+    // Create fiber routes layer
+    if (state.competition.showFiberRoutes) {
+      if (state.competition.useAllCompetitors) {
+        var mapLayerKey = `competitor_fiberRoutes_all`
+        oldMapLayers[mapLayerKey] = {
+          url: [`/tile/v1/fiber/competitive/all/tiles/line/${lineTransform}/`],
+          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+          isVisible: true,
+          drawingOptions: {
+            strokeStyle: '#000000',
+            fillStyle: '#000000',
+            showTileExtents: state.showMapTileExtents.getValue()
+          }
         }
+        createdMapLayerKeys.add(mapLayerKey)
+      } else {
+        state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
+          var mapLayerKey = `competitor_fiberRoutes_${providerType}_${selectedCompetitor.id}`
+          oldMapLayers[mapLayerKey] = {
+            url: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/line/${lineTransform}/`],
+            iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+            isVisible: true,
+            drawingOptions: {
+              strokeStyle: selectedCompetitor.strokeStyle,
+              fillStyle: selectedCompetitor.fillStyle,
+              showTileExtents: state.showMapTileExtents.getValue()
+            }
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        })
       }
-      mapLayer.aggregateOptions = aggregateOptions
-      if (state.competition.selectedRenderingOption.alphaRender) {
-        // Make sure min/max aggregated values are correct
-        var minAggregatedValue = Math.min($scope.minAggregatedValue, 0.99)
-        var maxAggregatedValue = Math.max(0.01, $scope.maxAggregatedValue)
-        if (maxAggregatedValue < minAggregatedValue) {
-          $scope.maxAggregatedValue = maxAggregatedValue = minAggregatedValue + 0.01
-        }
-        mapLayer.drawingOptions.alphaThreshold = {
-          property: aggregateOptions.aggregateBy,
-          minValue: minAggregatedValue,
-          maxValue: maxAggregatedValue
-        }
-        mapLayer.drawingOptions.blockHeatMap = $scope.showBlockHeatMap
-      }
-      oldMapLayers[mapLayerKey] = mapLayer
-      createdMapLayerKeys.add(mapLayerKey)
     }
-
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
