@@ -127,6 +127,40 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         })
       }
     }
+
+    // Create fiber routes buffer layer. Copy-pasted from "fiber routes layer" as the endpoints are changing at the moment.
+    if (state.competition.showFiberRoutesBuffer) {
+      if (state.competition.useAllCompetitors) {
+        var mapLayerKey = `competitor_fiberRoutesBuffer_all`
+        oldMapLayers[mapLayerKey] = {
+          url: [`/tile/v1/fiber/competitive/all/tiles/buffer/${polyTransform}/`],
+          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+          isVisible: true,
+          drawingOptions: {
+            strokeStyle: '#000000',
+            fillStyle: '#000000',
+            showTileExtents: state.showMapTileExtents.getValue()
+          }
+        }
+        createdMapLayerKeys.add(mapLayerKey)
+      } else {
+        state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
+          var mapLayerKey = `competitor_fiberRoutesBuffer_${providerType}_${selectedCompetitor.id}`
+          oldMapLayers[mapLayerKey] = {
+            url: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/buffer/${polyTransform}/`],
+            iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+            isVisible: true,
+            drawingOptions: {
+              strokeStyle: selectedCompetitor.strokeStyle,
+              fillStyle: selectedCompetitor.fillStyle,
+              showTileExtents: state.showMapTileExtents.getValue()
+            }
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        })
+      }
+    }
+
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
@@ -166,6 +200,10 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   }
 
   $scope.onUseAllCompetitorsChanged = () => {
+    // When we use all competitors, de-select any individual competitors
+    if (state.competition.useAllCompetitors) {
+      state.competition.selectedCompetitors = []
+    }
     updateMapLayers()
   }
 
