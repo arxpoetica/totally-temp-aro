@@ -57,7 +57,7 @@
 			"show": true,
 			"label": "Residential",
 			"tileUrl": "/tile/v1/locations/tiles/${dataSourceId}/household/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "12",
+			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/households_default.png",
 			"plannerKey": "household"
 		},

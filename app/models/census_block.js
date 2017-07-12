@@ -73,7 +73,7 @@ module.exports = class CensusBlock {
         carriers.name AS carrier_name,
         s.description AS speed
        FROM client.census_blocks_carriers cbc
-       JOIN carriers ON carriers.id = cbc.carrier_id
+       JOIN network_provider.carrier ON carriers.id = cbc.carrier_id
        JOIN client.speeds s ON s.code = cbc.download_speed
       WHERE cbc.census_block_gid=$1
       ORDER BY carriers.name ASC

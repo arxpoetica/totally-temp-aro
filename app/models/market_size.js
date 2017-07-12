@@ -64,7 +64,7 @@ module.exports = class MarketSize {
         WITH biz AS
         (SELECT b.id, b.industry_id, b.number_of_employees, b.location_id, b.name, b.address, b.geog
           FROM businesses b
-          JOIN carriers ON carriers.name = $${params.length}
+          JOIN network_provider.carrier ON carriers.name = $${params.length}
           JOIN aro.fiber_plant
             ON fiber_plant.carrier_id = carriers.id
            AND ST_Intersects(fiber_plant.buffer_geom, b.geom)
@@ -309,14 +309,13 @@ module.exports = class MarketSize {
     var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
     sql += `
       SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
-      CASE WHEN c.color IS NOT NULL THEN MAX(c.color)
-      ELSE '#' ||
+      '#' ||
         to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
         to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
-      END AS color
+      AS color
       FROM biz
       JOIN aro.fiber_plant r ON st_contains(r.buffer_geom, biz.geom)
-      JOIN carriers c ON r.carrier_id = c.id
+      JOIN network_provider.carrier c ON r.carrier_id = c.id
       JOIN locations l ON l.id = biz.location_id
         ${filters.entity_type === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
         ${filters.entity_type === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
@@ -613,7 +612,7 @@ module.exports = class MarketSize {
             FROM ${table} biz
             JOIN locations l ON l.id = biz.location_id AND l.id = $1
             JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-            JOIN carriers c ON lc.carrier_id = c.id
+            JOIN network_provider.carrier c ON lc.carrier_id = c.id
               ${table === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
               ${table === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
             GROUP BY c.id ORDER BY c.name
@@ -686,7 +685,7 @@ module.exports = class MarketSize {
           SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
           JOIN locations l ON l.id = biz.location_id AND l.id = 1
           JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id
+          JOIN network_provider.carrier c ON lc.carrier_id = c.id
           WHERE biz.id = $1
           GROUP BY c.id
         `
@@ -709,13 +708,13 @@ module.exports = class MarketSize {
           , (SELECT COUNT(*)::integer FROM businesses biz
           JOIN locations ON fishnet.geom && locations.geom
           JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id AND c.id = $1
+          JOIN network_provider.carrier c ON lc.carrier_id = c.id AND c.id = $1
           WHERE biz.location_id = locations.id) AS carrier_current
 
           , (SELECT COUNT(*)::integer FROM businesses biz
           JOIN locations ON fishnet.geom && locations.geom
           JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-          JOIN carriers c ON lc.carrier_id = c.id
+          JOIN network_provider.carrier c ON lc.carrier_id = c.id
           WHERE biz.location_id = locations.id) AS carrier_total
 
           FROM fishnet GROUP BY fishnet.geom
