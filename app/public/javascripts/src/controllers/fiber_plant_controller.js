@@ -1,6 +1,6 @@
 /* global app config $ _ google map */
 // Fiber Plant Controller
-app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_tools', ($scope, $location, state, map_tools) => {
+app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', 'state', 'map_tools', ($scope, $rootScope, $location, state, map_tools) => {
 
   $scope.map_tools = map_tools
   $scope.planState = state
@@ -28,10 +28,12 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
     // Add map layers based on the selection
     var censusBlockUrls = []
     var mapLayerKey = `competitor_censusBlocks`
+    const CENSUS_BLOCK_ZOOM_THRESHOLD = 11
     state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
       var carrierId = selectedCompetitor.id
       var providerType = state.competition.selectedCompetitorType.id
-      var polyTransform = map.getZoom() > 12 ? 'select' : 'smooth'
+      var blockType = map.getZoom() > CENSUS_BLOCK_ZOOM_THRESHOLD ? 'census-block' : 'census-block-group'
+      var polyTransform = map.getZoom() > 5 ? 'select' : 'smooth'
       var lineTransform = map.getZoom() > 10 ? 'select' : 'smooth_absolute'
       var dataSource = null
       if (state.competition.useNBMDataSource && state.competition.useGeotelDataSource) {
@@ -43,10 +45,11 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
       }
 
       if (state.competition.showCensusBlocks && dataSource) {
-        censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/carrier/${carrierId}/${providerType}/census-block/${polyTransform}/`)
+        censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/carrier/${carrierId}/${providerType}/${blockType}/${polyTransform}/`)
       }
     })
     if (censusBlockUrls.length > 0) {
+      var aggregateEntityId = map.getZoom() > CENSUS_BLOCK_ZOOM_THRESHOLD ? 'census_block_gid' : 'cbg_id'
       var mapLayer = {
         url: censusBlockUrls,
         iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
@@ -58,8 +61,8 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
         },
         aggregateOptions: {
           // Hacking defaults 'census_block_gid'
-          aggregateEntityId: state.competition.selectedRenderingOption.aggregateEntityId || 'census_block_gid',
-          aggregateBy: state.competition.selectedRenderingOption.aggregateBy || 'census_block_gid'
+          aggregateEntityId: aggregateEntityId,
+          aggregateBy: state.competition.selectedRenderingOption.aggregateBy || 'download_speed'
         }
       }
       if (censusBlockUrls.length > 1 && state.competition.selectedRenderingOption.alphaRender) {
@@ -117,5 +120,7 @@ app.controller('fiber_plant_controller', ['$scope', '$location', 'state', 'map_t
   $scope.onRenderingChanged = () => {
     updateMapLayers()
   }
+
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
 
 }])
