@@ -1,61 +1,75 @@
 <div id="fiber_plant_controller">
-  <h2>Fiber Routes</h2>
-  <div>
-    <div class="fiber_select_all">
-      <checkbox
-              class="chk-small"
-              ng-model="showAllCompetitors"
-              name="ctype-name"
-              ng-change="toggleAllCompetitors()">
-      </checkbox>
-      <span style="padding:5px 5px">All competitors</span>
-    </div>
-    <div class="fiber_select_many">
-      <input class="form-control" ng-model="selected_carriers" ng-change="carriersChanged()"/>
-    </div>
-  </div>
-  <hr>
 
-  <h2>Broadband Coverage</h2>
-  <div>
-    <div class="input-group" style="width:100%">
-      <select class="form-control" ng-change="nbmCarrierChanged()" ng-options="carrier as carrier.name for carrier in nbmCarriers track by carrier.id" ng-model="nbmCarrier">
-        <option value="">Select a carrier</option>
-      </select>
-      <span class="input-group-btn">
-        <button class="btn btn-default" ng-click="clearNbmCarrier()" ng-class="{disabled:!nbmCarrier}"><span class="fa fa-close"></span></button>
-      </span>
-    </div>
-    <div class="row" style="margin-top: 10px">
-      <div class="col-md-3">&lt;1 Mbps</div>
-      <div class="col-md-6" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-      <div class="col-md-3 text-right">&gt;1 Gbps</div>
-    </div>
-  </div>
-  <!--
-  <hr>
-  <div>
-    <h2>Overlay</h2>
-    <div class="form-group">
-      <select class="form-control" ng-model="overlay" ng-change="overlayChanged()">
-        <option value="none">None</option>
-        <option value="density">Density</option>
-        <option value="fairshare">Fair share</option>
-      </select>
-      <div class="row" style="margin-top: 10px" ng-show="overlay === 'fairshare'">
-        <div class="col-md-2">Low</div>
-        <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-        <div class="col-md-2 text-right">High</div>
-      </div>
-      <div class="row" style="margin-top: 10px" ng-show="overlay === 'density'">
-        <div class="col-md-2">Low</div>
-        <div class="col-md-8" style="background: linear-gradient(to right, hsl(120,100%,50%), hsl(0,100%,50%));">&nbsp;</div>
-        <div class="col-md-2 text-right">High</div>
-      </div>
-      <div ng-show="overlay_is_loading()">
-        <% include spinner.html %>
-      </div>
-    </div>
-  </div>
-  -->
+  <form>
+    <p><strong>Competitor Types</strong></p>
+    <select class="form-control"
+            ng-model="planState.competition.selectedCompetitorType"
+            ng-options="item as item.label for item in planState.competition.allCompetitorTypes"
+            ng-change="onCompetitorTypeChanged()">
+    </select>
+
+    <br>
+    <p><strong>Competitors</strong></p>
+    <input type="checkbox"
+           ng-model="planState.competition.useAllCompetitors"
+           ng-change="onUseAllCompetitorsChanged()"
+    > Use All Competitors
+    <ui-select multiple ng-model="planState.competition.selectedCompetitors"
+               ng-disabled="planState.competition.useAllCompetitors"
+               theme="bootstrap"
+               close-on-select="true"
+               on-select="onSelectedCompetitorsChanged()"
+               on-remove="onSelectedCompetitorsChanged()">
+      <ui-select-match placeholder="Select data sources...">
+        <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $item.fillStyle, opacity: 0.7, 'margin-right':'5px' }"></span>
+        {{$item.name}}
+      </ui-select-match>
+      <ui-select-choices class="ui-select-width-300" repeat="competitor in planState.competition.allCompetitors">
+        <div>
+          {{competitor.name}}
+        </div>
+      </ui-select-choices>
+    </ui-select>
+
+    <br>
+    <p><strong>Survey Data</strong></p>
+    <input type="checkbox" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> NBM
+    <input type="checkbox" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()"> Geotel
+
+    <br>
+    <p><strong>Survey Data</strong></p>
+    <input type="checkbox"
+           ng-checked="planState.competition.showCensusBlocks"
+           ng-click="toggleShowSurveyData()">
+    Census Blocks
+
+    <br>
+    <br>
+    <p><strong>Fiber Route Data</strong></p>
+    <input type="checkbox"
+           ng-checked="planState.competition.showFiberRoutes"
+           ng-click="toggleShowFiberRoutesData()">
+    Routes
+    <br>
+    <input type="checkbox"
+           ng-checked="planState.competition.showFiberRoutesBuffer"
+           ng-click="toggleShowFiberRoutesBufferData()">
+    Routes Buffer
+
+    <br>
+    <br>
+    <p><strong>Rendering</strong></p>
+    <select class="form-control"
+            ng-model="planState.competition.selectedRenderingOption"
+            ng-options="item as item.label for item in planState.competition.allRenderingOptions"
+            ng-change="onRenderingChanged()">
+    </select>
+    <!-- to test different rendering options -->
+    <p><input type="checkbox" ng-model="showBlockHeatMap" ng-change="onRenderingChanged()"> Show heatmap</p>
+    <p>Minimum aggregated value</p>
+    <input type="range" min="0.0" max="1.0" step="0.05" ng-model="minAggregatedValue" ng-change="onRenderingChanged()">
+    <p>Maximum aggregated value</p>
+    <input type="range" min="0.0" max="1.0" step="0.05" ng-model="maxAggregatedValue" ng-change="onRenderingChanged()">
+  </form>
+
 </div>

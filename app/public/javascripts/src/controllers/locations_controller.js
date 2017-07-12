@@ -1,6 +1,104 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+
+  // Get the point transformation mode with the current zoom level
+  var getPointTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+  }
+
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+  // Creates map layers based on selection in the UI
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
+
+    // Remove all the map layers previously created by this controller
+    createdMapLayerKeys.forEach((createdMapLayerKey) => {
+      delete oldMapLayers[createdMapLayerKey]
+    })
+    createdMapLayerKeys.clear()
+
+    // Add map layers based on the selection
+    state.selectedDataSources.forEach((selectedDataSource) => {
+
+      // Loop through the location types
+      state.locationTypes.getValue().forEach((locationType) => {
+
+        // Determine whether we want to add this locationtype + datasource combo
+        var createLayer = true
+        var dataSourceId = selectedDataSource.dataSourceId
+        if (selectedDataSource.dataSourceId === state.DS_GLOBAL_BUSINESSES) {
+          dataSourceId = 1  // This is the global data source id
+          createLayer = locationType.key.indexOf('business') >= 0
+        } else if (selectedDataSource.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS) {
+          dataSourceId = 1  // This is the global data source id
+          createLayer = locationType.key.indexOf('household') >= 0
+        } else if (selectedDataSource.dataSourceId === state.DS_GLOBAL_CELLTOWER) {
+          dataSourceId = 1  // This is the global data source id
+          createLayer = locationType.key.indexOf('tower') >= 0
+        }
+
+        if (locationType.checked && createLayer) {
+          // Location type is visible
+          var mapLayerKey = `${locationType.key}_${dataSourceId}`
+          var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
+          var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
+          url = url.replace('${dataSourceId}', dataSourceId)
+          oldMapLayers[mapLayerKey] = {
+            url: [url],
+            iconUrl: `${baseUrl}${locationType.iconUrl}`,
+            isVisible: true,
+            drawingOptions: {
+              strokeStyle: '#00ff00',
+              fillStyle: '#a0ffa0',
+              showTileExtents: state.showMapTileExtents.getValue()
+            }
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+      })
+    })
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldMapLayers)
+  }
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
+
+  // Create a new set of map layers
+  state.appReadyPromise.then(() => {
+    updateMapLayers()
+  })
+
+  // Update old and new map layers when data sources change
+  $scope.onSelectedDataSourcesChanged = () => {
+    $scope.changeLocationsLayer() // Old layers
+    updateMapLayers()             // New "tile" layers
+  }
+
+  // Upward data flow (updating map layer state)
+  $scope.setLocationTypeVisibility = (locationType, isVisible) => {
+    var newLocationTypes = angular.copy(state.locationTypes.getValue())
+    for (var iLocationType = 0; iLocationType < newLocationTypes.length; ++iLocationType) {
+      if (newLocationTypes[iLocationType].key === locationType.key) {
+        newLocationTypes[iLocationType].checked = isVisible
+        break
+      }
+    }
+    state.locationTypes.next(newLocationTypes)
+  }
+
+  // Watch for changes in the locationTypes and trigger a map layer update when that happens
+  $scope.derivedLocationTypes = []
+  state.locationTypes.subscribe((newValue) => {
+    $scope.derivedLocationTypes = newValue  // For the checkboxes to bind to
+    updateMapLayers()
+  })
+
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -148,7 +246,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', 'config
     var businessCategories = []
     var householdCategories = []
     var showTowers = false
-    $scope.planState.locationTypes.forEach((locationType) => {
+    $scope.planState.locationTypesV1.forEach((locationType) => {
       if ((locationType.type === 'business') && locationType.checked) {
         businessCategories.push(locationType.key)
       } else if ((locationType.type === 'household') && locationType.checked) {

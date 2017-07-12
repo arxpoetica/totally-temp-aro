@@ -153,12 +153,11 @@
   <div class="checkbox" ng-repeat="type in state.optimizationOptions.technologies">
     <label>
      <div style="display: inline-block">
-       <checkbox
-               class="chk-small"
-               ng-model="type.checked"
-               name="ctype-name"
-               ng-checked="type.checked"
-       ></checkbox>
+       <input type="checkbox"
+              ng-model="type.checked"
+              name="ctype-name"
+              ng-checked="type.checked"
+       >
        {{type.label}}
      </div>
     <div ng-show="type.id == 'FiveG' && type.checked" style="display: inline-block">
@@ -199,11 +198,10 @@
   <p><strong>Other Settings</strong></p>
   <div class="checkbox">
   	<label>
-	 <checkbox
-		class="chk-small"
-        ng-model="state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
-        name="ctype-name"
-     ></checkbox>
+	    <input type="checkbox"
+             ng-model="state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
+             name="ctype-name"
+      >
         Save Routed Locations
   	</label>      
   </div>

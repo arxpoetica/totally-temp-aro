@@ -1,6 +1,6 @@
 /* global app map config $ user_id google _ swal location */
 // Navigation Menu Controller
-app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', '$location', 'state','$q', ($scope, $rootScope, $http, map_tools, tracker, $location, state , $q) => {
+app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'tracker', 'tileDataService', '$location', 'state','$q', ($scope, $rootScope, $http, map_tools, tracker, tileDataService, $location, state , $q) => {
   // Controller instance variables
   $scope.new_plan_name = 'Untitled Plan'
   $scope.new_plan_area_name = ''
@@ -110,6 +110,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $rootScope.$on('plan_selected', (e, plan) => {
+
+    // Clear the client side tile cache
+    tileDataService.clearCache()
+
     $scope.plan = plan
     state.loadPlan(plan)
     $location.path(plan ? '/plan/' + plan.id : '/')
@@ -124,7 +128,16 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }
   })
 
+  $rootScope.$on('plan_cleared', (e, plan) => {
+    // Clear the client side tile cache
+    tileDataService.clearCache()
+  })
+
   $rootScope.$on('route_changed', (e) => {
+
+    // Clear the client side tile cache
+    tileDataService.clearCache()
+
     if (!$scope.plan) return
     recalculateMarketProfile()
   })

@@ -25,7 +25,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addRegionsToBody(state, optimization, regions, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     addTechnologiesToBody(state, optimizationBody)
-    optimizationBody.fiberSourceIds = state.optimizationOptions.fiberSourceIds
+    optimizationBody.fiberSourceIds = []
+    state.selectedExistingFibers.forEach((selectedExistingFiber) => optimizationBody.fiberSourceIds.push(selectedExistingFiber.systemId))
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
 
     return optimizationBody
@@ -33,8 +34,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
   var addLocationTypesToBody = (state, postBody) => {
-    var selectedLocationTypes = state.locationTypes.filter((item) => item.checked)
-    postBody.locationTypes = _.pluck(selectedLocationTypes, 'key')
+    var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
+    postBody.locationTypes = _.pluck(selectedLocationTypes, 'plannerKey')
   }
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
@@ -191,7 +192,15 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadFiberNetworkConstraintsFromBody(state, postBody)
     loadTechnologiesFromBody(state, postBody)
 
-    state.optimizationOptions.fiberSourceIds = postBody.fiberSourceIds.slice()
+    state.loadExistingFibersList()
+      .then(() => {
+        // The state will have a list of all fiber source ids
+        state.allExistingFibers.forEach((existingFiber) => {
+          if (postBody.fiberSourceIds.indexOf(existingFiber.systemId) >= 0) {
+            state.selectedExistingFibers.push(existingFiber)
+          }
+        })
+      })
 
     // Select geographies
     regions.removeAllGeographies()
@@ -210,13 +219,15 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   var loadLocationTypesFromBody = (state, postBody) => {
-    state.locationTypes.forEach((locationType) => locationType.checked = false)
+    var newLocationTypes = angular.copy(state.locationTypes.getValue())
+    newLocationTypes.forEach((locationType) => locationType.checked = false)
     postBody.locationTypes.forEach((locationType) => {
-      var serviceLocationTypeObj = state.locationTypes.filter((item) => item.key === locationType)[0]
+      var serviceLocationTypeObj = newLocationTypes.filter((item) => item.plannerKey === locationType)[0]
       if (serviceLocationTypeObj) {
         serviceLocationTypeObj.checked = true
       }
     })
+    state.locationTypes.next(newLocationTypes)
   }
 
   // Load data sources from a POST body object that is sent to the optimization engine

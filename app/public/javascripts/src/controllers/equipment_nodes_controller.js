@@ -1,6 +1,6 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'fiberGraph', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state, fiberGraph) => {
   // Controller instance variables
   $scope.map_tools = map_tools
   $scope.user_id = user_id
@@ -9,6 +9,113 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.selected_tool = null
   $scope.vztfttp = true
   $scope.planState = state;
+
+  // Get the point transformation mode with the current zoom level
+  var getPointTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+  }
+
+  // Get the line transformation mode with the current zoom level
+  var getLineTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'smooth_absolute'
+  }
+
+  // Get the polygon transformation mode with the current zoom level
+  var getPolygonTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'smooth'
+  }
+
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+  // Creates map layers based on selection in the UI
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
+
+    // Remove all the map layers previously created by this controller
+    createdMapLayerKeys.forEach((createdMapLayerKey) => {
+      delete oldMapLayers[createdMapLayerKey]
+    })
+    createdMapLayerKeys.clear()
+
+    // Only add planned equipment if we have a valid plan selected
+    if (state.planId !== state.INVALID_PLAN_ID) {
+
+      // Loop through all network equipment categories (e.g. "Existing Equipment")
+      state.networkEquipments.forEach((category) => {
+
+        // Loop through all the layers in this category
+        category.layers.forEach((networkEquipment) => {
+          if (networkEquipment.checked) {
+            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.planId)
+            if (networkEquipment.equipmentType === 'point') {
+              var lineTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{pointTransform}', lineTransform)
+            } else if (networkEquipment.equipmentType === 'line') {
+              var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+            } else if (networkEquipment.equipmentType === 'polygon') {
+              var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+            }
+            oldMapLayers[networkEquipment.key] = {
+              url: [tileUrl],
+              iconUrl: networkEquipment.iconUrl,
+              isVisible: true,
+              drawingOptions: networkEquipment.drawingOptions
+            }
+            createdMapLayerKeys.add(networkEquipment.key)
+          }
+        })
+      })
+    }
+
+    // Create layers for existing fiber (the ones that are selected for display)
+    var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
+    state.selectedExistingFibers.forEach((selectedExistingFiber) => {
+      var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
+      var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
+      oldMapLayers[mapLayerKey] = {
+        url: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`],
+        iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
+        isVisible: true,
+        drawingOptions: state.existingFiberOptions.drawingOptions
+      }
+      createdMapLayerKeys.add(mapLayerKey)
+    })
+
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldMapLayers)
+  }
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
+
+  // Change the visibility of a network equipment layer. layerObj should refer to an object
+  // in state.js --> networkEquipments[x].layers
+  $scope.changeLayerVisibility = (layerObj, isVisible) => {
+    layerObj.checked = isVisible
+    updateMapLayers()
+  }
+
+  // Create a new set of map layers
+  state.appReadyPromise.then(() => {
+    updateMapLayers()
+  })
+
+  // Subscribe to different plan events
+  $rootScope.$on('plan_selected', (e, plan) => updateMapLayers())
+  $rootScope.$on('plan_cleared', (e, plan) => updateMapLayers())
+  $rootScope.$on('route_planning_changed', (e, plan) => updateMapLayers())
+
   $scope.serviceLayers = []
   $scope.existingFibers=[];
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
@@ -774,6 +881,23 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   $rootScope.$on('uploaded_fiber', (e, info) => {
+
+    // Reload data sources into state
+    var selectedFiberIds = _.pluck(state.selectedExistingFibers, 'systemId')
+    state.loadExistingFibersList()
+      .then(() => {
+        state.allExistingFibers.forEach((existingFiber) => {
+          // Select the fibers that were selected earlier.
+          if (selectedFiberIds.indexOf(existingFiber.systemId) >= 0) {
+            state.selectedExistingFibers.push(existingFiber)
+          }
+          // Select the currently uploaded fiber
+          if (existingFiber.systemId === info.systemId) {
+            state.selectedExistingFibers.push(existingFiber)
+          }
+        })
+      })
+
     initDatasource(info)
     info.toggleVisibility()
     reloadDatasources();
@@ -782,12 +906,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Additional variable required ($scope.fibers.selectedFibers) because ui-select creates a new scope via ng-repeat
   $scope.fibers = { selectedFibers: [] }
   $scope.selectedFibersChanged = () => {
+    updateMapLayers()
     // Set visibility of fiber layers
     fiberLayers.forEach((fiberLayer) => fiberLayer.hide())
     $scope.fibers.selectedFibers.forEach((selectedFiber) => fiberLayers[selectedFiber.systemId].show())
-
-    // For now, save fiber source ids in state.js. Later we should store everything in state.js
-    state.optimizationOptions.fiberSourceIds = _.pluck($scope.fibers.selectedFibers, 'systemId').sort()
   }
 
   $scope.selectedExistingFiberIds = []    // For now, save fiber source ids in state.js. Later we should store everything in state.js

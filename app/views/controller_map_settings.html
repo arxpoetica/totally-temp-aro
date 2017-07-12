@@ -5,12 +5,10 @@
         <div class="settings_item">
           <div class="settings_label">Location Heatmap</div>
           <div class="settings_object">
-            <checkbox
-                    class="chk-small"
-                    ng-model="heatmapOn"
-                    name="ctype-name"
-                    ng-change="toggleHeatmap()">
-            </checkbox>
+            <input type="checkbox"
+                   ng-model="heatmapOn"
+                   name="ctype-name"
+                   ng-change="toggleHeatmap()">
           </div>
         </div>
 
@@ -60,6 +58,14 @@
           <div class="settings_label">Atomic Divisor</div>
           <div class="settings_object">
             <input type="text" ng-model="state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" placeholder="Atomic Divisor">
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="settings_item">
+          <div class="settings_label">Show tile information on map</div>
+          <div class="settings_object">
+              <input type="checkbox" ng-checked="showMapTileExtents" ng-click="setShowMapTileExtents(!showMapTileExtents)">
           </div>
         </div>
       </li>

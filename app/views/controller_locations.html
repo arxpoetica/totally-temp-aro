@@ -69,12 +69,12 @@
   <div id="locations_controller" ng-show="!isLoadingConfiguration">
 
     <form>
-      <!-- Businesses -->
       <div class="customer-type shaded">
         <label>Locations</label>
       </div>
       <ul class="customer-type">
-        <li ng-repeat="locationType in planState.locationTypes">
+        <!-- OLD (V1) locations -->
+        <!--<li ng-repeat="locationType in planState.locationTypesV1">
           <div class="ctype-icon"><img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">
             {{locationType.label}}
@@ -86,6 +86,17 @@
                     name="ctype-name"
                     ng-change="changeLocationsLayer()"
             ></checkbox>
+          </div>
+        </li>-->
+        <!-- New (Map Tiles) locations -->
+        <li ng-repeat="locationType in derivedLocationTypes">
+          <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
+          <div class="ctype-name">{{locationType.label}}</div>
+          <div class="ctype-checkbox">
+            <input type="checkbox"
+                   ng-checked="locationType.checked"
+                   ng-click="setLocationTypeVisibility(locationType, !locationType.checked)"
+            >
           </div>
         </li>
       </ul>
@@ -99,8 +110,8 @@
         <ui-select multiple ng-model="planState.selectedDataSources"
                    theme="bootstrap"
                    close-on-select="true"
-                   on-select="changeLocationsLayer()"
-                   on-remove="changeLocationsLayer()">
+                   on-select="onSelectedDataSourcesChanged()"
+                   on-remove="onSelectedDataSourcesChanged()">
           <!-- We will only show data source ids for uploaded data sources -->
           <ui-select-match placeholder="Select data sources...">{{$item.name}} {{$item.dataSourceId >= 0 ? '[id ' + $item.dataSourceId + ']' : ''}}</ui-select-match>
           <ui-select-choices class="ui-select-width-300" repeat="uploadedDataSource in planState.allDataSources">
