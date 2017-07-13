@@ -1,8 +1,8 @@
 general:
-  branches:
-    only:
-      - master
-      - vz-qa-deployment
+  # branches:
+  #   only:
+  #     - master
+
 
 machine:
   services:
