@@ -10,7 +10,7 @@
     "test-ui": "./node_modules/.bin/karma start",
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
     "test-all": "npm test && npm run test-ui && npm run test-integration",
-    "build-vendor-bundle": "./node_modules/.bin/browserify -r vector-tile -r pbf -r rxjs -p licensify | ./node_modules/.bin/uglifyjs --comments > ./public/javascripts/vendors/vendor-bundle.min.js",
+    "build-vendor-bundle": "./node_modules/browserify/bin/cmd.js -r vector-tile -r pbf -r rxjs -p licensify > ./public/javascripts/vendors/vendor-bundle.min.js",
     "build-angularjs": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib",
     "build": "npm run build-vendor-bundle && npm run build-angularjs",
     "watch": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib --watch --source-maps",
