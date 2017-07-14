@@ -40,7 +40,7 @@ class MapTileRenderer {
       return div
     }
 
-    if (this.layerProperties.data.drawingOptions.showTileExtents) {
+    if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
       canvas.style.border = "2px dotted";
     }
 
@@ -195,7 +195,8 @@ class MapTileRenderer {
           heatMapRenderer.radius(20, 20)
           heatMapRenderer.draw(0.0)
         }
-        if (this.layerProperties.data.drawingOptions.showTileExtents) {
+        if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
+          ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
           // Draw a rectangle showing the tile (not the margins)
           ctx.strokeStyle = "#000000"
           ctx.lineWidth = 2
@@ -216,8 +217,8 @@ class MapTileRenderer {
   }
 
   // Show/hide map tile extents
-  setMapTileExtentsVisibility(showMapTileExtents) {
-    this.layerProperties.data.drawingOptions.showTileExtents = showMapTileExtents
+  setMapTileOptions(mapTileOptions) {
+    this.layerProperties.data.mapTileOptions = mapTileOptions
   }
 
   // Perform hit detection on features and get the first one (if any) under the mouse
@@ -287,11 +288,12 @@ class TileComponentController {
     // Subscribe to changes in the map tile options
     state.mapTileOptions
       .subscribe((mapTileOptions) => {
-        this.handleShowMapTileExtentsChanged(mapTileOptions.showTileExtents)
+        this.handleMapTileOptionsChanged(mapTileOptions)
       })
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
+    this.state = state
     this.tileDataService = tileDataService
 
     this.DELTA = Object.freeze({
@@ -395,15 +397,15 @@ class TileComponentController {
   }
 
   // Called when the value of showing map tile extents (for debugging) changes
-  handleShowMapTileExtentsChanged(showMapTileExtents) {
+  handleMapTileOptionsChanged(mapTileOptions) {
     if (!this.mapRef) {
       // Map not initialized yet. Try again after some time
-      setTimeout(() => this.handleShowMapTileExtentsChanged(showMapTileExtents), 100)
+      setTimeout(() => this.handleMapTileOptionsChanged(mapTileOptions), 100)
       return
     }
 
     this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
-      overlayMap.setMapTileExtentsVisibility(showMapTileExtents)
+      overlayMap.setMapTileOptions(mapTileOptions)
       // Hacky way to get google maps to redraw the tiles
       this.mapRef.overlayMapTypes.setAt(index, null)
       this.mapRef.overlayMapTypes.setAt(index, overlayMap)
@@ -418,8 +420,6 @@ class TileComponentController {
     }
     // We have a new set of map layers. Determine which ones to update and which ones to delete
     var mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
-    console.log('-------- Actions')
-    console.log(mapLayerActions)
 
     // First delete any map layers that we want
     for (var iOverlay = 0; iOverlay < this.mapRef.overlayMapTypes.length; ++iOverlay) {
@@ -438,13 +438,13 @@ class TileComponentController {
       if (mapLayerActions[key] === this.DELTA.UPDATE) {
         this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
         var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, {id: key, data: mapLayer}, this.tileDataService)
+        tileRenderer.setMapTileOptions(this.state.mapTileOptions.getValue())
         if (key in mapExistingLayers) {
           // Tile exists in maps. Replace it
           var index = mapExistingLayers[key]
           this.mapRef.overlayMapTypes.setAt(index, tileRenderer)
         } else {
           // Tile does not already exist in maps
-          console.log('Added')
           this.mapRef.overlayMapTypes.push(tileRenderer)
         }
       }
