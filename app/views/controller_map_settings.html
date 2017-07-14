@@ -65,7 +65,26 @@
         <div class="settings_item">
           <div class="settings_label">Show tile information on map</div>
           <div class="settings_object">
-              <input type="checkbox" ng-checked="showMapTileExtents" ng-click="setShowMapTileExtents(!showMapTileExtents)">
+              <input type="checkbox" ng-model="mapTileOptions.showTileExtents" ng-change="updateState()">
+          </div>
+        </div>
+        <strong>Heatmap settings</strong>
+        <div class="settings_item">
+          <div class="settings_label">Power</div>
+          <div class="settings_object">
+              <input type="text" ng-model="mapTileOptions.heatMap.powerExponent" ng-change="updateState()">
+          </div>
+        </div>
+        <div class="settings_item">
+          <div class="settings_label"><input type="radio" name="heatmap" ng-model="mapTileOptions.heatMap.useAbsoluteMax" ng-value="true" ng-change="updateState()"> Absolute</div>
+          <div class="settings_object">
+              <input type="text" ng-model="mapTileOptions.heatMap.maxValue" ng-change="updateState()">
+          </div>
+        </div>
+        <div class="settings_item">
+          <div class="settings_label"><input type="radio" name="heatmap" ng-model="mapTileOptions.heatMap.useAbsoluteMax" ng-value="false" ng-change="updateState()"> World</div>
+          <div class="settings_object">
+              <input type="text" ng-model="mapTileOptions.heatMap.worldMaxValue" ng-change="updateState()">
           </div>
         </div>
       </li>

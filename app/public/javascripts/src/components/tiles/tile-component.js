@@ -81,7 +81,8 @@ class MapTileRenderer {
                   var x = this.drawMargins + shape[0].x - imageWidthBy2
                   var y = this.drawMargins + shape[0].y - imageHeightBy2
                   if (feature.properties.weight) {
-                    heatMapData.push([x, y, +feature.properties.weight])
+                    var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
+                    heatMapData.push([x, y, adjustedWeight])
                     maxWeightForHeatMap = Math.max(maxWeightForHeatMap, +feature.properties.weight)
                   } else {
                     ctx.drawImage(entityImage, x, y)
@@ -191,7 +192,16 @@ class MapTileRenderer {
         if (heatMapData.length > 0) {
           var heatMapRenderer = simpleheat(canvas)
           heatMapRenderer.data(heatMapData)
-          heatMapRenderer.max(maxWeightForHeatMap)
+          var maxValue = 1.0
+          if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
+            // Simply use the maximum value for the heatmap
+            maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
+          } else {
+            // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
+            maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
+                       / Math.pow(2.0, zoom)
+          }
+          heatMapRenderer.max(maxValue)
           heatMapRenderer.radius(20, 20)
           heatMapRenderer.draw(0.0)
         }
