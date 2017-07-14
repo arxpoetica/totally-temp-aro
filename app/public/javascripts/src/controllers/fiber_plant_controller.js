@@ -71,8 +71,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           isVisible: true,
           drawingOptions: {
             strokeStyle: '#5050ff',
-            fillStyle: '#5050af',
-            showTileExtents: state.showMapTileExtents.getValue()
+            fillStyle: '#5050af'
           }
         }
         mapLayer.aggregateOptions = aggregateOptions
@@ -105,8 +104,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           isVisible: true,
           drawingOptions: {
             strokeStyle: '#000000',
-            fillStyle: '#000000',
-            showTileExtents: state.showMapTileExtents.getValue()
+            fillStyle: '#000000'
           }
         }
         createdMapLayerKeys.add(mapLayerKey)
@@ -119,8 +117,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             isVisible: true,
             drawingOptions: {
               strokeStyle: selectedCompetitor.strokeStyle,
-              fillStyle: selectedCompetitor.fillStyle,
-              showTileExtents: state.showMapTileExtents.getValue()
+              fillStyle: selectedCompetitor.fillStyle
             }
           }
           createdMapLayerKeys.add(mapLayerKey)
@@ -138,8 +135,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           isVisible: true,
           drawingOptions: {
             strokeStyle: '#000000',
-            fillStyle: '#000000',
-            showTileExtents: state.showMapTileExtents.getValue()
+            fillStyle: '#000000'
           }
         }
         createdMapLayerKeys.add(mapLayerKey)
@@ -152,8 +148,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             isVisible: true,
             drawingOptions: {
               strokeStyle: selectedCompetitor.strokeStyle,
-              fillStyle: selectedCompetitor.fillStyle,
-              showTileExtents: state.showMapTileExtents.getValue()
+              fillStyle: selectedCompetitor.fillStyle
             }
           }
           createdMapLayerKeys.add(mapLayerKey)
