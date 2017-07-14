@@ -72,7 +72,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           drawingOptions: {
             strokeStyle: '#5050ff',
             fillStyle: '#5050af',
-            showTileExtents: state.showMapTileExtents.getValue()
+            showTileExtents: state.mapTileOptions.getValue().showTileExtents
           }
         }
         mapLayer.aggregateOptions = aggregateOptions
@@ -106,7 +106,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           drawingOptions: {
             strokeStyle: '#000000',
             fillStyle: '#000000',
-            showTileExtents: state.showMapTileExtents.getValue()
+            showTileExtents: state.mapTileOptions.getValue().showTileExtents
           }
         }
         createdMapLayerKeys.add(mapLayerKey)
@@ -120,7 +120,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             drawingOptions: {
               strokeStyle: selectedCompetitor.strokeStyle,
               fillStyle: selectedCompetitor.fillStyle,
-              showTileExtents: state.showMapTileExtents.getValue()
+              showTileExtents: state.mapTileOptions.getValue().showTileExtents
             }
           }
           createdMapLayerKeys.add(mapLayerKey)
@@ -139,7 +139,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           drawingOptions: {
             strokeStyle: '#000000',
             fillStyle: '#000000',
-            showTileExtents: state.showMapTileExtents.getValue()
+            showTileExtents: state.mapTileOptions.getValue().showTileExtents
           }
         }
         createdMapLayerKeys.add(mapLayerKey)
@@ -153,7 +153,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             drawingOptions: {
               strokeStyle: selectedCompetitor.strokeStyle,
               fillStyle: selectedCompetitor.fillStyle,
-              showTileExtents: state.showMapTileExtents.getValue()
+              showTileExtents: state.mapTileOptions.getValue().showTileExtents
             }
           }
           createdMapLayerKeys.add(mapLayerKey)

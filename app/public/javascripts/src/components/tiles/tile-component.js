@@ -284,8 +284,11 @@ class TileComponentController {
       .pairwise() // This will give us the previous value in addition to the current value
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1]))
 
-    state.showMapTileExtents
-      .subscribe((showMapTileExtents) => this.handleShowMapTileExtentsChanged(showMapTileExtents))
+    // Subscribe to changes in the map tile options
+    state.mapTileOptions
+      .subscribe((mapTileOptions) => {
+        this.handleShowMapTileExtentsChanged(mapTileOptions.showTileExtents)
+      })
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()

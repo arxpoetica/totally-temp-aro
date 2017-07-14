@@ -57,7 +57,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             drawingOptions: {
               strokeStyle: '#00ff00',
               fillStyle: '#a0ffa0',
-              showTileExtents: state.showMapTileExtents.getValue()
+              showTileExtents: state.mapTileOptions.getValue().showTileExtents
             }
           }
           createdMapLayerKeys.add(mapLayerKey)

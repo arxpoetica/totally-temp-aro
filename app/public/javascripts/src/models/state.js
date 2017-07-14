@@ -124,7 +124,15 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Map layers data - define once
   service.mapLayers = new Rx.BehaviorSubject({})
-  service.showMapTileExtents = new Rx.BehaviorSubject(false)
+  service.mapTileOptions = new Rx.BehaviorSubject({
+    showTileExtents: true,
+    heatMap: {
+      maxValue: 100,
+      powerExponent: 0.5,
+      useWorldMax: false,
+      worldMaxValue: 100000000
+    }
+  })
 
   service.mapLayers
     .pairwise()

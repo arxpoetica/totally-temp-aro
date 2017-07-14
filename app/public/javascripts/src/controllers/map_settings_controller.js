@@ -20,10 +20,12 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
   }
 
   // Checkbox to show/hide map tile extents. Used for debugging
-  state.showMapTileExtents
-    .subscribe((showMapTileExtents) => $scope.showMapTileExtents = showMapTileExtents)
+  state.mapTileOptions
+    .subscribe((mapTileOptions) => $scope.showMapTileExtents = mapTileOptions.showTileExtents)
 
   $scope.setShowMapTileExtents = (showMapTileExtents) => {
-    state.showMapTileExtents.next(showMapTileExtents)
+    var newState = angular.copy(state.mapTileOptions.getValue())
+    newState.showTileExtents = showMapTileExtents
+    state.mapTileOptions.next(newState)
   }
 }]);
