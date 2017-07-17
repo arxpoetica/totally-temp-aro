@@ -44,38 +44,90 @@ class MapTileRenderer {
       canvas.style.border = "2px dotted";
     }
 
-    // Get tile data from service
-    var promises = [
-      Promise.resolve({
-        canvas: canvas
-      }),
-      this.tileDataService.getTileData(this.layerProperties.data.url, zoom, coord.x, coord.y, this.layerProperties.data.aggregateOptions),
-      this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
-    ]
-    Promise.all(promises)
-      .then((promiseResults) => {
+    this.renderTile(zoom, coord, 1, canvas)
 
-        var canvas = promiseResults[0].canvas
-        var layerToFeatures = promiseResults[1].layerToFeatures
-        var entityImage = promiseResults[2]
-
-        // Response will be an array of objects
-        var features = []
-        Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-        var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
-        this.renderFeatures(canvas, features, entityImage, tileCoordinateString)
-      })
     return div
   }
 
+  // Takes a set of promise results and renders the tile
+  renderTile(zoom, coord, numNeighbors, canvas) {
+
+    // Get tile data from service
+    var tileDataPromises = []
+    var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
+    var tileDataOffsets = []
+    for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
+      for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
+        tileDataOffsets.push({
+          x: deltaX * this.tileSize.width,
+          y: deltaY * this.tileSize.height
+        })
+        var xTile = coord.x + deltaX
+        var yTile = coord.y + deltaY
+        tileDataPromises.push(this.tileDataService.getTileData(this.layerProperties.data.url, zoom, xTile, yTile, this.layerProperties.data.aggregateOptions))
+      }
+    }
+    tileDataPromises.push(this.tileDataService.getEntityImageForLayer(this.layerProperties.id))
+
+    Promise.all(tileDataPromises)
+      .then((promiseResults) => {
+        var entityImage = promiseResults[promiseResults.length - 1]
+
+        // Response will be an array of objects
+        var ctx=canvas.getContext("2d");
+        ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
+        ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
+        ctx.lineWidth = 1
+        var heatMapData = []
+        var maxWeightForHeatMap = 1
+        
+        for (var iResult = 0; iResult < promiseResults.length - 1; ++iResult) {
+          var layerToFeatures = promiseResults[iResult].layerToFeatures
+          var features = []
+          Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
+          this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, maxWeightForHeatMap)
+        }
+        if (heatMapData.length > 0) {
+          var heatMapRenderer = simpleheat(canvas)
+          heatMapRenderer.data(heatMapData)
+          var maxValue = 1.0
+          if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
+            // Simply use the maximum value for the heatmap
+            maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
+          } else {
+            // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
+            maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
+                        / Math.pow(2.0, zoom)
+          }
+          heatMapRenderer.max(maxValue)
+          heatMapRenderer.radius(20, 20)
+          heatMapRenderer.draw(0.0)
+          ctx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+          ctx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+          ctx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+          ctx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+        }
+        if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
+          ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
+          // Draw a rectangle showing the tile (not the margins)
+          ctx.strokeStyle = "#000000"
+          ctx.lineWidth = 2
+          ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
+          // Show the tile coordinates that we pass to aro-service
+          ctx.fillStyle = '#000000'
+          ctx.strokeStyle = '#ffffff'
+          ctx.lineWidth = 4
+          ctx.font = "15px Arial"
+          ctx.textAlign="center"
+          ctx.textBaseline = "middle"
+          ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+          ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+        }
+    })
+  }
+
   // Render a set of features on the map
-  renderFeatures(canvas, features, entityImage, tileCoordinateString) {
-    var ctx=canvas.getContext("2d");
-    ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
-    ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
-    ctx.lineWidth = 1
-    var heatMapData = []
-    var maxWeightForHeatMap = 1
+  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData, maxWeightForHeatMap) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
@@ -89,8 +141,8 @@ class MapTileRenderer {
         switch(shape.length) {
           case 1:
             // This is a point
-            var x = this.drawMargins + shape[0].x - imageWidthBy2
-            var y = this.drawMargins + shape[0].y - imageHeightBy2
+            var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
+            var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
             if (feature.properties.weight) {
               var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
@@ -198,38 +250,6 @@ class MapTileRenderer {
             break;
         }
       })
-    }
-    if (heatMapData.length > 0) {
-      var heatMapRenderer = simpleheat(canvas)
-      heatMapRenderer.data(heatMapData)
-      var maxValue = 1.0
-      if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
-        // Simply use the maximum value for the heatmap
-        maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
-      } else {
-        // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-        maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
-                    / Math.pow(2.0, zoom)
-      }
-      heatMapRenderer.max(maxValue)
-      heatMapRenderer.radius(20, 20)
-      heatMapRenderer.draw(0.0)
-    }
-    if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-      ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
-      // Draw a rectangle showing the tile (not the margins)
-      ctx.strokeStyle = "#000000"
-      ctx.lineWidth = 2
-      ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
-      // Show the tile coordinates that we pass to aro-service
-      ctx.fillStyle = '#000000'
-      ctx.strokeStyle = '#ffffff'
-      ctx.lineWidth = 4
-      ctx.font = "15px Arial"
-      ctx.textAlign="center"
-      ctx.textBaseline = "middle"
-      ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-      ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
     }
   }
 
