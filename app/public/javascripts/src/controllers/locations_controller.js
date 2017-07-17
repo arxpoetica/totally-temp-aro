@@ -24,6 +24,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     })
     createdMapLayerKeys.clear()
 
+    // Hold a list of layers that we want merged
+    var layersToMerge = {
+      urls: [],
+      iconUrl: null
+    }
+
     // Add map layers based on the selection
     state.selectedDataSources.forEach((selectedDataSource) => {
 
@@ -50,19 +56,48 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
           var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
           url = url.replace('${dataSourceId}', dataSourceId)
-          oldMapLayers[mapLayerKey] = {
-            url: [url],
-            iconUrl: `${baseUrl}${locationType.iconUrl}`,
-            isVisible: true,
-            drawingOptions: {
-              strokeStyle: '#00ff00',
-              fillStyle: '#a0ffa0'
+
+          if (pointTransform === 'aggregate' && locationType.key.indexOf('business') >= 0) {
+            // For aggregated BUSINESS locations we want to merge them into one layer
+            layersToMerge.urls.push(url)
+            // Overwriting any previous iconUrl, will be ok as we are aggregating, so we dont use the icon
+            layersToMerge.iconUrl = `${baseUrl}${locationType.iconUrl}`
+          } else {
+            // Add this map layer individually
+            oldMapLayers[mapLayerKey] = {
+              url: [url],
+              iconUrl: `${baseUrl}${locationType.iconUrl}`,
+              isVisible: true,
+              drawingOptions: {
+                strokeStyle: '#00ff00',
+                fillStyle: '#a0ffa0'
+              }
             }
+            createdMapLayerKeys.add(mapLayerKey)
           }
-          createdMapLayerKeys.add(mapLayerKey)
         }
       })
     })
+
+    if (layersToMerge.urls.length > 0) {
+      // We have some business layers that need to be merged into one
+      var mapLayerKey = 'aggregated_businesses'
+      oldMapLayers[mapLayerKey] = {
+        url: layersToMerge.urls,
+        iconUrl: layersToMerge.iconUrl,
+        isVisible: true,
+        drawingOptions: {
+          strokeStyle: '#00ff00',
+          fillStyle: '#a0ffa0'
+        },
+        aggregateOptions: {
+          aggregateEntityId: 'asdf',
+          aggregateBy: 'weight',
+          aggregateMode: 'simple_union'
+        }
+      }
+      createdMapLayerKeys.add(mapLayerKey)
+    }
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
