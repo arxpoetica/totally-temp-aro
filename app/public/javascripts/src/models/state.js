@@ -134,10 +134,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   })
 
-  service.mapLayers
-    .pairwise()
-    .subscribe((newValue) => console.log(newValue))
-
   service.hackRaiseEvent = (feature) => {
     $rootScope.$broadcast('map_layer_clicked_feature', feature, {})
   }
