@@ -73,22 +73,7 @@
         <label>Locations</label>
       </div>
       <ul class="customer-type">
-        <!-- OLD (V1) locations -->
-        <!--<li ng-repeat="locationType in planState.locationTypesV1">
-          <div class="ctype-icon"><img ng-src="{{locationType.icon}}" style="width:16px;margin-right:10px"></div>
-          <div class="ctype-name">
-            {{locationType.label}}
-          </div>
-          <div class="ctype-checkbox">
-            <checkbox
-                    class="chk-small"
-                    ng-model="locationType.checked"
-                    name="ctype-name"
-                    ng-change="changeLocationsLayer()"
-            ></checkbox>
-          </div>
-        </li>-->
-        <!-- New (Map Tiles) locations -->
+        <!-- Loop through all location types -->
         <li ng-repeat="locationType in derivedLocationTypes">
           <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">{{locationType.label}}</div>

@@ -17,6 +17,27 @@ app.service('tileDataService', ['$http', ($http) => {
     if (tileUrls.length === 1 && !aggregateOptions) {
       // We have a single URL. No need to aggregate anything.
       return tileDataService.getTileDataSingleUrl(tileUrls[0], zoom, tileX, tileY)
+    } else if (aggregateOptions && aggregateOptions.aggregateMode === 'simple_union') {
+      // We have multiple URLs where data is coming from, and we want a simple union of the results
+      return new Promise((resolve, reject) => {
+        var promises = []
+        tileUrls.forEach((tileUrl) => promises.push(tileDataService.getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+        Promise.all(promises)
+          .then((results) => {
+            var allFeatures = []
+            results.forEach((result) => {
+              var layerToFeatures = result.layerToFeatures
+              Object.keys(layerToFeatures).forEach((layerKey) => {
+                allFeatures = allFeatures.concat(layerToFeatures[layerKey])
+              })
+            })
+            resolve({
+              layerToFeatures: {
+                BUSINESSES_AGGREGATE: allFeatures
+              }
+            })
+          })
+      })
     } else {
       // We have multiple URLs where data is coming from. Return the aggregated result
       return new Promise((resolve, reject) => {
@@ -80,7 +101,6 @@ app.service('tileDataService', ['$http', ($http) => {
 
             // Save it all out and return
             resolve({
-              tileUrl: 'AGGREGATE',
               layerToFeatures: {
                 AGGREGATE_LAYER: aggregateFeatures
               }
