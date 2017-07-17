@@ -46,184 +46,191 @@ class MapTileRenderer {
 
     // Get tile data from service
     var promises = [
+      Promise.resolve({
+        canvas: canvas
+      }),
       this.tileDataService.getTileData(this.layerProperties.data.url, zoom, coord.x, coord.y, this.layerProperties.data.aggregateOptions),
       this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
     ]
     Promise.all(promises)
       .then((promiseResults) => {
 
-        var layerToFeatures = promiseResults[0].layerToFeatures
-        var entityImage = promiseResults[1]
-
-        var heatMapData = []
-        var maxWeightForHeatMap = 1
+        var canvas = promiseResults[0].canvas
+        var layerToFeatures = promiseResults[1].layerToFeatures
+        var entityImage = promiseResults[2]
 
         // Response will be an array of objects
-        var ctx=canvas.getContext("2d");
-        ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
-        ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
-        ctx.lineWidth = 1
-        Object.keys(layerToFeatures).forEach((layerKey) => {
-          var features = layerToFeatures[layerKey]
-          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-            // Parse the geometry out.
-            var feature = features[iFeature]
-            var geometry = feature.loadGeometry()
-            // console.log(JSON.stringify(geometry))
-            // Geometry is an array of shapes
-            var imageWidthBy2 = entityImage.width / 2
-            var imageHeightBy2 = entityImage.height / 2
-            geometry.forEach((shape) => {
-              // Shape is an array of coordinates
-              switch(shape.length) {
-                case 1:
-                  // This is a point
-                  var x = this.drawMargins + shape[0].x - imageWidthBy2
-                  var y = this.drawMargins + shape[0].y - imageHeightBy2
-                  if (feature.properties.weight) {
-                    var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
-                    heatMapData.push([x, y, adjustedWeight])
-                    maxWeightForHeatMap = Math.max(maxWeightForHeatMap, +feature.properties.weight)
-                  } else {
-                    ctx.drawImage(entityImage, x, y)
-                  }
-                  break;
-
-                default:
-                  // Check if this is a closed polygon
-                  var firstPoint = shape[0]
-                  var lastPoint = shape[shape.length - 1]
-                  var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
-
-                  if (isClosedPolygon) {
-                    // First draw a filled polygon with the fill color
-                    var fillAlpha = 0.7
-                    if (this.layerProperties.data.drawingOptions.alphaThreshold) {
-                      // We want to set the transparency based on a threshold provided in drawing options
-                      var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
-                      var minPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.minValue || 0.0
-                      var maxPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.maxValue || 1.0
-                      var range = maxPropertyValue - minPropertyValue
-                      if (range === 0) {
-                        range = 1.0  // Prevent any divide-by-zeros
-                      }
-                      var valueToPlot = feature.properties[thresholdProperty]
-                      if (feature.properties[thresholdProperty]) {
-                        // We are interested in features between the minPropertyValue and maxPropertyValue values
-                        var minAlpha = 0.2, maxAlpha = 0.8
-                        fillAlpha = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
-                        fillAlpha = Math.max(minAlpha, fillAlpha)
-                        fillAlpha = Math.min(maxAlpha, fillAlpha)
-                      }
-                      if (this.layerProperties.data.drawingOptions.blockHeatMap) {
-                        fillAlpha = 0.8
-                        var scaledValue = (valueToPlot - minPropertyValue) / range
-                        scaledValue = Math.max(0, scaledValue)
-                        scaledValue = Math.min(1, scaledValue)
-                        var fillColor = {
-                          r: Math.round(scaledValue * 255),
-                          g: Math.round((1 - scaledValue) * 255),
-                          b: 0
-                        }
-                        var componentToHex = (component) => {
-                          var retVal = component.toString(16)
-                          return (retVal.length === 1) ? '0' + retVal : retVal
-                        }
-                        ctx.fillStyle = '#' + componentToHex(fillColor.r) + componentToHex(fillColor.g) + componentToHex(fillColor.b)
-                        var strokeColor = {
-                          r: Math.max(0, fillColor.r - 20),
-                          g: Math.max(0, fillColor.g - 20),
-                          b: Math.max(0, fillColor.b - 20)
-                        }
-                        ctx.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
-                      }
-                    }
-                    ctx.globalAlpha = fillAlpha
-                    var x0 = this.drawMargins + shape[0].x
-                    var y0 = this.drawMargins + shape[0].y
-                    ctx.beginPath()
-                    ctx.moveTo(x0, y0)
-                    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                      var x1 = this.drawMargins + shape[iCoord].x
-                      var y1 = this.drawMargins + shape[iCoord].y
-                      ctx.lineTo(x1, y1)
-                    }
-                    ctx.fill()
-                    // Then draw a polyline except for the lines that are along the tile extents
-                    var xPrev = shape[0].x
-                    var yPrev = shape[0].y
-                    ctx.beginPath()
-                    ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
-                    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                      var xNext = shape[iCoord].x
-                      var yNext = shape[iCoord].y
-                      var isAlongXMin = (xPrev === 0 && xNext === 0)
-                      var isAlongXMax = (xPrev === 256 && xNext === 256)
-                      var isAlongYMin = (yPrev === 0 && yNext === 0)
-                      var isAlongYMax = (yPrev === 256 && yNext === 256)
-                      if (!isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax) {
-                        // Segment is not along the tile extents. Draw it.
-                        ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
-                      }
-                      xPrev = xNext
-                      yPrev = yNext
-                      ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
-                    }
-                    ctx.stroke()
-                    ctx.globalAlpha = 1.0
-                  } else {
-                    // This is not a closed polygon. Draw all the lines
-                    var x0 = this.drawMargins + shape[0].x
-                    var y0 = this.drawMargins + shape[0].y
-                    ctx.beginPath()
-                    ctx.moveTo(x0, y0)
-                    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                      var x1 = this.drawMargins + shape[iCoord].x
-                      var y1 = this.drawMargins + shape[iCoord].y
-                      ctx.lineTo(x1, y1)
-                    }
-                    ctx.stroke()
-                  }
-                  break;
-              }
-            })
-          }
-        })
-        if (heatMapData.length > 0) {
-          var heatMapRenderer = simpleheat(canvas)
-          heatMapRenderer.data(heatMapData)
-          var maxValue = 1.0
-          if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
-            // Simply use the maximum value for the heatmap
-            maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
-          } else {
-            // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-            maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
-                       / Math.pow(2.0, zoom)
-          }
-          heatMapRenderer.max(maxValue)
-          heatMapRenderer.radius(20, 20)
-          heatMapRenderer.draw(0.0)
-        }
-        if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-          ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
-          // Draw a rectangle showing the tile (not the margins)
-          ctx.strokeStyle = "#000000"
-          ctx.lineWidth = 2
-          ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
-          // Show the tile coordinates that we pass to aro-service
-          ctx.fillStyle = '#000000'
-          ctx.strokeStyle = '#ffffff'
-          ctx.lineWidth = 4
-          ctx.font = "15px Arial"
-          ctx.textAlign="center"
-          ctx.textBaseline = "middle"
-          var coordString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
-          ctx.strokeText(coordString, canvas.width / 2, canvas.height /2)
-          ctx.fillText(coordString, canvas.width / 2, canvas.height /2)
-        }
-    })
+        var features = []
+        Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
+        var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
+        this.renderFeatures(canvas, features, entityImage, tileCoordinateString)
+      })
     return div
+  }
+
+  // Render a set of features on the map
+  renderFeatures(canvas, features, entityImage, tileCoordinateString) {
+    var ctx=canvas.getContext("2d");
+    ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
+    ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
+    ctx.lineWidth = 1
+    var heatMapData = []
+    var maxWeightForHeatMap = 1
+    for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+      // Parse the geometry out.
+      var feature = features[iFeature]
+      var geometry = feature.loadGeometry()
+      // console.log(JSON.stringify(geometry))
+      // Geometry is an array of shapes
+      var imageWidthBy2 = entityImage.width / 2
+      var imageHeightBy2 = entityImage.height / 2
+      geometry.forEach((shape) => {
+        // Shape is an array of coordinates
+        switch(shape.length) {
+          case 1:
+            // This is a point
+            var x = this.drawMargins + shape[0].x - imageWidthBy2
+            var y = this.drawMargins + shape[0].y - imageHeightBy2
+            if (feature.properties.weight) {
+              var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
+              heatMapData.push([x, y, adjustedWeight])
+              maxWeightForHeatMap = Math.max(maxWeightForHeatMap, +feature.properties.weight)
+            } else {
+              ctx.drawImage(entityImage, x, y)
+            }
+            break;
+
+          default:
+            // Check if this is a closed polygon
+            var firstPoint = shape[0]
+            var lastPoint = shape[shape.length - 1]
+            var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
+
+            if (isClosedPolygon) {
+              // First draw a filled polygon with the fill color
+              var fillAlpha = 0.7
+              if (this.layerProperties.data.drawingOptions.alphaThreshold) {
+                // We want to set the transparency based on a threshold provided in drawing options
+                var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
+                var minPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.minValue || 0.0
+                var maxPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.maxValue || 1.0
+                var range = maxPropertyValue - minPropertyValue
+                if (range === 0) {
+                  range = 1.0  // Prevent any divide-by-zeros
+                }
+                var valueToPlot = feature.properties[thresholdProperty]
+                if (feature.properties[thresholdProperty]) {
+                  // We are interested in features between the minPropertyValue and maxPropertyValue values
+                  var minAlpha = 0.2, maxAlpha = 0.8
+                  fillAlpha = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
+                  fillAlpha = Math.max(minAlpha, fillAlpha)
+                  fillAlpha = Math.min(maxAlpha, fillAlpha)
+                }
+                if (this.layerProperties.data.drawingOptions.blockHeatMap) {
+                  fillAlpha = 0.8
+                  var scaledValue = (valueToPlot - minPropertyValue) / range
+                  scaledValue = Math.max(0, scaledValue)
+                  scaledValue = Math.min(1, scaledValue)
+                  var fillColor = {
+                    r: Math.round(scaledValue * 255),
+                    g: Math.round((1 - scaledValue) * 255),
+                    b: 0
+                  }
+                  var componentToHex = (component) => {
+                    var retVal = component.toString(16)
+                    return (retVal.length === 1) ? '0' + retVal : retVal
+                  }
+                  ctx.fillStyle = '#' + componentToHex(fillColor.r) + componentToHex(fillColor.g) + componentToHex(fillColor.b)
+                  var strokeColor = {
+                    r: Math.max(0, fillColor.r - 20),
+                    g: Math.max(0, fillColor.g - 20),
+                    b: Math.max(0, fillColor.b - 20)
+                  }
+                  ctx.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
+                }
+              }
+              ctx.globalAlpha = fillAlpha
+              var x0 = this.drawMargins + shape[0].x
+              var y0 = this.drawMargins + shape[0].y
+              ctx.beginPath()
+              ctx.moveTo(x0, y0)
+              for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+                var x1 = this.drawMargins + shape[iCoord].x
+                var y1 = this.drawMargins + shape[iCoord].y
+                ctx.lineTo(x1, y1)
+              }
+              ctx.fill()
+              // Then draw a polyline except for the lines that are along the tile extents
+              var xPrev = shape[0].x
+              var yPrev = shape[0].y
+              ctx.beginPath()
+              ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+              for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+                var xNext = shape[iCoord].x
+                var yNext = shape[iCoord].y
+                var isAlongXMin = (xPrev === 0 && xNext === 0)
+                var isAlongXMax = (xPrev === 256 && xNext === 256)
+                var isAlongYMin = (yPrev === 0 && yNext === 0)
+                var isAlongYMax = (yPrev === 256 && yNext === 256)
+                if (!isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax) {
+                  // Segment is not along the tile extents. Draw it.
+                  ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
+                }
+                xPrev = xNext
+                yPrev = yNext
+                ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+              }
+              ctx.stroke()
+              ctx.globalAlpha = 1.0
+            } else {
+              // This is not a closed polygon. Draw all the lines
+              var x0 = this.drawMargins + shape[0].x
+              var y0 = this.drawMargins + shape[0].y
+              ctx.beginPath()
+              ctx.moveTo(x0, y0)
+              for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+                var x1 = this.drawMargins + shape[iCoord].x
+                var y1 = this.drawMargins + shape[iCoord].y
+                ctx.lineTo(x1, y1)
+              }
+              ctx.stroke()
+            }
+            break;
+        }
+      })
+    }
+    if (heatMapData.length > 0) {
+      var heatMapRenderer = simpleheat(canvas)
+      heatMapRenderer.data(heatMapData)
+      var maxValue = 1.0
+      if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
+        // Simply use the maximum value for the heatmap
+        maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
+      } else {
+        // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
+        maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
+                    / Math.pow(2.0, zoom)
+      }
+      heatMapRenderer.max(maxValue)
+      heatMapRenderer.radius(20, 20)
+      heatMapRenderer.draw(0.0)
+    }
+    if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
+      ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
+      // Draw a rectangle showing the tile (not the margins)
+      ctx.strokeStyle = "#000000"
+      ctx.lineWidth = 2
+      ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
+      // Show the tile coordinates that we pass to aro-service
+      ctx.fillStyle = '#000000'
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 4
+      ctx.font = "15px Arial"
+      ctx.textAlign="center"
+      ctx.textBaseline = "middle"
+      ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+      ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+    }
   }
 
   // Show/hide map tile extents
