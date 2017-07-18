@@ -17,7 +17,7 @@ class MapTileRenderer {
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
     // be such that the largest rendered feature (or heatmap) does not get clipped.
-    this.drawMargins = 50
+    this.drawMargins = 10
   }
 
   // This method is called by Google Maps. Render a canvas tile and send it back.
@@ -44,15 +44,22 @@ class MapTileRenderer {
       canvas.style.border = "2px dotted";
     }
 
-    this.renderTile(zoom, coord, 1, canvas)
-
+    // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
+    // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
+    // Ideally we could fire the two renders in parallel, but one some tiles, the 0-neighbour tile shows up
+    // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
+    // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
+    // back buffer of the canvas. For now, just render them in order.
+    this.renderTile(zoom, coord, false, canvas)                // 0-neighbour tile
+      .then(() => this.renderTile(zoom, coord, true, canvas))  // 1-neighbour tile
     return div
   }
 
   // Takes a set of promise results and renders the tile
-  renderTile(zoom, coord, numNeighbors, canvas) {
+  renderTile(zoom, coord, useNeighbouringTileData, canvas) {
 
     // Get tile data from service
+    var numNeighbors = useNeighbouringTileData ? 1 : 0
     var tileDataPromises = []
     var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
     var tileDataOffsets = []
@@ -69,65 +76,67 @@ class MapTileRenderer {
     }
     tileDataPromises.push(this.tileDataService.getEntityImageForLayer(this.layerProperties.id))
 
-    Promise.all(tileDataPromises)
-      .then((promiseResults) => {
-        var entityImage = promiseResults[promiseResults.length - 1]
+    // Return a promise that resolves when all the rendering is finished
+    return new Promise((resolve, reject) => {
+      Promise.all(tileDataPromises)
+        .then((promiseResults) => {
 
-        // Response will be an array of objects
-        var ctx=canvas.getContext("2d");
-        ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
-        ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
-        ctx.lineWidth = 1
-        var heatMapData = []
-        var maxWeightForHeatMap = 1
-        
-        for (var iResult = 0; iResult < promiseResults.length - 1; ++iResult) {
-          var layerToFeatures = promiseResults[iResult].layerToFeatures
-          var features = []
-          Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-          this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, maxWeightForHeatMap)
-        }
-        if (heatMapData.length > 0) {
-          var heatMapRenderer = simpleheat(canvas)
-          heatMapRenderer.data(heatMapData)
-          var maxValue = 1.0
-          if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
-            // Simply use the maximum value for the heatmap
-            maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
-          } else {
-            // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-            maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
-                        / Math.pow(2.0, zoom)
+          var entityImage = promiseResults[promiseResults.length - 1]
+          var ctx = canvas.getContext("2d")
+          ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
+          ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
+          ctx.lineWidth = 1
+          var heatMapData = []
+
+          for (var iResult = 0; iResult < promiseResults.length - 1; ++iResult) {
+            var layerToFeatures = promiseResults[iResult].layerToFeatures
+            var features = []
+            Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
+            this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData)
           }
-          heatMapRenderer.max(maxValue)
-          heatMapRenderer.radius(20, 20)
-          heatMapRenderer.draw(0.0)
-          ctx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-          ctx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-          ctx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-          ctx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-        }
-        if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-          ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
-          // Draw a rectangle showing the tile (not the margins)
-          ctx.strokeStyle = "#000000"
-          ctx.lineWidth = 2
-          ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
-          // Show the tile coordinates that we pass to aro-service
-          ctx.fillStyle = '#000000'
-          ctx.strokeStyle = '#ffffff'
-          ctx.lineWidth = 4
-          ctx.font = "15px Arial"
-          ctx.textAlign="center"
-          ctx.textBaseline = "middle"
-          ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-          ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-        }
+          if (heatMapData.length > 0) {
+            var heatMapRenderer = simpleheat(canvas)
+            heatMapRenderer.data(heatMapData)
+            var maxValue = 1.0
+            if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
+              // Simply use the maximum value for the heatmap
+              maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
+            } else {
+              // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
+              maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
+                          / Math.pow(2.0, zoom)
+            }
+            heatMapRenderer.max(maxValue)
+            heatMapRenderer.radius(20, 20)
+            heatMapRenderer.draw(0.0)
+            ctx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+            ctx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+            ctx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+            ctx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+          }
+          if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
+            ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
+            // Draw a rectangle showing the tile (not the margins)
+            ctx.strokeStyle = "#000000"
+            ctx.lineWidth = 2
+            ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
+            // Show the tile coordinates that we pass to aro-service
+            ctx.fillStyle = '#000000'
+            ctx.strokeStyle = '#ffffff'
+            ctx.lineWidth = 4
+            ctx.font = "15px Arial"
+            ctx.textAlign="center"
+            ctx.textBaseline = "middle"
+            ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+            ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+          }
+          resolve() // All rendering has finished
+      })
     })
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData, maxWeightForHeatMap) {
+  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
@@ -146,7 +155,6 @@ class MapTileRenderer {
             if (feature.properties.weight) {
               var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
-              maxWeightForHeatMap = Math.max(maxWeightForHeatMap, +feature.properties.weight)
             } else {
               ctx.drawImage(entityImage, x, y)
             }
