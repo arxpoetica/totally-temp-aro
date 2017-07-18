@@ -10,12 +10,12 @@ pp = pprint.PrettyPrinter(indent=4)
 parser = argparse.ArgumentParser(description="Parse env type for deleting a stack.")
 parser.add_argument('env_type', metavar='E', type=str)
 args = parser.parse_args()
-if (args.env_type.lower() != 'staging') and (args.env_type.lower() != 'qa'):
-    raise StandardError("Can only tear down staging stacks via the console.  Please specify 'staging' or go to AWS.")
+#if (args.env_type.lower() != 'staging') and (args.env_type.lower() != 'qa'):
+#    raise StandardError("Can only tear down staging stacks via the console.  Please specify 'staging' or go to AWS.")
 
 environment = args.env_type.upper()
 PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
-                     'PRODUCTION': 'P-ARO-',
+                     'PRODUCTION': 'P-ARO-APP-',
                      'STAGING': 'S-ARO-APP-'}
 branch_name = os.environ['CIRCLE_BRANCH']
 cloudformation_stack_name = PROJECT_BASE_NAME[environment] + branch_name
@@ -29,7 +29,7 @@ opsworks_client = boto3.client('opsworks', region_name='us-east-1')
 opsworks = session.resource('opsworks')
 
 
-print "You are attempting to delete QA stack %s with the following specs: \n" % cloudformation_stack_name
+print "You are attempting to delete stack %s with the following specs: \n" % cloudformation_stack_name
 pp.pprint(cloudformation_client.describe_stacks(StackName=cloudformation_stack_name))
 resp = raw_input("This can't be undone. Continue? (YES/no [no]):  ")
 
