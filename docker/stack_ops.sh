@@ -14,12 +14,7 @@ if [ $action = 'create' ] || [ $action = 'update' ]; then
         python $DIR/create_or_update_stack.py $env_type $action
     fi
 elif [ $action = 'delete' ]; then
-    if [ $env_type = 'prod' ]; then
-        echo "Sorry, production stacks cannot be deleted from the console. Please access AWS to delete."
-        exit 0
-    else
-        python $DIR/delete_staging_stack.py $env_type
-    fi
+    python $DIR/delete_staging_stack.py $env_type
 else
     echo "please specify either 'create', 'update', or 'delete'"
     exit 1  # exit with error
