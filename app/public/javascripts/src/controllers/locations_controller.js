@@ -4,10 +4,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
-    var mapZoom = map.getZoom()
-    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
-    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+    var transform = ''
+    if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_OFF') {
+      // The user has explicitly asked to display points, not aggregates
+      transform = 'select'
+    } else {
+      var mapZoom = map.getZoom()
+      // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+      // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+      transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+    }
+    return transform
   }
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
@@ -57,13 +64,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
           url = url.replace('${dataSourceId}', dataSourceId)
 
-          if (pointTransform === 'aggregate' && locationType.key.indexOf('business') >= 0) {
-            // For aggregated BUSINESS locations we want to merge them into one layer
+          if (pointTransform === 'aggregate') {
+            // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
             layersToMerge.urls.push(url)
             // Overwriting any previous iconUrl, will be ok as we are aggregating, so we dont use the icon
             layersToMerge.iconUrl = `${baseUrl}${locationType.iconUrl}`
           } else {
-            // Add this map layer individually
             oldMapLayers[mapLayerKey] = {
               url: [url],
               iconUrl: `${baseUrl}${locationType.iconUrl}`,
@@ -81,7 +87,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
     if (layersToMerge.urls.length > 0) {
       // We have some business layers that need to be merged into one
-      var mapLayerKey = 'aggregated_businesses'
+      var mapLayerKey = 'aggregated_locations'
       oldMapLayers[mapLayerKey] = {
         url: layersToMerge.urls,
         iconUrl: layersToMerge.iconUrl,
@@ -90,7 +96,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           strokeStyle: '#00ff00',
           fillStyle: '#a0ffa0'
         },
-        aggregateOptions: {
+        heatmapDebug: (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_DEBUG')
+      }
+      if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_ON') {
+        oldMapLayers[mapLayerKey].aggregateOptions= {
           aggregateEntityId: 'asdf',
           aggregateBy: 'weight',
           aggregateMode: 'simple_union'
@@ -130,6 +139,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   state.locationTypes.subscribe((newValue) => {
     $scope.derivedLocationTypes = newValue  // For the checkboxes to bind to
     updateMapLayers()
+  })
+
+  // Update map layers when the heatmap options change
+  state.viewSetting.selectedHeatmapOption
+    .subscribe((newValue) => updateMapLayers())
+
+  // Debugging information for heatmaps
+  $scope.debugClickedLocations = null
+  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    var clickedLocationsDescripton = ''
+    options.forEach((feature) => clickedLocationsDescripton += JSON.stringify(feature) + '\n')
+    $scope.debugClickedLocations = clickedLocationsDescripton
+    $scope.$apply()
   })
 
   $scope.map_tools = map_tools
