@@ -4,10 +4,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
-    var mapZoom = map.getZoom()
-    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
-    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
-    return (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+    var transform = ''
+    if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_OFF') {
+      // The user has explicitly asked to display points, not aggregates
+      transform = 'select'
+    } else {
+      var mapZoom = map.getZoom()
+      // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+      // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+      transform = (mapZoom > zoomThreshold) ? 'select' : 'aggregate'
+    }
+    return transform
   }
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
@@ -89,8 +96,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         drawingOptions: {
           strokeStyle: '#00ff00',
           fillStyle: '#a0ffa0'
-        },
-        aggregateOptions: {
+        }
+      }
+      if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_ON') {
+        oldMapLayers[mapLayerKey].aggregateOptions= {
           aggregateEntityId: 'asdf',
           aggregateBy: 'weight',
           aggregateMode: 'simple_union'
@@ -131,6 +140,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     $scope.derivedLocationTypes = newValue  // For the checkboxes to bind to
     updateMapLayers()
   })
+
+  // Update map layers when the heatmap options change
+  state.viewSetting.selectedHeatmapOption
+    .subscribe((newValue) => updateMapLayers())
 
   $scope.map_tools = map_tools
   $scope.selected_tool = null
