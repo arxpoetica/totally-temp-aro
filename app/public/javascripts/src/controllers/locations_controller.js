@@ -69,6 +69,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             layersToMerge.urls.push(url)
             // Overwriting any previous iconUrl, will be ok as we are aggregating, so we dont use the icon
             layersToMerge.iconUrl = `${baseUrl}${locationType.iconUrl}`
+          } else {
+            oldMapLayers[mapLayerKey] = {
+              url: [url],
+              iconUrl: `${baseUrl}${locationType.iconUrl}`,
+              isVisible: true,
+              drawingOptions: {
+                strokeStyle: '#00ff00',
+                fillStyle: '#a0ffa0'
+              }
+            }
+            createdMapLayerKeys.add(mapLayerKey)
           }
         }
       })
