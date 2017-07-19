@@ -64,23 +64,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
           url = url.replace('${dataSourceId}', dataSourceId)
 
-          if (pointTransform === 'aggregate' && locationType.key.indexOf('business') >= 0) {
-            // For aggregated BUSINESS locations we want to merge them into one layer
+          if (pointTransform === 'aggregate') {
+            // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
             layersToMerge.urls.push(url)
             // Overwriting any previous iconUrl, will be ok as we are aggregating, so we dont use the icon
             layersToMerge.iconUrl = `${baseUrl}${locationType.iconUrl}`
-          } else {
-            // Add this map layer individually
-            oldMapLayers[mapLayerKey] = {
-              url: [url],
-              iconUrl: `${baseUrl}${locationType.iconUrl}`,
-              isVisible: true,
-              drawingOptions: {
-                strokeStyle: '#00ff00',
-                fillStyle: '#a0ffa0'
-              }
-            }
-            createdMapLayerKeys.add(mapLayerKey)
           }
         }
       })
@@ -88,7 +76,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
     if (layersToMerge.urls.length > 0) {
       // We have some business layers that need to be merged into one
-      var mapLayerKey = 'aggregated_businesses'
+      var mapLayerKey = 'aggregated_locations'
       oldMapLayers[mapLayerKey] = {
         url: layersToMerge.urls,
         iconUrl: layersToMerge.iconUrl,
