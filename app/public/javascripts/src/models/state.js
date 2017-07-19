@@ -134,8 +134,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   })
 
-  service.hackRaiseEvent = (feature) => {
-    $rootScope.$broadcast('map_layer_clicked_feature', feature, {})
+  service.hackRaiseEvent = (features) => {
+    $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
 
   // Sets (or adds) a map layer with the given key
@@ -171,7 +171,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     ],
     selectedHeatmapOption: null
   }
-  service.viewSetting.selectedHeatmapOption = new Rx.BehaviorSubject(service.viewSetting.heatmapOptions[1])
+  service.viewSetting.selectedHeatmapOption = new Rx.BehaviorSubject(service.viewSetting.heatmapOptions[0])
 
   // Default data sources - define once
   service.defaultDataSources = [

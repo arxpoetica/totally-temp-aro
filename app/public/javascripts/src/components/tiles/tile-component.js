@@ -284,6 +284,7 @@ class MapTileRenderer {
           var imageWidthBy2 = entityImage.width / 2
           var imageHeightBy2 = entityImage.height / 2
 
+          var hitFeatures = []
           Object.keys(layerToFeatures).forEach((layerKey) => {
             var features = layerToFeatures[layerKey]
             // console.log('layer has ' + layer.length + ' features')
@@ -302,9 +303,7 @@ class MapTileRenderer {
                         && xWithinTile <= shape[0].x + imageWidthBy2
                         && yWithinTile >= shape[0].y - imageHeightBy2
                         && yWithinTile <= shape[0].y + imageHeightBy2) {
-                          console.log('FEATURE DETECTED')
-                          console.log(features[iFeature].properties)
-                          resolve(features[iFeature].properties)
+                          hitFeatures.push(features[iFeature].properties)
                         }
                     break;
 
@@ -315,7 +314,7 @@ class MapTileRenderer {
               })
             }
           })
-          resolve(null)
+          resolve(hitFeatures)
         })
     })
   }
@@ -380,14 +379,12 @@ class TileComponentController {
         })
         Promise.all(hitPromises)
           .then((results) => {
-            var hitFeature = null
+            var hitFeatures = []
             results.forEach((result) => {
-              if (result && result.location_id) {
-                hitFeature = result
-              }
+              hitFeatures = hitFeatures.concat(result)
             })
-            if (hitFeature && hitFeature.location_id) {
-              state.hackRaiseEvent(hitFeature)
+            if (hitFeatures.length > 0) {
+              state.hackRaiseEvent(hitFeatures)
             }
           })
 

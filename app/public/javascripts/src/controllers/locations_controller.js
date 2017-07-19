@@ -146,6 +146,15 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   state.viewSetting.selectedHeatmapOption
     .subscribe((newValue) => updateMapLayers())
 
+  // Debugging information for heatmaps
+  $scope.debugClickedLocations = null
+  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    var clickedLocationsDescripton = ''
+    options.forEach((feature) => clickedLocationsDescripton += JSON.stringify(feature) + '\n')
+    $scope.debugClickedLocations = clickedLocationsDescripton
+    $scope.$apply()
+  })
+
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [

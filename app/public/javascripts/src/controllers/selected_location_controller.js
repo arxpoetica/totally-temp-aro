@@ -39,13 +39,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   }
 
   $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
-    // if ((map_layer.type !== 'locations' && map_layer.type !== 'selected_locations' && map_layer.type !== 'towers') ||
-      // map_tools.is_visible('target_builder')) return
-    // var feature = options.feature
-    // var id = feature.getProperty('id')
-    var id = options.location_id
-    openLocation(id)
-    tracker.track('Location selected')
+    if (options.length > 0 && options[0].location_id) {
+      var id = options[0].location_id
+      openLocation(id)
+      tracker.track('Location selected')
+    }
   })
 
   $rootScope.$on('openLocation', (event, id) => {
