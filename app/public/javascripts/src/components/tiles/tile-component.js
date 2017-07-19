@@ -92,9 +92,9 @@ class MapTileRenderer {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData)
+            this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
           }
-          if (heatMapData.length > 0) {
+          if (heatMapData.length > 0 && !this.layerProperties.data.heatmapDebug) {
             var heatMapRenderer = simpleheat(canvas)
             heatMapRenderer.data(heatMapData)
             var maxValue = 1.0
@@ -136,12 +136,11 @@ class MapTileRenderer {
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData) {
+  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData, heatmapDebug) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
       var geometry = feature.loadGeometry()
-      // console.log(JSON.stringify(geometry))
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage.width / 2
       var imageHeightBy2 = entityImage.height / 2
@@ -152,10 +151,11 @@ class MapTileRenderer {
             // This is a point
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-            if (feature.properties.weight) {
+            if (feature.properties.weight && !heatmapDebug) {
               var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
             } else {
+              // This could be because we are zoomed in, or because we want to debug the heatmap rendering
               ctx.drawImage(entityImage, x, y)
             }
             break;

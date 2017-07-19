@@ -96,7 +96,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         drawingOptions: {
           strokeStyle: '#00ff00',
           fillStyle: '#a0ffa0'
-        }
+        },
+        heatmapDebug: (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_DEBUG')
       }
       if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_ON') {
         oldMapLayers[mapLayerKey].aggregateOptions= {
