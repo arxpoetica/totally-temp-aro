@@ -151,8 +151,10 @@ class MapTileRenderer {
             // This is a point
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-            if (feature.properties.weight && !heatmapDebug) {
-              var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
+            // Aggregation property - first try entity_count, then weight. Note that both could be null
+            var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+            if (aggregationProperty && !heatmapDebug) {
+              var adjustedWeight = Math.pow(+aggregationProperty, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
             } else {
               // This could be because we are zoomed in, or because we want to debug the heatmap rendering
