@@ -94,7 +94,7 @@ class MapTileRenderer {
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
             this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
           }
-          if (heatMapData.length > 0 && !this.layerProperties.data.heatmapDebug) {
+          if (heatMapData.length > 0 && this.layerProperties.data.heatmapDebug === 'HEATMAP_ON') {
             var heatMapRenderer = simpleheat(canvas)
             heatMapRenderer.data(heatMapData)
             var maxValue = 1.0
@@ -152,8 +152,11 @@ class MapTileRenderer {
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
             // Aggregation property - first try entity_count, then weight. Note that both could be null
-            var aggregationProperty = feature.properties.entity_count || feature.properties.weight
-            if (aggregationProperty && !heatmapDebug) {
+            var aggregationProperty = null
+            if (heatmapDebug === 'HEATMAP_ON') {
+              aggregationProperty = feature.properties.entity_count || feature.properties.weight
+            }
+            if (aggregationProperty && heatmapDebug === 'HEATMAP_ON') {
               var adjustedWeight = Math.pow(+aggregationProperty, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
             } else {

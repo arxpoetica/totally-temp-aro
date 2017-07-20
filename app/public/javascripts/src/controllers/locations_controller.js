@@ -77,7 +77,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
               drawingOptions: {
                 strokeStyle: '#00ff00',
                 fillStyle: '#a0ffa0'
-              }
+              },
+              heatmapDebug: state.viewSetting.selectedHeatmapOption.getValue().id
             }
             createdMapLayerKeys.add(mapLayerKey)
           }
@@ -96,7 +97,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           strokeStyle: '#00ff00',
           fillStyle: '#a0ffa0'
         },
-        heatmapDebug: (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_DEBUG')
+        heatmapDebug: state.viewSetting.selectedHeatmapOption.getValue().id
       }
       if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_ON') {
         oldMapLayers[mapLayerKey].aggregateOptions= {
