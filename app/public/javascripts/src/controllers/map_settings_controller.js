@@ -4,16 +4,19 @@ app.controller('map_settings_controller', ['$scope','$rootScope','map_tools','st
   $scope.heatmapOn = true;
   $scope.state = state
 
-  state.viewSetting.selectedFiberOption = state.viewFiberOptions[0]
+  // Heatmap options
+  $scope.selectedHeatmapOption = null
 
-  $scope.toggleHeatmap = ()=>{
-    var locationsLayer = state.locations_layer;
-    if (!$scope.heatmapOn) {
-      locationsLayer.setThreshold(0)
-    } else {
-      locationsLayer.setThreshold(15)
-    }
+  // Data flow from state to controller
+  state.viewSetting.selectedHeatmapOption
+    .subscribe((newValue) => $scope.selectedHeatmapOption = newValue)
+
+  // Data flow from controller to state
+  $scope.onSelectedHeatmapOptionChanged = () => {
+    state.viewSetting.selectedHeatmapOption.next($scope.selectedHeatmapOption)
   }
+
+  state.viewSetting.selectedFiberOption = state.viewFiberOptions[0]
 
   $scope.fiberOptionChanged = () => {
     $rootScope.$broadcast("map_setting_changed" , {type : "fiber_option" , setting :  state.viewSetting.selectedFiberOption });
