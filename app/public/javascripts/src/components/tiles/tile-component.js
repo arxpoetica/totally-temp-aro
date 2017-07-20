@@ -210,24 +210,24 @@ class MapTileRenderer {
                 }
               }
               ctx.globalAlpha = fillAlpha
-              var x0 = this.drawMargins + shape[0].x
-              var y0 = this.drawMargins + shape[0].y
+              var x0 = this.drawMargins + geometryOffset.x + shape[0].x
+              var y0 = this.drawMargins + geometryOffset.y + shape[0].y
               ctx.beginPath()
               ctx.moveTo(x0, y0)
               for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var x1 = this.drawMargins + shape[iCoord].x
-                var y1 = this.drawMargins + shape[iCoord].y
+                var x1 = this.drawMargins + geometryOffset.x + shape[iCoord].x
+                var y1 = this.drawMargins + geometryOffset.y + shape[iCoord].y
                 ctx.lineTo(x1, y1)
               }
               ctx.fill()
               // Then draw a polyline except for the lines that are along the tile extents
-              var xPrev = shape[0].x
-              var yPrev = shape[0].y
+              var xPrev = shape[0].x + geometryOffset.x
+              var yPrev = shape[0].y + geometryOffset.y
               ctx.beginPath()
               ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
               for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var xNext = shape[iCoord].x
-                var yNext = shape[iCoord].y
+                var xNext = shape[iCoord].x + geometryOffset.x
+                var yNext = shape[iCoord].y + geometryOffset.y
                 var isAlongXMin = (xPrev === 0 && xNext === 0)
                 var isAlongXMax = (xPrev === 256 && xNext === 256)
                 var isAlongYMin = (yPrev === 0 && yNext === 0)
@@ -244,13 +244,13 @@ class MapTileRenderer {
               ctx.globalAlpha = 1.0
             } else {
               // This is not a closed polygon. Draw all the lines
-              var x0 = this.drawMargins + shape[0].x
-              var y0 = this.drawMargins + shape[0].y
+              var x0 = this.drawMargins + shape[0].x + geometryOffset.x
+              var y0 = this.drawMargins + shape[0].y + geometryOffset.y
               ctx.beginPath()
               ctx.moveTo(x0, y0)
               for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var x1 = this.drawMargins + shape[iCoord].x
-                var y1 = this.drawMargins + shape[iCoord].y
+                var x1 = this.drawMargins + shape[iCoord].x + geometryOffset.x
+                var y1 = this.drawMargins + shape[iCoord].y + geometryOffset.y
                 ctx.lineTo(x1, y1)
               }
               ctx.stroke()
