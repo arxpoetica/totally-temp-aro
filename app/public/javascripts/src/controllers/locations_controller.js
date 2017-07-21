@@ -78,7 +78,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                 strokeStyle: '#00ff00',
                 fillStyle: '#a0ffa0'
               },
-              heatmapDebug: state.viewSetting.selectedHeatmapOption.getValue().id
+              heatmapDebug: 'HEATMAP_OFF' // Always turn heatmap off when in 'select' mode
             }
             createdMapLayerKeys.add(mapLayerKey)
           }
