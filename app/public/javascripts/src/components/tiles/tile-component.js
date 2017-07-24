@@ -92,9 +92,9 @@ class MapTileRenderer {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData)
+            this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
           }
-          if (heatMapData.length > 0) {
+          if (heatMapData.length > 0 && !this.layerProperties.data.heatmapDebug) {
             var heatMapRenderer = simpleheat(canvas)
             heatMapRenderer.data(heatMapData)
             var maxValue = 1.0
@@ -136,12 +136,11 @@ class MapTileRenderer {
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData) {
+  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData, heatmapDebug) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
       var geometry = feature.loadGeometry()
-      // console.log(JSON.stringify(geometry))
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage.width / 2
       var imageHeightBy2 = entityImage.height / 2
@@ -152,10 +151,13 @@ class MapTileRenderer {
             // This is a point
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-            if (feature.properties.weight) {
-              var adjustedWeight = Math.pow(+feature.properties.weight, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
+            // Aggregation property - first try entity_count, then weight. Note that both could be null
+            var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+            if (aggregationProperty && !heatmapDebug) {
+              var adjustedWeight = Math.pow(+aggregationProperty, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
             } else {
+              // This could be because we are zoomed in, or because we want to debug the heatmap rendering
               ctx.drawImage(entityImage, x, y)
             }
             break;
@@ -210,24 +212,24 @@ class MapTileRenderer {
                 }
               }
               ctx.globalAlpha = fillAlpha
-              var x0 = this.drawMargins + shape[0].x
-              var y0 = this.drawMargins + shape[0].y
+              var x0 = this.drawMargins + geometryOffset.x + shape[0].x
+              var y0 = this.drawMargins + geometryOffset.y + shape[0].y
               ctx.beginPath()
               ctx.moveTo(x0, y0)
               for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var x1 = this.drawMargins + shape[iCoord].x
-                var y1 = this.drawMargins + shape[iCoord].y
+                var x1 = this.drawMargins + geometryOffset.x + shape[iCoord].x
+                var y1 = this.drawMargins + geometryOffset.y + shape[iCoord].y
                 ctx.lineTo(x1, y1)
               }
               ctx.fill()
               // Then draw a polyline except for the lines that are along the tile extents
-              var xPrev = shape[0].x
-              var yPrev = shape[0].y
+              var xPrev = shape[0].x + geometryOffset.x
+              var yPrev = shape[0].y + geometryOffset.y
               ctx.beginPath()
               ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
               for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var xNext = shape[iCoord].x
-                var yNext = shape[iCoord].y
+                var xNext = shape[iCoord].x + geometryOffset.x
+                var yNext = shape[iCoord].y + geometryOffset.y
                 var isAlongXMin = (xPrev === 0 && xNext === 0)
                 var isAlongXMax = (xPrev === 256 && xNext === 256)
                 var isAlongYMin = (yPrev === 0 && yNext === 0)
@@ -244,13 +246,13 @@ class MapTileRenderer {
               ctx.globalAlpha = 1.0
             } else {
               // This is not a closed polygon. Draw all the lines
-              var x0 = this.drawMargins + shape[0].x
-              var y0 = this.drawMargins + shape[0].y
+              var x0 = this.drawMargins + shape[0].x + geometryOffset.x
+              var y0 = this.drawMargins + shape[0].y + geometryOffset.y
               ctx.beginPath()
               ctx.moveTo(x0, y0)
               for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var x1 = this.drawMargins + shape[iCoord].x
-                var y1 = this.drawMargins + shape[iCoord].y
+                var x1 = this.drawMargins + shape[iCoord].x + geometryOffset.x
+                var y1 = this.drawMargins + shape[iCoord].y + geometryOffset.y
                 ctx.lineTo(x1, y1)
               }
               ctx.stroke()
@@ -284,6 +286,7 @@ class MapTileRenderer {
           var imageWidthBy2 = entityImage.width / 2
           var imageHeightBy2 = entityImage.height / 2
 
+          var hitFeatures = []
           Object.keys(layerToFeatures).forEach((layerKey) => {
             var features = layerToFeatures[layerKey]
             // console.log('layer has ' + layer.length + ' features')
@@ -302,9 +305,7 @@ class MapTileRenderer {
                         && xWithinTile <= shape[0].x + imageWidthBy2
                         && yWithinTile >= shape[0].y - imageHeightBy2
                         && yWithinTile <= shape[0].y + imageHeightBy2) {
-                          console.log('FEATURE DETECTED')
-                          console.log(features[iFeature].properties)
-                          resolve(features[iFeature].properties)
+                          hitFeatures.push(features[iFeature].properties)
                         }
                     break;
 
@@ -315,7 +316,7 @@ class MapTileRenderer {
               })
             }
           })
-          resolve(null)
+          resolve(hitFeatures)
         })
     })
   }
@@ -380,14 +381,12 @@ class TileComponentController {
         })
         Promise.all(hitPromises)
           .then((results) => {
-            var hitFeature = null
+            var hitFeatures = []
             results.forEach((result) => {
-              if (result && result.location_id) {
-                hitFeature = result
-              }
+              hitFeatures = hitFeatures.concat(result)
             })
-            if (hitFeature && hitFeature.location_id) {
-              state.hackRaiseEvent(hitFeature)
+            if (hitFeatures.length > 0) {
+              state.hackRaiseEvent(hitFeatures)
             }
           })
 
