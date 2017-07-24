@@ -138,6 +138,18 @@ module.exports = class Location {
 	}
 
   /*
+   * Returns a list of location IDs that are selected for this plan and the given viewport
+   */
+  static findSelectedLocationIds(planId) {
+    var sql = `
+      SELECT location_id
+      FROM client.plan_targets
+      WHERE plan_id=$1
+    `
+    return database.query(sql, [planId])
+  }
+
+  /*
   * Returns the selected locations with businesses and households on them
   */
   static findSelected (plan_id, viewport) {

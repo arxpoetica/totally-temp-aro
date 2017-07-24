@@ -71,7 +71,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
     })
 
-  
   api.post('/locations/visible/:plan_id', (request, response, next) => {
     var filters = {}
     filters['uploaded_datasources'] = request.body.uploaded_datasources || []
@@ -86,6 +85,13 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     models.Location.findSelected(plan_id, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/locations/:planId/selectedLocationIds', (request, response, next) => {
+    var planId = +request.params.planId
+    models.Location.findSelectedLocationIds(planId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

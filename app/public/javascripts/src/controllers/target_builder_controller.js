@@ -31,6 +31,27 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
 
+  function loadTargets () {
+    $http.get(`/locations/${$scope.plan.id}/targets`)
+      .then((response) => {
+        $scope.targets = response.data.targets
+        $scope.targetsTotal = response.data.total
+        if ($scope.targetsTotal > 0) optimization.setMode('targets')
+      })
+  }
+
+  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    if (options) {
+      // Do this in two steps: First, immediately set the selected location ids so we get instant feedback
+      var newIds = new Set()
+      state.selectedLocations.getValue().forEach((setItem) => newIds.add(setItem))
+      options.forEach((option) => newIds.add(+option.location_id))
+      state.selectedLocations.next(newIds)
+      // Second, save add these locations to the database and then reload them so that we are in sync with the db
+      loadTargets()
+    }
+  })
+
   $rootScope.$on('map_tool_changed_visibility', (event, toolName) => {
     if (toolName === map_tools.TOOL_IDS.TARGET_BUILDER && map_tools.is_visible(toolName)) {
       state.optimizationOptions.uiAlgorithms = [
@@ -196,15 +217,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   function calculateShowHeatmap () {
     $scope.showHeatmapAlert = $scope.locationsHeatmap && ($scope.selectedTool === 'single' || $scope.selectedTool === 'polygon')
-  }
-
-  function loadTargets () {
-    $http.get(`/locations/${$scope.plan.id}/targets`)
-      .then((response) => {
-        $scope.targets = response.data.targets
-        $scope.targetsTotal = response.data.total
-        if ($scope.targetsTotal > 0) optimization.setMode('targets')
-      })
   }
 
   function planChanged (e, plan) {

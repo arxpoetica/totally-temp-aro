@@ -345,6 +345,22 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.locationTypes = new Rx.BehaviorSubject([])
   service.constructionSites = new Rx.BehaviorSubject([])
 
+  // Hold a map of selected locations
+  service.selectedLocationIcon = '/images/map_icons/aro/target.png'
+  service.selectedLocations = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedLocations = () => {
+    if (service.planId !== service.INVALID_PLAN_ID) {
+      $http.get(`/locations/${service.planId}/selectedLocationIds`)
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            var selectedLocationsMap = new Set()
+            result.data.forEach((selectedLocationId) => selectedLocationsMap.add(+selectedLocationId.location_id))
+            service.selectedLocations.next(selectedLocationsMap)
+          }
+        })
+    }
+  }
+
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
 
@@ -369,44 +385,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
     service.locationTypes.next(locationTypes)
     service.constructionSites.next(angular.copy(locationTypes))
-
-    // ****************** START old (V1) location Types implementation
-    // Iterate over the business segments in the configuration
-    if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
-      Object.keys(configuration.locationCategories.business.segments).forEach((key) => {
-        var segment = configuration.locationCategories.business.segments[key];
-        if (segment.show) {
-          service.locationTypesV1.push({type: 'business', key: key, label: segment.label, checked: false, icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png'
-          })
-        }
-      })
-    }
-
-    // Show residential/household units
-    if (configuration && configuration.locationCategories && configuration.locationCategories.household) {
-      if (configuration.locationCategories.household.show) {
-        service.locationTypesV1.push({ type: 'household',
-          key: 'household',
-          label: configuration.locationCategories.household.label,
-          checked: false,
-          icon: configuration.locationCategories.mapIconFolder + 'households_default.png'
-        })
-      }
-    }
-
-    // Show Towers
-    if (configuration && configuration.locationCategories && configuration.locationCategories.celltower) {
-      if (configuration.locationCategories.celltower.show) {
-        service.locationTypesV1.push({
-          type: 'celltower',
-          key: 'celltower',
-          label: configuration.locationCategories.celltower.label,
-          checked: false,
-          icon: configuration.locationCategories.mapIconFolder + 'tower.png'
-        })
-      }
-    }
-    // ****************** END old (V1) location Types implementation
 
     // Network equipment layer
     service.networkEquipments = []
@@ -516,6 +494,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         state = {}
       }
     }
+    service.reloadSelectedLocations()
   }
 
   service.set = (attr, value) => {
