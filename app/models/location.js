@@ -400,22 +400,28 @@ module.exports = class Location {
       })
       .then(() => {
         var sql = `
-          SELECT address, ST_AsGeojson(geog)::json AS geog,
-            (SELECT ST_Distance(existing_fiber.geom::geography, locations.geog)
-              FROM client.existing_fiber
-              ORDER BY existing_fiber.geom <#> locations.geom ASC
-              LIMIT 1
+          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,
+            (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
+              FROM (
+                SELECT geom
+                FROM client.existing_fiber
+                ORDER BY existing_fiber.geom <#> locations.geom ASC
+                LIMIT 10
+              ) as ef_closest_fibers
             ) AS distance_to_client_fiber,
-            (SELECT ST_Distance(fr.geom::geography, locations.geog)
-              FROM client.fiber_route fr
-              WHERE fr.plan_id IN (
-                (SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
-                  (SELECT id FROM client.active_plan WHERE parent_plan_id=$2)
-                ))
-              )
-              ORDER BY fr.geom <#> locations.geom ASC
-              LIMIT 1
-            ) AS distance_to_planned_network
+            (SELECT min(ST_Distance(fr_closest_fibers.geom::geography, locations.geog))
+              FROM (
+                SELECT geom
+                FROM client.fiber_route fr
+                WHERE fr.plan_id IN (
+                  (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+	                  (SELECT id FROM client.plan WHERE parent_plan_id=$2)
+	                ))
+                  ORDER BY fr.geom <#> locations.geom ASC
+                  LIMIT 10
+                )
+              ) as fr_closest_fibers
+            ) as distance_to_planned_network
           FROM locations WHERE id=$1
         `
         return database.findOne(sql, [location_id, plan_id])
