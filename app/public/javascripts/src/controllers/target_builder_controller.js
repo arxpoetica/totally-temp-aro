@@ -42,13 +42,26 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
     if (options) {
-      // Do this in two steps: First, immediately set the selected location ids so we get instant feedback
-      var newIds = new Set()
-      state.selectedLocations.getValue().forEach((setItem) => newIds.add(setItem))
-      options.forEach((option) => newIds.add(+option.location_id))
-      state.selectedLocations.next(newIds)
-      // Second, save add these locations to the database and then reload them so that we are in sync with the db
-      loadTargets()
+      // Get a list of ids to add and remove
+      var existingIds = state.selectedLocations.getValue()
+      var idsToAdd = new Set(), idsToRemove = new Set()
+      options.forEach((option) => {
+        if (existingIds.has(+option.location_id)) {
+          idsToRemove.add(+option.location_id)
+        } else {
+          idsToAdd.add(+option.location_id)
+        }
+      })
+      // Make these changes to the database, then reload targets from the DB
+      var addRemoveTargetPromises = [
+        $http.post(`/network_plan/${state.planId}/addTargets`, { locationIds: Array.from(idsToAdd) }),
+        $http.post(`/network_plan/${state.planId}/removeTargets`, { locationIds: Array.from(idsToRemove) })
+      ]
+      Promise.all(addRemoveTargetPromises)
+        .then((response) => {
+          // Reload selected locations from database
+          state.reloadSelectedLocations()
+        })
     }
   })
 
