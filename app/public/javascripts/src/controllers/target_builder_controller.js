@@ -291,6 +291,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   drawingManager.addListener('overlaycomplete', (e) => {
     var overlay = e.overlay
+    state.requestPolygonSelect.next({
+      coords: overlay.getPath().getArray()
+    })
     if (e.type !== drawingManager.getDrawingMode()) {
       return overlay.setMap(null)
     }

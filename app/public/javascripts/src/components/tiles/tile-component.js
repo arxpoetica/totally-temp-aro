@@ -3,8 +3,9 @@
  */
 'use strict'
 
-// Important: RxJS must have been included using browserify before this point
+// Browserify includes
 var Rx = require('rxjs')
+var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
@@ -278,6 +279,40 @@ class MapTileRenderer {
     this.layerProperties.data.mapTileOptions = mapTileOptions
   }
 
+  // Gets all features that are within a given polygon
+  getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
+
+    return new Promise((resolve, reject) => {
+    // Get tile data
+    this.tileDataService.getTileData(this.layerProperties.data.url, tileZoom, tileX, tileY)
+      .then((result) => {
+
+        var layerToFeatures = result.layerToFeatures
+        var hitFeatures = []
+        Object.keys(layerToFeatures).forEach((layerKey) => {
+          var features = layerToFeatures[layerKey]
+          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+            var feature = features[iFeature]
+            var geometry = feature.loadGeometry()
+            geometry.forEach((shape) => {
+              if (shape.length === 1) {
+                // Only support points for now
+                var locationCoords = [shape[0].x, shape[0].y]
+                var isPointInPolygon = pointInPolygon(locationCoords, polygonCoords)
+                if (isPointInPolygon) {
+                  hitFeatures.push({
+                    location_id: feature.properties.location_id
+                  })
+                }
+              }
+            })
+          }
+        })
+        resolve(hitFeatures)
+      })
+    })
+  }
+
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
 
@@ -375,6 +410,55 @@ class TileComponentController {
     })
     this.TILE_SIZE = 256
 
+    this.state.requestPolygonSelect
+      .subscribe((args) => {
+        if (!this.mapRef || !args.coords) {
+          return
+        }
+        console.log('Polygon selection requested')
+        console.log(args)
+
+        var mapBounds = this.mapRef.getBounds()
+        var neCorner = mapBounds.getNorthEast()
+        var swCorner = mapBounds.getSouthWest()
+        var zoom = this.mapRef.getZoom()
+        // Note the swap from NE/SW to NW/SE when finding tile coordinates
+        var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+        var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+
+        // Loop through all visible tiles
+        var pointInPolyPromises = []
+        for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
+          for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
+
+            // Convert lat lng coordinates into pixel coordinates relative to this tile
+            var tileCoords = { x: xTile, y: yTile }
+            var convertedPixelCoords = []
+            args.coords.forEach((latLng) => {
+              var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
+              convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
+            })
+            console.log(convertedPixelCoords)
+
+            // Get the locations from this tile that are in the polygon
+            this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+              pointInPolyPromises.push(mapOverlay.getPointsInPolygon(zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
+            })
+          }
+        }
+        Promise.all(pointInPolyPromises)
+          .then((results) => {
+            var selectedLocationIds = new Set()
+            results.forEach((result) => {
+              result.forEach((locationObj) => selectedLocationIds.add(locationObj.location_id))
+            })
+            var selectedLocations = []
+            selectedLocationIds.forEach((id) => selectedLocations.push({ location_id: id }))
+            state.hackRaiseEvent(selectedLocations)
+          })
+
+      })
+
     $document.ready(() => {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
       // but don't know how to set it from markup
@@ -392,18 +476,11 @@ class TileComponentController {
         var tileCoords = this.getTileCoordinates(zoom, lat, lng)
 
         // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-        // 1. Get the top left coordinates of the tile in lat lngs
-        var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
-        // 2. Convert to pixels
-        var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
-        // 3. Convert the clicked lat lng to pixels
-        var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
-        var xWithinTile = clickedPointPixels.x - nwCornerPixels.x
-        var yWithinTile = clickedPointPixels.y - nwCornerPixels.y
+        var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
 
         var hitPromises = []
         this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, xWithinTile, yWithinTile))
+          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
         })
         Promise.all(hitPromises)
           .then((results) => {
@@ -418,6 +495,21 @@ class TileComponentController {
 
       })
     })
+  }
+
+  // Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
+  getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
+    // 1. Get the top left coordinates of the tile in lat lngs
+    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
+    // 2. Convert to pixels
+    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
+    // 3. Convert the clicked lat lng to pixels
+    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+
+    return {
+      x: clickedPointPixels.x - nwCornerPixels.x,
+      y: clickedPointPixels.y - nwCornerPixels.y
+    }
   }
 
   // Returns the tile coordinates (x, y) for a given lat/long and zoom level

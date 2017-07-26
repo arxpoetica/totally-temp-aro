@@ -139,6 +139,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
 
+  // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
+  service.requestPolygonSelect = new Rx.BehaviorSubject({})
+
   // Sets (or adds) a map layer with the given key
   service.setMapLayer = (layerKey, data) => {
     // Get a copy of the current maplayers. A little Redux-ey
