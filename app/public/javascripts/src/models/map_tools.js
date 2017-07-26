@@ -89,13 +89,14 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
   }
 
   tools.TOOL_IDS = {
+    LOCATIONS: 'locations',
     AREA_NETWORK_PLANNING: 'area_network_planning',
     TARGET_BUILDER: 'target_builder'
   }
 
   tools.available_tools = [
     {
-      id: 'locations',
+      id: tools.TOOL_IDS.LOCATIONS,
       name: 'Locations',
       short_name: 'L',
       icon: 'fa fa-building fa-2x'

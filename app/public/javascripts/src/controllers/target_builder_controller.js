@@ -41,6 +41,9 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   }
 
   $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    if (!map_tools.is_visible(map_tools.TOOL_IDS.TARGET_BUILDER)) {
+      return  // Nothing to do if the target builder is not being shown
+    }
     if (options) {
       // Get a list of ids to add and remove
       var existingIds = state.selectedLocations.getValue()
