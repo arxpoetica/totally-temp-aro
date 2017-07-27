@@ -10,7 +10,7 @@
 
     <br>
     <p><strong>Competitors</strong></p>
-    <input type="checkbox"
+    <input type="checkbox" class="checkboxfill"
            ng-model="planState.competition.useAllCompetitors"
            ng-change="onUseAllCompetitorsChanged()"
     > Use All Competitors
@@ -33,12 +33,12 @@
 
     <br>
     <p><strong>Survey Data</strong></p>
-    <input type="checkbox" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> NBM
-    <input type="checkbox" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()"> Geotel
+    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> NBM
+    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()"> Geotel
 
     <br>
     <p><strong>Survey Data</strong></p>
-    <input type="checkbox"
+    <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showCensusBlocks"
            ng-click="toggleShowSurveyData()">
     Census Blocks
@@ -46,12 +46,12 @@
     <br>
     <br>
     <p><strong>Fiber Route Data</strong></p>
-    <input type="checkbox"
+    <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showFiberRoutes"
            ng-click="toggleShowFiberRoutesData()">
     Routes
     <br>
-    <input type="checkbox"
+    <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showFiberRoutesBuffer"
            ng-click="toggleShowFiberRoutesBufferData()">
     Routes Buffer
@@ -65,7 +65,7 @@
             ng-change="onRenderingChanged()">
     </select>
     <!-- to test different rendering options -->
-    <p><input type="checkbox" ng-model="showBlockHeatMap" ng-change="onRenderingChanged()"> Show heatmap</p>
+    <p><input type="checkbox" class="checkboxfill" ng-model="showBlockHeatMap" ng-change="onRenderingChanged()"> Show heatmap</p>
     <p>Minimum aggregated value</p>
     <input type="range" min="0.0" max="1.0" step="0.05" ng-model="minAggregatedValue" ng-change="onRenderingChanged()">
     <p>Maximum aggregated value</p>
