@@ -78,9 +78,9 @@
           <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">{{locationType.label}}</div>
           <div class="ctype-checkbox">
-            <md-checkbox md-no-ink aria-label="Checkbox No Ink" ng-checked="locationType.checked" 
-              class="primary" ng-click="setLocationTypeVisibility(locationType, !locationType.checked)">
-            </md-checkbox>
+            <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
+                    ng-checked="locationType.checked"
+                    ng-click="setLocationTypeVisibility(locationType, !locationType.checked)">
           </div>
         </li>
       </ul>

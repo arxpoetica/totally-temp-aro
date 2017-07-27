@@ -13,9 +13,13 @@
           <div class="ctype-name">
             {{constructionSite.label}}
           </div>
-            <md-checkbox md-no-ink aria-label="Checkbox No Ink" ng-model="constructionSite.checked" 
-              class="primary" ng-change="changeLocationsLayer()">
-            </md-checkbox>
+          <div class="ctype-checkbox">
+            <input type="checkbox" class="checkboxfill"
+                   ng-model="constructionSite.checked"
+                   name="ctype-name"
+                   ng-change="changeLocationsLayer()"
+            >
+          </div>
         </li>
       </ul>
 
