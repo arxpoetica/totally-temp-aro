@@ -1103,10 +1103,11 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
     height: 15px;
     position: relative;
     border-radius: 2px;
-    border: 1px solid #ddd;
+    border: 1px solid #c0c0c0;
 }
 .checkboxfill:checked {
     background:#4d99e5;
+    border: #4d99e5;
 }
 .checkboxfill:checked:after {
     /* Heres your symbol replacement - this is a tick in Unicode. */
