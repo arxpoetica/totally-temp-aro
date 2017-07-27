@@ -266,8 +266,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     if (plan) {
       plan.location_types = plan.location_types || []
       map.ready(() => {
-        selectedLocationsLayer.show()
-        selectedLocationsLayer.reloadData()
+        //selectedLocationsLayer.show()
+       // selectedLocationsLayer.reloadData()
       })
     }
 
