@@ -113,6 +113,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
     // Clear the client side tile cache
     tileDataService.clearCache()
+    state.requestMapLayerRefresh.next({})
 
     $scope.plan = plan
     state.loadPlan(plan)
@@ -131,12 +132,13 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('plan_cleared', (e, plan) => {
     // Clear the client side tile cache
     tileDataService.clearCache()
+    state.requestMapLayerRefresh.next({})
   })
 
   $rootScope.$on('route_changed', (e) => {
-
     // Clear the client side tile cache
     tileDataService.clearCache()
+    state.requestMapLayerRefresh.next({})
 
     if (!$scope.plan) return
     recalculateMarketProfile()

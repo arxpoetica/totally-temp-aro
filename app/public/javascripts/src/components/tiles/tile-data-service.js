@@ -183,7 +183,7 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   tileDataService.clearCache = () => {
-    tileDataService.tileCache = {}
+    tileDataService.tileDataCache = {}
   }
 
   return tileDataService

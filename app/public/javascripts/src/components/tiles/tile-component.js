@@ -340,6 +340,10 @@ class TileComponentController {
         this.handleMapTileOptionsChanged(mapTileOptions)
       })
 
+    // Redraw map tiles when requestd
+    state.requestMapLayerRefresh
+      .subscribe((newValue) => this.redrawMapTiles())
+
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
@@ -443,6 +447,16 @@ class TileComponentController {
     }
   }
 
+  redrawMapTiles() {
+    if (this.mapRef) {
+      this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+        // Hacky way to get google maps to redraw the tiles. Dont have anything better for now
+        this.mapRef.overlayMapTypes.setAt(index, null)
+        this.mapRef.overlayMapTypes.setAt(index, overlayMap)
+      })
+    }
+  }
+
   // Called when the value of showing map tile extents (for debugging) changes
   handleMapTileOptionsChanged(mapTileOptions) {
     if (!this.mapRef) {
@@ -453,10 +467,8 @@ class TileComponentController {
 
     this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
       overlayMap.setMapTileOptions(mapTileOptions)
-      // Hacky way to get google maps to redraw the tiles
-      this.mapRef.overlayMapTypes.setAt(index, null)
-      this.mapRef.overlayMapTypes.setAt(index, overlayMap)
     })
+    this.redrawMapTiles()
   }
 
   // Handles map layer events
