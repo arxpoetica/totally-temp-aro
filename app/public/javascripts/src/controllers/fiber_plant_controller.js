@@ -62,6 +62,10 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           aggregateEntityId: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateEntityId,
           aggregateBy: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateBy
         }
+      } else {
+        aggregateOptions = {
+          aggregateMode: 'simple_union'
+        }
       }
 
       if (censusBlockUrls.length > 0) {
