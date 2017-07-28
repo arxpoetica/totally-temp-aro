@@ -141,7 +141,7 @@
             </div>
             <form class="form-inline">
               <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-                  <input type="checkbox"
+                  <input type="checkbox" class="checkboxfill"
                          ng-model="connectCapexFilterEntityTypes[entityType]"
                          name="ctype-name"
                          ng-change="showConnectCapexChart(true)"
@@ -218,7 +218,7 @@
             <!-- Checkboxes for business/household/celltower categories -->
             <div ng-show="!isLoadingConfiguration">
               <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-                  <input type="checkbox"
+                  <input type="checkbox" class="checkboxfill"
                          ng-model="premisesFilterEntityTypes[entityType]"
                          name="ctype-name"
                          ng-change="showPremisesChart(true)"
@@ -264,7 +264,7 @@
           <form class="form-inline">
             <!-- Checkboxes for business/household/celltower categories -->
             <div class="radio" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-                <input type="checkbox"
+                <input type="checkbox" class="checkboxfill"
                        ng-model="subscribersFilterEntityTypes[entityType]"
                        name="ctype-name"
                        ng-change="showSubscribersChart(true)"
@@ -320,7 +320,7 @@
         <form class="form-inline">
           <!-- Checkboxes for business/household/celltower categories -->
           <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
-              <input type="checkbox"
+              <input type="checkbox" class="checkboxfill"
                      ng-model="opexRecurringFilterEntityTypes[entityType]"
                      name="ctype-name"
                      ng-change="showOpexRecurringChart(true)"

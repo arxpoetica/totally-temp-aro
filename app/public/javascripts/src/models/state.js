@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
+app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -326,11 +326,24 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.competition.selectedCompetitorType = service.competition.allCompetitorTypes[0]
   service.competition.selectedRenderingOption = service.competition.allRenderingOptions[0]
   service.reloadCompetitors = () => {
-    return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`)
+    if (map) {
+      var bounds = map.getBounds()
+      var params = {
+        minX: bounds.getNorthEast().lat(),
+        minY: bounds.getNorthEast().lng(),
+        maxX: bounds.getSouthWest().lat(),
+        maxY: bounds.getSouthWest().lng()
+      }
+    }
+    var temp = map != null ? params : {}
+    var args = {
+      params: temp,
+    };
+    return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`, args)
       .then((response) => {
         if (response.status >= 200 && response.status <= 299) {
           service.competition.selectedCompetitors = []
-          service.competition.allCompetitors = response.data
+          service.competition.allCompetitors = $filter('orderBy')(response.data,'name')
           // For now just populate random colors for each competitor. This can later come from the api.
           for (var iCompetitor = 0; iCompetitor < service.competition.allCompetitors.length; ++iCompetitor) {
             var randomColors = getRandomColors()
@@ -340,7 +353,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         }
       })
   }
-  service.reloadCompetitors()
+  //service.reloadCompetitors()
 
   service.locationTypes = new Rx.BehaviorSubject([])
   service.constructionSites = new Rx.BehaviorSubject([])
