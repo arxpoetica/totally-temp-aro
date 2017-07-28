@@ -415,8 +415,6 @@ class TileComponentController {
         if (!this.mapRef || !args.coords) {
           return
         }
-        console.log('Polygon selection requested')
-        console.log(args)
 
         var mapBounds = this.mapRef.getBounds()
         var neCorner = mapBounds.getNorthEast()
