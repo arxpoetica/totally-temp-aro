@@ -92,6 +92,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
         state.OPTIMIZATION_TYPES.IRR_TARGET
       ]
       state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
+      optimization.setMode('targets')
     }
   })
 
