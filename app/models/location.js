@@ -204,46 +204,6 @@ module.exports = class Location {
       })
   }
 
-  // Selected locations as a list
-  static findTargets (plan_id) {
-    var sql = `
-      SELECT locations.id, address
-      FROM locations
-      JOIN client.plan_targets
-        ON plan_targets.plan_id = $1
-       AND plan_targets.location_id = locations.id
-     ORDER BY locations.id ASC
-    `
-    return database.query(sql, [plan_id])
-      .then((targets) => {
-        return database.findOne(`
-          SELECT COUNT(*) AS total
-          FROM locations
-          JOIN client.plan_targets
-            ON plan_targets.plan_id=$1
-           AND plan_targets.location_id = locations.id
-        `, [plan_id])
-          .then((row) => {
-            return {
-              targets: targets,
-              total: row.total
-            }
-          })
-      })
-  }
-
-  static deleteTarget (plan_id, locationId) {
-    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1 AND location_id=$2'
-    return database.query(sql, [plan_id, locationId])
-      .then(() => this.findTargets(plan_id))
-  }
-
-  static deleteAllTargets (plan_id) {
-    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
-    return database.query(sql, [plan_id])
-      .then(() => this.findTargets(plan_id))
-  }
-
   // Get summary information for a given location
   static showInformation (plan_id, location_id) {
     var info

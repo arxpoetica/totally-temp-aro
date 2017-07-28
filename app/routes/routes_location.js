@@ -167,28 +167,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/locations/:plan_id/targets', check_any_permission, (request, response, next) => {
-    var planId = +request.params.plan_id
-    models.Location.findTargets(planId)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.post('/locations/:plan_id/targets/delete', check_owner_permission, (request, response, next) => {
-    var planId = +request.params.plan_id
-    var locationId = +request.body.locationId
-    models.Location.deleteTarget(planId, locationId)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.post('/locations/:plan_id/targets/delete_all', check_owner_permission, (request, response, next) => {
-    var planId = +request.params.plan_id
-    models.Location.deleteAllTargets(planId)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   function editUserDefinedCustomers (request, response, next) {
     var name = request.body.name
     var id = request.params.id || null

@@ -3,7 +3,11 @@
 app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$q', 'map_tools', 'map_layers', '$timeout', '$window', 'optimization', 'state', ($scope, $rootScope, $http, $q, map_tools, map_layers, $timeout, $window, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
-  $scope.selectedTool = null
+  $scope.tools = Object.freeze({
+    SINGLE: 1,
+    POLYGON: 2
+  })
+  $scope.selectedTool = $scope.tools.SINGLE
   $scope.modes = {
     'single': null,
     'polygon': 'polygon'
@@ -17,7 +21,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   $scope.state = state
 
   // ARO version
-  $scope.optimizationMode = 'targets'
   $scope.calculating = false
 
   $scope.optimizeHouseholds = true
@@ -31,12 +34,24 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
     polygonStrategy: 'FIXED_RADIUS'  // 'Fixed Radius'
   }
 
-  function loadTargets () {
-    $http.get(`/locations/${$scope.plan.id}/targets`)
+  state.selectedLocations
+    .subscribe((selectedLocations) => {
+      // The selected locations have changed. Get the count and addresses that we want to show
+      $scope.targetsTotal = selectedLocations.size
+      var locationIds = Array.from(selectedLocations).slice(0, 9) // Only get addresses for a few locations
+      $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            $scope.targets = result.data
+          }
+        })
+    })
+
+  $scope.deleteAllTargets = () => {
+    $http.delete(`/network_plan/${$scope.plan.id}/removeAllTargets`)
       .then((response) => {
-        $scope.targets = response.data.targets
-        $scope.targetsTotal = response.data.total
-        if ($scope.targetsTotal > 0) optimization.setMode('targets')
+        // Reload selected locations from database
+        state.reloadSelectedLocations()
       })
   }
 
@@ -194,14 +209,7 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 	  }
 	  state.optimizationOptions.processLayers = selectedProcessLayers
   }
-  // --
 
-  $rootScope.$on('map_layer_loaded_data', (e, layer) => {
-    if (layer.type !== 'locations') return
-    $scope.locationsHeatmap = layer.heatmapLayer && layer.heatmapLayer.getMap()
-    calculateShowHeatmap()
-  })
-  
   function changeSelectionForFeaturesMatching(dataSources) {
     var layer = map_layers.getFeatureLayer('locations')
     var changes = layer.createEmptyChanges()
@@ -231,55 +239,26 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
      }
   }
 
-  function calculateShowHeatmap () {
-    $scope.showHeatmapAlert = $scope.locationsHeatmap && ($scope.selectedTool === 'single' || $scope.selectedTool === 'polygon')
-  }
-
   function planChanged (e, plan) {
     $scope.plan = plan
     if (!plan) return
-    loadTargets()
   }
   $rootScope.$on('plan_selected', planChanged)
 
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (tool === 'target_builder') {
-      calculateUnaselectable()
       drawingManager.setMap(map_tools.is_visible('target_builder') ? map : null)
     }
   })
-
-  function calculateUnaselectable () {
-    var unselectable = !map_tools.is_visible('target_builder') || $scope.selectedTool !== 'single'
-    map_layers.getFeatureLayer('locations').unselectable = unselectable
-    map_layers.getFeatureLayer('selected_locations').unselectable = unselectable
-  }
 
   $scope.isToolSelected = (name) => {
     return $scope.selectedTool === name
   }
 
-  $scope.setSelectedTool = (name) => {
-    if (name) {
-      $scope.selectedTool = name
-      drawingManager.oldDrawingMode = name
-      drawingManager.setDrawingMode($scope.modes[name])
-    } else {
-      $scope.selectedTool = null
-      drawingManager.oldDrawingMode = null
-      drawingManager.setDrawingMode(null)
-    }
-    calculateShowHeatmap()
-    calculateUnaselectable()
-  }
-
-  $scope.toggleSelectedTool = (name) => {
-	optimization.datasources = _.uniq(optimization.datasources.concat(1));  
-    if ($scope.selectedTool !== name) {
-      $scope.setSelectedTool(name)
-    } else {
-      $scope.setSelectedTool(null)
-    }
+  $scope.setActiveTool = (id) => {
+    $scope.selectedTool = id
+    var drawingMode = (id === $scope.tools.POLYGON) ? 'polygon' : null
+    drawingManager.setDrawingMode(drawingMode)
   }
 
   var drawingManager = new google.maps.drawing.DrawingManager({
@@ -305,17 +284,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   $(document).ready(() => drawingManager.setMap(map))
 
-  function setDrawingManagerEnabled (enabled) {
-    if (enabled) {
-      drawingManager.setDrawingMode(drawingManager.oldDrawingMode || null)
-    } else {
-      drawingManager.setDrawingMode(null)
-    }
-  }
-
   function updateSelectionTools (e) {
     $scope.deselectMode = e.shiftKey
-    setDrawingManagerEnabled(!e.ctrlKey)
     if (!$rootScope.$$phase) { $rootScope.$apply() } // refresh button state
   }
 
@@ -323,7 +293,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   document.addEventListener('keyup', updateSelectionTools)
 
   $('#target-builder-upload input').change(() => {
-    $scope.setSelectedTool(null)
     var form = $('#target-builder-upload').get(0)
     var formData = new FormData(form)
     var xhr = new XMLHttpRequest()
@@ -345,8 +314,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
         return swal('Error', data.error || 'Unknown error', 'error')
       }
       swal('File processed', `Locations selected: ${data.found}, not found: ${data.notFound}, errors: ${data.errors}`, 'info')
-      map_layers.getFeatureLayer('locations').reloadData()
-      map_layers.getFeatureLayer('selected_locations').reloadData()
       $scope.pendingPost = true
     })
     xhr.send(formData)
@@ -410,62 +377,4 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
   }
 
   $timeout(configureBusinessesSearch)
-
-  $scope.deleteTarget = (target) => {
-    var config = {
-      url: `/locations/${$scope.plan.id}/targets/delete`,
-      method: 'post',
-      data: {
-        locationId: target.id
-      }
-    }
-    $http(config)
-      .then((response) => {
-        $scope.targets = response.data.targets
-        $scope.targetsTotal = response.data.total
-        if ($scope.targetsTotal > 0) optimization.setMode('targets')
-        map_layers.getFeatureLayer('locations').reloadData(true)
-        map_layers.getFeatureLayer('selected_locations').reloadData(true)
-      })
-  }
-
-  $rootScope.$on('map_layer_changed_selection', (e, layer, changes) => {
-    if (!$scope.plan) return
-
-    if (layer.type !== 'locations' &&
-      layer.type !== 'selected_locations' &&
-      layer.type !== 'network_nodes' &&
-      layer.type !== 'towers') return
-
-    postChanges(changes, true)
-    optimization.setMode('targets')
-  })
-
-  function postChanges (changes) {
-    changes.lazy = !config.ui.map_tools.target_builder.eager
-    optimization.optimize($scope.plan, changes, loadTargets, () => {})
-  }
-
-  $scope.deleteAllTargets = () => {
-    var config = {
-      url: `/locations/${$scope.plan.id}/targets/delete_all`,
-      method: 'post',
-      data: {}
-    }
-    $http(config)
-      .then((response) => {
-        $scope.targets = response.data.targets
-        $scope.targetsTotal = response.data.total
-        map_layers.getFeatureLayer('locations').reloadData()
-        map_layers.getFeatureLayer('selected_locations').reloadData()
-      })
-  }
-
-  $scope.optimizationMode = optimization.getMode()
-  $rootScope.$on('optimization_mode_changed', (e, mode) => {
-    $scope.optimizationMode = mode
-    if (mode !== 'targets') {
-      $scope.deleteAllTargets()
-    }
-  })
 }])

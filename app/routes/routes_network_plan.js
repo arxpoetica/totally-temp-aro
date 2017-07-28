@@ -179,9 +179,17 @@ exports.configure = (api, middleware) => {
   })
 
   // Remove all plan targets from a plan
-  api.post('/network_plan/:planId/removeAllTargets', (request, response, next) => {
+  api.delete('/network_plan/:planId/removeAllTargets', (request, response, next) => {
     var planId = request.params.planId
     models.NetworkPlan.removeAllTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Get addresses for the specified locations
+  api.post('/network_plan/targets/addresses', (request, response, next) => {
+    var locationIds = request.body.locationIds
+    models.NetworkPlan.getTargetsAddresses(locationIds)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

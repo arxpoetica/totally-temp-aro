@@ -77,12 +77,6 @@ app.service('optimization', ($rootScope, $http, $q) => {
   optimization.optimize = (plan, changes, geographies, success, error) => {
     var canceler = $q.defer()
 
-    changes.entityDataSources = optimization.datasources
-    //To get the uploaded business routing to work skip appending celltower to location types
-    if (changes.entityDataSources.length > 0) {
-      changes.locationTypes = _.uniq((changes.locationTypes || []))  //.concat(['celltower']))
-    }
-
     // Clear the geography selection from the plan
     function clearGeographySelection(planId) {
       return $http.post('/network_plan/' + planId + '/clearGeographySelection')

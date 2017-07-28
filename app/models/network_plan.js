@@ -69,10 +69,19 @@ module.exports = class NetworkPlan {
   }
 
   static removeAllTargets (plan_id) {
-    if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
-
     var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'    
     return database.query(sql, [plan_id])
+  }
+
+  static getTargetsAddresses (locationIds) {
+    if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
+
+    var sql = `
+      SELECT id, address
+      FROM locations
+      WHERE id IN ($1)
+    `
+    return database.query(sql, [locationIds])
   }
 
   static _deleteSources (plan_id, network_node_ids) {
