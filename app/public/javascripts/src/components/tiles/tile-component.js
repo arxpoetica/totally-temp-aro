@@ -94,7 +94,7 @@ class MapTileRenderer {
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
             this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
           }
-          if (heatMapData.length > 0 && !this.layerProperties.data.heatmapDebug) {
+          if (heatMapData.length > 0 && this.layerProperties.data.heatmapDebug === 'HEATMAP_ON') {
             var heatMapRenderer = simpleheat(canvas)
             heatMapRenderer.data(heatMapData)
             var maxValue = 1.0
@@ -152,8 +152,11 @@ class MapTileRenderer {
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
             // Aggregation property - first try entity_count, then weight. Note that both could be null
-            var aggregationProperty = feature.properties.entity_count || feature.properties.weight
-            if (aggregationProperty && !heatmapDebug) {
+            var aggregationProperty = null
+            if (heatmapDebug === 'HEATMAP_ON') {
+              aggregationProperty = feature.properties.entity_count || feature.properties.weight
+            }
+            if (aggregationProperty && heatmapDebug === 'HEATMAP_ON') {
               var adjustedWeight = Math.pow(+aggregationProperty, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
               heatMapData.push([x, y, adjustedWeight])
             } else {
@@ -337,6 +340,10 @@ class TileComponentController {
         this.handleMapTileOptionsChanged(mapTileOptions)
       })
 
+    // Redraw map tiles when requestd
+    state.requestMapLayerRefresh
+      .subscribe((newValue) => this.redrawMapTiles())
+
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
@@ -440,6 +447,16 @@ class TileComponentController {
     }
   }
 
+  redrawMapTiles() {
+    if (this.mapRef) {
+      this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+        // Hacky way to get google maps to redraw the tiles. Dont have anything better for now
+        this.mapRef.overlayMapTypes.setAt(index, null)
+        this.mapRef.overlayMapTypes.setAt(index, overlayMap)
+      })
+    }
+  }
+
   // Called when the value of showing map tile extents (for debugging) changes
   handleMapTileOptionsChanged(mapTileOptions) {
     if (!this.mapRef) {
@@ -450,10 +467,8 @@ class TileComponentController {
 
     this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
       overlayMap.setMapTileOptions(mapTileOptions)
-      // Hacky way to get google maps to redraw the tiles
-      this.mapRef.overlayMapTypes.setAt(index, null)
-      this.mapRef.overlayMapTypes.setAt(index, overlayMap)
     })
+    this.redrawMapTiles()
   }
 
   // Handles map layer events

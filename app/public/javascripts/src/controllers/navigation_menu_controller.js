@@ -113,6 +113,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
     // Clear the client side tile cache
     tileDataService.clearCache()
+    state.requestMapLayerRefresh.next({})
 
     $scope.plan = plan
     state.loadPlan(plan)
@@ -131,13 +132,19 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('plan_cleared', (e, plan) => {
     // Clear the client side tile cache
     tileDataService.clearCache()
+    state.requestMapLayerRefresh.next({})
+  })
+
+  // When a plan is done, clear the tile cache
+  $rootScope.$on('optimization_stopped_polling', () => {
+    tileDataService.clearCache()
+    state.requestMapLayerRefresh.next({})
   })
 
   $rootScope.$on('route_changed', (e) => {
-
-    // Clear the client side tile cache
-    tileDataService.clearCache()
-
+    // This method is called before (and after) optimization is done. If you clear the tile cache here, then
+    // aro-service will save the cache in memory before optimization is done, and we won't get planned data
+    // after the optimization is done.
     if (!$scope.plan) return
     recalculateMarketProfile()
   })
