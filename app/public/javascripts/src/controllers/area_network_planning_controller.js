@@ -134,6 +134,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
         state.optimizationOptions.uiAlgorithms.push(state.OPTIMIZATION_TYPES.TABC)
       }
       state.optimizationOptions.uiSelectedAlgorithm = state.optimizationOptions.uiAlgorithms[0]
+      optimization.setMode('boundaries')
     }
   })
 

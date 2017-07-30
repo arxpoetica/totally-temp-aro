@@ -42,37 +42,46 @@ module.exports = class NetworkPlan {
       })
   }
 
-  static _addTargets (plan_id, location_ids) {
+  static addTargets (plan_id, location_ids) {
     if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
 
-    return Promise.resolve()
-      .then(() => {
-        // avoid duplicates
-        var sql = `
-          DELETE FROM client.plan_targets
-          WHERE plan_id=$1 AND location_id IN ($2)
-        `
-        return database.execute(sql, [plan_id, location_ids])
-      })
-      .then(() => {
-        // calculate closest vertex
-        // TODO: simplify
-        var sql = `
-          INSERT INTO client.plan_targets (location_id, plan_id)
-          (SELECT locations.id, $2 AS plan_id
-             FROM locations
-            WHERE locations.id IN ($1))
-        `
-        return database.execute(sql, [location_ids, plan_id])
-      })
-      .then(() => {
-        // cannot selet both targets and boundaires
-        return Promise.all([
-          database.execute('DELETE FROM client.selected_regions WHERE plan_id = $1', [plan_id]),
-          database.execute('DELETE FROM client.selected_service_area WHERE plan_id = $1', [plan_id]),
-          database.execute('DELETE FROM client.selected_analysis_area WHERE plan_id = $1', [plan_id])
-        ])
-      })
+    var sql = `
+      INSERT INTO client.plan_targets(location_id, plan_id)
+      (
+        SELECT id, $2
+        FROM locations
+        WHERE id IN ($1)
+        AND id NOT IN (SELECT location_id FROM client.plan_targets WHERE plan_id=$2)  -- We don't want duplicate targets
+      )
+    `
+    return database.query(sql, [location_ids, plan_id])
+  }
+
+  static removeTargets (plan_id, location_ids) {
+    if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
+
+    var sql = `
+      DELETE FROM client.plan_targets
+      WHERE location_id in ($1)
+      AND plan_id = $2
+    `
+    return database.query(sql, [location_ids, plan_id])
+  }
+
+  static removeAllTargets (plan_id) {
+    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'    
+    return database.query(sql, [plan_id])
+  }
+
+  static getTargetsAddresses (locationIds) {
+    if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
+
+    var sql = `
+      SELECT id, address
+      FROM locations
+      WHERE id IN ($1)
+    `
+    return database.query(sql, [locationIds])
   }
 
   static _deleteSources (plan_id, network_node_ids) {
@@ -84,18 +93,6 @@ module.exports = class NetworkPlan {
         WHERE plan_id=$1 AND network_node_id=$2
       `
       return database.execute(sql, [plan_id, network_node_id])
-    })
-  }
-
-  static _deleteTargets (plan_id, location_ids) {
-    if (!_.isArray(location_ids) || location_ids.length === 0) return Promise.resolve()
-
-    return pync.series(location_ids, (location_id) => {
-      var sql = `
-        DELETE FROM client.plan_targets
-        WHERE plan_id=$1 AND location_id=$2
-      `
-      return database.execute(sql, [plan_id, location_id])
     })
   }
 
@@ -644,13 +641,7 @@ module.exports = class NetworkPlan {
         this._addSources(plan_id, changes.insertions && changes.insertions.network_nodes)
       ))
       .then(() => (
-        this._addTargets(plan_id, changes.insertions && changes.insertions.locations)
-      ))
-      .then(() => (
         this._deleteSources(plan_id, changes.deletions && changes.deletions.network_nodes)
-      ))
-      .then(() => (
-        this._deleteTargets(plan_id, changes.deletions && changes.deletions.locations)
       ))
       .then(() => (
         changes.lazy ? null : models.Network.recalculateNodes(plan_id, changes)

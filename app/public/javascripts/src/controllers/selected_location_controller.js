@@ -39,6 +39,9 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
   }
 
   $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+    if (!map_tools.is_visible(map_tools.TOOL_IDS.LOCATIONS)) {
+      return  // Process the click only if we have the locations layer open
+    }
     if (options.length > 0 && options[0].location_id) {
       var id = options[0].location_id
       openLocation(id)

@@ -3,8 +3,9 @@
  */
 'use strict'
 
-// Important: RxJS must have been included using browserify before this point
+// Browserify includes
 var Rx = require('rxjs')
+var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
@@ -75,24 +76,26 @@ class MapTileRenderer {
       }
     }
     tileDataPromises.push(this.tileDataService.getEntityImageForLayer(this.layerProperties.id))
+    tileDataPromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
 
     // Return a promise that resolves when all the rendering is finished
     return new Promise((resolve, reject) => {
       Promise.all(tileDataPromises)
         .then((promiseResults) => {
 
-          var entityImage = promiseResults[promiseResults.length - 1]
+          var entityImage = promiseResults[promiseResults.length - 2]
+          var selectedLocationImage = promiseResults[promiseResults.length - 1]
           var ctx = canvas.getContext("2d")
           ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
           ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
           ctx.lineWidth = 1
           var heatMapData = []
 
-          for (var iResult = 0; iResult < promiseResults.length - 1; ++iResult) {
+          for (var iResult = 0; iResult < promiseResults.length - 2; ++iResult) {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
+            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
           }
           if (heatMapData.length > 0 && this.layerProperties.data.heatmapDebug === 'HEATMAP_ON') {
             var heatMapRenderer = simpleheat(canvas)
@@ -136,7 +139,7 @@ class MapTileRenderer {
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, tileCoordinateString, geometryOffset, heatMapData, heatmapDebug) {
+  renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, geometryOffset, heatMapData, heatmapDebug) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
@@ -161,7 +164,12 @@ class MapTileRenderer {
               heatMapData.push([x, y, adjustedWeight])
             } else {
               // This could be because we are zoomed in, or because we want to debug the heatmap rendering
-              ctx.drawImage(entityImage, x, y)
+              if (feature.properties.location_id && this.layerProperties.data.selectedLocationIds.has(+feature.properties.location_id)) {
+                // Draw selected icon
+                ctx.drawImage(selectedLocationImage, x, y)
+              } else {
+                ctx.drawImage(entityImage, x, y)
+              }
             }
             break;
 
@@ -271,6 +279,40 @@ class MapTileRenderer {
     this.layerProperties.data.mapTileOptions = mapTileOptions
   }
 
+  // Gets all features that are within a given polygon
+  getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
+
+    return new Promise((resolve, reject) => {
+    // Get tile data
+    this.tileDataService.getTileData(this.layerProperties.data.url, tileZoom, tileX, tileY)
+      .then((result) => {
+
+        var layerToFeatures = result.layerToFeatures
+        var hitFeatures = []
+        Object.keys(layerToFeatures).forEach((layerKey) => {
+          var features = layerToFeatures[layerKey]
+          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+            var feature = features[iFeature]
+            var geometry = feature.loadGeometry()
+            geometry.forEach((shape) => {
+              if (shape.length === 1) {
+                // Only support points for now
+                var locationCoords = [shape[0].x, shape[0].y]
+                var isPointInPolygon = pointInPolygon(locationCoords, polygonCoords)
+                if (isPointInPolygon) {
+                  hitFeatures.push({
+                    location_id: feature.properties.location_id
+                  })
+                }
+              }
+            })
+          }
+        })
+        resolve(hitFeatures)
+      })
+    })
+  }
+
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
 
@@ -332,7 +374,7 @@ class TileComponentController {
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
       .pairwise() // This will give us the previous value in addition to the current value
-      .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1]))
+      .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
 
     // Subscribe to changes in the map tile options
     state.mapTileOptions
@@ -342,7 +384,19 @@ class TileComponentController {
 
     // Redraw map tiles when requestd
     state.requestMapLayerRefresh
-      .subscribe((newValue) => this.redrawMapTiles())
+      .subscribe((newValue) => this.refreshMapTiles())
+
+    // If selected location ids change, set that in the tile data service
+    state.selectedLocations
+      .subscribe((selectedLocationIds) => {
+        // Force an update of all map layers for now
+        var newMapLayers = angular.copy(state.mapLayers.getValue())
+        var mapLayerActions = {}
+        Object.keys(newMapLayers).forEach((mapLayerKey) => mapLayerActions[mapLayerKey] = this.DELTA.UPDATE)
+        this.handleMapEvents(newMapLayers, newMapLayers, mapLayerActions)
+      })
+
+    tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
@@ -355,6 +409,53 @@ class TileComponentController {
       UPDATE: 2
     })
     this.TILE_SIZE = 256
+
+    this.state.requestPolygonSelect
+      .subscribe((args) => {
+        if (!this.mapRef || !args.coords) {
+          return
+        }
+
+        var mapBounds = this.mapRef.getBounds()
+        var neCorner = mapBounds.getNorthEast()
+        var swCorner = mapBounds.getSouthWest()
+        var zoom = this.mapRef.getZoom()
+        // Note the swap from NE/SW to NW/SE when finding tile coordinates
+        var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+        var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+
+        // Loop through all visible tiles
+        var pointInPolyPromises = []
+        for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
+          for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
+
+            // Convert lat lng coordinates into pixel coordinates relative to this tile
+            var tileCoords = { x: xTile, y: yTile }
+            var convertedPixelCoords = []
+            args.coords.forEach((latLng) => {
+              var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
+              convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
+            })
+            console.log(convertedPixelCoords)
+
+            // Get the locations from this tile that are in the polygon
+            this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+              pointInPolyPromises.push(mapOverlay.getPointsInPolygon(zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
+            })
+          }
+        }
+        Promise.all(pointInPolyPromises)
+          .then((results) => {
+            var selectedLocationIds = new Set()
+            results.forEach((result) => {
+              result.forEach((locationObj) => selectedLocationIds.add(locationObj.location_id))
+            })
+            var selectedLocations = []
+            selectedLocationIds.forEach((id) => selectedLocations.push({ location_id: id }))
+            state.hackRaiseEvent(selectedLocations)
+          })
+
+      })
 
     $document.ready(() => {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
@@ -373,18 +474,11 @@ class TileComponentController {
         var tileCoords = this.getTileCoordinates(zoom, lat, lng)
 
         // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-        // 1. Get the top left coordinates of the tile in lat lngs
-        var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
-        // 2. Convert to pixels
-        var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
-        // 3. Convert the clicked lat lng to pixels
-        var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
-        var xWithinTile = clickedPointPixels.x - nwCornerPixels.x
-        var yWithinTile = clickedPointPixels.y - nwCornerPixels.y
+        var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
 
         var hitPromises = []
         this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, xWithinTile, yWithinTile))
+          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
         })
         Promise.all(hitPromises)
           .then((results) => {
@@ -399,6 +493,21 @@ class TileComponentController {
 
       })
     })
+  }
+
+  // Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
+  getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
+    // 1. Get the top left coordinates of the tile in lat lngs
+    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
+    // 2. Convert to pixels
+    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
+    // 3. Convert the clicked lat lng to pixels
+    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+
+    return {
+      x: clickedPointPixels.x - nwCornerPixels.x,
+      y: clickedPointPixels.y - nwCornerPixels.y
+    }
   }
 
   // Returns the tile coordinates (x, y) for a given lat/long and zoom level
@@ -447,10 +556,11 @@ class TileComponentController {
     }
   }
 
-  redrawMapTiles() {
+  // Refresh map tiles
+  refreshMapTiles() {
     if (this.mapRef) {
+      // Hacky way to get google maps to redraw the tiles
       this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
-        // Hacky way to get google maps to redraw the tiles. Dont have anything better for now
         this.mapRef.overlayMapTypes.setAt(index, null)
         this.mapRef.overlayMapTypes.setAt(index, overlayMap)
       })
@@ -468,17 +578,19 @@ class TileComponentController {
     this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
       overlayMap.setMapTileOptions(mapTileOptions)
     })
-    this.redrawMapTiles()
+    this.refreshMapTiles()
   }
 
   // Handles map layer events
-  handleMapEvents(oldMapLayers, newMapLayers) {
+  handleMapEvents(oldMapLayers, newMapLayers, mapLayerActions) {
     if (!this.mapRef) {
       // Map not initialized yet
       return
     }
     // We have a new set of map layers. Determine which ones to update and which ones to delete
-    var mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
+    if (!mapLayerActions) {
+      mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
+    }
 
     // First delete any map layers that we want
     for (var iOverlay = 0; iOverlay < this.mapRef.overlayMapTypes.length; ++iOverlay) {
@@ -496,7 +608,12 @@ class TileComponentController {
       var mapLayer = newMapLayers[key]
       if (mapLayerActions[key] === this.DELTA.UPDATE) {
         this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
-        var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, {id: key, data: mapLayer}, this.tileDataService)
+        var layerProperties = {
+          id: key,
+          data: mapLayer
+        }
+        layerProperties.data.selectedLocationIds = this.state.selectedLocations.getValue()
+        var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, layerProperties, this.tileDataService)
         tileRenderer.setMapTileOptions(this.state.mapTileOptions.getValue())
         if (key in mapExistingLayers) {
           // Tile exists in maps. Replace it

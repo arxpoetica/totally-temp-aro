@@ -71,7 +71,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
     })
 
-  
   api.post('/locations/visible/:plan_id', (request, response, next) => {
     var filters = {}
     filters['uploaded_datasources'] = request.body.uploaded_datasources || []
@@ -86,6 +85,13 @@ exports.configure = (api, middleware) => {
     var plan_id = +request.params.plan_id
 
     models.Location.findSelected(plan_id, viewport)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  api.get('/locations/:planId/selectedLocationIds', (request, response, next) => {
+    var planId = +request.params.planId
+    models.Location.findSelectedLocationIds(planId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
@@ -157,28 +163,6 @@ exports.configure = (api, middleware) => {
   api.get('/search/locations', (request, response, next) => {
     var text = request.query.text
     models.Location.search(text)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.get('/locations/:plan_id/targets', check_any_permission, (request, response, next) => {
-    var planId = +request.params.plan_id
-    models.Location.findTargets(planId)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.post('/locations/:plan_id/targets/delete', check_owner_permission, (request, response, next) => {
-    var planId = +request.params.plan_id
-    var locationId = +request.body.locationId
-    models.Location.deleteTarget(planId, locationId)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.post('/locations/:plan_id/targets/delete_all', check_owner_permission, (request, response, next) => {
-    var planId = +request.params.plan_id
-    models.Location.deleteAllTargets(planId)
       .then(jsonSuccess(response, next))
       .catch(next)
   })
