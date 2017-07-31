@@ -205,7 +205,17 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     }
     updateMapLayers()
   }
+  
+  function reloadCompetitors() {
+    state.reloadCompetitors()
+  }
 
-  $rootScope.$on('map_zoom_changed', updateMapLayers)
+  reloadCompetitors()
+  
+  $rootScope.$on('map_dragend', reloadCompetitors)
+  $rootScope.$on('map_zoom_changed', () => {
+    updateMapLayers()
+    reloadCompetitors()
+  })
 
 }])
