@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
-psql -c "CREATE EXTENSION postgis;"
-psql -c "CREATE EXTENSION fuzzystrmatch;"
-psql -c "CREATE EXTENSION \"uuid-ossp\";"
+psql -c "CREATE EXTENSION IF NOT EXISTS  postgis;"
+psql -c "CREATE EXTENSION IF NOT EXISTS  hstore;"
+psql -c "CREATE EXTENSION IF NOT EXISTS  fuzzystrmatch;"
+psql -c "CREATE EXTENSION IF NOT EXISTS  \"uuid-ossp\";"
