@@ -329,10 +329,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     if (map) {
       var bounds = map.getBounds()
       var params = {
-        minX: bounds.getNorthEast().lat(),
-        minY: bounds.getNorthEast().lng(),
-        maxX: bounds.getSouthWest().lat(),
-        maxY: bounds.getSouthWest().lng()
+    	maxY: bounds.getNorthEast().lat(),
+    	maxX: bounds.getNorthEast().lng(),
+        minY: bounds.getSouthWest().lat(),
+        minX: bounds.getSouthWest().lng()
       }
     }
     var temp = map != null ? params : {}
