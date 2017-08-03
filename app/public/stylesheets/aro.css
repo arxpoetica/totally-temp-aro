@@ -1117,12 +1117,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
     user-select: none;
     border: 1px solid #c0c0c0;
 }
-
-.checkboxfill:hover {
-    color: #333;
-    background-color: #d4d4d4;
-    border-color: #8c8c8c;
-}
     
 .checkboxfill:checked {
     background:#4d99e5;
