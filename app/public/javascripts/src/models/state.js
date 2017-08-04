@@ -345,7 +345,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`, args)
       .then((response) => {
         if (response.status >= 200 && response.status <= 299) {
-          service.competition.selectedCompetitors = []
           service.competition.allCompetitors = $filter('orderBy')(response.data,'name')
           // For now just populate random colors for each competitor. This can later come from the api.
           for (var iCompetitor = 0; iCompetitor < service.competition.allCompetitors.length; ++iCompetitor) {
