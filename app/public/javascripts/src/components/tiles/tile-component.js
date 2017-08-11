@@ -15,6 +15,8 @@ class MapTileRenderer {
     this.mapLayers = mapLayers
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations
+    this.renderBatches = []
+    this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
@@ -25,6 +27,7 @@ class MapTileRenderer {
   // Sets the global tile options
   setMapTileOptions(mapTileOptions) {
     this.mapTileOptions = mapTileOptions
+    this.tileDataService.markHtmlCacheDirty()
   }
 
   // Sets the selected location ids
@@ -64,8 +67,43 @@ class MapTileRenderer {
     return `mapTile_${zoom}_${tileX}_${tileY}`
   }
 
+  // Starts the render queue. Does nothing if it has already started
+  startRenderingRecursive() {
+
+    // Rendering requests can come in from multiple sources - when Google Maps calls the getTile() method,
+    // when the mapLayers change, or any other request. If we start rendering a tile WHILE a previous
+    // request is still rendering it, then we get multiple renders on the same canvas. To prevent this,
+    // we render tiles in "batches". A batch consists of an array of functions, and each function renders
+    // one tile completely. Each render function in a batch is independent of the other tiles, so all of
+    // them can be run asynchronously.
+    // When a rendering request comes in, we push a rendering batch onto the queue. This function then
+    // renders each batch one after the other. This also allows batches to be pushed onto the queue while
+    // tiles are being rendered.
+
+    if (this.isRendering) {
+      return  // Nothing to do
+    }
+
+    if (this.renderBatches.length === 0) {
+      this.isRendering = false  // We are done rendering all elements in the queue
+      return
+    }
+
+    // Get the latest batch of rendering promises
+    this.isRendering = true
+    var renderingFunctions = this.renderBatches.pop()
+    var renderingPromises = []
+    renderingFunctions.forEach((fn) => renderingPromises.push(fn()))
+    Promise.all(renderingPromises)  // Wait for all rendering in this batch to be completed
+      .then(() => {
+        this.isRendering = false
+        this.startRenderingRecursive()  // Call this function again. Until the queue is empty
+      })
+  }
+
   // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
+    var renderBatch0 = [], renderBatch1 = []
     tiles.forEach((tile) => {
       var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
       var cachedTile = this.tileDataService.tileHtmlCache[tileId]
@@ -76,11 +114,21 @@ class MapTileRenderer {
         // Re-render only if the tile is marked as dirty
         if (cachedTile.isDirty && frontBufferCanvas && backBufferCanvas) {
           var coord = { x: tile.x, y: tile.y }
-          this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
-            .then(() => this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
+          // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
+          // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
+          // Ideally we could fire the two renders in parallel, but one some tiles, the 0-neighbour tile shows up
+          // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
+          // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
+          // back buffer of the canvas. For now, just render them in order.
+          renderBatch0.push(this.renderTile.bind(this, tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas))   // 0-neighbour tile
+          renderBatch1.push(this.renderTile.bind(this, tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))    // 1-neighbour tile
         }
       }
     })
+    // This is a queue, and we want the 0-neighbour renders to be popped first. So push the 1-neighbour renders first
+    this.renderBatches.push(renderBatch1)
+    this.renderBatches.push(renderBatch0)
+    this.startRenderingRecursive()
   }
 
   // Creates a tile canvas element
@@ -130,16 +178,12 @@ class MapTileRenderer {
       }
     }
 
-    if (isDirty) {
-      // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
-      // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
-      // Ideally we could fire the two renders in parallel, but one some tiles, the 0-neighbour tile shows up
-      // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
-      // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
-      // back buffer of the canvas. For now, just render them in order.
-      this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
-        .then(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
-    }
+    // Pass this tile to redrawCachedTiles(), that will take care of scheduling the render
+    this.redrawCachedTiles([{
+      zoom: zoom,
+      x: coord.x,
+      y: coord.y
+    }])
     return div
   }
 
@@ -506,8 +550,14 @@ class TileComponentController {
 
   constructor($document, state, tileDataService) {
 
+    this.layerIdToMapTilesIndex = {}
+    this.mapRef = null  // Will be set in $document.ready()
+    this.state = state
+    this.tileDataService = tileDataService
+
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
+      .debounceTime(100)
       .pairwise() // This will give us the previous value in addition to the current value
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
 
@@ -521,7 +571,10 @@ class TileComponentController {
 
     // Redraw map tiles when requestd
     state.requestMapLayerRefresh
-      .subscribe((newValue) => this.refreshMapTiles())
+      .subscribe((newValue) => {
+        this.tileDataService.markHtmlCacheDirty()
+        this.refreshMapTiles()
+      })
 
     // If selected location ids change, set that in the tile data service
     state.selectedLocations
@@ -532,11 +585,6 @@ class TileComponentController {
       })
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
-
-    this.layerIdToMapTilesIndex = {}
-    this.mapRef = null  // Will be set in $document.ready()
-    this.state = state
-    this.tileDataService = tileDataService
 
     this.DELTA = Object.freeze({
       IGNORE: 0,

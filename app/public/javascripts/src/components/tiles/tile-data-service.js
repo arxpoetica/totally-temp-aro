@@ -210,9 +210,8 @@ app.service('tileDataService', ['$http', ($http) => {
     return entityImagePromise
   }
 
-  tileDataService.clearCache = () => {
+  tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
-    tileDataService.tileHtmlCache = {}
   }
 
   tileDataService.markHtmlCacheDirty = () => {
