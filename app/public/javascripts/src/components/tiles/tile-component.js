@@ -30,23 +30,51 @@ class MapTileRenderer {
   // Sets the selected location ids
   setselectedLocations(selectedLocations) {
     this.selectedLocations = selectedLocations
+    this.tileDataService.markHtmlCacheDirty()
   }
 
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
-    this.mapLayers = mapLayers
+    // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
+    var layersChanged = false
+    Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
+      if (!mapLayers[oldMapLayerKey]) {
+        // Old map layer key does not exist in new map layers, so layers have changed
+        layersChanged = true
+      } else if (JSON.stringify(this.mapLayers[oldMapLayerKey]) !== JSON.stringify(mapLayers[oldMapLayerKey])) {
+        // The contents of this map layer have changed
+        layersChanged = true
+      }
+    })
+    Object.keys(mapLayers).forEach((newMapLayerKey) => {
+      if (!this.mapLayers[newMapLayerKey]) {
+        // New map layer key doees not exist in old map layers, so layers have changed
+        layersChanged = true
+      }
+    })
+
+    if (layersChanged) {
+      this.tileDataService.markHtmlCacheDirty()
+    }
+    this.mapLayers = mapLayers  // Set the object in any case
+  }
+
+  // Gets the tile id for given zoom and coords. Useful for setting div ids and cache keys
+  getTileId(zoom, tileX, tileY) {
+    return `mapTile_${zoom}_${tileX}_${tileY}`
   }
 
   // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
     tiles.forEach((tile) => {
-      var tileId = `mapTile_${tile.zoom}_${tile.x}_${tile.y}`
+      var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
       var cachedTile = this.tileDataService.tileHtmlCache[tileId]
       if (cachedTile) {
         var frontBufferCanvas = cachedTile.frontBufferCanvas
         var backBufferCanvas = cachedTile.backBufferCanvas
         var heatmapCanvas = cachedTile.heatmapCanvas
-        if (frontBufferCanvas && backBufferCanvas) {
+        // Re-render only if the tile is marked as dirty
+        if (cachedTile.isDirty && frontBufferCanvas && backBufferCanvas) {
           var coord = { x: tile.x, y: tile.y }
           this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
             .then(() => this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
@@ -69,14 +97,15 @@ class MapTileRenderer {
     // We create a div with a parent canvas. This is because the canvas needs to have its top-left
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
-    var tileId = `mapTile_${zoom}_${coord.x}_${coord.y}`
-    var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null
+    var tileId = this.getTileId(zoom, coord.x, coord.y)
+    var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null, isDirty = false
     var htmlCache = this.tileDataService.tileHtmlCache[tileId]
     if (htmlCache) {
       div = htmlCache.div
       frontBufferCanvas = htmlCache.frontBufferCanvas
       backBufferCanvas = htmlCache.backBufferCanvas
       heatmapCanvas = htmlCache.heatmapCanvas
+      isDirty = htmlCache.isDirty
     } else {
       div = ownerDocument.createElement('div')
       div.id = tileId
@@ -91,22 +120,26 @@ class MapTileRenderer {
       frontBufferCanvas.style.top = `-${this.drawMargins + borderWidth}px`
       backBufferCanvas = this.createTileCanvas(ownerDocument)
       heatmapCanvas = this.createTileCanvas(ownerDocument)
+      isDirty = true  // Tile hasn't been rendered yet, so is dirty
       this.tileDataService.tileHtmlCache[tileId] = {
         div: div,
         frontBufferCanvas: frontBufferCanvas,
         backBufferCanvas: backBufferCanvas,
-        heatmapCanvas: heatmapCanvas
+        heatmapCanvas: heatmapCanvas,
+        isDirty: isDirty
       }
     }
 
-    // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
-    // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
-    // Ideally we could fire the two renders in parallel, but one some tiles, the 0-neighbour tile shows up
-    // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
-    // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
-    // back buffer of the canvas. For now, just render them in order.
-    this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
-      .then(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
+    if (isDirty) {
+      // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
+      // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
+      // Ideally we could fire the two renders in parallel, but one some tiles, the 0-neighbour tile shows up
+      // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
+      // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
+      // back buffer of the canvas. For now, just render them in order.
+      this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
+        .then(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
+    }
     return div
   }
 
@@ -114,10 +147,9 @@ class MapTileRenderer {
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
     // Render each tile synchronously (one after the other). Return a promise of the last rendered data layer
     var renderPromise = Promise.resolve()
-    // Hold a dirty flag for the canvas because we want to clear it IF we render at least one layer
-    var canvasIsDirty = { value: true } // An object because we want to modify it in the called function
+    backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
-      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, heatmapCanvas, mapLayerKey, this.mapLayers[mapLayerKey], canvasIsDirty))
+      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, heatmapCanvas, mapLayerKey, this.mapLayers[mapLayerKey]))
     })
     return new Promise((resolve, reject) => {
       renderPromise
@@ -126,19 +158,16 @@ class MapTileRenderer {
           var ctx = frontBufferCanvas.getContext('2d')
           ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
           ctx.drawImage(backBufferCanvas, 0, 0)
+          // All rendering has been done. Mark the cached HTML tile as not-dirty
+          var tileId = this.getTileId(zoom, coord.x, coord.y)
+          this.tileDataService.tileHtmlCache[tileId].isDirty = false
           resolve()
         })
     })
   }
 
   // Renders a single map layer onto this tile
-  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, heatmapCanvas, mapLayerId, mapLayer, canvasIsDirty) {
-
-    // Clear canvas if it is dirty
-    if (canvasIsDirty.value) {
-      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-      canvasIsDirty.value = false
-    }
+  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, heatmapCanvas, mapLayerId, mapLayer) {
 
     // Use neighbouring tile data only for heatmaps
     var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0

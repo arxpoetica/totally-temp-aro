@@ -100,6 +100,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
+  // When the map zoom changes, map layers can change
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
