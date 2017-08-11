@@ -99,13 +99,15 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
 
     // Create fiber routes layer
     if (state.competition.showFiberRoutes) {
+      var fiberLineWidth = 2
       if (state.competition.useAllCompetitors) {
         var mapLayerKey = `competitor_fiberRoutes_all`
         oldMapLayers[mapLayerKey] = {
           dataUrls: [`/tile/v1/fiber/competitive/all/tiles/line/${lineTransform}/`],
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           strokeStyle: '#000000',
-          fillStyle: '#000000'
+          fillStyle: '#000000',
+          lineWidth: fiberLineWidth
         }
         createdMapLayerKeys.add(mapLayerKey)
       } else {
@@ -115,7 +117,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/line/${lineTransform}/`],
             iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
             strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle
+            fillStyle: selectedCompetitor.fillStyle,
+            lineWidth: fiberLineWidth
           }
           createdMapLayerKeys.add(mapLayerKey)
         })
