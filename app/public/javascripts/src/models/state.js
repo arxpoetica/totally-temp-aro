@@ -365,9 +365,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       $http.get(`/locations/${service.planId}/selectedLocationIds`)
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
-            var selectedLocationsMap = new Set()
-            result.data.forEach((selectedLocationId) => selectedLocationsMap.add(+selectedLocationId.location_id))
-            service.selectedLocations.next(selectedLocationsMap)
+            var selectedLocationsSet = new Set()
+            result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
+            service.selectedLocations.next(selectedLocationsSet)
+            service.requestMapLayerRefresh.next({})
           }
         })
     }

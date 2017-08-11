@@ -14,11 +14,8 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
-    if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE') {
-      // No need to aggregate anything.
-      return tileDataService.getTileDataSingleUrl(mapLayer.dataUrls[0], zoom, tileX, tileY)
-    } else if (mapLayer.aggregateMode === 'FLATTEN') {
-      // We have multiple URLs where data is coming from, and we want a simple union of the results
+    if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
+      // We have one or multiple URLs where data is coming from, and we want a simple union of the results
       return tileDataService.getTileDataFlatten(mapLayer, zoom, tileX, tileY)
     } else if (mapLayer.aggregateMode === 'BY_ID') {
       // We want to aggregate by feature id
@@ -28,7 +25,7 @@ app.service('tileDataService', ['$http', ($http) => {
     }
   }
 
-  tileDataService.getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
+  var getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
     url += `${zoom}/${tileX}/${tileY}.mvt`
     var tileCacheKey = tileDataService.getTileCacheKey(url)
     if (tileDataService.tileDataCache[tileCacheKey]) {
@@ -58,7 +55,6 @@ app.service('tileDataService', ['$http', ($http) => {
             layerToFeatures[layerKey] = features
           })
           tileDataService.tileDataCache[tileCacheKey] = {
-            tileUrl: url,
             layerToFeatures: layerToFeatures
           }
           resolve(tileDataService.tileDataCache[tileCacheKey])
@@ -76,21 +72,38 @@ app.service('tileDataService', ['$http', ($http) => {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
     return new Promise((resolve, reject) => {
       var promises = []
-      mapLayer.dataUrls.forEach((tileUrl) => promises.push(tileDataService.getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+      mapLayer.dataUrls.forEach((tileUrl) => promises.push(getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+      var hasIcon = mapLayer.iconUrl
+      if (hasIcon) {
+        promises.push(new Promise((resolve, reject) => {
+          var img = new Image()
+          img.src = mapLayer.iconUrl
+          img.onload = () => {
+            // Image has been loaded
+            resolve(img)
+          }
+        }))
+      }
       Promise.all(promises)
         .then((results) => {
           var allFeatures = []
-          results.forEach((result) => {
+          var numDataResults = hasIcon ? results.length - 1 : results.length
+          for (var iResult = 0; iResult < numDataResults; ++iResult) {
+            var result = results[iResult]
             var layerToFeatures = result.layerToFeatures
             Object.keys(layerToFeatures).forEach((layerKey) => {
               allFeatures = allFeatures.concat(layerToFeatures[layerKey])
             })
-          })
-          resolve({
+          }
+          var tileData = {
             layerToFeatures: {
               FEATURES_FLATTENED: allFeatures
             }
-          })
+          }
+          if (hasIcon) {
+            tileData.icon = results[results.length - 1]
+          }
+          resolve(tileData)
         })
     })
   }
@@ -100,7 +113,7 @@ app.service('tileDataService', ['$http', ($http) => {
     // We have multiple URLs where data is coming from. Return the aggregated result
     return new Promise((resolve, reject) => {
       var promises = []
-      mapLayer.dataUrls.forEach((tileUrl) => promises.push(tileDataService.getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+      mapLayer.dataUrls.forEach((tileUrl) => promises.push(getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
       Promise.all(promises)
         .then((results) => {
           // We have data from all urls. First, we create an object that will map the objects

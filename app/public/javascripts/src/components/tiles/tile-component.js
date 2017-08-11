@@ -104,7 +104,6 @@ class MapTileRenderer {
         tileDataPromises.push(this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile, mapLayer))
       }
     }
-    tileDataPromises.push(this.tileDataService.getEntityImageForLayer(mapLayerId))
     tileDataPromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
 
     // Return a promise that resolves when all the rendering is finished
@@ -112,13 +111,13 @@ class MapTileRenderer {
       Promise.all(tileDataPromises)
         .then((promiseResults) => {
 
-          var entityImage = promiseResults[promiseResults.length - 2]
+          var entityImage = promiseResults[0].icon
           var selectedLocationImage = promiseResults[promiseResults.length - 1]
           var ctx = canvas.getContext("2d")
           ctx.lineWidth = 1
           var heatMapData = []
 
-          for (var iResult = 0; iResult < promiseResults.length - 2; ++iResult) {
+          for (var iResult = 0; iResult < promiseResults.length - 1; ++iResult) {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
@@ -326,85 +325,101 @@ class MapTileRenderer {
   // Gets all features that are within a given polygon
   getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
 
+    var promises = []
+    Object.keys(this.mapLayers).forEach((mapLayerKey) => {
+      var mapLayer = this.mapLayers[mapLayerKey]
+      if (mapLayer.selectable) {
+        promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
+      }
+    })
     return new Promise((resolve, reject) => {
-    // Get tile data
-    this.tileDataService.getTileData(this.layerProperties.data.url, tileZoom, tileX, tileY)
-      .then((result) => {
+      Promise.all(promises)
+        .then((promiseResults) => {
 
-        var layerToFeatures = result.layerToFeatures
-        var hitFeatures = []
-        Object.keys(layerToFeatures).forEach((layerKey) => {
-          var features = layerToFeatures[layerKey]
-          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-            var feature = features[iFeature]
-            var geometry = feature.loadGeometry()
-            geometry.forEach((shape) => {
-              if (shape.length === 1) {
-                // Only support points for now
-                var locationCoords = [shape[0].x, shape[0].y]
-                var isPointInPolygon = pointInPolygon(locationCoords, polygonCoords)
-                if (isPointInPolygon) {
-                  hitFeatures.push({
-                    location_id: feature.properties.location_id
-                  })
-                }
+          var hitFeatures = []
+          promiseResults.forEach((result) => {
+            var layerToFeatures = result.layerToFeatures
+            var entityImage = result.icon
+
+            var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
+            var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
+
+            Object.keys(layerToFeatures).forEach((layerKey) => {
+              var features = layerToFeatures[layerKey]
+              for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+                var feature = features[iFeature]
+                // Parse the geometry out.
+                var geometry = feature.loadGeometry()
+                // Geometry is an array of shapes
+                geometry.forEach((shape) => {
+                  if (shape.length === 1) {
+                    // Only support points for now
+                    var locationCoords = [shape[0].x, shape[0].y]
+                    var isPointInPolygon = pointInPolygon(locationCoords, polygonCoords)
+                    if (isPointInPolygon) {
+                      hitFeatures.push(feature.properties)
+                    }
+                  }
+                })
               }
             })
-          }
+          })
+          // We have a list of features that are 'hit', i.e. under the specified point. Return them.
+          resolve(hitFeatures)
         })
-        resolve(hitFeatures)
-      })
     })
   }
 
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
 
-    // Get tile data from service
-    var promises = [
-      this.tileDataService.getTileData(this.layerProperties.data.url, tileZoom, tileX, tileY),
-      this.tileDataService.getEntityImageForLayer(this.layerProperties.id)
-    ]
+    var promises = []
+    Object.keys(this.mapLayers).forEach((mapLayerKey) => {
+      var mapLayer = this.mapLayers[mapLayerKey]
+      if (mapLayer.selectable) {
+        promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
+      }
+    })
     return new Promise((resolve, reject) => {
       Promise.all(promises)
         .then((promiseResults) => {
 
-          var layerToFeatures = promiseResults[0].layerToFeatures
-          var entityImage = promiseResults[1]
-
-          var imageWidthBy2 = entityImage.width / 2
-          var imageHeightBy2 = entityImage.height / 2
-
           var hitFeatures = []
-          Object.keys(layerToFeatures).forEach((layerKey) => {
-            var features = layerToFeatures[layerKey]
-            // console.log('layer has ' + layer.length + ' features')
-            for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-              // Parse the geometry out.
-              var geometry = features[iFeature].loadGeometry()
-              // Geometry is an array of shapes
-              var imageWidthBy2 = entityImage.width / 2
-              var imageHeightBy2 = entityImage.height / 2
-              geometry.forEach((shape) => {
-                // Shape is an array of coordinates
-                switch(shape.length) {
-                  case 1:
-                    // This is a point
-                    if (xWithinTile >= shape[0].x - imageWidthBy2
-                        && xWithinTile <= shape[0].x + imageWidthBy2
-                        && yWithinTile >= shape[0].y - imageHeightBy2
-                        && yWithinTile <= shape[0].y + imageHeightBy2) {
-                          hitFeatures.push(features[iFeature].properties)
-                        }
-                    break;
+          promiseResults.forEach((result) => {
+            var layerToFeatures = result.layerToFeatures
+            var entityImage = result.icon
 
-                  default:
-                    // Not supported yet
-                    break;
-                }
-              })
-            }
+            var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
+            var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
+
+            Object.keys(layerToFeatures).forEach((layerKey) => {
+              var features = layerToFeatures[layerKey]
+              for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+                // Parse the geometry out.
+                var geometry = features[iFeature].loadGeometry()
+                // Geometry is an array of shapes
+                geometry.forEach((shape) => {
+                  // Shape is an array of coordinates
+                  switch(shape.length) {
+                    case 1:
+                      // This is a point
+                      if (xWithinTile >= shape[0].x - imageWidthBy2
+                          && xWithinTile <= shape[0].x + imageWidthBy2
+                          && yWithinTile >= shape[0].y - imageHeightBy2
+                          && yWithinTile <= shape[0].y + imageHeightBy2) {
+                            hitFeatures.push(features[iFeature].properties)
+                          }
+                      break;
+
+                    default:
+                      // Not supported yet
+                      break;
+                  }
+                })
+              }
+            })
           })
+          // We have a list of features that are 'hit', i.e. under the specified point. Return them.
           resolve(hitFeatures)
         })
     })
@@ -494,9 +509,9 @@ class TileComponentController {
             results.forEach((result) => {
               result.forEach((locationObj) => selectedLocations.add(locationObj.location_id))
             })
-            var selectedLocations = []
-            selectedLocations.forEach((id) => selectedLocations.push({ location_id: id }))
-            state.hackRaiseEvent(selectedLocations)
+            var selectedLocationsIds = []
+            selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+            state.hackRaiseEvent(selectedLocationsIds)
           })
 
       })
@@ -623,85 +638,9 @@ class TileComponentController {
       return
     }
 
-    // Add icon images for all map layers
-    Object.keys(newMapLayers).forEach((mapLayerKey) => {
-      var mapLayer = newMapLayers[mapLayerKey]
-      if (mapLayer.iconUrl) {
-        this.tileDataService.addEntityImageForLayer(mapLayerKey, mapLayer.iconUrl)
-      }
-    })
-
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
-    // // We have a new set of map layers. Determine which ones to update and which ones to delete
-    // if (!mapLayerActions) {
-    //   mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
-    // }
-
-    // // First delete any map layers that we want
-    // for (var iOverlay = 0; iOverlay < this.mapRef.overlayMapTypes.length; ++iOverlay) {
-    //   var overlayId = this.mapRef.overlayMapTypes.getAt(iOverlay).layerProperties.id
-    //   if (mapLayerActions[overlayId] === this.DELTA.DELETE) {
-    //     this.mapRef.overlayMapTypes.removeAt(iOverlay)
-    //     --iOverlay
-    //   }
-    // }
-
-    // // Then update any map layers that we want
-    // var mapExistingLayers = {}
-    // this.mapRef.overlayMapTypes.forEach((overlayMapType, index) => mapExistingLayers[overlayMapType.layerProperties.id] = index)
-    // Object.keys(newMapLayers).forEach((key) => {
-    //   var mapLayer = newMapLayers[key]
-    //   if (mapLayerActions[key] === this.DELTA.UPDATE) {
-    //     this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
-    //     var layerProperties = {
-    //       id: key,
-    //       data: mapLayer
-    //     }
-    //     layerProperties.data.selectedLocations = this.state.selectedLocations.getValue()
-    //     var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, layerProperties, this.tileDataService)
-    //     tileRenderer.setMapTileOptions(this.state.mapTileOptions.getValue())
-    //     if (key in mapExistingLayers) {
-    //       // Tile exists in maps. Replace it
-    //       var index = mapExistingLayers[key]
-    //       this.mapRef.overlayMapTypes.setAt(index, tileRenderer)
-    //     } else {
-    //       // Tile does not already exist in maps
-    //       this.mapRef.overlayMapTypes.push(tileRenderer)
-    //     }
-    //   }
-    // })
   }
-
-  // // Compares old and new mapLayers objects and returns the list of layers to be added/updated and removed
-  // computeMapLayerActions(oldMapLayers, newMapLayers) {
-
-  //   // First mark the layers to update
-  //   var mapLayerActions = {}
-  //   Object.keys(newMapLayers).forEach((newMapLayerKey) => {
-  //     mapLayerActions[newMapLayerKey] = this.DELTA.IGNORE
-  //     if (!oldMapLayers[newMapLayerKey]) {
-  //       // Map layer key does not exist in old layers. Add it
-  //       mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
-  //     } else {
-  //       var newObj = newMapLayers[newMapLayerKey]
-  //       var oldObj = oldMapLayers[newMapLayerKey]
-  //       // Quick check with stringifys. Objects are very small.
-  //       if (JSON.stringify(newObj) !== JSON.stringify(oldObj)) {
-  //         mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
-  //       }
-  //     }
-  //   })
-
-  //   // Then mark the layers to delete
-  //   Object.keys(oldMapLayers).forEach((oldMapLayerKey) => {
-  //     if (!newMapLayers[oldMapLayerKey]) {
-  //       mapLayerActions[oldMapLayerKey] = this.DELTA.DELETE
-  //     }
-  //   })
-
-  //   return mapLayerActions
-  // }
 }
 
 TileComponentController.$inject = ['$document', 'state', 'tileDataService']
