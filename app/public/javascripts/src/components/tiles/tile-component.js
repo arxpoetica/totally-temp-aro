@@ -89,9 +89,17 @@ class MapTileRenderer {
       return
     }
 
-    // Get the latest batch of rendering promises
+    // Rendering batches are always added in pairs (one for 0-neighbours, one for 1-neighbours).
+    // If we have more than two batches in the queue, skip to the last one.
     this.isRendering = true
-    var renderingFunctions = this.renderBatches.pop()
+    var renderingFunctions = null
+    if (this.renderBatches.length > 2) {
+      renderingFunctions = this.renderBatches[this.renderBatches.length - 1]
+      this.renderBatches = []
+    } else {
+      renderingFunctions = this.renderBatches[0]
+      this.renderBatches.splice(0, 1)
+    }
     var renderingPromises = []
     renderingFunctions.forEach((fn) => renderingPromises.push(fn()))
     Promise.all(renderingPromises)  // Wait for all rendering in this batch to be completed
@@ -125,9 +133,8 @@ class MapTileRenderer {
         }
       }
     })
-    // This is a queue, and we want the 0-neighbour renders to be popped first. So push the 1-neighbour renders first
-    this.renderBatches.push(renderBatch1)
     this.renderBatches.push(renderBatch0)
+    this.renderBatches.push(renderBatch1)
     this.startRenderingRecursive()
   }
 
@@ -193,7 +200,11 @@ class MapTileRenderer {
     var renderPromise = Promise.resolve()
     backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
-      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, heatmapCanvas, mapLayerKey, this.mapLayers[mapLayerKey]))
+      var mapLayer = this.mapLayers[mapLayerKey]
+      if (mapLayer) {
+        // This check is only when this.mapLayers gets modified by another thread while this loop is completing
+        renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, heatmapCanvas, mapLayerKey, mapLayer))
+      }
     })
     return new Promise((resolve, reject) => {
       renderPromise
