@@ -542,7 +542,6 @@ class TileComponentController {
               var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
               convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
             })
-            console.log(convertedPixelCoords)
 
             // Get the locations from this tile that are in the polygon
             this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
