@@ -92,14 +92,8 @@ class MapTileRenderer {
     // Rendering batches are always added in pairs (one for 0-neighbours, one for 1-neighbours).
     // If we have more than two batches in the queue, skip to the last one.
     this.isRendering = true
-    var renderingFunctions = null
-    if (this.renderBatches.length > 2) {
-      renderingFunctions = this.renderBatches[this.renderBatches.length - 1]
-      this.renderBatches = []
-    } else {
-      renderingFunctions = this.renderBatches[0]
-      this.renderBatches.splice(0, 1)
-    }
+    var renderingFunctions = this.renderBatches[0]
+    this.renderBatches.splice(0, 1)
     var renderingPromises = []
     renderingFunctions.forEach((fn) => renderingPromises.push(fn()))
     Promise.all(renderingPromises)  // Wait for all rendering in this batch to be completed
