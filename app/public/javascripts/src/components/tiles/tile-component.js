@@ -559,6 +559,31 @@ class MapTileRenderer {
 
 class TileComponentController {
 
+  // MapLayer objects contain the following information
+  // id: A globally (within an instance of the application) unique identifier for this layer
+  // dataUrls: One or more URLs where we will get the data from. The URL will contain everything except the tile coordinates (zoom/x/y)
+  // renderMode: One of the following values:
+  //             PRIMITIVE_FEATURES: Renders features using icons, lines or polygons
+  //             HEATMAP: Renders features using a heatmap
+  //             AGGREGATE_OPACITY: Renders aggregated features with varying opacity based on the aggregated values. Valid only when aggregateMode===BY_ID
+  //             AGGREGATE_GRADIENT: Renders aggregated features with varying colors (from a gradient) based on the aggregated values. Valid only when aggregateMode===BY_ID. Think of this as the same as AGGREATE_OPACITY, but instead of opacity from 0.0 to 1.0, the colors change from (for example) red to green
+  // iconUrls: (Optional) Urls for icons used to display point data (e.g. Small Businesses)
+  // singleIcon: (Optional, default true) If true, then we will use one single icon for rendering all point features in the layer. If false, we will render icons based on certain feature properties
+  // iconSwitchFunction: (Optional) A function that will be called by the rendering code (if “singleIcon” is false) for each point feature. The function should return the URL of the icon used for rendering the point. The returned URL must be part of the iconUrls field
+  // selectable: (Optional, default false) Set true if you want features in this layer to be selectable
+  // aggregateMode: (Optional) One of the following strings:
+  //                NONE: Do not perform aggregation
+  //                FLATTEN: Flatten all features into a single layer before rendering
+  //                BY_ID: Perform aggregation by feature ID. More properties have to be set for this to work
+  // aggregateById: (Optional) If aggregateMode===BY_ID, then this gives the feature property by which we want to aggregate. E.g. for census block features, we may have the “gid” property
+  // aggregateProperty: (Optional) If aggregateMode===BY_ID, then this gives us the feature property that we want to aggregate. E.g. for census block features, we may want to aggregate by “download_speed”
+  // aggregateMinPalette: (Optional) if aggregateMode===BY_ID, then any value below this is rendered with the same color
+  // aggregateMaxPalette: (Optional) if aggregateMode===BY_ID, then any value above this is rendered with the same color
+  // lineWidth: (Optional) For line and polygon features, this is the width of the line
+  // strokeStyle: (Optional) For line and polygon features, this is the color of the line (e.g. ‘#f0a033’)
+  // fillStyle: (Optional) For polygon features, this is the fill color
+  // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
+
   constructor($document, state, tileDataService) {
 
     this.layerIdToMapTilesIndex = {}

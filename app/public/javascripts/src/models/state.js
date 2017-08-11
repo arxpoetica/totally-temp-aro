@@ -141,7 +141,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     ]
   }
 
-  // Map layers data - define once
+  // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
   service.mapLayers = new Rx.BehaviorSubject({})
   service.mapTileOptions = new Rx.BehaviorSubject({
     showTileExtents: false,
