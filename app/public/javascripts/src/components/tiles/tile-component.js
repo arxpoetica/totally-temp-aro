@@ -45,10 +45,11 @@ class MapTileRenderer {
       if (cachedTile) {
         var frontBufferCanvas = cachedTile.frontBufferCanvas
         var backBufferCanvas = cachedTile.backBufferCanvas
+        var heatmapCanvas = cachedTile.heatmapCanvas
         if (frontBufferCanvas && backBufferCanvas) {
           var coord = { x: tile.x, y: tile.y }
-          this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas)                // 0-neighbour tile
-            .then(() => this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas))  // 1-neighbour tile
+          this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
+            .then(() => this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
         }
       }
     })
@@ -69,12 +70,13 @@ class MapTileRenderer {
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
     var tileId = `mapTile_${zoom}_${coord.x}_${coord.y}`
-    var div = null, frontBufferCanvas = null, backBufferCanvas = null
+    var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null
     var htmlCache = this.tileDataService.tileHtmlCache[tileId]
     if (htmlCache) {
       div = htmlCache.div
       frontBufferCanvas = htmlCache.frontBufferCanvas
       backBufferCanvas = htmlCache.backBufferCanvas
+      heatmapCanvas = htmlCache.heatmapCanvas
     } else {
       div = ownerDocument.createElement('div')
       div.id = tileId
@@ -88,10 +90,12 @@ class MapTileRenderer {
       frontBufferCanvas.style.left = `-${this.drawMargins + borderWidth}px`
       frontBufferCanvas.style.top = `-${this.drawMargins + borderWidth}px`
       backBufferCanvas = this.createTileCanvas(ownerDocument)
+      heatmapCanvas = this.createTileCanvas(ownerDocument)
       this.tileDataService.tileHtmlCache[tileId] = {
         div: div,
         frontBufferCanvas: frontBufferCanvas,
-        backBufferCanvas: backBufferCanvas
+        backBufferCanvas: backBufferCanvas,
+        heatmapCanvas: heatmapCanvas
       }
     }
 
@@ -101,19 +105,19 @@ class MapTileRenderer {
     // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
     // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
     // back buffer of the canvas. For now, just render them in order.
-    this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas)                // 0-neighbour tile
-      .then(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas))  // 1-neighbour tile
+    this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)                // 0-neighbour tile
+      .then(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))  // 1-neighbour tile
     return div
   }
 
   // Renders all data for this tile
-  renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas) {
+  renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
     // Render each tile synchronously (one after the other). Return a promise of the last rendered data layer
     var renderPromise = Promise.resolve()
     // Hold a dirty flag for the canvas because we want to clear it IF we render at least one layer
     var canvasIsDirty = { value: true } // An object because we want to modify it in the called function
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
-      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, mapLayerKey, this.mapLayers[mapLayerKey], canvasIsDirty))
+      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, heatmapCanvas, mapLayerKey, this.mapLayers[mapLayerKey], canvasIsDirty))
     })
     return new Promise((resolve, reject) => {
       renderPromise
@@ -128,7 +132,7 @@ class MapTileRenderer {
   }
 
   // Renders a single map layer onto this tile
-  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerId, mapLayer, canvasIsDirty) {
+  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, heatmapCanvas, mapLayerId, mapLayer, canvasIsDirty) {
 
     // Clear canvas if it is dirty
     if (canvasIsDirty.value) {
@@ -172,7 +176,11 @@ class MapTileRenderer {
             this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileDataOffsets[iResult], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
           }
           if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
-            var heatMapRenderer = simpleheat(canvas)
+            // Note that we render the heatmap to another canvas, then copy that image over to the main canvas. This
+            // is because the heatmap library clears the canvas before rendering
+            var heatmapCtx = heatmapCanvas.getContext('2d')
+            heatmapCtx.globalAlpha = 1.0
+            var heatMapRenderer = simpleheat(heatmapCanvas)
             heatMapRenderer.data(heatMapData)
             var maxValue = 1.0
             if (this.mapTileOptions.heatMap.useAbsoluteMax) {
@@ -185,10 +193,12 @@ class MapTileRenderer {
             heatMapRenderer.max(maxValue)
             heatMapRenderer.radius(20, 20)
             heatMapRenderer.draw(0.0)
-            ctx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-            ctx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-            ctx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-            ctx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+            heatmapCtx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+            heatmapCtx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+            heatmapCtx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+            heatmapCtx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+            // Draw the heatmap onto the main canvas
+            ctx.drawImage(heatmapCanvas, 0, 0)
           }
           var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
           this.renderTileInformation(canvas, ctx, tileCoordinateString)
