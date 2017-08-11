@@ -37,27 +37,62 @@ class MapTileRenderer {
     this.mapLayers = mapLayers
   }
 
+  // Redraws cached tiles with the specified tile IDs
+  redrawCachedTiles(tiles) {
+    tiles.forEach((tile) => {
+      var tileId = `mapTile_${tile.zoom}_${tile.x}_${tile.y}`
+      var cachedTile = this.tileDataService.tileHtmlCache[tileId]
+      if (cachedTile) {
+        var frontBufferCanvas = cachedTile.frontBufferCanvas
+        var backBufferCanvas = cachedTile.backBufferCanvas
+        if (frontBufferCanvas && backBufferCanvas) {
+          var coord = { x: tile.x, y: tile.y }
+          this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas)                // 0-neighbour tile
+            .then(() => this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas))  // 1-neighbour tile
+        }
+      }
+    })
+  }
+
+  // Creates a tile canvas element
+  createTileCanvas(ownerDocument) {
+    var canvas = ownerDocument.createElement('canvas');
+    var borderWidth = 0
+    canvas.width = this.tileSize.width + this.drawMargins * 2;
+    canvas.height = this.tileSize.height + this.drawMargins * 2;
+    return canvas
+  }
+
   // This method is called by Google Maps. Render a canvas tile and send it back.
   getTile(coord, zoom, ownerDocument) {
     // We create a div with a parent canvas. This is because the canvas needs to have its top-left
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
-    var div = ownerDocument.createElement('div')
-    div.id = `map_tile_${zoom}_${coord.x}_${coord.y}`
-    var canvas = ownerDocument.createElement('canvas');
-    div.appendChild(canvas)
-    canvas.style.position = 'absolute'
-    var borderWidth = 0
-    if (this.mapTileOptions.showTileExtents) {
-      borderWidth = 2
-    }
-    canvas.style.left = `-${this.drawMargins + borderWidth}px`
-    canvas.style.top = `-${this.drawMargins + borderWidth}px`
-    canvas.width = this.tileSize.width + this.drawMargins * 2;
-    canvas.height = this.tileSize.height + this.drawMargins * 2;
-
-    if (this.mapTileOptions.showTileExtents) {
-      canvas.style.border = `${borderWidth}px dotted`
+    var tileId = `mapTile_${zoom}_${coord.x}_${coord.y}`
+    var div = null, frontBufferCanvas = null, backBufferCanvas = null
+    var htmlCache = this.tileDataService.tileHtmlCache[tileId]
+    if (htmlCache) {
+      div = htmlCache.div
+      frontBufferCanvas = htmlCache.frontBufferCanvas
+      backBufferCanvas = htmlCache.backBufferCanvas
+    } else {
+      div = ownerDocument.createElement('div')
+      div.id = tileId
+      var frontBufferCanvas = this.createTileCanvas(ownerDocument)
+      div.appendChild(frontBufferCanvas)
+      frontBufferCanvas.style.position = 'absolute'
+      var borderWidth = 0
+      if (this.mapTileOptions.showTileExtents) {
+        borderWidth = 2
+      }
+      frontBufferCanvas.style.left = `-${this.drawMargins + borderWidth}px`
+      frontBufferCanvas.style.top = `-${this.drawMargins + borderWidth}px`
+      backBufferCanvas = this.createTileCanvas(ownerDocument)
+      this.tileDataService.tileHtmlCache[tileId] = {
+        div: div,
+        frontBufferCanvas: frontBufferCanvas,
+        backBufferCanvas: backBufferCanvas
+      }
     }
 
     // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
@@ -66,27 +101,44 @@ class MapTileRenderer {
     // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
     // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
     // back buffer of the canvas. For now, just render them in order.
-    this.renderTile(zoom, coord, false, canvas)                // 0-neighbour tile
-      .then(() => this.renderTile(zoom, coord, true, canvas))  // 1-neighbour tile
+    this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas)                // 0-neighbour tile
+      .then(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas))  // 1-neighbour tile
     return div
   }
 
   // Renders all data for this tile
-  renderTile(zoom, coord, useNeighbouringTileData, canvas) {
+  renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas) {
     // Render each tile synchronously (one after the other). Return a promise of the last rendered data layer
     var renderPromise = Promise.resolve()
+    // Hold a dirty flag for the canvas because we want to clear it IF we render at least one layer
+    var canvasIsDirty = { value: true } // An object because we want to modify it in the called function
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
-      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerKey, this.mapLayers[mapLayerKey]))
+      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, mapLayerKey, this.mapLayers[mapLayerKey], canvasIsDirty))
     })
-    return renderPromise
+    return new Promise((resolve, reject) => {
+      renderPromise
+        .then(() => {
+          // Copy the back buffer image onto the front buffer
+          var ctx = frontBufferCanvas.getContext('2d')
+          ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
+          ctx.drawImage(backBufferCanvas, 0, 0)
+          resolve()
+        })
+    })
   }
 
   // Renders a single map layer onto this tile
-  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerId, mapLayer) {
+  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerId, mapLayer, canvasIsDirty) {
 
     // Use neighbouring tile data only for heatmaps
     if (useNeighbouringTileData && mapLayer.renderMode !== 'HEATMAP') {
       return Promise.resolve()
+    }
+
+    // Clear canvas if it is dirty
+    if (canvasIsDirty.value) {
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+      canvasIsDirty.value = false
     }
 
     // Get tile data from service
@@ -113,7 +165,7 @@ class MapTileRenderer {
 
           var entityImage = promiseResults[0].icon
           var selectedLocationImage = promiseResults[promiseResults.length - 1]
-          var ctx = canvas.getContext("2d")
+          var ctx = canvas.getContext('2d')
           ctx.lineWidth = 1
           var heatMapData = []
 
@@ -153,9 +205,13 @@ class MapTileRenderer {
   renderTileInformation(canvas, ctx, tileCoordinateString) {
     if (this.mapTileOptions.showTileExtents) {
       ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
-      // Draw a rectangle showing the tile (not the margins)
+      // Draw a rectangle showing the tile margins
       ctx.strokeStyle = "#000000"
       ctx.lineWidth = 2
+      ctx.setLineDash([3, 3])
+      ctx.strokeRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.tileSize.height + this.drawMargins * 2)
+      // Draw a rectangle showing the tile (not the margins)
+      ctx.setLineDash([])
       ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
       // Show the tile coordinates that we pass to aro-service
       ctx.fillStyle = '#000000'
@@ -171,13 +227,14 @@ class MapTileRenderer {
 
   // Render a set of features on the map
   renderFeatures(ctx, features, entityImage, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+    ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
       var geometry = feature.loadGeometry()
       // Geometry is an array of shapes
-      var imageWidthBy2 = entityImage.width / 2
-      var imageHeightBy2 = entityImage.height / 2
+      var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
+      var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
       geometry.forEach((shape) => {
         // Shape is an array of coordinates
         switch(shape.length) {
@@ -606,13 +663,34 @@ class TileComponentController {
 
   // Refresh map tiles
   refreshMapTiles() {
-    if (this.mapRef) {
-      // Hacky way to get google maps to redraw the tiles
-      this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
-        this.mapRef.overlayMapTypes.setAt(index, null)
-        this.mapRef.overlayMapTypes.setAt(index, overlayMap)
-      })
+    if (!this.mapRef || !this.mapRef.getBounds()) {
+      return
     }
+
+    // First get a list of tiles that are visible on the screen. We will only redraw these ones
+    var visibleTiles = []
+    var mapBounds = this.mapRef.getBounds()
+    var neCorner = mapBounds.getNorthEast()
+    var swCorner = mapBounds.getSouthWest()
+    var zoom = this.mapRef.getZoom()
+    // Note the swap from NE/SW to NW/SE when finding tile coordinates
+    var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+    var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+
+    for (var x = tileCoordsNW.x; x <= tileCoordsSE.x; ++x) {
+      for (var y = tileCoordsNW.y; y <= tileCoordsSE.y; ++y) {
+        visibleTiles.push({
+          zoom: zoom,
+          x: x,
+          y: y
+        })
+      }
+    }
+
+    // Redraw cached tiles
+    this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+      overlayMap.redrawCachedTiles(visibleTiles)
+    })
   }
 
   // Handles map layer events

@@ -6,8 +6,9 @@ app.service('tileDataService', ['$http', ($http) => {
 
   var tileDataService = {}
   tileDataService.tileDataCache = {}
+  tileDataService.tileHtmlCache = {}  // A cache of HTML elements created. Used to prevent flicker.
   // Hold a map of layer keys to image urls (and image data once it is loaded)
-  tileDataService.layerEntityImages = {}
+  tileDataService.entityImageCache = {}
 
   tileDataService.getTileCacheKey = (url) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
@@ -182,7 +183,7 @@ app.service('tileDataService', ['$http', ($http) => {
 
   // Adds a layer key and url to the tile data service
   tileDataService.addEntityImageForLayer = (layerKey, imageUrl) => {
-    if (tileDataService.layerEntityImages[layerKey]) {
+    if (tileDataService.entityImageCache[layerKey]) {
       // This has already been added. Nothing to do.
       return
     }
@@ -197,12 +198,12 @@ app.service('tileDataService', ['$http', ($http) => {
     })
 
     // Save the mapping
-    tileDataService.layerEntityImages[layerKey] = imageLoadedPromise
+    tileDataService.entityImageCache[layerKey] = imageLoadedPromise
   }
 
   // Returns a promise for the image associated with a layer key
   tileDataService.getEntityImageForLayer = (layerKey) => {
-    var entityImagePromise = tileDataService.layerEntityImages[layerKey]
+    var entityImagePromise = tileDataService.entityImageCache[layerKey]
     if (!entityImagePromise) {
       throw 'No promise for image with layerKey ' + layerKey
     }
@@ -211,6 +212,7 @@ app.service('tileDataService', ['$http', ($http) => {
 
   tileDataService.clearCache = () => {
     tileDataService.tileDataCache = {}
+    tileDataService.tileHtmlCache = {}
   }
 
   return tileDataService
