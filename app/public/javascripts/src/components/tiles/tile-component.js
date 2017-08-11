@@ -40,11 +40,6 @@ class MapTileRenderer {
     canvas.width = this.tileSize.width + this.drawMargins * 2;
     canvas.height = this.tileSize.height + this.drawMargins * 2;
 
-    // if (!this.layerProperties.data.isVisible) {
-    //   // Layer is invisible
-    //   return div
-    // }
-
     // if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
     //   canvas.style.border = "2px dotted";
     // }
@@ -86,7 +81,7 @@ class MapTileRenderer {
         })
         var xTile = coord.x + deltaX
         var yTile = coord.y + deltaY
-        tileDataPromises.push(this.tileDataService.getTileData(mapLayer.dataUrls, zoom, xTile, yTile, mapLayer))
+        tileDataPromises.push(this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile, mapLayer))
       }
     }
     tileDataPromises.push(this.tileDataService.getEntityImageForLayer(mapLayerId))
