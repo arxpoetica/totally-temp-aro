@@ -130,19 +130,15 @@ class MapTileRenderer {
   // Renders a single map layer onto this tile
   renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerId, mapLayer, canvasIsDirty) {
 
-    // Use neighbouring tile data only for heatmaps
-    if (useNeighbouringTileData && mapLayer.renderMode !== 'HEATMAP') {
-      return Promise.resolve()
-    }
-
     // Clear canvas if it is dirty
     if (canvasIsDirty.value) {
       canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
       canvasIsDirty.value = false
     }
 
-    // Get tile data from service
-    var numNeighbors = useNeighbouringTileData ? 1 : 0
+    // Use neighbouring tile data only for heatmaps
+    var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
+
     var tileDataPromises = []
     var tileDataOffsets = []
     for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
