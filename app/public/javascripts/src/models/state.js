@@ -122,6 +122,25 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
+  // View Settings layer - define once
+  service.viewSetting = {
+    selectedFiberOption: null,
+    heatmapOptions: [
+      {
+        id: 'HEATMAP_ON',
+        label: 'Aggregate heatmap'
+      },
+      {
+        id: 'HEATMAP_DEBUG',
+        label: 'Aggregate points'
+      },
+      {
+        id: 'HEATMAP_OFF',
+        label: 'Raw Points'
+      }
+    ]
+  }
+
   // Map layers data - define once
   service.mapLayers = new Rx.BehaviorSubject({})
   service.mapTileOptions = new Rx.BehaviorSubject({
@@ -131,7 +150,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       maxValue: 100,
       powerExponent: 0.5,
       worldMaxValue: 100000000
-    }
+    },
+    selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
   })
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
 
@@ -155,27 +175,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.boundaries = {
     areaLayers: []
   }
-  
-  // View Settings layer - define once
-  service.viewSetting = {
-    selectedFiberOption: null,
-    heatmapOptions: [
-      {
-        id: 'HEATMAP_ON',
-        label: 'Aggregate heatmap'
-      },
-      {
-        id: 'HEATMAP_DEBUG',
-        label: 'Aggregate points'
-      },
-      {
-        id: 'HEATMAP_OFF',
-        label: 'Raw Points'
-      }
-    ],
-    selectedHeatmapOption: null
-  }
-  service.viewSetting.selectedHeatmapOption = new Rx.BehaviorSubject(service.viewSetting.heatmapOptions[0])
 
   // Default data sources - define once
   service.defaultDataSources = [

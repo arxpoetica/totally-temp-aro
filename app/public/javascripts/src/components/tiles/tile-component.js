@@ -9,15 +9,27 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
+    this.mapTileOptions = mapTileOptions
+    this.selectedLocations = selectedLocations
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
     // be such that the largest rendered feature (or heatmap) does not get clipped.
     this.drawMargins = 10
+  }
+
+  // Sets the global tile options
+  setMapTileOptions(mapTileOptions) {
+    this.mapTileOptions = mapTileOptions
+  }
+
+  // Sets the selected location ids
+  setselectedLocations(selectedLocations) {
+    this.selectedLocations = selectedLocations
   }
 
   // Sets the map layers for this renderer
@@ -40,9 +52,9 @@ class MapTileRenderer {
     canvas.width = this.tileSize.width + this.drawMargins * 2;
     canvas.height = this.tileSize.height + this.drawMargins * 2;
 
-    // if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-    //   canvas.style.border = "2px dotted";
-    // }
+    if (this.mapTileOptions.showTileExtents) {
+      canvas.style.border = '2px dotted'
+    }
 
     // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
     // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
@@ -104,19 +116,18 @@ class MapTileRenderer {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, false)
+            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
           }
-          if (heatMapData.length > 0 && this.layerProperties.data.heatmapDebug === 'HEATMAP_ON') {
+          if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
             var heatMapRenderer = simpleheat(canvas)
             heatMapRenderer.data(heatMapData)
             var maxValue = 1.0
-            if (this.layerProperties.data.mapTileOptions.heatMap.useAbsoluteMax) {
+            if (this.mapTileOptions.heatMap.useAbsoluteMax) {
               // Simply use the maximum value for the heatmap
-              maxValue = this.layerProperties.data.mapTileOptions.heatMap.maxValue
+              maxValue = this.mapTileOptions.heatMap.maxValue
             } else {
               // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-              maxValue = this.layerProperties.data.mapTileOptions.heatMap.worldMaxValue
-                          / Math.pow(2.0, zoom)
+              maxValue = this.mapTileOptions.heatMap.worldMaxValue / Math.pow(2.0, zoom)
             }
             heatMapRenderer.max(maxValue)
             heatMapRenderer.radius(20, 20)
@@ -148,7 +159,7 @@ class MapTileRenderer {
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, geometryOffset, heatMapData, heatmapDebug) {
+  renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, geometryOffset, heatMapData, heatmapID, mapLayer) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
@@ -163,21 +174,20 @@ class MapTileRenderer {
             // This is a point
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-            // Aggregation property - first try entity_count, then weight. Note that both could be null
-            var aggregationProperty = null
-            if (heatmapDebug === 'HEATMAP_ON') {
-              aggregationProperty = feature.properties.entity_count || feature.properties.weight
-            }
-            if (aggregationProperty && heatmapDebug === 'HEATMAP_ON') {
-              var adjustedWeight = Math.pow(+aggregationProperty, this.layerProperties.data.mapTileOptions.heatMap.powerExponent)
-              heatMapData.push([x, y, adjustedWeight])
-            } else {
-              // This could be because we are zoomed in, or because we want to debug the heatmap rendering
-              if (feature.properties.location_id && this.layerProperties.data.selectedLocationIds.has(+feature.properties.location_id)) {
+            if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'ICON') {
+              // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
+              if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)) {
                 // Draw selected icon
                 ctx.drawImage(selectedLocationImage, x, y)
               } else {
                 ctx.drawImage(entityImage, x, y)
+              }
+            } else {
+              // Display heatmap
+              var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+              if (aggregationProperty) {
+                var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
+                heatMapData.push([x, y, adjustedWeight])
               }
             }
             break;
@@ -283,11 +293,6 @@ class MapTileRenderer {
     }
   }
 
-  // Show/hide map tile extents
-  setMapTileOptions(mapTileOptions) {
-    this.layerProperties.data.mapTileOptions = mapTileOptions
-  }
-
   // Gets all features that are within a given polygon
   getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
 
@@ -388,7 +393,9 @@ class TileComponentController {
     // Subscribe to changes in the map tile options
     state.mapTileOptions
       .subscribe((mapTileOptions) => {
-        this.handleMapTileOptionsChanged(mapTileOptions)
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
+        }
       })
 
     // Redraw map tiles when requestd
@@ -397,7 +404,11 @@ class TileComponentController {
 
     // If selected location ids change, set that in the tile data service
     state.selectedLocations
-      .subscribe((selectedLocationIds) => this.refreshMapTiles())
+      .subscribe((selectedLocations) => {
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedLocations(selectedLocations)
+        }
+      })
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
@@ -449,12 +460,12 @@ class TileComponentController {
         }
         Promise.all(pointInPolyPromises)
           .then((results) => {
-            var selectedLocationIds = new Set()
+            var selectedLocations = new Set()
             results.forEach((result) => {
-              result.forEach((locationObj) => selectedLocationIds.add(locationObj.location_id))
+              result.forEach((locationObj) => selectedLocations.add(locationObj.location_id))
             })
             var selectedLocations = []
-            selectedLocationIds.forEach((id) => selectedLocations.push({ location_id: id }))
+            selectedLocations.forEach((id) => selectedLocations.push({ location_id: id }))
             state.hackRaiseEvent(selectedLocations)
           })
 
@@ -464,7 +475,10 @@ class TileComponentController {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
       // but don't know how to set it from markup
       this.mapRef = map
-      this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), this.tileDataService))
+      this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
+                                                           this.tileDataService,
+                                                           this.state.mapTileOptions.getValue(),
+                                                           this.state.selectedLocations.getValue()))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
 
@@ -572,20 +586,6 @@ class TileComponentController {
     }
   }
 
-  // Called when the value of showing map tile extents (for debugging) changes
-  handleMapTileOptionsChanged(mapTileOptions) {
-    // if (!this.mapRef) {
-    //   // Map not initialized yet. Try again after some time
-    //   setTimeout(() => this.handleMapTileOptionsChanged(mapTileOptions), 100)
-    //   return
-    // }
-
-    // this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
-    //   overlayMap.setMapTileOptions(mapTileOptions)
-    // })
-    // this.refreshMapTiles()
-  }
-
   // Handles map layer events
   handleMapEvents(oldMapLayers, newMapLayers, mapLayerActions) {
     if (!this.mapRef || this.mapRef.overlayMapTypes.getLength() <= this.OVERLAY_MAP_INDEX) {
@@ -628,7 +628,7 @@ class TileComponentController {
     //       id: key,
     //       data: mapLayer
     //     }
-    //     layerProperties.data.selectedLocationIds = this.state.selectedLocations.getValue()
+    //     layerProperties.data.selectedLocations = this.state.selectedLocations.getValue()
     //     var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, layerProperties, this.tileDataService)
     //     tileRenderer.setMapTileOptions(this.state.mapTileOptions.getValue())
     //     if (key in mapExistingLayers) {

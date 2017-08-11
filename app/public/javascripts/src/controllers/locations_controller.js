@@ -5,7 +5,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
     var transform = ''
-    if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_OFF') {
+    if (state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_OFF') {
       // The user has explicitly asked to display points, not aggregates
       transform = 'select'
     } else {
@@ -68,7 +68,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             // We want to create an individual layer
             oldMapLayers[mapLayerKey] = {
               dataUrls: [url],
-              iconUrl: `${baseUrl}${locationType.iconUrl}`
+              iconUrl: `${baseUrl}${locationType.iconUrl}`,
+              renderMode: 'ICON'
             }
             createdMapLayerKeys.add(mapLayerKey)
           }
@@ -78,9 +79,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
     if (mergedLayerUrls.length > 0) {
       // We have some business layers that need to be merged into one
+      // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
+      var firstLocation = state.locationTypes.getValue()[0]
       var mapLayerKey = 'aggregated_locations'
       oldMapLayers[mapLayerKey] = {
         dataUrls: mergedLayerUrls,
+        iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
+        renderMode: 'HEATMAP',
         aggregateMode: 'FLATTEN'
       }
       createdMapLayerKeys.add(mapLayerKey)
@@ -120,7 +125,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   })
 
   // Update map layers when the heatmap options change
-  state.viewSetting.selectedHeatmapOption
+  state.mapTileOptions
     .subscribe((newValue) => updateMapLayers())
 
   // Debugging information for heatmaps
