@@ -83,7 +83,6 @@ class MapTileRenderer {
     // Get tile data from service
     var numNeighbors = useNeighbouringTileData ? 1 : 0
     var tileDataPromises = []
-    var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
     var tileDataOffsets = []
     for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
       for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
@@ -116,7 +115,7 @@ class MapTileRenderer {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileDataOffsets[iResult], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
           }
           if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
             var heatMapRenderer = simpleheat(canvas)
@@ -137,29 +136,35 @@ class MapTileRenderer {
             ctx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
             ctx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
           }
-          // if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-          //   ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
-          //   // Draw a rectangle showing the tile (not the margins)
-          //   ctx.strokeStyle = "#000000"
-          //   ctx.lineWidth = 2
-          //   ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
-          //   // Show the tile coordinates that we pass to aro-service
-          //   ctx.fillStyle = '#000000'
-          //   ctx.strokeStyle = '#ffffff'
-          //   ctx.lineWidth = 4
-          //   ctx.font = "15px Arial"
-          //   ctx.textAlign="center"
-          //   ctx.textBaseline = "middle"
-          //   ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-          //   ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-          // }
+          var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
+          this.renderTileInformation(canvas, ctx, tileCoordinateString)
           resolve() // All rendering has finished
       })
     })
   }
 
+  // Render tile information
+  renderTileInformation(canvas, ctx, tileCoordinateString) {
+    if (this.mapTileOptions.showTileExtents) {
+      ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
+      // Draw a rectangle showing the tile (not the margins)
+      ctx.strokeStyle = "#000000"
+      ctx.lineWidth = 2
+      ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
+      // Show the tile coordinates that we pass to aro-service
+      ctx.fillStyle = '#000000'
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 4
+      ctx.font = "15px Arial"
+      ctx.textAlign="center"
+      ctx.textBaseline = "middle"
+      ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+      ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+    }
+  }
+
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, geometryOffset, heatMapData, heatmapID, mapLayer) {
+  renderFeatures(ctx, features, entityImage, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
