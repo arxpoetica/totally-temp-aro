@@ -212,61 +212,7 @@ class MapTileRenderer {
 
             if (isClosedPolygon) {
               // First draw a filled polygon with the fill color
-              var fillAlpha = 0.7
-              if (false && this.layerProperties.data.drawingOptions.alphaThreshold) {
-                // We want to set the transparency based on a threshold provided in drawing options
-                var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
-                var minPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.minValue || 0.0
-                var maxPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.maxValue || 1.0
-                var range = maxPropertyValue - minPropertyValue
-                if (range === 0) {
-                  range = 1.0  // Prevent any divide-by-zeros
-                }
-                var valueToPlot = feature.properties[thresholdProperty]
-                if (feature.properties[thresholdProperty]) {
-                  // We are interested in features between the minPropertyValue and maxPropertyValue values
-                  var minAlpha = 0.2, maxAlpha = 0.8
-                  fillAlpha = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
-                  fillAlpha = Math.max(minAlpha, fillAlpha)
-                  fillAlpha = Math.min(maxAlpha, fillAlpha)
-                }
-                if (this.layerProperties.data.drawingOptions.blockHeatMap) {
-                  fillAlpha = 0.8
-                  var scaledValue = (valueToPlot - minPropertyValue) / range
-                  scaledValue = Math.max(0, scaledValue)
-                  scaledValue = Math.min(1, scaledValue)
-                  var fillColor = {
-                    r: Math.round(scaledValue * 255),
-                    g: Math.round((1 - scaledValue) * 255),
-                    b: 0
-                  }
-                  var componentToHex = (component) => {
-                    var retVal = component.toString(16)
-                    return (retVal.length === 1) ? '0' + retVal : retVal
-                  }
-                  ctx.fillStyle = '#' + componentToHex(fillColor.r) + componentToHex(fillColor.g) + componentToHex(fillColor.b)
-                  var strokeColor = {
-                    r: Math.max(0, fillColor.r - 20),
-                    g: Math.max(0, fillColor.g - 20),
-                    b: Math.max(0, fillColor.b - 20)
-                  }
-                  ctx.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
-                }
-              }
-              ctx.fillStyle = mapLayer.fillStyle
-              ctx.globalAlpha = fillAlpha
-              var x0 = this.drawMargins + geometryOffset.x + shape[0].x
-              var y0 = this.drawMargins + geometryOffset.y + shape[0].y
-              ctx.beginPath()
-              ctx.moveTo(x0, y0)
-              for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var x1 = this.drawMargins + geometryOffset.x + shape[iCoord].x
-                var y1 = this.drawMargins + geometryOffset.y + shape[iCoord].y
-                ctx.lineTo(x1, y1)
-              }
-              ctx.fill()
-              // Then draw a polyline except for the lines that are along the tile extents
-              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer)
+              this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
               ctx.globalAlpha = 1.0
             } else {
               // This is not a closed polygon. Render lines only
@@ -279,10 +225,10 @@ class MapTileRenderer {
   }
 
   // Renders a polyline feature onto the canvas
-  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer) {
+  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles) {
 
-    ctx.strokeStyle = mapLayer.strokeStyle
-    ctx.lineWidth = mapLayer.lineWidth || 1
+    ctx.strokeStyle = drawingStyles ? drawingStyles.strokeStyle : mapLayer.strokeStyle
+    ctx.lineWidth = drawingStyles ? drawingStyles.lineWidth : (mapLayer.lineWidth || 1)
 
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y
@@ -305,6 +251,76 @@ class MapTileRenderer {
       ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
     }
     ctx.stroke()
+  }
+
+  // Renders a polygon feature onto the canvas
+  renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer) {
+
+    // Get the drawing styles for rendering the polygon
+    var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
+    ctx.fillStyle = drawingStyles.fillStyle
+    ctx.globalAlpha = drawingStyles.opacity
+
+    // Draw a filled polygon with the drawing styles computed for this feature
+    var x0 = this.drawMargins + geometryOffset.x + shape[0].x
+    var y0 = this.drawMargins + geometryOffset.y + shape[0].y
+    ctx.beginPath()
+    ctx.moveTo(x0, y0)
+    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+      var x1 = this.drawMargins + geometryOffset.x + shape[iCoord].x
+      var y1 = this.drawMargins + geometryOffset.y + shape[iCoord].y
+      ctx.lineTo(x1, y1)
+    }
+    ctx.fill()
+
+    // Then draw a polyline except for the lines that are along the tile extents
+    // Override the layers drawing styles by passing it through to the rendering function
+    this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles)
+  }
+
+  // Computes the fill and stroke styles for polygon features
+  getDrawingStylesForPolygon(feature, mapLayer) {
+
+    // Set the default drawing styles that we will return in case we are not aggregating features
+    var drawingStyles = {
+      strokeStyle: mapLayer.strokeStyle,
+      fillStyle: mapLayer.fillStyle,
+      lineWidth: 1,
+      opacity: 0.7
+    }
+
+    // We have to calculate the fill and stroke styles based on the computed aggregate values of the feature
+    var thresholdProperty = mapLayer.aggregateProperty
+    var minPropertyValue = mapLayer.aggregateMinPalette || 0.0
+    var maxPropertyValue = mapLayer.aggregateMaxPalette || 1.0
+    var range = maxPropertyValue - minPropertyValue
+    if (range === 0) {
+      range = 1.0  // Prevent any divide-by-zeros
+    }
+    var valueToPlot = feature.properties[mapLayer.aggregateProperty]
+
+    if (mapLayer.renderMode === 'AGGREGATE_OPACITY') {
+      // Calculate the opacity at which we want to show this feature
+      var minAlpha = 0.2, maxAlpha = 0.8
+      var opacity = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
+      opacity = Math.max(minAlpha, opacity)
+      opacity = Math.min(maxAlpha, opacity)
+      drawingStyles.opacity = opacity
+    } else if (mapLayer.renderMode === 'AGGREGATE_GRADIENT') {
+      // Calculate the color value at which we want to show this feature
+      var scaledValue = (valueToPlot - minPropertyValue) / range
+      scaledValue = Math.max(0, scaledValue)
+      scaledValue = Math.min(1, scaledValue)
+      var fillColor = { r: Math.round(scaledValue * 255), g: Math.round((1 - scaledValue) * 255), b: 0 }
+      var componentToHex = (component) => {
+        var retVal = component.toString(16)
+        return (retVal.length === 1) ? '0' + retVal : retVal
+      }
+      drawingStyles.fillStyle = '#' + componentToHex(fillColor.r) + componentToHex(fillColor.g) + componentToHex(fillColor.b)
+      var strokeColor = { r: Math.max(0, fillColor.r - 20), g: Math.max(0, fillColor.g - 20), b: Math.max(0, fillColor.b - 20) }
+      drawingStyles.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
+    }
+    return drawingStyles
   }
 
   // Gets all features that are within a given polygon

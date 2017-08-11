@@ -106,6 +106,8 @@ app.service('tileDataService', ['$http', ($http) => {
           // We have data from all urls. First, we create an object that will map the objects
           // of interest (e.g. census blocks) to their geometry and list of properties.
           // For e.g. if we are aggregating download speeds for census blocks, we will have
+          // Input: mapLayer.aggregateById = 'gid', mapLayer.aggregateProperty = 'download_speed'
+          // Output:
           // {
           //   census_block_id_1: {
           //     geometry: { geom object },
@@ -113,8 +115,6 @@ app.service('tileDataService', ['$http', ($http) => {
           //   },
           //   census_block_id_2: { ... } ... etc
           // }
-          var aggregateEntityId = aggregateOptions.aggregateEntityId
-          var aggregateBy = aggregateOptions.aggregateBy
           var entityData = {}
           // Loop through each tile result
           results.forEach((result) => {
@@ -125,7 +125,7 @@ app.service('tileDataService', ['$http', ($http) => {
               var features = layerToFeatures[layerKey]
               features.forEach((feature) => {
                 // Store the geometry for the census block. This will be overwritten but should be fine since its the same geometry
-                var aggregateEntityGID = feature.properties[aggregateEntityId]
+                var aggregateEntityGID = feature.properties[mapLayer.aggregateById]
                 if (!entityData[aggregateEntityGID]) {
                   entityData[aggregateEntityGID] = {}
                 }
@@ -134,7 +134,7 @@ app.service('tileDataService', ['$http', ($http) => {
                 if (!entityData[aggregateEntityGID].layers) {
                   entityData[aggregateEntityGID].layers =[]
                 }
-                entityData[aggregateEntityGID].layers.push(feature.properties[aggregateBy])
+                entityData[aggregateEntityGID].layers.push(feature.properties[mapLayer.aggregateProperty])
               })
             })
           })
@@ -150,7 +150,7 @@ app.service('tileDataService', ['$http', ($http) => {
             const aggregateFinalValue = 1 - (MY_SPEED / (MY_SPEED + sumValues))
             // Save it all out in a feature
             var properties = {}
-            properties[aggregateBy] = aggregateFinalValue
+            properties[mapLayer.aggregateProperty] = aggregateFinalValue
             aggregateFeatures.push({
               properties: properties,
               loadGeometry: () => entityData[aggregateEntityGID].geometry // Hack because thats how we get the geometry later

@@ -225,27 +225,25 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       },
       {
         label: 'Competitive Strength',
-        alphaRender: true,
-        alphaThresholdProperty: 'strength',
         aggregate: {
           individual: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'strength'
+              aggregateById: 'gid',
+              aggregateProperty: 'strength'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'strength'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'strength'
             }
           },
           all: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'sum_strength'
+              aggregateById: 'gid',
+              aggregateProperty: 'sum_strength'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'sum_strength'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'sum_strength'
             }
           }
         }
@@ -257,22 +255,22 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         aggregate: {
           individual: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'download_speed'
+              aggregateById: 'gid',
+              aggregateProperty: 'download_speed'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'download_speed'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'download_speed'
             }
           },
           all: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'max_download'
+              aggregateById: 'gid',
+              aggregateProperty: 'max_download'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'max_download'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'max_download'
             }
           }
         }
