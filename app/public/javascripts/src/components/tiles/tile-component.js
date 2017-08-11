@@ -322,9 +322,10 @@ class MapTileRenderer {
     return drawingStyles
   }
 
-  // Gets all features that are within a given polygon
-  getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
+  // Loops through all features in this tile and selects the ones that match a comparator function
+  selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected) {
 
+    // Build an array of promises that gets all map layer features (for the layers marked as selectable)
     var promises = []
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
       var mapLayer = this.mapLayers[mapLayerKey]
@@ -332,35 +333,25 @@ class MapTileRenderer {
         promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
       }
     })
+
+    // Return a promise that resolves when all features have been tested
     return new Promise((resolve, reject) => {
       Promise.all(promises)
         .then((promiseResults) => {
-
           var hitFeatures = []
+
+          // Loop through all results
           promiseResults.forEach((result) => {
             var layerToFeatures = result.layerToFeatures
-            var entityImage = result.icon
 
-            var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
-            var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
-
+            // Loop through all layers in this result
             Object.keys(layerToFeatures).forEach((layerKey) => {
               var features = layerToFeatures[layerKey]
               for (var iFeature = 0; iFeature < features.length; ++iFeature) {
                 var feature = features[iFeature]
-                // Parse the geometry out.
-                var geometry = feature.loadGeometry()
-                // Geometry is an array of shapes
-                geometry.forEach((shape) => {
-                  if (shape.length === 1) {
-                    // Only support points for now
-                    var locationCoords = [shape[0].x, shape[0].y]
-                    var isPointInPolygon = pointInPolygon(locationCoords, polygonCoords)
-                    if (isPointInPolygon) {
-                      hitFeatures.push(feature.properties)
-                    }
-                  }
-                })
+                if (shouldFeatureBeSelected(feature, result.icon)) {
+                  hitFeatures.push(feature.properties)
+                }
               }
             })
           })
@@ -370,59 +361,52 @@ class MapTileRenderer {
     })
   }
 
+  // Gets all features that are within a given polygon
+  getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
+
+    // Define a function that will return true if a given feature should be selected
+    var shouldFeatureBeSelected = (feature, icon) => {
+      var selectFeature = false
+      var geometry = feature.loadGeometry()
+      geometry.forEach((shape) => {
+        if (shape.length === 1) {
+          // Only support points for now
+          var locationCoords = [shape[0].x, shape[0].y]
+          if (pointInPolygon(locationCoords, polygonCoords)) {
+            selectFeature = true
+          }
+        }
+      })
+      return selectFeature
+    }
+    return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
+  }
+
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
 
-    var promises = []
-    Object.keys(this.mapLayers).forEach((mapLayerKey) => {
-      var mapLayer = this.mapLayers[mapLayerKey]
-      if (mapLayer.selectable) {
-        promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
-      }
-    })
-    return new Promise((resolve, reject) => {
-      Promise.all(promises)
-        .then((promiseResults) => {
-
-          var hitFeatures = []
-          promiseResults.forEach((result) => {
-            var layerToFeatures = result.layerToFeatures
-            var entityImage = result.icon
-
-            var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
-            var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
-
-            Object.keys(layerToFeatures).forEach((layerKey) => {
-              var features = layerToFeatures[layerKey]
-              for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-                // Parse the geometry out.
-                var geometry = features[iFeature].loadGeometry()
-                // Geometry is an array of shapes
-                geometry.forEach((shape) => {
-                  // Shape is an array of coordinates
-                  switch(shape.length) {
-                    case 1:
-                      // This is a point
-                      if (xWithinTile >= shape[0].x - imageWidthBy2
-                          && xWithinTile <= shape[0].x + imageWidthBy2
-                          && yWithinTile >= shape[0].y - imageHeightBy2
-                          && yWithinTile <= shape[0].y + imageHeightBy2) {
-                            hitFeatures.push(features[iFeature].properties)
-                          }
-                      break;
-
-                    default:
-                      // Not supported yet
-                      break;
-                  }
-                })
+    // Define a function that will return true if a given feature should be selected
+    var shouldFeatureBeSelected = (feature, icon) => {
+      var selectFeature = false
+      var imageWidthBy2 = icon ? icon.width / 2 : 0
+      var imageHeightBy2 = icon ? icon.height / 2 : 0
+      var geometry = feature.loadGeometry()
+      // Geometry is an array of shapes
+      geometry.forEach((shape) => {
+        // Shape is an array of coordinates
+        if (shape.length === 1) {
+          if (xWithinTile >= shape[0].x - imageWidthBy2
+              && xWithinTile <= shape[0].x + imageWidthBy2
+              && yWithinTile >= shape[0].y - imageHeightBy2
+              && yWithinTile <= shape[0].y + imageHeightBy2) {
+                // The clicked point is inside the bounding box of the features icon
+                selectFeature = true
               }
-            })
-          })
-          // We have a list of features that are 'hit', i.e. under the specified point. Return them.
-          resolve(hitFeatures)
-        })
-    })
+        }
+      })
+      return selectFeature
+    }
+    return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
   }
 }
 
