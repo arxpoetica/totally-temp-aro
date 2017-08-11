@@ -53,16 +53,6 @@
             "strokeStyle": "#0000ff"
           }
         },
-        "planned_5g_site": {
-          "label": "5G Site",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
-          "aggregateZoomThreshold": "14",
-          "equipmentType": "point",
-          "drawingOptions": {
-            "strokeStyle": "#0000ff"
-          }
-        },
         "planned_5g_coverage": {
           "label": "5G Coverage",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
@@ -72,6 +62,16 @@
           "drawingOptions": {
             "strokeStyle": "#00a000",
             "fillStyle": "#a0ffa0"
+          }
+        },
+        "planned_5g_site": {
+          "label": "5G Site",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
+          "aggregateZoomThreshold": "14",
+          "equipmentType": "point",
+          "drawingOptions": {
+            "strokeStyle": "#0000ff"
           }
         },
         "planned_feeder_fiber": {

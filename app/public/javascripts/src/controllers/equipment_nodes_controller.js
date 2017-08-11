@@ -59,8 +59,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           if (networkEquipment.checked) {
             var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.planId)
             if (networkEquipment.equipmentType === 'point') {
-              var lineTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-              tileUrl = tileUrl.replace('{pointTransform}', lineTransform)
+              var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
             } else if (networkEquipment.equipmentType === 'line') {
               var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
               tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
@@ -69,10 +69,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
             }
             oldMapLayers[networkEquipment.key] = {
-              url: [tileUrl],
+              dataUrls: [tileUrl],
               iconUrl: networkEquipment.iconUrl,
-              isVisible: true,
-              drawingOptions: networkEquipment.drawingOptions
+              renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+              strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+              lineWidth: 2,
+              fillStyle: networkEquipment.drawingOptions.fillStyle
             }
             createdMapLayerKeys.add(networkEquipment.key)
           }
@@ -86,10 +88,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
       var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
       oldMapLayers[mapLayerKey] = {
-        url: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`],
+        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`],
         iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
-        isVisible: true,
-        drawingOptions: state.existingFiberOptions.drawingOptions
+        renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+        strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
+        lineWidth: 2
       }
       createdMapLayerKeys.add(mapLayerKey)
     })
@@ -153,126 +156,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
   }
 
-  var userDefinedLayer = {
-    id: 'user_defined',
-    name: 'user_defined',
-    description: 'User-Uploaded',
-    equipment_description: 'User-Uploaded',
-    additional: true,
-    nodeTypes: [{
-      description: 'Central Office',
-      id: 1,
-      name: 'central_office',
-      service_layer_id: -1,
-      service_layer_node_name: 'Central Office'
-    }],
-    hidden: true,
-    userDefined: true
-  }
-
-  $(document).ready(() => {
-    map.ready(() => {
-      $scope.serviceLayers = JSON.parse(JSON.stringify(globalServiceLayers)).filter((layer) => layer.show_in_assets)
-      $scope.serviceLayers.push(userDefinedLayer)
-      var additionalLayer = {
-        id: 'all',
-        name: 'all',
-        description: 'Optimized equipment',
-        equipment_description: 'Optimized equipment',
-        additional: true,
-        nodeTypes: globalServiceLayers[0].nodeTypes.map((item) => Object.assign({}, item)),
-        needsPlan : true
-      }
-      $scope.serviceLayers.push(additionalLayer)
-      $scope.existingFibers = globalExistingFiberSourceNames.map((name) => {
-        return new MapLayer({
-          name: name,
-          type: 'fiber_plant',
-          id :Math.random().toString(36).substr(2 , 10), //random id works
-          short_name: 'F',
-          api_endpoint: `/network/fiber_plant/current_carrier/${name}`,
-          style_options: {
-            normal: {
-              strokeColor: config.ui.colors.fiber,
-              strokeWeight: 2,
-              fillColor: config.ui.colors.fiber
-            }
-          },
-          threshold: 0,
-          reload: 'always'
-        })
-      });
-
-      var existingFiberLayer = {
-        id: 'existing_fiber',
-        name: 'existing_fiber',
-        description: 'Existing Fiber',
-        equipment_description: 'Existing Fiber',
-        additional: true,
-        layers: $scope.existingFibers
-      }
-
-      $scope.serviceLayers.push(existingFiberLayer)
-      if ($scope.serviceLayers.length > 0) {
-        var layer = $scope.serviceLayers[0]
-        // layer.enabled = true
-        $timeout(() => {
-          $(`#serviceLayer${layer.id}`).addClass('in')
-          // $scope.serviceLayers.slice(1).forEach((layer) => {
-          //   $(`#serviceLayer${layer.id}`).addClass('disabled')
-          // })
-        }, 1)
-      }
-      $scope.serviceLayers.forEach((layer) => {
-        configureServiceLayer(layer)
-      })
-    })
-  })
-
-  function upWardStyle() {
-    return (feature, styles) => {
-      var isSelected = feature.getProperty("isSelected");
-      styles.strokeColor = isSelected ? 'green' : '#419df4';
-    }
-  }
-
-  // Create a map layer for showing the "Upward route", i.e. the route from a given fiber
-  // strand to the central office
-  $scope.upwardRouteLayer = new MapLayer({
-    name: name,
-    type: 'upward_route_layer',
-    short_name: 'U',
-    api_endpoint: '',
-    style_options: {
-      normal: {
-        strokeColor: 'red',
-        strokeWeight: 10,
-        zIndex: MapLayer.Z_INDEX_UPWARD_FIBER_STRANDS
-      }
-    },
-    declarativeStyles: upWardStyle(),
-    threshold: 0,
-    reload: 'always'
-  });
-
-  $scope.hoverLayer = new MapLayer({
-    name: name,
-    type: 'hover_route_layer',
-    short_name: 'U',
-    api_endpoint: '',
-    style_options: {
-      normal: {
-        strokeColor: 'green',
-        strokeWeight: 10,
-        zIndex: 98
-      }
-    },
-    threshold: 0,
-    reload: 'always'
-  })
-
-
-
   var fiberGraphForPlan = fiberGraph
   // reload fiber graph when plan changes
   var reloadFiberGraph = () => {
@@ -292,12 +175,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           }
         })
     }
-  }
-
-  var reloadFiberStyles = ()=>{
-    $scope.serviceLayers.forEach((layer) => {
-      layer.routeLayer.revertStyles();
-    })
   }
 
   // Subscribe to different plan events
@@ -323,9 +200,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     }
   })
-
-
-
 
   function clearUpwardPath() {
     $scope.upwardRouteLayer.clearData();

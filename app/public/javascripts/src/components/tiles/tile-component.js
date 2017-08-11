@@ -47,13 +47,17 @@ class MapTileRenderer {
     var canvas = ownerDocument.createElement('canvas');
     div.appendChild(canvas)
     canvas.style.position = 'absolute'
-    canvas.style.left = `-${this.drawMargins}px`
-    canvas.style.top = `-${this.drawMargins}px`
+    var borderWidth = 0
+    if (this.mapTileOptions.showTileExtents) {
+      borderWidth = 2
+    }
+    canvas.style.left = `-${this.drawMargins + borderWidth}px`
+    canvas.style.top = `-${this.drawMargins + borderWidth}px`
     canvas.width = this.tileSize.width + this.drawMargins * 2;
     canvas.height = this.tileSize.height + this.drawMargins * 2;
 
     if (this.mapTileOptions.showTileExtents) {
-      canvas.style.border = '2px dotted'
+      canvas.style.border = `${borderWidth}px dotted`
     }
 
     // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
@@ -79,6 +83,11 @@ class MapTileRenderer {
 
   // Renders a single map layer onto this tile
   renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerId, mapLayer) {
+
+    // Use neighbouring tile data only for heatmaps
+    if (useNeighbouringTileData && mapLayer.renderMode !== 'HEATMAP') {
+      return Promise.resolve()
+    }
 
     // Get tile data from service
     var numNeighbors = useNeighbouringTileData ? 1 : 0
@@ -106,8 +115,6 @@ class MapTileRenderer {
           var entityImage = promiseResults[promiseResults.length - 2]
           var selectedLocationImage = promiseResults[promiseResults.length - 1]
           var ctx = canvas.getContext("2d")
-          // ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
-          // ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
           ctx.lineWidth = 1
           var heatMapData = []
 
@@ -179,7 +186,7 @@ class MapTileRenderer {
             // This is a point
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-            if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'ICON') {
+            if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
               // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
               if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)) {
                 // Draw selected icon
@@ -206,7 +213,7 @@ class MapTileRenderer {
             if (isClosedPolygon) {
               // First draw a filled polygon with the fill color
               var fillAlpha = 0.7
-              if (this.layerProperties.data.drawingOptions.alphaThreshold) {
+              if (false && this.layerProperties.data.drawingOptions.alphaThreshold) {
                 // We want to set the transparency based on a threshold provided in drawing options
                 var thresholdProperty = this.layerProperties.data.drawingOptions.alphaThreshold.property
                 var minPropertyValue = this.layerProperties.data.drawingOptions.alphaThreshold.minValue || 0.0
@@ -246,6 +253,7 @@ class MapTileRenderer {
                   ctx.strokeStyle = '#' + componentToHex(strokeColor.r) + componentToHex(strokeColor.g) + componentToHex(strokeColor.b)
                 }
               }
+              ctx.fillStyle = mapLayer.fillStyle
               ctx.globalAlpha = fillAlpha
               var x0 = this.drawMargins + geometryOffset.x + shape[0].x
               var y0 = this.drawMargins + geometryOffset.y + shape[0].y
@@ -258,44 +266,45 @@ class MapTileRenderer {
               }
               ctx.fill()
               // Then draw a polyline except for the lines that are along the tile extents
-              var xPrev = shape[0].x + geometryOffset.x
-              var yPrev = shape[0].y + geometryOffset.y
-              ctx.beginPath()
-              ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
-              for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var xNext = shape[iCoord].x + geometryOffset.x
-                var yNext = shape[iCoord].y + geometryOffset.y
-                var isAlongXMin = (xPrev === 0 && xNext === 0)
-                var isAlongXMax = (xPrev === 256 && xNext === 256)
-                var isAlongYMin = (yPrev === 0 && yNext === 0)
-                var isAlongYMax = (yPrev === 256 && yNext === 256)
-                if (!isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax) {
-                  // Segment is not along the tile extents. Draw it.
-                  ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
-                }
-                xPrev = xNext
-                yPrev = yNext
-                ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
-              }
-              ctx.stroke()
+              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer)
               ctx.globalAlpha = 1.0
             } else {
-              // This is not a closed polygon. Draw all the lines
-              var x0 = this.drawMargins + shape[0].x + geometryOffset.x
-              var y0 = this.drawMargins + shape[0].y + geometryOffset.y
-              ctx.beginPath()
-              ctx.moveTo(x0, y0)
-              for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-                var x1 = this.drawMargins + shape[iCoord].x + geometryOffset.x
-                var y1 = this.drawMargins + shape[iCoord].y + geometryOffset.y
-                ctx.lineTo(x1, y1)
-              }
-              ctx.stroke()
+              // This is not a closed polygon. Render lines only
+              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer)
             }
             break;
         }
       })
     }
+  }
+
+  // Renders a polyline feature onto the canvas
+  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer) {
+
+    ctx.strokeStyle = mapLayer.strokeStyle
+    ctx.lineWidth = mapLayer.lineWidth || 1
+
+    var xPrev = shape[0].x + geometryOffset.x
+    var yPrev = shape[0].y + geometryOffset.y
+    ctx.beginPath()
+    ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+    for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
+      var xNext = shape[iCoord].x + geometryOffset.x
+      var yNext = shape[iCoord].y + geometryOffset.y
+      var isAlongXMin = (xPrev === 0 && xNext === 0)
+      var isAlongXMax = (xPrev === this.tileSize.width && xNext === this.tileSize.width)
+      var isAlongYMin = (yPrev === 0 && yNext === 0)
+      var isAlongYMax = (yPrev === this.tileSize.height && yNext === this.tileSize.height)
+      if (!isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax) {
+        // Segment is not along the tile extents. Draw it. We do this because polygons can be
+        // clipped by the tile extents, and we don't want to draw segments along tile extents.
+        ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
+      }
+      xPrev = xNext
+      yPrev = yNext
+      ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+    }
+    ctx.stroke()
   }
 
   // Gets all features that are within a given polygon

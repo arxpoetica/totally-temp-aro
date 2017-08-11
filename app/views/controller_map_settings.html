@@ -4,9 +4,9 @@
 
       <div class="settings_item">
         <select class="form-control"
-                ng-model="selectedHeatmapOption"
-                ng-options="item as item.label for item in state.viewSetting.heatmapOptions"
-                ng-change="onSelectedHeatmapOptionChanged()">
+                ng-model="mapTileOptions.selectedHeatmapOption"
+                ng-options="item as item.label for item in state.viewSetting.heatmapOptions track by item.id"
+                ng-change="updateState()">
         </select>
       </div>
 

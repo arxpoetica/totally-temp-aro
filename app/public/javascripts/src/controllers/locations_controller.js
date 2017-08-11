@@ -69,7 +69,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             oldMapLayers[mapLayerKey] = {
               dataUrls: [url],
               iconUrl: `${baseUrl}${locationType.iconUrl}`,
-              renderMode: 'ICON'
+              renderMode: 'PRIMITIVE_FEATURES'
             }
             createdMapLayerKeys.add(mapLayerKey)
           }
