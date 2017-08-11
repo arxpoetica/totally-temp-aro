@@ -32,10 +32,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     createdMapLayerKeys.clear()
 
     // Hold a list of layers that we want merged
-    var layersToMerge = {
-      urls: [],
-      iconUrl: null
-    }
+    var mergedLayerUrls = []
 
     // Add map layers based on the selection
     state.selectedDataSources.forEach((selectedDataSource) => {
@@ -66,19 +63,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
           if (pointTransform === 'aggregate') {
             // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-            layersToMerge.urls.push(url)
-            // Overwriting any previous iconUrl, will be ok as we are aggregating, so we dont use the icon
-            layersToMerge.iconUrl = `${baseUrl}${locationType.iconUrl}`
+            mergedLayerUrls.push(url)
           } else {
+            // We want to create an individual layer
             oldMapLayers[mapLayerKey] = {
-              url: [url],
-              iconUrl: `${baseUrl}${locationType.iconUrl}`,
-              isVisible: true,
-              drawingOptions: {
-                strokeStyle: '#00ff00',
-                fillStyle: '#a0ffa0'
-              },
-              heatmapDebug: 'HEATMAP_OFF' // Always turn heatmap off when in 'select' mode
+              dataUrls: [url],
+              iconUrl: `${baseUrl}${locationType.iconUrl}`
             }
             createdMapLayerKeys.add(mapLayerKey)
           }
@@ -86,25 +76,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
       })
     })
 
-    if (layersToMerge.urls.length > 0) {
+    if (mergedLayerUrls.length > 0) {
       // We have some business layers that need to be merged into one
       var mapLayerKey = 'aggregated_locations'
       oldMapLayers[mapLayerKey] = {
-        url: layersToMerge.urls,
-        iconUrl: layersToMerge.iconUrl,
-        isVisible: true,
-        drawingOptions: {
-          strokeStyle: '#00ff00',
-          fillStyle: '#a0ffa0'
-        },
-        heatmapDebug: state.viewSetting.selectedHeatmapOption.getValue().id
-      }
-      if (state.viewSetting.selectedHeatmapOption.getValue().id === 'HEATMAP_ON') {
-        oldMapLayers[mapLayerKey].aggregateOptions= {
-          aggregateEntityId: 'asdf',
-          aggregateBy: 'weight',
-          aggregateMode: 'simple_union'
-        }
+        dataUrls: mergedLayerUrls,
+        aggregateMode: 'FLATTEN'
       }
       createdMapLayerKeys.add(mapLayerKey)
     }

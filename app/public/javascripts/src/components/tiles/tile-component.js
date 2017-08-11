@@ -9,16 +9,20 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, rootPlanId, layerProperties, tileDataService) {
+  constructor(tileSize, tileDataService, mapLayers = []) {
     this.tileSize = tileSize
-    this.rootPlanId = rootPlanId
-    this.layerProperties = layerProperties
     this.tileDataService = tileDataService
+    this.mapLayers = mapLayers
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
     // be such that the largest rendered feature (or heatmap) does not get clipped.
     this.drawMargins = 10
+  }
+
+  // Sets the map layers for this renderer
+  setMapLayers(mapLayers) {
+    this.mapLayers = mapLayers
   }
 
   // This method is called by Google Maps. Render a canvas tile and send it back.
@@ -27,7 +31,7 @@ class MapTileRenderer {
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
     var div = ownerDocument.createElement('div')
-    div.id = `map_tile_${this.layerProperties.id}_${zoom}_${coord.x}_${coord.y}`
+    div.id = `map_tile_${zoom}_${coord.x}_${coord.y}`
     var canvas = ownerDocument.createElement('canvas');
     div.appendChild(canvas)
     canvas.style.position = 'absolute'
@@ -36,14 +40,14 @@ class MapTileRenderer {
     canvas.width = this.tileSize.width + this.drawMargins * 2;
     canvas.height = this.tileSize.height + this.drawMargins * 2;
 
-    if (!this.layerProperties.data.isVisible) {
-      // Layer is invisible
-      return div
-    }
+    // if (!this.layerProperties.data.isVisible) {
+    //   // Layer is invisible
+    //   return div
+    // }
 
-    if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-      canvas.style.border = "2px dotted";
-    }
+    // if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
+    //   canvas.style.border = "2px dotted";
+    // }
 
     // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
     // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
@@ -56,8 +60,18 @@ class MapTileRenderer {
     return div
   }
 
-  // Takes a set of promise results and renders the tile
+  // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, canvas) {
+    // Render each tile synchronously (one after the other). Return a promise of the last rendered data layer
+    var renderPromise = Promise.resolve()
+    Object.keys(this.mapLayers).forEach((mapLayerKey) => {
+      renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerKey, this.mapLayers[mapLayerKey]))
+    })
+    return renderPromise
+  }
+
+  // Renders a single map layer onto this tile
+  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, mapLayerId, mapLayer) {
 
     // Get tile data from service
     var numNeighbors = useNeighbouringTileData ? 1 : 0
@@ -72,10 +86,10 @@ class MapTileRenderer {
         })
         var xTile = coord.x + deltaX
         var yTile = coord.y + deltaY
-        tileDataPromises.push(this.tileDataService.getTileData(this.layerProperties.data.url, zoom, xTile, yTile, this.layerProperties.data.aggregateOptions))
+        tileDataPromises.push(this.tileDataService.getTileData(mapLayer.dataUrls, zoom, xTile, yTile, mapLayer))
       }
     }
-    tileDataPromises.push(this.tileDataService.getEntityImageForLayer(this.layerProperties.id))
+    tileDataPromises.push(this.tileDataService.getEntityImageForLayer(mapLayerId))
     tileDataPromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
 
     // Return a promise that resolves when all the rendering is finished
@@ -86,8 +100,8 @@ class MapTileRenderer {
           var entityImage = promiseResults[promiseResults.length - 2]
           var selectedLocationImage = promiseResults[promiseResults.length - 1]
           var ctx = canvas.getContext("2d")
-          ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
-          ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
+          // ctx.fillStyle = this.layerProperties.data.drawingOptions.fillStyle
+          // ctx.strokeStyle = this.layerProperties.data.drawingOptions.strokeStyle
           ctx.lineWidth = 1
           var heatMapData = []
 
@@ -95,7 +109,7 @@ class MapTileRenderer {
             var layerToFeatures = promiseResults[iResult].layerToFeatures
             var features = []
             Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, this.layerProperties.data.heatmapDebug)
+            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileCoordinateString, tileDataOffsets[iResult], heatMapData, false)
           }
           if (heatMapData.length > 0 && this.layerProperties.data.heatmapDebug === 'HEATMAP_ON') {
             var heatMapRenderer = simpleheat(canvas)
@@ -117,22 +131,22 @@ class MapTileRenderer {
             ctx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
             ctx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
           }
-          if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
-            ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
-            // Draw a rectangle showing the tile (not the margins)
-            ctx.strokeStyle = "#000000"
-            ctx.lineWidth = 2
-            ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
-            // Show the tile coordinates that we pass to aro-service
-            ctx.fillStyle = '#000000'
-            ctx.strokeStyle = '#ffffff'
-            ctx.lineWidth = 4
-            ctx.font = "15px Arial"
-            ctx.textAlign="center"
-            ctx.textBaseline = "middle"
-            ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-            ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-          }
+          // if (this.layerProperties.data.mapTileOptions && this.layerProperties.data.mapTileOptions.showTileExtents) {
+          //   ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
+          //   // Draw a rectangle showing the tile (not the margins)
+          //   ctx.strokeStyle = "#000000"
+          //   ctx.lineWidth = 2
+          //   ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
+          //   // Show the tile coordinates that we pass to aro-service
+          //   ctx.fillStyle = '#000000'
+          //   ctx.strokeStyle = '#ffffff'
+          //   ctx.lineWidth = 4
+          //   ctx.font = "15px Arial"
+          //   ctx.textAlign="center"
+          //   ctx.textBaseline = "middle"
+          //   ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+          //   ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+          // }
           resolve() // All rendering has finished
       })
     })
@@ -388,13 +402,7 @@ class TileComponentController {
 
     // If selected location ids change, set that in the tile data service
     state.selectedLocations
-      .subscribe((selectedLocationIds) => {
-        // Force an update of all map layers for now
-        var newMapLayers = angular.copy(state.mapLayers.getValue())
-        var mapLayerActions = {}
-        Object.keys(newMapLayers).forEach((mapLayerKey) => mapLayerActions[mapLayerKey] = this.DELTA.UPDATE)
-        this.handleMapEvents(newMapLayers, newMapLayers, mapLayerActions)
-      })
+      .subscribe((selectedLocationIds) => this.refreshMapTiles())
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
@@ -461,6 +469,8 @@ class TileComponentController {
       // Saving a reference to the global map object. Ideally should be passed in to the component,
       // but don't know how to set it from markup
       this.mapRef = map
+      this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), this.tileDataService))
+      this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
 
         // Get latitiude and longitude
@@ -569,93 +579,104 @@ class TileComponentController {
 
   // Called when the value of showing map tile extents (for debugging) changes
   handleMapTileOptionsChanged(mapTileOptions) {
-    if (!this.mapRef) {
-      // Map not initialized yet. Try again after some time
-      setTimeout(() => this.handleMapTileOptionsChanged(mapTileOptions), 100)
-      return
-    }
+    // if (!this.mapRef) {
+    //   // Map not initialized yet. Try again after some time
+    //   setTimeout(() => this.handleMapTileOptionsChanged(mapTileOptions), 100)
+    //   return
+    // }
 
-    this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
-      overlayMap.setMapTileOptions(mapTileOptions)
-    })
-    this.refreshMapTiles()
+    // this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+    //   overlayMap.setMapTileOptions(mapTileOptions)
+    // })
+    // this.refreshMapTiles()
   }
 
   // Handles map layer events
   handleMapEvents(oldMapLayers, newMapLayers, mapLayerActions) {
-    if (!this.mapRef) {
+    if (!this.mapRef || this.mapRef.overlayMapTypes.getLength() <= this.OVERLAY_MAP_INDEX) {
       // Map not initialized yet
       return
     }
-    // We have a new set of map layers. Determine which ones to update and which ones to delete
-    if (!mapLayerActions) {
-      mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
-    }
 
-    // First delete any map layers that we want
-    for (var iOverlay = 0; iOverlay < this.mapRef.overlayMapTypes.length; ++iOverlay) {
-      var overlayId = this.mapRef.overlayMapTypes.getAt(iOverlay).layerProperties.id
-      if (mapLayerActions[overlayId] === this.DELTA.DELETE) {
-        this.mapRef.overlayMapTypes.removeAt(iOverlay)
-        --iOverlay
-      }
-    }
-
-    // Then update any map layers that we want
-    var mapExistingLayers = {}
-    this.mapRef.overlayMapTypes.forEach((overlayMapType, index) => mapExistingLayers[overlayMapType.layerProperties.id] = index)
-    Object.keys(newMapLayers).forEach((key) => {
-      var mapLayer = newMapLayers[key]
-      if (mapLayerActions[key] === this.DELTA.UPDATE) {
-        this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
-        var layerProperties = {
-          id: key,
-          data: mapLayer
-        }
-        layerProperties.data.selectedLocationIds = this.state.selectedLocations.getValue()
-        var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, layerProperties, this.tileDataService)
-        tileRenderer.setMapTileOptions(this.state.mapTileOptions.getValue())
-        if (key in mapExistingLayers) {
-          // Tile exists in maps. Replace it
-          var index = mapExistingLayers[key]
-          this.mapRef.overlayMapTypes.setAt(index, tileRenderer)
-        } else {
-          // Tile does not already exist in maps
-          this.mapRef.overlayMapTypes.push(tileRenderer)
-        }
+    // Add icon images for all map layers
+    Object.keys(newMapLayers).forEach((mapLayerKey) => {
+      var mapLayer = newMapLayers[mapLayerKey]
+      if (mapLayer.iconUrl) {
+        this.tileDataService.addEntityImageForLayer(mapLayerKey, mapLayer.iconUrl)
       }
     })
+
+    this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
+    this.refreshMapTiles()
+    // // We have a new set of map layers. Determine which ones to update and which ones to delete
+    // if (!mapLayerActions) {
+    //   mapLayerActions = this.computeMapLayerActions(oldMapLayers, newMapLayers)
+    // }
+
+    // // First delete any map layers that we want
+    // for (var iOverlay = 0; iOverlay < this.mapRef.overlayMapTypes.length; ++iOverlay) {
+    //   var overlayId = this.mapRef.overlayMapTypes.getAt(iOverlay).layerProperties.id
+    //   if (mapLayerActions[overlayId] === this.DELTA.DELETE) {
+    //     this.mapRef.overlayMapTypes.removeAt(iOverlay)
+    //     --iOverlay
+    //   }
+    // }
+
+    // // Then update any map layers that we want
+    // var mapExistingLayers = {}
+    // this.mapRef.overlayMapTypes.forEach((overlayMapType, index) => mapExistingLayers[overlayMapType.layerProperties.id] = index)
+    // Object.keys(newMapLayers).forEach((key) => {
+    //   var mapLayer = newMapLayers[key]
+    //   if (mapLayerActions[key] === this.DELTA.UPDATE) {
+    //     this.tileDataService.addEntityImageForLayer(key, mapLayer.iconUrl)
+    //     var layerProperties = {
+    //       id: key,
+    //       data: mapLayer
+    //     }
+    //     layerProperties.data.selectedLocationIds = this.state.selectedLocations.getValue()
+    //     var tileRenderer = new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 1075, layerProperties, this.tileDataService)
+    //     tileRenderer.setMapTileOptions(this.state.mapTileOptions.getValue())
+    //     if (key in mapExistingLayers) {
+    //       // Tile exists in maps. Replace it
+    //       var index = mapExistingLayers[key]
+    //       this.mapRef.overlayMapTypes.setAt(index, tileRenderer)
+    //     } else {
+    //       // Tile does not already exist in maps
+    //       this.mapRef.overlayMapTypes.push(tileRenderer)
+    //     }
+    //   }
+    // })
   }
 
-  // Compares old and new mapLayers objects and returns the list of layers to be added/updated and removed
-  computeMapLayerActions(oldMapLayers, newMapLayers) {
+  // // Compares old and new mapLayers objects and returns the list of layers to be added/updated and removed
+  // computeMapLayerActions(oldMapLayers, newMapLayers) {
 
-    // First mark the layers to update
-    var mapLayerActions = {}
-    Object.keys(newMapLayers).forEach((newMapLayerKey) => {
-      mapLayerActions[newMapLayerKey] = this.DELTA.IGNORE
-      if (!oldMapLayers[newMapLayerKey]) {
-        // Map layer key does not exist in old layers. Add it
-        mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
-      } else {
-        var newObj = newMapLayers[newMapLayerKey]
-        var oldObj = oldMapLayers[newMapLayerKey]
-        // Quick check with stringifys. Objects are very small.
-        if (JSON.stringify(newObj) !== JSON.stringify(oldObj)) {
-          mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
-        }
-      }
-    })
+  //   // First mark the layers to update
+  //   var mapLayerActions = {}
+  //   Object.keys(newMapLayers).forEach((newMapLayerKey) => {
+  //     mapLayerActions[newMapLayerKey] = this.DELTA.IGNORE
+  //     if (!oldMapLayers[newMapLayerKey]) {
+  //       // Map layer key does not exist in old layers. Add it
+  //       mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
+  //     } else {
+  //       var newObj = newMapLayers[newMapLayerKey]
+  //       var oldObj = oldMapLayers[newMapLayerKey]
+  //       // Quick check with stringifys. Objects are very small.
+  //       if (JSON.stringify(newObj) !== JSON.stringify(oldObj)) {
+  //         mapLayerActions[newMapLayerKey] = this.DELTA.UPDATE
+  //       }
+  //     }
+  //   })
 
-    // Then mark the layers to delete
-    Object.keys(oldMapLayers).forEach((oldMapLayerKey) => {
-      if (!newMapLayers[oldMapLayerKey]) {
-        mapLayerActions[oldMapLayerKey] = this.DELTA.DELETE
-      }
-    })
+  //   // Then mark the layers to delete
+  //   Object.keys(oldMapLayers).forEach((oldMapLayerKey) => {
+  //     if (!newMapLayers[oldMapLayerKey]) {
+  //       mapLayerActions[oldMapLayerKey] = this.DELTA.DELETE
+  //     }
+  //   })
 
-    return mapLayerActions
-  }
+  //   return mapLayerActions
+  // }
 }
 
 TileComponentController.$inject = ['$document', 'state', 'tileDataService']
