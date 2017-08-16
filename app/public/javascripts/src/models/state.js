@@ -122,7 +122,26 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
-  // Map layers data - define once
+  // View Settings layer - define once
+  service.viewSetting = {
+    selectedFiberOption: null,
+    heatmapOptions: [
+      {
+        id: 'HEATMAP_ON',
+        label: 'Aggregate heatmap'
+      },
+      {
+        id: 'HEATMAP_DEBUG',
+        label: 'Aggregate points'
+      },
+      {
+        id: 'HEATMAP_OFF',
+        label: 'Raw Points'
+      }
+    ]
+  }
+
+  // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
   service.mapLayers = new Rx.BehaviorSubject({})
   service.mapTileOptions = new Rx.BehaviorSubject({
     showTileExtents: false,
@@ -131,7 +150,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       maxValue: 100,
       powerExponent: 0.5,
       worldMaxValue: 100000000
-    }
+    },
+    selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
   })
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
 
@@ -155,27 +175,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.boundaries = {
     areaLayers: []
   }
-  
-  // View Settings layer - define once
-  service.viewSetting = {
-    selectedFiberOption: null,
-    heatmapOptions: [
-      {
-        id: 'HEATMAP_ON',
-        label: 'Aggregate heatmap'
-      },
-      {
-        id: 'HEATMAP_DEBUG',
-        label: 'Aggregate points'
-      },
-      {
-        id: 'HEATMAP_OFF',
-        label: 'Raw Points'
-      }
-    ],
-    selectedHeatmapOption: null
-  }
-  service.viewSetting.selectedHeatmapOption = new Rx.BehaviorSubject(service.viewSetting.heatmapOptions[0])
 
   // Default data sources - define once
   service.defaultDataSources = [
@@ -226,27 +225,25 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       },
       {
         label: 'Competitive Strength',
-        alphaRender: true,
-        alphaThresholdProperty: 'strength',
         aggregate: {
           individual: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'strength'
+              aggregateById: 'gid',
+              aggregateProperty: 'strength'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'strength'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'strength'
             }
           },
           all: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'sum_strength'
+              aggregateById: 'gid',
+              aggregateProperty: 'sum_strength'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'sum_strength'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'sum_strength'
             }
           }
         }
@@ -258,22 +255,22 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         aggregate: {
           individual: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'download_speed'
+              aggregateById: 'gid',
+              aggregateProperty: 'download_speed'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'download_speed'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'download_speed'
             }
           },
           all: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'max_download'
+              aggregateById: 'gid',
+              aggregateProperty: 'max_download'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'max_download'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'max_download'
             }
           }
         }
@@ -368,9 +365,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       $http.get(`/locations/${service.planId}/selectedLocationIds`)
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
-            var selectedLocationsMap = new Set()
-            result.data.forEach((selectedLocationId) => selectedLocationsMap.add(+selectedLocationId.location_id))
-            service.selectedLocations.next(selectedLocationsMap)
+            var selectedLocationsSet = new Set()
+            result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
+            service.selectedLocations.next(selectedLocationsSet)
+            service.requestMapLayerRefresh.next({})
           }
         })
     }

@@ -43,11 +43,13 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     var providerType = state.competition.selectedCompetitorType.id
 
     if (state.competition.showCensusBlocks && dataSource) {
-      var aggregateOptionsType = null
+      var aggregateOptionsType = null, cbStrokeStyle = null, cbFillStyle = null
       if (state.competition.useAllCompetitors) {
         // Our endpoint uses "all competitors"
         censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/strength/${providerType}/${blockType}/poly/${polyTransform}/`)
         aggregateOptionsType = 'all'
+        cbStrokeStyle = '#000000'
+        cbFillStyle = '#505050'
       } else {
         // We want to use only the selected competitors
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
@@ -55,44 +57,41 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/carrier/${carrierId}/${providerType}/${blockType}/${polyTransform}/`)
         })
         aggregateOptionsType = 'individual'
-      }
-      var aggregateOptions = null
-      if (state.competition.selectedRenderingOption.aggregate) {
-        aggregateOptions = {
-          aggregateEntityId: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateEntityId,
-          aggregateBy: state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateBy
-        }
-      } else {
-        aggregateOptions = {
-          aggregateMode: 'simple_union'
+        if (state.competition.selectedCompetitors.length > 0) {
+          cbStrokeStyle = state.competition.selectedCompetitors[0].strokeStyle
+          cbFillStyle = state.competition.selectedCompetitors[0].fillStyle
         }
       }
 
       if (censusBlockUrls.length > 0) {
         var mapLayer = {
-          url: censusBlockUrls,
+          dataUrls: censusBlockUrls,
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: '#5050ff',
-            fillStyle: '#5050af'
-          }
+          strokeStyle: cbStrokeStyle,
+          fillStyle: cbFillStyle,
+          opacity: 0.6
         }
-        mapLayer.aggregateOptions = aggregateOptions
-        if (state.competition.selectedRenderingOption.alphaRender) {
+
+        // Set aggregation options
+        if (state.competition.selectedRenderingOption.aggregate) {
+          mapLayer.aggregateMode = 'BY_ID'
+          mapLayer.aggregateById = state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateById,
+          mapLayer.aggregateProperty = state.competition.selectedRenderingOption.aggregate[aggregateOptionsType][blockType].aggregateProperty
+
           // Make sure min/max aggregated values are correct
           var minAggregatedValue = Math.min($scope.minAggregatedValue, 0.99)
           var maxAggregatedValue = Math.max(0.01, $scope.maxAggregatedValue)
           if (maxAggregatedValue < minAggregatedValue) {
             $scope.maxAggregatedValue = maxAggregatedValue = minAggregatedValue + 0.01
           }
-          mapLayer.drawingOptions.alphaThreshold = {
-            property: aggregateOptions.aggregateBy,
-            minValue: minAggregatedValue,
-            maxValue: maxAggregatedValue
-          }
-          mapLayer.drawingOptions.blockHeatMap = $scope.showBlockHeatMap
+          mapLayer.aggregateMinPalette = minAggregatedValue
+          mapLayer.aggregateMaxPalette = maxAggregatedValue
+          mapLayer.renderMode = $scope.showBlockHeatMap ? 'AGGREGATE_GRADIENT' : 'AGGREGATE_OPACITY'
+        } else {
+          mapLayer.aggregateMode = 'FLATTEN'
+          mapLayer.renderMode = 'PRIMITIVE_FEATURES'
         }
+
         oldMapLayers[mapLayerKey] = mapLayer
         createdMapLayerKeys.add(mapLayerKey)
       }
@@ -100,29 +99,26 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
 
     // Create fiber routes layer
     if (state.competition.showFiberRoutes) {
+      var fiberLineWidth = 2
       if (state.competition.useAllCompetitors) {
         var mapLayerKey = `competitor_fiberRoutes_all`
         oldMapLayers[mapLayerKey] = {
-          url: [`/tile/v1/fiber/competitive/all/tiles/line/${lineTransform}/`],
+          dataUrls: [`/tile/v1/fiber/competitive/all/tiles/line/${lineTransform}/`],
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: '#000000',
-            fillStyle: '#000000'
-          }
+          strokeStyle: '#000000',
+          fillStyle: '#000000',
+          lineWidth: fiberLineWidth
         }
         createdMapLayerKeys.add(mapLayerKey)
       } else {
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
           var mapLayerKey = `competitor_fiberRoutes_${providerType}_${selectedCompetitor.id}`
           oldMapLayers[mapLayerKey] = {
-            url: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/line/${lineTransform}/`],
+            dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/line/${lineTransform}/`],
             iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-            isVisible: true,
-            drawingOptions: {
-              strokeStyle: selectedCompetitor.strokeStyle,
-              fillStyle: selectedCompetitor.fillStyle
-            }
+            strokeStyle: selectedCompetitor.strokeStyle,
+            fillStyle: selectedCompetitor.fillStyle,
+            lineWidth: fiberLineWidth
           }
           createdMapLayerKeys.add(mapLayerKey)
         })
@@ -134,26 +130,21 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       if (state.competition.useAllCompetitors) {
         var mapLayerKey = `competitor_fiberRoutesBuffer_all`
         oldMapLayers[mapLayerKey] = {
-          url: [`/tile/v1/fiber/competitive/all/tiles/buffer/${polyTransform}/`],
+          dataUrls: [`/tile/v1/fiber/competitive/all/tiles/buffer/${polyTransform}/`],
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          isVisible: true,
-          drawingOptions: {
-            strokeStyle: '#000000',
-            fillStyle: '#000000'
-          }
+          strokeStyle: '#000000',
+          fillStyle: '#000000'
         }
         createdMapLayerKeys.add(mapLayerKey)
       } else {
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
           var mapLayerKey = `competitor_fiberRoutesBuffer_${providerType}_${selectedCompetitor.id}`
           oldMapLayers[mapLayerKey] = {
-            url: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/buffer/${polyTransform}/`],
+            dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/buffer/${polyTransform}/`],
             iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-            isVisible: true,
-            drawingOptions: {
-              strokeStyle: selectedCompetitor.strokeStyle,
-              fillStyle: selectedCompetitor.fillStyle
-            }
+            strokeStyle: selectedCompetitor.strokeStyle,
+            fillStyle: selectedCompetitor.fillStyle,
+            opacity: 0.4
           }
           createdMapLayerKeys.add(mapLayerKey)
         })
@@ -214,8 +205,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   
   $rootScope.$on('map_dragend', reloadCompetitors)
   $rootScope.$on('map_zoom_changed', () => {
-    updateMapLayers()
     reloadCompetitors()
+    updateMapLayers()
   })
 
 }])
