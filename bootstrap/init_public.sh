@@ -40,8 +40,8 @@ psql -c "CREATE EXTENSION IF NOT EXISTS hstore;" # this is also a hack. for some
 psql -c "CREATE EXTENSION IF NOT EXISTS "\"uuid-ossp\"";" # this is also a hack. for some reason resetting the schema drops this extension.
 make load_schema
 
-make reset_stage_reference
-make stage_reference
+#make reset_stage_reference
+#make stage_reference
 
 make reset_view
 make load_view
