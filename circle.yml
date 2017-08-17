@@ -8,12 +8,9 @@ machine:
   services:
     - docker
   environment:
-    IMAGE_NAME: ait-docker-registry.cloud.altvil.com/aro/aro-app
-    IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
-    LATEST_TAG: ${IMAGE_NAME}:latest
-    ECR_IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
-    ECR_IMAGE_TAG: ${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
-    ECR_LATEST_TAG: ${ECR_IMAGE_NAME}:latest
+    IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
+    IMAGE_TAG: ${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
+    LATEST_TAG: ${ECR_IMAGE_NAME}:latest
 
     #CONTAINER VERSIONS AND DEPLOYMENT SETTINGS
     # ARO_NGINX_IMAGE_VERSION: "8"
@@ -38,13 +35,10 @@ dependencies:
     # these load/save commands work around inability to cache copy-on-write layers properly
     # by caching the image in a tarball
     - if [[ -e ~/docker-image/image.tar ]]; then docker load --input ~/docker-image/image.tar; fi
-    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS https://ait-docker-registry.cloud.altvil.com/
     - eval $(aws ecr get-login --region us-east-1)
     - docker/build.sh
     - docker build -t ${IMAGE_TAG} ./target
     - docker tag ${IMAGE_TAG} ${LATEST_TAG}
-    - docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
-    - docker tag ${IMAGE_TAG} ${ECR_LATEST_TAG}
     - mkdir -p ~/docker-image; docker save ${IMAGE_TAG} > ~/docker-image/image.tar
 
 database:
@@ -63,8 +57,6 @@ deployment:
     commands:
       - docker push ${IMAGE_TAG}
       - docker push ${LATEST_TAG}
-      - docker push ${ECR_IMAGE_TAG}
-      - docker push ${ECR_LATEST_TAG}
       - python docker/publish_version.py ait-master app $CIRCLE_BUILD_NUM
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
