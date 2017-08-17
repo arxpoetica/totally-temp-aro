@@ -1,4 +1,4 @@
-FROM ait-docker-registry.cloud.altvil.com/aro/aro-app-base
+FROM 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app-base
 
 MAINTAINER nvitucci@altvil.com
 
