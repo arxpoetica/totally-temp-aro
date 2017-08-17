@@ -49,13 +49,9 @@ with open(TEMPLATE_FILE, 'r') as template_file:
 vz_qa_master = os.environ.get('VZ_QA_MASTER')
 branch_name = 'vz-master' if vz_qa_master == 'true' else os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
-aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro-etl'
+aro_app_image_name = os.environ.get('ARO_APP_IMAGE_NAME') or 'aro/aro-app'
+aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro/aro-etl'
 nginx_image_version = os.environ.get('ARO_NGINX_IMAGE_VERSION') 
-aro_service_image_version = os.environ.get('ARO_SERVICE_IMAGE_VERSION')
-aro_data_image_version = os.environ.get('ARO_DATA_IMAGE_VERSION')
-aro_data_image_name = os.environ.get('ARO_DATA_IMAGE_NAME') or 'aro-data'
-aro_private_data_image_name = os.environ.get('ARO_PRIVATE_DATA_IMAGE_NAME') or 'none'
-aro_private_data_image_version = os.environ.get('ARO_PRIVATE_DATA_IMAGE_VERSION') or 'none'
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
@@ -64,10 +60,11 @@ decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
 token_key = os.environ.get('ARO_APP_TOKEN_KEY')
 db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
+db_database = os.environ.get('ARO_APP_DB_DATABASE') or 'aro'
 docker_pass = os.environ.get('DOCKER_PASS')
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
 aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
-ecr_path = os.environ.get('ECR_PATH')
+ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
 
 etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
@@ -164,6 +161,7 @@ def provision_stack(cloudformation_stack):
         dbpass=db_pass,
         dbhost=db_host,
         dbuser=db_user,
+        dbdatabase=db_database,
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
@@ -191,7 +189,8 @@ def update_stack(outputs):
         opsworks_client=opsworks_client,
         dbhost=db_host,
         dbpass=db_pass,
-        dbuser=db_user
+        dbuser=db_user,
+        dbdatabase=db_database
         
     )
     # re-enable alarms
@@ -199,21 +198,18 @@ def update_stack(outputs):
 
 def _set_environment():
     """ returns a list of hashes of environment variables """
-    return [{ 'Key': 'app_container_tag', 'Value': str(build_num), 'Secure': False },
-            { 'Key': 'etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
-            { 'Key': 'nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
-            { 'Key': 'aro_service_container_tag', 'Value': str(aro_service_image_version), 'Secure': False },
-            { 'Key': 'aro_data_container_tag', 'Value': str(aro_data_image_version), 'Secure': False },
-            { 'Key': 'aro_data_image_name', 'Value': str(aro_data_image_name), 'Secure': False },
-            { 'Key': 'aro_private_data_image_name', 'Value': str(aro_private_data_image_name), 'Secure': False },
+    return [{ 'Key': 'aro_app_container_tag', 'Value': str(build_num), 'Secure': False },
+            { 'Key': 'aro_app_image_name', 'Value': str(aro_app_image_name), 'Secure': False },
+            { 'Key': 'aro_etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
+            { 'Key': 'aro_nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
             { 'Key': 'aro_etl_image_name', 'Value': str(aro_etl_image_name), 'Secure': False },
-            { 'Key': 'aro_private_data_container_tag', 'Value': str(aro_private_data_image_version), 'Secure': False },
             # { 'Key': 'database_url', 'Value': str(database_url), 'Secure': True },
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
             { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
             { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
-            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False }]
+            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False }],
+            { 'Key': 'ecr_uri_root', 'Value': str(ecr_uri_root), 'Secure': False } ]
 
 
 
