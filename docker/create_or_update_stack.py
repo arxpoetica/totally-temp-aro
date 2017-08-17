@@ -208,7 +208,7 @@ def _set_environment():
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
             { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
             { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
-            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False }],
+            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False },
             { 'Key': 'ecr_uri_root', 'Value': str(ecr_uri_root), 'Secure': False } ]
 
 
