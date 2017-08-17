@@ -9,8 +9,8 @@ machine:
     - docker
   environment:
     IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
-    IMAGE_TAG: ${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
-    LATEST_TAG: ${ECR_IMAGE_NAME}:latest
+    IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
+    LATEST_TAG: ${IMAGE_NAME}:latest
 
     #CONTAINER VERSIONS AND DEPLOYMENT SETTINGS
     # ARO_NGINX_IMAGE_VERSION: "8"
