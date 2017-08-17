@@ -142,6 +142,7 @@ def provision_aro_stack(opsworks_stack_id=None,
                         dbuser='',
                         dbhost='',
                         dbpass='',
+                        dbdatabase='',
                         docker_pass='',
                         environment_vars=[],
                         start_stack=False,
@@ -186,6 +187,7 @@ def provision_aro_stack(opsworks_stack_id=None,
         Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
                       { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
                       { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
+                      { 'Key': 'PGDATABASE', 'Value': str(dbdatabase), 'Secure': False},
                       { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
     )
     ids = [opsworks_layer_id]
@@ -279,7 +281,8 @@ def deploy_aro_stack(opsworks_stack_id=None,
                      opsworks_client=None,
                      dbpass='',
                      dbuser='',
-                     dbhost=''):
+                     dbhost='',
+                     dbdatabase=''):
     """Update a previously created and provisioned stack"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region='us-east-1')
 
@@ -291,7 +294,8 @@ def deploy_aro_stack(opsworks_stack_id=None,
         Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
                       { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
                       { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
-                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': False} ] + environment_vars
+                      { 'Key': 'PGDATABASE', 'Value': str(dbdatabase), 'Secure': False},
+                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
     )
 
     deploy_response = opsworks_client.create_deployment(

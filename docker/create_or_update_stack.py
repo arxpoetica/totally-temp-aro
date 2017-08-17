@@ -64,10 +64,11 @@ decrypt_key = os.environ.get('ARO_APP_DECRYPT_KEY')
 token_key = os.environ.get('ARO_APP_TOKEN_KEY')
 db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
+db_database = os.environ.get('ARO_APP_DB_DATABASE') or 'aro'
 docker_pass = os.environ.get('DOCKER_PASS')
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
 aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
-ecr_path = os.environ.get('ECR_PATH')
+ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
 
 etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
@@ -164,6 +165,7 @@ def provision_stack(cloudformation_stack):
         dbpass=db_pass,
         dbhost=db_host,
         dbuser=db_user,
+        dbdatabase=db_database,
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
@@ -191,7 +193,8 @@ def update_stack(outputs):
         opsworks_client=opsworks_client,
         dbhost=db_host,
         dbpass=db_pass,
-        dbuser=db_user
+        dbuser=db_user,
+        dbdatabase=db_database
         
     )
     # re-enable alarms
@@ -213,7 +216,8 @@ def _set_environment():
             { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
             { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
             { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
-            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False }]
+            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False }],
+            { 'Key': 'ecr_uri_root', 'Value': str(ecr_uri_root), 'Secure': False } ]
 
 
 
