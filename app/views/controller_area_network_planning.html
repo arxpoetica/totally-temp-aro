@@ -104,13 +104,13 @@
     <button class="btn btn-sm"
             ng-class="{'btn-primary' : !isToolSelected('polygon') ,'btn-selected': isToolSelected('polygon') && !deselectMode, 'btn-danger active': isToolSelected('polygon') && deselectMode}"
             ng-click="toggleSelectedTool('polygon')">Polygon Select</button>
-    <div class="btn-group btn-group-sm">
+    <!-- <div class="btn-group btn-group-sm">
       <button class="btn btn-primary"
               ng-disabled="isSelectingServiceAreas"
               ng-click="selectServiceAreasContainingDataSources()">
-        <!-- Default text to select service areas -->
+        Default text to select service areas
         <div ng-show="!isSelectingServiceAreas">Select service areas</div>
-        <!-- Spinner that is shown when the system is selecting the service areas -->
+        Spinner that is shown when the system is selecting the service areas
         <div ng-show="isSelectingServiceAreas">
           <div class="spinner" style="margin:0px;height:18px;font-size:14px;float:left;">
             <div class="rect1"style="background-color:white; width: 2px"></div>
@@ -129,7 +129,7 @@
               data-content="This feature is used to select service areas containing all locations in the selected data sources. This cannot be used with global data sources.">
         <span class="fa fa-question-circle"></span>
       </button>
-    </div>
+    </div> -->
   </div>
   <p ng-hide="regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
   <div style="margin: 5px;min-height: 0px;max-height: 110px;overflow: auto;">
