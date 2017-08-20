@@ -159,4 +159,38 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Add plan targets to a plan
+  api.post('/network_plan/:planId/addTargets', (request, response, next) => {
+    var planId = request.params.planId
+    var locationIds = request.body.locationIds
+    models.NetworkPlan.addTargets(planId, locationIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Remove plan targets from a plan
+  api.post('/network_plan/:planId/removeTargets', (request, response, next) => {
+    var planId = request.params.planId
+    var locationIds = request.body.locationIds
+    models.NetworkPlan.removeTargets(planId, locationIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Remove all plan targets from a plan
+  api.delete('/network_plan/:planId/removeAllTargets', (request, response, next) => {
+    var planId = request.params.planId
+    models.NetworkPlan.removeAllTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Get addresses for the specified locations
+  api.post('/network_plan/targets/addresses', (request, response, next) => {
+    var locationIds = request.body.locationIds
+    models.NetworkPlan.getTargetsAddresses(locationIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

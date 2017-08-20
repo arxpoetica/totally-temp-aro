@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper) => {
+app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -122,37 +122,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
-  // Map layers data - define once
-  service.mapLayers = new Rx.BehaviorSubject({})
-  service.mapTileOptions = new Rx.BehaviorSubject({
-    showTileExtents: false,
-    heatMap: {
-      useAbsoluteMax: true,
-      maxValue: 100,
-      powerExponent: 0.5,
-      worldMaxValue: 100000000
-    }
-  })
-  service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
-
-  service.hackRaiseEvent = (features) => {
-    $rootScope.$broadcast('map_layer_clicked_feature', features, {})
-  }
-
-  // Sets (or adds) a map layer with the given key
-  service.setMapLayer = (layerKey, data) => {
-    // Get a copy of the current maplayers. A little Redux-ey
-    var newMapLayers = angular.copy(service.mapLayers.getValue(), {})
-    // Set the mapLayer (can be a new layer)
-    newMapLayers[layerKey] = data
-    service.mapLayers.next(newMapLayers)
-  }
-
-  // Boundaries layer data - define once
-  service.boundaries = {
-    areaLayers: []
-  }
-  
   // View Settings layer - define once
   service.viewSetting = {
     selectedFiberOption: null,
@@ -169,10 +138,43 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         id: 'HEATMAP_OFF',
         label: 'Raw Points'
       }
-    ],
-    selectedHeatmapOption: null
+    ]
   }
-  service.viewSetting.selectedHeatmapOption = new Rx.BehaviorSubject(service.viewSetting.heatmapOptions[0])
+
+  // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
+  service.mapLayers = new Rx.BehaviorSubject({})
+  service.mapTileOptions = new Rx.BehaviorSubject({
+    showTileExtents: false,
+    heatMap: {
+      useAbsoluteMax: true,
+      maxValue: 100,
+      powerExponent: 0.5,
+      worldMaxValue: 100000000
+    },
+    selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
+  })
+  service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
+
+  service.hackRaiseEvent = (features) => {
+    $rootScope.$broadcast('map_layer_clicked_feature', features, {})
+  }
+
+  // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
+  service.requestPolygonSelect = new Rx.BehaviorSubject({})
+
+  // Sets (or adds) a map layer with the given key
+  service.setMapLayer = (layerKey, data) => {
+    // Get a copy of the current maplayers. A little Redux-ey
+    var newMapLayers = angular.copy(service.mapLayers.getValue(), {})
+    // Set the mapLayer (can be a new layer)
+    newMapLayers[layerKey] = data
+    service.mapLayers.next(newMapLayers)
+  }
+
+  // Boundaries layer data - define once
+  service.boundaries = {
+    areaLayers: []
+  }
 
   // Default data sources - define once
   service.defaultDataSources = [
@@ -223,27 +225,25 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       },
       {
         label: 'Competitive Strength',
-        alphaRender: true,
-        alphaThresholdProperty: 'strength',
         aggregate: {
           individual: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'strength'
+              aggregateById: 'gid',
+              aggregateProperty: 'strength'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'strength'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'strength'
             }
           },
           all: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'sum_strength'
+              aggregateById: 'gid',
+              aggregateProperty: 'sum_strength'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'sum_strength'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'sum_strength'
             }
           }
         }
@@ -255,22 +255,22 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         aggregate: {
           individual: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'download_speed'
+              aggregateById: 'gid',
+              aggregateProperty: 'download_speed'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'download_speed'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'download_speed'
             }
           },
           all: {
             'census-block': {
-              aggregateEntityId: 'gid',
-              aggregateBy: 'max_download'
+              aggregateById: 'gid',
+              aggregateProperty: 'max_download'
             },
             'census-block-group': {
-              aggregateEntityId: 'cbg_id',
-              aggregateBy: 'max_download'
+              aggregateById: 'cbg_id',
+              aggregateProperty: 'max_download'
             }
           }
         }
@@ -326,11 +326,23 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.competition.selectedCompetitorType = service.competition.allCompetitorTypes[0]
   service.competition.selectedRenderingOption = service.competition.allRenderingOptions[0]
   service.reloadCompetitors = () => {
-    return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`)
+    if (map) {
+      var bounds = map.getBounds()
+      var params = {
+    	maxY: bounds.getNorthEast().lat(),
+    	maxX: bounds.getNorthEast().lng(),
+        minY: bounds.getSouthWest().lat(),
+        minX: bounds.getSouthWest().lng()
+      }
+    }
+    var temp = map != null ? params : {}
+    var args = {
+      params: temp,
+    };
+    return $http.get(`/competitors/v1/competitors/carriers/${service.competition.selectedCompetitorType.id}`, args)
       .then((response) => {
         if (response.status >= 200 && response.status <= 299) {
-          service.competition.selectedCompetitors = []
-          service.competition.allCompetitors = response.data
+          service.competition.allCompetitors = $filter('orderBy')(response.data,'name')
           // For now just populate random colors for each competitor. This can later come from the api.
           for (var iCompetitor = 0; iCompetitor < service.competition.allCompetitors.length; ++iCompetitor) {
             var randomColors = getRandomColors()
@@ -340,10 +352,27 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         }
       })
   }
-  service.reloadCompetitors()
+  //service.reloadCompetitors()
 
   service.locationTypes = new Rx.BehaviorSubject([])
   service.constructionSites = new Rx.BehaviorSubject([])
+
+  // Hold a map of selected locations
+  service.selectedLocationIcon = '/images/map_icons/aro/target.png'
+  service.selectedLocations = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedLocations = () => {
+    if (service.planId !== service.INVALID_PLAN_ID) {
+      $http.get(`/locations/${service.planId}/selectedLocationIds`)
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            var selectedLocationsSet = new Set()
+            result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
+            service.selectedLocations.next(selectedLocationsSet)
+            service.requestMapLayerRefresh.next({})
+          }
+        })
+    }
+  }
 
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
@@ -369,44 +398,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
     service.locationTypes.next(locationTypes)
     service.constructionSites.next(angular.copy(locationTypes))
-
-    // ****************** START old (V1) location Types implementation
-    // Iterate over the business segments in the configuration
-    if (configuration && configuration.locationCategories && configuration.locationCategories.business && configuration.locationCategories.business.segments) {
-      Object.keys(configuration.locationCategories.business.segments).forEach((key) => {
-        var segment = configuration.locationCategories.business.segments[key];
-        if (segment.show) {
-          service.locationTypesV1.push({type: 'business', key: key, label: segment.label, checked: false, icon: configuration.locationCategories.mapIconFolder + 'businesses_' + key + '_default.png'
-          })
-        }
-      })
-    }
-
-    // Show residential/household units
-    if (configuration && configuration.locationCategories && configuration.locationCategories.household) {
-      if (configuration.locationCategories.household.show) {
-        service.locationTypesV1.push({ type: 'household',
-          key: 'household',
-          label: configuration.locationCategories.household.label,
-          checked: false,
-          icon: configuration.locationCategories.mapIconFolder + 'households_default.png'
-        })
-      }
-    }
-
-    // Show Towers
-    if (configuration && configuration.locationCategories && configuration.locationCategories.celltower) {
-      if (configuration.locationCategories.celltower.show) {
-        service.locationTypesV1.push({
-          type: 'celltower',
-          key: 'celltower',
-          label: configuration.locationCategories.celltower.label,
-          checked: false,
-          icon: configuration.locationCategories.mapIconFolder + 'tower.png'
-        })
-      }
-    }
-    // ****************** END old (V1) location Types implementation
 
     // Network equipment layer
     service.networkEquipments = []
@@ -516,6 +507,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         state = {}
       }
     }
+    service.reloadSelectedLocations()
   }
 
   service.set = (attr, value) => {

@@ -138,6 +138,18 @@ module.exports = class Location {
 	}
 
   /*
+   * Returns a list of location IDs that are selected for this plan and the given viewport
+   */
+  static findSelectedLocationIds(planId) {
+    var sql = `
+      SELECT location_id
+      FROM client.plan_targets
+      WHERE plan_id=$1
+    `
+    return database.query(sql, [planId])
+  }
+
+  /*
   * Returns the selected locations with businesses and households on them
   */
   static findSelected (plan_id, viewport) {
@@ -190,46 +202,6 @@ module.exports = class Location {
         viewport.buffer *= 10
         return database.points(sql, [plan_id], true, viewport, true)
       })
-  }
-
-  // Selected locations as a list
-  static findTargets (plan_id) {
-    var sql = `
-      SELECT locations.id, address
-      FROM locations
-      JOIN client.plan_targets
-        ON plan_targets.plan_id = $1
-       AND plan_targets.location_id = locations.id
-     ORDER BY locations.id ASC
-    `
-    return database.query(sql, [plan_id])
-      .then((targets) => {
-        return database.findOne(`
-          SELECT COUNT(*) AS total
-          FROM locations
-          JOIN client.plan_targets
-            ON plan_targets.plan_id=$1
-           AND plan_targets.location_id = locations.id
-        `, [plan_id])
-          .then((row) => {
-            return {
-              targets: targets,
-              total: row.total
-            }
-          })
-      })
-  }
-
-  static deleteTarget (plan_id, locationId) {
-    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1 AND location_id=$2'
-    return database.query(sql, [plan_id, locationId])
-      .then(() => this.findTargets(plan_id))
-  }
-
-  static deleteAllTargets (plan_id) {
-    var sql = 'DELETE FROM client.plan_targets WHERE plan_id=$1'
-    return database.query(sql, [plan_id])
-      .then(() => this.findTargets(plan_id))
   }
 
   // Get summary information for a given location
@@ -400,22 +372,28 @@ module.exports = class Location {
       })
       .then(() => {
         var sql = `
-          SELECT address, ST_AsGeojson(geog)::json AS geog,
-            (SELECT ST_Distance(existing_fiber.geom::geography, locations.geog)
-              FROM client.existing_fiber
-              ORDER BY existing_fiber.geom <#> locations.geom ASC
-              LIMIT 1
+          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,
+            (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
+              FROM (
+                SELECT geom
+                FROM client.existing_fiber
+                ORDER BY existing_fiber.geom <#> locations.geom ASC
+                LIMIT 10
+              ) as ef_closest_fibers
             ) AS distance_to_client_fiber,
-            (SELECT ST_Distance(fr.geom::geography, locations.geog)
-              FROM client.fiber_route fr
-              WHERE fr.plan_id IN (
-                (SELECT p.id FROM client.active_plan p WHERE p.parent_plan_id IN (
-                  (SELECT id FROM client.active_plan WHERE parent_plan_id=$2)
-                ))
-              )
-              ORDER BY fr.geom <#> locations.geom ASC
-              LIMIT 1
-            ) AS distance_to_planned_network
+            (SELECT min(ST_Distance(fr_closest_fibers.geom::geography, locations.geog))
+              FROM (
+                SELECT geom
+                FROM client.fiber_route fr
+                WHERE fr.plan_id IN (
+                  (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
+	                  (SELECT id FROM client.plan WHERE parent_plan_id=$2)
+	                ))
+                  ORDER BY fr.geom <#> locations.geom ASC
+                  LIMIT 10
+                )
+              ) as fr_closest_fibers
+            ) as distance_to_planned_network
           FROM locations WHERE id=$1
         `
         return database.findOne(sql, [location_id, plan_id])

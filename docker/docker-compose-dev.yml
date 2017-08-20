@@ -2,7 +2,7 @@ version: '2'
 
 services:
     db:
-        image: ait-docker-registry.cloud.altvil.com/aro/aro-postgis:9.5
+        image: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-postgis:9.5
         volumes:
             - postgres-data:/var/lib/postgresql/data
         ports:
@@ -11,7 +11,7 @@ services:
             POSTGRES_PASSWORD: aro
             POSTGRES_USER: aro
     service:
-        image: ait-docker-registry.cloud.altvil.com/aro/aro-service:latest
+        image: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-service:latest
         expose:
             - "8080"
         links:
@@ -30,7 +30,7 @@ services:
         image: zookeeper
 
     app:
-        image: ait-docker-registry.cloud.altvil.com/aro/aro-app-base-dev:latest
+        image: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app-base-dev:latest
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db
