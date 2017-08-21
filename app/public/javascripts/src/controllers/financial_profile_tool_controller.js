@@ -207,8 +207,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     refresh()
   })
 
-  $rootScope.$on('route_planning_changed', (e) => {
+  $rootScope.$on('route_planning_changed', (e, plan) => {
     if (!$scope.plan) return
+    updateMetadataLabels(plan.metadata);
     refreshCurrentTab()
   })
 
