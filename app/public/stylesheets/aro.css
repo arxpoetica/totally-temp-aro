@@ -1096,3 +1096,59 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .panel-fiber-details .panel-close-icon :hover {
   color: #c0c0c0;
 }
+
+.checkboxfill{
+    -webkit-appearance: initial;
+    width: 18px;
+    height: 18px;
+    position: relative;
+    padding: 1px 3px;
+    font-size: 10px;
+    line-height: 1.5;
+    border-radius: 3px;
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: 400;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #c0c0c0;
+}
+    
+.checkboxfill:checked {
+    background:#4d99e5;
+    border: #4d99e5;
+}
+.checkboxfill:checked:after {
+    /* Heres your symbol replacement - this is a tick in Unicode. */
+    font-family: "Glyphicons Halflings";
+    content: "\e013";
+    color: #fff;
+    font-size: 10px;
+    line-height: 1.5;
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    /* The following positions my tick in the center, 
+     * but you could just overlay the entire box
+     * with a full after element with a background if you want to */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%,-50%);
+    -moz-transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    /*
+     * If you want to fully change the check appearance, use the following:
+     * content: " ";
+     * width: 100%;
+     * height: 100%;
+     * background: blue;
+     * top: 0;
+     * left: 0;
+     */
+}
