@@ -40,6 +40,7 @@ app.controller('upload_fiber_controller', ['$scope', '$rootScope', '$http', ($sc
     var url = '/user_fiber/upload'
     var formData = new FormData(form)
     var name = formData.get('name')
+    formData.set("fileType",formData.get('file').name.split('.').pop().toUpperCase())
     if (!name) return swal({ title: 'Error', text: 'Please enter a name for the uploaded dataset', type: 'error' })
     $scope.uploading = true
     var xhr = new XMLHttpRequest()
