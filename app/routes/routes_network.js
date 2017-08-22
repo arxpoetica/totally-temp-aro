@@ -313,11 +313,13 @@ exports.configure = (api, middleware) => {
   api.post('/user_fiber/upload', upload.single('file'), (request, response, next) => {
     var userId = request.user.id
     var name = request.body.name
+    var mediaType = request.body.fileType
     var fullpath = request.file && request.file.path
     var req = {
       url: config.aro_service_url + '/installed/fiber/files',
       qs: {
-        'user_id': userId
+        'user_id': userId,
+        'media': mediaType
       },
       method: 'POST',
       formData: {
