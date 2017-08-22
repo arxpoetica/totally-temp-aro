@@ -23,6 +23,7 @@ exports.configure = (api, middleware) => {
     }
 
     models.AROService.request(req)
+      .then((data) => Promise.resolve(JSON.parse(data)))  // "data" comes back as a string from aro-service. Convert it to a obj.
       .then(jsonSuccess(response, next))
       .catch(next)
   })
