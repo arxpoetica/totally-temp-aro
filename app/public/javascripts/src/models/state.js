@@ -179,15 +179,15 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   // Default data sources - define once
   service.defaultDataSources = [
     {
-      dataSourceId: service.DS_GLOBAL_BUSINESSES,
+      libraryId: service.DS_GLOBAL_BUSINESSES,
       name: "Global Businesses"
     },
     {
-      dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
+      libraryId: service.DS_GLOBAL_HOUSEHOLDS,
       name: "Global Households"
     },
     {
-      dataSourceId: service.DS_GLOBAL_CELLTOWER,
+      libraryId: service.DS_GLOBAL_CELLTOWER,
       name: "Global CellTower"
     }
   ]
@@ -522,7 +522,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   }
 
   service.isDataSourceSelected = function (ds) {
-    var existingDataSources = _.pluck(service.selectedDataSources , 'dataSourceId');
+    var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');
     return existingDataSources.indexOf(ds) != -1;
   }
 
