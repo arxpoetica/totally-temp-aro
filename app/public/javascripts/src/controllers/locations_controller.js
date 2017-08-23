@@ -60,7 +60,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           var mapLayerKey = `${locationType.key}_${dataSourceId}`
           var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
           var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
-          url = url.replace('${dataSourceId}', dataSourceId)
+          url = url.replace('${libraryId}', dataSourceId)
 
           if (pointTransform === 'aggregate') {
             // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
