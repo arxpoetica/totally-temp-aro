@@ -52,23 +52,23 @@
           </th>
           <th>Status</th>
           <th>Actions</th>
-          <th>
+          <!-- <th>
             Created at
             <a href="javascript:void(0)" ng-click="sortBy('created_at', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('created_at', false)">↑</a>
-          </th>
+          </th> -->
           <th>
-            Updated at
+            Last Modified
             <a href="javascript:void(0)" ng-click="sortBy('updated_at', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('updated_at', false)">↑</a>
           </th>
-          <th>Owner</th>
-          <th class="text-right">
+          <th> Created By</th>
+          <!-- <th class="text-right">
             Total Cost
             <a href="javascript:void(0)" ng-click="sortBy('total_cost', true)">↓</a>
             <a href="javascript:void(0)" ng-click="sortBy('total_cost', false)">↑</a>
-          </th>
-          <th>Optimization Type</th>
+          </th> -->
+          <!-- <th>Optimization Type</th> -->
         </tr>
       </thead>
       <tbody>
@@ -83,7 +83,7 @@
               </div>
             </div>
             <div ng-if="!plan.progress && plan.ranOptimization">
-              <div style="float:left; width:200px">
+              <div style="float:left; width:100px">
                 <div class="progress" style="margin:0">
                   <div class="progress-bar progress-bar-success" role="progressbar" style="width: 100%">Complete</div>
                 </div>
@@ -96,11 +96,11 @@
             <a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>
             <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="deletePlan(plan)" ng-show="plan.owner_id === user_id"><span class="glyphicon glyphicon-trash"></span></a>
           </td>
+          <!-- <td>{{plan.created_at | date:'shortDate'}}</td> -->
           <td>{{plan.updated_at | date:'shortDate'}}</td>
-          <td>{{plan.created_at | date:'shortDate'}}</td>
           <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
-          <td class="text-right">{{plan.total_cost | currency:"<%- config.currency_symbol %>"}}</td>
-          <td></td>
+          <!-- <td class="text-right">{{plan.total_cost | currency:"<%- config.currency_symbol %>"}}</td> -->
+          <!-- <td></td> -->
         </tr>
       </tbody>
     </table>
