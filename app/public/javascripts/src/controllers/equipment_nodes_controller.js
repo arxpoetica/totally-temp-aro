@@ -88,7 +88,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
       var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
       oldMapLayers[mapLayerKey] = {
-        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`],
+        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.libraryId}/${lineTransform}/`],
         iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
         renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
         strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
@@ -302,7 +302,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         })
       })
 
-    initDatasource(info)
+    //initDatasource(info)
     info.toggleVisibility()
     reloadDatasources();
   })
