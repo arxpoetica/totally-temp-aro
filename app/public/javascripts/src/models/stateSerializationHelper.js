@@ -63,10 +63,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addUserUploadedDataSourcesToBody = (state, postBody) => {
     postBody.locationDataSources = postBody.locationDataSources || {}
     // Get all uploaded data sources except the global data sources
-    var uploadedDataSources = state.selectedDataSources.filter((item) => (item.dataSourceId != state.DS_GLOBAL_BUSINESSES)
-                                                                           && (item.dataSourceId != state.DS_GLOBAL_HOUSEHOLDS)
-                                                                           && (item.dataSourceId != state.DS_GLOBAL_CELLTOWER))
-    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'dataSourceId')
+    var uploadedDataSources = state.selectedDataSources.filter((item) => (item.libraryId != state.DS_GLOBAL_BUSINESSES)
+                                                                           && (item.libraryId != state.DS_GLOBAL_HOUSEHOLDS)
+                                                                           && (item.libraryId != state.DS_GLOBAL_CELLTOWER))
+    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'libraryId')
 
     if (uploadedDataSourceIds.length > 0) {
       postBody.locationDataSources.business = postBody.locationDataSources.business || [];
