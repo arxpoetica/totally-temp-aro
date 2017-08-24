@@ -3,6 +3,7 @@ var helpers = require('../helpers')
 var passport = require('passport')
 var querystring = require('querystring')
 var public_config = helpers.public_config
+var config = helpers.config
 
 exports.configure = (app, middleware) => {
   var LocalStrategy = require('passport-local').Strategy
@@ -26,7 +27,25 @@ exports.configure = (app, middleware) => {
 
   passport.deserializeUser((id, callback) => {
     models.User.find_by_id(id)
-      .then((user) => callback(null, user || null))
+      .then((user) => {
+        if (!user) {
+          callback(null, null)
+        }
+        // We have the user, now find the project ID associated with this user
+        var req = {
+          method: 'GET',
+          url: `${config.aro_service_url}/v1/user-project`,
+          qs: {
+            user_id: user.id
+          },
+          json: true
+        }
+        models.AROService.request(req)
+          .then((result) => {
+            user.projectId = result.id
+            callback(null, user || null)
+          })
+      })
       .catch(callback)
   })
 

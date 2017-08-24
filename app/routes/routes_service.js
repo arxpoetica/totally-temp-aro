@@ -14,7 +14,8 @@ exports.configure = (api, middleware) => {
     var req = {
       url: `${config.aro_service_url}/${serviceUrl}`,
       method: request.method,
-      params: request.params
+      params: request.params,
+      json: true
     }
 
     // Attach request body if required
@@ -23,7 +24,6 @@ exports.configure = (api, middleware) => {
     }
 
     models.AROService.request(req)
-      .then((data) => Promise.resolve(JSON.parse(data)))  // "data" comes back as a string from aro-service. Convert it to a obj.
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -73,6 +73,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.plans = []
 
   $scope.user_id = user_id
+  $scope.projectId = globalUser.projectId
 
   $scope.show_market_profile = config.ui.top_bar_tools.indexOf('market_profile') >= 0
   $scope.show_customer_profile = config.ui.top_bar_tools.indexOf('customer_profile') >= 0
@@ -93,17 +94,16 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
-    var centroid = plan && plan.area_centroid
-    if (centroid) {
+    if (plan && plan.latitude && plan.longitude) {
       try {
         var s = search.select2('data');
         var curProject = plan.area_name === s.text
         if(!s || !s.geocoded){
-          map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
+          map.setCenter({ lat: plan.latitude, lng: plan.longitude })
           map.setZoom(+state.get('mapZoom') || 14)
         }
       } catch (err) {
-        map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
+        map.setCenter({ lat: plan.latitude, lng: plan.longitude })
         map.setZoom(14)
       }
     }
@@ -237,6 +237,23 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     clearInterval(interval)
     $scope.currentPage = page || 1
     var load = (callback) => {
+
+      var planOptions = {
+        url: '/service/v1/plan',
+        method: 'GET',
+        params: {
+          user_id: $scope.user_id,
+          search: $scope.search_text,
+          project_id: $scope.projectId
+        }
+      }
+      $http(planOptions)
+        .then((result) => {
+          console.log(result)
+          $scope.plans = result.data
+          callback && callback()
+        })
+
       var options = {
         url: '/network_plan/find_all',
         method: 'GET',
@@ -337,15 +354,13 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.saveNewPlan = () => {
     var params = {
       name: $scope.new_plan_name,
-      area: {
-        name: $scope.new_plan_area_name,
-        centroid: $scope.new_plan_area_centroid,
-        bounds: $scope.new_plan_area_bounds
-      }
+      areaName: $scope.new_plan_area_name,
+      latitude: $scope.new_plan_area_centroid.coordinates[1],
+      longitude: $scope.new_plan_area_centroid.coordinates[0],
+      projectId: $scope.projectId
     }
 
-
-    $http.post('/network_plan/create', params).then((response) => {
+    $http.post('/service/v1/plan?user_id=' + $scope.user_id, params).then((response) => {
       state.clearPlan(response.data)
       $scope.selectPlan(response.data)
       $('#new-plan').modal('hide')
