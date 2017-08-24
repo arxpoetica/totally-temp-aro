@@ -221,7 +221,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('plan_selected', null)
         delete $rootScope.currentPlan;
       }
-      $http.post('/network_plan/' + plan.id + '/delete', { userId: $scope.user_id }).then((response) => {
+      $http.delete(`/service/v1/plan/${plan.id}?user_id=${$scope.user_id}`).then((response) => {
         $scope.loadPlans()
       })
     })
@@ -248,44 +248,25 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         }
       }
       $http(planOptions)
-        .then((result) => {
-          console.log(result)
-          $scope.plans = result.data
-          callback && callback()
+        .then((response) => {
+            $http.get('/optimization/processes').then((running) => {
+              response.data.forEach((plan) => {
+                var info = running.data.find((status) => status.planId === +plan.id)
+                if (info) {
+                  var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
+                  var min = Math.floor(diff / 60)
+                  var sec = Math.ceil(diff % 60)
+                  plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
+                  plan.progress = info.progress
+                  plan.startDate = info.startDate
+                  plan.optimizationState = info.optimizationState
+                }
+              })
+              $scope.plans = response.data
+              // $scope.pages = response.data.pages
+              callback && callback()
+            })
         })
-
-      var options = {
-        url: '/network_plan/find_all',
-        method: 'GET',
-        params: {
-          text: $scope.search_text,
-          page: $scope.currentPage,
-          sortField: $scope.sortField,
-          sortOrder: $scope.sortOrder,
-          minimumCost: $scope.minimumCost,
-          maximumCost: $scope.maximumCost,
-          allPlans: $scope.allPlans
-        }
-      }
-      $http(options).then((response) => {
-        $http.get('/optimization/processes').then((running) => {
-          response.data.plans.forEach((plan) => {
-            var info = running.data.find((status) => status.planId === +plan.id)
-            if (info) {
-              var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
-              var min = Math.floor(diff / 60)
-              var sec = Math.ceil(diff % 60)
-              plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
-              plan.progress = info.progress
-              plan.startDate = info.startDate
-              plan.optimizationState = info.optimizationState
-            }
-          })
-          $scope.plans = response.data.plans
-          $scope.pages = response.data.pages
-          callback && callback()
-        })
-      })
     }
     load(callback)
     interval = setInterval(load, 100000)
