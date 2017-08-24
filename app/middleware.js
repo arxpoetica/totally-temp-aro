@@ -53,11 +53,11 @@ function jsonHandler (response, next) {
 function check_permission (rol) {
   return (request, response, next) => {
     var user = request.user
-    var plan_id = request.params.plan_id
-    models.Permission.findPermission(plan_id, user.id)
+    var project_id = user.projectId
+    models.Permission.findPermission(project_id, user.id)
       .then((permission) => {
         // !rol means any permission is ok
-        if (permission && (!rol || rol === permission.rol || permission.rol === 'owner')) {
+        if (permission && (!rol || rol === permission.rol || permission.rol === 'Owner')) {
           return next()
         }
         response.status(403).json({
