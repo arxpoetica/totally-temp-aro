@@ -16,21 +16,7 @@ exports.configure = (app, middleware) => {
   (email, password, callback) => {
     models.User.login(email, password)
       .then((user) => {
-        // We have the user, now find the project ID associated with this user
-        var req = {
-          method: 'GET',
-          url: `${config.aro_service_url}/v1/user-project`,
-          qs: {
-            user_id: user.id
-          },
-          json: true
-        }
-        models.AROService.request(req)
-          .then((result) => {
-            user.projectId = result.id
-            mapUserIdToProjectId[user.id] = user.projectId
-            callback(null, user)
-          })
+        callback(null, user)
       })
       .catch((err) => {
         if (!require('node-errors').isCustomError(err)) return callback(err)
@@ -48,8 +34,26 @@ exports.configure = (app, middleware) => {
         if (!user) {
           callback(null, null)
         }
-        user.projectId = mapUserIdToProjectId[user.id]  // This will have been saved on a successful login
-        callback(null, user || null)
+        if (!mapUserIdToProjectId[user.id]) {
+          // We don't have the project ID for this user yet. Get it
+          var req = {
+            method: 'GET',
+            url: `${config.aro_service_url}/v1/user-project`,
+            qs: {
+              user_id: user.id
+            },
+            json: true
+          }
+          models.AROService.request(req)
+            .then((result) => {
+              user.projectId = result.id
+              mapUserIdToProjectId[user.id] = user.projectId
+              callback(null, user || null)
+          })
+        } else {
+          user.projectId = mapUserIdToProjectId[user.id]  // This will have been saved on a successful login
+          callback(null, user || null)
+        }
       })
       .catch(callback)
   })
