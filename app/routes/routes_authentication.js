@@ -7,6 +7,7 @@ var config = helpers.config
 
 exports.configure = (app, middleware) => {
   var LocalStrategy = require('passport-local').Strategy
+  var mapUserIdToProjectId = {}
 
   passport.use(new LocalStrategy({
     usernameField: 'email',
@@ -14,7 +15,23 @@ exports.configure = (app, middleware) => {
   },
   (email, password, callback) => {
     models.User.login(email, password)
-      .then((user) => callback(null, user))
+      .then((user) => {
+        // We have the user, now find the project ID associated with this user
+        var req = {
+          method: 'GET',
+          url: `${config.aro_service_url}/v1/user-project`,
+          qs: {
+            user_id: user.id
+          },
+          json: true
+        }
+        models.AROService.request(req)
+          .then((result) => {
+            user.projectId = result.id
+            mapUserIdToProjectId[user.id] = user.projectId
+            callback(null, user)
+          })
+      })
       .catch((err) => {
         if (!require('node-errors').isCustomError(err)) return callback(err)
         return callback(null, false, { message: err.message })
@@ -31,20 +48,8 @@ exports.configure = (app, middleware) => {
         if (!user) {
           callback(null, null)
         }
-        // We have the user, now find the project ID associated with this user
-        var req = {
-          method: 'GET',
-          url: `${config.aro_service_url}/v1/user-project`,
-          qs: {
-            user_id: user.id
-          },
-          json: true
-        }
-        models.AROService.request(req)
-          .then((result) => {
-            user.projectId = result.id
-            callback(null, user || null)
-          })
+        user.projectId = mapUserIdToProjectId[user.id]  // This will have been saved on a successful login
+        callback(null, user || null)
       })
       .catch(callback)
   })
