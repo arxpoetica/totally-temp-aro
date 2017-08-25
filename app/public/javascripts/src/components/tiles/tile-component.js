@@ -591,6 +591,18 @@ class TileComponentController {
       .pairwise() // This will give us the previous value in addition to the current value
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
 
+    // Subscribe to changes in the plan coordinates (center and zoom)
+    state.planCoordinates
+      .subscribe((planCoordinates) => {
+        if (this.mapRef) {
+          this.mapRef.setZoom(planCoordinates.zoom)
+          this.mapRef.setCenter({
+            lat: planCoordinates.latitude,
+            lng: planCoordinates.longitude
+          })
+        }
+      })
+
     // Subscribe to changes in the map tile options
     state.mapTileOptions
       .subscribe((mapTileOptions) => {

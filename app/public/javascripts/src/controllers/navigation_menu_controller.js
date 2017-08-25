@@ -94,19 +94,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
-    if (plan && plan.latitude && plan.longitude) {
-      try {
-        var s = search.select2('data');
-        var curProject = plan.area_name === s.text
-        if(!s || !s.geocoded){
-          map.setCenter({ lat: plan.latitude, lng: plan.longitude })
-          map.setZoom(+state.get('mapZoom') || 14)
-        }
-      } catch (err) {
-        map.setCenter({ lat: plan.latitude, lng: plan.longitude })
-        map.setZoom(14)
-      }
-    }
   }
 
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -276,9 +263,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path()
   if (path.indexOf('/plan/') === 0) {
     var plan_id = path.substring('/plan/'.length)
-    $http.get('/network_plan/' + plan_id).then((response) => {
-      $scope.selectPlan(response.data)
-    })
+    $http.get(`/service/v1/plan/${plan_id}?user_id=${$scope.user_id}`)
+      .then((response) => {
+        $scope.selectPlan(response.data)
+      })
   }
 
   $scope.showPlans = () => {
@@ -342,7 +330,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     }
 
     $http.post('/service/v1/plan?user_id=' + $scope.user_id, params).then((response) => {
-      state.clearPlan(response.data)
       $scope.selectPlan(response.data)
       $('#new-plan').modal('hide')
       $('#plan-combo').modal('hide')
