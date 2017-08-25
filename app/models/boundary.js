@@ -91,11 +91,9 @@ module.exports = class Boundary {
         if (!id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + '/serviceLayers',
+            url: config.aro_service_url + `/v1/project/${user.projectId}/serviceLayers` + `?user_id=${user.id}`,
             body: {
-              layerDescription: name,
-              layerName: name,
-              userId: user.id
+              name: name
             },
             json: true
           }
@@ -106,11 +104,11 @@ module.exports = class Boundary {
         }
       })
       .then((res) => {
-        id = id || res.id
+        id = id || res.identifier
         if (!file) return { id: id }
         var req = {
           method: 'POST',
-          url: config.aro_service_url + `/serviceLayers/${id}/producer/entities.csv`,
+          url: config.aro_service_url + `/v1/library/${id}` + `?userId=${user.id}&media=CSV`,
           formData: {
             file: fs.createReadStream(file)
           }
@@ -119,10 +117,12 @@ module.exports = class Boundary {
           .then(() => {
             var req = {
               method: 'POST',
-              url: config.aro_service_url + `/serviceLayers/${id}/command`,
+              url: config.aro_service_url + `/v1/project/${user.projectId}/serviceLayers-cmd` + `?user_id=${user.id}`,
               body: {
                 action: 'GENERATE_POLYGONS',
-                maxDistanceMeters: radius
+                maxDistanceMeters: radius,
+                equipmentLibraryId: id,
+                serviceLayerLibraryId: 3
               },
               json: true
             }

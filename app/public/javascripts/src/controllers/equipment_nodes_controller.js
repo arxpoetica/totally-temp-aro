@@ -300,10 +300,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
             state.selectedExistingFibers.push(existingFiber)
           }
         })
+        updateMapLayers()
       })
 
     //initDatasource(info)
-    info.toggleVisibility()
+    //info.toggleVisibility()
     reloadDatasources();
   })
 
