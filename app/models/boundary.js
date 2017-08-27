@@ -91,8 +91,9 @@ module.exports = class Boundary {
         if (!id) {
           var req = {
             method: 'POST',
-            url: config.aro_service_url + `/v1/project/${user.projectId}/serviceLayers` + `?user_id=${user.id}`,
+            url: config.aro_service_url + `/v1/project/${user.projectId}/library` + `?user_id=${user.id}`,
             body: {
+              dataType: "equipment",
               name: name
             },
             json: true
@@ -121,13 +122,12 @@ module.exports = class Boundary {
               body: {
                 action: 'GENERATE_POLYGONS',
                 maxDistanceMeters: radius,
-                equipmentLibraryId: id,
-                serviceLayerLibraryId: 3
+                equipmentLibraryId: id
               },
               json: true
             }
             return models.AROService.request(req)
-              .then(() => ({ id: id }))
+              .then((res) => ({ id: id, name: res.serviceLayerLibrary.name}))
           })
       })
   }

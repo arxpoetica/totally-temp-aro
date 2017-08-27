@@ -61,6 +61,7 @@ app.controller('user_defined_boundary_controller', ['$scope', '$rootScope', '$ht
         return swal('Error', data.error || 'Unknown error', 'error')
       }
       $scope.editingUserDefinedBoundary.id = data.id
+      $scope.editingUserDefinedBoundary.name = data.name
       $rootScope.$broadcast('saved_user_defined_boundary', $scope.editingUserDefinedBoundary)
       $('#user_defined_boundaries_modal').modal('hide')
     })
