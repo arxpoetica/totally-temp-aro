@@ -341,10 +341,11 @@ module.exports = class Network {
 
     // Add plan id to optimization options
     options.planId = plan_id
+    options.backhaulOptimization = {}
 
     var req = {
       method: 'POST',
-      url: `${config.aro_service_url}/optimize/masterplan`,
+      url: `${config.aro_service_url}/v1/optimize/masterplan`,
       json: true,
       body: options
     }
@@ -355,7 +356,7 @@ module.exports = class Network {
                        [plan_id, options.locationTypes, options.algorithm])
     ])
       .then((results) => {
-        options.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
+        options.backhaulOptimization.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
         return this._callService(req)
       })
   }
