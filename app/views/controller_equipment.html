@@ -44,7 +44,7 @@
                               close-on-select="true"
                               on-select="selectedFibersChanged()"
                               on-remove="selectedFibersChanged()">
-                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.systemId}}]</ui-select-match>
+                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.libraryId}}]</ui-select-match>
                     <ui-select-choices class="ui-select-width-250" repeat="existingFiber in planState.allExistingFibers">
                       <div>{{existingFiber.name}}</div>
                     </ui-select-choices>

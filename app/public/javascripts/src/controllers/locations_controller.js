@@ -37,19 +37,20 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     // Add map layers based on the selection
     state.selectedDataSources.forEach((selectedDataSource) => {
 
+      //selectedDataSource = JSON.parse(JSON.stringify(selectedDataSource).replace("\"libraryId\":", "\"dataSourceId\":"))
       // Loop through the location types
       state.locationTypes.getValue().forEach((locationType) => {
 
         // Determine whether we want to add this locationtype + datasource combo
         var createLayer = true
-        var dataSourceId = selectedDataSource.dataSourceId
-        if (selectedDataSource.dataSourceId === state.DS_GLOBAL_BUSINESSES) {
+        var dataSourceId = selectedDataSource.libraryId
+        if (selectedDataSource.libraryId === state.DS_GLOBAL_BUSINESSES) {
           dataSourceId = 1  // This is the global data source id
           createLayer = locationType.key.indexOf('business') >= 0
-        } else if (selectedDataSource.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS) {
+        } else if (selectedDataSource.libraryId === state.DS_GLOBAL_HOUSEHOLDS) {
           dataSourceId = 1  // This is the global data source id
           createLayer = locationType.key.indexOf('household') >= 0
-        } else if (selectedDataSource.dataSourceId === state.DS_GLOBAL_CELLTOWER) {
+        } else if (selectedDataSource.libraryId === state.DS_GLOBAL_CELLTOWER) {
           dataSourceId = 1  // This is the global data source id
           createLayer = locationType.key.indexOf('tower') >= 0
         }
@@ -59,7 +60,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
           var mapLayerKey = `${locationType.key}_${dataSourceId}`
           var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
           var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
-          url = url.replace('${dataSourceId}', dataSourceId)
+          url = url.replace('${libraryId}', dataSourceId)
 
           if (pointTransform === 'aggregate') {
             // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer

@@ -88,7 +88,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
       var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
       oldMapLayers[mapLayerKey] = {
-        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.systemId}/${lineTransform}/`],
+        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.libraryId}/${lineTransform}/`],
         iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
         renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
         strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
@@ -287,23 +287,24 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $rootScope.$on('uploaded_fiber', (e, info) => {
 
     // Reload data sources into state
-    var selectedFiberIds = _.pluck(state.selectedExistingFibers, 'systemId')
+    var selectedFiberIds = _.pluck(state.selectedExistingFibers, 'libraryId')
     state.loadExistingFibersList()
       .then(() => {
         state.allExistingFibers.forEach((existingFiber) => {
           // Select the fibers that were selected earlier.
-          if (selectedFiberIds.indexOf(existingFiber.systemId) >= 0) {
+          if (selectedFiberIds.indexOf(existingFiber.libraryId) >= 0) {
             state.selectedExistingFibers.push(existingFiber)
           }
           // Select the currently uploaded fiber
-          if (existingFiber.systemId === info.systemId) {
+          if (existingFiber.libraryId === info.libraryId) {
             state.selectedExistingFibers.push(existingFiber)
           }
         })
+        updateMapLayers()
       })
 
-    initDatasource(info)
-    info.toggleVisibility()
+    //initDatasource(info)
+    //info.toggleVisibility()
     reloadDatasources();
   })
 
