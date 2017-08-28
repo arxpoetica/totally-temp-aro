@@ -223,6 +223,14 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.loadPlans = function (page, callback) {
     clearInterval(interval)
     $scope.currentPage = page || 1
+    $scope.maxResults = 10
+    if(page > 1) {
+      var start = $scope.maxResults * (page - 1);
+      var end   = start + $scope.maxResults;
+      $scope.plans = $scope.allPlans.slice(start, end);
+      return;
+    }
+
     var load = (callback) => {
 
       var planOptions = {
@@ -249,8 +257,15 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
                   plan.optimizationState = info.optimizationState
                 }
               })
-              $scope.plans = response.data
+              $scope.allPlans = response.data
+              $scope.plans = response.data.slice(0, $scope.maxResults);
               // $scope.pages = response.data.pages
+              $scope.pages = [];
+              var pageSize = Math.floor(response.data.length / $scope.maxResults) + (response.data.length % $scope.maxResults > 0 ? 1 : 0);
+              for (var i = 1; i <= pageSize; i++) {
+                $scope.pages.push(i);
+              }
+
               callback && callback()
             })
         })
