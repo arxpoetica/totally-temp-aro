@@ -24,16 +24,16 @@ html, body {
   right: 0px;
 }
 
-#aro-header {
+/* #aro-header {
   background-color: white;
   box-shadow: 0px 3px 15px #888888;
-  z-index: 1; /* This is needed to show the "box-shadow" on top of the google map */
+  z-index: 1; This is needed to show the "box-shadow" on top of the google map
   position:absolute;
   top: 50px;
   left: 0px;
   height: 50px;
   right: 0px;
-}
+} */
 
 #map-canvas {
   height: 100%;
