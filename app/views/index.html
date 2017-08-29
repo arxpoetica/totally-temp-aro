@@ -21,6 +21,38 @@
 
     <!-- Include bundles with vendor scripts -->
     <script src="javascripts/vendors/vendor-bundle.min.js"></script>
+    <style>
+
+  /*.split p {
+    padding: 20px;
+  }*/
+  .split {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .gutter {
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: 50%;
+  }
+  .gutter.gutter-horizontal {
+    background-image: url('../grips/vertical.png');
+    cursor: ew-resize;
+    border-left: #bbb solid 2px;
+    /*box-shadow: -10px 0px 5px #000;*/
+  }
+  /*.gutter.gutter-vertical {
+    background-image: url('../grips/horizontal.png');
+    cursor: ns-resize;
+  }*/
+  .split.split-horizontal, .gutter.gutter-horizontal {
+    height: 100%;
+    float: left;
+  }
+    </style>
   </head>
   <body>
     <!-- The tile component subscribes to map layer events raised from state.js. Include it before changing the state -->
@@ -323,7 +355,9 @@
     </div>
 
     <div id="map-canvas-wrapper">
-      <div id="map-canvas"></div>
+      <div id="map-canvas" style="float:left"></div>
+      <!--<div id="sidebar2" style="float:left; background-color:blue; height: 100%"></div>-->
+      <div id="sidebar" style="float:left; background-color:#fff; height: 100%"></div>
     </div>
 
     <div ng-controller="contextual_menu_controller">
@@ -359,6 +393,7 @@
     var map;
 
     function initialize() {
+
       var styles = [];
       styles.push({
         featureType: 'poi',
@@ -379,6 +414,7 @@
         },
         styles: styles,
       });
+      var splitterInitialized = false
       map.ready = function(callback) {
 
         if (map.getBounds()) {
@@ -388,6 +424,14 @@
             callback();
             google.maps.event.removeListener(listener);
           });
+        }
+
+        if (!splitterInitialized) {
+          splitterInitialized = true;
+          var test = Split(['#map-canvas', '#sidebar'], {
+            sizes: [75, 25]
+          })
+          // setTimeout(() => test.collapse(1), 5000)
         }
       }
     }
@@ -414,6 +458,7 @@
   <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
   <script src="javascripts/vendors/ng-currency.js"></script>
   <script src="javascripts/vendors/simpleheat.js"></script>
+  <script src="javascripts/vendors/split.min.js"></script>
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
