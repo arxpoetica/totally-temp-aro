@@ -721,7 +721,7 @@ module.exports = class Location {
             },
             qs: {
               'name': name,
-              'user-id': user.id
+              'user_id': user.id
             },
             formData: {
               file: fs.createReadStream(file)

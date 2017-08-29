@@ -4,7 +4,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
-  var key = null
   var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
@@ -59,18 +58,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       }
     }
   ]
-
-  ;['dragend', 'zoom_changed'].forEach((event_name) => {
-    $rootScope.$on('map_' + event_name, () => {
-      if (!key) return
-
-      var center = map.getCenter()
-      if (!center) return
-      var literal = { lat: center.lat(), lng: center.lng() }
-      service.set('mapCenter', JSON.stringify(literal))
-      service.set('mapZoom', map.getZoom())
-    })
-  })
 
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
@@ -179,15 +166,15 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   // Default data sources - define once
   service.defaultDataSources = [
     {
-      dataSourceId: service.DS_GLOBAL_BUSINESSES,
+      libraryId: service.DS_GLOBAL_BUSINESSES,
       name: "Global Businesses"
     },
     {
-      dataSourceId: service.DS_GLOBAL_HOUSEHOLDS,
+      libraryId: service.DS_GLOBAL_HOUSEHOLDS,
       name: "Global Households"
     },
     {
-      dataSourceId: service.DS_GLOBAL_CELLTOWER,
+      libraryId: service.DS_GLOBAL_CELLTOWER,
       name: "Global CellTower"
     }
   ]
@@ -374,6 +361,13 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
+  // Plan coordinates - define once
+  service.planCoordinates = new Rx.BehaviorSubject({
+    zoom: 14,
+    latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
+    longitude: -123.3321    // Seattle, WA by default. For no particular reason.
+  })
+
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
 
@@ -487,42 +481,24 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
   }
 
-  service.clearPlan = (plan) => {
-    key = null
-    //dont clear the existing state here
-    //initializeState()
-    localStorage.removeItem(`plan_${plan.id}`)
-  }
-
   service.loadPlan = (plan) => {
-    service.planId = +plan.id
     if (!plan) {
-      key = null
+      service.planId = service.INVALID_PLAN_ID
       initializeState()
     } else {
-      key = `plan_${plan.id}`
-      try {
-        state = JSON.parse(localStorage.getItem(key)) || {}
-      } catch (err) {
-        state = {}
-      }
+      service.planId = +plan.id
+      // Set plan center and zoom
+      service.planCoordinates.next({
+        zoom: plan.zoomIndex,
+        latitude: plan.latitude,
+        longitude: plan.longitude
+      })
     }
     service.reloadSelectedLocations()
   }
 
-  service.set = (attr, value) => {
-    if (state.planId === service.INVALID_PLAN_ID) return
-    state[attr] = value
-    localStorage.setItem(key, JSON.stringify(state))
-  }
-
-  service.get = (attr, value, def) => {
-    if (state.planId === service.INVALID_PLAN_ID) return def
-    return state[attr] || def
-  }
-
   service.isDataSourceSelected = function (ds) {
-    var existingDataSources = _.pluck(service.selectedDataSources , 'dataSourceId');
+    var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');
     return existingDataSources.indexOf(ds) != -1;
   }
 

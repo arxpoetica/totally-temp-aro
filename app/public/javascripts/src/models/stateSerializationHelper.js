@@ -16,6 +16,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   stateSerializationHelper.getOptimizationBody = (state, optimization, regions) => {
 
     var optimizationBody = {}
+    optimizationBody.locationConstraints = {}
+    optimizationBody.fronthaulOptimization = {}
+    //optimizationBody.overridenConfiguration = {}
 
     addLocationTypesToBody(state, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
@@ -35,7 +38,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Add location types to a POST body that we will send to aro-service for performing optimization
   var addLocationTypesToBody = (state, postBody) => {
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
-    postBody.locationTypes = _.pluck(selectedLocationTypes, 'plannerKey')
+    postBody.locationConstraints.locationTypes = _.pluck(selectedLocationTypes, 'plannerKey')
   }
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
@@ -63,10 +66,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addUserUploadedDataSourcesToBody = (state, postBody) => {
     postBody.locationDataSources = postBody.locationDataSources || {}
     // Get all uploaded data sources except the global data sources
-    var uploadedDataSources = state.selectedDataSources.filter((item) => (item.dataSourceId != state.DS_GLOBAL_BUSINESSES)
-                                                                           && (item.dataSourceId != state.DS_GLOBAL_HOUSEHOLDS)
-                                                                           && (item.dataSourceId != state.DS_GLOBAL_CELLTOWER))
-    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'dataSourceId')
+    var uploadedDataSources = state.selectedDataSources.filter((item) => (item.libraryId != state.DS_GLOBAL_BUSINESSES)
+                                                                           && (item.libraryId != state.DS_GLOBAL_HOUSEHOLDS)
+                                                                           && (item.libraryId != state.DS_GLOBAL_CELLTOWER))
+    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'libraryId')
 
     if (uploadedDataSourceIds.length > 0) {
       postBody.locationDataSources.business = postBody.locationDataSources.business || [];
@@ -83,8 +86,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization
   var addAlgorithmParametersToBody = (state, postBody) => {
     // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
-    postBody.algorithm = state.optimizationOptions.uiSelectedAlgorithm.algorithm
-    postBody.uiSelectedAlgorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
+    postBody.fronthaulOptimization.algorithm = state.optimizationOptions.uiSelectedAlgorithm.algorithm
+    postBody.fronthaulOptimization.uiSelectedAlgorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
     if (state.optimizationOptions.uiSelectedAlgorithm.algorithm === 'TABC') {
       var generations = state.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
       postBody.customOptimization = {
@@ -94,25 +97,25 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
-    postBody.threshold = state.optimizationOptions.threshold
+    postBody.fronthaulOptimization.threshold = state.optimizationOptions.threshold
 
     // Delete items from postBody.financialConstraints based on the type of algorithm we are using.
     var algorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
     if (algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR') {
       delete postBody.financialConstraints.budget
       delete postBody.financialConstraints.preIrrThreshold
-      delete postBody.threshold
+      delete postBody.fronthaulOptimization.threshold
     } else if (algorithmId === 'COVERAGE') {
       delete postBody.financialConstraints.budget
       delete postBody.financialConstraints.preIrrThreshold
     } else if (algorithmId === 'BUDGET') {
       delete postBody.financialConstraints.preIrrThreshold
-      delete postBody.threshold
+      delete postBody.fronthaulOptimization.threshold
     } else if (algorithmId === 'IRR_TARGET') {
       delete postBody.financialConstraints.preIrrThreshold
     } else if (algorithmId === 'IRR_THRESH') {
       delete postBody.financialConstraints.budget
-      delete postBody.threshold
+      delete postBody.fronthaulOptimization.threshold
     }
   }
 
@@ -135,7 +138,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
     //postBody.processLayers = [] // Array.from(setOfProcessLayers)
     postBody.processLayers = state.optimizationOptions.processLayers
-    postBody.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
+    postBody.locationConstraints.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     if (state.optimizationOptions.selectedLayer) {
       postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
     }
@@ -165,10 +168,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add technologies to a POST body that we will send to aro-service for optimization
   var addTechnologiesToBody = (state, postBody) => {
-    postBody.networkTypes = []
+	postBody.networkGeneration = {}
+    postBody.networkGeneration.networkTypes = []
     state.optimizationOptions.technologies.forEach((technology) => {
       if (technology.checked) {
-        postBody.networkTypes.push(technology.id)
+        postBody.networkGeneration.networkTypes.push(technology.id)
       }
     })
   }
@@ -204,12 +208,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     // Select geographies
     regions.removeAllGeographies()
-    if (postBody.analysisSelectionMode === 'SELECTED_AREAS') {
+    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       var geographyIds = []
       postBody.geographies.forEach((geography) => geographyIds.push(geography.id))
       // Note that we are returning a promise that will be resolved when the UI loads all selected regions
       return regions.selectGeographyFromIds(geographyIds)
-    } else if (postBody.analysisSelectionMode === 'SELECTED_LOCATIONS') {
+    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       // Immediately resolve and return a promise. Nothing to do when we are in target builder mode
       return $q.when()
     } else {
@@ -221,7 +225,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var loadLocationTypesFromBody = (state, postBody) => {
     var newLocationTypes = angular.copy(state.locationTypes.getValue())
     newLocationTypes.forEach((locationType) => locationType.checked = false)
-    postBody.locationTypes.forEach((locationType) => {
+    postBody.locationConstraints.locationTypes.forEach((locationType) => {
       var serviceLocationTypeObj = newLocationTypes.filter((item) => item.plannerKey === locationType)[0]
       if (serviceLocationTypeObj) {
         serviceLocationTypeObj.checked = true
@@ -291,11 +295,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.financialConstraints.preIrrThreshold = postBody.financialConstraints.preIrrThreshold
     }
     if (postBody.threshold) {
-      state.optimizationOptions.threshold = postBody.threshold
+      state.optimizationOptions.threshold = postBody.fronthaulOptimization.threshold
     }
-    if (postBody.analysisSelectionMode === 'SELECTED_AREAS') {
+    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
-    } else if (postBody.analysisSelectionMode === 'SELECTED_LOCATIONS') {
+    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       optimization.setMode('targets')
     }
   }
@@ -323,7 +327,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load technologies from a POST body object that is sent to the optimization engine
   var loadTechnologiesFromBody = (state, postBody) => {
     state.optimizationOptions.technologies.forEach((technology) => technology.checked = false)
-    postBody.networkTypes.forEach((networkType) => {
+    postBody.networkGeneration.networkTypes.forEach((networkType) => {
       var matchedTechnology = state.optimizationOptions.technologies.filter((technology) => technology.id.toUpperCase() === networkType.toUpperCase())
       if (matchedTechnology && matchedTechnology.length === 1) {
         matchedTechnology[0].checked = true

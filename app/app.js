@@ -40,6 +40,7 @@ var routes = [
   'location',
   'network',
   'boundary',
+  'service',
   'tiles',
   'market_size',
   'network_plan',

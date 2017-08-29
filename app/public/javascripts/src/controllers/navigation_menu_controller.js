@@ -73,6 +73,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.plans = []
 
   $scope.user_id = user_id
+  $scope.projectId = globalUser.projectId
 
   $scope.show_market_profile = config.ui.top_bar_tools.indexOf('market_profile') >= 0
   $scope.show_customer_profile = config.ui.top_bar_tools.indexOf('customer_profile') >= 0
@@ -93,20 +94,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
-    var centroid = plan && plan.area_centroid
-    if (centroid) {
-      try {
-        var s = search.select2('data');
-        var curProject = plan.area_name === s.text
-        if(!s || !s.geocoded){
-          map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
-          map.setZoom(+state.get('mapZoom') || 14)
-        }
-      } catch (err) {
-        map.setCenter({ lat: centroid.coordinates[1], lng: centroid.coordinates[0] })
-        map.setZoom(14)
-      }
-    }
   }
 
   $rootScope.$on('plan_selected', (e, plan) => {
@@ -225,7 +212,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         $rootScope.$broadcast('plan_selected', null)
         delete $rootScope.currentPlan;
       }
-      $http.post('/network_plan/' + plan.id + '/delete', { userId: $scope.user_id }).then((response) => {
+      $http.delete(`/service/v1/plan/${plan.id}?user_id=${$scope.user_id}`).then((response) => {
         $scope.loadPlans()
       })
     })
@@ -240,39 +227,52 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.loadPlans = function (page, callback) {
     clearInterval(interval)
     $scope.currentPage = page || 1
+    $scope.maxResults = 10
+    if(page > 1) {
+      var start = $scope.maxResults * (page - 1);
+      var end   = start + $scope.maxResults;
+      $scope.plans = $scope.allPlans.slice(start, end);
+      return;
+    }
+
     var load = (callback) => {
-      var options = {
-        url: '/network_plan/find_all',
+
+      var planOptions = {
+        url: '/service/v1/plan',
         method: 'GET',
         params: {
-          text: $scope.search_text,
-          page: $scope.currentPage,
-          sortField: $scope.sortField,
-          sortOrder: $scope.sortOrder,
-          minimumCost: $scope.minimumCost,
-          maximumCost: $scope.maximumCost,
-          allPlans: $scope.allPlans
+          user_id: $scope.user_id,
+          search: $scope.search_text,
+          project_id: $scope.projectId
         }
       }
-      $http(options).then((response) => {
-        $http.get('/optimization/processes').then((running) => {
-          response.data.plans.forEach((plan) => {
-            var info = running.data.find((status) => status.planId === +plan.id)
-            if (info) {
-              var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
-              var min = Math.floor(diff / 60)
-              var sec = Math.ceil(diff % 60)
-              plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
-              plan.progress = info.progress
-              plan.startDate = info.startDate
-              plan.optimizationState = info.optimizationState
-            }
-          })
-          $scope.plans = response.data.plans
-          $scope.pages = response.data.pages
-          callback && callback()
+      $http(planOptions)
+        .then((response) => {
+            $http.get('/optimization/processes').then((running) => {
+              response.data.forEach((plan) => {
+                var info = running.data.find((status) => status.planId === +plan.id)
+                if (info) {
+                  var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
+                  var min = Math.floor(diff / 60)
+                  var sec = Math.ceil(diff % 60)
+                  plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
+                  plan.progress = info.progress
+                  plan.startDate = info.startDate
+                  plan.optimizationState = info.optimizationState
+                }
+              })
+              $scope.allPlans = response.data
+              $scope.plans = response.data.slice(0, $scope.maxResults);
+              // $scope.pages = response.data.pages
+              $scope.pages = [];
+              var pageSize = Math.floor(response.data.length / $scope.maxResults) + (response.data.length % $scope.maxResults > 0 ? 1 : 0);
+              for (var i = 1; i <= pageSize; i++) {
+                $scope.pages.push(i);
+              }
+
+              callback && callback()
+            })
         })
-      })
     }
     load(callback)
     interval = setInterval(load, 100000)
@@ -282,9 +282,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   var path = $location.path()
   if (path.indexOf('/plan/') === 0) {
     var plan_id = path.substring('/plan/'.length)
-    $http.get('/network_plan/' + plan_id).then((response) => {
-      $scope.selectPlan(response.data)
-    })
+    $http.get(`/service/v1/plan/${plan_id}?user_id=${$scope.user_id}`)
+      .then((response) => {
+        $scope.selectPlan(response.data)
+      })
   }
 
   $scope.showPlans = () => {
@@ -341,16 +342,13 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.saveNewPlan = () => {
     var params = {
       name: $scope.new_plan_name,
-      area: {
-        name: $scope.new_plan_area_name,
-        centroid: $scope.new_plan_area_centroid,
-        bounds: $scope.new_plan_area_bounds
-      }
+      areaName: $scope.new_plan_area_name,
+      latitude: $scope.new_plan_area_centroid.coordinates[1],
+      longitude: $scope.new_plan_area_centroid.coordinates[0],
+      projectId: $scope.projectId
     }
 
-
-    $http.post('/network_plan/create', params).then((response) => {
-      state.clearPlan(response.data)
+    $http.post('/service/v1/plan?user_id=' + $scope.user_id, params).then((response) => {
       $scope.selectPlan(response.data)
       $('#new-plan').modal('hide')
       $('#plan-combo').modal('hide')
