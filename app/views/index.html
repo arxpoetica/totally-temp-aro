@@ -354,11 +354,7 @@
       <% include modal_market_profile.html %>
     </div>
 
-    <div id="map-canvas-wrapper">
-      <div id="map-canvas" style="float:left"></div>
-      <!--<div id="sidebar2" style="float:left; background-color:blue; height: 100%"></div>-->
-      <div id="sidebar" style="float:left; background-color:#fff; height: 100%"></div>
-    </div>
+    <map-split></map-split>
 
     <div ng-controller="contextual_menu_controller">
       <ul class="dropdown-menu" id="contextual_menu">
@@ -425,14 +421,6 @@
             google.maps.event.removeListener(listener);
           });
         }
-
-        if (!splitterInitialized) {
-          splitterInitialized = true;
-          var test = Split(['#map-canvas', '#sidebar'], {
-            sizes: [75, 25]
-          })
-          // setTimeout(() => test.collapse(1), 5000)
-        }
       }
     }
 
@@ -461,6 +449,7 @@
   <script src="javascripts/vendors/split.min.js"></script>
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
+  <script src="javascripts/lib/components/map-split-component.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
