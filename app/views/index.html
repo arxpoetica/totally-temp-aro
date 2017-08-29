@@ -325,9 +325,7 @@
       <% include modal_market_profile.html %>
     </div>
 
-    <div id="map-canvas-wrapper">
-      <div id="map-canvas"></div>
-    </div>
+    <map-split></map-split>
 
     <div ng-controller="contextual_menu_controller">
       <ul class="dropdown-menu" id="contextual_menu">
@@ -362,6 +360,7 @@
     var map;
 
     function initialize() {
+
       var styles = [];
       styles.push({
         featureType: 'poi',
@@ -382,6 +381,7 @@
         },
         styles: styles,
       });
+      var splitterInitialized = false
       map.ready = function(callback) {
 
         if (map.getBounds()) {
@@ -417,8 +417,10 @@
   <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
   <script src="javascripts/vendors/ng-currency.js"></script>
   <script src="javascripts/vendors/simpleheat.js"></script>
+  <script src="javascripts/vendors/split.min.js"></script>
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
+  <script src="javascripts/lib/components/map-split-component.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
