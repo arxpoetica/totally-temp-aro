@@ -39,7 +39,6 @@ app.component('mapSplit', {
         background-position: 50%;
       }
       .gutter.gutter-horizontal {
-        background-image: url('../grips/vertical.png');
         cursor: ew-resize;
         border-left: #bbb solid 1px;
       }
