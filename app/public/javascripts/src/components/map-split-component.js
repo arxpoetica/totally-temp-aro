@@ -7,7 +7,13 @@ class MapSplitController {
     $document.ready(() => {
       if (!this.splitterObj) {
         this.splitterObj = Split(['#map-canvas', '#sidebar'], {
-          sizes: [75, 25]
+          sizes: [75, 25],
+          onDragEnd: () => {
+            // Trigger a resize so that any tiles that have been uncovered will be loaded
+            if (map) {
+              google.maps.event.trigger(map, "resize")
+            }
+          }
         })
         // setTimeout(() => test.collapse(1), 5000)
       }
