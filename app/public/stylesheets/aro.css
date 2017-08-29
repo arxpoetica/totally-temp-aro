@@ -42,7 +42,7 @@ html, body {
 
 #left-col-wrapper {
   position: absolute;
-  top: 100px;
+  top: 0px;
   bottom: 0px; /* footer height */
   left: 0;
   z-index: 3;
@@ -470,7 +470,7 @@ footer nav {
   position: absolute;
   left: 76px;
   width: 319px;
-  top: 105px;
+  top: 10px;
   z-index: 1;
 }
 
