@@ -466,25 +466,12 @@ footer nav {
   border-bottom: 0;
 }
 
-
 #global-search {
   position: absolute;
   left: 76px;
   width: 319px;
   top: 105px;
   z-index: 1;
-}
-
-#tool-bar-logo {
-  position: relative;
-  margin: 0 auto;
-  top: 29px;
-  width: 50px;
-  z-index: 1;
-  background: #1a79db;
-  border-radius: 5px;
-  border: 10px solid #1a79db;
-  color: #fff;
 }
 
 #serviceLayersAccordion div.panel-heading {
