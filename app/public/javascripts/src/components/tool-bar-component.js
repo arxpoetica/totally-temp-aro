@@ -11,15 +11,25 @@ app.component('toolBar', {
   template: `
   <style scoped>
     #tool-bar {
+      background: #1a79db;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      border: 10px solid #1a79db;
+      color: #fff;
       z-index: 1;
       top: 100px;
       position: absolute;
-      left: 33%;
+      left: 32%;
     }
     
-    #tool-bar.navbar-nav>li>a {
+    #tool-bar .navbar-nav>li>a {
       padding-top: 10px;
       padding-bottom: 10px;
+      color: white;
+    }
+
+    #tool-bar .navbar-nav>li>a:hover {
+      color: #1a79db;
     }
 
     #tool-bar-logo {
@@ -29,7 +39,8 @@ app.component('toolBar', {
       width: 50px;
       z-index: 1;
       background: #1a79db;
-      border-radius: 5px;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
       border: 10px solid #1a79db;
       color: #fff;
     }
