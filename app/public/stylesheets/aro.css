@@ -478,9 +478,13 @@ footer nav {
 #tool-bar-logo {
   position: relative;
   margin: 0 auto;
-  top: 40px;
-  width: 30px;
+  top: 29px;
+  width: 50px;
   z-index: 1;
+  background: #1a79db;
+  border-radius: 5px;
+  border: 10px solid #1a79db;
+  color: #fff;
 }
 
 #serviceLayersAccordion div.panel-heading {
