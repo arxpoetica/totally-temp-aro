@@ -2,10 +2,12 @@ class ToolBarController {
 
   constructor($scope,state) {
     this.state = state
+    this.state.showGlobalSettings
+    .subscribe((newValue) => {})
   }
 
   openGlobalSettings() {
-    this.state.openGlobalSettings = true
+    this.state.showGlobalSettings.next(true)
     //$('#global_settings_modal').modal('show')
   }
 }
