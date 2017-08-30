@@ -1,10 +1,12 @@
 class MapSplitController {
   
-  constructor($document, state) {
-    this.state = state
+  constructor($document, $timeout, $scope) {
+    this.$timeout = $timeout
     this.splitterObj = null
     this.isCollapsed = false
     this.sizesBeforeCollapse = null
+    this.transitionTimeMsec = 100
+    this.transitionCSS = `width ${this.transitionTimeMsec}ms`  // This must be the same for the map and sidebar, otherwise animations don't work correctly
 
     $document.ready(() => {
       if (!this.splitterObj) {
@@ -40,12 +42,13 @@ class MapSplitController {
     this.isCollapsed = !this.isCollapsed
     // Trigger a resize so that any tiles that have been uncovered will be loaded
     if (map) {
-      google.maps.event.trigger(map, "resize")
+      // Call the resize a litle bit after animations finish, so that the right width is loaded
+      this.$timeout(() => google.maps.event.trigger(map, "resize"), this.transitionTimeMsec + 50)
     }
   }
 }
 
-MapSplitController.$inject = ['$document', 'state']
+MapSplitController.$inject = ['$document', '$timeout', '$scope']
 
 app.component('mapSplit', {
   template: `
@@ -59,8 +62,6 @@ app.component('mapSplit', {
       }
       .gutter {
         background-color: #fff;
-        background-repeat: no-repeat;
-        background-position: 50%;
       }
       .gutter.gutter-horizontal {
         cursor: ew-resize;
@@ -95,11 +96,11 @@ app.component('mapSplit', {
     <!-- First define the container for both the map and the sidebar. -->
     <div style="position:absolute; top: 0px; left: 0px; bottom: 0px; right: 0px">
 
-      <!-- Define the canvas that will hold the map -->
-      <div id="map-canvas" style="float:left; height: 100%; width: 100%"></div>
+      <!-- Define the canvas that will hold the map. -->
+      <div id="map-canvas" ng-style="{ float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }"></div>
 
       <!-- Define the sidebar -->
-      <div id="sidebar" style="float:left; background-color:#fff; height: 100%">
+      <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', transition: $ctrl.transitionCSS}">
         <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar -->
         <div class="expander" ng-click="$ctrl.toggleCollapseSideBar()">
           <i ng-class="{'fa fa-2x': true, 'fa-arrow-circle-left': $ctrl.isCollapsed, 'fa-arrow-circle-right': !$ctrl.isCollapsed}"></i>
