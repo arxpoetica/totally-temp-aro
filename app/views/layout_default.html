@@ -22,16 +22,16 @@
 
 <div ng-controller="locations_controller">
   <div id="map-extras">
-    <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Road Segments">
+    <span data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Road Segments">
       <button class="btn" ng-class="{'btn-selected': roadLayer.visible, 'btn-primary': !roadLayer.visible}" ng-click="roadLayer.toggleVisibility()" style="width: 39px">
         <span class="fa fa-road map-layer-spinner map-layer-spinner-road_segments"></span>
       </button>
-    </p>
-    <p data-toggle="popover" data-trigger="hover" data-placement="left" data-content="Measuring Stick. Click points on the map to draw a line segments to be measured. Double click to finish the line segment and see the distance.">
+    </span>
+    <span data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Measuring Stick. Click points on the map to draw a line segments to be measured. Double click to finish the line segment and see the distance.">
       <button class="btn" ng-class="{'btn-selected': measuringStickEnabled, 'btn-primary': !measuringStickEnabled}" ng-click="toggleMeasuringStick()" style="width: 39px">
         <span class="fa fa-arrows-h"></span>
       </button>
-    </p>
+    </span>
   </div>
   <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
     <div class="panel-heading">
