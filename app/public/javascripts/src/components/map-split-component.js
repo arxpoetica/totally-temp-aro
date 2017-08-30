@@ -88,9 +88,20 @@ app.component('mapSplit', {
         padding: 8px;
         color: #aaa;
         cursor: pointer;
+        box-shadow: #888 -4px 4px 6px;
+        z-index: 2;
       }
       .expander :hover {
         color: #1a79db;
+      }
+      #map-canvas:before {
+        box-shadow: -4px 0px 6px #888 inset;
+        content: "";
+        height: 100%;
+        right: 0;
+        position: absolute;
+        width: 9px;
+        z-index: 1;
       }
     </style>
     <!-- First define the container for both the map and the sidebar. -->
