@@ -75,7 +75,7 @@ html, body {
 .map-tool {
   border: 2px solid #eee;
   width: 320px;
-  margin: 0;
+  margin-top: 8%;
 }
 
 .map-tool.ng-hide-remove {

@@ -21,9 +21,9 @@ app.component('toolBar', {
       border: 10px solid #1a79db;
       color: #fff;
       z-index: 1;
-      top: 10px;
+      top: 0px;
       position: absolute;
-      left: 32%;
+      right: 52%;
     }
     
     #tool-bar .navbar-nav>li>a {
@@ -37,9 +37,10 @@ app.component('toolBar', {
     }
 
     #tool-bar-logo {
-      position: relative;
+      position: absolute;
       margin: 0 auto;
-      top: -62px;
+      top: 0px;
+      left: 50%;
       width: 50px;
       z-index: 1;
       background: #1a79db;
