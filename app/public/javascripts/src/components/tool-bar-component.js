@@ -1,11 +1,15 @@
 class ToolBarController {
 
-  constructor(state) {
+  constructor($scope,state) {
     this.state = state
+
+    $scope.openGlobalSettings = () => {
+      $('#global_settings_modal').modal('show')
+    }
   }
 }
 
-ToolBarController.$inject = ['state']
+ToolBarController.$inject = ['$scope','state']
 
 app.component('toolBar', {
   template: `
@@ -49,7 +53,7 @@ app.component('toolBar', {
     <nav>
         <ul class="nav navbar-nav">
             <li style="border-right: 1px solid #4d99e5;">
-                <a class="fa fa-1x fa-th" aria-hidden="true" href="#"></a></li>
+                <a class="fa fa-1x fa-th" aria-hidden="true" data-ng-click="openGlobalSettings()" href=""></a></li>
             <li><a class="fa fa-1x fa-file" href="#"></a></li>
             <li><a class="fa fa-1x fa-floppy-o" href="#"></a></li>
             <li><a class="fa fa-1x fa-folder-open" href="#"></a></li>
@@ -58,7 +62,7 @@ app.component('toolBar', {
   </div>
   <div id="tool-bar-logo">
     <img src="images/logos/aro/logo_navbar.png" style="margin-top: -4px">&nbsp;ARO
-  </div> 
+  </div>
   `,
   bindings: {},
   controller: ToolBarController
