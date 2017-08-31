@@ -113,8 +113,9 @@ app.component('mapSplit', {
       <!-- Define the sidebar -->
       <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', transition: $ctrl.transitionCSS}">
         <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar -->
-        <div class="expander" ng-click="$ctrl.toggleCollapseSideBar()">
-          <i ng-class="{'fa fa-2x': true, 'fa-arrow-circle-left': $ctrl.isCollapsed, 'fa-arrow-circle-right': !$ctrl.isCollapsed}"></i>
+        <div class="expander">
+          <i ng-click="$ctrl.toggleCollapseSideBar()" ng-class="{'fa fa-2x': true, 'fa-arrow-circle-left': $ctrl.isCollapsed, 'fa-arrow-circle-right': !$ctrl.isCollapsed}"></i>
+          <network-plan><network-plan/>
         </div>
       </div>
     </div>
