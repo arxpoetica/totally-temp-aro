@@ -77,12 +77,18 @@ app.component('mapSplit', {
         height: 100%;
         float: left;
       }
-      .expander {
+      .expander-position {
+        float: left;
         position: relative;
         left: -49px;
         top: -10px;
+        width: 0px;
+        height: 0px;
+        z-index: 2;
+      }
+      .expander-content {
         width: 40px;
-        height: 44px;
+        height: 60px;
         background-color: #fff;
         border-radius: 0px 0px 0px 5px;
         border: #bbb solid 1px;
@@ -92,9 +98,9 @@ app.component('mapSplit', {
         color: #aaa;
         cursor: pointer;
         box-shadow: #888 -4px 4px 6px;
-        z-index: 2;
+        line-height: 55px; /* To vertically center the icon */
       }
-      .expander :hover {
+      .expander-content :hover {
         color: #1a79db;
       }
       #map-canvas:before {
@@ -115,23 +121,28 @@ app.component('mapSplit', {
 
       <!-- Define the sidebar -->
       <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px', 'padding-left': '0px', transition: $ctrl.transitionCSS}">
-        <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar -->
-        <div class="expander" ng-click="$ctrl.toggleCollapseSideBar()"
+        <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
+             the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
+             use this div to position the contents of the expander. This makes sure we don't affect flow. -->
+        <div class="expander-position">
+          <div class="expander-content" ng-click="$ctrl.toggleCollapseSideBar()"
               ng-mouseenter="$ctrl.hovering = true"
               ng-mouseleave="$ctrl.hovering = false">
-          <! -- Why so complicated? The use case is:
-                1. When expanded, it should show an arrow pointing right
-                2. When collapsed and not hovering, it should show the display mode that is currently active
-                3. When collapsed and hovering, it should show an arrow pointing left -->
-          <i ng-class="{'fa fa-2x': true,
-                        'fa-eye': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW,
-                        'fa-wrench': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS,
-                        'fa-cog': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS,
-                        'fa-arrow-circle-right': !$ctrl.isCollapsed,
-                        'fa-arrow-circle-left': $ctrl.hovering && $ctrl.isCollapsed }">
-          </i>
-          <network-plan><network-plan/>
+            <! -- Why so complicated? The use case is:
+                  1. When expanded, it should show an arrow pointing right
+                  2. When collapsed and not hovering, it should show the display mode that is currently active
+                  3. When collapsed and hovering, it should show an arrow pointing left -->
+            <i ng-class="{'fa fa-2x': true,
+                          'fa-eye': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW,
+                          'fa-wrench': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS,
+                          'fa-cog': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS,
+                          'fa-arrow-circle-right': !$ctrl.isCollapsed,
+                          'fa-arrow-circle-left': $ctrl.hovering && $ctrl.isCollapsed }">
+            </i>
+            <network-plan><network-plan/>
+          </div>
         </div>
+        <!-- Add a wrapping div because the expander changes the layout even though it is outside the panel -->
         <div ng-show="!$ctrl.isCollapsed">
           <display-mode-buttons></display-mode-buttons>
         </div>
