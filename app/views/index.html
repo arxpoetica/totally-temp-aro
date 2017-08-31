@@ -74,10 +74,6 @@
       </div>
     <% } %>
 
-    <div ng-controller="global_settings_controller">
-        <% include modal_global_settings.html %>
-    </div>
-
     <div ng-controller="navigation_menu_controller">
 
       <% include modal_build_sequence.html %>
@@ -343,6 +339,7 @@
     <div growl></div>
     <div class="infobox" desc="shows fiber strand count">0</div>
     <fiber-strand-info></fiber-strand-info>
+    <global-settings></global-settings>
   </body>
 
   <!-- Angular controllers and services -->
@@ -426,6 +423,7 @@
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
   <script src="javascripts/lib/components/map-split-component.js"></script>
   <script src="javascripts/lib/components/tool-bar-component.js"></script>
+  <script src="javascripts/lib/components/global-settings-component.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
@@ -453,7 +451,6 @@
   <script src="javascripts/lib/controllers/upload_customers_controller.js"></script>
   <script src="javascripts/lib/controllers/upload_morphology_controller.js"></script>
   <script src="javascripts/lib/controllers/upload_fiber_controller.js"></script>
-  <script src="javascripts/lib/controllers/global_settings_controller.js"></script>
   <script src="javascripts/lib/controllers/reports_controller.js"></script>
   <script src="javascripts/lib/controllers/backhaul_controller.js"></script>
   <script src="javascripts/lib/controllers/data_management_controller.js"></script>
