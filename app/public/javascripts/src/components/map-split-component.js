@@ -12,6 +12,7 @@ class MapSplitController {
       if (!this.splitterObj) {
         this.splitterObj = Split(['#map-canvas', '#sidebar'], {
           sizes: [75, 25],
+          minSize: 250,
           onDragEnd: () => {
             // Trigger a resize so that any tiles that have been uncovered will be loaded
             if (map) {
@@ -37,7 +38,7 @@ class MapSplitController {
     } else {
       // Save the current sizes and then collapse the sidebar
       this.sizesBeforeCollapse = this.splitterObj.getSizes()
-      this.splitterObj.collapse(1)
+      this.splitterObj.setSizes([99, 1])
     }
     this.isCollapsed = !this.isCollapsed
     // Trigger a resize so that any tiles that have been uncovered will be loaded
@@ -77,7 +78,7 @@ app.component('mapSplit', {
       .expander {
         position: relative;
         left: -49px;
-        top: 0px;
+        top: -10px;
         width: 40px;
         height: 44px;
         background-color: #fff;
@@ -111,11 +112,14 @@ app.component('mapSplit', {
       <div id="map-canvas" ng-style="{ float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }"></div>
 
       <!-- Define the sidebar -->
-      <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', transition: $ctrl.transitionCSS}">
+      <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px', 'padding-left': '0px', transition: $ctrl.transitionCSS}">
         <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar -->
         <div class="expander">
           <i ng-click="$ctrl.toggleCollapseSideBar()" ng-class="{'fa fa-2x': true, 'fa-arrow-circle-left': $ctrl.isCollapsed, 'fa-arrow-circle-right': !$ctrl.isCollapsed}"></i>
           <network-plan><network-plan/>
+        </div>
+        <div ng-show="!$ctrl.isCollapsed">
+          <display-mode-buttons></display-mode-buttons>
         </div>
       </div>
     </div>

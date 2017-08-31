@@ -180,6 +180,14 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   ]
 
+  // The display modes for the application
+  service.displayModes = Object.freeze({
+    VIEW: 0,
+    ANALYSIS: 1,
+    PLAN_SETTINGS: 2
+  })
+  service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
+
   // Competition display
   service.competition = {
     allCompetitorTypes: [
@@ -419,6 +427,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
       }
     }
+
+    service.selectedDisplayMode.next(service.displayModes.VIEW)
   }
 
   // Load tile information from the server
