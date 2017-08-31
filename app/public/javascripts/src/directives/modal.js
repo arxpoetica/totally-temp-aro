@@ -4,7 +4,7 @@ app.directive('modal', function () {
         restrict: 'E',
         transclude: true,
         replace: true,
-        scope: { visible: '=' },
+        scope: { visible: '=', onShow: '&', onHide: '&' },
         link: function postLink(scope, element, attrs) {
 
             $(element).modal({
@@ -21,6 +21,31 @@ app.directive('modal', function () {
                     $(element).modal('hide');
                 }
             });
+
+            $(element).on('shown.bs.modal', function () {
+                scope.$apply(function () {
+                    scope.$parent[attrs.visible] = true;
+                });
+            });
+
+            $(element).on('hidden.bs.modal', function () {
+                scope.$apply(function () {
+                    scope.$parent[attrs.visible] = false;
+                });
+            });
+
+            $(element).on('shown.bs.modal', function () {
+                scope.$apply(function () {
+                    scope.onShow({});
+                });
+            });
+
+            $(element).on('hidden.bs.modal', function () {
+                scope.$apply(function () {
+                    scope.onHide({});
+                });
+            });
+            
         }
     };
 }
