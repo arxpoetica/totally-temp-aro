@@ -1,7 +1,9 @@
 class MapSplitController {
   
-  constructor($document, $timeout, $scope) {
+  constructor($document, $timeout, $scope, state) {
     this.$timeout = $timeout
+    this.displayModes = state.displayModes
+    state.selectedDisplayMode.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)
     this.splitterObj = null
     this.isCollapsed = false
     this.sizesBeforeCollapse = null
@@ -49,7 +51,7 @@ class MapSplitController {
   }
 }
 
-MapSplitController.$inject = ['$document', '$timeout', '$scope']
+MapSplitController.$inject = ['$document', '$timeout', '$scope', 'state']
 
 app.component('mapSplit', {
   template: `
@@ -114,8 +116,20 @@ app.component('mapSplit', {
       <!-- Define the sidebar -->
       <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px', 'padding-left': '0px', transition: $ctrl.transitionCSS}">
         <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar -->
-        <div class="expander">
-          <i ng-click="$ctrl.toggleCollapseSideBar()" ng-class="{'fa fa-2x': true, 'fa-arrow-circle-left': $ctrl.isCollapsed, 'fa-arrow-circle-right': !$ctrl.isCollapsed}"></i>
+        <div class="expander" ng-click="$ctrl.toggleCollapseSideBar()"
+              ng-mouseenter="$ctrl.hovering = true"
+              ng-mouseleave="$ctrl.hovering = false">
+          <! -- Why so complicated? The use case is:
+                1. When expanded, it should show an arrow pointing right
+                2. When collapsed and not hovering, it should show the display mode that is currently active
+                3. When collapsed and hovering, it should show an arrow pointing left -->
+          <i ng-class="{'fa fa-2x': true,
+                        'fa-eye': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW,
+                        'fa-wrench': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS,
+                        'fa-cog': !$ctrl.hovering && $ctrl.isCollapsed && $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS,
+                        'fa-arrow-circle-right': !$ctrl.isCollapsed,
+                        'fa-arrow-circle-left': $ctrl.hovering && $ctrl.isCollapsed }">
+          </i>
           <network-plan><network-plan/>
         </div>
         <div ng-show="!$ctrl.isCollapsed">
