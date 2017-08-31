@@ -2,6 +2,7 @@ class GlobalSettingsController {
     
       constructor($scope,state) {
         this.state = state
+        this.user = globalUser
 
         $scope.close = () => {
             //state.openGlobalSettings = false;
