@@ -144,7 +144,10 @@ app.component('mapSplit', {
         </div>
         <!-- Add a wrapping div because the expander changes the layout even though it is outside the panel -->
         <div ng-show="!$ctrl.isCollapsed">
-          <display-mode-buttons></display-mode-buttons>
+          <div style="overflow: auto;"> <!-- this is necessary to make the display-mode-buttons flow correctly -->
+            <display-mode-buttons></display-mode-buttons>
+          </div>
+          <analysis-mode></analysis-mode>
         </div>
       </div>
     </div>

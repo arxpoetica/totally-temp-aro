@@ -430,6 +430,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
 
     service.selectedDisplayMode.next(service.displayModes.VIEW)
+
+    service.networkAnalysisType = 'Network Build'
   }
 
   // Load tile information from the server
