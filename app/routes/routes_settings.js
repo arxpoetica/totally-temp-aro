@@ -25,8 +25,12 @@ exports.configure = (app, middleware) => {
 
     if (oldPassword && password && passwordConfirm) {
       if (password !== passwordConfirm) {
-        request.flash('error', 'Passwords do not match')
-        return response.redirect('/settings/show')
+        //request.flash('error', 'Passwords do not match')
+        response.status(500)
+        response.json({
+          error: 'Passwords do not match'
+        })
+        return response
       }
 
       promise = models.User.changePassword(user.id, oldPassword, password)
@@ -36,12 +40,19 @@ exports.configure = (app, middleware) => {
         models.User.updateSettings(user.id, firstName, lastName, email)
       ))
       .then(() => {
-        request.flash('success', 'Settings changed successfully')
-        response.redirect('/settings/show')
+        //request.flash('success', 'Settings changed successfully')
+        //response.redirect('/settings/show')
+        response.json({
+          success: 'Settings changed successfully'
+        })
       })
       .catch((err) => {
-        request.flash('error', err.message)
-        response.redirect('/settings/show')
+        //request.flash('error', err.message)
+        //response.redirect('/settings/show')
+        response.status(500)
+        response.json({
+          error: err.message
+        })
       })
   })
 }
