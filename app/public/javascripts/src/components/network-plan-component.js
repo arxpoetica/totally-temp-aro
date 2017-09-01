@@ -5,7 +5,7 @@ app.component('networkPlan', {
     .network-plan {
       top: 0px;
       white-space: nowrap;
-      right: 40px;
+      right: 0px;
       position: absolute;
       background: #1a79db;
       padding: 7px;
@@ -20,15 +20,15 @@ app.component('networkPlan', {
       line-height: 46px;
       cursor: pointer;
     }
-    
-    .expander .network-plan:hover, .expander .network-plan-load:hover, .expander .network-plan span:hover {
+
+    .network-plan:hover, .network-plan-load:hover, .network-plan span:hover {
       color: #ccc
     }
     
   </style>
 
   <div class="network-plan">
-    <div class="network-plan-load" ng-click="showCombo()">
+    <div class="network-plan-load" ng-click="openPlanModal()">
       <span ng-if="plan.name">{{plan.name}}</span>
       <span ng-if="!plan.name"><i class="fa fa-plus f-select-plan" style="font-size: 12px"></i> Select a plan</span>
     </div>
@@ -40,6 +40,10 @@ app.component('networkPlan', {
 
     $scope.showCombo = () => {
       console.log(this.state.planId);
+    }
+
+    $scope.openPlanModal = () => {
+      this.state.networkPlanModal.next(true)
     }
   }
 })

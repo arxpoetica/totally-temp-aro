@@ -142,7 +142,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   })
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
-
+  service.networkPlanModal =  new Rx.BehaviorSubject(false)
+  
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
