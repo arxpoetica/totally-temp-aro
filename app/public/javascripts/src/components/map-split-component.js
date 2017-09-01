@@ -5,6 +5,7 @@ class MapSplitController {
     this.displayModes = state.displayModes
     state.selectedDisplayMode.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)
     this.splitterObj = null
+    this.splitterObjVertical = null
     this.isCollapsed = false
     this.sizesBeforeCollapse = null
     this.transitionTimeMsec = 100
@@ -27,6 +28,10 @@ class MapSplitController {
               $scope.$apply()
             }
           }
+        })
+
+        this.splitterObjVertical = Split(['#input-configuration-bar','#output-configuration-bar'], {
+          direction: 'vertical'
         })
       }
     })
@@ -69,6 +74,10 @@ app.component('mapSplit', {
       .gutter.gutter-horizontal {
         cursor: ew-resize;
         border-left: #bbb solid 1px;
+      }
+      .gutter.gutter-vertical {
+        cursor: n-resize;
+        border: #bbb solid 1px;
       }
       .gutter:hover {
         background-color: #ccc;
@@ -146,6 +155,9 @@ app.component('mapSplit', {
         <div ng-show="!$ctrl.isCollapsed">
           <display-mode-buttons></display-mode-buttons>
         </div>
+        <div id="input-configuration-bar" style="height: calc(50% - 5px);"></div>
+        <!-- <div class="gutter gutter-vertical" style="height: 0px;"></div> -->
+        <div id="output-configuration-bar" style="height: calc(50% - 5px);"></div>
       </div>
     </div>
   `,
