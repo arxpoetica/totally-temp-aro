@@ -36,9 +36,13 @@ app.component('analysisMode', {
       }
       .accordion-contents {
         flex: 1 1 auto;
+        transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
+        overflow: hidden;
       }
       .accordion-contents.collapsed {
-        display: none;
+        flex: 0 0 auto;
+        height: 0px;
+        visibility: hidden;
       }
     </style>
     <div class="analysis-mode-container">
