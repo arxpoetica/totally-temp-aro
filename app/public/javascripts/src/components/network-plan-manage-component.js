@@ -13,15 +13,15 @@ app.component('networkPlanManage', {
       <div>
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active">
-              <a href="#new-plan" aria-controls="home" role="tab" data-toggle="tab">Create New Network Plan</a>
+              <a href="#create-new-plan" aria-controls="home" role="tab" data-toggle="tab">Create New Network Plan</a>
             </li>
             <li role="presentation">
-              <a href="#saved-plan" aria-controls="home" role="tab" data-toggle="tab">Open Saved Network Plan</a>
+              <a href="#open-saved-plan" aria-controls="home" role="tab" data-toggle="tab">Open Saved Network Plan</a>
             </li>
         </ul>
 
         <div class="tab-content" style="padding-top: 20px">
-            <div role="tabpanel" class="tab-pane active" id="new-plan">
+            <div role="tabpanel" class="tab-pane active" id="create-new-plan">
                 <form action="/settings/update_settings" method="post">
                     <fieldset>
                         <div class="form-group">
@@ -40,7 +40,7 @@ app.component('networkPlanManage', {
                 </form>
             </div>
 
-            <div role="tabpanel" class="tab-pane" id="saved-plan" style="padding-top: 20px">
+            <div role="tabpanel" class="tab-pane" id="open-saved-plan" style="padding-top: 20px">
                 <p class="text-center">In users tab</p>
             </div>
         </div>

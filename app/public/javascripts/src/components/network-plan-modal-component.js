@@ -1,4 +1,4 @@
-class NetworkPLanModalController {
+class NetworkPlanModalController {
   constructor($scope,state) {
     this.state = state
     $scope.close = () => {
@@ -18,8 +18,8 @@ class NetworkPLanModalController {
     }
   }
 }
-  
-GlobalSettingsController.$inject = ['$scope','state']
+
+NetworkPlanModalController.$inject = ['$scope','state']
 
 app.component('networkPlanModal', {
   template: `
@@ -35,5 +35,5 @@ app.component('networkPlanModal', {
   </modal>
   `,
   bindings: {},
-  controller: NetworkPLanModalController
+  controller: NetworkPlanModalController
 })
