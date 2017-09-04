@@ -103,7 +103,7 @@ app.component('mapSplit', {
       .expander-content :hover {
         color: #1a79db;
       }
-      #map-canvas-container:before {
+      #map-canvas:before {
         box-shadow: -4px 0px 6px #888 inset;
         content: "";
         height: 100%;

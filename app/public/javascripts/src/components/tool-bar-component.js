@@ -1,6 +1,6 @@
 class ToolBarController {
 
-  constructor($scope,state) {
+  constructor($scope, state) {
     this.state = state
     this.state.showGlobalSettings
     .subscribe((newValue) => {})
@@ -8,7 +8,10 @@ class ToolBarController {
 
   openGlobalSettings() {
     this.state.showGlobalSettings.next(true)
-    //$('#global_settings_modal').modal('show')
+  }
+
+  setSelectionMode(selectionMode) {
+    this.state.activeSelectionMode.next(selectionMode)
   }
 }
 
@@ -30,6 +33,15 @@ app.component('toolBar', {
       color: white;
       border-top-left-radius: 0px;
       border-top-right-radius: 0px;
+    }
+
+    .tool-bar .btn-group {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .tool-bar .btn.btn-selected {
+      background-color: #1a79db;
     }
 
     #tool-bar .navbar-nav>li>a {
@@ -66,6 +78,16 @@ app.component('toolBar', {
         <button class="btn btn-default"><i class="fa fa-2x fa-file"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-folder-open"></i></button>
+      </div>
+      <div class="btn-group">
+        <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"
+                ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.SINGLE_ENTITY)">
+          <i class="fa fa-2x fa-dot-circle-o"></i>
+        </button>
+        <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.POLYGON }"
+                ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.POLYGON)">
+          <i class="fa fa-2x fa-building-o"></i>
+        </button>
       </div>
     </div>
     <div style="flex: 0 1 auto; padding-left: 100px; padding-right: 100px">

@@ -197,6 +197,13 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
 
+  // The selection modes for the application
+  service.selectionModes = Object.freeze({
+    SINGLE_ENTITY: 0,
+    POLYGON: 1
+  })
+  service.activeSelectionMode = new Rx.BehaviorSubject(service.selectionModes.SINGLE_ENTITY)
+
   // Competition display
   service.competition = {
     allCompetitorTypes: [
@@ -439,6 +446,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
 
     service.selectedDisplayMode.next(service.displayModes.VIEW)
+    service.activeSelectionMode.next(service.selectionModes.SINGLE_ENTITY)
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_BUILD', label: 'Network Build' },
