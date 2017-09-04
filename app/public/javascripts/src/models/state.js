@@ -20,6 +20,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
+
+  service.GEOGRAPHY_LAYERS = {
+    SERVICE_AREAS: { id: 'SELECTED_AREAS', label: 'Service Areas' },
+    LOCATIONS: { id: 'SELECTED_LOCATIONS', label: 'Locations' }
+  }
   
   service.viewFiberOptions = [
     {
@@ -106,7 +111,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     selectedLayer: null,
     generatedDataRequest: {
       generatePlanLocationLinks : false
-    }
+    },
+    geographicalLayers: [],
+    selectedgeographicalLayer: null
   }
 
   // View Settings layer - define once

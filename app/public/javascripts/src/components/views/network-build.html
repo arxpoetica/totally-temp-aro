@@ -95,7 +95,52 @@
   </div>
 
   <br>
-  <p><strong>Endpoint technology</strong></p>
+  <p><strong>Choose Geography Type</strong></p>
+  <select class="form-control"
+    ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer"
+    ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
+  </select>
+
+  <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
+    <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
+    <div style="margin: 5px;min-height: 0px;max-height: 110px;overflow: auto;">
+      <strong ng-show="$ctrl.regions.selectedRegions.length > 5" class="ng-binding;">Total: {{$ctrl.regions.selectedRegions.length}}</strong>
+      <ul ng-show="$ctrl.regions.selectedRegions.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
+        <li ng-repeat="geography in $ctrl.regions.selectedRegions">
+          <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeGeography(geography)" style="margin-right: 5px">
+          <span class="fa fa-trash-o"></span>
+        </a> {{ geography.name }}
+        </li>
+      </ul>
+    </div>
+    <p ng-show="$ctrl.regions.selectedRegions.length > 0">
+      <button class="btn btn-primary btn-sm" ng-click="$ctrl.removeAllGeographies()">Remove all boundaries</button>
+    </p>
+  </div>
+
+  <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
+    <!-- <strong ng-show="$ctrl.targetsTotal > 5" class="ng-binding;" style="float:right;">Total: {{$ctrl.targetsTotal}}</strong></p> -->
+    <p ng-show="$ctrl.targets.length === 0">
+      <em>No locations selected</em>
+    </p>
+    <div style="min-height: 0px; max-height: 150px; overflow: auto;">
+      <ul style="list-style-type:none; padding:0" ng-repeat="target in $ctrl.targets">
+        <li>
+          <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.deleteTarget(target)" style="margin-right: 5px">
+              <span class="fa fa-trash-o"></span>
+            </a> {{ target.address }}
+        </li>
+      </ul>
+    </div>
+
+    <p ng-show="$ctrl.targets.length > 0">
+      <button class="btn btn-primary btn-sm" ng-click="$ctrl.deleteAllTargets()">Remove all targets</button>
+    </p>
+  </div>
+
+  
+  <br>
+  <p><strong>Endpoint Technology</strong></p>
 
   <div class="checkbox" ng-repeat="type in $ctrl.state.optimizationOptions.technologies">
     <label>
