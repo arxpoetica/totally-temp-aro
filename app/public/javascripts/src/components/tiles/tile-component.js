@@ -682,9 +682,8 @@ class TileComponentController {
       })
 
     $document.ready(() => {
-      // Saving a reference to the global map object. Ideally should be passed in to the component,
-      // but don't know how to set it from markup
-      this.mapRef = map
+      // We should have a map variable at this point
+      this.mapRef = window[this.mapGlobalObjectName]
       this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
                                                            this.tileDataService,
                                                            this.state.mapTileOptions.getValue(),
@@ -827,13 +826,21 @@ class TileComponentController {
     this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapLayers(newMapLayers)
     this.refreshMapTiles()
   }
+
+  $onInit() {
+    if (!this.mapGlobalObjectName) {
+      console.error('ERROR: You must specify the name of the global variable that contains the map object.')
+    }
+  }
 }
 
 TileComponentController.$inject = ['$document', 'state', 'tileDataService']
 
 app.component('tile', {
   template: '',
-  bindings: { },
+  bindings: {
+    mapGlobalObjectName: '@'
+  },
   controller: TileComponentController
 })
 

@@ -24,7 +24,7 @@
   </head>
   <body>
     <!-- The tile component subscribes to map layer events raised from state.js. Include it before changing the state -->
-    <tile></tile>
+    <tile map-global-object-name="map"></tile>
 
     <div ng-controller="data_management_controller">
       <% include modal_data_management.html %>
@@ -423,6 +423,7 @@
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
   <script src="javascripts/lib/components/analysis-mode-component.js"></script>
   <script src="javascripts/lib/components/display-mode-buttons-component.js"></script>
+  <script src="javascripts/lib/components/map-selector-component.js"></script>
   <script src="javascripts/lib/components/map-split-component.js"></script>
   <script src="javascripts/lib/components/tool-bar-component.js"></script>
   <script src="javascripts/lib/components/network-plan-component.js"></script>

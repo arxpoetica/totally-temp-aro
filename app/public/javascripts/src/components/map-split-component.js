@@ -120,6 +120,7 @@ app.component('mapSplit', {
       <div  id="map-canvas-container" ng-style="{ float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }">
         <div id="map-canvas"></div>
         <tool-bar></tool-bar>
+        <map-selector map-global-object-name="map"></map-selector>
       </div>
 
       <!-- Define the sidebar -->
