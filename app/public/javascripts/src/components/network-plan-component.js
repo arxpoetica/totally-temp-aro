@@ -35,13 +35,14 @@ app.component('networkPlan', {
   </div>
   `,
   bindings: {},
-  controller: function($scope, $http, $q, state, tracker) {
+  controller: function($scope, $http, $q, $rootScope, state, tracker) {
     this.state = state;
     this.tracker = tracker;
     $scope.allPlans = false
     $scope.user_id = user_id
     $scope.projectId = globalUser.projectId
-    
+    $scope.new_plan_name = 'Untitled Plan'
+
     $scope.plan = null
     $scope.plans = []
 
@@ -101,11 +102,16 @@ app.component('networkPlan', {
     // $scope.pages = [1]
     // $scope.planView ='add';
 
+    // If we use this more than once it should be more generalized...
+    $scope.clear_default_text = () => {
+      $scope.new_plan_name = ''
+    }
+    
     $scope.showCombo = () => {
       $scope.loadPlans(1, () => {
         //Load search value
         loadSearch()
-        this.state.networkPlanModal.next(true)
+        state.networkPlanModal.next(true)
         // $('#plan-combo').modal('show')
         tracker.track('Open Analysis')
   
@@ -167,6 +173,41 @@ app.component('networkPlan', {
       }
       load(callback)
       interval = setInterval(load, 100000)
+    }
+
+    $scope.saveNewPlan = () => {
+      var params = {
+        name: $scope.new_plan_name,
+        areaName: $scope.new_plan_area_name,
+        latitude: $scope.new_plan_area_centroid.coordinates[1],
+        longitude: $scope.new_plan_area_centroid.coordinates[0],
+        projectId: $scope.projectId
+      }
+  
+      $http.post('/service/v1/plan?user_id=' + $scope.user_id, params).then((response) => {
+        $scope.selectPlan(response.data)
+        state.networkPlanModal.next(false)
+        $scope.loadPlans()
+      })
+    }
+
+    // $rootScope.$on('go-home', () => {
+    //   $scope.selectPlan(null)
+    // })
+
+    $rootScope.$on('network-plan-component:select-plan', (e, new_plan_name) => {
+      $scope.new_plan_name = new_plan_name
+      $scope.saveNewPlan()
+    })
+      
+    $scope.selectPlan = function (plan) {
+      $scope.plan = plan
+      // $('#plan-saving').stop().hide()
+      // $('#plan-saved').stop().hide()
+      // $('#plan-saving-progress').hide()
+      state.loadPlan(plan)
+      // $rootScope.$broadcast('plan_selected', plan)
+      state.networkPlanModal.next(false)
     }
 
     function reloadCurrentLocation() {

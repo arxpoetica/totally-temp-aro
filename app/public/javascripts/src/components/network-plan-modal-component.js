@@ -1,6 +1,8 @@
 class NetworkPlanModalController {
   constructor($scope,state) {
     this.state = state
+    this.newplan = false
+
     $scope.close = () => {
         state.networkPlanModal.next(false)
     }
@@ -14,8 +16,10 @@ class NetworkPlanModalController {
     }
 
     $scope.saveNewPlan = () => {
-      //Save new plan
+      //network-plan-manage-component will save the plan
+      this.newplan = true
     }
+
   }
 }
 
@@ -26,7 +30,7 @@ app.component('networkPlanModal', {
   <modal visible="$ctrl.state.networkPlanModal.value" backdrop="static" on-show="modalShown()" on-hide="modalHide()" >
     <modal-header title="Network Plan"></modal-header>
       <modal-body>
-        <network-plan-manage></network-plan-manage>
+        <network-plan-manage visible="$ctrl.newplan"></network-plan-manage>
       </modal-body>
     <modal-footer>
       <button class="btn btn-primary" ng-click="close()">Close</button>
