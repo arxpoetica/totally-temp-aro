@@ -12,7 +12,7 @@ class MapSplitController {
 
     $document.ready(() => {
       if (!this.splitterObj) {
-        this.splitterObj = Split(['#map-canvas', '#sidebar'], {
+        this.splitterObj = Split(['#map-canvas-container', '#sidebar'], {
           sizes: [75, 25],
           minSize: 250,
           onDragEnd: () => {
@@ -103,7 +103,7 @@ app.component('mapSplit', {
       .expander-content :hover {
         color: #1a79db;
       }
-      #map-canvas:before {
+      #map-canvas-container:before {
         box-shadow: -4px 0px 6px #888 inset;
         content: "";
         height: 100%;
@@ -117,7 +117,10 @@ app.component('mapSplit', {
     <div style="position:absolute; top: 0px; left: 0px; bottom: 0px; right: 0px">
 
       <!-- Define the canvas that will hold the map. -->
-      <div id="map-canvas" ng-style="{ float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }"></div>
+      <div  id="map-canvas-container" ng-style="{ float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }">
+        <div id="map-canvas"></div>
+        <tool-bar></tool-bar>
+      </div>
 
       <!-- Define the sidebar -->
       <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px', 'padding-left': '0px', transition: $ctrl.transitionCSS}">
