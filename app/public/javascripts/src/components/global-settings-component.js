@@ -34,9 +34,9 @@ class GlobalSettingsController {
             </div> -->
             <user-account-settings></user-account-settings>
             </modal-body>
-            <modal-footer>
+            <!-- <modal-footer>
                 <button class="btn btn-primary" ng-click="close()">Close</button>
-            </modal-footer>
+            </modal-footer> -->
         </modal>
       `,
       bindings: {},

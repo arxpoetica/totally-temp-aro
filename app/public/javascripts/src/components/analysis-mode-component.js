@@ -38,6 +38,8 @@ app.component('analysisMode', {
         flex: 1 1 auto;
         transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
         overflow: hidden;
+        max-height: 500px;
+        overflow: auto;
       }
       .accordion-contents.collapsed {
         flex: 0 0 auto;
@@ -57,7 +59,7 @@ app.component('analysisMode', {
         <button class="btn btn-default btn-block" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
       </div>
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
-        content content content content content content content content content content content content content content content content content content
+        <network-build></network-build>
       </div>
       <div class="accordion-title">
         <button class="btn btn-default btn-block" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
