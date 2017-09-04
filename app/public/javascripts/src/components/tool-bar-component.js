@@ -44,6 +44,14 @@ app.component('toolBar', {
       background-color: #1a79db;
     }
 
+    .tool-bar .ng-hide-remove {
+        animation: fadeInDown 300ms;
+    }
+
+    .tool-bar .ng-hide-add {
+        animation: fadeOutUp 300ms;
+    }
+
     #tool-bar .navbar-nav>li>a {
       padding-top: 10px;
       padding-bottom: 10px;
@@ -79,7 +87,7 @@ app.component('toolBar', {
         <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-folder-open"></i></button>
       </div>
-      <div class="btn-group">
+      <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
         <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"
                 ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.SINGLE_ENTITY)">
           <i class="fa fa-2x fa-dot-circle-o"></i>
