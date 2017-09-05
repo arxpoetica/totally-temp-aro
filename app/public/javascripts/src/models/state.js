@@ -438,7 +438,14 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
     service.selectedDisplayMode.next(service.displayModes.VIEW)
 
-    service.networkAnalysisType = 'Network Build'
+    service.networkAnalysisTypes = [
+      { id: 'NETWORK_BUILD', label: 'Network Build' },
+      { id: 'NETWORK_ANALYSIS', label: 'Network Analysis' },
+      { id: 'Coverage_ANALYSIS', label: 'Coverage Analysis' },
+      { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis' }
+    ]
+    service.networkAnalysisType = service.networkAnalysisTypes[0]
+
   }
 
   // Load tile information from the server

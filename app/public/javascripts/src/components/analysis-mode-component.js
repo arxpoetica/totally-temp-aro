@@ -49,7 +49,12 @@ app.component('analysisMode', {
     </style>
     <div class="analysis-mode-container">
       <div class="analysis-type">
-        <h4 style="text-align: center;">{{$ctrl.state.networkAnalysisType}}</h4>
+        <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
+        <select class="form-control"
+          ng-model="$ctrl.state.networkAnalysisType"
+          ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
+        </select>
+        </div>
         <button class="btn btn-default btn-block">
           <i class="fa fa-bolt"></i> Run
         </button>
@@ -59,7 +64,9 @@ app.component('analysisMode', {
         <button class="btn btn-default btn-block" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
       </div>
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
-        <network-build></network-build>
+        <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
+          <network-build></network-build>
+        </div>  
       </div>
       <div class="accordion-title">
         <button class="btn btn-default btn-block" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
