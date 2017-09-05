@@ -108,6 +108,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       { id: 'Fiber', label: 'Fiber', checked: true},
       { id: 'FiveG', label: '5G', checked: false}
     ],
+    selectedTechnology: null,
     selectedLayer: null,
     generatedDataRequest: {
       generatePlanLocationLinks : false
