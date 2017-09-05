@@ -1,17 +1,19 @@
 <div>
-  <br>
+  <!--<br>
   <input type="checkbox" class="checkboxfill"
     ng-model="$ctrl.toogleTableView"
     name="ctype-name"
-  >
+  >-->
+  <style scoped>
+    #tblNetworkBuild td {
+      line-height: 33px;  /* To vertically align text */
+    }
+    .indent-1 {
+      padding-left: 30px !important;
+    }
+  </style>
   <div ng-show="! $ctrl.toogleTableView">
-  <table class="table table-condensed">
-    <thead>
-        <tr>
-          <td>Name</td>
-          <td>Action</td>
-        </tr>
-    </thead>
+  <table id="tblNetworkBuild" class="table table-condensed table-striped">
     <tbody>
       <tr>
         <td>Optimization Type</td>
@@ -124,8 +126,8 @@
           </select>
         </td>
       </tr>
-      <tr ng-show="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
-        <td>Polygon Type</td>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+        <td class="indent-1">Polygon Type</td>
         <td> 
           <select class="form-control" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
             <option value="FIXED_RADIUS">Fixed Radius</option>
@@ -134,20 +136,18 @@
           </select>
         </td>
       </tr>
-      <tr ng-show="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
-        <td>Radius</td>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+        <td class="indent-1">Radius</td>
         <td> 
-          <div class="form-group form-group-sm">
-            <div class="input-group input-group-sm">
-              <input type="text" class="form-control text-right" placeholder="Cell Radius" 
-                ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius">
-              <div class="input-group-addon">m</div>  
-            </div>
+          <div class="input-group input-group">
+            <input type="text" class="form-control text-right" placeholder="Cell Radius"
+              ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius">
+            <div class="input-group-addon">m</div>
           </div>
         </td>
       </tr>
-      <tr ng-show="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
-        <td>Tile System</td>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+        <td class="indent-1">Tile System</td>
         <td> 
           <select class="form-control ng-pristine ng-valid ng-touched"
             ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile"

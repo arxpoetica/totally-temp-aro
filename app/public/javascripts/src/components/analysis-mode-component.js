@@ -46,6 +46,13 @@ app.component('analysisMode', {
         height: 0px;
         visibility: hidden;
       }
+      .accordion-title {
+        background-color: #333;
+        color: white;
+        font-weight: 700;
+        font-size: 18px;
+        border-radius: 0px;
+      }
     </style>
     <div class="analysis-mode-container">
       <div class="analysis-type">
@@ -61,7 +68,7 @@ app.component('analysisMode', {
         <hr></hr>
       </div>
       <div class="accordion-title">
-        <button class="btn btn-default btn-block" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
+        <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
       </div>
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
         <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
@@ -69,7 +76,7 @@ app.component('analysisMode', {
         </div>  
       </div>
       <div class="accordion-title">
-        <button class="btn btn-default btn-block" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
+        <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
       </div>
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.OUTPUT }">
         content content content content content content content content content content content content content content content content content content
