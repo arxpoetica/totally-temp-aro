@@ -139,7 +139,7 @@ app.component('mapSplit', {
                           'fa-arrow-circle-right': !$ctrl.isCollapsed,
                           'fa-arrow-circle-left': $ctrl.hovering && $ctrl.isCollapsed }">
             </i>
-            <network-plan><network-plan/>
+            <network-plan ng-click="$event.stopPropagation()"><network-plan/>
           </div>
         </div>
         <!-- Add a wrapping div because the expander changes the layout even though it is outside the panel -->

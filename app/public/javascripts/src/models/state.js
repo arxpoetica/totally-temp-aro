@@ -389,7 +389,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   var initializeState = function () {
 
     service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
-
+    service.planName = ""                       // The plan Name that is currently selected
+    
     // A list of location types to show in the locations layer
     service.locationTypesV1 = []
     service.allDataSources = service.defaultDataSources.slice()
@@ -515,6 +516,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       initializeState()
     } else {
       service.planId = +plan.id
+      service.planName = plan.areaName
       // Set plan center and zoom
       service.planCoordinates.next({
         zoom: plan.zoomIndex,
