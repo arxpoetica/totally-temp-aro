@@ -720,7 +720,7 @@ class TileComponentController {
             if (hitFeatures.length > 0) {
               state.hackRaiseEvent(hitFeatures)
               state.mapFeaturesSelectedEvent.next({
-                locations: selectedLocationsIds
+                locations: hitFeatures
               })
             }
           })
