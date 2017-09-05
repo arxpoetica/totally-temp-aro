@@ -155,6 +155,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
+  service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
 
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})

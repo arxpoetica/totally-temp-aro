@@ -677,6 +677,9 @@ class TileComponentController {
             var selectedLocationsIds = []
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
             state.hackRaiseEvent(selectedLocationsIds)
+            state.mapFeaturesSelectedEvent.next({
+              locations: selectedLocationsIds
+            })
           })
 
       })
@@ -716,9 +719,11 @@ class TileComponentController {
             })
             if (hitFeatures.length > 0) {
               state.hackRaiseEvent(hitFeatures)
+              state.mapFeaturesSelectedEvent.next({
+                locations: selectedLocationsIds
+              })
             }
           })
-
       })
     })
   }
