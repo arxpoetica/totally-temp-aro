@@ -67,7 +67,7 @@ aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
 ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
 
-etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
+etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') or 'latest'
 
 session = Session(region_name='us-east-1')
 
@@ -165,7 +165,7 @@ def provision_stack(cloudformation_stack):
         docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
-        initialize_database = True if environment == 'qa' else False,
+        initialize_database = False,
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,

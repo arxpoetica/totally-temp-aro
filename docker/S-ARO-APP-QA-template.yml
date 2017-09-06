@@ -47,10 +47,10 @@ Parameters:
     Default: "aro-qa-2016"
   SslCertificateArn:
     Type: String
-    Default: "arn:aws:acm:us-east-1:976168524097:certificate/b7189445-e5c4-4d94-b875-376b39d063e1"
+    Default: "arn:aws:acm:us-east-1:976168524097:certificate/ef51a231-d186-4ab2-9c13-94934d3bfdcd"
   ConfigRepoBranch:
     Type: String
-    Default: "master"
+    Default: "v1.2.1"
   AroClient:
     Type: String
     Default: "aro"
@@ -63,6 +63,18 @@ Parameters:
     Type: String
     AllowedValues: ["yes", "no"]
     Default: "no"
+  EcrUriRoot:
+    Type: String
+    Default: "976168524097.dkr.ecr.us-east-1.amazonaws.com"
+  AroAppImageName:
+    Type: String
+    Default: "aro/aro-app"
+  AroEtlImageName:
+    Type: String
+    Default: "aro/aro-etl"
+  AroNginxImageName:
+    Type: String
+    Default: "aro/aro-app-nginx"
 
 Mappings:
   DNSZoneMap:
@@ -332,6 +344,42 @@ Resources:
           ],
           "Resource": [ "*" ]
         } ]
+      }
+      
+  StackEcrAccessPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Roles:
+        - !Ref StackRole
+      PolicyName: !Sub "S-ARO-APP-${EnvSlug}-ECR-ACCESS-POLICY" 
+      PolicyDocument: {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Stmt1484162767000",
+            "Effect": "Allow",
+            "Action": [
+              "ecr:GetAuthorizationToken"
+            ],
+            "Resource": [
+              "*"
+            ]
+          },
+          {
+            "Sid": "Stmt1484162767001",
+            "Effect": "Allow",
+             "Action": [
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage",
+              "ecr:BatchCheckLayerAvailability"
+            ],
+            "Resource": [
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroAppImageName}",
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroEtlImageName}",
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroNginxImageName}"              
+            ]
+          }
+        ]
       }
 
   StackInstanceProfile:

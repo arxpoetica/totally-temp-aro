@@ -69,14 +69,14 @@ deployment:
       #       ARO_CLIENT: verizon
       #       ARO_DB_HOST: db.vz-master.aro.qa.app.altvil.com
       - rm -f opsworks_ssh_key
-  # staging:
-  #   branch: [dockerize]
-  #   owner: AIT
-  #   commands:
-  #     - docker push ${IMAGE_TAG}
-  #     - docker push ${LATEST_TAG}
-  #     - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
-  #     - chmod 400 opsworks_ssh_key
-  #     - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update staging
-  #     - rm -f opsworks_ssh_key
+  qa-projectui:
+    branch: [test-deploy]
+    owner: AIT
+    commands:
+      - docker push ${IMAGE_TAG}
+      - docker push ${LATEST_TAG}
+      - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
+      - chmod 400 opsworks_ssh_key
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
+      - rm -f opsworks_ssh_key
   
