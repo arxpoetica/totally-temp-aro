@@ -162,14 +162,13 @@ def provision_stack(cloudformation_stack):
         dbhost=db_host,
         dbuser=db_user,
         dbdatabase=db_database,
-        docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
         initialize_database = False,
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='t2.large',
+        instance_type='t2.medium',
         app_initial_email=app_default_admin_email,
         app_initial_password=app_default_admin_password
     )
@@ -184,7 +183,6 @@ def update_stack(outputs):
     # deploy
     stack.deploy_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
-        docker_pass=docker_pass,
         environment_vars=_set_environment(),
         opsworks_client=opsworks_client,
         dbhost=db_host,
