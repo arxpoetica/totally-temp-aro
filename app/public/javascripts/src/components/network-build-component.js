@@ -13,50 +13,51 @@ class NetworkBuildController {
 
         this.initializeConfigurations()
 
-        // state.selectedLocations
-        //     .subscribe((selectedLocations) => {
-        //         // The selected locations have changed. Get the count and addresses that we want to show
-        //         this.targetsTotal = selectedLocations.size
-        //         var locationIds = Array.from(selectedLocations).slice(0, 9) // Only get addresses for a few locations
-        //         $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-        //             .then((result) => {
-        //                 if (result.status >= 200 && result.status <= 299) {
-        //                     this.targets = result.data
-        //                 }
-        //             })
-        //     })
+        state.selectedLocations
+            .subscribe((selectedLocations) => {
+                // The selected locations have changed. Get the count and addresses that we want to show
+                this.targetsTotal = selectedLocations.size
+                var locationIds = Array.from(selectedLocations).slice(0, 30) // Only get addresses for a few locations
+                $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+                    .then((result) => {
+                        if (result.status >= 200 && result.status <= 299) {
+                            this.targets = result.data
+                        }
+                    })
+            })
 
 
 
-        $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
+        // $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
             
-            if (options && this.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS') {
-                // Get a list of ids to add and remove
-                var existingIds = this.selectedLocations
-                var idsToAdd = new Set(), idsToRemove = new Set()
-                options.forEach((option) => {
-                    if (existingIds.has(+option.location_id)) {
-                        idsToRemove.add(+option.location_id)
-                    } else {
-                        idsToAdd.add(+option.location_id)
-                    }
-                })
-                idsToAdd.forEach(this.selectedLocations.add,this.selectedLocations)
-                idsToRemove.forEach(this.selectedLocations.delete,this.selectedLocations)
+        //     if (options && this.state.selectedDisplayMode == 1) {
+        //         // Get a list of ids to add and remove
+        //         var existingIds = this.selectedLocations
+        //         var idsToAdd = new Set(), idsToRemove = new Set()
+        //         options.forEach((option) => {
+        //             if (existingIds.has(+option.location_id)) {
+        //                 idsToRemove.add(+option.location_id)
+        //             } else {
+        //                 idsToAdd.add(+option.location_id)
+        //             }
+        //         })
+        //         idsToAdd.forEach(this.selectedLocations.add,this.selectedLocations)
+        //         idsToRemove.forEach(this.selectedLocations.delete,this.selectedLocations)
 
-                this.displaySelectedLocations()
-                // Make these changes to the database, then reload targets from the DB
-                // var addRemoveTargetPromises = [
-                //     $http.post(`/network_plan/${state.planId}/addTargets`, { locationIds: Array.from(idsToAdd) }),
-                //     $http.post(`/network_plan/${state.planId}/removeTargets`, { locationIds: Array.from(idsToRemove) })
-                // ]
-                // Promise.all(addRemoveTargetPromises)
-                //     .then((response) => {
-                //         // Reload selected locations from database
-                //         state.reloadSelectedLocations()
-                //     })
-            }
-        })
+        //         this.displaySelectedLocations()
+        //         // Make these changes to the database, then reload targets from the DB
+        //         // var addRemoveTargetPromises = [
+        //         //     $http.post(`/network_plan/${state.planId}/addTargets`, { locationIds: Array.from(idsToAdd) }),
+        //         //     $http.post(`/network_plan/${state.planId}/removeTargets`, { locationIds: Array.from(idsToRemove) })
+        //         // ]
+        //         // Promise.all(addRemoveTargetPromises)
+        //         //     .then((response) => {
+        //         //         // Reload selected locations from database
+        //         //         state.reloadSelectedLocations()
+        //         //     })
+        //     }
+        // })
+
     }
 
     initializeConfigurations() {
@@ -90,32 +91,30 @@ class NetworkBuildController {
         this.regions.removeAllGeographies()
     }
 
-    deleteTarget(target) {
-        this.selectedLocations.delete(target.id)
-        this.displaySelectedLocations()
-    }
+    // deleteTarget(target) {
+    //     this.selectedLocations.delete(target.id)
+    //     this.displaySelectedLocations()
+    // }
 
     deleteAllTargets() {
-        // this.$http.delete(`/network_plan/${this.state.planId}/removeAllTargets`)
-        //     .then((response) => {
-        //         // Reload selected locations from database
-        //         this.state.reloadSelectedLocations()
-        //     })
-        this.selectedLocations = new Set()
-        this.displaySelectedLocations()
+        this.$http.delete(`/network_plan/${this.state.planId}/removeAllTargets`)
+            .then((response) => {
+                // Reload selected locations from database
+                this.state.reloadSelectedLocations()
+            })
     }
 
-    displaySelectedLocations() {
-        this.targetsTotal = this.selectedLocations.size
-        var locationIds = Array.from(this.selectedLocations).slice(0, 9) // Only get addresses for a few locations
-        this.$http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-            .then((result) => {
-                if (result.status >= 200 && result.status <= 299) {
-                    this.targets = result.data
-                }
-            })
-        this.state.requestMapLayerRefresh.next({})    
-    }
+    // displaySelectedLocations() {
+    //     this.targetsTotal = this.selectedLocations.size
+    //     var locationIds = Array.from(this.selectedLocations).slice(0, 9) // Only get addresses for a few locations
+    //     this.$http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+    //         .then((result) => {
+    //             if (result.status >= 200 && result.status <= 299) {
+    //                 this.targets = result.data
+    //             }
+    //         })
+    //     this.state.requestMapLayerRefresh.next({})    
+    // }
 
     getSelectedGeographies() {
         var selectedRegions = []

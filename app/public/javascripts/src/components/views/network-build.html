@@ -11,6 +11,13 @@
     .indent-1 {
       padding-left: 30px !important;
     }
+    #show-targets{
+        max-height: 75px;
+        overflow: hidden;
+    }   
+	  #show-targets:hover {
+        overflow: auto;
+    } 
   </style>
   <div ng-show="! $ctrl.toogleTableView">
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
@@ -183,12 +190,27 @@
             </label>      
           </div>
         </td>
-      </tr>      
+      </tr>
+      <tr ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
+        <td>Selected Geographies</td>
+        <td> 
+          
+        </td>
+      </tr>
+      <tr ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
+        <td>Selected Locations</td>
+        <td>
+          <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
+          <div id="show-targets">
+            <div class="label label-default" style="float:left;margin-right: 5px;margin-top: 1px;" ng-repeat="target in $ctrl.targets">{{ target.address }}</div>
+          </div>
+        </td>
+      </tr> 
     </tbody>
   </table>
 
   <!-- show Selected Service Areas / Locations -->
-  <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
+  <!-- <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
       <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
       <div style="margin: 5px;min-height: 0px;max-height: 110px;overflow: auto;">
         <strong ng-show="$ctrl.regions.selectedRegions.length > 5" class="ng-binding;">Total: {{$ctrl.regions.selectedRegions.length}}</strong>
@@ -223,7 +245,7 @@
       <p ng-show="$ctrl.targets.length > 0">
         <button class="btn btn-primary btn-sm" ng-click="$ctrl.deleteAllTargets()">Remove all targets</button>
       </p>
-    </div>
+    </div> -->
   </div>
 
   <!-- Hide Normal View -->

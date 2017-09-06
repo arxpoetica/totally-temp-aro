@@ -2,6 +2,7 @@ class MapSplitController {
   
   constructor($document, $timeout, $scope, state) {
     this.$timeout = $timeout
+    this.state = state
     this.displayModes = state.displayModes
     state.selectedDisplayMode.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)
     this.splitterObj = null
@@ -151,7 +152,7 @@ app.component('mapSplit', {
           <div style="overflow: auto; flex: 0 0 auto"> <!-- this is necessary to make the display-mode-buttons flow correctly -->
             <display-mode-buttons></display-mode-buttons>
           </div>
-          <div style="flex: 1 1 auto; position: relative;">
+          <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
             <analysis-mode></analysis-mode>
           </div>
         </div>
