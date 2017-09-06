@@ -17,7 +17,7 @@ class NetworkBuildController {
             .subscribe((selectedLocations) => {
                 // The selected locations have changed. Get the count and addresses that we want to show
                 this.targetsTotal = selectedLocations.size
-                var locationIds = Array.from(selectedLocations).slice(0, 30) // Only get addresses for a few locations
+                var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
                 $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
                     .then((result) => {
                         if (result.status >= 200 && result.status <= 299) {
