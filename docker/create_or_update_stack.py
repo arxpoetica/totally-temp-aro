@@ -152,7 +152,6 @@ def provision_stack(cloudformation_stack):
     stack.provision_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         opsworks_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'Layer'),
-        # internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
         environment=environment,
         name='ARO-' + SERVICE_TAG,
