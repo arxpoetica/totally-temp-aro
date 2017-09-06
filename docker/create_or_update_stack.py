@@ -168,9 +168,7 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='t2.medium',
-        app_initial_email=app_default_admin_email,
-        app_initial_password=app_default_admin_password
+        instance_type='t2.medium'
     )
 
 
