@@ -53,6 +53,10 @@ app.component('analysisMode', {
         font-size: 18px;
         border-radius: 0px;
       }
+      .accordion-title:hover, .accordion-title:focus {
+        background-color: #333;
+        color: white;
+      }
     </style>
     <div class="analysis-mode-container">
       <div class="analysis-type">
