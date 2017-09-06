@@ -11,13 +11,6 @@
     .indent-1 {
       padding-left: 30px !important;
     }
-    #show-targets{
-        max-height: 75px;
-        overflow: hidden;
-    }   
-	  #show-targets:hover {
-        overflow: auto;
-    } 
   </style>
   <div ng-show="! $ctrl.toogleTableView">
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
@@ -194,16 +187,15 @@
       <tr ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
         <td>Selected Geographies</td>
         <td> 
-          
+          <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
+          <show-targets targets="$ctrl.regions.selectedRegions"></show-targets>
         </td>
       </tr>
       <tr ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
         <td>Selected Locations</td>
         <td>
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
-          <div id="show-targets">
-            <div class="label label-default" style="float:left;margin-right: 5px;margin-top: 1px;" ng-repeat="target in $ctrl.targets">{{ target.address }}</div>
-          </div>
+          <show-targets targets="$ctrl.targets"></show-targets>
         </td>
       </tr> 
     </tbody>
