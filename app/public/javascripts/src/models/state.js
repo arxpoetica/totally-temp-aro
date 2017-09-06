@@ -76,7 +76,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.optimizationOptions = {
     uiAlgorithms: [],
     uiSelectedAlgorithm: null,
-    fiberNetworkConstraints: {
+    networkConstraints: {
       routingMode: 'DIRECT_ROUTING',
       cellNodeConstraints: {
         cellRadius: 300.0,
@@ -426,10 +426,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 	 method: 'GET'
 	})
 	.then((response) => {
-	  service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles = response.data
-    service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile 
-      = (service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles.length > 0)
-        ? service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles[0]
+	  service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles = response.data
+    service.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
+      = (service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles.length > 0)
+        ? service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles[0]
         : null
 	})
 

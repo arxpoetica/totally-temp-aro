@@ -17,8 +17,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     var optimizationBody = {}
     optimizationBody.locationConstraints = {}
-    optimizationBody.fronthaulOptimization = {}
-    //optimizationBody.overridenConfiguration = {}
+    optimizationBody.optimization = {}
+    optimizationBody.analysis_type = 'NETWORK_PLAN'
 
     addLocationTypesToBody(state, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
@@ -27,7 +27,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addAlgorithmParametersToBody(state, optimizationBody)
     addRegionsToBody(state, optimization, regions, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
-    addTechnologiesToBody(state, optimizationBody)
     optimizationBody.fiberSourceIds = []
     state.selectedExistingFibers.forEach((selectedExistingFiber) => optimizationBody.fiberSourceIds.push(selectedExistingFiber.systemId))
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
@@ -86,8 +85,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization
   var addAlgorithmParametersToBody = (state, postBody) => {
     // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
-    postBody.fronthaulOptimization.algorithm = state.optimizationOptions.uiSelectedAlgorithm.algorithm
-    postBody.fronthaulOptimization.uiSelectedAlgorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
+    postBody.optimization.algorithm = state.optimizationOptions.uiSelectedAlgorithm.algorithm
+    postBody.optimization.uiSelectedAlgorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
     if (state.optimizationOptions.uiSelectedAlgorithm.algorithm === 'TABC') {
       var generations = state.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
       postBody.customOptimization = {
@@ -97,25 +96,25 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
-    postBody.fronthaulOptimization.threshold = state.optimizationOptions.threshold
+    postBody.optimization.threshold = state.optimizationOptions.threshold
 
     // Delete items from postBody.financialConstraints based on the type of algorithm we are using.
     var algorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
     if (algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR') {
       delete postBody.financialConstraints.budget
       delete postBody.financialConstraints.preIrrThreshold
-      delete postBody.fronthaulOptimization.threshold
+      delete postBody.optimization.threshold
     } else if (algorithmId === 'COVERAGE') {
       delete postBody.financialConstraints.budget
       delete postBody.financialConstraints.preIrrThreshold
     } else if (algorithmId === 'BUDGET') {
       delete postBody.financialConstraints.preIrrThreshold
-      delete postBody.fronthaulOptimization.threshold
+      delete postBody.optimization.threshold
     } else if (algorithmId === 'IRR_TARGET') {
       delete postBody.financialConstraints.preIrrThreshold
     } else if (algorithmId === 'IRR_THRESH') {
       delete postBody.financialConstraints.budget
-      delete postBody.fronthaulOptimization.threshold
+      delete postBody.optimization.threshold
     }
   }
 
@@ -146,8 +145,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
-    postBody.fiberNetworkConstraints = {}
-    postBody.fiberNetworkConstraints.routingMode = state.optimizationOptions.fiberNetworkConstraints.routingMode
+    postBody.networkConstraints = {}
+    postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
 
     var fiveGEnabled = false
     state.optimizationOptions.technologies.forEach((technology) => {
@@ -156,23 +155,20 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
     if (fiveGEnabled) {
-      postBody.fiberNetworkConstraints.cellNodeConstraints = {}
-      postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius
-      postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
-      var selectedTile = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile
+      postBody.networkConstraints.cellNodeConstraints = {}
+      postBody.networkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius
+      postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
+      var selectedTile = state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
       if (selectedTile) {
-        postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
+        postBody.networkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
       }
     }
-  }
 
-  // Add technologies to a POST body that we will send to aro-service for optimization
-  var addTechnologiesToBody = (state, postBody) => {
-	postBody.networkGeneration = {}
-    postBody.networkGeneration.networkTypes = []
+    // Add technologies like "Fiber" and "5G"
+    postBody.networkConstraints.networkTypes = []
     state.optimizationOptions.technologies.forEach((technology) => {
       if (technology.checked) {
-        postBody.networkGeneration.networkTypes.push(technology.id)
+        postBody.networkConstraints.networkTypes.push(technology.id)
       }
     })
   }
@@ -295,7 +291,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.financialConstraints.preIrrThreshold = postBody.financialConstraints.preIrrThreshold
     }
     if (postBody.threshold) {
-      state.optimizationOptions.threshold = postBody.fronthaulOptimization.threshold
+      state.optimizationOptions.threshold = postBody.optimization.threshold
     }
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
@@ -306,17 +302,17 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load fiber network constraints from a POST body object that is sent to the optimization engine
   var loadFiberNetworkConstraintsFromBody = (state, postBody) => {
-    if (postBody.fiberNetworkConstraints
-        && postBody.fiberNetworkConstraints.cellNodeConstraints) {
-      var cellNodeConstraintsObj = state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints
-      if (postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius) {
-        cellNodeConstraintsObj.cellRadius = postBody.fiberNetworkConstraints.cellNodeConstraints.cellRadius
+    if (postBody.networkConstraints
+        && postBody.networkConstraints.cellNodeConstraints) {
+      var cellNodeConstraintsObj = state.optimizationOptions.networkConstraints.cellNodeConstraints
+      if (postBody.networkConstraints.cellNodeConstraints.cellRadius) {
+        cellNodeConstraintsObj.cellRadius = postBody.networkConstraints.cellNodeConstraints.cellRadius
       }
-      if (postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy) {
-        cellNodeConstraintsObj.polygonStrategy = postBody.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy
+      if (postBody.networkConstraints.cellNodeConstraints.polygonStrategy) {
+        cellNodeConstraintsObj.polygonStrategy = postBody.networkConstraints.cellNodeConstraints.polygonStrategy
       }
-      if (postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId) {
-        var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === postBody.fiberNetworkConstraints.cellNodeConstraints.tileSystemId)
+      if (postBody.networkConstraints.cellNodeConstraints.tileSystemId) {
+        var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === postBody.networkConstraints.cellNodeConstraints.tileSystemId)
         if (selectedTile.length === 1) {
           cellNodeConstraintsObj.selectedTile = selectedTile[0]
         }
@@ -327,7 +323,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load technologies from a POST body object that is sent to the optimization engine
   var loadTechnologiesFromBody = (state, postBody) => {
     state.optimizationOptions.technologies.forEach((technology) => technology.checked = false)
-    postBody.networkGeneration.networkTypes.forEach((networkType) => {
+    postBody.networkConstraints.networkTypes.forEach((networkType) => {
       var matchedTechnology = state.optimizationOptions.technologies.filter((technology) => technology.id.toUpperCase() === networkType.toUpperCase())
       if (matchedTechnology && matchedTechnology.length === 1) {
         matchedTechnology[0].checked = true

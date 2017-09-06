@@ -150,7 +150,7 @@
      <div style="display: inline-block">
       <span>Polygon Type</span>
       <select class="form-control ng-pristine ng-valid ng-touched" 
-      		  ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
+      		  ng-model="state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
         <option value="FIXED_RADIUS">Fixed Radius</option>
         <option value="AVERAGE_RADIUS">Average Radius</option>
         <option value="RAY_TRACING">Ray Tracing</option>
@@ -160,7 +160,7 @@
        <span>
            <input
                    type="text"
-                   ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius"
+                   ng-model="state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius"
                    placeholder="Cell Radius"
                    style="width: 85px;margin-left: 50px"
            >
@@ -187,7 +187,7 @@
   <p><strong>Network Construction</strong></p>
   <form>
 
-    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="state.optimizationOptions.fiberNetworkConstraints.routingMode" >
+    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="state.optimizationOptions.networkConstraints.routingMode" >
       <option value="DIRECT_ROUTING">Unsplit Routing</option>
       <option value="ODN_1" >Hub-Only Split</option>
       <% if (config.ARO_CLIENT === 'reliance') { %>
