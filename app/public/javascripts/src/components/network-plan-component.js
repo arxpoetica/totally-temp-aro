@@ -2,13 +2,14 @@ class NetworkPlanController {
 
   constructor($timeout, state)  {
     this.plan = null
+    this.requestNetworkPlanModal = state.networkPlanModal
     state.plan.subscribe((newValue) => {
       this.plan = newValue
     })
   }
 
   showNetworkPlanModal() {
-      state.networkPlanModal.next(true)
+    this.requestNetworkPlanModal.next(true)
   }
 }
 

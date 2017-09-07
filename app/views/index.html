@@ -74,48 +74,10 @@
       </div>
     <% } %>
 
-    <div ng-controller="navigation_menu_controller">
+    <!-- Remove controller for now. Later, the whole navigation div should be gone<div ng-controller="navigation_menu_controller">-->
+    <div>
 
       <% include modal_build_sequence.html %>
-
-      <!--<div id="home_screen" ng-show="!plan">-->
-        <!--<div class="container">-->
-          <!--<div class="row">-->
-            <!--<div class="col-sm-12">-->
-              <!--<img id="aro_logo" src="/images/logos/<%= config.ARO_CLIENT %>/logo.png">-->
-            <!--</div>-->
-            <!--<div class="col-sm-8">-->
-              <!--<a id="btnNewPlan" href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_plan()">Create New Network Plan</a>-->
-              <!--<br>-->
-            <!--</div>-->
-            <!--<div class="col-sm-8">-->
-              <!--<a id="btnExistingPlans" href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showPlans()">Existing Plans</a>-->
-              <!--<br>-->
-            <!--</div>-->
-            <!--&lt;!&ndash;-->
-            <!--<div class="col-sm-8">-->
-              <!--<a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showReports()">Reports</a>-->
-              <!--<br>-->
-            <!--</div>-->
-            <!--&ndash;&gt;-->
-            <!--<% if (user.rol === 'admin') { %>-->
-              <!--<div class="col-sm-8">-->
-                <!--<a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage Users</a>-->
-                <!--<br>-->
-              <!--</div>-->
-              <!--<div class="col-sm-8">-->
-                <!--<a href="#application-settings" class="btn btn-primary btn-block" data-toggle="modal">Application Settings</a>-->
-                <!--<br>-->
-              <!--</div>-->
-            <!--<% } %>-->
-
-            <!--<div class="col-sm-8">-->
-              <!--<a href="#data-management" class="btn btn-primary btn-block" data-toggle="modal">Data Management</a>-->
-              <!--<br>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
-      <!--</div>-->
 
       <% include modal_select_plan.html %>
 
@@ -245,38 +207,6 @@
           </div>
         </div>
       </nav>
-      <!-- <div id="aro-header">
-        <div class="header-container">
-          <div class="header-column-child-width">
-            <div class="header-plan" ng-click="showCombo()">
-              <span ng-if="plan.name">{{plan.name}}</span>
-              <span ng-if="!plan.name"><i class="fa fa-plus f-select-plan" style="font-size: 12px"></i> Select a plan</span>
-            </div>
-          </div>
-          <div class="header-column-child-width">
-            <div class="header-plan-location"><span class="fa fa-map-marker pad10"></span>{{plan.area_name}}</div>
-          </div>
-          <div class="header-column-child-width" id="plan-saving-progress">
-            <div class="progress plan-progress">
-              <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="header-column-fill-width">
-            <p ng-show="plan" class="pull-right header-financials-container" id="top_bar_tools">
-
-              <span ng-show="plan.ranOptimization" class="header-financials-item">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
-              <span ng-hide="plan.ranOptimization" class="header-financials-item"><%- config.currency_symbol %>0K NPV</span>
-              |
-              <span ng-show="plan.ranOptimization" class="header-financials-item">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
-              <span ng-hide="plan.ranOptimization" class="header-financials-item">0% IRR</span>
-              |
-              <span ng-show="plan.ranOptimization" id="shortest_path_total_cost" class="header-financials-item header-financials-capex">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
-              <span ng-hide="plan.ranOptimization" id="shortest_path_total_cost" class="header-financials-item header-financials-capex">0K CapEx</span>
-
-            </p>
-          </div>
-        </div>
-      </div> -->
     </div>
 
 
