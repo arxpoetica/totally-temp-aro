@@ -250,7 +250,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         .then((response) => {
             $http.get('/optimization/processes').then((running) => {
               response.data.forEach((plan) => {
-                var info = running.data.find((status) => status.planId === +plan.id)
+                var info = running.data.find((status) => status.plan.id === +plan.id)
                 if (info) {
                   var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
                   var min = Math.floor(diff / 60)

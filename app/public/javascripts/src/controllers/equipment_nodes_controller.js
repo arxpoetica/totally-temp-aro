@@ -49,7 +49,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createdMapLayerKeys.clear()
 
     // Only add planned equipment if we have a valid plan selected
-    if (state.planId !== state.INVALID_PLAN_ID) {
+    if (state.plan) {
 
       // Loop through all network equipment categories (e.g. "Existing Equipment")
       state.networkEquipments.forEach((category) => {
@@ -57,7 +57,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // Loop through all the layers in this category
         category.layers.forEach((networkEquipment) => {
           if (networkEquipment.checked) {
-            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.planId)
+            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.plan.id)
             if (networkEquipment.equipmentType === 'point') {
               var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
               tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
@@ -127,8 +127,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     // Get the data again from the server. This is because some geometries are empty and are not
     // put into the map, so we cant get it from mapLayer.features
     fiberGraphForPlan = fiberGraph
-    if (state.planId !== state.INVALID_PLAN_ID) {
-      $http.get(`/network/fiber/connectivityForPlan/${state.planId}`)
+    if (state.plan) {
+      $http.get(`/network/fiber/connectivityForPlan/${state.plan.id}`)
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
             var links = response.data

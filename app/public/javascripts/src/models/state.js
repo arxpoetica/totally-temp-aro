@@ -376,8 +376,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
   service.selectedLocations = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedLocations = () => {
-    if (service.planId !== service.INVALID_PLAN_ID) {
-      $http.get(`/locations/${service.planId}/selectedLocationIds`)
+    var plan = service.plan.getValue()
+    if (plan) {
+      $http.get(`/locations/${plan.id}/selectedLocationIds`)
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
             var selectedLocationsSet = new Set()
@@ -389,18 +390,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
-  // Plan coordinates - define once
-  service.planCoordinates = new Rx.BehaviorSubject({
-    zoom: 14,
-    latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
-    longitude: -123.3321    // Seattle, WA by default. For no particular reason.
-  })
+  // Plan - define once
+  service.plan = new Rx.BehaviorSubject(null)
 
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
-
-    service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
-    service.planName = ""                       // The plan Name that is currently selected
     
     // A list of location types to show in the locations layer
     service.locationTypesV1 = []
@@ -522,22 +516,49 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
   }
 
-  service.loadPlan = (plan) => {
-    if (!plan) {
-      service.planId = service.INVALID_PLAN_ID
-      initializeState()
-    } else {
-      service.planId = +plan.id
-      service.planName = plan.areaName
-      // Set plan center and zoom
-      service.planCoordinates.next({
-        zoom: plan.zoomIndex,
-        latitude: plan.latitude,
-        longitude: plan.longitude
-      })
-    }
-    service.reloadSelectedLocations()
+  service.defaultPlanCoordinates = {
+    zoom: 14,
+    latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
+    longitude: -123.3321    // Seattle, WA by default. For no particular reason.
   }
+
+  service.createEphemeralPlan = () => {
+
+    var planOptions = {
+      projectId: globalUser.projectId, // Ugh. Depending on global variable "globalUser"
+      areaName: 'Seattle, WA',
+      latitude: service.defaultPlanCoordinates.latitude,
+      longitude: service.defaultPlanCoordinates.longitude,
+      zoomIndex: service.defaultPlanCoordinates.zoom,
+      ephemeral: true
+    }
+    var apiEndpoint = `/service/v1/plan?user_id=${globalUser.id}` // Ugh. Depending on global variable "globalUser"
+    $http.post(apiEndpoint, planOptions)
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          service.plan.next(result.data)
+          initializeState()
+          service.reloadSelectedLocations()
+        } else {
+          console.log(result)
+        }
+      })
+      .catch((err) => console.log(err))
+
+
+    // } else {
+    //   service.plan.id = +plan.id
+    //   service.planName = plan.areaName
+    //   // Set plan center and zoom
+    //   service.planCoordinates.next({
+    //     zoom: plan.zoomIndex,
+    //     latitude: plan.latitude,
+    //     longitude: plan.longitude
+    //   })
+    // }
+    // service.reloadSelectedLocations()
+  }
+  service.createEphemeralPlan() // Will be called once when the page loads, since state.js is a service
 
   service.isDataSourceSelected = function (ds) {
     var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');
