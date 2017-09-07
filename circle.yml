@@ -70,7 +70,7 @@ deployment:
       #       ARO_DB_HOST: db.vz-master.aro.qa.app.altvil.com
       - rm -f opsworks_ssh_key
   qa-projectui:
-    branch: [test-deploy]
+    branch: [aro_project_UI]
     owner: AIT
     commands:
       - docker push ${IMAGE_TAG}
