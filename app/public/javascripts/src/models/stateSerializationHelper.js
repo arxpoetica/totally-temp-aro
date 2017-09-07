@@ -138,7 +138,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
     //postBody.processLayers = [] // Array.from(setOfProcessLayers)
     postBody.processLayers = state.optimizationOptions.processLayers
-    postBody.locationConstraints.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
+    postBody.locationConstraints.analysisSelectionMode = (state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     if (state.optimizationOptions.selectedLayer) {
       postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
     }

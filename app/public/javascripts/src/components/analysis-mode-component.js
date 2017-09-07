@@ -1,7 +1,13 @@
 class AnalysisModeController {
 
-  constructor(state) {
+  constructor($scope,$rootScope,state,optimization,regions) {
     this.state = state
+    this.optimization = optimization
+    this.canceler = null
+    this.$scope = $scope
+    this.selectedRegions = []
+
+    $scope.plan = null
 
     this.accordions = Object.freeze({
       INPUT: 0,
@@ -9,6 +15,49 @@ class AnalysisModeController {
     })
 
     this.expandedAccordionIndex = this.accordions.INPUT
+
+    //listening to plan change need to change to reactivejs observer pattern 
+    $rootScope.$on('plan_selected', planChanged)
+
+    function planChanged(e, plan) {
+      $scope.plan = plan
+      if (!plan) return
+    }
+
+    this.optimizeSelectedNetworkAnalysisType = () => {
+
+      if (state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') {
+        Object.keys(regions.selectedRegions).forEach((key) => {
+          var regionObj = regions.selectedRegions[key]
+          this.selectedRegions.push({
+            id: regionObj.id,
+            name: regionObj.name,
+            type: regionObj.type,
+            layerId: regionObj.layerId
+          })
+        })
+      }
+
+      var optimizationBody = state.getOptimizationBody()
+      // Check if at least one data source is selected
+      var isAnyDataSourceSelected = state.selectedDataSources.length > 0
+      // A location is selected if the "checked" property is true
+      var isAnyLocationTypeSelected = (state.locationTypes.getValue().filter((item) => item.checked).length > 0) || (state.constructionSites.filter((item) => item.checked).length > 0)
+      var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
+      if (validSelection) {
+        this.canceler = optimization.optimize($scope.plan, optimizationBody, this.selectedRegions)
+      } else {
+        swal({
+          title: 'Incomplete input',
+          text: 'Please select one or more locations and data sources before running optimization',
+          type: 'error',
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Ok',
+          closeOnConfirm: true
+        })
+      }
+    }
+
   }
 
   expandAccordion(expandedAccordionIndex) {
@@ -17,7 +66,7 @@ class AnalysisModeController {
 
 }
 
-AnalysisModeController.$inject = ['state']
+AnalysisModeController.$inject = ['$scope','$rootScope','state','optimization','regions']
 
 app.component('analysisMode', {
   template: `
@@ -66,7 +115,7 @@ app.component('analysisMode', {
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>
         </div>
-        <button class="btn btn-default btn-block">
+        <button class="btn btn-default btn-block" ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
           <i class="fa fa-bolt"></i> Run
         </button>
         <hr></hr>
@@ -77,7 +126,10 @@ app.component('analysisMode', {
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
         <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
           <network-build></network-build>
-        </div>  
+        </div>
+        <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+          <network-analysis></network-analysis>
+        </div>
       </div>
       <div class="accordion-title">
         <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>

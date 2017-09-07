@@ -1,0 +1,116 @@
+<div>
+  <style scoped>
+    #tblNetworkBuild td {
+      line-height: 33px;  /* To vertically align text */
+    }
+    .indent-1 {
+      padding-left: 30px !important;
+    }
+  </style>
+  <table id="tblNetworkBuild" class="table table-condensed table-striped">
+    <tbody>
+      <tr>
+        <td>Geography Type</td>
+        <td>
+          <select class="form-control"
+            ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer"
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Endpoint Technology</td>
+        <td>
+          <select class="form-control"
+            ng-model="$ctrl.state.optimizationOptions.selectedTechnology"
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies">
+          </select>
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+        <td class="indent-1">Polygon Type</td>
+        <td> 
+          <select class="form-control" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
+            <option value="FIXED_RADIUS">Fixed Radius</option>
+            <option value="AVERAGE_RADIUS">Average Radius</option>
+            <option value="RAY_TRACING">Ray Tracing</option>
+          </select>
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+        <td class="indent-1">Radius</td>
+        <td> 
+          <div class="input-group input-group">
+            <input type="text" class="form-control text-right" placeholder="Cell Radius"
+              ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius">
+            <div class="input-group-addon">m</div>
+          </div>
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+        <td class="indent-1">Tile System</td>
+        <td> 
+          <select class="form-control ng-pristine ng-valid ng-touched"
+            ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile"
+            ng-change="changeTileSelected(tileselected)"
+            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles">
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Network Construction</td>
+        <td> 
+          <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.routingMode" >
+            <option value="DIRECT_ROUTING">Unsplit Routing</option>
+            <option value="ODN_1" >Hub-Only Split</option>
+            <% if (config.ARO_CLIENT === 'reliance') { %>
+            <option value="ODN_2">Hub-Terminal Split </option>
+            <% } else {%>
+            <option value="ODN_2">Hub-Distribution Split</option>
+            <% } %>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>Other Settings</td>
+        <td> 
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" class="checkboxfill"
+                      ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
+                      name="ctype-name"
+              >
+                Save Routed Locations
+            </label>      
+          </div>
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
+        <td>Selected Geographies</td>
+        <td> 
+          <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
+          <show-targets targets="$ctrl.regions.selectedRegions"></show-targets>
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
+        <td>Selected Locations</td>
+        <td>
+          <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
+          <show-targets targets="$ctrl.targets"></show-targets>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div>
+  	<!-- <% if (user.rol === 'admin') { %>
+    <p class="pull-left">
+        <button class="btn btn-primary" ng-click="runExpertMode()">Expert Mode</button>
+    </p>
+    <% } %> -->
+    <!-- <p class="pull-right">
+      <button class="btn btn-primary" ng-hide="calculating" ng-click="run($ctrl.state.getOptimizationBody(), getSelectedGeographies())">Get Results</button>
+      <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
+    </p> -->
+  </div>
+</div>
