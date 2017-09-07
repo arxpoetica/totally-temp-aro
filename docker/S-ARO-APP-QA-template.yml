@@ -50,7 +50,7 @@ Parameters:
     Default: "arn:aws:acm:us-east-1:976168524097:certificate/ef51a231-d186-4ab2-9c13-94934d3bfdcd"
   ConfigRepoBranch:
     Type: String
-    Default: "v1.2.1"
+    Default: "v1.3"
   AroClient:
     Type: String
     Default: "aro"
