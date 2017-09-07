@@ -296,7 +296,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
         return;
       }
 
-      if ((!this.data_loaded || this.dirty)) {
+      if (this.type !== 'wirecenter' && (!this.data_loaded || this.dirty)) {
         this.dirty = false
         if (this.data) {
           this.addGeoJson(this.data)

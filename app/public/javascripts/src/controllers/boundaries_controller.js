@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', 'state', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization, map_layers, state) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', 'state', '$location', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization, map_layers, state, $location) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -24,6 +24,78 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
   // --
 
+  // Get the point transformation mode with the current zoom level
+  var getPointTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'smooth'
+  }
+  
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+
+  // Creates map layers based on selection in the UI
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
+    
+    // Remove all the map layers previously created by this controller
+    createdMapLayerKeys.forEach((createdMapLayerKey) => {
+      delete oldMapLayers[createdMapLayerKey]
+    })
+
+    createdMapLayerKeys.clear()
+
+    // Hold a list of layers that we want merged
+    var mergedLayerUrls = []
+
+    state.boundaries.areaLayers.forEach((layer) => { 
+
+      if (layer.type === 'wirecenter' && layer.visible) {
+        // Location type is visible
+        //var mapLayerKey = `${locationType.key}_${dataSourceId}`
+        var pointTransform = getPointTransformForLayer(+15)
+        var mapLayerKey = `${pointTransform}_${layer.type}_${layer.layerId}`
+        
+        var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
+        url = url.replace('${layerId}', layer.layerId)
+
+        if (pointTransform === 'smooth') {
+          // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+          mergedLayerUrls.push(url)
+        } else {
+          // We want to create an individual layer
+          oldMapLayers[mapLayerKey] = {
+            dataUrls: [url],
+            renderMode: 'PRIMITIVE_FEATURES',
+            selectable: true
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+
+        if (mergedLayerUrls.length > 0) {
+          // We have some business layers that need to be merged into one
+          // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
+          oldMapLayers[mapLayerKey] = {
+            dataUrls: mergedLayerUrls,
+            renderMode: 'HEATMAP',
+            aggregateMode: 'FLATTEN'
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+      }
+      
+    })
+
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldMapLayers)
+  }
+
+  // When the map zoom changes, map layers can change
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
+    
   var countySubdivisionsLayer
   var censusBlocksLayer
   var cmaBoundariesLayer
@@ -172,7 +244,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     var layer = new MapLayer({
       name: serviceLayer.description,
       type: serviceLayer.name,
-      api_endpoint: `/service_areas/${serviceLayer.name}`,
+      api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
       highlighteable: true,
       style_options: {
         normal: {
@@ -539,6 +611,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.toggleVisibility = (layer) => {
     layer.visible = layer.visible_check;
 
+    //Update the service_area layer using new tiles API
+    updateMapLayers()
     layer.configureVisibility()
     regions.setSearchOption(layer.type, layer.visible)
   }
