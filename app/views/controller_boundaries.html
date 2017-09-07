@@ -25,6 +25,27 @@
         </label>
       </div>
     </div>
+    <div ng-repeat="layer in state.boundaries.tileLayers">
+      <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
+        <div class="pull-right">
+          <input type="checkbox" class="checkboxfill"
+            ng-model="layer.visible_check"
+            name="ctype-name"
+            ng-change="tilesToggleVisibility(layer)"
+            ng-disabled="layer.disabled"
+          >
+        </div>
+        <div class="pull-right" style="margin-right: 30px">
+          <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
+          <!--
+          <a href="javascript:void(0)" class="text-success" ng-click="select_area(layer)"><span class="<%= config.ui.icons.market_profile %>"></span></a>
+          -->
+        </div>
+        <label>
+          {{layer.name}}
+        </label>
+      </div>
+    </div>
     <div ng-repeat="boundary in boundaries">
       <div class="checkbox">
         <div class="pull-right boundary-options">

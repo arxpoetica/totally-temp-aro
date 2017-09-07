@@ -171,6 +171,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Boundaries layer data - define once
   service.boundaries = {
+    tileLayers: [],
     areaLayers: []
   }
 

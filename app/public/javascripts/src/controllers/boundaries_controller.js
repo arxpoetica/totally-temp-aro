@@ -51,12 +51,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
 
-    state.boundaries.areaLayers.forEach((layer) => { 
+    state.boundaries.tileLayers.forEach((layer) => { 
 
-      if (layer.type === 'wirecenter' && layer.visible) {
+      if (layer.visible) {
         // Location type is visible
         //var mapLayerKey = `${locationType.key}_${dataSourceId}`
-        var pointTransform = getPointTransformForLayer(+15)
+        var pointTransform = getPointTransformForLayer(+layer.aggregateZoomThreshold)
         var mapLayerKey = `${pointTransform}_${layer.type}_${layer.layerId}`
         
         var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
@@ -240,35 +240,48 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
 
   globalServiceLayers.forEach((serviceLayer) => {
     if (!serviceLayer.show_in_boundaries) return
-    var color = serviceLayersColors.shift() || 'black'
-    var layer = new MapLayer({
+    var wirecenter_layer = {
       name: serviceLayer.description,
       type: serviceLayer.name,
       api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
-      highlighteable: true,
-      style_options: {
-        normal: {
-          strokeColor: color,
-          strokeWeight: 4,
-          fillOpacity: 0
-        },
-        highlight: {
-          strokeColor: color,
-          strokeWeight: 6,
-          fillOpacity: 0.1
-        }
-      },
-      reload: 'always',
-      threshold: 0,
-      minZoom: 6,
-      hoverField: 'name',
-      visibilityThreshold : 1,
-      isBoundaryLayer : true
-    })
-    layer.layerId = serviceLayer.id // Hack to get the id for now
-    if (serviceLayer.show_in_boundaries) state.boundaries.areaLayers.push(layer)
-    map_layers.addFeatureLayer(layer);
+      layerId: serviceLayer.id,
+      aggregateZoomThreshold: 15
+    }
+  
+    state.boundaries.tileLayers.push(wirecenter_layer)
   })
+
+  // globalServiceLayers.forEach((serviceLayer) => {
+  //   if (!serviceLayer.show_in_boundaries) return
+  //   var color = serviceLayersColors.shift() || 'black'
+  //   var layer = new MapLayer({
+  //     name: serviceLayer.description,
+  //     type: serviceLayer.name,
+  //     api_endpoint: `/service_areas/${serviceLayer.name}`,
+  //     highlighteable: true,
+  //     style_options: {
+  //       normal: {
+  //         strokeColor: color,
+  //         strokeWeight: 4,
+  //         fillOpacity: 0
+  //       },
+  //       highlight: {
+  //         strokeColor: color,
+  //         strokeWeight: 6,
+  //         fillOpacity: 0.1
+  //       }
+  //     },
+  //     reload: 'always',
+  //     threshold: 0,
+  //     minZoom: 6,
+  //     hoverField: 'name',
+  //     visibilityThreshold : 1,
+  //     isBoundaryLayer : true
+  //   })
+  //   layer.layerId = serviceLayer.id // Hack to get the id for now
+  //   if (serviceLayer.show_in_boundaries) state.boundaries.areaLayers.push(layer)
+  //   map_layers.addFeatureLayer(layer);
+  // })
 
   state.boundaries.areaLayers.push(userDefinedLayer)
 
@@ -611,10 +624,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   $scope.toggleVisibility = (layer) => {
     layer.visible = layer.visible_check;
 
-    //Update the service_area layer using new tiles API
-    updateMapLayers()
     layer.configureVisibility()
     regions.setSearchOption(layer.type, layer.visible)
+  }
+
+  $scope.tilesToggleVisibility = (layer) => {
+    layer.visible = layer.visible_check;
+    updateMapLayers()
   }
 
   $scope.createUserDefinedBoundary = () => {
