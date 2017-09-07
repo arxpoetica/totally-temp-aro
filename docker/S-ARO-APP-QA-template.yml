@@ -345,7 +345,7 @@ Resources:
           "Resource": [ "*" ]
         } ]
       }
-      
+
   StackEcrAccessPolicy:
     Type: "AWS::IAM::Policy"
     Properties:
@@ -430,8 +430,8 @@ Resources:
       InstallUpdatesOnBoot: true
       CustomRecipes:
         Setup:
+          - "aro_ops_app::install"
           - "aro_ops::cwlogs"
-          - "aro_ops::install"
         Deploy:
           - "aro_ops_app::compose"
       VolumeConfigurations:
