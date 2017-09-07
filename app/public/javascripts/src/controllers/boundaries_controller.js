@@ -251,38 +251,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     state.boundaries.tileLayers.push(wirecenter_layer)
   })
 
-  // globalServiceLayers.forEach((serviceLayer) => {
-  //   if (!serviceLayer.show_in_boundaries) return
-  //   var color = serviceLayersColors.shift() || 'black'
-  //   var layer = new MapLayer({
-  //     name: serviceLayer.description,
-  //     type: serviceLayer.name,
-  //     api_endpoint: `/service_areas/${serviceLayer.name}`,
-  //     highlighteable: true,
-  //     style_options: {
-  //       normal: {
-  //         strokeColor: color,
-  //         strokeWeight: 4,
-  //         fillOpacity: 0
-  //       },
-  //       highlight: {
-  //         strokeColor: color,
-  //         strokeWeight: 6,
-  //         fillOpacity: 0.1
-  //       }
-  //     },
-  //     reload: 'always',
-  //     threshold: 0,
-  //     minZoom: 6,
-  //     hoverField: 'name',
-  //     visibilityThreshold : 1,
-  //     isBoundaryLayer : true
-  //   })
-  //   layer.layerId = serviceLayer.id // Hack to get the id for now
-  //   if (serviceLayer.show_in_boundaries) state.boundaries.areaLayers.push(layer)
-  //   map_layers.addFeatureLayer(layer);
-  // })
-
   state.boundaries.areaLayers.push(userDefinedLayer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({
