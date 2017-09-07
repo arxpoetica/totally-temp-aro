@@ -47,7 +47,7 @@ Parameters:
     Default: "aro-qa-2016"
   SslCertificateArn:
     Type: String
-    Default: "arn:aws:acm:us-east-1:976168524097:certificate/ef51a231-d186-4ab2-9c13-94934d3bfdcd"
+    Default: "arn:aws:acm:us-east-1:976168524097:certificate/b7189445-e5c4-4d94-b875-376b39d063e1"
   ConfigRepoBranch:
     Type: String
     Default: "v1.3"
