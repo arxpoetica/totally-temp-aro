@@ -143,16 +143,13 @@ def provision_aro_stack(opsworks_stack_id=None,
                         dbhost='',
                         dbpass='',
                         dbdatabase='',
-                        docker_pass='',
                         environment_vars=[],
                         start_stack=False,
                         initialize_database=False,
                         opsworks_client=None,
                         logs_client=None,
                         iam_client=None,
-                        instance_type='',
-                        app_initial_email='',
-                        app_initial_password=''):
+                        instance_type=''):
     """Provision a newly created OpsWorks stack by hooking up the app and RDS"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region_name='us-east-1')
     logs_client = logs_client or boto3.client('logs', region_name='us-east-1')
@@ -184,8 +181,7 @@ def provision_aro_stack(opsworks_stack_id=None,
         # DataSources=data_sources,
         Type='other',
         EnableSsl=False,
-        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
-                      { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
+        Environment=[ { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
                       { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
                       { 'Key': 'PGDATABASE', 'Value': str(dbdatabase), 'Secure': False},
                       { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
@@ -276,7 +272,6 @@ def provision_aro_stack(opsworks_stack_id=None,
 
 
 def deploy_aro_stack(opsworks_stack_id=None,
-                     docker_pass='',
                      environment_vars=[],
                      opsworks_client=None,
                      dbpass='',
@@ -290,9 +285,8 @@ def deploy_aro_stack(opsworks_stack_id=None,
     app_id = apps_response['Apps'][0]['AppId']
     update_response = opsworks_client.update_app(
         AppId=app_id,
-        # Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True } ] + environment_vars
-        Environment=[ { 'Key': 'registry_password', 'Value': docker_pass, 'Secure': True },
-                      { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
+        
+        Environment=[ { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
                       { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
                       { 'Key': 'PGDATABASE', 'Value': str(dbdatabase), 'Secure': False},
                       { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars

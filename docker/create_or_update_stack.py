@@ -67,7 +67,7 @@ aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
 ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
 
-etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
+etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') or 'latest'
 
 session = Session(region_name='us-east-1')
 
@@ -81,7 +81,7 @@ elif environment == 'STAGING':
 else:
     host_name = branch_name + '.aro.qa.app.altvil.com'
 app_base_url = 'https://' + host_name
-aro_service_url = os.environ.get('ARO_SERVICE_URL') or 'http://service.' + host_name 
+aro_service_url = 'os.environ.get('ARO_SERVICE_URL')' else 'http://service.master.aro.qa.app.altvil.com'
 db_host = os.environ.get('ARO_DB_HOST')
 
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
@@ -152,7 +152,6 @@ def provision_stack(cloudformation_stack):
     stack.provision_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         opsworks_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'Layer'),
-        # internal_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ExtraInternalLayer'),
         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
         environment=environment,
         name='ARO-' + SERVICE_TAG,
@@ -162,16 +161,13 @@ def provision_stack(cloudformation_stack):
         dbhost=db_host,
         dbuser=db_user,
         dbdatabase=db_database,
-        docker_pass=docker_pass,
         environment_vars=_set_environment(),
         start_stack=True,
-        initialize_database = True if environment == 'qa' else False,
+        initialize_database = False,
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='t2.large',
-        app_initial_email=app_default_admin_email,
-        app_initial_password=app_default_admin_password
+        instance_type='t2.medium'
     )
 
 
@@ -184,7 +180,6 @@ def update_stack(outputs):
     # deploy
     stack.deploy_aro_stack(
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
-        docker_pass=docker_pass,
         environment_vars=_set_environment(),
         opsworks_client=opsworks_client,
         dbhost=db_host,
