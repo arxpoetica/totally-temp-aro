@@ -411,7 +411,7 @@ Resources:
       CustomCookbooksSource:
         Type: "git"
         Url: "git@octocat.altvil.com:AIT/aro-opsworks"
-        Revision: "swarm"
+        Revision: !Ref ConfigRepoBranch
         SshKey: !Ref GithubSshKey
       UseOpsworksSecurityGroups: false
 
