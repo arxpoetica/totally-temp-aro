@@ -270,7 +270,8 @@
               <span ng-show="plan.ranOptimization" class="header-financials-item">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
               <span ng-hide="plan.ranOptimization" class="header-financials-item">0% IRR</span>
               |
-              <span id="shortest_path_total_cost" class="header-financials-item header-financials-capex">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
+              <span ng-show="plan.ranOptimization" id="shortest_path_total_cost" class="header-financials-item header-financials-capex">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
+              <span ng-hide="plan.ranOptimization" id="shortest_path_total_cost" class="header-financials-item header-financials-capex">0K CapEx</span>
 
             </p>
           </div>

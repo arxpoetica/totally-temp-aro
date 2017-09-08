@@ -81,7 +81,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.optimizationOptions = {
     uiAlgorithms: [],
     uiSelectedAlgorithm: null,
-    fiberNetworkConstraints: {
+    networkConstraints: {
       routingMode: 'DIRECT_ROUTING',
       cellNodeConstraints: {
         cellRadius: 300.0,
@@ -92,9 +92,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     },
     processLayers: [],
     financialConstraints: {
-      years: 10,
-      budget: 10000000,
-      preIrrThreshold: 0.1 // This will be converted to a precentage when sending to the UI
+      cashFlowStrategyType: 'EXTERNAL',
+      discountRate: 0.06,
+      years: 15
     },
     threshold: 0, // This will be converted to a precentage when sending to the UI
     customOptimization: null,
@@ -466,10 +466,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 	 method: 'GET'
 	})
 	.then((response) => {
-	  service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles = response.data
-    service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile 
-      = (service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles.length > 0)
-        ? service.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles[0]
+	  service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles = response.data
+    service.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
+      = (service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles.length > 0)
+        ? service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles[0]
         : null
 	})
 

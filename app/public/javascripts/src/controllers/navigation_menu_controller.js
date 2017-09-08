@@ -116,6 +116,10 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
       $('#serviceLayersAccordion').find('#serviceLayerall').removeClass('in');
     }
   })
+  
+  $rootScope.$on('route_planning_changed', (e, plan) => {
+    $scope.plan = plan
+  })
 
   $rootScope.$on('plan_cleared', (e, plan) => {
     // Clear the client side tile cache
