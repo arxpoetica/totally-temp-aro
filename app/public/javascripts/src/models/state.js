@@ -537,27 +537,51 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   })
 
+  service.getAddressFor = (latitude, longitude) => {
+    return new Promise((resolve, reject) => {
+      var geocoder = new google.maps.Geocoder
+      var address = ''
+      geocoder.geocode({ 'location': new google.maps.LatLng(latitude, longitude) }, function (results, status) {
+        if (status === 'OK') {
+          if (results[1]) {
+            address = results[0].formatted_address
+          } else {
+            console.warn(`No address results for coordinates ${latitude}, ${longitude}`)
+          }
+        } else {
+          console.warn(`Unable to get address for coordinates ${latitude}, ${longitude}`)
+        }
+        resolve(address)  // Always resolve, even if reverse geocoding failed
+      })
+    })
+  }
+
   service.createEphemeralPlan = () => {
+    // Use reverse geocoding to get the address at the current center of the map
     var planOptions = {
       projectId: globalUser.projectId, // Ugh. Depending on global variable "globalUser"
-      areaName: 'Seattle, WA',
+      areaName: '',
       latitude: service.defaultPlanCoordinates.latitude,
       longitude: service.defaultPlanCoordinates.longitude,
       zoomIndex: service.defaultPlanCoordinates.zoom,
       ephemeral: true
     }
-    var apiEndpoint = `/service/v1/plan?user_id=${globalUser.id}` // Ugh. Depending on global variable "globalUser"
-    $http.post(apiEndpoint, planOptions)
-      .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          service.plan.next(result.data)
-          initializeState()
-          service.reloadSelectedLocations()
-        } else {
-          console.log(result)
-        }
+    service.getAddressFor(planOptions.latitude, planOptions.longitude)
+      .then((address) => {
+        planOptions.areaName = address
+        var apiEndpoint = `/service/v1/plan?user_id=${globalUser.id}` // Ugh. Depending on global variable "globalUser"
+        $http.post(apiEndpoint, planOptions)
+          .then((result) => {
+            if (result.status >= 200 && result.status <= 299) {
+              service.plan.next(result.data)
+              initializeState()
+              service.reloadSelectedLocations()
+            } else {
+              console.error(result)
+            }
+          })
+          .catch((err) => console.error(err))
       })
-      .catch((err) => console.log(err))
   }
   service.createEphemeralPlan() // Will be called once when the page loads, since state.js is a service
 
@@ -565,15 +589,21 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
     newPlan.name = planName
     newPlan.ephemeral = false
-    $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
-      .then((result) => {
-        if (result.status >= 200 && result.status < 299) {
-          // Plan has been saved in the DB. Reload it
-          service.loadPlan(result.data.id)
-        } else {
-          console.error('Unable to make plan permanent')
-          console.error(result)
-        }
+    newPlan.latitude = service.defaultPlanCoordinates.latitude
+    newPlan.longitude = service.defaultPlanCoordinates.longitude
+    service.getAddressFor(newPlan.latitude, newPlan.longitude)
+      .then((address) => {
+        newPlan.areaName = address
+        $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
+          .then((result) => {
+            if (result.status >= 200 && result.status < 299) {
+              // Plan has been saved in the DB. Reload it
+              service.loadPlan(result.data.id)
+            } else {
+              console.error('Unable to make plan permanent')
+              console.error(result)
+            }
+          })
       })
   }
 
