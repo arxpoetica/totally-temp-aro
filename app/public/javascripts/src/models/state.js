@@ -538,7 +538,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   })
 
   service.createEphemeralPlan = () => {
-
     var planOptions = {
       projectId: globalUser.projectId, // Ugh. Depending on global variable "globalUser"
       areaName: 'Seattle, WA',
@@ -559,21 +558,33 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         }
       })
       .catch((err) => console.log(err))
-
-
-    // } else {
-    //   service.plan.id = +plan.id
-    //   service.planName = plan.areaName
-    //   // Set plan center and zoom
-    //   service.planCoordinates.next({
-    //     zoom: plan.zoomIndex,
-    //     latitude: plan.latitude,
-    //     longitude: plan.longitude
-    //   })
-    // }
-    // service.reloadSelectedLocations()
   }
   service.createEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+
+  service.makeCurrentPlanNonEphemeral = (planName) => {
+    var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+    newPlan.name = planName
+    newPlan.ephemeral = false
+    $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
+      .then((result) => {
+        if (result.status >= 200 && result.status < 299) {
+          // Plan has been saved in the DB. Reload it
+          service.loadPlan(result.data.id)
+        } else {
+          console.error('Unable to make plan permanent')
+          console.error(result)
+        }
+      })
+  }
+
+  service.loadPlan = (planId) => {
+    $http.get(`/service/v1/plan/${planId}?user_id=${globalUser.id}`)
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          service.plan.next(result.data)
+        }
+      })
+  }
 
   service.isDataSourceSelected = function (ds) {
     var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');

@@ -17,6 +17,22 @@ class ToolBarController {
   createEphemeralPlan() {
     this.state.createEphemeralPlan()
   }
+
+  saveEphemeralPlanAs() {
+    swal({
+      title: 'Plan name required',
+      text: 'Enter a name for saving the plan',
+      type: 'input',
+      showCancelButton: true,
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Create Plan'
+    },
+    (planName) => {
+      if (planName) {
+        this.state.makeCurrentPlanNonEphemeral(planName)
+      }
+    })
+  }
 }
 
 ToolBarController.$inject = ['$scope','state']
@@ -88,7 +104,7 @@ app.component('toolBar', {
       </div>
       <div class="btn-group">
         <button class="btn btn-default"><i class="fa fa-2x fa-file" ng-click="$ctrl.createEphemeralPlan()"></i></button>
-        <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o"></i></button>
+        <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o" ng-click="$ctrl.saveEphemeralPlanAs()"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-folder-open"></i></button>
       </div>
       <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
