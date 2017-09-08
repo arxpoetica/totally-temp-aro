@@ -135,7 +135,9 @@ app.component('analysisMode', {
         <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
       </div>
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.OUTPUT }">
-        content content content content content content content content content content content content content content content content content content
+        <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+          <network-analysis-output></network-analysis-output>
+        </div>
       </div>
     </div>
   `,
