@@ -70,7 +70,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
           oldMapLayers[mapLayerKey] = {
             dataUrls: [url],
             renderMode: 'PRIMITIVE_FEATURES',
-            selectable: true
+            selectable: true,
+            strokeStyle: '#00ff00',
+            lineWidth: 4,
+            fillStyle: "transparent",
+            opacity: 0.7
           }
           createdMapLayerKeys.add(mapLayerKey)
         }
@@ -81,7 +85,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
           oldMapLayers[mapLayerKey] = {
             dataUrls: mergedLayerUrls,
             renderMode: 'HEATMAP',
-            aggregateMode: 'FLATTEN'
+            aggregateMode: 'FLATTEN',
+            strokeStyle: '#00ff00',
+            lineWidth: 4,
+            fillStyle: "transparent",
+            opacity: 0.7
           }
           createdMapLayerKeys.add(mapLayerKey)
         }

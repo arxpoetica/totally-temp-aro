@@ -425,8 +425,8 @@ class MapTileRenderer {
     var drawingStyles = {
       strokeStyle: mapLayer.strokeStyle,
       fillStyle: mapLayer.fillStyle,
-      lineWidth: 1,
-      opacity: 0.7
+      lineWidth: mapLayer.lineWidth || 1,
+      opacity: mapLayer.opacity || 0.7
     }
 
     // We have to calculate the fill and stroke styles based on the computed aggregate values of the feature
