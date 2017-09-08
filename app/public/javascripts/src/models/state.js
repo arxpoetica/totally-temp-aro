@@ -521,6 +521,21 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
     longitude: -122.3321    // Seattle, WA by default. For no particular reason.
   }
+  $document.ready(() => {
+    // We should have a map object at this point. Unfortunately, this is hardcoded for now.
+    if (map) {
+      map.addListener('center_changed', () => {
+        var center = map.getCenter()
+        service.defaultPlanCoordinates.latitude = center.lat()
+        service.defaultPlanCoordinates.longitude = center.lng()
+      })
+      map.addListener('zoom_changed', () => {
+        service.defaultPlanCoordinates.zoom = map.getZoom()
+      })
+    } else {
+      console.warn('Map object not found. Plan coordinates and zoom will not be updated when the user pans or zooms the map')
+    }
+  })
 
   service.createEphemeralPlan = () => {
 
