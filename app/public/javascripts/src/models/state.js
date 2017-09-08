@@ -519,7 +519,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.defaultPlanCoordinates = {
     zoom: 14,
     latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
-    longitude: -123.3321    // Seattle, WA by default. For no particular reason.
+    longitude: -122.3321    // Seattle, WA by default. For no particular reason.
   }
 
   service.createEphemeralPlan = () => {

@@ -13,6 +13,10 @@ class ToolBarController {
   setSelectionMode(selectionMode) {
     this.state.activeSelectionMode.next(selectionMode)
   }
+
+  createEphemeralPlan() {
+    this.state.createEphemeralPlan()
+  }
 }
 
 ToolBarController.$inject = ['$scope','state']
@@ -83,7 +87,7 @@ app.component('toolBar', {
         <button class="btn btn-default"><i class="fa fa-2x fa-th" data-ng-click="$ctrl.openGlobalSettings()"></i></button>
       </div>
       <div class="btn-group">
-        <button class="btn btn-default"><i class="fa fa-2x fa-file"></i></button>
+        <button class="btn btn-default"><i class="fa fa-2x fa-file" ng-click="$ctrl.createEphemeralPlan()"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-folder-open"></i></button>
       </div>
