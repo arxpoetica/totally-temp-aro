@@ -451,10 +451,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.activeSelectionMode.next(service.selectionModes.SINGLE_ENTITY)
 
     service.networkAnalysisTypes = [
-      { id: 'NETWORK_BUILD', label: 'Network Build' },
-      { id: 'NETWORK_ANALYSIS', label: 'Network Analysis' },
-      { id: 'Coverage_ANALYSIS', label: 'Coverage Analysis' },
-      { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis' }
+      { id: 'NETWORK_BUILD', label: 'Network Build', type: "NETWORK_PLAN" },
+      { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: "NETWORK_ANALYSIS" },
+      { id: 'Coverage_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
+      { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" }
     ]
     service.networkAnalysisType = service.networkAnalysisTypes[0]
 

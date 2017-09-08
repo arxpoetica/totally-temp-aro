@@ -32,7 +32,19 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     state.selectedExistingFibers.forEach((selectedExistingFiber) => optimizationBody.fiberSourceIds.push(selectedExistingFiber.systemId))
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
 
+    addNetworkAnalysisType(state, optimizationBody)    
+
     return optimizationBody
+  }
+
+  // Add Network Analysis types to a POST body that we will send to aro-service for performing optimization its either network plan or network analysis or coverage
+  var addNetworkAnalysisType = (state, postBody) => {
+    postBody.analysis_type = state.networkAnalysisType.type
+
+    if (postBody.analysis_type === 'NETWORK_ANALYSIS') {
+      delete postBody.fronthaulOptimization
+      delete postBody.generatedDataRequest
+    }
   }
 
   // Add location types to a POST body that we will send to aro-service for performing optimization

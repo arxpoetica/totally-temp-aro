@@ -345,7 +345,7 @@ module.exports = class Network {
 
     var req = {
       method: 'POST',
-      url: `${config.aro_service_url}/v1/optimize/masterplan`,
+      //url: `${config.aro_service_url}/v1/optimize/masterplan`,
       json: true,
       body: options
     }
@@ -357,6 +357,14 @@ module.exports = class Network {
     ])
       .then((results) => {
         options.backhaulOptimization.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
+
+        if (options.analysis_type === 'NETWORK_PLAN') {
+          req.url = `${config.aro_service_url}/v1/optimize/masterplan`
+        } else if (options.analysis_type === 'NETWORK_ANALYSIS') {
+          req.url = `${config.aro_service_url}/v1/analyze/masterplan`
+          delete options.backhaulOptimization
+        }
+
         return this._callService(req)
       })
   }
