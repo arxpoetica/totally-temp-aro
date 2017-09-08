@@ -596,7 +596,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         newPlan.areaName = address
         $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
           .then((result) => {
-            if (result.status >= 200 && result.status < 299) {
+            if (result.status >= 200 && result.status <= 299) {
               // Plan has been saved in the DB. Reload it
               service.loadPlan(result.data.id)
             } else {
@@ -604,6 +604,21 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
               console.error(result)
             }
           })
+      })
+  }
+
+  service.copyCurrentPlanTo = (planName) => {
+    var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+    newPlan.name = planName
+    newPlan.ephemeral = false
+    $http.post(`/service/v1/plan?user_id=${globalUser.id}&source_plan_id=${newPlan.id}`, newPlan)
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          service.loadPlan(result.data.id)
+        } else {
+          console.error('Unable to copy plan')
+          console.error(result)
+        }
       })
   }
 

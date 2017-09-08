@@ -18,20 +18,34 @@ class ToolBarController {
     this.state.createEphemeralPlan()
   }
 
-  saveEphemeralPlanAs() {
-    swal({
+  savePlanAs() {
+    var swalOptions = {
       title: 'Plan name required',
       text: 'Enter a name for saving the plan',
       type: 'input',
       showCancelButton: true,
       confirmButtonColor: '#DD6B55',
       confirmButtonText: 'Create Plan'
-    },
-    (planName) => {
-      if (planName) {
-        this.state.makeCurrentPlanNonEphemeral(planName)
-      }
-    })
+    }
+
+    var currentPlan = this.state.plan.getValue()
+    if (currentPlan.ephemeral) {
+      // This is an ephemeral plan
+      swal(swalOptions,
+      (planName) => {
+        if (planName) {
+          this.state.makeCurrentPlanNonEphemeral(planName)
+        }
+      })
+    } else {
+      // Copy the plan
+      swal(swalOptions,
+      (planName) => {
+        if (planName) {
+          this.state.copyCurrentPlanTo(planName)
+        }
+      })
+    }
   }
 }
 
@@ -104,7 +118,7 @@ app.component('toolBar', {
       </div>
       <div class="btn-group">
         <button class="btn btn-default"><i class="fa fa-2x fa-file" ng-click="$ctrl.createEphemeralPlan()"></i></button>
-        <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o" ng-click="$ctrl.saveEphemeralPlanAs()"></i></button>
+        <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o" ng-click="$ctrl.savePlanAs()"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-folder-open"></i></button>
       </div>
       <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
