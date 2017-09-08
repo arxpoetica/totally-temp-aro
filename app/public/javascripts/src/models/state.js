@@ -87,9 +87,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     },
     processLayers: [],
     financialConstraints: {
-      years: 10,
-      budget: 10000000,
-      preIrrThreshold: 0.1 // This will be converted to a precentage when sending to the UI
+      cashFlowStrategyType: 'EXTERNAL',
+      discountRate: 0.06,
+      years: 15
     },
     threshold: 0, // This will be converted to a precentage when sending to the UI
     customOptimization: null,

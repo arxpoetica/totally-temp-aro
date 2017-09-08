@@ -16,14 +16,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   stateSerializationHelper.getOptimizationBody = (state, optimization, regions) => {
 
     var optimizationBody = {}
-    optimizationBody.locationConstraints = {}
     optimizationBody.optimization = {}
     optimizationBody.analysis_type = 'NETWORK_PLAN'
 
-    addLocationTypesToBody(state, optimizationBody)
+    addLocationTypesToBody(state, optimization, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
-    addGlobalDataSourcesToBody(state, optimizationBody)
-    addUserUploadedDataSourcesToBody(state, optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addRegionsToBody(state, optimization, regions, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
@@ -35,9 +32,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
-  var addLocationTypesToBody = (state, postBody) => {
+  var addLocationTypesToBody = (state, optimization, postBody) => {
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
-    postBody.locationConstraints.locationTypes = _.pluck(selectedLocationTypes, 'plannerKey')
+    postBody.locationConstraints = {
+      locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
+      analysisSelectionMode: (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
+    }
   }
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
@@ -47,46 +47,17 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     // postBody.locationTypes = _.pluck(selectedConstructionSites, 'key')
   }
 
-  // Add global data sources to a POST body that we will send to aro-service for performing optimization
-  var addGlobalDataSourcesToBody = (state, postBody) => {
-    postBody.locationDataSources = postBody.locationDataSources || {}
-    if (state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)) {
-      postBody.locationDataSources.business = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
-    }
-    if (state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)) {
-      postBody.locationDataSources.household = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
-    }
-    if (state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)) {
-      postBody.locationDataSources.celltower = [OPTIMIZATION_DATA_SOURCE_GLOBAL]
-    }
-  }
-
-  // Add user uploaded data sources to a POST body that we will send to aro-service for performing optimization
-  var addUserUploadedDataSourcesToBody = (state, postBody) => {
-    postBody.locationDataSources = postBody.locationDataSources || {}
-    // Get all uploaded data sources except the global data sources
-    var uploadedDataSources = state.selectedDataSources.filter((item) => (item.libraryId != state.DS_GLOBAL_BUSINESSES)
-                                                                           && (item.libraryId != state.DS_GLOBAL_HOUSEHOLDS)
-                                                                           && (item.libraryId != state.DS_GLOBAL_CELLTOWER))
-    var uploadedDataSourceIds = _.pluck(uploadedDataSources, 'libraryId')
-
-    if (uploadedDataSourceIds.length > 0) {
-      postBody.locationDataSources.business = postBody.locationDataSources.business || [];
-      postBody.locationDataSources.business = postBody.locationDataSources.business.concat(uploadedDataSourceIds);
-
-      postBody.locationDataSources.household = postBody.locationDataSources.household || [];
-      postBody.locationDataSources.household = postBody.locationDataSources.household.concat(uploadedDataSourceIds);
-
-      postBody.locationDataSources.celltower = postBody.locationDataSources.celltower || [];
-      postBody.locationDataSources.celltower = postBody.locationDataSources.celltower.concat(uploadedDataSourceIds);
-    }
-  }
-
   // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization
   var addAlgorithmParametersToBody = (state, postBody) => {
     // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
-    postBody.optimization.algorithm = state.optimizationOptions.uiSelectedAlgorithm.algorithm
-    postBody.optimization.uiSelectedAlgorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
+    postBody.optimization = {
+      algorithmType: 'DEFAULT',
+      algorithm: state.optimizationOptions.uiSelectedAlgorithm.algorithm,
+      uiSelectedAlgorithmId: state.optimizationOptions.uiSelectedAlgorithm.id,
+      threshold: state.optimizationOptions.threshold,
+      preIrrThreshold: null,
+      budget: 'Infinity'
+    }
     if (state.optimizationOptions.uiSelectedAlgorithm.algorithm === 'TABC') {
       var generations = state.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
       postBody.customOptimization = {
@@ -96,26 +67,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
-    postBody.optimization.threshold = state.optimizationOptions.threshold
-
-    // Delete items from postBody.financialConstraints based on the type of algorithm we are using.
-    var algorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
-    if (algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR') {
-      delete postBody.financialConstraints.budget
-      delete postBody.financialConstraints.preIrrThreshold
-      delete postBody.optimization.threshold
-    } else if (algorithmId === 'COVERAGE') {
-      delete postBody.financialConstraints.budget
-      delete postBody.financialConstraints.preIrrThreshold
-    } else if (algorithmId === 'BUDGET') {
-      delete postBody.financialConstraints.preIrrThreshold
-      delete postBody.optimization.threshold
-    } else if (algorithmId === 'IRR_TARGET') {
-      delete postBody.financialConstraints.preIrrThreshold
-    } else if (algorithmId === 'IRR_THRESH') {
-      delete postBody.financialConstraints.budget
-      delete postBody.optimization.threshold
-    }
   }
 
   // Add regions to a POST body that we will send to aro-service for performing optimization
@@ -137,7 +88,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
     //postBody.processLayers = [] // Array.from(setOfProcessLayers)
     postBody.processLayers = state.optimizationOptions.processLayers
-    postBody.locationConstraints.analysisSelectionMode = (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     if (state.optimizationOptions.selectedLayer) {
       postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
     }
@@ -147,6 +97,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
+    postBody.networkConstraints.fiberRoutingMode = 'ROUTE_FROM_NODES'
 
     var fiveGEnabled = false
     state.optimizationOptions.technologies.forEach((technology) => {
@@ -158,6 +109,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       postBody.networkConstraints.cellNodeConstraints = {}
       postBody.networkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius
       postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
+      postBody.networkConstraints.cellNodeConstraints.cellGranularityRatio = 0.5
+      postBody.networkConstraints.cellNodeConstraints.minimumRayLength = 45
       var selectedTile = state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
       if (selectedTile) {
         postBody.networkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id
@@ -187,7 +140,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     var postBody = JSON.parse(json)
 
     loadLocationTypesFromBody(state, postBody)
-    loadDataSourcesFromBody(state, postBody)
     loadAlgorithmParametersFromBody(state, optimization, postBody)
     loadFiberNetworkConstraintsFromBody(state, postBody)
     loadTechnologiesFromBody(state, postBody)
@@ -230,45 +182,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     state.locationTypes.next(newLocationTypes)
   }
 
-  // Load data sources from a POST body object that is sent to the optimization engine
-  var loadDataSourcesFromBody = (state, postBody) => {
-    state.selectedDataSources = []
-    var setOfUploadedDataSources = new Set()
-    if (postBody.locationDataSources.business) {
-      postBody.locationDataSources.business.forEach((item) => setOfUploadedDataSources.add(item))
-      if (postBody.locationDataSources.business.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
-        var globalBusinessesDataSource = state.defaultDataSources.filter((item) => item.dataSourceId === state.DS_GLOBAL_BUSINESSES)[0]
-        state.selectedDataSources.push(globalBusinessesDataSource)
-      }
-    }
-    if (postBody.locationDataSources.household) {
-      postBody.locationDataSources.household.forEach((item) => setOfUploadedDataSources.add(item))
-      if (postBody.locationDataSources.household.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
-        var globalHouseholdsDataSource = state.defaultDataSources.filter((item) => item.dataSourceId === state.DS_GLOBAL_HOUSEHOLDS)[0]
-        state.selectedDataSources.push(globalHouseholdsDataSource)
-      }
-    }
-    if (postBody.locationDataSources.celltower) {
-      postBody.locationDataSources.celltower.forEach((item) => setOfUploadedDataSources.add(item))
-      if (postBody.locationDataSources.celltower.indexOf(OPTIMIZATION_DATA_SOURCE_GLOBAL) >= 0) {
-        var globalCellTowerDataSource = state.defaultDataSources.filter((item) => item.dataSourceId === state.DS_GLOBAL_CELLTOWER)[0]
-        state.selectedDataSources.push(globalCellTowerDataSource)
-      }
-    }
-
-    // At this point, the setOfUploadedDataSources will have all data sources selected. Remove the global data source from the list.
-    // Note that the "global businesses" data source has id of DS_GLOBAL_BUSINESSES but this is not the same as the global data source.
-    // This is because all "global" data sources go in as id 1 to the optimization engine.
-    setOfUploadedDataSources.delete(OPTIMIZATION_DATA_SOURCE_GLOBAL)
-    // And then add the uploaded data sources to the list
-    setOfUploadedDataSources.forEach((uploadedDataSourceId) => {
-      var uploadedDataSource = state.allDataSources.filter((item) => item.dataSourceId === uploadedDataSourceId)[0]
-      if (uploadedDataSource) {
-        state.selectedDataSources.push(uploadedDataSource)
-      }
-    })
-  }
-
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   var loadAlgorithmParametersFromBody = (state, optimization, postBody) => {
     // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
@@ -278,17 +191,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
 
-    if (postBody.financialConstraints
-        && postBody.financialConstraints.years) {
-      state.optimizationOptions.financialConstraints.years = postBody.financialConstraints.years
-    }
-    if (postBody.financialConstraints
-        && postBody.financialConstraints.budget) {
-      state.optimizationOptions.financialConstraints.budget = postBody.financialConstraints.budget
-    }
-    if (postBody.financialConstraints
-        && postBody.financialConstraints.preIrrThreshold) {
-      state.optimizationOptions.financialConstraints.preIrrThreshold = postBody.financialConstraints.preIrrThreshold
+    if (postBody.financialConstraints) {
+      state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
     if (postBody.threshold) {
       state.optimizationOptions.threshold = postBody.optimization.threshold
