@@ -202,14 +202,6 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
 
   loadBoundaries()
   $rootScope.$on('saved_user_defined_boundary', loadBoundaries)
-  
-  $scope.setSelectedBoundary = () => {
-	  var selectedProcessLayers = []
-	  if ( $scope.selectedBoundary ) {
-		  selectedProcessLayers.push($scope.selectedBoundary.id)  
-	  }
-	  state.optimizationOptions.processLayers = selectedProcessLayers
-  }
 
   function changeSelectionForFeaturesMatching(dataSources) {
     var layer = map_layers.getFeatureLayer('locations')

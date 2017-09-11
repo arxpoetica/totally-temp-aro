@@ -22,10 +22,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addLocationTypesToBody(state, optimization, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
-    addRegionsToBody(state, optimization, regions, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
-    optimizationBody.fiberSourceIds = []
-    state.selectedExistingFibers.forEach((selectedExistingFiber) => optimizationBody.fiberSourceIds.push(selectedExistingFiber.systemId))
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
 
     return optimizationBody
@@ -68,36 +65,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
   }
-
-  // Add regions to a POST body that we will send to aro-service for performing optimization
-  var addRegionsToBody = (state, optimization, regions, postBody) => {
-    var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined', 'wirecenter', 'cran', 'directional_facility']
-    var setOfProcessLayers = new Set()
-    regions.selectedRegions.map((i) => {
-      var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-      // geography information may be too large so we avoid to send it for known region types
-      if (standardTypes.indexOf(i.type) === -1) {
-        info.geog = i.geog
-      }
-      if (i.layerId) {
-        setOfProcessLayers.add(+i.layerId)
-      }
-      return info
-    })
-    // Temporarily setting postBody.processLayers to []. As of now, aro-service does not create routes when
-    // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
-    //postBody.processLayers = [] // Array.from(setOfProcessLayers)
-    postBody.processLayers = state.optimizationOptions.processLayers
-    if (state.optimizationOptions.selectedLayer) {
-      postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
-    }
-  }
   
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
-    postBody.networkConstraints.fiberRoutingMode = 'ROUTE_FROM_NODES'
 
     var fiveGEnabled = false
     state.optimizationOptions.technologies.forEach((technology) => {
@@ -143,16 +115,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadAlgorithmParametersFromBody(state, optimization, postBody)
     loadFiberNetworkConstraintsFromBody(state, postBody)
     loadTechnologiesFromBody(state, postBody)
-
-    state.loadExistingFibersList()
-      .then(() => {
-        // The state will have a list of all fiber source ids
-        state.allExistingFibers.forEach((existingFiber) => {
-          if (postBody.fiberSourceIds.indexOf(existingFiber.systemId) >= 0) {
-            state.selectedExistingFibers.push(existingFiber)
-          }
-        })
-      })
 
     // Select geographies
     regions.removeAllGeographies()

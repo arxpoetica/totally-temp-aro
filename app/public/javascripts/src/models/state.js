@@ -85,7 +85,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         selectedTile: null
       }
     },
-    processLayers: [],
     financialConstraints: {
       cashFlowStrategyType: 'EXTERNAL',
       discountRate: 0.06,
