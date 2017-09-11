@@ -32,12 +32,32 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addLocationTypesToBody = (state, optimization, postBody) => {
 
     var setOfSelectedDataSources = new Set()  // All global data sources have id "1"
+
+    var businessesSelected = false, householdsSelected = false, celltowersSelected = false
+    state.locationTypes.getValue().forEach((locationType) => {
+      if (locationType.checked && locationType.key.indexOf('business') >= 0) {
+        businessesSelected = true
+      } else if (locationType.checked && locationType.key === 'household') {
+        householdsSelected = true
+      } else if (locationType.checked && locationType.key === 'celltower') {
+        celltowersSelected = true
+      }
+    })
+
+    // All global data source ids are 1. But only add it if the correct combination is selected (for
+    // example, businesses + global business datasources = valid combination)
     state.selectedDataSources.forEach((selectedDataSource) => {
       var libraryId = selectedDataSource.libraryId
-      if (libraryId === state.DS_GLOBAL_BUSINESSES || libraryId === state.DS_GLOBAL_HOUSEHOLDS || libraryId === state.DS_GLOBAL_CELLTOWER) {
-        libraryId = 1  // All global data sources have ID 1
+      if (libraryId === state.DS_GLOBAL_BUSINESSES) {
+        libraryId = businessesSelected ? 1 : null
+      } else if (libraryId === state.DS_GLOBAL_HOUSEHOLDS) {
+        libraryId = householdsSelected ? 1 : null
+      } else if (libraryId === state.DS_GLOBAL_CELLTOWER) {
+        libraryId = celltowersSelected ? 1 : null
       }
-      setOfSelectedDataSources.add(libraryId)
+      if (libraryId) {
+        setOfSelectedDataSources.add(libraryId)
+      }
     })
     var libraryItems = []
     setOfSelectedDataSources.forEach((libraryId) => libraryItems.push({ identifier: libraryId }))
