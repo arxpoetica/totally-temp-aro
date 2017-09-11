@@ -30,6 +30,22 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
   var addLocationTypesToBody = (state, optimization, postBody) => {
+
+    var setOfSelectedDataSources = new Set()  // All global data sources have id "1"
+    state.selectedDataSources.forEach((selectedDataSource) => {
+      var libraryId = selectedDataSource.libraryId
+      if (libraryId === state.DS_GLOBAL_BUSINESSES || libraryId === state.DS_GLOBAL_HOUSEHOLDS || libraryId === state.DS_GLOBAL_CELLTOWER) {
+        libraryId = 1  // All global data sources have ID 1
+      }
+      setOfSelectedDataSources.add(libraryId)
+    })
+    var libraryItems = []
+    setOfSelectedDataSources.forEach((libraryId) => libraryItems.push({ identifier: libraryId }))
+    postBody.overridenConfiguration = [{
+      dataType: 'location',
+      libraryItems: libraryItems
+    }]
+
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),

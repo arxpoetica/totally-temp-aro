@@ -373,7 +373,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.planId = service.INVALID_PLAN_ID    // The plan ID that is currently selected
 
     // A list of location types to show in the locations layer
-    service.locationTypesV1 = []
     service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
