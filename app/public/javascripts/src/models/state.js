@@ -622,8 +622,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       })
   }
 
-  service.loadPlan = (planId) => {
-    $http.get(`/service/v1/plan/${planId}?user_id=${globalUser.id}`)
+  service.loadPlan = (plan) => {
+    $http.get(`/service/v1/plan/${plan.id}?user_id=${globalUser.id}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.plan.next(result.data)
