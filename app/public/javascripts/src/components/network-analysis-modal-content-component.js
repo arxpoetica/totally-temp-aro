@@ -1,6 +1,6 @@
 class NetworkAnalysisModalContentController {
 
-  constructor($scope,$rootScope,$document,$http, state) {
+  constructor($scope,$rootScope,$document,$http,$filter, state) {
     this.state = state
     this.$http = $http
     $scope.plan = null
@@ -75,7 +75,7 @@ class NetworkAnalysisModalContentController {
       result = result.map((row) => _.object(labels[0],row))
       
       return {
-        labels: result.map((row) => String(row.capex)),
+        labels: result.map((row) => String($filter('number')(+row.capex/1000,0)+'K')),
         datasets: [datasets].map((dataset, i) => Object.assign({
           label: dataset.name,
           data: result.map((row) => row[dataset.key])
@@ -102,7 +102,7 @@ class NetworkAnalysisModalContentController {
   }
 }
 
-NetworkAnalysisModalContentController.$inject = ['$scope', '$rootScope', '$document','$http', 'state']
+NetworkAnalysisModalContentController.$inject = ['$scope', '$rootScope', '$document','$http','$filter', 'state']
 
 app.component('networkAnalysisContent', {
   template: `

@@ -16,13 +16,10 @@ class AnalysisModeController {
 
     this.expandedAccordionIndex = this.accordions.INPUT
 
-    //listening to plan change need to change to reactivejs observer pattern 
-    $rootScope.$on('plan_selected', planChanged)
-
-    function planChanged(e, plan) {
-      $scope.plan = plan
-      if (!plan) return
-    }
+    state.plan
+      .subscribe((plan) => {
+        $scope.plan = plan
+      })
 
     this.optimizeSelectedNetworkAnalysisType = () => {
 

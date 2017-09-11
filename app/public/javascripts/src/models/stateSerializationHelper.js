@@ -48,7 +48,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
-      analysisSelectionMode: (optimization.getMode() === 'boundaries') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
+      analysisSelectionMode: (state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     }
   }
 

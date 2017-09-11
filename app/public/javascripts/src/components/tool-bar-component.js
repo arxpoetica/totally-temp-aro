@@ -124,7 +124,7 @@ app.component('toolBar', {
       <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
         <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"
                 ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.SINGLE_ENTITY)">
-          <i class="fa fa-2x fa-dot-circle-o"></i>
+          <i class="fa fa-2x fa-mouse-pointer"></i>
         </button>
         <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.POLYGON }"
                 ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.POLYGON)">

@@ -130,45 +130,45 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
       name: 'View Settings',
       short_name: 'V',
       icon: 'fa fa-eye fa-2x'
-    },
-    {
-      separator: true
-    },
-    {
-      id: tools.TOOL_IDS.AREA_NETWORK_PLANNING,
-      name: 'Area Network Planning',
-      short_name: 'A',
-      icon: 'fa fa-legal fa-2x',
-      needsPlan :true
     }
+    // {
+    //   separator: true
+    // },
+    // {
+    //   id: tools.TOOL_IDS.AREA_NETWORK_PLANNING,
+    //   name: 'Area Network Planning',
+    //   short_name: 'A',
+    //   icon: 'fa fa-legal fa-2x',
+    //   needsPlan :true
+    // }
   ]
 
-  if (!config.ui.map_tools.target_builder.disabled) {
-    tools.available_tools.push({
-      id: tools.TOOL_IDS.TARGET_BUILDER,
-      name: 'Target builder',
-      short_name: 'TB',
-      icon: 'fa fa-bullseye fa-2x',
-      needsPlan :true
-    })
-  }
+  // if (!config.ui.map_tools.target_builder.disabled) {
+  //   tools.available_tools.push({
+  //     id: tools.TOOL_IDS.TARGET_BUILDER,
+  //     name: 'Target builder',
+  //     short_name: 'TB',
+  //     icon: 'fa fa-bullseye fa-2x',
+  //     needsPlan :true
+  //   })
+  // }
 
-  tools.available_tools.push({
-    id: 'backhaul',
-    name: 'Backhaul',
-    short_name: 'BH',
-    icon: 'fa fa-undo fa-2x',
-    needsPlan :true
-  })
+  // tools.available_tools.push({
+  //   id: 'backhaul',
+  //   name: 'Backhaul',
+  //   short_name: 'BH',
+  //   icon: 'fa fa-undo fa-2x',
+  //   needsPlan :true
+  // })
 
-  var iconClass = 'fa fa-line-chart fa-2x'
-  tools.available_tools.push({
-    id: 'financial_profile',
-    name: 'Financial Profile',
-    short_name: 'F',
-    icon: iconClass,
-    needsPlan :true
-  })
+  // var iconClass = 'fa fa-line-chart fa-2x'
+  // tools.available_tools.push({
+  //   id: 'financial_profile',
+  //   name: 'Financial Profile',
+  //   short_name: 'F',
+  //   icon: iconClass,
+  //   needsPlan :true
+  // })
 
   if (config.ARO_CLIENT === 'demo') {
     var tool = tools.available_tools.find((item) => item.id === tools.TOOL_IDS.AREA_NETWORK_PLANNING)
