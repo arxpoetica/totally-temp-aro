@@ -500,5 +500,15 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return existingDataSources.indexOf(ds) != -1;
   }
 
+  service.hasLocationType = (locationKey) => {
+    var hasLocationType = false
+    service.locationTypes.getValue().forEach((locationType) => {
+      if (locationType.checked && locationType.key.indexOf(locationKey) >= 0) {
+        hasLocationType = true
+      }
+    })
+    return hasLocationType
+  }
+
   return service
 }])

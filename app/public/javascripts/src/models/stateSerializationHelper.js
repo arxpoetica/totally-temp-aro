@@ -32,17 +32,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addLocationTypesToBody = (state, optimization, postBody) => {
 
     var setOfSelectedDataSources = new Set()  // All global data sources have id "1"
-
-    var businessesSelected = false, householdsSelected = false, celltowersSelected = false
-    state.locationTypes.getValue().forEach((locationType) => {
-      if (locationType.checked && locationType.key.indexOf('business') >= 0) {
-        businessesSelected = true
-      } else if (locationType.checked && locationType.key === 'household') {
-        householdsSelected = true
-      } else if (locationType.checked && locationType.key === 'celltower') {
-        celltowersSelected = true
-      }
-    })
+    var businessesSelected = state.hasLocationType('business')  // This will cover small, medium, large
+    var householdsSelected = state.hasLocationType('household')
+    var celltowersSelected = state.hasLocationType('celltower')
 
     // All global data source ids are 1. But only add it if the correct combination is selected (for
     // example, businesses + global business datasources = valid combination)
@@ -178,6 +170,36 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
     state.locationTypes.next(newLocationTypes)
+
+    // Load the selected data sources
+    var dataSourceIdsToSelect = []
+    var businessesSelected = state.hasLocationType('business')  // This will cover small, medium, large
+    var householdsSelected = state.hasLocationType('household')
+    var celltowersSelected = state.hasLocationType('celltower')
+    if (postBody.overridenConfiguration) {
+      postBody.overridenConfiguration.forEach((overridenConfiguration) => {
+        if (overridenConfiguration.dataType === 'location') {
+          // This is a location configuration. Loop through the library ids
+          overridenConfiguration.libraryItems.forEach((libraryItem) => {
+            var dataSourceId = libraryItem.identifier
+            if (dataSourceId === 1 && businessesSelected) {
+              dataSourceIdsToSelect.push(state.DS_GLOBAL_BUSINESSES)
+            } else if (dataSourceId === 1 && householdsSelected) {
+              dataSourceIdsToSelect.push(state.DS_GLOBAL_HOUSEHOLDS)
+            } else if (dataSourceId === 1 && celltowersSelected) {
+              dataSourceIdsToSelect.push(state.DS_GLOBAL_CELLTOWER)
+            } else {
+              dataSourceIdsToSelect.push(dataSourceId)
+            }
+          })
+        }
+      })
+    }
+    // Select data source ids from the list of all data sources
+    var mapDataSourceIdToObj = {}
+    state.allDataSources.forEach((dataSource) => mapDataSourceIdToObj[dataSource.libraryId] = dataSource)
+    state.selectedDataSources = []
+    dataSourceIdsToSelect.forEach((dataSourceId) => state.selectedDataSources.push(mapDataSourceIdToObj[dataSourceId]))
   }
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
