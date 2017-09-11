@@ -26,28 +26,29 @@ class NetworkAnalysisModalContentController {
         highlightStroke: 'rgba(121,127,121,1)'
       }
     ]
-  
-    $rootScope.$on('plan_selected', planChanged)
 
-    function planChanged(e, plan) {
-      $scope.plan = plan
-      if (!plan) return
-    }
+    $scope.datasets = [
+      { key: 'irr', name: 'IRR' },
+      { key: 'npv', name: 'NPV' },
+      { key: 'coverage', name: 'Coverage' }
+    ]
+
+    $scope.selectedOption = $scope.datasets[0]
+
+    state.plan
+      .subscribe((plan) => {
+        $scope.plan = plan
+      })
 
     state.showNetworkAnalysisOutput
     .subscribe((show) => {
       if(show)
-        showCashFlowChart()
+        $scope.showCashFlowChart()
     })
 
-    function showCashFlowChart(force) {
-      var datasets = [
-        { key: 'bau', name: 'BAU' },
-        { key: 'plan', name: 'Plan' },
-        { key: 'incremental', name: 'Incremental' }
-      ]
-      request(force, 'cash_flow', {}, (cashFlow) => {
-        var data = buildChartData(cashFlow, datasets)
+    $scope.showCashFlowChart = () => {
+      request('optimization_analysis', {}, (cashFlow) => {
+        var data = buildChartData(cashFlow, $scope.selectedOption)
         var options = {
           datasetFill: false,
           bezierCurve: false,
@@ -59,17 +60,27 @@ class NetworkAnalysisModalContentController {
       })
     }
 
-    $scope.financialData = {}
-    function request (force, key, params, callback) {
+    function request (key, params, callback) {
       if (!$scope.plan) return
-      if (force) delete $scope.financialData[key]
-      else if ($scope.financialData[key]) return $scope.financialData[key]
       var plan_id = $scope.plan.id
-      $http({ url: `/financial_profile/${plan_id}/${key}`, params: params })
+      //plan_id = 23
+      $http({ url: `/reports/network_analysis/${plan_id}/${key}`, params: params })
         .then((response) => {
-          $scope.financialData[key] = response.data
           callback(response.data)
         })
+    }
+    
+    function buildChartData (result, datasets) {
+      var labels = result.splice(0, 1)
+      result = result.map((row) => _.object(labels[0],row))
+      
+      return {
+        labels: result.map((row) => String(row.capex)),
+        datasets: [datasets].map((dataset, i) => Object.assign({
+          label: dataset.name,
+          data: result.map((row) => row[dataset.key])
+        }, chartStyles[i % chartStyles.length]))
+      }
     }
 
     function showChart (id, type, data, options) {
@@ -88,16 +99,6 @@ class NetworkAnalysisModalContentController {
         legend.innerHTML = charts[id].generateLegend()
       }
     }
-  
-    function buildChartData (result, datasets) {
-      return {
-        labels: result.map((row) => String(row.year)),
-        datasets: datasets.map((dataset, i) => Object.assign({
-          label: dataset.name,
-          data: result.map((row) => row[dataset.key])
-        }, chartStyles[i % chartStyles.length]))
-      }
-    }
   }
 }
 
@@ -106,7 +107,7 @@ NetworkAnalysisModalContentController.$inject = ['$scope', '$rootScope', '$docum
 app.component('networkAnalysisContent', {
   template: `
     <div>
-      <ul class="nav nav-tabs" role="tablist">
+      <!-- <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active">
           <a href="#NetworkAnalysisOutput" aria-controls="home" role="tab" data-toggle="tab">Analysis</a>
         </li>
@@ -124,8 +125,17 @@ app.component('networkAnalysisContent', {
         </div>
         <div role="tabpanel" class="tab-pane" id="NetworkAnalysisOutput1" style="padding-top: 20px">
           <p class="text-center">In output1</p>
+          <canvas id="network-analysis-chart-cash-flow1" style="width:100%; height:200px"></canvas>
+          <div id="network-analysis-chart-cash-flow1-legend"></div>
         </div>
-      </div>
+      </div> -->
+      <select class="form-control" style="width: 20%;float: right"
+        ng-change="showCashFlowChart()"
+        ng-model="selectedOption"
+        ng-options="item as item.name for item in datasets">
+      </select>
+      <canvas id="network-analysis-chart-cash-flow" style="width:100%; height:200px"></canvas>
+      <div id="network-analysis-chart-cash-flow-legend"></div>
     </div>
       `,
   bindings: {},

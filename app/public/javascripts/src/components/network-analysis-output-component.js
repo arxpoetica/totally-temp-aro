@@ -5,20 +5,6 @@ class NetworkAnalysisOutputController {
     this.state = state
     this.optimization = optimization
     this.regions = regions
-
-    $rootScope.$on('plan_selected', planChanged)
-
-    function planChanged(e, plan) {
-      $scope.plan = plan
-      if (!plan) return
-    }
-
-    this.showOutput1 = () => {
-      $http.get(`/reports/network_analysis/${$scope.plan.id}/optimization_analysis`).then((response) => {
-        response
-      })   
-
-    }
     
     this.showOutput = () => {
       state.showNetworkAnalysisOutput.next(true)
