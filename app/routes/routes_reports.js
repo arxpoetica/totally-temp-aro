@@ -193,4 +193,19 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/reports/network_analysis/download/:plan_id/:name', (request, response, next) => {
+    var name = request.params.name
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'GET',
+      url: config.aro_service_url + `/v1/report-extended/${name}/${plan_id}.csv`
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        response.attachment('NetworkAnalysis.csv')
+        response.send(output)
+      })
+      .catch(next)
+  })
+
 }

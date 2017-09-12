@@ -46,6 +46,11 @@ class NetworkAnalysisModalContentController {
         $scope.showCashFlowChart()
     })
 
+    $scope.downloadChart = () => {
+      if (!$scope.plan) return
+      window.location.href = `/reports/network_analysis/download/${$scope.plan.id}/optimization_analysis`
+    }
+
     $scope.showCashFlowChart = () => {
       request('optimization_analysis', {}, (cashFlow) => {
         var data = buildChartData(cashFlow, $scope.selectedOption)
@@ -153,6 +158,9 @@ app.component('networkAnalysisContent', {
         ng-options="item as item.name for item in datasets">
       </select>
       <canvas id="network-analysis-chart-cash-flow" style="width:100%; height:200px"></canvas>
+      <button ng-click="downloadChart()" class="pull-right btn btn-default btn-sm">
+        <span style="color:#4d99e5" class="fa fa-download"></span>
+      </button>
       <div id="network-analysis-chart-cash-flow-legend"></div>
     </div>
       `,
