@@ -350,13 +350,9 @@ module.exports = class Network {
       body: options
     }
 
-    return Promise.all([
-      database.findOne('SELECT * FROM client.plan_links WHERE plan_id = $1 LIMIT 1', [plan_id]),
-      database.execute('UPDATE client.active_plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
+    return database.execute('UPDATE client.active_plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
                        [plan_id, options.locationTypes, options.algorithm])
-    ])
       .then((results) => {
-        options.backhaulOptimization.backhaulOptimizationType = results[0] ? 'LINKED_NODES' : 'UNDEFINED'
         return this._callService(req)
       })
   }

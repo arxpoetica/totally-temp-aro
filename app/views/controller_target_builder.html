@@ -5,7 +5,7 @@
       ng-model="state.optimizationOptions.uiSelectedAlgorithm"
       ng-options="item as item.label for item in state.optimizationOptions.uiAlgorithms">
     </select>
-    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
+    <!--<div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
       <br>
       <p><strong>IRR Threshold</strong></p>
       <div class="row">
@@ -31,7 +31,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
     <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
       <br>
       <p><strong>IRR Target</strong></p>
@@ -59,7 +59,7 @@
         </div>
       </div>
     </div>
-    <div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
+    <!--<div ng-show="state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
       <br>
       <p><strong>Target Capital</strong></p>
       <div class="row">
@@ -78,7 +78,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
     <br>
   <% } %>
 
@@ -150,7 +150,7 @@
      <div style="display: inline-block">
       <span>Polygon Type</span>
       <select class="form-control ng-pristine ng-valid ng-touched" 
-      		  ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
+      		  ng-model="state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
         <option value="FIXED_RADIUS">Fixed Radius</option>
         <option value="AVERAGE_RADIUS">Average Radius</option>
         <option value="RAY_TRACING">Ray Tracing</option>
@@ -160,7 +160,7 @@
        <span>
            <input
                    type="text"
-                   ng-model="state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius"
+                   ng-model="state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius"
                    placeholder="Cell Radius"
                    style="width: 85px;margin-left: 50px"
            >
@@ -187,7 +187,7 @@
   <p><strong>Network Construction</strong></p>
   <form>
 
-    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="state.optimizationOptions.fiberNetworkConstraints.routingMode" >
+    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="state.optimizationOptions.networkConstraints.routingMode" >
       <option value="DIRECT_ROUTING">Unsplit Routing</option>
       <option value="ODN_1" >Hub-Only Split</option>
       <% if (config.ARO_CLIENT === 'reliance') { %>
@@ -200,7 +200,7 @@
   </form>
     
   <% if (config.ARO_CLIENT !== 'verizon') { %>
-    <div>
+    <!--<div>
       <p><strong>Optimization Processing Layer</strong></p>
       <p>
       <form>
@@ -210,7 +210,7 @@
         </select>
       </form>  
       </p>
-    </div>
+    </div>-->
 
     <div>
     	<% if (user.rol === 'admin') { %>
