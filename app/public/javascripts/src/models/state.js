@@ -90,7 +90,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         selectedTile: null
       }
     },
-    processLayers: [],
     financialConstraints: {
       cashFlowStrategyType: 'EXTERNAL',
       discountRate: 0.06,
@@ -397,7 +396,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   var initializeState = function () {
     
     // A list of location types to show in the locations layer
-    service.locationTypesV1 = []
     service.allDataSources = service.defaultDataSources.slice()
 
     // A list of location data sources to show in the locations layer
@@ -634,6 +632,16 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.isDataSourceSelected = function (ds) {
     var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');
     return existingDataSources.indexOf(ds) != -1;
+  }
+
+  service.hasLocationType = (locationKey) => {
+    var hasLocationType = false
+    service.locationTypes.getValue().forEach((locationType) => {
+      if (locationType.checked && locationType.key.indexOf(locationKey) >= 0) {
+        hasLocationType = true
+      }
+    })
+    return hasLocationType
   }
 
   return service

@@ -22,10 +22,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addLocationTypesToBody(state, optimization, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
-    addRegionsToBody(state, optimization, regions, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
-    optimizationBody.fiberSourceIds = []
-    state.selectedExistingFibers.forEach((selectedExistingFiber) => optimizationBody.fiberSourceIds.push(selectedExistingFiber.systemId))
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
 
     addNetworkAnalysisType(state, optimizationBody)    
@@ -45,6 +42,34 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
   var addLocationTypesToBody = (state, optimization, postBody) => {
+
+    var setOfSelectedDataSources = new Set()  // All global data sources have id "1"
+    var businessesSelected = state.hasLocationType('business')  // This will cover small, medium, large
+    var householdsSelected = state.hasLocationType('household')
+    var celltowersSelected = state.hasLocationType('celltower')
+
+    // All global data source ids are 1. But only add it if the correct combination is selected (for
+    // example, businesses + global business datasources = valid combination)
+    state.selectedDataSources.forEach((selectedDataSource) => {
+      var libraryId = selectedDataSource.libraryId
+      if (libraryId === state.DS_GLOBAL_BUSINESSES) {
+        libraryId = businessesSelected ? 1 : null
+      } else if (libraryId === state.DS_GLOBAL_HOUSEHOLDS) {
+        libraryId = householdsSelected ? 1 : null
+      } else if (libraryId === state.DS_GLOBAL_CELLTOWER) {
+        libraryId = celltowersSelected ? 1 : null
+      }
+      if (libraryId) {
+        setOfSelectedDataSources.add(libraryId)
+      }
+    })
+    var libraryItems = []
+    setOfSelectedDataSources.forEach((libraryId) => libraryItems.push({ identifier: libraryId }))
+    postBody.overridenConfiguration = [{
+      dataType: 'location',
+      libraryItems: libraryItems
+    }]
+
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
@@ -80,36 +105,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
   }
-
-  // Add regions to a POST body that we will send to aro-service for performing optimization
-  var addRegionsToBody = (state, optimization, regions, postBody) => {
-    var standardTypes = ['cma_boundaries', 'census_blocks', 'county_subdivisions', 'user_defined', 'wirecenter', 'cran', 'directional_facility']
-    var setOfProcessLayers = new Set()
-    regions.selectedRegions.map((i) => {
-      var info = { name: i.name, id: i.id, type: i.type, layerId: i.layerId }
-      // geography information may be too large so we avoid to send it for known region types
-      if (standardTypes.indexOf(i.type) === -1) {
-        info.geog = i.geog
-      }
-      if (i.layerId) {
-        setOfProcessLayers.add(+i.layerId)
-      }
-      return info
-    })
-    // Temporarily setting postBody.processLayers to []. As of now, aro-service does not create routes when
-    // you send a process layer into it. Will send process layer ids after we figure out what is happening in service.
-    //postBody.processLayers = [] // Array.from(setOfProcessLayers)
-    postBody.processLayers = state.optimizationOptions.processLayers
-    if (state.optimizationOptions.selectedLayer) {
-      postBody.processLayers = [state.optimizationOptions.selectedLayer.id]
-    }
-  }
   
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
-    postBody.networkConstraints.fiberRoutingMode = 'ROUTE_FROM_NODES'
 
     var fiveGEnabled = false
     state.optimizationOptions.technologies.forEach((technology) => {
@@ -156,16 +156,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     loadFiberNetworkConstraintsFromBody(state, postBody)
     loadTechnologiesFromBody(state, postBody)
 
-    state.loadExistingFibersList()
-      .then(() => {
-        // The state will have a list of all fiber source ids
-        state.allExistingFibers.forEach((existingFiber) => {
-          if (postBody.fiberSourceIds.indexOf(existingFiber.systemId) >= 0) {
-            state.selectedExistingFibers.push(existingFiber)
-          }
-        })
-      })
-
     // Select geographies
     regions.removeAllGeographies()
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
@@ -192,6 +182,36 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     })
     state.locationTypes.next(newLocationTypes)
+
+    // Load the selected data sources
+    var dataSourceIdsToSelect = []
+    var businessesSelected = state.hasLocationType('business')  // This will cover small, medium, large
+    var householdsSelected = state.hasLocationType('household')
+    var celltowersSelected = state.hasLocationType('celltower')
+    if (postBody.overridenConfiguration) {
+      postBody.overridenConfiguration.forEach((overridenConfiguration) => {
+        if (overridenConfiguration.dataType === 'location') {
+          // This is a location configuration. Loop through the library ids
+          overridenConfiguration.libraryItems.forEach((libraryItem) => {
+            var dataSourceId = libraryItem.identifier
+            if (dataSourceId === 1 && businessesSelected) {
+              dataSourceIdsToSelect.push(state.DS_GLOBAL_BUSINESSES)
+            } else if (dataSourceId === 1 && householdsSelected) {
+              dataSourceIdsToSelect.push(state.DS_GLOBAL_HOUSEHOLDS)
+            } else if (dataSourceId === 1 && celltowersSelected) {
+              dataSourceIdsToSelect.push(state.DS_GLOBAL_CELLTOWER)
+            } else {
+              dataSourceIdsToSelect.push(dataSourceId)
+            }
+          })
+        }
+      })
+    }
+    // Select data source ids from the list of all data sources
+    var mapDataSourceIdToObj = {}
+    state.allDataSources.forEach((dataSource) => mapDataSourceIdToObj[dataSource.libraryId] = dataSource)
+    state.selectedDataSources = []
+    dataSourceIdsToSelect.forEach((dataSourceId) => state.selectedDataSources.push(mapDataSourceIdToObj[dataSourceId]))
   }
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
