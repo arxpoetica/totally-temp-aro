@@ -390,6 +390,14 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
+  service.selectedServiceAreas = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedServiceAreas = () => {
+    var plan = service.plan.getValue()
+    if (plan.id !== service.INVALID_PLAN_ID) {
+      // Need to Highlight the selected service area on map.
+    }
+  }
+
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)
 

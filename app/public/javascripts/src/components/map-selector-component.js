@@ -18,7 +18,9 @@ class MapSelectorController {
 
     // Handle selection events from state
     state.mapFeaturesSelectedEvent.subscribe((event) => {
-      if (event.locations) {
+      var plan = state.plan.getValue()
+      
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0) {
       // Get a list of ids to add and remove
       var existingIds = state.selectedLocations.getValue()
       var idsToAdd = new Set(), idsToRemove = new Set()
@@ -30,7 +32,6 @@ class MapSelectorController {
         }
       })
       // Make these changes to the database, then reload targets from the DB
-      var plan = state.plan.getValue()
       var addRemoveTargetPromises = [
         $http.post(`/network_plan/${plan.id}/addTargets`, { locationIds: Array.from(idsToAdd) }),
         $http.post(`/network_plan/${plan.id}/removeTargets`, { locationIds: Array.from(idsToRemove) })
@@ -41,6 +42,31 @@ class MapSelectorController {
           state.reloadSelectedLocations()
         })
       }
+      
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0) {
+        // Get a list of ids to add and remove
+        var existingIds = state.selectedServiceAreas.getValue()
+        var idsToAdd = new Set(), idsToRemove = new Set()
+        event.serviceAreas.forEach((serviceArea) => {
+          if (existingIds.has(+serviceArea.id)) {
+            idsToRemove.add(+serviceArea.id)
+          } else {
+            idsToAdd.add(+serviceArea.id)
+          }
+        })
+        // Make these changes to the database, then reload targets from the DB
+        var addRemoveTargetPromises = [
+          $http.post(`/service_areas/${plan.id}/addServiceAreaTargets`, { serviceAreaIds: Array.from(idsToAdd) }),
+          $http.post(`/service_areas/${plan.id}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(idsToRemove) })
+        ]
+        Promise.all(addRemoveTargetPromises)
+          .then((response) => {
+            // Reload selected locations from database
+            state.reloadSelectedServiceAreas()
+          })
+      }
+
+
     })
 
     $document.ready(() => {

@@ -9,12 +9,13 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations
+    this.selectedServiceAreas = selectedServiceAreas
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -545,6 +546,12 @@ class MapTileRenderer {
               }
         }
       })
+
+      //Need to handle the logic to load the selected Service area
+      if(feature.properties.code) {
+        selectFeature = true
+      }
+
       return selectFeature
     }
     return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
@@ -699,7 +706,9 @@ class TileComponentController {
       this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
                                                            this.tileDataService,
                                                            this.state.mapTileOptions.getValue(),
-                                                           this.state.selectedLocations.getValue()))
+                                                           this.state.selectedLocations.getValue(),
+                                                           this.state.selectedServiceAreas.getValue()
+                                                          ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
 
@@ -723,15 +732,24 @@ class TileComponentController {
         Promise.all(hitPromises)
           .then((results) => {
             var hitFeatures = []
+            var serviceAreaFeatures = []
+
             results.forEach((result) => {
-              hitFeatures = hitFeatures.concat(result)
+              if(result.length > 0 && result[0].location_id) {
+                hitFeatures = hitFeatures.concat(result)
+              } else if (result.length > 0 && result[0].code) {
+                serviceAreaFeatures = serviceAreaFeatures.concat(result)
+              }
             })
+
             if (hitFeatures.length > 0) {
               state.hackRaiseEvent(hitFeatures)
-              state.mapFeaturesSelectedEvent.next({
-                locations: hitFeatures
-              })
             }
+
+            state.mapFeaturesSelectedEvent.next({
+              locations: hitFeatures,
+              serviceAreas: serviceAreaFeatures
+            })
           })
       })
     })
