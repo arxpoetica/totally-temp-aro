@@ -39,7 +39,7 @@ app.component('displayModeButtons', {
                           'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
                           'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
               ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.ANALYSIS)">
-                <div class="fa fa-2x fa-wrench"
+                <div class="fa fa-2x fa-gavel fa-rotate-90"
                    data-toggle="tooltip"
                    data-placement="bottom"
                    title="Analysis Mode"></div>

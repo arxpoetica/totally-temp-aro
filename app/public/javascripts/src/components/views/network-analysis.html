@@ -30,7 +30,7 @@
       <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
         <td class="indent-1">Polygon Type</td>
         <td> 
-          <select class="form-control" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
+          <select class="form-control" ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
             <option value="FIXED_RADIUS">Fixed Radius</option>
             <option value="AVERAGE_RADIUS">Average Radius</option>
             <option value="RAY_TRACING">Ray Tracing</option>
@@ -42,7 +42,7 @@
         <td> 
           <div class="input-group input-group">
             <input type="text" class="form-control text-right" placeholder="Cell Radius"
-              ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius">
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
             <div class="input-group-addon">m</div>
           </div>
         </td>
@@ -51,16 +51,16 @@
         <td class="indent-1">Tile System</td>
         <td> 
           <select class="form-control ng-pristine ng-valid ng-touched"
-            ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile"
+            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile"
             ng-change="changeTileSelected(tileselected)"
-            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles">
+            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles">
           </select>
         </td>
       </tr>
       <tr>
         <td>Network Construction</td>
         <td> 
-          <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.routingMode" >
+          <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode" >
             <option value="DIRECT_ROUTING">Unsplit Routing</option>
             <option value="ODN_1" >Hub-Only Split</option>
             <% if (config.ARO_CLIENT === 'reliance') { %>

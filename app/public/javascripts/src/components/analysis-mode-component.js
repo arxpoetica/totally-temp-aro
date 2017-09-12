@@ -55,6 +55,11 @@ class AnalysisModeController {
       }
     }
 
+    this.validateRunButton = () => {
+      // yet to check weather serviceArea/locations are selected or not once service area selection is done
+      return state.selectedLocations.getValue().size > 0 ? true : false
+    }
+
   }
 
   expandAccordion(expandedAccordionIndex) {
@@ -112,7 +117,12 @@ app.component('analysisMode', {
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>
         </div>
-        <button class="btn btn-default btn-block" ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
+        <!-- <button ng-class="{ 'btn btn-default btn-block': true, 'btn-primary': $ctrl.state.selectedLocations.getValue().size > 0 }"
+        ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()"> -->
+        <button ng-class="{ 'btn btn-default btn-block': true, 
+          'disabled': !$ctrl.validateRunButton(),
+          'btn-primary active': $ctrl.validateRunButton() }"
+          ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
           <i class="fa fa-bolt"></i> Run
         </button>
         <hr></hr>

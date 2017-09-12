@@ -128,7 +128,7 @@ app.component('toolBar', {
         </button>
         <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.POLYGON }"
                 ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.POLYGON)">
-          <i class="fa fa-2x fa-building-o"></i>
+          <i class="fa fa-2x fa-bookmark-o fa-rotate-180"></i>
         </button>
       </div>
     </div>
