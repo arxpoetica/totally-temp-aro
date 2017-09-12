@@ -37,6 +37,12 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
+  // Sets the selected service area ids
+  setselectedServiceAreas(selectedServiceAreas) {
+    this.selectedServiceAreas = selectedServiceAreas
+    this.tileDataService.markHtmlCacheDirty()
+  }
+  
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
@@ -399,6 +405,14 @@ class MapTileRenderer {
 
     // Get the drawing styles for rendering the polygon
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
+
+    //Highlight the selected SA
+    if(this.selectedServiceAreas.has(feature.properties.id)) {
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
+      drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
+    }
+
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
 
@@ -642,6 +656,14 @@ class TileComponentController {
         }
       })
 
+    // If selected service_area ids change, set that in the tile data service
+    state.selectedServiceAreas
+    .subscribe((selectedServiceAreas) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
+      }
+    })
+    
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
     this.DELTA = Object.freeze({

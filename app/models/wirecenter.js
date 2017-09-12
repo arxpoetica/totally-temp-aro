@@ -66,4 +66,16 @@ module.exports = class Wirecenter {
     return database.query(sql, [plan_id])
   }
 
+  /*
+   * Returns a list of SA IDs that are selected for this plan and the given viewport
+   */
+  static selectedServiceAreaIds(planId) {
+    var sql = `
+      SELECT service_area_id
+      FROM client.selected_service_area
+      WHERE plan_id=$1
+    `
+    return database.query(sql, [planId])
+  }
+
 }

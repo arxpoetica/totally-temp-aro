@@ -51,4 +51,13 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Select all highlight service area targets from a plan
+  api.get('/service_areas/:planId/selectedServiceAreaIds', (request, response, next) => {
+    var planId = request.params.planId
+    models.Wirecenter.selectedServiceAreaIds(planId)
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
 }
