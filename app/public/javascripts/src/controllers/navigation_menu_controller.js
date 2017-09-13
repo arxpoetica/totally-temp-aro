@@ -90,7 +90,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $('#plan-saving').stop().hide()
     $('#plan-saved').stop().hide()
     $('#plan-saving-progress').hide()
-    state.loadPlan(plan)
+    state.loadPlan(plan.id)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
@@ -104,7 +104,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     state.requestMapLayerRefresh.next({})
 
     $scope.plan = plan
-    state.loadPlan(plan)
+    state.loadPlan(plan.id)
     $location.path(plan ? '/plan/' + plan.id : '/')
 
     $scope.market_profile = {}

@@ -568,20 +568,38 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .then((address) => {
         planOptions.areaName = address
         var apiEndpoint = `/service/v1/plan?user_id=${globalUser.id}` // Ugh. Depending on global variable "globalUser"
-        $http.post(apiEndpoint, planOptions)
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              service.plan.next(result.data)
-              initializeState()
-              service.reloadSelectedLocations()
-            } else {
-              console.error(result)
-            }
-          })
-          .catch((err) => console.error(err))
+        return $http.post(apiEndpoint, planOptions)
+      })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          return Promise.resolve(result.data)
+        } else {
+          return Promise.reject(result)
+        }
       })
   }
-  service.createEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+
+  // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
+  service.getOrCreateEphemeralPlan = () => {
+    return $http.get(`/service/v1/plan-summary?user_id=${globalUser.id}&$filter=ephemeral eq true`)
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          if (result.data.length > 0) {
+            // We have at least one ephemeral plan. Return the first one
+            return Promise.resolve(result.data[0])
+          } else {
+            // We dont have an ephemeral plan. Create one and send it back
+            return service.createEphemeralPlan()
+          }
+        } else {
+          return Promise.reject(result)
+        }
+      })
+  }
+  service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+    .then((ephemeralPlan) => {
+      service.setPlan(ephemeralPlan)
+    })
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
@@ -592,16 +610,16 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
-        $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              // Plan has been saved in the DB. Reload it
-              service.loadPlan(result.data.id)
-            } else {
-              console.error('Unable to make plan permanent')
-              console.error(result)
-            }
-          })
+        return $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
+      })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          // Plan has been saved in the DB. Reload it
+          service.setPlan(result.data)
+        } else {
+          console.error('Unable to make plan permanent')
+          console.error(result)
+        }
       })
   }
 
@@ -620,13 +638,19 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       })
   }
 
-  service.loadPlan = (plan) => {
-    $http.get(`/service/v1/plan/${plan.id}?user_id=${globalUser.id}`)
+  service.loadPlan = (planId) => {
+    $http.get(`/service/v1/plan/${planId}?user_id=${globalUser.id}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
-          service.plan.next(result.data)
+          service.setPlan(result.data)
         }
       })
+  }
+
+  service.setPlan = (plan) => {
+    service.plan.next(plan)
+    initializeState()
+    service.reloadSelectedLocations()
   }
 
   service.isDataSourceSelected = function (ds) {

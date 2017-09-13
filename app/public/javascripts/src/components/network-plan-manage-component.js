@@ -269,12 +269,12 @@ app.directive('networkPlanManage', function () {
         var load = (callback) => {
 
           var planOptions = {
-            url: '/service/v1/plan',
+            url: '/service/v1/plan-summary',
             method: 'GET',
             params: {
-              user_id: $scope.user_id,
-              search: $scope.search_text,
-              project_id: $scope.projectId
+              user_id: $scope.user_id
+              // search: $scope.search_text
+              // project_id: $scope.projectId
             }
           }
           $http(planOptions)
@@ -326,7 +326,7 @@ app.directive('networkPlanManage', function () {
 
       $scope.selectPlan = function (plan) {
         $scope.plan = plan
-        state.loadPlan(plan)
+        state.loadPlan(plan.id)
         state.networkPlanModal.next(false)
       }
 
