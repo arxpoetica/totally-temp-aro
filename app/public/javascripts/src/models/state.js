@@ -564,7 +564,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       zoomIndex: service.defaultPlanCoordinates.zoom,
       ephemeral: true
     }
-    service.getAddressFor(planOptions.latitude, planOptions.longitude)
+    return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
         planOptions.areaName = address
         var apiEndpoint = `/service/v1/plan?user_id=${globalUser.id}` // Ugh. Depending on global variable "globalUser"
