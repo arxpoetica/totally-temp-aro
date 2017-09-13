@@ -410,7 +410,6 @@ class MapTileRenderer {
     if(this.selectedServiceAreas.has(feature.properties.id)) {
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
-      drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
 
     ctx.fillStyle = drawingStyles.fillStyle
@@ -561,9 +560,30 @@ class MapTileRenderer {
         }
       })
 
-      //Need to handle the logic to load the selected Service area
+      //Load the selected service area 
       if(feature.properties.code) {
-        selectFeature = true
+        //The below are the link for this Randolph Franklin Algorithm
+        //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
+        //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+        var vertx = [], verty = []
+        var testx = xWithinTile
+        var testy = yWithinTile
+        var i, j, nvert, inside = false;
+        
+        _.each(Object.values(feature.loadGeometry()[0]), (point) => {
+          vertx.push(point.x)
+          verty.push(point.y)
+        })
+        
+        nvert = vertx.length
+        for (i = 0, j = nvert-1; i < nvert; j = i++) {
+          if ( ((verty[i]>testy) != (verty[j]>testy)) && (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+             inside = !inside;
+        }
+
+        if(inside) {
+          selectFeature = true
+        }
       }
 
       return selectFeature

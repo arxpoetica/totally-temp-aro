@@ -77,7 +77,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             opacity: 0.7,
             highlightStyle: {
               strokeStyle: '#7c1700',
-              lineWidth: 6,
               fillStyle: '#996666'
             }
           }
@@ -98,7 +97,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             opacity: 0.7,
             highlightStyle: {
               strokeStyle: '#7c1700',
-              lineWidth: 6,
               fillStyle: '#996666'
             }
           }
