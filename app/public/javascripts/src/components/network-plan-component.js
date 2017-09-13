@@ -2,15 +2,11 @@ class NetworkPlanController {
 
   constructor($timeout, state)  {
     this.plan = null
-    this.requestNetworkPlanModal = state.networkPlanModal
     state.plan.subscribe((newValue) => {
       this.plan = newValue
     })
   }
 
-  showNetworkPlanModal() {
-    this.requestNetworkPlanModal.next(true)
-  }
 }
 
 NetworkPlanController.inject = ['$timeout', 'state']
@@ -40,7 +36,7 @@ app.component('networkPlan', {
     
   </style>
 
-  <div class="network-plan" ng-click="$ctrl.showNetworkPlanModal()">
+  <div class="network-plan">
     <!-- For ephemeral plans, the name has not been set by the user -->
     <div ng-if="$ctrl.plan && $ctrl.plan.ephemeral">
       <div style="font-size: 25px; line-height: 40px;">Unsaved Plan</div>

@@ -14,6 +14,10 @@ class ToolBarController {
     this.state.activeSelectionMode.next(selectionMode)
   }
 
+  showPlanModal() {
+    this.state.networkPlanModal.next(true)
+  }
+
   createEphemeralPlan() {
     this.state.createEphemeralPlan()
     .then((ephemeralPlan) => {
@@ -123,7 +127,7 @@ app.component('toolBar', {
       <div class="btn-group">
         <button class="btn btn-default"><i class="fa fa-2x fa-file" ng-click="$ctrl.createEphemeralPlan()"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o" ng-click="$ctrl.savePlanAs()"></i></button>
-        <button class="btn btn-default"><i class="fa fa-2x fa-folder-open"></i></button>
+        <button class="btn btn-default"><i class="fa fa-2x fa-folder-open" ng-click="$ctrl.showPlanModal()"></i></button>
       </div>
       <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
         <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"

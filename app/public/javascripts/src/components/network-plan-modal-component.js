@@ -1,18 +1,18 @@
 class NetworkPlanModalController {
-  constructor($scope,state) {
+  constructor($scope, state) {
     this.state = state
     this.newplan = false
 
     $scope.close = () => {
-        state.networkPlanModal.next(false)
+      state.networkPlanModal.next(false)
     }
 
     $scope.modalShown = () => {
-        state.networkPlanModal.next(true)
+      state.networkPlanModal.next(true)
     }
 
     $scope.modalHide = () => {
-        state.networkPlanModal.next(false)
+      state.networkPlanModal.next(false)
     }
 
     $scope.saveNewPlan = () => {
@@ -23,7 +23,7 @@ class NetworkPlanModalController {
   }
 }
 
-NetworkPlanModalController.$inject = ['$scope','state']
+NetworkPlanModalController.$inject = ['$scope', 'state']
 
 app.component('networkPlanModal', {
   template: `
