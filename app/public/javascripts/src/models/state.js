@@ -581,12 +581,14 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
   service.getOrCreateEphemeralPlan = () => {
-    return $http.get(`/service/v1/plan-summary?user_id=${globalUser.id}&$filter=ephemeral eq true`)
+    return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${globalUser.id}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
-          if (result.data.length > 0) {
-            // We have at least one ephemeral plan. Return the first one
-            return Promise.resolve(result.data[0])
+          // We have a valid ephemeral plan if we get back an object with *some* properties
+          var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
+          if (isValidEphemeralPlan) {
+            // We have a valid ephemeral plan. Return it.
+            return Promise.resolve(result.data)
           } else {
             // We dont have an ephemeral plan. Create one and send it back
             return service.createEphemeralPlan()
