@@ -5,79 +5,46 @@ app.directive('networkPlanManage', function () {
     replace: true,
     template: `
     <div>
-      <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active">
-        <a href="#create-new-plan" aria-controls="home" role="tab" data-toggle="tab">Create New Network Plan</a>
-        </li>
-        <li role="presentation">
-        <a href="#open-saved-plan" aria-controls="home" role="tab" data-toggle="tab">Open Saved Network Plan</a>
-        </li>
-      </ul>
-
-      <div class="tab-content" style="padding-top: 20px">
-        <div role="tabpanel" class="tab-pane active" id="create-new-plan">
-          <form action="/settings/update_settings" method="post">
-            <fieldset>
-              <div class="form-group">
-                <label class="col-sm-4 control-label">Plan Name</label>
-                <div class="col-sm-8">
-                  <input id="txtNewPlanName" type="text" class="form-control" ng-focus="clear_default_text()" ng-model="new_plan_name"><br>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="col-sm-4 control-label">Choose Starting Location</label>
-                <div class="col-sm-8">
-                  <input id="txtNewPlanStartingLocation" class="form-control select2" style="width: 100%"></input><br>
-                </div>
-              </div>
-            </fieldset>
-          </form>
+      <form>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search for Plan Names, Owners, or Geographies" ng-model="search_text" ng-change="loadPlans()">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-search"></span>
+          </span>
+          </div>
         </div>
-
-        <div role="tabpanel" class="tab-pane" id="open-saved-plan" style="padding-top: 20px">
-
-          <form>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="input-group">
-              <input type="text" class="form-control" placeholder="Search for Plan Names, Owners, or Geographies" ng-model="search_text" ng-change="loadPlans()">
-              <span class="input-group-addon">
-                <span class="glyphicon glyphicon-search"></span>
-              </span>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
-              <span class="input-group-addon">{{ config.currency_symbol }}</span>
-              <input type="text" class="form-control" placeholder="Minimum cost" ng-model="minimumCost" ng-change="loadPlans()">
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="input-group">
-              <span class="input-group-addon">{{ config.currency_symbol }}</span>
-              <input type="text" class="form-control" placeholder="Maximum cost" ng-model="maximumCost" ng-change="loadPlans()">
-              </div>
-            </div>
+        <div class="col-md-3">
+          <div class="input-group">
+          <span class="input-group-addon">{{ config.currency_symbol }}</span>
+          <input type="text" class="form-control" placeholder="Minimum cost" ng-model="minimumCost" ng-change="loadPlans()">
           </div>
-
-          <div ng-if="user.rol == admin" class="row">
-            <div class="col-md-12">
-            <div class="checkbox">
-              <input type="checkbox" style="left: 10px; margin-top: 1px;" class="checkboxfill"
-                  ng-model="allPlans"
-                  name="ctype-name"
-                  ng-change="$scope.loadPlans()"
-              >
-              <span style="padding-left: 13px">Show plans of all users</span>
-            </div>
-            </div>
+        </div>
+        <div class="col-md-3">
+          <div class="input-group">
+          <span class="input-group-addon">{{ config.currency_symbol }}</span>
+          <input type="text" class="form-control" placeholder="Maximum cost" ng-model="maximumCost" ng-change="loadPlans()">
           </div>
-          <hr>          
-        </form>
+        </div>
+      </div>
 
-        <p ng-show="plans.length < 1" class="text-center">
-          No plans found
-        </p>
+      <div ng-if="user.rol == admin" class="row">
+        <div class="col-md-12">
+        <div class="checkbox">
+          <input type="checkbox" style="left: 10px; margin-top: 1px;" class="checkboxfill"
+              ng-model="allPlans"
+              name="ctype-name"
+              ng-change="$scope.loadPlans()"
+          >
+          <span style="padding-left: 13px">Show plans of all users</span>
+        </div>
+        <hr>
+      </form>
+
+      <p ng-show="plans.length < 1" class="text-center">
+        No plans found
+      </p>
         <div ng-show="plans.length > 0">
           <div class="table-responsive">
           <table id="tblSelectPlans" class="table table-striped">
@@ -161,8 +128,6 @@ app.directive('networkPlanManage', function () {
                 </li>
             </ul>
           </nav>
-        </div>
-        
         </div>
       </div>
     </div>
