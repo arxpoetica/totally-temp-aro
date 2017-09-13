@@ -74,7 +74,7 @@ app.component('analysisMode', {
   template: `
     <style>
       .analysis-mode-container {
-        position: absolute; /* This will require the parent to have position: relative or absolute */
+        position: relative; /* This will require the parent to have position: relative or absolute */
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -111,14 +111,7 @@ app.component('analysisMode', {
     </style>
     <div class="analysis-mode-container">
       <div class="analysis-type">
-        <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
-        <select class="form-control"
-          ng-model="$ctrl.state.networkAnalysisType"
-          ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
-        </select>
-        </div>
-        <!-- <button ng-class="{ 'btn btn-default btn-block': true, 'btn-primary': $ctrl.state.selectedLocations.getValue().size > 0 }"
-        ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()"> -->
+        <h4 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
         <button ng-class="{ 'btn btn-default btn-block': true, 
           'disabled': !$ctrl.validateRunButton(),
           'btn-primary active': $ctrl.validateRunButton() }"
@@ -131,6 +124,12 @@ app.component('analysisMode', {
         <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
       </div>
       <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
+        <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
+          <select class="form-control"
+            ng-model="$ctrl.state.networkAnalysisType"
+            ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
+          </select>
+        </div>
         <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
           <network-build></network-build>
         </div>

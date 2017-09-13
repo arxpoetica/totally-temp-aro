@@ -10,15 +10,6 @@
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
     <tbody>
       <tr>
-        <td>Geography Type</td>
-        <td>
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
-          </select>
-        </td>
-      </tr>
-      <tr>
         <td>Endpoint Technology</td>
         <td>
           <select class="form-control"
@@ -85,16 +76,18 @@
           </div>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
-        <td>Selected Geographies</td>
-        <td> 
+      <tr>
+        <td>
+          <select class="form-control"
+            ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer"
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
+          </select>
+        </td>
+        <td ng-if="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'"> 
           <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
           <show-targets targets="$ctrl.regions.selectedRegions"></show-targets>
         </td>
-      </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
-        <td>Selected Locations</td>
-        <td>
+        <td ng-if="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
           <show-targets targets="$ctrl.targets"></show-targets>
         </td>
