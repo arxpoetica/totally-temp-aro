@@ -92,8 +92,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       algorithm: state.optimizationOptions.uiSelectedAlgorithm.algorithm,
       uiSelectedAlgorithmId: state.optimizationOptions.uiSelectedAlgorithm.id,
       threshold: state.optimizationOptions.threshold,
-      preIrrThreshold: null,
-      budget: 'Infinity'
+      preIrrThreshold: state.optimizationOptions.preIrrThreshold,
+      budget: state.optimizationOptions.budget
     }
     if (state.optimizationOptions.uiSelectedAlgorithm.algorithm === 'TABC') {
       var generations = state.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
@@ -101,6 +101,25 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         name: 'TABC',
         map: { generations: generations.join(',') }
       }
+    }
+
+    // Delete items from postBody.optimization based on the type of algorithm we are using.
+    var algorithmId = state.optimizationOptions.uiSelectedAlgorithm.id
+    if (algorithmId === 'UNCONSTRAINED' || algorithmId === 'MAX_IRR') {
+      delete postBody.optimization.budget
+      delete postBody.optimization.preIrrThreshold
+      delete postBody.optimization.threshold
+    } else if (algorithmId === 'COVERAGE') {
+      delete postBody.optimization.budget
+      delete postBody.optimization.preIrrThreshold
+    } else if (algorithmId === 'BUDGET') {
+      delete postBody.optimization.preIrrThreshold
+      delete postBody.optimization.threshold
+    } else if (algorithmId === 'IRR_TARGET') {
+      delete postBody.optimization.preIrrThreshold
+    } else if (algorithmId === 'IRR_THRESH') {
+      delete postBody.optimization.budget
+      delete postBody.optimization.threshold
     }
 
     postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
@@ -227,7 +246,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
     if (postBody.threshold) {
-      state.optimizationOptions.threshold = postBody.optimization.threshold
+      state.optimizationOptions.threshold = +postBody.optimization.threshold
+    }
+    if (postBody.preIrrThreshold) {
+      state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
+    }
+    if (postBody.budget) {
+      state.optimizationOptions.budget = +postBody.optimization.budget
     }
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')

@@ -96,6 +96,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       years: 15
     },
     threshold: 0, // This will be converted to a precentage when sending to the UI
+    preIrrThreshold: 1.0,
+    budget: 100000000,
     customOptimization: null,
     routeGenerationOptions: [
       { id: 'T', value: 'A Route', checked: false },
