@@ -1,11 +1,12 @@
 class AnalysisModeController {
 
-  constructor($scope,$http,state,optimization,regions) {
+  constructor($scope,$rootScope,state,optimization) {
     this.state = state
     this.optimization = optimization
     this.canceler = null
-    this.selectedRegions = []
-    this.plan = null
+    this.$scope = $scope
+
+    $scope.plan = null
 
     this.accordions = Object.freeze({
       INPUT: 0,
@@ -37,54 +38,18 @@ class AnalysisModeController {
         })
     }
 
-    this.optimizeSelectedNetworkAnalysisType = () => {
-
-      if (state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') {
-        Object.keys(regions.selectedRegions).forEach((key) => {
-          var regionObj = regions.selectedRegions[key]
-          this.selectedRegions.push({
-            id: regionObj.id,
-            name: regionObj.name,
-            type: regionObj.type,
-            layerId: regionObj.layerId
-          })
-        })
-      }
-
-      var optimizationBody = state.getOptimizationBody()
-      // Check if at least one data source is selected
-      var isAnyDataSourceSelected = state.selectedDataSources.length > 0
-      // A location is selected if the "checked" property is true
-      var isAnyLocationTypeSelected = (state.locationTypes.getValue().filter((item) => item.checked).length > 0) || (state.constructionSites.filter((item) => item.checked).length > 0)
-      var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
-      if (validSelection) {
-        this.canceler = optimization.optimize(this.plan, optimizationBody, this.selectedRegions)
-      } else {
-        swal({
-          title: 'Incomplete input',
-          text: 'Please select one or more locations and data sources before running optimization',
-          type: 'error',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Ok',
-          closeOnConfirm: true
-        })
-      }
-    }
-
     this.validateRunButton = () => {
       // yet to check weather serviceArea/locations are selected or not once service area selection is done
       return state.selectedLocations.getValue().size > 0 ? true : false
     }
-
   }
 
   expandAccordion(expandedAccordionIndex) {
     this.expandedAccordionIndex = expandedAccordionIndex
   }
-
 }
 
-AnalysisModeController.$inject = ['$scope','$http','state','optimization','regions']
+AnalysisModeController.$inject = ['$scope','$rootScope','state','optimization']
 
 app.component('analysisMode', {
   template: `
@@ -128,13 +93,7 @@ app.component('analysisMode', {
     <div class="analysis-mode-container">
       <div class="analysis-type">
         <h4 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
-        <button ng-class="{ 'btn btn-default btn-block': true, 
-          'disabled': !$ctrl.validateRunButton(),
-          'btn-primary active': $ctrl.validateRunButton() }"
-          ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
-          <i class="fa fa-bolt"></i> Run
-        </button>
-        <hr></hr>
+        <optimize-button></optimize-button>
       </div>
       <div class="accordion-title">
         <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
