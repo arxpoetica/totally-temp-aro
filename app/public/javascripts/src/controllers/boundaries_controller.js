@@ -76,8 +76,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             fillStyle: "transparent",
             opacity: 0.7,
             highlightStyle: {
-              strokeStyle: '#7c1700',
-              fillStyle: '#996666'
+              strokeStyle: '#000000',
+              fillStyle: 'green',
+              opacity: 0.3
             }
           }
           createdMapLayerKeys.add(mapLayerKey)
@@ -96,8 +97,9 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             fillStyle: "transparent",
             opacity: 0.7,
             highlightStyle: {
-              strokeStyle: '#7c1700',
-              fillStyle: '#996666'
+              strokeStyle: '#000000',
+              fillStyle: 'green',
+              opacity: 0.3
             }
           }
           createdMapLayerKeys.add(mapLayerKey)

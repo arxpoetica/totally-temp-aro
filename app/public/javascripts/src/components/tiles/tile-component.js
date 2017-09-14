@@ -410,6 +410,7 @@ class MapTileRenderer {
     if(this.selectedServiceAreas.has(feature.properties.id)) {
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
+      drawingStyles.opacity = mapLayer.highlightStyle.opacity
     }
 
     ctx.fillStyle = drawingStyles.fillStyle
@@ -530,6 +531,36 @@ class MapTileRenderer {
           if (pointInPolygon(locationCoords, polygonCoords)) {
             selectFeature = true
           }
+        } else if(feature.properties.code) {
+          //The below are the link for this Randolph Franklin Algorithm
+          //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
+          //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+          var vertx = [], verty = []
+          var testx, testy
+          var i, j, nvert, inside = false;
+          
+          _.each(Object.values(feature.loadGeometry()[0]), (point) => {
+            vertx.push(point.x)
+            verty.push(point.y)
+          })
+
+          for(var i=0; i<polygonCoords.length; i++) {
+            testx = Object.values(polygonCoords[i])[0]
+            testy = Object.values(polygonCoords[i])[1]
+
+            inside = false
+            nvert = vertx.length
+            for (i = 0, j = nvert-1; i < nvert; j = i++) {
+              if ( ((verty[i]>testy) != (verty[j]>testy)) && (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+                inside = !inside;
+            }
+  
+            if(inside) {
+              selectFeature = true
+              break
+            }
+          } 
+
         }
       })
       return selectFeature
@@ -729,14 +760,29 @@ class TileComponentController {
         Promise.all(pointInPolyPromises)
           .then((results) => {
             var selectedLocations = new Set()
+            var selectedServiceAreas = new Set()
+
             results.forEach((result) => {
-              result.forEach((locationObj) => selectedLocations.add(locationObj.location_id))
+              result.forEach((selectedObj) => {
+                if (selectedObj.location_id) {
+                  selectedLocations.add(selectedObj.location_id)
+                } else if(selectedObj.id) {
+                  selectedServiceAreas.add(selectedObj.id)
+                }
+              })
             })
+
             var selectedLocationsIds = []
+            var selectedServiceAreaIds = []
+
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+            selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+            
             state.hackRaiseEvent(selectedLocationsIds)
+
             state.mapFeaturesSelectedEvent.next({
-              locations: selectedLocationsIds
+              locations: selectedLocationsIds,
+              serviceAreas: selectedServiceAreaIds
             })
           })
 
