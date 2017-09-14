@@ -39,19 +39,21 @@ class NetworkAnalysisModalContentController {
       .subscribe((plan) => {
         $scope.plan = plan
       })
-
+    
     state.showNetworkAnalysisOutput
     .subscribe((show) => {
+      if (_.size(charts) > 0) charts['network-analysis-chart-cash-flow-panel'] && charts['network-analysis-chart-cash-flow-panel'].destroy()
       if(show)
-        $scope.showCashFlowChart()
+        this.showCashFlowChart()
     })
 
-    $scope.downloadChart = () => {
+    this.downloadChart = () => {
       if (!$scope.plan) return
       window.location.href = `/reports/network_analysis/download/${$scope.plan.id}/optimization_analysis`
     }
 
-    $scope.showCashFlowChart = () => {
+    this.showCashFlowChart = () => {
+      if (!$scope.plan) return
       request('optimization_analysis', {}, (cashFlow) => {
         var data = buildChartData(cashFlow, $scope.selectedOption)
         var categories = Object.freeze({
@@ -90,7 +92,7 @@ class NetworkAnalysisModalContentController {
           options.tooltipTemplate = function (label) { return buildLabel (label,2,yAxisCategory,false) }
           options.multiTooltipTemplate = function (label) { return buildLabel (label,2,yAxisCategory,false) }
         }
-        showChart('network-analysis-chart-cash-flow', 'Line', data, options)
+        showChart(this.target, 'Line', data, options)
       })
     }
 
@@ -140,16 +142,24 @@ class NetworkAnalysisModalContentController {
       elem.removeAttribute('width')
       elem.removeAttribute('height')
       elem.style.width = '100%'
+      //elem.style.maxWidth = '100%'
       elem.style.height = '200px'
       var ctx = elem.getContext('2d')
       // ctx.fillStyle = 'white'
       // ctx.fillRect(0, 0, elem.offsetWidth, elem.offsetHeight)
       charts[id] = new Chart(ctx)[type](data, options)
+      // charts[id] = new Chart(ctx,{
+      //   type: type,
+      //   data: data,
+      //   options: options})
+     
       var legend = document.getElementById(id + '-legend')
       if (legend) {
         legend.innerHTML = charts[id].generateLegend()
       }
     }
+
+    this.showCashFlowChart()    
   }
 }
 
@@ -181,18 +191,20 @@ app.component('networkAnalysisContent', {
         </div>
       </div> -->
       <select class="form-control" style="width: 20%;float: right"
-        ng-change="showCashFlowChart()"
+        ng-change="$ctrl.showCashFlowChart()"
         ng-model="selectedOption"
         ng-options="item as item.name for item in datasets">
       </select>
-      <canvas id="network-analysis-chart-cash-flow" style="width:100%; height:200px"></canvas>
-      <button ng-click="downloadChart()" class="pull-right btn btn-default btn-sm">
+      <canvas ng-attr-id= "{{ $ctrl.target }}" style="width:100%; height:200px"></canvas>
+      <button ng-click="$ctrl.downloadChart()" class="pull-right btn btn-default btn-sm">
         <span style="color:#4d99e5" class="fa fa-download"></span>
       </button>
-      <div id="network-analysis-chart-cash-flow-legend"></div>
+      <div ng-attr-id= "{{ $ctrl.target }}-legend"></div>
     </div>
       `,
-  bindings: {},
+  bindings: {
+    target: '@'
+  },
   controller: NetworkAnalysisModalContentController
 })
 

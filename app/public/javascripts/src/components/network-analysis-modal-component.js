@@ -23,7 +23,7 @@ app.component('networkAnalysisModal', {
     <modal visible="$ctrl.state.showNetworkAnalysisOutput.value" backdrop="static" on-show="modalShown()" on-hide="modalHide()" >
       <modal-header title="Network Analysis"></modal-header>
       <modal-body>
-        <network-analysis-content></network-analysis-content>
+        <network-analysis-content target="network-analysis-chart-cash-flow"></network-analysis-content>
       </modal-body>
     </modal>
       `,
