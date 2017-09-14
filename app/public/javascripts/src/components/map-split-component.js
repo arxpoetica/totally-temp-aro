@@ -27,8 +27,10 @@ class MapSplitController {
               this.sizesBeforeCollapse = null
               $scope.$apply()
             }
+            state.splitterObj.next(this.splitterObj)
           }
         })
+        state.splitterObj.next(this.splitterObj)
       }
     })
   }

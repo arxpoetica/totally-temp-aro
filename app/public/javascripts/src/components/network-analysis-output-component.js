@@ -9,6 +9,12 @@ class NetworkAnalysisOutputController {
     this.showOutput = () => {
       state.showNetworkAnalysisOutput.next(true)
     }
+
+    state.splitterObj
+    .subscribe((splitterObj) => {
+      this.splitterObj = splitterObj
+    })
+    
   }
 
 }
