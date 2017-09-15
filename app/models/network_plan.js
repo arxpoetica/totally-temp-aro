@@ -77,7 +77,7 @@ module.exports = class NetworkPlan {
     if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
 
     var sql = `
-      SELECT id, address
+      SELECT id, address,ST_X(geom) as lng, ST_Y(geom) as lat
       FROM locations
       WHERE id IN ($1)
     `

@@ -68,7 +68,7 @@ class NetworkAnalysisModalContentController {
           yAxisCategory = categories.Thousand
         else
           yAxisCategory = categories.Normal
-        var ticks = {}
+      
         var tooltips = {}
         var options = {
           elements: {
@@ -82,8 +82,8 @@ class NetworkAnalysisModalContentController {
         }
 
         if ($scope.selectedOption.key === 'irr') {
-          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, false, '%') } }, }] }
-          tooltips = {  
+          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, false, '%') },beginAtZero:  true } }] }
+          tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
                 return buildLabel(tooltipItems.yLabel, 2, yAxisCategory, false, '%')
@@ -91,7 +91,7 @@ class NetworkAnalysisModalContentController {
             }
           }
         } else if ($scope.selectedOption.key === 'npv') {
-          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, true, '$') } } }] }
+          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, true, '$') },beginAtZero:  true } }] }
           tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
@@ -100,7 +100,7 @@ class NetworkAnalysisModalContentController {
             }
           }
         } else {
-          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, false) } } }] }
+          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, false) },beginAtZero:  true } }] }
           tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
@@ -110,10 +110,6 @@ class NetworkAnalysisModalContentController {
           }
         }
         
-        //Starting Yaxis at zero if minimum value is greater than zero
-        if ( _.min(data.datasets[0].data) > 0 ) {
-          ticks.beginAtZero = true
-        }
         options.tooltips = tooltips
         showChart(this.target, 'line', data, options)
       })
@@ -158,7 +154,7 @@ class NetworkAnalysisModalContentController {
       elem.removeAttribute('height')
       elem.style.width = '100%'
       elem.style.maxWidth = '100%'
-      elem.style.height = '200px'
+      elem.style.height = '250px'
       //elem.style.maxHeight = '500px'
       var ctx = elem.getContext('2d')
       // ctx.fillStyle = 'white'
