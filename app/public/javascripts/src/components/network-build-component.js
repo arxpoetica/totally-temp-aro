@@ -8,6 +8,7 @@ class NetworkBuildController {
     this.targets = []
     this.targetsTotal = 0
     this.selectedLocations = new Set()
+    this.plan = null
 
     this.toogleTableView = false
 
@@ -25,6 +26,23 @@ class NetworkBuildController {
             }
           })
       })
+
+      state.plan
+      .subscribe((plan) => {
+        this.plan = plan
+      })
+
+      this.zoomTarget = (target) => {
+        map.setZoom(18)
+        map.panTo({lat:target.lat,lng:target.lng})
+      }
+    
+      this.removeTarget = (target) => {
+        this.$http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: [target.id] })
+        .then((response) => {
+          this.state.reloadSelectedLocations()
+        })
+      }
   }
 
   initializeConfigurations() {

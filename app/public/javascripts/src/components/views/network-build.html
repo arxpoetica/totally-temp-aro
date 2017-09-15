@@ -204,7 +204,7 @@
         <td>Selected Locations</td>
         <td>
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
-          <show-targets targets="$ctrl.targets"></show-targets>
+          <show-targets targets="$ctrl.targets" remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"></show-targets>
         </td>
       </tr>
     </tbody>
