@@ -411,6 +411,7 @@ class MapTileRenderer {
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
+      ctx.globalCompositeOperation = 'multiply'
     }
 
     ctx.fillStyle = drawingStyles.fillStyle
@@ -427,6 +428,9 @@ class MapTileRenderer {
       ctx.lineTo(x1, y1)
     }
     ctx.fill()
+
+    //Make Line Border is highlighted
+    ctx.globalAlpha = mapLayer.opacity || 0.7
 
     // Then draw a polyline except for the lines that are along the tile extents
     // Override the layers drawing styles by passing it through to the rendering function
