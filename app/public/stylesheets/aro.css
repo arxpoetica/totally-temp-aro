@@ -1151,3 +1151,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
      * left: 0;
      */
 }
+
+.progress-bar-optimization {
+  background-color: #1a79db;
+}

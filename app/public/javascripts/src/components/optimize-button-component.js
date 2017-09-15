@@ -3,6 +3,15 @@ class OptimizeButtonController {
     this.state = state
     this.regions = regions
     this.selectedRegions = []
+
+    this.areInputsComplete = true
+    this.plan = null
+    state.plan.subscribe((newPlan) => {
+      this.plan = newPlan;
+      if (this.plan) this.plan.optimizationState='STARTED'
+    })
+    this.progressMessage = "01:46"
+    this.progressPercent = 2
   }
 
   optimizeSelectedNetworkAnalysisType() {
@@ -44,10 +53,30 @@ OptimizeButtonController.$inject = ['state', 'regions']
 
 app.component('optimizeButton', {
   template: `
-    <button ng-class="{ 'btn btn-default btn-block': true }"
-      ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
+    <!-- Show the "Run" button only if the current plan is in START_STATE or INITIALIZED state -->
+    <button ng-if="$ctrl.plan.optimizationState === 'START_STATE' || $ctrl.plan.optimizationState === 'INITIALIZED'"
+            ng-class="{ 'btn btn-block': true, 'btn-default': !$ctrl.areInputsComplete, 'btn-primary': $ctrl.areInputsComplete }"
+            ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
       <i class="fa fa-bolt"></i> Run
     </button>
+
+    <!-- Show the progress bar only if the current plan is in STARTED state -->
+    <div ng-if="$ctrl.plan.optimizationState === 'STARTED'"
+         class="progress"
+         style="height: 34px">
+      <div class="progress-bar progress-bar-optimization"
+           role="progressbar"
+           aria-valuenow="$ctrl.progressPercent"
+           aria-valuemin="0"
+           aria-valuemax="100"
+           ng-style="{ 'line-height': '34px', width: $ctrl.progressPercent + '%' }">
+      </div>
+    </div>
+    <!-- A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! -->
+    <div ng-if="$ctrl.plan.optimizationState === 'STARTED'"
+         style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 60px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
+      {{$ctrl.progressMessage}}
+    </div>
   `,
   bindings: {},
   controller: OptimizeButtonController
