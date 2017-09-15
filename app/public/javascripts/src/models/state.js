@@ -392,6 +392,22 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
+  service.selectedServiceAreas = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedServiceAreas = () => {
+    var plan = service.plan.getValue()
+    if (plan) {
+      $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            var selectedSASet = new Set()
+            result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
+            service.selectedServiceAreas.next(selectedSASet)
+            service.requestMapLayerRefresh.next({})
+          }
+        })
+    }
+  }
+
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)
 

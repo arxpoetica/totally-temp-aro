@@ -9,12 +9,13 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations
+    this.selectedServiceAreas = selectedServiceAreas
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -36,6 +37,12 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
+  // Sets the selected service area ids
+  setselectedServiceAreas(selectedServiceAreas) {
+    this.selectedServiceAreas = selectedServiceAreas
+    this.tileDataService.markHtmlCacheDirty()
+  }
+  
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
@@ -398,6 +405,14 @@ class MapTileRenderer {
 
     // Get the drawing styles for rendering the polygon
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
+
+    //Highlight the selected SA
+    if(this.selectedServiceAreas.has(feature.properties.id)) {
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
+      drawingStyles.opacity = mapLayer.highlightStyle.opacity
+    }
+
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
 
@@ -516,6 +531,40 @@ class MapTileRenderer {
           if (pointInPolygon(locationCoords, polygonCoords)) {
             selectFeature = true
           }
+        } else if (feature.properties.code) {
+          //The below are the link for this Randolph Franklin Algorithm
+          //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
+          //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+          var vertx = [], verty = []
+          var testx, testy
+          var i, j, nvert, inside = false;
+
+          _.each(Object.values(polygonCoords), (point) => {
+            vertx.push(point[0])
+            verty.push(point[1])
+          })
+
+          outerLoop: for (var k = 0; k < feature.loadGeometry().length; k++) {
+            var featuresgeom = Object.values(feature.loadGeometry()[k])
+
+            innerLoop: for (var pos = 0; pos < featuresgeom.length; pos++) {
+              testx = Object.values(featuresgeom[pos])[0]
+              testy = Object.values(featuresgeom[pos])[1]
+
+              inside = false;
+
+              nvert = vertx.length
+              for (i = 0, j = nvert - 1; i < nvert; j = i++) {
+                if (((verty[i] > testy) != (verty[j] > testy)) && (testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i]))
+                  inside = !inside;
+              }
+
+              if (inside) {
+                selectFeature = true
+                break outerLoop
+              }
+            }
+          }
         }
       })
       return selectFeature
@@ -545,6 +594,35 @@ class MapTileRenderer {
               }
         }
       })
+
+      //Load the selected service area 
+      if(feature.properties.code) {
+        //The below are the link for this Randolph Franklin Algorithm
+        //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
+        //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+        var vertx = [], verty = []
+        var testx = xWithinTile
+        var testy = yWithinTile
+        var i, j, nvert, inside = false;
+        
+        _.each(Object.values(feature.loadGeometry()), function (point) {
+          _.each(point, function (eachpoint) {
+            vertx.push(eachpoint.x)
+            verty.push(eachpoint.y)
+          })
+        });
+        
+        nvert = vertx.length
+        for (i = 0, j = nvert-1; i < nvert; j = i++) {
+          if ( ((verty[i]>testy) != (verty[j]>testy)) && (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+             inside = !inside;
+        }
+
+        if(inside) {
+          selectFeature = true
+        }
+      }
+
       return selectFeature
     }
     return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
@@ -635,6 +713,14 @@ class TileComponentController {
         }
       })
 
+    // If selected service_area ids change, set that in the tile data service
+    state.selectedServiceAreas
+    .subscribe((selectedServiceAreas) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
+      }
+    })
+    
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
     this.DELTA = Object.freeze({
@@ -680,14 +766,29 @@ class TileComponentController {
         Promise.all(pointInPolyPromises)
           .then((results) => {
             var selectedLocations = new Set()
+            var selectedServiceAreas = new Set()
+
             results.forEach((result) => {
-              result.forEach((locationObj) => selectedLocations.add(locationObj.location_id))
+              result.forEach((selectedObj) => {
+                if (selectedObj.location_id) {
+                  selectedLocations.add(selectedObj.location_id)
+                } else if(selectedObj.id) {
+                  selectedServiceAreas.add(selectedObj.id)
+                }
+              })
             })
+
             var selectedLocationsIds = []
+            var selectedServiceAreaIds = []
+
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+            selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+            
             state.hackRaiseEvent(selectedLocationsIds)
+
             state.mapFeaturesSelectedEvent.next({
-              locations: selectedLocationsIds
+              locations: selectedLocationsIds,
+              serviceAreas: selectedServiceAreaIds
             })
           })
 
@@ -699,7 +800,9 @@ class TileComponentController {
       this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
                                                            this.tileDataService,
                                                            this.state.mapTileOptions.getValue(),
-                                                           this.state.selectedLocations.getValue()))
+                                                           this.state.selectedLocations.getValue(),
+                                                           this.state.selectedServiceAreas.getValue()
+                                                          ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
 
@@ -723,15 +826,24 @@ class TileComponentController {
         Promise.all(hitPromises)
           .then((results) => {
             var hitFeatures = []
+            var serviceAreaFeatures = []
+
             results.forEach((result) => {
-              hitFeatures = hitFeatures.concat(result)
+              if(result.length > 0 && result[0].location_id) {
+                hitFeatures = hitFeatures.concat(result)
+              } else if (result.length > 0 && result[0].code) {
+                serviceAreaFeatures = serviceAreaFeatures.concat(result)
+              }
             })
+
             if (hitFeatures.length > 0) {
               state.hackRaiseEvent(hitFeatures)
-              state.mapFeaturesSelectedEvent.next({
-                locations: hitFeatures
-              })
             }
+
+            state.mapFeaturesSelectedEvent.next({
+              locations: hitFeatures,
+              serviceAreas: serviceAreaFeatures
+            })
           })
       })
     })

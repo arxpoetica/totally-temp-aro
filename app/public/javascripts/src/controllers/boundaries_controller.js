@@ -74,7 +74,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             strokeStyle: '#00ff00',
             lineWidth: 4,
             fillStyle: "transparent",
-            opacity: 0.7
+            opacity: 0.7,
+            highlightStyle: {
+              strokeStyle: '#000000',
+              fillStyle: 'green',
+              opacity: 0.3
+            }
           }
           createdMapLayerKeys.add(mapLayerKey)
         }
@@ -85,11 +90,17 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
           oldMapLayers[mapLayerKey] = {
             dataUrls: mergedLayerUrls,
             renderMode: 'HEATMAP',
+            selectable: true,
             aggregateMode: 'FLATTEN',
             strokeStyle: '#00ff00',
             lineWidth: 4,
             fillStyle: "transparent",
-            opacity: 0.7
+            opacity: 0.7,
+            highlightStyle: {
+              strokeStyle: '#000000',
+              fillStyle: 'green',
+              opacity: 0.3
+            }
           }
           createdMapLayerKeys.add(mapLayerKey)
         }
@@ -253,7 +264,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       type: serviceLayer.name,
       api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
       layerId: serviceLayer.id,
-      aggregateZoomThreshold: 15
+      aggregateZoomThreshold: 10
     }
   
     state.boundaries.tileLayers.push(wirecenter_layer)
