@@ -531,36 +531,40 @@ class MapTileRenderer {
           if (pointInPolygon(locationCoords, polygonCoords)) {
             selectFeature = true
           }
-        } else if(feature.properties.code) {
+        } else if (feature.properties.code) {
           //The below are the link for this Randolph Franklin Algorithm
           //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
           //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
           var vertx = [], verty = []
           var testx, testy
           var i, j, nvert, inside = false;
-          
-          _.each(Object.values(feature.loadGeometry()[0]), (point) => {
-            vertx.push(point.x)
-            verty.push(point.y)
+
+          _.each(Object.values(polygonCoords), (point) => {
+            vertx.push(point[0])
+            verty.push(point[1])
           })
 
-          for(var i=0; i<polygonCoords.length; i++) {
-            testx = Object.values(polygonCoords[i])[0]
-            testy = Object.values(polygonCoords[i])[1]
+          outerLoop: for (var k = 0; k < feature.loadGeometry().length; k++) {
+            var featuresgeom = Object.values(feature.loadGeometry()[k])
 
-            inside = false
-            nvert = vertx.length
-            for (i = 0, j = nvert-1; i < nvert; j = i++) {
-              if ( ((verty[i]>testy) != (verty[j]>testy)) && (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
-                inside = !inside;
-            }
-  
-            if(inside) {
-              selectFeature = true
-              break
-            }
-          } 
+            innerLoop: for (var pos = 0; pos < featuresgeom.length; pos++) {
+              testx = Object.values(featuresgeom[pos])[0]
+              testy = Object.values(featuresgeom[pos])[1]
 
+              inside = false;
+
+              nvert = vertx.length
+              for (i = 0, j = nvert - 1; i < nvert; j = i++) {
+                if (((verty[i] > testy) != (verty[j] > testy)) && (testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i]))
+                  inside = !inside;
+              }
+
+              if (inside) {
+                selectFeature = true
+                break outerLoop
+              }
+            }
+          }
         }
       })
       return selectFeature
@@ -601,10 +605,12 @@ class MapTileRenderer {
         var testy = yWithinTile
         var i, j, nvert, inside = false;
         
-        _.each(Object.values(feature.loadGeometry()[0]), (point) => {
-          vertx.push(point.x)
-          verty.push(point.y)
-        })
+        _.each(Object.values(feature.loadGeometry()), function (point) {
+          _.each(point, function (eachpoint) {
+            vertx.push(eachpoint.x)
+            verty.push(eachpoint.y)
+          })
+        });
         
         nvert = vertx.length
         for (i = 0, j = nvert-1; i < nvert; j = i++) {
