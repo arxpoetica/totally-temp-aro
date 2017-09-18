@@ -854,10 +854,21 @@ class TileComponentController {
               state.hackRaiseEvent(hitFeatures)
             }
 
-            state.mapFeaturesSelectedEvent.next({
-              locations: hitFeatures,
-              serviceAreas: serviceAreaFeatures
-            })
+            //Locations or service areas can be selected in Analysis Mode
+            if (state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
+              state.mapFeaturesSelectedEvent.next({
+                locations: hitFeatures,
+                serviceAreas: serviceAreaFeatures
+              })
+            }
+
+            //Locations Info is shown in Analysis Mode
+            if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+              state.showLocationInfo.next({
+                locations: hitFeatures
+              })
+            }
+
           })
       })
     })
