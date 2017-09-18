@@ -724,6 +724,16 @@ class TileComponentController {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
       }
     })
+
+    // To change the center of the map to given LatLng 
+    state.requestPanToMap
+      .subscribe((coord) => {
+        if (!coord.zoom) {
+          return
+        }
+        this.mapRef.setZoom(coord.zoom)
+        this.mapRef.panTo({ lat: coord.lat, lng: coord.lng })
+      })
     
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
