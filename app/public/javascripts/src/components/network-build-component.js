@@ -1,6 +1,6 @@
 class NetworkBuildController {
 
-  constructor($rootScope, $http, state, optimization, regions) {
+  constructor($http, state, optimization, regions) {
     this.$http = $http
     this.state = state
     this.optimization = optimization
@@ -8,7 +8,7 @@ class NetworkBuildController {
     this.targets = []
     this.targetsTotal = 0
     this.selectedLocations = new Set()
-    this.plan = null
+    this.serviceAreas = []
 
     this.toogleTableView = false
 
@@ -27,22 +27,17 @@ class NetworkBuildController {
           })
       })
 
-      state.plan
-      .subscribe((plan) => {
-        this.plan = plan
-      })
-
-      this.zoomTarget = (target) => {
-        map.setZoom(18)
-        map.panTo({lat:target.lat,lng:target.lng})
-      }
-    
-      this.removeTarget = (target) => {
-        this.$http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: [target.id] })
-        .then((response) => {
-          this.state.reloadSelectedLocations()
-        })
-      }
+    state.selectedServiceAreas
+      .subscribe((selectedServiceAreas) => {
+        // The selected SA have changed.
+        var serviceAreaIds = Array.from(selectedServiceAreas)
+        $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+          .then((result) => {
+            if (result.status >= 200 && result.status <= 299) {
+              this.serviceAreas = result.data
+            }
+          })
+      }) 
   }
 
   initializeConfigurations() {
@@ -68,33 +63,16 @@ class NetworkBuildController {
     this.state.optimizationOptions.selectedTechnology = this.state.optimizationOptions.technologies[0]
 
   }
-
-  removeGeography(geography) {
-    this.regions.removeGeography(geography)
-  }
-  removeAllGeographies() {
-    this.regions.removeAllGeographies()
-  }
-
-  getSelectedGeographies() {
-    var selectedRegions = []
-    Object.keys(this.regions.selectedRegions).forEach((key) => {
-      var regionObj = this.regions.selectedRegions[key]
-      selectedRegions.push({
-        id: regionObj.id,
-        name: regionObj.name,
-        type: regionObj.type,
-        layerId: regionObj.layerId
-      })
-    })
-    return selectedRegions
-  }
 }
 
-NetworkBuildController.$inject = ['$rootScope', '$http', 'state', 'optimization', 'regions']
+NetworkBuildController.$inject = ['$http', 'state', 'optimization', 'regions']
 
 app.component('networkBuild', {
   templateUrl: '/javascripts/src/components/views/network-build.html',
-  bindings: {},
+  bindings: {
+    removeTarget: '&', 
+    zoomTarget: '&',
+    removeServiceArea: '&'
+  },
   controller: NetworkBuildController
 })    

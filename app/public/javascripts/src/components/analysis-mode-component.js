@@ -1,13 +1,11 @@
 class AnalysisModeController {
 
-  constructor($scope,$rootScope,state,optimization,regions) {
+  constructor($scope,$http,state,optimization,regions) {
     this.state = state
     this.optimization = optimization
     this.canceler = null
-    this.$scope = $scope
     this.selectedRegions = []
-
-    $scope.plan = null
+    this.plan = null
 
     this.accordions = Object.freeze({
       INPUT: 0,
@@ -18,8 +16,27 @@ class AnalysisModeController {
 
     state.plan
       .subscribe((plan) => {
-        $scope.plan = plan
+        this.plan = plan
       })
+
+    this.zoomTarget = (target) => {
+      map.setZoom(18)
+      map.panTo({ lat: target.lat, lng: target.lng })
+    }
+
+    this.removeTarget = (target) => {
+      $http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: [target.id] })
+        .then((response) => {
+          this.state.reloadSelectedLocations()
+        })
+    }
+
+    this.removeServiceArea = (target) => {
+      $http.post(`/service_areas/${this.plan.id}/removeServiceAreaTargets`, { serviceAreaIds: [target.id] })
+        .then((response) => {
+          this.state.reloadSelectedServiceAreas()
+        })
+    }
 
     this.optimizeSelectedNetworkAnalysisType = () => {
 
@@ -42,7 +59,7 @@ class AnalysisModeController {
       var isAnyLocationTypeSelected = (state.locationTypes.getValue().filter((item) => item.checked).length > 0) || (state.constructionSites.filter((item) => item.checked).length > 0)
       var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
       if (validSelection) {
-        this.canceler = optimization.optimize($scope.plan, optimizationBody, this.selectedRegions)
+        this.canceler = optimization.optimize(this.plan, optimizationBody, this.selectedRegions)
       } else {
         swal({
           title: 'Incomplete input',
@@ -68,7 +85,7 @@ class AnalysisModeController {
 
 }
 
-AnalysisModeController.$inject = ['$scope','$rootScope','state','optimization','regions']
+AnalysisModeController.$inject = ['$scope','$http','state','optimization','regions']
 
 app.component('analysisMode', {
   template: `
@@ -131,10 +148,12 @@ app.component('analysisMode', {
           </select>
         </div>
         <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
-          <network-build></network-build>
+          <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
+            remove-service-area="$ctrl.removeServiceArea(target)"></network-build>
         </div>
         <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
-          <network-analysis></network-analysis>
+          <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
+            remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
         </div>
       </div>
       <div class="accordion-title">

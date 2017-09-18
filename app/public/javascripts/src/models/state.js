@@ -672,6 +672,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.plan.next(plan)
     initializeState()
     service.reloadSelectedLocations()
+    service.reloadSelectedServiceAreas()
   }
 
   service.isDataSourceSelected = function (ds) {

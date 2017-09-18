@@ -1,12 +1,12 @@
 class NetworkAnalysisController {
 
-  constructor($rootScope, $http, state, optimization, regions) {
+  constructor($http, state, optimization) {
     this.$http = $http
     this.state = state
     this.optimization = optimization
-    this.regions = regions
     this.targets = []
     this.targetsTotal = 0
+    this.serviceAreas = []
 
     this.initializeConfigurations()
 
@@ -23,6 +23,17 @@ class NetworkAnalysisController {
           })
       })
 
+    state.selectedServiceAreas
+      .subscribe((selectedServiceAreas) => {
+        // The selected SA have changed.
+        var serviceAreaIds = Array.from(selectedServiceAreas)
+        $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            this.serviceAreas = result.data
+          }
+        })
+      })
   }
 
   initializeConfigurations() {
@@ -48,28 +59,16 @@ class NetworkAnalysisController {
     this.state.optimizationOptions.selectedTechnology = this.state.optimizationOptions.technologies[0]
 
   }
-
-  removeGeography(geography) {
-    this.regions.removeGeography(geography)
-  }
-  removeAllGeographies() {
-    this.regions.removeAllGeographies()
-  }
-
-  deleteAllTargets() {
-    this.$http.delete(`/network_plan/${this.state.planId}/removeAllTargets`)
-      .then((response) => {
-        // Reload selected locations from database
-        this.state.reloadSelectedLocations()
-      })
-  }
-
 }
 
-NetworkAnalysisController.$inject = ['$rootScope', '$http', 'state', 'optimization', 'regions']
+NetworkAnalysisController.$inject = ['$http', 'state', 'optimization']
 
 app.component('networkAnalysis', {
   templateUrl: '/javascripts/src/components/views/network-analysis.html',
-  bindings: {},
+  bindings: {
+    removeTarget: '&', 
+    zoomTarget: '&',
+    removeServiceArea: '&'
+  },
   controller: NetworkAnalysisController
 })    
