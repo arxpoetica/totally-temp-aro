@@ -1,17 +1,21 @@
 class OptimizeButtonController {
-  constructor(state, regions) {
+  constructor(state, $http, regions) {
     this.state = state
+    this.$http = $http
     this.regions = regions
     this.selectedRegions = []
+    this.modifyDialogResult = Object.freeze({
+      SAVEAS: 0,
+      OVERWRITE: 1
+    })
 
     this.areInputsComplete = true
     this.plan = null
     state.plan.subscribe((newPlan) => {
       this.plan = newPlan;
-      if (this.plan) this.plan.optimizationState='STARTED'
     })
-    this.progressMessage = "01:46"
-    this.progressPercent = 2
+    this.progressMessage = ''
+    this.progressPercent = 0
   }
 
   optimizeSelectedNetworkAnalysisType() {
@@ -47,9 +51,69 @@ class OptimizeButtonController {
       })
     }
   }
+
+  showModifyQuestionDialog() {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: '',
+        text: 'You are modifying a plan with a completed analysis. Do you wish to save into a new plan or overwrite the existing plan?  Overwriting will clear all results which were previously run.',
+        type: 'info',
+        confirmButtonColor: '#b9b9b9',
+        confirmButtonText: 'Save as',
+        cancelButtonColor: '#DD6B55',
+        cancelButtonText: 'Overwrite existing',
+        showCancelButton: true,
+        closeOnConfirm: false
+      }, (wasConfirmClicked) => {
+        resolve(wasConfirmClicked ? this.modifyDialogResult.SAVEAS : this.modifyDialogResult.OVERWRITE)
+      })
+    })
+  }
+
+  handleModifyClicked() {
+    var currentPlan = this.state.plan.getValue()
+    if (currentPlan.ephemeral) {
+      // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
+      var userId = this.state.getUserId()
+      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
+      this.$http.post(url, {})
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            this.state.setPlan(result.data)
+          }
+        })
+        .catch((err) => console.log(err))
+    } else {
+      // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
+      this.showModifyQuestionDialog()
+        .then((result) => {
+          if (result === this.modifyDialogResult.SAVEAS) {
+            // Ask for the name to save this plan as, then save it
+            swal({
+              title: 'Plan name required',
+              text: 'Enter a name for saving the plan',
+              type: 'input',
+              showCancelButton: true,
+              confirmButtonColor: '#DD6B55',
+              confirmButtonText: 'Create Plan'
+            },
+            (planName) => {
+              if (planName) {
+                this.state.copyCurrentPlanTo(planName)
+              }
+            })
+          } else if (result === this.modifyDialogResult.OVERWRITE) {
+            // Overwrite the current plan. Delete existing results. Reload the plan from the server.
+            this.$http.delete(`v1/plan/${currentPlan.id}/analysis`)
+              .then((result) => this.state.loadPlan(currentPlan.id))
+          }
+        })
+        .catch((err) => console.log(err))
+    }
+  }
 }
 
-OptimizeButtonController.$inject = ['state', 'regions']
+OptimizeButtonController.$inject = ['state', '$http', 'regions']
 
 app.component('optimizeButton', {
   template: `
@@ -77,6 +141,16 @@ app.component('optimizeButton', {
          style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 60px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
       {{$ctrl.progressMessage}}
     </div>
+
+    <!-- Show the modify button if the current plan is in COMPLETED, CANCELED or FAILED state -->
+    <button ng-if="$ctrl.plan.optimizationState === 'COMPLETED' || $ctrl.plan.optimizationState === 'CANCELED' || $ctrl.plan.optimizationState === 'FAILED'"
+            class="btn btn-block modify-analysis-button"
+            ng-click="$ctrl.handleModifyClicked()">
+      Modify
+    </button>
+
+    <!-- A spacer div -->
+    <div style="width: 100%; padding-bottom: 20px"></div>
   `,
   bindings: {},
   controller: OptimizeButtonController

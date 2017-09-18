@@ -575,6 +575,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     })
   }
 
+  service.getUserId = () => {
+    return globalUser.id // Ugh. Depending on global variable "globalUser"
+  }
+
   service.createEphemeralPlan = () => {
     // Use reverse geocoding to get the address at the current center of the map
     var planOptions = {
@@ -588,7 +592,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
         planOptions.areaName = address
-        var apiEndpoint = `/service/v1/plan?user_id=${globalUser.id}` // Ugh. Depending on global variable "globalUser"
+        var userId = service.getUserId()
+        var apiEndpoint = `/service/v1/plan?user_id=${userId}` // Ugh. Depending on global variable "globalUser"
         return $http.post(apiEndpoint, planOptions)
       })
       .then((result) => {
@@ -602,7 +607,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
   service.getOrCreateEphemeralPlan = () => {
-    return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${globalUser.id}`)
+    var userId = service.getUserId()
+    return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${userId}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           // We have a valid ephemeral plan if we get back an object with *some* properties
@@ -633,7 +639,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
-        return $http.put(`/service/v1/plan?user_id=${globalUser.id}`, newPlan)
+        var userId = service.getUserId()
+        return $http.put(`/service/v1/plan?user_id=${userId}`, newPlan)
       })
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
@@ -650,7 +657,16 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
     newPlan.name = planName
     newPlan.ephemeral = false
-    $http.post(`/service/v1/plan?user_id=${globalUser.id}&source_plan_id=${newPlan.id}`, newPlan)
+    // Only keep the properties needed to create a plan
+    var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex'])
+    var keysInPlan = Object.keys(newPlan)
+    keysInPlan.forEach((key) => {
+      if (!validProperties.has(key)) {
+        delete newPlan[key]
+      }
+    })
+    var userId = service.getUserId()
+    $http.post(`/service/v1/plan?user_id=${userId}&source_plan_id=${newPlan.id}`, newPlan)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.loadPlan(result.data.id)
@@ -662,7 +678,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   }
 
   service.loadPlan = (planId) => {
-    $http.get(`/service/v1/plan/${planId}?user_id=${globalUser.id}`)
+    var userId = service.getUserId()
+    $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)

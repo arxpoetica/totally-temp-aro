@@ -1155,3 +1155,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .progress-bar-optimization {
   background-color: #1a79db;
 }
+
+.modify-analysis-button, .modify-analysis-button:hover, .modify-analysis-button:focus {
+  background-color: #4cae4c;
+  color: white;
+}
