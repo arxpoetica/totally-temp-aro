@@ -18,38 +18,10 @@ class OptimizeButtonController {
     this.progressPercent = 0
   }
 
-  optimizeSelectedNetworkAnalysisType() {
-
-    if (this.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') {
-      Object.keys(this.regions.selectedRegions).forEach((key) => {
-        var regionObj = regions.selectedRegions[key]
-        this.selectedRegions.push({
-          id: regionObj.id,
-          name: regionObj.name,
-          type: regionObj.type,
-          layerId: regionObj.layerId
-        })
-      })
-    }
-
+  runOptimization() {
     var optimizationBody = this.state.getOptimizationBody()
-    // Check if at least one data source is selected
-    var isAnyDataSourceSelected = this.state.selectedDataSources.length > 0
-    // A location is selected if the "checked" property is true
-    var isAnyLocationTypeSelected = (this.state.locationTypes.getValue().filter((item) => item.checked).length > 0) || (this.state.constructionSites.filter((item) => item.checked).length > 0)
-    var validSelection = isAnyDataSourceSelected && isAnyLocationTypeSelected
-    if (validSelection) {
-      this.canceler = optimization.optimize($scope.plan, optimizationBody, this.selectedRegions)
-    } else {
-      swal({
-        title: 'Incomplete input',
-        text: 'Please select one or more locations and data sources before running optimization',
-        type: 'error',
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Ok',
-        closeOnConfirm: true
-      })
-    }
+    this.$http.post(`/service/v1/optimize/masterplan`, optimizationBody)
+      .then((result) => console.log(result))
   }
 
   showModifyQuestionDialog() {
@@ -72,9 +44,9 @@ class OptimizeButtonController {
 
   handleModifyClicked() {
     var currentPlan = this.state.plan.getValue()
+    var userId = this.state.getUserId()
     if (currentPlan.ephemeral) {
       // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
-      var userId = this.state.getUserId()
       var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
       this.$http.post(url, {})
         .then((result) => {
@@ -104,7 +76,7 @@ class OptimizeButtonController {
             })
           } else if (result === this.modifyDialogResult.OVERWRITE) {
             // Overwrite the current plan. Delete existing results. Reload the plan from the server.
-            this.$http.delete(`v1/plan/${currentPlan.id}/analysis`)
+            this.$http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
               .then((result) => this.state.loadPlan(currentPlan.id))
           }
         })
@@ -118,14 +90,14 @@ OptimizeButtonController.$inject = ['state', '$http', 'regions']
 app.component('optimizeButton', {
   template: `
     <!-- Show the "Run" button only if the current plan is in START_STATE or INITIALIZED state -->
-    <button ng-if="$ctrl.plan.optimizationState === 'START_STATE' || $ctrl.plan.optimizationState === 'INITIALIZED'"
+    <button ng-if="$ctrl.plan.planState === 'START_STATE' || $ctrl.plan.planState === 'INITIALIZED'"
             ng-class="{ 'btn btn-block': true, 'btn-default': !$ctrl.areInputsComplete, 'btn-primary': $ctrl.areInputsComplete }"
-            ng-click="$ctrl.optimizeSelectedNetworkAnalysisType()">
+            ng-click="$ctrl.runOptimization()">
       <i class="fa fa-bolt"></i> Run
     </button>
 
     <!-- Show the progress bar only if the current plan is in STARTED state -->
-    <div ng-if="$ctrl.plan.optimizationState === 'STARTED'"
+    <div ng-if="$ctrl.plan.planState === 'STARTED'"
          class="progress"
          style="height: 34px">
       <div class="progress-bar progress-bar-optimization"
@@ -137,13 +109,13 @@ app.component('optimizeButton', {
       </div>
     </div>
     <!-- A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! -->
-    <div ng-if="$ctrl.plan.optimizationState === 'STARTED'"
+    <div ng-if="$ctrl.plan.planState === 'STARTED'"
          style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 60px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
       {{$ctrl.progressMessage}}
     </div>
 
     <!-- Show the modify button if the current plan is in COMPLETED, CANCELED or FAILED state -->
-    <button ng-if="$ctrl.plan.optimizationState === 'COMPLETED' || $ctrl.plan.optimizationState === 'CANCELED' || $ctrl.plan.optimizationState === 'FAILED'"
+    <button ng-if="$ctrl.plan.planState === 'COMPLETED' || $ctrl.plan.planState === 'CANCELED' || $ctrl.plan.planState === 'FAILED'"
             class="btn btn-block modify-analysis-button"
             ng-click="$ctrl.handleModifyClicked()">
       Modify

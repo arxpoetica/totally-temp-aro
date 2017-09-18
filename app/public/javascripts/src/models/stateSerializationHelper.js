@@ -15,9 +15,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Get a POST body that we will send to aro-service for performing optimization
   stateSerializationHelper.getOptimizationBody = (state, optimization, regions) => {
 
-    var optimizationBody = {}
-    optimizationBody.optimization = {}
-    optimizationBody.analysis_type = 'NETWORK_PLAN'
+    var optimizationBody = {
+      planId: state.plan.getValue().id,
+      analysis_type: 'NETWORK_PLAN'
+    }
 
     addLocationTypesToBody(state, optimization, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
