@@ -13,10 +13,12 @@ class OptimizeButtonController {
     this.progressPollingInterval = null
     this.progressMessage = ''
     this.progressPercent = 0
+    this.isCanceling = false  // True when we have requested the server to cancel a request
     this.plan = null
     state.plan.subscribe((newPlan) => {
       this.plan = newPlan
       this.stopPolling()
+      this.isCanceling = false
       if (this.plan && this.plan.planState === 'STARTED') {
         // Optimization is in progress. We can start polling for the results
         this.startPolling()
@@ -27,7 +29,7 @@ class OptimizeButtonController {
   startPolling() {
     this.stopPolling()
     this.progressPollingInterval = setInterval(() => {
-      this.$http.get('/optimization/processes/' + this.plan.optimizationId).then((response) => {
+      this.$http.get(`/service/optimization/processes/${this.plan.optimizationId}`).then((response) => {
         // We are modifying the optimizationState on this.plan, not state.plan. Components outside of this one
         // will still see the old optimization state.
         this.plan.planState = response.data.optimizationState
@@ -65,6 +67,26 @@ class OptimizeButtonController {
         } else {
           console.error(response)
         }
+      })
+  }
+
+  cancelOptimization() {
+    this.isCanceling = true
+    this.$http.delete(`/service/optimization/processes/${this.plan.optimizationId}`)
+      .then((response) => {
+        // Optimization process was cancelled. Get the plan status from the server
+        return this.$http.get(`/service/v1/plan/${this.plan.id}?user_id=${this.state.getUserId()}`)
+      })
+      .then((response) => {
+        this.isCanceling = false
+        if (response.status >= 200 && response.status <= 299) {
+          this.plan.planState = response.data.planState
+          this.plan.optimizationId = response.data.optimizationId
+        }
+      })
+      .catch((err) => {
+        console.error(err)
+        this.isCanceling = false
       })
   }
 
@@ -141,7 +163,8 @@ app.component('optimizeButton', {
     </button>
 
     <!-- Show the progress bar only if the current plan is in STARTED state -->
-    <div style="height: 34px; width: 100%; display: flex" ng-if="$ctrl.plan.planState === 'STARTED'">
+    <div style="height: 34px; width: 100%; display: flex" ng-if="$ctrl.plan.planState === 'STARTED'"
+         ng-disabled="$ctrl.isCanceling">
       <div style="flex: 1 1 auto;">
         <div class="progress"
             style="height: 100%">
@@ -158,7 +181,11 @@ app.component('optimizeButton', {
           {{$ctrl.progressMessage}}
         </div>
       </div>
-      <button class="btn btn-danger" style="flex: 0 0 auto;">Cancel</button>
+      <button class="btn btn-danger"
+              style="flex: 0 0 auto;"
+              ng-click="$ctrl.cancelOptimization()">
+                {{$ctrl.isCanceling ? 'Canceling' : 'Cancel'}}
+      </button>
     </div>
 
     <!-- Show the modify button if the current plan is in COMPLETED, CANCELED or FAILED state -->
