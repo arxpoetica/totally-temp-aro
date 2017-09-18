@@ -137,21 +137,24 @@ app.component('optimizeButton', {
     </button>
 
     <!-- Show the progress bar only if the current plan is in STARTED state -->
-    <div ng-if="$ctrl.plan.planState === 'STARTED'"
-         class="progress"
-         style="height: 34px">
-      <div class="progress-bar progress-bar-optimization"
-           role="progressbar"
-           aria-valuenow="$ctrl.progressPercent"
-           aria-valuemin="0"
-           aria-valuemax="100"
-           ng-style="{ 'line-height': '34px', width: $ctrl.progressPercent + '%' }">
+    <div style="height: 34px; width: 100%; display: flex" ng-if="$ctrl.plan.planState === 'STARTED'">
+      <div style="flex: 1 1 auto;">
+        <div class="progress"
+            style="height: 100%">
+          <div class="progress-bar progress-bar-optimization"
+              role="progressbar"
+              aria-valuenow="$ctrl.progressPercent"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              ng-style="{ 'line-height': '34px', width: $ctrl.progressPercent + '%' }">
+          </div>
+        </div>
+        <!-- A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! -->
+        <div style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 60px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
+          {{$ctrl.progressMessage}}
+        </div>
       </div>
-    </div>
-    <!-- A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! -->
-    <div ng-if="$ctrl.plan.planState === 'STARTED'"
-         style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 60px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
-      {{$ctrl.progressMessage}}
+      <button class="btn btn-danger" style="flex: 0 0 auto;">Cancel</button>
     </div>
 
     <!-- Show the modify button if the current plan is in COMPLETED, CANCELED or FAILED state -->
