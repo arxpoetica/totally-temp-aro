@@ -10,18 +10,58 @@ class OptimizeButtonController {
     })
 
     this.areInputsComplete = true
-    this.plan = null
-    state.plan.subscribe((newPlan) => {
-      this.plan = newPlan;
-    })
+    this.progressPollingInterval = null
     this.progressMessage = ''
     this.progressPercent = 0
+    this.plan = null
+    state.plan.subscribe((newPlan) => {
+      this.plan = newPlan
+      this.stopPolling()
+    })
+  }
+
+  startPolling() {
+    this.stopPolling()
+    this.progressPollingInterval = setInterval(() => {
+      $http.get('/optimization/processes/' + this.plan.optimizationId).then((response) => {
+        // We are modifying the optimizationState on this.plan, not state.plan. Components outside of this one
+        // will still see the old optimization state.
+        this.plan.optimizationState = response.data.optimizationState
+        if (this.plan.optimizationState === 'COMPLETED'
+            || this.plan.optimizationState === 'CANCELED'
+            || this.plan.optimizationState === 'FAILED') {
+          this.stopPolling()
+        }
+        var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
+        var minutes = Math.floor(diff / 60)
+        var seconds = Math.ceil(diff % 60)
+        this.progressPercent = response.data.progress * 100
+        this.progressMessage = `${minutes < 10 ? '0': ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+      })
+    }, 1000)
+  }
+
+  stopPolling() {
+    if (this.progressPollingInterval) {
+      clearInterval(this.progressPollingInterval)
+      this.progressPollingInterval = null
+    }
   }
 
   runOptimization() {
+    // Get the optimization options that we will pass to the server
     var optimizationBody = this.state.getOptimizationBody()
+    // Make the API call that starts optimization calculations on aro-service
     this.$http.post(`/service/v1/optimize/masterplan`, optimizationBody)
-      .then((result) => console.log(result))
+      .then((result) => {
+        console.log(result)
+        if (result.status >= 200 && result.status <= 299) {
+          this.plan.optimizationId = response.data.optimizationIdentifier
+          this.startPolling()
+        } else {
+          console.error(result)
+        }
+      })
   }
 
   showModifyQuestionDialog() {
