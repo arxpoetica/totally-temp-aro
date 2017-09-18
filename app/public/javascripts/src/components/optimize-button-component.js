@@ -17,7 +17,7 @@ class OptimizeButtonController {
     state.plan.subscribe((newPlan) => {
       this.plan = newPlan
       this.stopPolling()
-      if (this.plan.planState === 'STARTED') {
+      if (this.plan && this.plan.planState === 'STARTED') {
         // Optimization is in progress. We can start polling for the results
         this.startPolling()
       }
@@ -27,7 +27,7 @@ class OptimizeButtonController {
   startPolling() {
     this.stopPolling()
     this.progressPollingInterval = setInterval(() => {
-      $http.get('/optimization/processes/' + this.plan.optimizationId).then((response) => {
+      this.$http.get('/optimization/processes/' + this.plan.optimizationId).then((response) => {
         // We are modifying the optimizationState on this.plan, not state.plan. Components outside of this one
         // will still see the old optimization state.
         this.plan.planState = response.data.optimizationState
@@ -57,13 +57,13 @@ class OptimizeButtonController {
     var optimizationBody = this.state.getOptimizationBody()
     // Make the API call that starts optimization calculations on aro-service
     this.$http.post(`/service/v1/optimize/masterplan`, optimizationBody)
-      .then((result) => {
-        console.log(result)
-        if (result.status >= 200 && result.status <= 299) {
+      .then((response) => {
+        console.log(response)
+        if (response.status >= 200 && response.status <= 299) {
           this.plan.optimizationId = response.data.optimizationIdentifier
           this.startPolling()
         } else {
-          console.error(result)
+          console.error(response)
         }
       })
   }
@@ -154,7 +154,7 @@ app.component('optimizeButton', {
           </div>
         </div>
         <!-- A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! -->
-        <div style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 60px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
+        <div style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 120px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
           {{$ctrl.progressMessage}}
         </div>
       </div>
