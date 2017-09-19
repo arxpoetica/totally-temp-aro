@@ -150,12 +150,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     // Add technologies like "Fiber" and "5G"
-    postBody.networkConstraints.networkTypes = []
-    state.optimizationOptions.technologies.forEach((technology) => {
-      if (technology.checked) {
-        postBody.networkConstraints.networkTypes.push(technology.id)
-      }
-    })
+    postBody.networkConstraints.networkTypes = [state.optimizationOptions.selectedTechnology.id]
   }
 
   // ------------------------------------------------------------------------------------------------------------------
@@ -287,9 +282,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     state.optimizationOptions.technologies.forEach((technology) => technology.checked = false)
     postBody.networkConstraints.networkTypes.forEach((networkType) => {
       var matchedTechnology = state.optimizationOptions.technologies.filter((technology) => technology.id.toUpperCase() === networkType.toUpperCase())
-      if (matchedTechnology && matchedTechnology.length === 1) {
-        matchedTechnology[0].checked = true
-      }
+      state.optimizationOptions.selectedTechnology = matchedTechnology  // Technically this will be overwritten if we have multiple technologies. Let it be for now.
     })
   }
 
