@@ -10,9 +10,14 @@ class NetworkBuildController {
     this.selectedLocations = new Set()
     this.serviceAreas = []
 
-    this.toogleTableView = false
-
     this.initializeConfigurations()
+
+    this.areControlsEnabled = true
+    state.plan.subscribe((newPlan) => {
+      if (newPlan) {
+        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+      }
+    })
 
     state.selectedLocations
       .subscribe((selectedLocations) => {

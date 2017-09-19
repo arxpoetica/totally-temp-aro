@@ -29,7 +29,8 @@
         <td> 
           <select class="form-control"
             ng-model="$ctrl.state.optimizationOptions.uiSelectedAlgorithm"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms">
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms"
+            ng-disabled="!$ctrl.areControlsEnabled">
           </select>
         </td>
       </tr>
@@ -44,7 +45,8 @@
                   max="1"
                   step="0.01"
                   ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
-                  style="margin-top: 10px">
+                  style="margin-top: 10px"
+                  ng-disabled="!$ctrl.areControlsEnabled">
               </div>
               <div class="col-md-5">
                 <div class="form-group form-group-sm">
@@ -53,7 +55,8 @@
                       type="number"
                       ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
                       class="form-control text-right"
-                      percentage-input>
+                      percentage-input
+                      ng-disabled="!$ctrl.areControlsEnabled">
                     <div class="input-group-addon">%</div>
                   </div>
                 </div>
@@ -72,7 +75,8 @@
                   max="1"
                   step="0.01"
                   ng-model="$ctrl.state.optimizationOptions.threshold"
-                  style="margin-top: 10px">
+                  style="margin-top: 10px"
+                  ng-disabled="!$ctrl.areControlsEnabled">
               </div>
               <div class="col-md-5">
                 <div class="form-group form-group-sm">
@@ -81,7 +85,8 @@
                       type="number"
                       ng-model="$ctrl.state.optimizationOptions.threshold"
                       class="form-control text-right"
-                      percentage-input>
+                      percentage-input
+                      ng-disabled="!$ctrl.areControlsEnabled">
                     <div class="input-group-addon">%</div>
                   </div>
                 </div>
@@ -96,12 +101,13 @@
             <div class="input-group input-group-sm">
               <div class="input-group-addon"><%- config.currency_symbol %></div>
               <input type="text"
-                      class="form-control text-right"
-                      placeholder="Amount"
-                      ng-model="$ctrl.state.optimizationOptions.financialConstraints.budget"
-                      ng-currency
-                      currency-symbol=""
-                      fraction="0">
+                     class="form-control text-right"
+                     placeholder="Amount"
+                     ng-model="$ctrl.state.optimizationOptions.financialConstraints.budget"
+                     ng-currency
+                     currency-symbol=""
+                     fraction="0"
+                     ng-disabled="!$ctrl.areControlsEnabled">
             </div>
           </div>
         </td>
@@ -112,7 +118,12 @@
           <div class="form-group form-group-sm">
             <div class="input-group input-group-sm">
               <div class="input-group-addon">%</div>
-              <input percentage-input type="text" class="form-control text-right" placeholder="Percentage" ng-model="$ctrl.state.optimizationOptions.threshold" name="coverage_target">
+              <input percentage-input type="text"
+                     class="form-control text-right"
+                     placeholder="Percentage"
+                     ng-model="$ctrl.state.optimizationOptions.threshold"
+                     name="coverage_target"
+                     ng-disabled="!$ctrl.areControlsEnabled">
             </div>
           </div>
         </td>
@@ -122,14 +133,17 @@
         <td>
           <select class="form-control"
             ng-model="$ctrl.state.optimizationOptions.selectedTechnology"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies">
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies"
+            ng-disabled="!$ctrl.areControlsEnabled">
           </select>
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
         <td class="indent-1">Polygon Type</td>
         <td> 
-          <select class="form-control" ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
+          <select class="form-control"
+                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy"
+                  ng-disabled="!$ctrl.areControlsEnabled">
             <option value="FIXED_RADIUS">Fixed Radius</option>
             <option value="AVERAGE_RADIUS">Average Radius</option>
             <option value="RAY_TRACING">Ray Tracing</option>
@@ -141,7 +155,8 @@
         <td> 
           <div class="input-group input-group">
             <input type="text" class="form-control text-right" placeholder="Cell Radius"
-              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius"
+              ng-disabled="!$ctrl.areControlsEnabled">
             <div class="input-group-addon">m</div>
           </div>
         </td>
@@ -152,14 +167,16 @@
           <select class="form-control ng-pristine ng-valid ng-touched"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile"
             ng-change="changeTileSelected(tileselected)"
-            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles">
+            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles"
+            ng-disabled="!$ctrl.areControlsEnabled">
           </select>
         </td>
       </tr>
       <tr>
         <td width="48%">Network Construction</td>
         <td> 
-          <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode" >
+          <select class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
+                  ng-disabled="!$ctrl.areControlsEnabled">
             <option value="DIRECT_ROUTING">Unsplit Routing</option>
             <option value="ODN_1" >Hub-Only Split</option>
             <% if (config.ARO_CLIENT === 'reliance') { %>
@@ -173,9 +190,11 @@
       <tr>
         <td>Other Settings</td>
         <td> 
-          <input type="checkbox" class="checkboxfill"
-            ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
-            name="ctype-name"> Save Routed Locations
+          <input type="checkbox"
+                 class="checkboxfill"
+                 ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
+                 name="ctype-name"
+                 ng-disabled="!$ctrl.areControlsEnabled"> Save Routed Locations
         </td>
       </tr>
       <tr>
@@ -183,7 +202,8 @@
         <td>
           <select class="form-control" 
             ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer" 
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers"
+            ng-disabled="!$ctrl.areControlsEnabled">
           </select>
         </td>
       </tr>
@@ -203,282 +223,5 @@
       </tr>
     </tbody>
   </table>
-
-  <!-- show Selected Service Areas / Locations -->
-  <!-- <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
-      <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
-      <div style="margin: 5px;min-height: 0px;max-height: 110px;overflow: auto;">
-        <strong ng-show="$ctrl.regions.selectedRegions.length > 5" class="ng-binding;">Total: {{$ctrl.regions.selectedRegions.length}}</strong>
-        <ul ng-show="$ctrl.regions.selectedRegions.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
-          <li ng-repeat="geography in $ctrl.regions.selectedRegions">
-            <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeGeography(geography)" style="margin-right: 5px">
-            <span class="fa fa-trash-o"></span>
-          </a> {{ geography.name }}
-          </li>
-        </ul>
-      </div>
-      <p ng-show="$ctrl.regions.selectedRegions.length > 0">
-        <button class="btn btn-primary btn-sm" ng-click="$ctrl.removeAllGeographies()">Remove all boundaries</button>
-      </p>
-    </div>
-  
-    <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
-      <strong ng-show="$ctrl.targetsTotal > 5" class="ng-binding;" style="float:right;">Total: {{$ctrl.targetsTotal}}</strong></p>
-      <p ng-show="$ctrl.targets.length === 0">
-        <em>No locations selected</em>
-      </p>
-      <div style="min-height: 0px; max-height: 150px; overflow: auto;">
-        <ul style="list-style-type:none; padding:0" ng-repeat="target in $ctrl.targets">
-          <li>
-            <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.deleteTarget(target)" style="margin-right: 5px">
-                <span class="fa fa-trash-o"></span>
-              </a> {{ target.address }}
-          </li>
-        </ul>
-      </div>
-  
-      <p ng-show="$ctrl.targets.length > 0">
-        <button class="btn btn-primary btn-sm" ng-click="$ctrl.deleteAllTargets()">Remove all targets</button>
-      </p>
-    </div> -->
-  </div>
-
-  <!-- Hide Normal View -->
-  <div ng-show="$ctrl.toogleTableView">
-  <p><strong>Optimization Type</strong></p>
-  <select class="form-control"
-    ng-model="$ctrl.state.optimizationOptions.uiSelectedAlgorithm"
-    ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms">
-  </select>
-  <div ng-show="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
-    <br>
-    <p><strong>IRR Threshold</strong></p>
-    <div class="row">
-      <div class="col-md-7">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
-          style="margin-top: 10px">
-      </div>
-      <div class="col-md-5">
-        <div class="form-group form-group-sm">
-          <div class="input-group input-group-sm">
-            <input
-              type="number"
-              ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
-              class="form-control text-right"
-              percentage-input>
-            <div class="input-group-addon">%</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div ng-show="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-    <br>
-    <p><strong>IRR Target</strong></p>
-    <div class="row">
-      <div class="col-md-7">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          ng-model="$ctrl.state.optimizationOptions.threshold"
-          style="margin-top: 10px">
-      </div>
-      <div class="col-md-5">
-        <div class="form-group form-group-sm">
-          <div class="input-group input-group-sm">
-            <input
-              type="number"
-              ng-model="$ctrl.state.optimizationOptions.threshold"
-              class="form-control text-right"
-              percentage-input>
-            <div class="input-group-addon">%</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div ng-show="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || $ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-    <br>
-    <p><strong>Target Capital</strong></p>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group form-group-sm">
-          <div class="input-group input-group-sm">
-            <div class="input-group-addon"><%- config.currency_symbol %></div>
-            <input type="text"
-                    class="form-control text-right"
-                    placeholder="Amount"
-                    ng-model="$ctrl.state.optimizationOptions.financialConstraints.budget"
-                    ng-currency
-                    currency-symbol=""
-                    fraction="0">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div ng-show="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">
-    <br>
-    <p><strong>Coverage Target</strong></p>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group form-group-sm">
-          <div class="input-group input-group-sm">
-            <div class="input-group-addon">%</div>
-            <input percentage-input type="text" class="form-control text-right" placeholder="Percentage" ng-model="$ctrl.state.optimizationOptions.threshold" name="coverage_target">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <br>
-  <p><strong>Choose Geography Type</strong></p>
-  <select class="form-control"
-    ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer"
-    ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
-  </select>
-
-  <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS'">
-    <p ng-hide="$ctrl.regions.selectedRegions.length > 0"><em>No geographies selected</em></p>
-    <div style="margin: 5px;min-height: 0px;max-height: 110px;overflow: auto;">
-      <strong ng-show="$ctrl.regions.selectedRegions.length > 5" class="ng-binding;">Total: {{$ctrl.regions.selectedRegions.length}}</strong>
-      <ul ng-show="$ctrl.regions.selectedRegions.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
-        <li ng-repeat="geography in $ctrl.regions.selectedRegions">
-          <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeGeography(geography)" style="margin-right: 5px">
-          <span class="fa fa-trash-o"></span>
-        </a> {{ geography.name }}
-        </li>
-      </ul>
-    </div>
-    <p ng-show="$ctrl.regions.selectedRegions.length > 0">
-      <button class="btn btn-primary btn-sm" ng-click="$ctrl.removeAllGeographies()">Remove all boundaries</button>
-    </p>
-  </div>
-
-  <div ng-show="$ctrl.state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_LOCATIONS'">
-    <strong ng-show="$ctrl.targetsTotal > 5" class="ng-binding;" style="float:right;">Total: {{$ctrl.targetsTotal}}</strong></p>
-    <p ng-show="$ctrl.targets.length === 0">
-      <em>No locations selected</em>
-    </p>
-    <div style="min-height: 0px; max-height: 150px; overflow: auto;">
-      <ul style="list-style-type:none; padding:0" ng-repeat="target in $ctrl.targets">
-        <li>
-          <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.deleteTarget(target)" style="margin-right: 5px">
-              <span class="fa fa-trash-o"></span>
-            </a> {{ target.address }}
-        </li>
-      </ul>
-    </div>
-
-    <p ng-show="$ctrl.targets.length > 0">
-      <button class="btn btn-primary btn-sm" ng-click="$ctrl.deleteAllTargets()">Remove all targets</button>
-    </p>
-  </div>
-
-  <br>
-  <p><strong>Endpoint Technology</strong></p>
-
-  <div class="checkbox" ng-repeat="type in $ctrl.state.optimizationOptions.technologies">
-    <label>
-     <div style="display: inline-block">
-       <input type="checkbox" class="checkboxfill"
-              ng-model="type.checked"
-              name="ctype-name"
-              ng-checked="type.checked"
-       >
-       {{type.label}}
-     </div>
-    <div ng-show="type.id == 'FiveG' && type.checked" style="display: inline-block">
-    <label>
-      <div style="display: inline-block">
-      	<span>Polygon Type</span>
-      	<select class="form-control" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.polygonStrategy">
-          <option value="FIXED_RADIUS">Fixed Radius</option>
-          <option value="AVERAGE_RADIUS">Average Radius</option>
-          <option value="RAY_TRACING">Ray Tracing</option>
-      	</select>
-      </div>
-      <div style="display: inline-block"> Radius
-        <span>
-            <input
-                    type="text"
-                    ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.cellRadius"
-                    placeholder="Cell Radius"
-                    style="width: 85px;margin-left: 50px"
-            >
-            <span><b>m</b></span>
-        </span>
-      </div>
-      <div>
-        <span>Tile System</span>
-        <select class="form-control ng-pristine ng-valid ng-touched"
-                ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.selectedTile"
-                ng-change="changeTileSelected(tileselected)"
-                ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.fiberNetworkConstraints.cellNodeConstraints.tiles">
-        </select>
-      </div>
-    </label>
-    </div>
-    </label>
-
-  </div>
-  
-  <br>
-  <p><strong>Network Construction</strong></p>
-  <form>
-
-    <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.fiberNetworkConstraints.routingMode" >
-      <option value="DIRECT_ROUTING">Unsplit Routing</option>
-      <option value="ODN_1" >Hub-Only Split</option>
-      <% if (config.ARO_CLIENT === 'reliance') { %>
-      <option value="ODN_2">Hub-Terminal Split </option>
-      <% } else {%>
-      <option value="ODN_2">Hub-Distribution Split</option>
-      <% } %>
-    </select>
-
-  </form>
-
-  <br>
-  <p><strong>Other Settings</strong></p>
-  <div class="checkbox">
-  	<label>
-	    <input type="checkbox" class="checkboxfill"
-             ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
-             name="ctype-name"
-      >
-        Save Routed Locations
-  	</label>      
-  </div>
-
-  <div ng-show="optimizationMode === 'targets'">
-    <p><strong>Optimization Processing Layer</strong></p>
-    <p>
-      <select class="form-control" ng-model="selectedBoundary"
-        ng-options="boundary as boundary.description for boundary in allBoundaries track by boundary.id">
-        <option value="">Default Layer</option>
-      </select>
-    </p>
-  </div>
-  </div>
-
-  <div>
-  	<!-- <% if (user.rol === 'admin') { %>
-    <p class="pull-left">
-        <button class="btn btn-primary" ng-click="runExpertMode()">Expert Mode</button>
-    </p>
-    <% } %> -->
-    <!-- <p class="pull-right">
-      <button class="btn btn-primary" ng-hide="calculating" ng-click="run($ctrl.state.getOptimizationBody(), getSelectedGeographies())">Get Results</button>
-      <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>
-    </p> -->
   </div>
 </div>
