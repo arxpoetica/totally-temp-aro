@@ -1,8 +1,9 @@
 class OptimizeButtonController {
-  constructor(state, $http, regions) {
+  constructor(state, $http, regions, tileDataService) {
     this.state = state
     this.$http = $http
     this.regions = regions
+    this.tileDataService = tileDataService
     this.selectedRegions = []
     this.modifyDialogResult = Object.freeze({
       SAVEAS: 0,
@@ -37,6 +38,7 @@ class OptimizeButtonController {
             || response.data.optimizationState === 'CANCELED'
             || response.data.optimizationState === 'FAILED') {
           this.stopPolling()
+          this.refreshMapTilesCacheAndData()
         }
         var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
         var minutes = Math.floor(diff / 60)
@@ -55,6 +57,8 @@ class OptimizeButtonController {
   }
 
   runOptimization() {
+
+    this.refreshMapTilesCacheAndData()
     // Get the optimization options that we will pass to the server
     var optimizationBody = this.state.getOptimizationBody()
     // Make the API call that starts optimization calculations on aro-service
@@ -82,12 +86,20 @@ class OptimizeButtonController {
         if (response.status >= 200 && response.status <= 299) {
           this.plan.planState = response.data.planState
           this.plan.optimizationId = response.data.optimizationId
+          this.refreshMapTilesCacheAndData()
         }
       })
       .catch((err) => {
         console.error(err)
         this.isCanceling = false
       })
+  }
+
+  refreshMapTilesCacheAndData() {
+    // Refresh the tile data cache and redraw the tiles
+    this.tileDataService.clearDataCache()
+    this.tileDataService.markHtmlCacheDirty()
+    this.state.requestMapLayerRefresh.next({})
   }
 
   showModifyQuestionDialog() {
@@ -99,7 +111,7 @@ class OptimizeButtonController {
         confirmButtonColor: '#b9b9b9',
         confirmButtonText: 'Save as',
         cancelButtonColor: '#DD6B55',
-        cancelButtonText: 'Overwrite existing',
+        cancelButtonText: 'Overwrite',
         showCancelButton: true,
         closeOnConfirm: false
       }, (wasConfirmClicked) => {
@@ -118,6 +130,7 @@ class OptimizeButtonController {
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
             this.state.setPlan(result.data)
+            this.refreshMapTilesCacheAndData()
           }
         })
         .catch((err) => console.log(err))
@@ -143,7 +156,10 @@ class OptimizeButtonController {
           } else if (result === this.modifyDialogResult.OVERWRITE) {
             // Overwrite the current plan. Delete existing results. Reload the plan from the server.
             this.$http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
-              .then((result) => this.state.loadPlan(currentPlan.id))
+              .then((result) => {
+                this.state.loadPlan(currentPlan.id)
+                this.refreshMapTilesCacheAndData()
+              })
           }
         })
         .catch((err) => console.log(err))
@@ -151,7 +167,7 @@ class OptimizeButtonController {
   }
 }
 
-OptimizeButtonController.$inject = ['state', '$http', 'regions']
+OptimizeButtonController.$inject = ['state', '$http', 'regions', 'tileDataService']
 
 app.component('optimizeButton', {
   template: `
