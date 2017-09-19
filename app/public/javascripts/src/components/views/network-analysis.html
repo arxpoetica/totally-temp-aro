@@ -60,11 +60,7 @@
                   ng-disabled="!$ctrl.areControlsEnabled">
             <option value="DIRECT_ROUTING">Unsplit Routing</option>
             <option value="ODN_1" >Hub-Only Split</option>
-            <% if (config.ARO_CLIENT === 'reliance') { %>
-            <option value="ODN_2">Hub-Terminal Split </option>
-            <% } else {%>
             <option value="ODN_2">Hub-Distribution Split</option>
-            <% } %>
           </select>
         </td>
       </tr>

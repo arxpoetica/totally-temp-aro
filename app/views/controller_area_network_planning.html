@@ -186,11 +186,7 @@
     <select  class="form-control ng-pristine ng-valid ng-touched" ng-model="state.optimizationOptions.networkConstraints.routingMode" >
       <option value="DIRECT_ROUTING">Unsplit Routing</option>
       <option value="ODN_1" >Hub-Only Split</option>
-      <% if (config.ARO_CLIENT === 'reliance') { %>
-      <option value="ODN_2">Hub-Terminal Split </option>
-      <% } else {%>
       <option value="ODN_2">Hub-Distribution Split</option>
-      <% } %>
     </select>
 
   </form>
