@@ -156,6 +156,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestPanToMap = new Rx.BehaviorSubject({})
   service.showLocationInfo = new Rx.BehaviorSubject({})
+  service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})

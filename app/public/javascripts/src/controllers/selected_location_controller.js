@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, configuration, map_layers, tracker, map_tools) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, configuration, map_layers, tracker, map_tools,state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -64,6 +64,22 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
       $scope.calculateMarketSize()
     })
   }
+
+  state.plan
+  .subscribe((plan) => {
+    $scope.plan = plan
+  })
+
+  state.showDetailedLocationInfo
+  .subscribe((locationInfo) => {
+    if(!locationInfo) return
+    setSelectedLocation(locationInfo)
+    $('#selected_location_controller').modal('show')
+    $('#selected_location_market_profile select[multiple]').select2('val', [])
+    $scope.market_size = null
+    $scope.fair_share = null
+    $scope.calculateMarketSize()
+  })
 
   $('#selected_location_controller').on('shown.bs.modal', (e) => {
     $('#selected_location_controller a[href="#selected_location_customer_profile"]').tab('show')
@@ -358,7 +374,13 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     }
     var ctx = document.getElementById('location_customer_profile_chart_' + type).getContext('2d')
     destroyCustomerProfileChart(type)
-    customerProfileCharts[type] = new Chart(ctx).Pie(data, options)
+    //customerProfileCharts[type] = new Chart(ctx).Pie(data, options)
+    //Using 2.7.0 version of Chart.js
+    customerProfileCharts[type] = new Chart(ctx, {
+      type: 'pie',
+      data: data,
+      options: options
+    });
     document.getElementById('location_customer_profile_chart_legend_' + type).innerHTML = customerProfileCharts[type].generateLegend()
   }
 
