@@ -49,7 +49,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createdMapLayerKeys.clear()
 
     // Only add planned equipment if we have a valid plan selected
-    if (state.plan) {
+    var planId = state.plan.getValue().id
+    if (planId) {
 
       // Loop through all network equipment categories (e.g. "Existing Equipment")
       state.networkEquipments.forEach((category) => {
@@ -57,7 +58,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // Loop through all the layers in this category
         category.layers.forEach((networkEquipment) => {
           if (networkEquipment.checked) {
-            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.plan.id)
+            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
             if (networkEquipment.equipmentType === 'point') {
               var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
               tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
