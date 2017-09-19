@@ -23,7 +23,7 @@
 <div ng-controller="locations_controller">
   <div id="map-extras">
     <span data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Road Segments">
-      <button class="btn" ng-class="{'btn-selected': roadLayer.visible, 'btn-primary': !roadLayer.visible}" ng-click="roadLayer.toggleVisibility()" style="width: 39px">
+      <button class="btn" ng-class="{'btn-selected': roadLayer.visible, 'btn-primary': !roadLayer.visible}" ng-click="toggleRoadLayer()" style="width: 39px">
         <span class="fa fa-road map-layer-spinner map-layer-spinner-road_segments"></span>
       </button>
     </span>

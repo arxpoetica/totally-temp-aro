@@ -411,6 +411,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
+  service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedRoadSegments = (road) => {
+    service.selectedRoadSegments.next(road)
+    service.requestMapLayerRefresh.next({})
+  }
+
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)
 

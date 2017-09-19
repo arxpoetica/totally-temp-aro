@@ -9,13 +9,14 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedRoadSegment, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations
     this.selectedServiceAreas = selectedServiceAreas
+    this.selectedRoadSegment = selectedRoadSegment
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -42,7 +43,13 @@ class MapTileRenderer {
     this.selectedServiceAreas = selectedServiceAreas
     this.tileDataService.markHtmlCacheDirty()
   }
-  
+
+  // Sets the selected service area ids
+  setSelectedRoadSegment(selectedRoadSegment) {
+    this.selectedRoadSegment = selectedRoadSegment
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
@@ -363,7 +370,15 @@ class MapTileRenderer {
               ctx.globalAlpha = 1.0
             } else {
               // This is not a closed polygon. Render lines only
-              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer)
+              if (this.selectedRoadSegment.length > 0 && this.selectedRoadSegment[0].gid === feature.properties.gid) {
+                //Highlight the selected Selected RoadSegments
+                var drawingStyles = {
+                  lineWidth: mapLayer.highlightStyle.lineWidth
+                }
+                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles)
+              } else {
+                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer)
+              }
             }
             break;
         }
@@ -514,6 +529,10 @@ class MapTileRenderer {
                 }
               }
             })
+            
+            if (this.selectedRoadSegment) {
+              hitFeatures.push(this.selectedRoadSegment)
+            }
           })
           // We have a list of features that are 'hit', i.e. under the specified point. Return them.
           resolve(hitFeatures)
@@ -575,10 +594,70 @@ class MapTileRenderer {
     }
     return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
   }
+  
+  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance) {
+
+    var geometry = feature.loadGeometry()
+    var distance
+
+    // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
+    var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
+    lineX1 = Object.values(geometry[0])[0].x //X1, Y1 are the first point of that line segment.
+    lineY1 = Object.values(geometry[0])[0].y
+
+    lineX2 = Object.values(geometry[0])[1].x //X2, Y2 are the end point of that line segment
+    lineY2 = Object.values(geometry[0])[1].y
+
+    pointX = xWithinTile  //pointX, pointY are the point of the reference point.
+    pointY = yWithinTile
+
+    distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY)       //calling function to find the shortest distance
+
+    if(distance <= minimumRoadDistance) {
+      this.selectedRoadSegment = feature.properties
+    }
+
+    function findDistanceToSegment(x1, y1, x2, y2, pointX, pointY)
+    {
+        var diffX = x2 - x1
+        var diffY = y2 - y1
+        if ((diffX == 0) && (diffY == 0))
+        {
+            diffX = pointX - x1
+            diffY = pointY - y1
+            return Math.sqrt(diffX * diffX + diffY * diffY)
+        }
+    
+        var t = ((pointX - x1) * diffX + (pointY - y1) * diffY) / (diffX * diffX + diffY * diffY)
+    
+        if (t < 0)
+        {
+            //point is nearest to the first point i.e x1 and y1
+            diffX = pointX - x1
+            diffY = pointY - y1
+        }
+        else if (t > 1)
+        {
+            //point is nearest to the end point i.e x2 and y2
+            diffX = pointX - x2
+            diffY = pointY - y2
+        }
+        else
+        {
+            //if perpendicular line intersect the line segment.
+            diffX = pointX - (x1 + t * diffX)
+            diffY = pointY - (y1 + t * diffY)
+        }
+    
+        //returning shortest distance
+        return Math.sqrt(diffX * diffX + diffY * diffY)
+    }
+  }
 
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
 
+    var minimumRoadDistance = 5;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
       var selectFeature = false
@@ -598,6 +677,10 @@ class MapTileRenderer {
               }
         }
       })
+
+      if(feature.properties.gid) {
+        this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance)
+      }
 
       //Load the selected service area 
       if(feature.properties.code) {
@@ -725,6 +808,14 @@ class TileComponentController {
       }
     })
 
+    // If selected road_segment ids change, set that in the tile data road
+    state.selectedRoadSegments
+    .subscribe((selectedRoadSegment) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedRoadSegment(selectedRoadSegment)
+      }
+    })
+
     // To change the center of the map to given LatLng 
     state.requestPanToMap
       .subscribe((coord) => {
@@ -781,7 +872,7 @@ class TileComponentController {
           .then((results) => {
             var selectedLocations = new Set()
             var selectedServiceAreas = new Set()
-
+            
             results.forEach((result) => {
               result.forEach((selectedObj) => {
                 if (selectedObj.location_id) {
@@ -794,7 +885,7 @@ class TileComponentController {
 
             var selectedLocationsIds = []
             var selectedServiceAreaIds = []
-
+            
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
             
@@ -815,7 +906,8 @@ class TileComponentController {
                                                            this.tileDataService,
                                                            this.state.mapTileOptions.getValue(),
                                                            this.state.selectedLocations.getValue(),
-                                                           this.state.selectedServiceAreas.getValue()
+                                                           this.state.selectedServiceAreas.getValue(),
+                                                           this.state.selectedRoadSegments.getValue()
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
@@ -841,12 +933,15 @@ class TileComponentController {
           .then((results) => {
             var hitFeatures = []
             var serviceAreaFeatures = []
-
+            var roadFeatures = []
+            
             results.forEach((result) => {
               if(result.length > 0 && result[0].location_id) {
                 hitFeatures = hitFeatures.concat(result)
               } else if (result.length > 0 && result[0].code) {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
+              } else if (result.length > 0 && result[0].gid) {
+                roadFeatures = roadFeatures.concat(result)
               }
             })
 
@@ -866,6 +961,12 @@ class TileComponentController {
             if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
               state.showLocationInfo.next({
                 locations: hitFeatures
+              })
+            }
+
+            if(roadFeatures) {
+              state.mapFeaturesSelectedEvent.next({
+                roadSegment: roadFeatures
               })
             }
 

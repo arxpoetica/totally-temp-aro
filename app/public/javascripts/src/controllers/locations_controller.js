@@ -97,6 +97,80 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   }
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateMapLayers)
+  
+  // Creates map layers based on selection in the UI
+  var createdRoadMapLayerKeys = new Set()
+  var updateRoadMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldRoadMapLayers = angular.copy(state.mapLayers.getValue())
+    
+    // Remove all the map layers previously created by this controller
+    createdRoadMapLayerKeys.forEach((createdRoadMapLayerKey) => {
+      delete oldRoadMapLayers[createdRoadMapLayerKey]
+    })
+
+    createdRoadMapLayerKeys.clear()
+
+    // Hold a list of layers that we want merged
+    var mergedLayerUrls = []
+    var layer = $scope.roadLayer;
+
+    if (layer.visible) {
+      // Location type is visible
+      var mapZoom = map.getZoom()
+      var pointTransform = (mapZoom > layer.aggregateZoomThreshold) ? 'select' : 'smooth_relative'
+      var mapLayerKey = `${pointTransform}_${layer.type}_${layer.libraryId}`
+
+      var url = layer.api_endpoint.replace('${lineTransform}', pointTransform)
+      url = url.replace('${libraryId}', layer.libraryId)
+
+      if (pointTransform === 'smooth_relative') {
+        // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+        mergedLayerUrls.push(url)
+      } else {
+        // We want to create an individual layer
+        oldRoadMapLayers[mapLayerKey] = {
+          dataUrls: [url],
+          renderMode: 'PRIMITIVE_FEATURES',
+          selectable: true,
+          strokeStyle: layer.style_options.normal.strokeColor,
+          lineWidth: layer.style_options.normal.strokeWeight,
+          highlightStyle: {
+            lineWidth: layer.style_options.highlight.strokeWeight
+          },
+          fillStyle: "transparent",
+          opacity: 0.7
+        }
+        createdRoadMapLayerKeys.add(mapLayerKey)
+      }
+
+      if (mergedLayerUrls.length > 0) {
+        // We have some business layers that need to be merged into one
+        // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
+        oldRoadMapLayers[mapLayerKey] = {
+          dataUrls: mergedLayerUrls,
+          renderMode: 'HEATMAP',
+          selectable: true,
+          aggregateMode: 'FLATTEN',
+          strokeStyle: layer.style_options.normal.strokeColor,
+          lineWidth: layer.style_options.normal.strokeWeight,
+          highlightStyle: {
+            lineWidth: layer.style_options.highlight.strokeWeight
+          },
+          fillStyle: "transparent",
+          opacity: 0.7
+        }
+        createdRoadMapLayerKeys.add(mapLayerKey)
+      }
+    }
+
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldRoadMapLayers)
+  }
+
+  // When the map zoom changes, map layers can change
+  $rootScope.$on('map_zoom_changed', updateRoadMapLayers)
 
   // Create a new set of map layers
   state.appReadyPromise.then(() => {
@@ -157,7 +231,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     }
   ]
   $scope.overlay = 'none'
-  $scope.roadLayer = new MapLayer({
+  $scope.roadLayer = {
     short_name: 'RS',
     name: 'Road Segments',
     type: 'road_segments',
@@ -165,12 +239,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
       normal: {
         strokeColor: 'teal',
         strokeWeight: 2
+      },
+      highlight: {
+        strokeWeight: 4
       }
     },
-    api_endpoint: '/network/road_segments',
+    libraryId: 2,
+    aggregateZoomThreshold: 15,
+    visible: false,
+    api_endpoint: '/tile/v1/edge/tiles/${libraryId}/${lineTransform}/',
     threshold: 12,
     reload: 'always'
-  })
+  }
+
   state.reloadDatasources() // Reload data sources even without a plan
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
@@ -305,6 +386,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   function removeLatestOverlay () {
     latestOverlay && latestOverlay.setMap(null)
     latestOverlay = null
+  }
+
+  $scope.toggleRoadLayer = (layer) => {
+    $scope.roadLayer.visible = !$scope.roadLayer.visible;
+    updateRoadMapLayers()
   }
 
   $scope.toggleMeasuringStick = () => {

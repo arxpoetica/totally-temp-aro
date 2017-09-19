@@ -66,6 +66,9 @@ class MapSelectorController {
           })
       }
 
+      if (event.roadSegment && event.roadSegment.length > 0) {
+          state.reloadSelectedRoadSegments(event.roadSegment)
+      }
 
     })
 
