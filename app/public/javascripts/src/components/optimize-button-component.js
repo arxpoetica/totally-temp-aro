@@ -16,8 +16,8 @@ class OptimizeButtonController {
     this.isCanceling = false  // True when we have requested the server to cancel a request
     this.plan = null
     state.plan.subscribe((newPlan) => {
-      this.plan = newPlan
       this.stopPolling()
+      this.plan = newPlan
       this.isCanceling = false
       if (this.plan && this.plan.planState === 'STARTED') {
         // Optimization is in progress. We can start polling for the results
@@ -30,12 +30,12 @@ class OptimizeButtonController {
     this.stopPolling()
     this.progressPollingInterval = setInterval(() => {
       this.$http.get(`/service/optimization/processes/${this.plan.optimizationId}`).then((response) => {
-        // We are modifying the optimizationState on this.plan, not state.plan. Components outside of this one
-        // will still see the old optimization state.
-        this.plan.planState = response.data.optimizationState
-        if (this.plan.planState === 'COMPLETED'
-            || this.plan.planState === 'CANCELED'
-            || this.plan.planState === 'FAILED') {
+        var newPlan = JSON.parse(JSON.stringify(this.state.plan.getValue()))
+        newPlan.planState = response.data.optimizationState
+        this.state.plan.next(newPlan)
+        if (response.data.optimizationState === 'COMPLETED'
+            || response.data.optimizationState === 'CANCELED'
+            || response.data.optimizationState === 'FAILED') {
           this.stopPolling()
         }
         var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
