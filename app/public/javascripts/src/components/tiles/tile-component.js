@@ -602,19 +602,23 @@ class MapTileRenderer {
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
     var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
-    lineX1 = Object.values(geometry[0])[0].x //X1, Y1 are the first point of that line segment.
-    lineY1 = Object.values(geometry[0])[0].y
 
-    lineX2 = Object.values(geometry[0])[1].x //X2, Y2 are the end point of that line segment
-    lineY2 = Object.values(geometry[0])[1].y
+    //Some road segments has more points
+    for (var i = 0; i < geometry[0].length - 1; i++) {
+      lineX1 = Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
+      lineY1 = Object.values(geometry[0])[i].y
+  
+      lineX2 = Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
+      lineY2 = Object.values(geometry[0])[i+1].y
 
-    pointX = xWithinTile  //pointX, pointY are the point of the reference point.
-    pointY = yWithinTile
+      pointX = xWithinTile  //pointX, pointY are the point of the reference point.
+      pointY = yWithinTile
 
-    distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY)       //calling function to find the shortest distance
+      distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY)       //calling function to find the shortest distance
 
-    if(distance <= minimumRoadDistance) {
-      this.selectedRoadSegment = feature.properties
+      if(distance <= minimumRoadDistance) {
+        this.selectedRoadSegment = feature.properties
+      }
     }
 
     function findDistanceToSegment(x1, y1, x2, y2, pointX, pointY)
@@ -657,7 +661,7 @@ class MapTileRenderer {
   // Perform hit detection on features and get the first one (if any) under the mouse
   performHitDetection(tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
 
-    var minimumRoadDistance = 5;
+    var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
       var selectFeature = false

@@ -415,6 +415,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.reloadSelectedRoadSegments = (road) => {
     service.selectedRoadSegments.next(road)
     service.requestMapLayerRefresh.next({})
+    swal({ title: '', text: `gid: ${road[0].gid}`, type: 'info' })
   }
 
   // Plan - define once
