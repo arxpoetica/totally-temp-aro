@@ -27,6 +27,7 @@ class ViewModeController {
             center: coordinates,
             zoom: 13,
             size: '325x110',
+            scale: 2,
             maptype: 'roadmap',
             markers: 'color:red|label:L|' + coordinates,
             key: google_maps_key

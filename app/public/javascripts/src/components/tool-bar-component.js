@@ -4,6 +4,30 @@ class ToolBarController {
     this.state = state
     this.state.showGlobalSettings
     .subscribe((newValue) => {})
+
+    this.latestOverlay = null
+    this.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+      drawingControl: false
+    })
+
+    this.drawingManager.addListener('overlaycomplete', (e) => {
+      this.removeLatestOverlay()
+      this.latestOverlay = e.overlay
+  
+      var points = e.overlay.getPath()
+      var total = 0
+      var prev = null
+      points.forEach((point) => {
+        if (prev) {
+          total += google.maps.geometry.spherical.computeDistanceBetween(prev, point)
+        }
+        prev = point
+      })
+      this.measuredDistance = total
+      swal({ title: 'Measured Distance', text: `${total * 0.000621371} mi` })
+      if (!$scope.$$phase) { $scope.$apply() } // refresh UI
+    })
   }
 
   openGlobalSettings() {
@@ -55,6 +79,19 @@ class ToolBarController {
       })
     }
   }
+
+  removeLatestOverlay () {
+    this.latestOverlay && this.latestOverlay.setMap(null)
+    this.latestOverlay = null
+  }
+
+  toggleMeasuringStick() {
+    var current = this.drawingManager.getMap()
+    this.drawingManager.setMap(current ? null : map)
+    this.removeLatestOverlay()
+    if (current) this.measuredDistance = null
+  }
+
 }
 
 ToolBarController.$inject = ['$scope','state']
@@ -128,6 +165,9 @@ app.component('toolBar', {
         <button class="btn btn-default"><i class="fa fa-2x fa-file" ng-click="$ctrl.createEphemeralPlan()"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-floppy-o" ng-click="$ctrl.savePlanAs()"></i></button>
         <button class="btn btn-default"><i class="fa fa-2x fa-folder-open" ng-click="$ctrl.showPlanModal()"></i></button>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-default"><i class="fa fa-2x fa-arrows-h" data-ng-click="$ctrl.toggleMeasuringStick()"></i></button>
       </div>
       <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
         <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"
