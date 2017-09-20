@@ -3,6 +3,7 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     var config = {}
     var configBaseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port()
     var configurationPromises = []  // Configuration is said to be "loaded" when all promises are resolved
+    config.google_maps_key = 'AIzaSyDYjYSshVYlkt2hxjrpqTg31KdMkw-TXSM' 
 
     // Define a list of configurations we want to get from the server
     var configurationTypes = [

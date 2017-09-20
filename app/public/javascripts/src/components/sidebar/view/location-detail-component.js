@@ -1,6 +1,6 @@
 class ViewModeController {
 
-  constructor(state,$http) {
+  constructor($http,state,configuration) {
     this.state = state
     this.plan = null
     this.selectedLocationInfo = null
@@ -21,7 +21,7 @@ class ViewModeController {
         .then((locationInfo) => {
           this.selectedLocationInfo = locationInfo
           
-          var google_maps_key = 'AIzaSyDYjYSshVYlkt2hxjrpqTg31KdMkw-TXSM'
+          var google_maps_key = configuration.google_maps_key
           var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
           var params = {
             center: coordinates,
@@ -56,7 +56,7 @@ class ViewModeController {
   }  
 }
 
-ViewModeController.$inject = ['state','$http']
+ViewModeController.$inject = ['$http','state','configuration']
 
 app.component('locationDetail', {
   template: `

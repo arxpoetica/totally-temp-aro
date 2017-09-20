@@ -10,7 +10,6 @@ class OptimizeButtonController {
       OVERWRITE: 1
     })
 
-    this.areInputsComplete = true
     this.progressPollingInterval = null
     this.progressMessage = ''
     this.progressPercent = 0
@@ -164,6 +163,19 @@ class OptimizeButtonController {
         })
         .catch((err) => console.log(err))
     }
+  }
+
+  areInputsComplete() {
+    var isValid = false
+    if ((this.state.selectedLocations.getValue().size > 0 ||
+      this.state.selectedServiceAreas.getValue().size > 0) && (
+        this.state.hasLocationType('business') ||
+        this.state.hasLocationType('household') ||
+        this.state.hasLocationType('celltower'))
+    )
+      isValid = true
+
+    return isValid
   }
 }
 
