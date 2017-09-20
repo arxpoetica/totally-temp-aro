@@ -299,6 +299,7 @@
         stylers: [ { visibility: 'off' } ],
       });
 
+      console.log(document.getElementById('map-canvas'))
       map = new google.maps.Map(document.getElementById('map-canvas'), {
         zoom: 12,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -353,24 +354,29 @@
   <!-- Components -->
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
-  <script src="javascripts/lib/components/analysis-mode-component.js"></script>
+
+  <script src="javascripts/lib/components/sidebar/optimize-button-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/display-mode-buttons-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/analysis-mode-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/show-targets-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-modal-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-modal-content-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-component.js"></script>
+
+  <script src="javascripts/lib/components/global-settings/global-settings-component.js"></script>
+  <script src="javascripts/lib/components/global-settings/user-account-settings-component.js"></script>
+
+  <script src="javascripts/lib/components/header/tool-bar-component.js"></script>
+  <script src="javascripts/lib/components/header/network-plan-component.js"></script>
+  <script src="javascripts/lib/components/header/network-plan-manage-component.js"></script>
+  <script src="javascripts/lib/components/header/network-plan-modal-component.js"></script>
+
+  <script src="javascripts/lib/components/map/map-split-component.js"></script>
+  <script src="javascripts/lib/components/map/map-selector-component.js"></script>
+
   <script src="javascripts/lib/components/view-mode-component.js"></script>
-  <script src="javascripts/lib/components/display-mode-buttons-component.js"></script>
-  <script src="javascripts/lib/components/map-selector-component.js"></script>
-  <script src="javascripts/lib/components/map-split-component.js"></script>
-  <script src="javascripts/lib/components/tool-bar-component.js"></script>
-  <script src="javascripts/lib/components/network-plan-component.js"></script>
-  <script src="javascripts/lib/components/global-settings-component.js"></script>
-  <script src="javascripts/lib/components/user-account-settings-component.js"></script>
-  <script src="javascripts/lib/components/network-plan-modal-component.js"></script>
-  <script src="javascripts/lib/components/network-plan-manage-component.js"></script>
-  <script src="javascripts/lib/components/network-build-component.js"></script>
-  <script src="javascripts/lib/components/show-targets-component.js"></script>
-  <script src="javascripts/lib/components/network-analysis-component.js"></script>
-  <script src="javascripts/lib/components/network-analysis-output-component.js"></script>
-  <script src="javascripts/lib/components/network-analysis-modal-component.js"></script>
-  <script src="javascripts/lib/components/network-analysis-modal-content-component.js"></script>
-  <script src="javascripts/lib/components/optimize-button-component.js"></script>
   
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>

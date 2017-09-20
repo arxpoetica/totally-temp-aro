@@ -181,40 +181,14 @@ NetworkAnalysisModalContentController.$inject = ['$scope', '$rootScope', '$docum
 app.component('networkAnalysisContent', {
   template: `
     <div>
-      <!-- <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active">
-          <a href="#NetworkAnalysisOutput" aria-controls="home" role="tab" data-toggle="tab">Analysis</a>
-        </li>
-        <li role="presentation">
-          <a href="#NetworkAnalysisOutput1" aria-controls="profile" role="tab" data-toggle="tab">Analysis1</a>
-        </li>
-      </ul>
-      <div class="tab-content" style="padding-top: 20px">
-        <div role="tabpanel" class="tab-pane active" id="NetworkAnalysisOutput">
-          <div>
-            <p class="text-center"><strong>Network Analysis Summary</strong></p>
-            <canvas id="network-analysis-chart-cash-flow" style="width:100%; height:200px"></canvas>
-            <div id="network-analysis-chart-cash-flow-legend"></div>
-          </div>
-        </div>
-        <div role="tabpanel" class="tab-pane" id="NetworkAnalysisOutput1" style="padding-top: 20px">
-          <p class="text-center">In output1</p>
-          <canvas id="network-analysis-chart-cash-flow1" style="width:100%; height:200px"></canvas>
-          <div id="network-analysis-chart-cash-flow1-legend"></div>
-        </div>
-      </div> -->
       <select class="form-control" style="width: 20%;float: right"
         ng-change="$ctrl.showCashFlowChart()"
         ng-model="selectedOption"
         ng-options="item as item.name for item in datasets">
       </select>
       <canvas ng-attr-id= "{{ $ctrl.target }}" style="width:100%; height:200px"></canvas>
-      <!-- <button ng-click="$ctrl.downloadChart()" class="pull-right btn btn-default btn-sm">
-        <span style="color:#4d99e5" class="fa fa-download"></span>
-      </button>
-      <div ng-attr-id= "{{ $ctrl.target }}-legend"></div> -->
     </div>
-      `,
+  `,
   bindings: {
     target: '@'
   },

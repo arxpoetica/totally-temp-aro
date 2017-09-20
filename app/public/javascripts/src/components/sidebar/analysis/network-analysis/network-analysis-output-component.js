@@ -33,7 +33,7 @@ class NetworkAnalysisOutputController {
 NetworkAnalysisOutputController.$inject = ['$scope','$rootScope', '$http', 'state', 'optimization', 'regions']
 
 app.component('networkAnalysisOutput', {
-  templateUrl: '/javascripts/src/components/views/network-analysis-output.html',
+  templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis-output-component.html',
   bindings: {},
   controller: NetworkAnalysisOutputController
 })    

@@ -1,11 +1,13 @@
-class NetworkAnalysisController {
+class NetworkBuildController {
 
-  constructor($http, state, optimization) {
+  constructor($http, state, optimization, regions) {
     this.$http = $http
     this.state = state
     this.optimization = optimization
+    this.regions = regions
     this.targets = []
     this.targetsTotal = 0
+    this.selectedLocations = new Set()
     this.serviceAreas = []
 
     this.initializeConfigurations()
@@ -35,12 +37,12 @@ class NetworkAnalysisController {
         // The selected SA have changed.
         var serviceAreaIds = Array.from(selectedServiceAreas)
         $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-        .then((result) => {
-          if (result.status >= 200 && result.status <= 299) {
-            this.serviceAreas = result.data
-          }
-        })
-      })
+          .then((result) => {
+            if (result.status >= 200 && result.status <= 299) {
+              this.serviceAreas = result.data
+            }
+          })
+      }) 
   }
 
   initializeConfigurations() {
@@ -61,21 +63,21 @@ class NetworkAnalysisController {
     ]
 
     this.state.optimizationOptions.selectedgeographicalLayer = this.state.optimizationOptions.geographicalLayers[0]
-    //this.optimization.setMode('boundaries')
+    this.optimization.setMode('boundaries')
 
     this.state.optimizationOptions.selectedTechnology = this.state.optimizationOptions.technologies[0]
 
   }
 }
 
-NetworkAnalysisController.$inject = ['$http', 'state', 'optimization']
+NetworkBuildController.$inject = ['$http', 'state', 'optimization', 'regions']
 
-app.component('networkAnalysis', {
-  templateUrl: '/javascripts/src/components/views/network-analysis.html',
+app.component('networkBuild', {
+  templateUrl: '/components/sidebar/analysis/network-build/network-build-component.html',
   bindings: {
     removeTarget: '&', 
     zoomTarget: '&',
     removeServiceArea: '&'
   },
-  controller: NetworkAnalysisController
+  controller: NetworkBuildController
 })    
