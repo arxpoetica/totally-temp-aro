@@ -58,31 +58,18 @@ class ViewModeController {
 
 ViewModeController.$inject = ['state','$http']
 
-app.component('viewMode', {
+app.component('locationDetail', {
   template: `
   <style>
     .view-mode-container {
       position: relative; /* This will require the parent to have position: relative or absolute */
       height: 100%;
     }
-    .map-overlay {
-      color: white;
-      background: rgba(0, 0, 0, 0.7);
-      position:absolute;
-      left:0px;
-      top: 0%;
-      width: 100%;
-      height: 110px;
-      padding: 10px;
-      padding-top: 40px;
-    }
   </style>
   <div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
     <img width="100%" ng-attr-src="{{$ctrl.map_url}}">
-    <div class="map-overlay">
-      <div style="position: absolute;font-size: 15px;top: 15%;"> {{$ctrl.selectedLocationInfo.address}} </div>
-    </div>
     <br>
+    <div>Address: {{$ctrl.selectedLocationInfo.address}}</div>
     <div>HouseHolds: {{$ctrl.selectedLocationInfo.number_of_households}}</div>
     <div>Businesses: {{$ctrl.selectedLocationInfo.number_of_businesses}}</div>
     <div>Towers: {{$ctrl.selectedLocationInfo.number_of_towers}}</div>

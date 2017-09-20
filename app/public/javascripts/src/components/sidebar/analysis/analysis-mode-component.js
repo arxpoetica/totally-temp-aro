@@ -1,6 +1,6 @@
 class AnalysisModeController {
 
-  constructor($scope,$rootScope,state,optimization) {
+  constructor($scope,$rootScope,$http,state,optimization) {
     this.state = state
     this.optimization = optimization
     this.canceler = null
@@ -49,7 +49,7 @@ class AnalysisModeController {
   }
 }
 
-AnalysisModeController.$inject = ['$scope','$rootScope','state','optimization']
+AnalysisModeController.$inject = ['$scope','$rootScope','$http','state','optimization']
 
 app.component('analysisMode', {
   templateUrl: '/components/sidebar/analysis/analysis-mode-component.html',

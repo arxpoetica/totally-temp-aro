@@ -168,7 +168,7 @@ app.component('mapSplit', {
             <display-mode-buttons></display-mode-buttons>
           </div>
           <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.VIEW">
-            <view-mode></view-mode>
+            <location-detail></location-detail>
           </div>
           <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
             <analysis-mode></analysis-mode>
