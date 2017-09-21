@@ -104,6 +104,11 @@ app.service('optimization', ($rootScope, $http, $q) => {
       return Promise.all(addGeographiesPromises)
     }
 
+    // Delete the analysis for the plan so that the state won't be 'COMPLETED' (or FAILED, etc)
+    function deletePlanAnalysis(planId) {
+      return $http.delete(`/service/v1/plan/${planId}/analysis?user_id=${user_id}`)   // user_id is a global variable :(
+    }
+
     function callOptimizationEndpoint(planId) {
       var url = '/network_plan/' + planId + '/edit'
       var options = {
@@ -120,6 +125,7 @@ app.service('optimization', ($rootScope, $http, $q) => {
       // First clear any geography selections
       clearGeographySelection(plan.id)
         .then(addGeographiesToPlan.bind(null, plan.id, geographies))
+        .then(deletePlanAnalysis.bind(null, plan.id))
         .then(callOptimizationEndpoint.bind(null, plan.id))
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
