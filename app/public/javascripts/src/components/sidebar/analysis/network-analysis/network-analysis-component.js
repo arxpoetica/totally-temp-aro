@@ -63,8 +63,6 @@ class NetworkAnalysisController {
     this.state.optimizationOptions.selectedgeographicalLayer = this.state.optimizationOptions.geographicalLayers[0]
     //this.optimization.setMode('boundaries')
 
-    this.state.optimizationOptions.selectedTechnology = this.state.optimizationOptions.technologies[0]
-
   }
 }
 

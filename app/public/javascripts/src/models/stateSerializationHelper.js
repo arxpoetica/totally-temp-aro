@@ -150,7 +150,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     // Add technologies like "Fiber" and "5G"
-    postBody.networkConstraints.networkTypes = [state.optimizationOptions.selectedTechnology.id]
+    postBody.networkConstraints.networkTypes = []
+    state.optimizationOptions.selectedTechnology.forEach((technology) => {
+      postBody.networkConstraints.networkTypes.push(technology.id)
+    })
   }
 
   // ------------------------------------------------------------------------------------------------------------------

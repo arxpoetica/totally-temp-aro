@@ -109,7 +109,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       { id: 'Fiber', label: 'Fiber', checked: true},
       { id: 'FiveG', label: '5G', checked: false}
     ],
-    selectedTechnology: null,
+    selectedTechnology: [],
     selectedLayer: null,
     generatedDataRequest: {
       generatePlanLocationLinks : false
@@ -117,6 +117,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     geographicalLayers: [],
     selectedgeographicalLayer: null
   }
+
+  // Default technology
+  service.optimizationOptions.selectedTechnology.push(service.optimizationOptions.technologies[0])
 
   // View Settings layer - define once
   service.viewSetting = {

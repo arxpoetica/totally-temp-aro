@@ -12,14 +12,15 @@
       <tr>
         <td>Endpoint Technology</td>
         <td>
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.selectedTechnology"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies"
-            ng-disabled="!$ctrl.areControlsEnabled">
-          </select>
+            <ui-select multiple ng-model="$ctrl.state.optimizationOptions.selectedTechnology" theme="bootstrap" close-on-select="true">
+              <ui-select-match placeholder="Select technology...">{{$item.label}}</ui-select-match>
+              <ui-select-choices class="ui-select-width-250" repeat="item in $ctrl.state.optimizationOptions.technologies">
+                <div>{{item.label}}</div>
+              </ui-select-choices>
+            </ui-select>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+      <tr ng-repeat="tech in $ctrl.state.optimizationOptions.selectedTechnology" ng-if="tech.id === 'FiveG'">
         <td class="indent-1">Polygon Type</td>
         <td> 
           <select class="form-control"
@@ -31,7 +32,7 @@
           </select>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+      <tr ng-repeat="tech in $ctrl.state.optimizationOptions.selectedTechnology" ng-if="tech.id === 'FiveG'">
         <td class="indent-1">Radius</td>
         <td> 
           <div class="input-group input-group">
@@ -42,7 +43,7 @@
           </div>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.selectedTechnology.id === 'FiveG'">
+      <tr ng-repeat="tech in $ctrl.state.optimizationOptions.selectedTechnology" ng-if="tech.id === 'FiveG'">
         <td class="indent-1">Tile System</td>
         <td> 
           <select class="form-control ng-pristine ng-valid ng-touched"
