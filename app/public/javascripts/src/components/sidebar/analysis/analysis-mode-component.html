@@ -8,10 +8,10 @@
   .analysis-type {
     flex: 0 0 auto;
   }
-  .accordion-title {
+  .old-accordion-title {
     flex: 0 0 auto;
   }
-  .accordion-contents {
+  .old-accordion-contents {
     flex: 1 1 auto;
     transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
     overflow: hidden;
@@ -19,19 +19,19 @@
     max-height: 500px;
     overflow: auto;
   }
-  .accordion-contents.collapsed {
+  .old-accordion-contents.collapsed {
     flex: 0 0 auto;
     height: 0px;
     visibility: hidden;
   }
-  .accordion-title {
+  .old-accordion-title {
     background-color: #333;
     color: white;
     font-weight: 700;
     font-size: 18px;
     border-radius: 0px;
   }
-  .accordion-title:hover, .accordion-title:focus {
+  .old-accordion-title:hover, .old-accordion-title:focus {
     background-color: #333;
     color: white;
   }
@@ -41,10 +41,10 @@
     <h4 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
     <optimize-button></optimize-button>
   </div>
-  <div class="accordion-title">
-    <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
+  <div class="old-accordion-title">
+    <button class="btn btn-default btn-block old-accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
   </div>
-  <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
+  <div ng-class="{ 'old-accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
     <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
       <select class="form-control"
         ng-model="$ctrl.state.networkAnalysisType"
@@ -60,10 +60,10 @@
         remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
     </div>
   </div>
-  <div class="accordion-title">
-    <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
+  <div class="old-accordion-title">
+    <button class="btn btn-default btn-block old-accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
   </div>
-  <div ng-class="{ 'accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.OUTPUT }">
+  <div ng-class="{ 'old-accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.OUTPUT }">
     <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
       <network-analysis-output></network-analysis-output>
     </div>

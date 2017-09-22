@@ -1,27 +1,55 @@
+class AccordionController {
+  constructor() {
+    this.expandedAccordionId = 'ONE'
+  }
+
+  setExpandedAccordionId(id) {
+    this.expandedAccordionId = id
+  }
+}
+
 app.component('accordion', {
   template: `
     <style scoped>
       .accordion-container {
-        position: relative; /* This will require the parent to have position: relative or absolute */
+        position: absolute; /* This will require the parent to have position: relative or absolute */
         height: 100%;
+        width: 100%;
         display: flex;
         flex-direction: column;
       }
     </style>
-    <div class="accordion-container">
-      <ng-transclude></ng-transclude>
+    <div>
+      <!-- Note that we are applying the display:flex on ng-transclude, and then the panels must be a direct child
+           of this element in order for the flexbox to work -->
+      <ng-transclude class="accordion-container"></ng-transclude>
     </div>
   `,
   transclude: true,
-  controller: function() 
-  { this.index = 3 }
+  controller: AccordionController
 })
+
+class AccordionPanelController {
+  constructor() {
+  }
+
+  $onInit() {
+    console.log('init')
+    console.log(this.parentAccordion)
+  }
+
+}
 
 app.component('accordionPanel', {
   template: `
     <style scoped>
       .accordion-title {
         flex: 0 0 auto;
+        background-color: #333;
+        color: white;
+        font-weight: 700;
+        font-size: 18px;
+        border-radius: 0px;
       }
       .accordion-contents {
         flex: 1 1 auto;
@@ -30,19 +58,25 @@ app.component('accordionPanel', {
         max-height: 500px;
         overflow: auto;
       }
+      .accordion-contents.collapsed {
+        flex: 0 0 auto;
+        height: 0px;
+        visibility: hidden;
+      }
     </style>
-    <div class="accordion-title">
+    <div class="accordion-title" ng-click="$ctrl.parentAccordion.setExpandedAccordionId($ctrl.panelId)">
       This is the title
-      {{JSON.stringify($ctrl.parent)}}
     </div>
-    <div class="accordion-contents">
+    <div ng-class="{'accordion-contents': true, 'collapsed': $ctrl.parentAccordion.expandedAccordionId !== $ctrl.panelId}">
       <ng-transclude></ng-transclude>
     </div>
   `,
   transclude: true,
   require: {
-    parent: '^accordion'
+    parentAccordion: '^accordion'
   },
-  controller: function($scope) { console.log(this.parent) },
-  $ngOnInit: function() { console.log('init');console.log(this.parent) }
+  bindings: {
+    panelId: '<'
+  },
+  controller: AccordionPanelController
 })
