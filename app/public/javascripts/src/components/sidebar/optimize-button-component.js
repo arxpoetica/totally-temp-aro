@@ -61,7 +61,8 @@ class OptimizeButtonController {
     // Get the optimization options that we will pass to the server
     var optimizationBody = this.state.getOptimizationBody()
     // Make the API call that starts optimization calculations on aro-service
-    this.$http.post(`/service/v1/optimize/masterplan`, optimizationBody)
+    var apiUrl = (this.state.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
+    this.$http.post(apiUrl, optimizationBody)
       .then((response) => {
         console.log(response)
         if (response.status >= 200 && response.status <= 299) {

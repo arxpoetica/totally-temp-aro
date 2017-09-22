@@ -139,8 +139,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     })
     if (fiveGEnabled) {
       postBody.networkConstraints.cellNodeConstraints = {}
-      postBody.networkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius
       postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
+      // Cell radius should be added only for fixed radius
+      if (state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy === 'FIXED_RADIUS') {
+        postBody.networkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius
+      }
       postBody.networkConstraints.cellNodeConstraints.cellGranularityRatio = 0.5
       postBody.networkConstraints.cellNodeConstraints.minimumRayLength = 45
       var selectedTile = state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
