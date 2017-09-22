@@ -1,16 +1,14 @@
 // See README.md for details on how to use the accordion component
 
-class AccordionPanelController {
+class AccordionPanelContentsController {
   constructor($element) {
     this.$element = $element
-    this.panelId = null
   }
 
   $onInit() {
-    // Set the unique (within siblings) id for this component
-    this.panelId = this.parentAccordion.getNextChildId()
     // Register a listener that will handle the expanded accordion ID changing
     this.parentAccordion.addExpandedAccordionIdListener(this.onExpandedAccordionIdChanged.bind(this))
+    this.onExpandedAccordionIdChanged()
   }
 
   onExpandedAccordionIdChanged() {
@@ -23,9 +21,9 @@ class AccordionPanelController {
   }
 }
 
-AccordionPanelController.inject = ['$element']
+AccordionPanelContentsController.inject = ['$element']
 
-app.component('accordionPanel', {
+app.component('accordionPanelContents', {
   template: `
     <style scoped>
       .accordion-expanded {
@@ -37,34 +35,18 @@ app.component('accordionPanel', {
         flex: 0 0 auto;
         transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
       }
-      .accordion-title {
-        background-color: #333;
-        color: white;
-        font-weight: 700;
-        font-size: 18px;
-        border-radius: 0px;
-      }
-      .accordion-contents {
-        overflow-y: hidden;
-      }
-      .accordion-contents.collapsed {
-        height: 0px;
-        visibility: hidden;
+      .hide-transcluded {
+        display: none;
       }
     </style>
-    <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.parentAccordion.setExpandedAccordionId($ctrl.panelId)">
-      {{$ctrl.title}}
-    </button>
-    <div ng-class="{'accordion-contents': true, 'collapsed': $ctrl.parentAccordion.expandedAccordionId !== $ctrl.panelId}">
-      <ng-transclude></ng-transclude>
-    </div>
+    <ng-transclude ng-class="{'hide-transcluded': $ctrl.parentAccordion.expandedAccordionId !== $ctrl.panelId }"></ng-transclude>
   `,
   transclude: true,
   require: {
     parentAccordion: '^accordion'
   },
   bindings: {
-    title: '<'
+    panelId: '<'
   },
-  controller: AccordionPanelController
+  controller: AccordionPanelContentsController
 })

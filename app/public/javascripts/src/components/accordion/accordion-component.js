@@ -1,9 +1,12 @@
 // See README.md for details on how to use the accordion component
 class AccordionController {
   constructor() {
-    this.expandedAccordionId = null
     this.expandedAccordionIdListeners = []
     this.nextAvailableChildId = 0
+  }
+
+  $onInit() {
+    this.expandedAccordionId = this.initialExpandedPanel
   }
 
   // Returns the next available child ID.
@@ -46,5 +49,8 @@ app.component('accordion', {
     </div>
   `,
   transclude: true,
+  bindings: {
+    initialExpandedPanel: '<'
+  },
   controller: AccordionController
 })
