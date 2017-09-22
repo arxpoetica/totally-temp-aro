@@ -753,6 +753,7 @@ class TileComponentController {
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
     this.tileDataService = tileDataService
+    this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
     state.mapLayers
@@ -778,6 +779,10 @@ class TileComponentController {
             lat: coordinates.latitude,
             lng: coordinates.longitude
           })
+        }
+
+        if (plan) {
+          this.areControlsEnabled = (plan.planState === 'START_STATE') || (plan.planState === 'INITIALIZED')
         }
       })
 
@@ -895,10 +900,13 @@ class TileComponentController {
             
             state.hackRaiseEvent(selectedLocationsIds)
 
-            state.mapFeaturesSelectedEvent.next({
-              locations: selectedLocationsIds,
-              serviceAreas: selectedServiceAreaIds
-            })
+            //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+            if (this.areControlsEnabled) {
+              state.mapFeaturesSelectedEvent.next({
+                locations: selectedLocationsIds,
+                serviceAreas: selectedServiceAreaIds
+              })
+            }
           })
 
       })
@@ -953,15 +961,15 @@ class TileComponentController {
               state.hackRaiseEvent(hitFeatures)
             }
 
-            //Locations or service areas can be selected in Analysis Mode
-            if (state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
+            //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+            if (state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS && this.areControlsEnabled) {
               state.mapFeaturesSelectedEvent.next({
                 locations: hitFeatures,
                 serviceAreas: serviceAreaFeatures
               })
             }
 
-            //Locations Info is shown in Analysis Mode
+            //Locations Info is shown in View Mode
             if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
               state.showLocationInfo.next({
                 locations: hitFeatures

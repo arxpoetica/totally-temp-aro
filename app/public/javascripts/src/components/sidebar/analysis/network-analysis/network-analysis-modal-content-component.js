@@ -136,7 +136,7 @@ class NetworkAnalysisModalContentController {
     function buildChartData (result, datasets) {
       var labels = result.splice(0, 1)
       result = result.map((row) => _.object(labels[0],row.map((value) => +value)))
-      result = _.sortBy(result,'capex')
+      result = _.sortBy(result,'index')
       
       return {
         labels: result.map((row) => String($filter('number')(+row.capex/1000,0)+'K')),
@@ -159,7 +159,7 @@ class NetworkAnalysisModalContentController {
       var ctx = elem.getContext('2d')
       // ctx.fillStyle = 'white'
       // ctx.fillRect(0, 0, elem.offsetWidth, elem.offsetHeight)
-      //charts[id] = new Chart(ctx)[type](data, options)
+      //charts[id] = new Chart(ctx)[type](data, options)  
       charts[id] = new Chart(ctx, {
         type: type,
         data: data,
