@@ -132,8 +132,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
 
     var fiveGEnabled = false
-    state.optimizationOptions.technologies.forEach((technology) => {
-      if (technology.id === 'FiveG' && technology.checked) {
+    state.optimizationOptions.selectedTechnology.forEach((technology) => {
+      if (technology.id === 'FiveG') {
         fiveGEnabled = true
       }
     })

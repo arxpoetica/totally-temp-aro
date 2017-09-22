@@ -1,7 +1,8 @@
 class ToolBarController {
 
-  constructor($scope, state) {
+  constructor($scope, state, map_tools) {
     this.state = state
+    this.map_tools = map_tools
     this.state.showGlobalSettings
     .subscribe((newValue) => {})
 
@@ -92,9 +93,19 @@ class ToolBarController {
     if (current) this.measuredDistance = null
   }
 
+  toggleViewSettings() {
+    var viewSettingConfig = {
+      id: 'map_settings',
+      name: 'View Settings',
+      short_name: 'V',
+      icon: 'fa fa-eye fa-2x'
+    }
+    this.map_tools.toggle(viewSettingConfig)
+  }
+
 }
 
-ToolBarController.$inject = ['$scope','state']
+ToolBarController.$inject = ['$scope','state','map_tools']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',

@@ -68,6 +68,7 @@
     </div>
     <div class="btn-group">
       <button class="btn btn-default"><i class="fa fa-2x fa-arrows-h" data-ng-click="$ctrl.toggleMeasuringStick()"></i></button>
+      <button class="btn btn-default"><i class="fa fa-2x fa-eye" data-ng-click="$ctrl.toggleViewSettings()"></i></button>
     </div>
     <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
       <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"

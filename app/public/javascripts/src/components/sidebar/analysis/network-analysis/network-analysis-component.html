@@ -12,12 +12,11 @@
       <tr>
         <td>Endpoint Technology</td>
         <td>
-            <ui-select multiple ng-model="$ctrl.state.optimizationOptions.selectedTechnology" theme="bootstrap" close-on-select="true">
-              <ui-select-match placeholder="Select technology...">{{$item.label}}</ui-select-match>
-              <ui-select-choices class="ui-select-width-250" repeat="item in $ctrl.state.optimizationOptions.technologies">
-                <div>{{item.label}}</div>
-              </ui-select-choices>
-            </ui-select>
+          <select class="form-control selectpicker" multiple title="select technology..."
+            ng-model="$ctrl.state.optimizationOptions.selectedTechnology"
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies"
+            ng-disabled="!$ctrl.areControlsEnabled">
+          </select>
         </td>
       </tr>
       <tr ng-repeat="tech in $ctrl.state.optimizationOptions.selectedTechnology" ng-if="tech.id === 'FiveG'">
