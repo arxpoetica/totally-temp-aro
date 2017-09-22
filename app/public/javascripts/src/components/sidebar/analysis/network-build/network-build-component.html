@@ -1,9 +1,4 @@
 <div>
-  <!--<br>
-  <input type="checkbox" class="checkboxfill"
-    ng-model="$ctrl.toogleTableView"
-    name="ctype-name"
-  >-->
   <style scoped>
     #tblNetworkBuild td {
       line-height: 33px;  /* To vertically align text */
@@ -12,18 +7,8 @@
       padding-left: 30px !important;
     }
   </style>
-  <div ng-show="! $ctrl.toogleTableView">
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
     <tbody>
-      <!-- <tr>
-        <td>Analysis Type</td>
-        <td> 
-          <select class="form-control"
-            ng-model="$ctrl.state.networkAnalysisType"
-            ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
-          </select>
-        </td>
-      </tr> -->
       <tr>
         <td>Optimization Type</td>
         <td> 
@@ -219,5 +204,4 @@
       </tr>
     </tbody>
   </table>
-  </div>
 </div>

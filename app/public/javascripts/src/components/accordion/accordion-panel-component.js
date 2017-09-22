@@ -53,7 +53,7 @@ app.component('accordionPanel', {
       }
     </style>
     <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.parentAccordion.setExpandedAccordionId($ctrl.panelId)">
-      This is the title
+      {{$ctrl.title}}
     </button>
     <div ng-class="{'accordion-contents': true, 'collapsed': $ctrl.parentAccordion.expandedAccordionId !== $ctrl.panelId}">
       <ng-transclude></ng-transclude>
@@ -62,6 +62,9 @@ app.component('accordionPanel', {
   transclude: true,
   require: {
     parentAccordion: '^accordion'
+  },
+  bindings: {
+    title: '<'
   },
   controller: AccordionPanelController
 })

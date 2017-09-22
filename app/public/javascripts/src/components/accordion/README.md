@@ -9,7 +9,7 @@ The accordion component can be used in the following way:
   <accordion>
 
     <!-- Then declare the accordion panels with whatever custom content you want -->
-    <accordion-panel>
+    <accordion-panel title="'Title1'">  <!-- Note the title is sent as a string, so "'Title1'", not "Title1" -->
       Custom content<br>
       Custom content<br>
       Custom content<br>
@@ -17,7 +17,7 @@ The accordion component can be used in the following way:
       Custom content<br>
     </accordion-panel>
     
-    <accordion-panel>
+    <accordion-panel title="'Title2'">
       More custom content
     </accordion-panel>
   </accordion>

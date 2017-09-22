@@ -1,7 +1,8 @@
 <style>
   .analysis-mode-container {
-    position: relative; /* This will require the parent to have position: relative or absolute */
+    position: absolute;
     height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
   }
@@ -41,31 +42,27 @@
     <h4 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
     <optimize-button></optimize-button>
   </div>
-  <div class="old-accordion-title">
-    <button class="btn btn-default btn-block old-accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.INPUT)">Input</button>
-  </div>
-  <div ng-class="{ 'old-accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.INPUT }">
-    <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
-      <select class="form-control"
-        ng-model="$ctrl.state.networkAnalysisType"
-        ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
-      </select>
-    </div>
-    <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
-      <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
-        remove-service-area="$ctrl.removeServiceArea(target)"></network-build>
-    </div>
-    <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
-      <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
-        remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
-    </div>
-  </div>
-  <div class="old-accordion-title">
-    <button class="btn btn-default btn-block old-accordion-title" ng-click="$ctrl.expandAccordion($ctrl.accordions.OUTPUT)">Output</button>
-  </div>
-  <div ng-class="{ 'old-accordion-contents': true, 'collapsed': $ctrl.expandedAccordionIndex !== $ctrl.accordions.OUTPUT }">
-    <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
-      <network-analysis-output></network-analysis-output>
-    </div>
-  </div>
+  <accordion style="position: relative; flex: 1 1 auto;">
+    <accordion-panel title="'Input'">
+      <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
+        <select class="form-control"
+          ng-model="$ctrl.state.networkAnalysisType"
+          ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
+        </select>
+      </div>
+      <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
+        <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
+          remove-service-area="$ctrl.removeServiceArea(target)"></network-build>
+      </div>
+      <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+        <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
+          remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
+      </div>
+    </accordion-panel>
+    <accordion-panel title="'Output'">
+      <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+        <network-analysis-output></network-analysis-output>
+      </div>
+    </accordion-panel>
+  </accordion>
 </div>
