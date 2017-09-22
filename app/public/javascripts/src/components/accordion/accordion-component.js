@@ -1,10 +1,16 @@
 class AccordionController {
   constructor() {
     this.expandedAccordionId = 'ONE'
+    this.expandedAccordionIdListeners = []
   }
 
   setExpandedAccordionId(id) {
     this.expandedAccordionId = id
+    this.expandedAccordionIdListeners.forEach((listener) => listener())
+  }
+
+  addExpandedAccordionIdListener(listener) {
+    this.expandedAccordionIdListeners.push(listener)
   }
 }
 
@@ -30,19 +36,42 @@ app.component('accordion', {
 })
 
 class AccordionPanelController {
-  constructor() {
+  constructor($element) {
+    this.$element = $element
+    console.log($element)
   }
 
   $onInit() {
     console.log('init')
     console.log(this.parentAccordion)
+    this.parentAccordion.addExpandedAccordionIdListener(this.onExpandedAccordionIdChanged.bind(this))
   }
 
+  $onChange() {
+    console.log('onchange triggered')
+    console.log(this)
+  }
+
+  onExpandedAccordionIdChanged() {
+    console.log(`${this.panelId}, ${this.parentAccordion.expandedAccordionId}`)
+    this.$element.removeClass('accordion-expanded')
+    this.$element.removeClass('accordion-collapsed')
+    var newClass = (this.parentAccordion.expandedAccordionId === this.panelId) ? 'accordion-expanded' : 'accordion-collapsed'
+    this.$element.addClass(newClass)
+  }
 }
+
+AccordionPanelController.inject = ['$element']
 
 app.component('accordionPanel', {
   template: `
     <style scoped>
+      .accordion-expanded {
+        flex: 1 1 auto;
+      }
+      .accordion-collapsed {
+        flex: 0 0 auto;
+      }
       .accordion-title {
         flex: 0 0 auto;
         background-color: #333;
