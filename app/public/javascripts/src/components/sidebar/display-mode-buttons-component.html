@@ -25,13 +25,15 @@
                 title="Analysis Mode"></div>
   </button>
 </div>
-<button type="button"
-        ng-class="{ 'btn display-mode-button pull-right': true,
-                    'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
-                    'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
-        ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.PLAN_SETTINGS)">
-          <div class="fa fa-2x fa-cog"
-                data-toggle="tooltip"
-                data-placement="bottom"
-                title="Plan Settings Mode"></div>
-</button>
+<div class="btn-group pull-right">
+  <button type="button"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.PLAN_SETTINGS)">
+            <div class="fa fa-2x fa-cog"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Plan Settings Mode"></div>
+  </button>
+</div>

@@ -157,8 +157,7 @@ app.component('mapSplit', {
                               'fa-arrow-circle-right': !$ctrl.isCollapsed,
                               'fa-arrow-circle-left': $ctrl.hovering && $ctrl.isCollapsed }">
                 </i>
-            <network-plan ng-click="$event.stopPropagation()">
-              <network-plan/>
+            <network-plan ng-click="$event.stopPropagation()"></network-plan>
           </div>
         </div>
         <!-- Add a wrapping div because the expander changes the layout even though it is outside the panel -->
@@ -172,6 +171,9 @@ app.component('mapSplit', {
           </div>
           <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
             <analysis-mode></analysis-mode>
+          </div>
+          <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.PLAN_SETTINGS">
+            <plan-settings></plan-settings>
           </div>
         </div>
       </div>
