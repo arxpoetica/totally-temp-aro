@@ -61,10 +61,11 @@ class NetworkAnalysisModalContentController {
           Thousand: 1000,
           Million: 1000000
         })
-        var yAxisCategory = categories.Normal 
-        if(_.max(data.datasets[0].data) >= 10000000) 
+        var yAxisCategory = categories.Normal
+        var MaxYVal = Math.max(...data.datasets[0].data.map(val => val.y)) 
+        if(MaxYVal >= 10000000) 
           yAxisCategory = categories.Million
-        else if(_.max(data.datasets[0].data) >= 10000 && _.max(data.datasets[0].data) < 10000000)
+        else if(MaxYVal >= 10000 && MaxYVal < 10000000)
           yAxisCategory = categories.Thousand
         else
           yAxisCategory = categories.Normal
@@ -78,7 +79,8 @@ class NetworkAnalysisModalContentController {
             }
           },
           tooltips: {},
-          scales: {}
+          scales: {},
+          showLines: true
         }
 
         if ($scope.selectedOption.key === 'irr') {
@@ -86,7 +88,7 @@ class NetworkAnalysisModalContentController {
           tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
-                return buildLabel(tooltipItems.yLabel, 2, yAxisCategory, false, '%')
+                return buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, false, '%')
               }
             }
           }
@@ -95,7 +97,7 @@ class NetworkAnalysisModalContentController {
           tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
-                return buildLabel(tooltipItems.yLabel, 2, yAxisCategory, true, '$')
+                return buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, true, '$')
               }
             }
           }
@@ -104,14 +106,26 @@ class NetworkAnalysisModalContentController {
           tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
-                return buildLabel(tooltipItems.yLabel, 2, yAxisCategory, false)
+                return buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, false)
               }
             }
           }
         }
         
+        options.scales.xAxes = [{ ticks: {
+          userCallback: function(label, index, labels) {
+            var MaxXVal = _.max(labels)
+            var xAxisCategory = categories.Normal
+            if(MaxXVal >= 10000000) 
+              xAxisCategory = categories.Million
+            else if(MaxXVal >= 10000 && MaxXVal < 10000000)
+              xAxisCategory = categories.Thousand
+            else
+              xAxisCategory = categories.Normal
+            return String($filter('number')(+label/xAxisCategory,0) + (xAxisCategory === 1000000 ? 'M' : 'K'))
+          }, autoSkip:true, maxTicksLimit:10 } }]
         options.tooltips = tooltips
-        showChart(this.target, 'line', data, options)
+        showChart(this.target, 'scatter', data, options)
       })
     }
 
@@ -123,10 +137,19 @@ class NetworkAnalysisModalContentController {
       }
     }
 
+    function buildTooltipLabel(value,data, fractionSize, category, isCurrency, symbol) {
+      var tooltip = "CAPEX:" + String($filter('number')(+data.datasets[0].data[value.index].x/1000,0)+'K')
+         + ';' +data.datasets[value.datasetIndex].label +': '
+      if (isCurrency)
+        return tooltip + $filter('currency')(value.yLabel / category, symbol, fractionSize) + (category === 1000000 ? 'M' : 'K')
+      else {        
+        return tooltip + $filter('number')(value.yLabel / category, fractionSize) + (symbol ? symbol : (category === 1000000 ? 'M' : (category === 1000 ? 'K' : '')))
+      }
+    }
+
     function request (key, params, callback) {
       if (!$scope.plan) return
       var plan_id = $scope.plan.id
-      //plan_id = 23
       $http({ url: `/reports/network_analysis/${plan_id}/${key}`, params: params })
         .then((response) => {
           callback(response.data)
@@ -139,10 +162,9 @@ class NetworkAnalysisModalContentController {
       result = _.sortBy(result,'index')
       
       return {
-        labels: result.map((row) => String($filter('number')(+row.capex/1000,0)+'K')),
         datasets: [datasets].map((dataset, i) => Object.assign({
           label: dataset.name,
-          data: result.map((row) => row[dataset.key])
+          data: result.map((row) => ({x:row.capex,y:row[dataset.key]}))
         }, chartStyles[i % chartStyles.length]))
       }
     }
@@ -159,7 +181,8 @@ class NetworkAnalysisModalContentController {
       var ctx = elem.getContext('2d')
       // ctx.fillStyle = 'white'
       // ctx.fillRect(0, 0, elem.offsetWidth, elem.offsetHeight)
-      //charts[id] = new Chart(ctx)[type](data, options)  
+      //charts[id] = new Chart(ctx)[type](data, options)    
+      
       charts[id] = new Chart(ctx, {
         type: type,
         data: data,

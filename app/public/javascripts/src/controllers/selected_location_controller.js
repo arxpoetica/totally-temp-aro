@@ -44,7 +44,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     }
     if (options.length > 0 && options[0].location_id) {
       var id = options[0].location_id
-      openLocation(id)
+      //openLocation(id) In project2.0 version on click of location in view mode -> more info w'll display the location detail modal
       tracker.track('Location selected')
     }
   })
