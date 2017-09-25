@@ -166,14 +166,12 @@ app.component('mapSplit', {
             <!-- this is necessary to make the display-mode-buttons flow correctly -->
             <display-mode-buttons></display-mode-buttons>
           </div>
-          <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.VIEW">
-            <location-detail></location-detail>
-          </div>
-          <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
-            <analysis-mode></analysis-mode>
-          </div>
-          <div style="flex: 1 1 auto; position: relative;" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.PLAN_SETTINGS">
-            <plan-settings></plan-settings>
+          <div style="flex: 1 1 auto; position: relative;">
+            <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
+                 when destroyed to ask if settings should be saved -->
+            <location-detail ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"></location-detail>
+            <analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS"></analysis-mode>
+            <plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS"></plan-settings>
           </div>
         </div>
       </div>
