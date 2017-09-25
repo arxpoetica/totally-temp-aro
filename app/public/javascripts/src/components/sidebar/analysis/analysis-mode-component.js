@@ -21,7 +21,7 @@ class AnalysisModeController {
       })
 
     this.zoomTarget = (target) => {
-      state.requestPanToMap.next({ lat: target.lat, lng: target.lng, zoom:18 })
+      state.requestSetMapCenter.next({ latitude: target.lat, longitude: target.lng})
     }
 
     this.removeTarget = (target) => {

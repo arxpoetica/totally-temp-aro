@@ -773,13 +773,6 @@ class TileComponentController {
             longitude: plan.longitude
           }
         }
-        if (this.mapRef) {
-          this.mapRef.setZoom(coordinates.zoom)
-          this.mapRef.setCenter({
-            lat: coordinates.latitude,
-            lng: coordinates.longitude
-          })
-        }
 
         if (plan) {
           this.areControlsEnabled = (plan.planState === 'START_STATE') || (plan.planState === 'INITIALIZED')
@@ -825,14 +818,20 @@ class TileComponentController {
       }
     })
 
-    // To change the center of the map to given LatLng 
-    state.requestPanToMap
-      .subscribe((coord) => {
-        if (!coord.zoom) {
-          return
+    // Set the map zoom level
+    state.requestSetMapZoom
+      .subscribe((zoom) => {
+        if (this.mapRef) {
+          this.mapRef.setZoom(zoom)
         }
-        this.mapRef.setZoom(coord.zoom)
-        this.mapRef.panTo({ lat: coord.lat, lng: coord.lng })
+      })
+
+    // To change the center of the map to given LatLng 
+    state.requestSetMapCenter
+      .subscribe((mapCenter) => {
+        if (this.mapRef) {
+          this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+        }
       })
     
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)

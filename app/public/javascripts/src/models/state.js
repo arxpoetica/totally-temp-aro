@@ -152,12 +152,18 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     },
     selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
   })
+  service.defaultPlanCoordinates = {
+    zoom: 14,
+    latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
+    longitude: -122.3321    // Seattle, WA by default. For no particular reason.
+  }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = new Rx.BehaviorSubject(false)
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
   service.splitterObj = new Rx.BehaviorSubject({})
-  service.requestPanToMap = new Rx.BehaviorSubject({})
+  service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
+  service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
   service.showLocationInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   
@@ -546,11 +552,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
   }
 
-  service.defaultPlanCoordinates = {
-    zoom: 14,
-    latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
-    longitude: -122.3321    // Seattle, WA by default. For no particular reason.
-  }
   $document.ready(() => {
     // We should have a map object at this point. Unfortunately, this is hardcoded for now.
     if (map) {
@@ -694,6 +695,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)
+          service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
+          service.requestSetMapZoom.next(result.data.zoomIndex)
         }
       })
   }
