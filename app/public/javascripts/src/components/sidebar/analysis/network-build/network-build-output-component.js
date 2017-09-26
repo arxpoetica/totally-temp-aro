@@ -4,6 +4,7 @@ class NetworkBuildOutputController {
     this.state = state
     this.$http = $http
     this.networkBuildSummary = {}
+    this.config = config
 
     state.plan
     .subscribe((plan) => {
@@ -17,6 +18,10 @@ class NetworkBuildOutputController {
     this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
       this.networkBuildSummary = response.data
     })  
+  }
+
+  showDetailedOutput() {
+
   }
 
 }
