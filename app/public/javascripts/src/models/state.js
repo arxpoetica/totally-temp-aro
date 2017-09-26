@@ -105,11 +105,16 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       { id: 'B', value: 'C Route', checked: false },
       { id: 'C', value: 'D Route', checked: false }
     ],
-    technologies: [
-      { id: 'Fiber', label: 'Fiber', checked: true},
-      { id: 'FiveG', label: '5G', checked: false}
-    ],
-    selectedTechnology: [],
+    technologies: { // Note that the keys are passed in to the optimization endpoint, so don't change them
+      Fiber: {
+        label: 'Fiber',
+        checked: true
+      },
+      FiveG: {
+        label: '5G',
+        checked: false
+      }
+    },
     selectedLayer: null,
     generatedDataRequest: {
       generatePlanLocationLinks : false
@@ -117,9 +122,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     geographicalLayers: [],
     selectedgeographicalLayer: null
   }
-
-  // Default technology
-  service.optimizationOptions.selectedTechnology.push(service.optimizationOptions.technologies[0])
 
   // View Settings layer - define once
   service.viewSetting = {

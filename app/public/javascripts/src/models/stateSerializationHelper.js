@@ -131,12 +131,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
 
-    var fiveGEnabled = false
-    state.optimizationOptions.selectedTechnology.forEach((technology) => {
-      if (technology.id === 'FiveG') {
-        fiveGEnabled = true
-      }
-    })
+    var fiveGEnabled = state.optimizationOptions.technologies.FiveG.checked
     if (fiveGEnabled) {
       postBody.networkConstraints.cellNodeConstraints = {}
       postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
@@ -154,8 +149,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     // Add technologies like "Fiber" and "5G"
     postBody.networkConstraints.networkTypes = []
-    state.optimizationOptions.selectedTechnology.forEach((technology) => {
-      postBody.networkConstraints.networkTypes.push(technology.id)
+    Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => {
+      var technology = state.optimizationOptions.technologies[technologyKey]
+      if (technology.checked) {
+        postBody.networkConstraints.networkTypes.push(technologyKey)
+      }
     })
   }
 
@@ -285,10 +283,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load technologies from a POST body object that is sent to the optimization engine
   var loadTechnologiesFromBody = (state, postBody) => {
-    state.optimizationOptions.technologies.forEach((technology) => technology.checked = false)
+    Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey] = false)
     postBody.networkConstraints.networkTypes.forEach((networkType) => {
-      var matchedTechnology = state.optimizationOptions.technologies.filter((technology) => technology.id.toUpperCase() === networkType.toUpperCase())
-      state.optimizationOptions.selectedTechnology = matchedTechnology  // Technically this will be overwritten if we have multiple technologies. Let it be for now.
+      var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())
+      state.optimizationOptions.technologies[matchedTechnology].checked = true
     })
   }
 
