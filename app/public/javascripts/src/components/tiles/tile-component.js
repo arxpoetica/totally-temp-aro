@@ -555,39 +555,18 @@ class MapTileRenderer {
             selectFeature = true
           }
         } else if (feature.properties.code) {
-          //The below are the link for this Randolph Franklin Algorithm
-          //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
-          //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-          var vertx = [], verty = []
-          var testx, testy
-          var i, j, nvert, inside = false;
+          feature.loadGeometry().forEach(function (areaGeom) {
+            areaGeom.forEach(function (eachValue) {
+              var eachPoint = []
+              eachPoint.push(eachValue.x)
+              eachPoint.push(eachValue.y)
 
-          _.each(Object.values(polygonCoords), (point) => {
-            vertx.push(point[0])
-            verty.push(point[1])
-          })
-
-          outerLoop: for (var k = 0; k < feature.loadGeometry().length; k++) {
-            var featuresgeom = Object.values(feature.loadGeometry()[k])
-
-            innerLoop: for (var pos = 0; pos < featuresgeom.length; pos++) {
-              testx = Object.values(featuresgeom[pos])[0]
-              testy = Object.values(featuresgeom[pos])[1]
-
-              inside = false;
-
-              nvert = vertx.length
-              for (i = 0, j = nvert - 1; i < nvert; j = i++) {
-                if (((verty[i] > testy) != (verty[j] > testy)) && (testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i]))
-                  inside = !inside;
-              }
-
-              if (inside) {
+              if (pointInPolygon(eachPoint, polygonCoords)) {
                 selectFeature = true
-                break outerLoop
+                return
               }
-            }
-          }
+            })
+          })
         }
       })
       return selectFeature
@@ -688,30 +667,21 @@ class MapTileRenderer {
 
       //Load the selected service area 
       if(feature.properties.code) {
-        //The below are the link for this Randolph Franklin Algorithm
-        //https://stackoverflow.com/questions/217578/how-can-i-determine-whether-a-2d-point-is-within-a-polygon#answer-2922778
-        //https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-        var vertx = [], verty = []
-        var testx = xWithinTile
-        var testy = yWithinTile
-        var i, j, nvert, inside = false;
-        
-        _.each(Object.values(feature.loadGeometry()), function (point) {
-          _.each(point, function (eachpoint) {
-            vertx.push(eachpoint.x)
-            verty.push(eachpoint.y)
-          })
-        });
-        
-        nvert = vertx.length
-        for (i = 0, j = nvert-1; i < nvert; j = i++) {
-          if ( ((verty[i]>testy) != (verty[j]>testy)) && (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
-             inside = !inside;
-        }
+        feature.loadGeometry().forEach(function (areaGeom) {
+          var areaPolyCoordinates = []
 
-        if(inside) {
-          selectFeature = true
-        }
+          areaGeom.forEach(function (eachValue) {
+            var eachPoint = []
+            eachPoint.push(eachValue.x)
+            eachPoint.push(eachValue.y)
+            areaPolyCoordinates.push(eachPoint)
+          })
+
+          if (pointInPolygon([xWithinTile, yWithinTile], areaPolyCoordinates)) {
+            selectFeature = true
+            return
+          }
+        })
       }
 
       return selectFeature
