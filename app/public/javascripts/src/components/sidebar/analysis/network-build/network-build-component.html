@@ -130,13 +130,10 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
-        <td class="indent-1">Radius</td>
+        <td class="indent-1">Radius (m)</td>
         <td> 
-          <div class="input-group input-group">
-            <input type="text" class="form-control text-right" placeholder="Cell Radius"
-              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
-            <div class="input-group-addon">m</div>
-          </div>
+          <input type="text" class="form-control text-right" placeholder="Cell Radius"
+            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
