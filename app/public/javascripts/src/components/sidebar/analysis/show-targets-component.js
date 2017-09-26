@@ -24,22 +24,12 @@ app.component('showTargets', {
       }   
       #show-targets:hover {
           overflow: auto;
-      } 
-      ul li.item[disabled] {
-        opacity: .4;
-        cursor: default;
-        pointer-events: none;
-      }
-      ul li.item.active {
-        pointer-events: initial;
       }
     </style>
     <div id="show-targets">
       <div style="margin: 5px;min-height: 0px;">
         <ul ng-show="$ctrl.targets.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
-          <li class="item" ng-repeat="target in $ctrl.targets track by $index" 
-            ng-disabled="$ctrl.disable" 
-            ng-class="{active: !$ctrl.disable}" 
+          <li class="item" ng-repeat="target in $ctrl.targets track by $index"
             ng-click="$ctrl.zoomLocation(target)">
             <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeLocation(target)" style="margin-right: 5px">
             <span class="fa fa-trash-o"></span>
@@ -51,7 +41,6 @@ app.component('showTargets', {
     `,
   bindings: {
     targets: '=',
-    disable: '=',
     removeTarget: '&', 
     zoomTarget: '&'
   },

@@ -1,14 +1,16 @@
 <div>
   <!-- <p class="pull-right"> -->
-    <div ng-if="$ctrl.splitterObj.getSizes()[1] <= 34">
-      <em>Ouput is too large to display at this width</em>
+    <div style="display: inline-block;width: 100%">
+      <em ng-if="$ctrl.splitterObj.getSizes()[1] <= 34">Ouput is too large to display at this width</em>
+      <div ng-if="$ctrl.splitterObj.getSizes()[1] <= 34">
+        <button class="pull-left btn btn-primary" ng-click="$ctrl.showOutput()">Expand Results</button>
+      </div>
       <div>
-        <button class="btn btn-primary" ng-click="$ctrl.showOutput()">Expand Results</button>
         <button ng-click="$ctrl.downloadChart()" class="pull-right btn btn-default btn-sm">
-            <span style="color:#4d99e5" class="fa fa-download"></span>
+          <span style="color:#4d99e5" class="fa fa-download"></span>
         </button>
-      </div>  
-    </div>  
+      </div>
+    </div>
     <div ng-if="$ctrl.splitterObj.getSizes()[1] > 34">
       <network-analysis-content target="network-analysis-chart-cash-flow-panel"></network-analysis-content>
     </div>

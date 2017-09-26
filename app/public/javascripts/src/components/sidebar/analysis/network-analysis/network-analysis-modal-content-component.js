@@ -84,7 +84,7 @@ class NetworkAnalysisModalContentController {
         }
 
         if ($scope.selectedOption.key === 'irr') {
-          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value, 0, yAxisCategory, false, '%') },beginAtZero:  true } }] }
+          options.scales = { yAxes: [{ ticks: { callback: function (value, index, values) { return buildLabel(value * 100, 0, yAxisCategory, false, '%') },beginAtZero:  true } }] }
           tooltips = {
             callbacks: {
               label: function (tooltipItems, data) {
@@ -143,7 +143,8 @@ class NetworkAnalysisModalContentController {
       if (isCurrency)
         return tooltip + $filter('currency')(value.yLabel / category, symbol, fractionSize) + (category === 1000000 ? 'M' : 'K')
       else {        
-        return tooltip + $filter('number')(value.yLabel / category, fractionSize) + (symbol ? symbol : (category === 1000000 ? 'M' : (category === 1000 ? 'K' : '')))
+        return tooltip + (symbol ? $filter('number')(value.yLabel * 100 / category, fractionSize) : $filter('number')(value.yLabel / category, fractionSize))  
+          + (symbol ? symbol : (category === 1000000 ? 'M' : (category === 1000 ? 'K' : '')))
       }
     }
 

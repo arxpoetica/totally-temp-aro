@@ -62,6 +62,9 @@
     </accordion-panel-contents>
     <accordion-panel-title title="'Output'" panel-id="'OUTPUT'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'OUTPUT'">
+      <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
+        <network-build-output></network-build-output>
+      </div>
       <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis-output></network-analysis-output>
       </div>

@@ -1,0 +1,52 @@
+<div>
+  <style scoped>
+    #tblNetworkBuildOutput td {
+      line-height: 33px; /* To vertically align text */
+    }
+    .indent-1 {
+      padding-left: 30px !important;
+    }
+  </style>
+  <button class="btn btn-primary" ng-click="$ctrl.showDetailedOutput()">Expand Results</button> <br>
+  <table id="tblNetworkBuildOutput" class="table table-condensed table-striped">
+    <tbody>
+      <tr>
+        <th colspan="2">Fiber Capex</th>
+      </tr>
+      <tr ng-repeat="fiberCost in $ctrl.networkBuildSummary.priceModel.fiberCosts">
+        <td class="indent-1">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters | number : 0}} m)</td>
+        <td>{{fiberCost.totalCost / 1000 | currency:"$":1}}K</td>
+      </tr>
+      <tr>
+        <th colspan="2">Equipment Capex</th>
+      </tr>
+      <tr ng-repeat="equipmentCost in $ctrl.networkBuildSummary.priceModel.equipmentCosts">
+        <td class="indent-1">{{equipmentCost.nodeType}} (x{{equipmentCost.quantity | number }})</td>
+        <td>{{equipmentCost.total / 1000 | currency:"$":1}}K</td>
+      </tr>
+      <tr>
+        <th>Total Capex</th>
+        <td>{{$ctrl.networkBuildSummary.priceModel.totalCost / 1000 | currency:"$":1}}K</td>
+      </tr>
+
+      <tr>
+        <th>Premises Passed</th>
+        <td> {{$ctrl.networkBuildSummary.demandSummary.networkDemands[0].locationDemand.adjustedAtomicUnits | number}} </td>
+      </tr>
+      <tr ng-repeat="(key, value) in $ctrl.networkBuildSummary.demandSummary.networkDemands[0].locationDemand.entityDemands">
+        <td class="indent-1"> {{key}} </th>
+        <td> {{value.atomicUnits}} </td>
+      </tr>
+
+      <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics">
+        <th>{{networkStatistic.networkStatisticType}}</th>
+        <td ng-if="networkStatistic.networkStatisticType === 'roic_npv' || networkStatistic.networkStatisticType === 'npv'">
+          {{networkStatistic.value / 1000 | currency:"$":1}}K
+        </td>
+        <td ng-if="networkStatistic.networkStatisticType === 'roic_irr' || networkStatistic.networkStatisticType === 'irr'">
+          {{(networkStatistic.value * 100) | number : 1}}%
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
