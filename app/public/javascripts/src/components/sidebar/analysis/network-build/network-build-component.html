@@ -14,8 +14,7 @@
         <td> 
           <select class="form-control"
             ng-model="$ctrl.state.optimizationOptions.uiSelectedAlgorithm"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms"
-            ng-disabled="!$ctrl.areControlsEnabled">
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms">
           </select>
         </td>
       </tr>
@@ -30,8 +29,7 @@
                   max="1"
                   step="0.01"
                   ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
-                  style="margin-top: 10px"
-                  ng-disabled="!$ctrl.areControlsEnabled">
+                  style="margin-top: 10px">
               </div>
               <div class="col-md-5">
                 <div class="form-group form-group-sm">
@@ -40,8 +38,7 @@
                       type="number"
                       ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
                       class="form-control text-right"
-                      percentage-input
-                      ng-disabled="!$ctrl.areControlsEnabled">
+                      percentage-input>
                     <div class="input-group-addon">%</div>
                   </div>
                 </div>
@@ -60,8 +57,7 @@
                   max="1"
                   step="0.01"
                   ng-model="$ctrl.state.optimizationOptions.threshold"
-                  style="margin-top: 10px"
-                  ng-disabled="!$ctrl.areControlsEnabled">
+                  style="margin-top: 10px">
               </div>
               <div class="col-md-5">
                 <div class="form-group form-group-sm">
@@ -70,8 +66,7 @@
                       type="number"
                       ng-model="$ctrl.state.optimizationOptions.threshold"
                       class="form-control text-right"
-                      percentage-input
-                      ng-disabled="!$ctrl.areControlsEnabled">
+                      percentage-input>
                     <div class="input-group-addon">%</div>
                   </div>
                 </div>
@@ -91,8 +86,7 @@
                      ng-model="$ctrl.state.optimizationOptions.financialConstraints.budget"
                      ng-currency
                      currency-symbol=""
-                     fraction="0"
-                     ng-disabled="!$ctrl.areControlsEnabled">
+                     fraction="0">
             </div>
           </div>
         </td>
@@ -107,8 +101,7 @@
                      class="form-control text-right"
                      placeholder="Percentage"
                      ng-model="$ctrl.state.optimizationOptions.threshold"
-                     name="coverage_target"
-                     ng-disabled="!$ctrl.areControlsEnabled">
+                     name="coverage_target">
             </div>
           </div>
         </td>
@@ -118,8 +111,7 @@
         <td>
           <select class="form-control selectpicker" multiple title="select technology..."
             ng-model="$ctrl.state.optimizationOptions.selectedTechnology"
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies"
-            ng-disabled="!$ctrl.areControlsEnabled">
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.technologies">
           </select>
         </td>
       </tr>
@@ -127,8 +119,7 @@
         <td class="indent-1">Polygon Type</td>
         <td> 
           <select class="form-control"
-                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy"
-                  ng-disabled="!$ctrl.areControlsEnabled">
+                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
             <option value="FIXED_RADIUS">Fixed Radius</option>
             <option value="AVERAGE_RADIUS">Average Radius</option>
             <option value="RAY_TRACING">Ray Tracing</option>
@@ -140,8 +131,7 @@
         <td> 
           <div class="input-group input-group">
             <input type="text" class="form-control text-right" placeholder="Cell Radius"
-              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius"
-              ng-disabled="!$ctrl.areControlsEnabled">
+              ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
             <div class="input-group-addon">m</div>
           </div>
         </td>
@@ -152,16 +142,14 @@
           <select class="form-control ng-pristine ng-valid ng-touched"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile"
             ng-change="changeTileSelected(tileselected)"
-            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles"
-            ng-disabled="!$ctrl.areControlsEnabled">
+            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles">
           </select>
         </td>
       </tr>
       <tr>
         <td width="48%">Network Construction</td>
         <td> 
-          <select class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
-                  ng-disabled="!$ctrl.areControlsEnabled">
+          <select class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode">
             <option value="DIRECT_ROUTING">Unsplit Routing</option>
             <option value="ODN_1" >Hub-Only Split</option>
             <option value="ODN_2">Hub-Distribution Split</option>
@@ -174,8 +162,7 @@
           <input type="checkbox"
                  class="checkboxfill"
                  ng-model="$ctrl.state.optimizationOptions.generatedDataRequest.generatePlanLocationLinks"
-                 name="ctype-name"
-                 ng-disabled="!$ctrl.areControlsEnabled"> Save Routed Locations
+                 name="ctype-name"> Save Routed Locations
         </td>
       </tr>
       <tr>
@@ -183,8 +170,7 @@
         <td>
           <select class="form-control" 
             ng-model="$ctrl.state.optimizationOptions.selectedgeographicalLayer" 
-            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers"
-            ng-disabled="!$ctrl.areControlsEnabled">
+            ng-options="item as item.label for item in $ctrl.state.optimizationOptions.geographicalLayers">
           </select>
         </td>
       </tr>
@@ -192,7 +178,7 @@
         <td>Selected Geographies</td>
         <td> 
           <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
-          <show-targets targets="$ctrl.serviceAreas" disable="!$ctrl.areControlsEnabled"
+          <show-targets targets="$ctrl.serviceAreas"
             remove-target="$ctrl.removeServiceArea({target:target})"></show-targets>
         </td>
       </tr>
@@ -200,10 +186,14 @@
         <td>Selected Locations</td>
         <td>
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
-          <show-targets targets="$ctrl.targets" disable="!$ctrl.areControlsEnabled"
+          <show-targets targets="$ctrl.targets"
             remove-target="$ctrl.removeTarget({target:target})" zoom-target="$ctrl.zoomTarget({target:target})"></show-targets>
         </td>
       </tr>
     </tbody>
   </table>
+  <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+  <div class="disable-sibling-controls"
+       ng-hide="$ctrl.areControlsEnabled">
+  </div>
 </div>
