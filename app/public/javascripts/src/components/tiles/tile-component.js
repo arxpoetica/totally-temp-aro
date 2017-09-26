@@ -555,6 +555,8 @@ class MapTileRenderer {
             selectFeature = true
           }
         } else if (feature.properties.code) {
+          //Check the SA boundary inside the drew polygon 
+          //This will be uses when draw the polygon with more than one SA. (With touch the SA boundary)
           feature.loadGeometry().forEach(function (areaGeom) {
             areaGeom.forEach(function (eachValue) {
               var eachPoint = []
@@ -567,6 +569,28 @@ class MapTileRenderer {
               }
             })
           })
+
+          if(!selectFeature) {
+            //Check the drew polygon coordinate inside SA boundary
+            //This will be uses when draw the polygon with in one SA. (Without touch the SA boundary)
+            feature.loadGeometry().forEach(function (areaGeom) {
+              var areaPolyCoordinates = []
+
+              areaGeom.forEach(function (eachValue) {
+                var eachPoint = []
+                eachPoint.push(eachValue.x)
+                eachPoint.push(eachValue.y)
+                areaPolyCoordinates.push(eachPoint)
+              })
+
+              polygonCoords.forEach(function (polyCoord) {
+                if (pointInPolygon([polyCoord[0], polyCoord[1]], areaPolyCoordinates)) {
+                  selectFeature = true
+                  return
+                }
+              })
+            })
+          }
         }
       })
       return selectFeature
