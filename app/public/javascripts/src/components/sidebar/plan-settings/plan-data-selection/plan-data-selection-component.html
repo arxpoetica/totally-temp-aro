@@ -3,17 +3,20 @@
       <tr ng-repeat="(itemKey, itemValue) in $ctrl.dataItems">
         <td>{{itemValue.description}}</td>
         <td>
-          <ui-select multiple ng-model="itemValue.selectedLibraryItems"
-                     theme="bootstrap"
-                     close-on-select="true">
-            <ui-select-match placeholder="Select {{itemValue.description}}...">{{$item.identifier}}-{{$item.name}}</ui-select-match>
-            <ui-select-choices class="ui-select-width-300" repeat="libraryItem in itemValue.allLibraryItems">
-              <div>{{libraryItem.name}}</div>
-            </ui-select-choices>
-          </ui-select>
-          <!--<button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addCustomers()">
-            <span class="fa fa-plus"></span> Add data sources...
-          </button>-->
+          <div style="display:flex">
+            <ui-select multiple ng-model="itemValue.selectedLibraryItems"
+                      theme="bootstrap"
+                      close-on-select="true"
+                      style="flex: 1 1 auto;">
+              <ui-select-match placeholder="Select {{itemValue.description}}...">{{$item.identifier}}-{{$item.name}}</ui-select-match>
+              <ui-select-choices class="ui-select-width-300" repeat="libraryItem in itemValue.allLibraryItems">
+                <div>{{libraryItem.name}}</div>
+              </ui-select-choices>
+            </ui-select>
+            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="addCustomers()">
+              <span class="fa fa-upload"></span>
+            </button>
+          </div>
         </td>
       </tr>
     </tbody>
