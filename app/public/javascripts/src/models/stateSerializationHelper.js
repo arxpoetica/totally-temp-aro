@@ -139,8 +139,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       if (state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy === 'FIXED_RADIUS') {
         postBody.networkConstraints.cellNodeConstraints.cellRadius = state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius
       }
-      postBody.networkConstraints.cellNodeConstraints.cellGranularityRatio = 0.5
-      postBody.networkConstraints.cellNodeConstraints.minimumRayLength = 45
+      postBody.networkConstraints.cellNodeConstraints.cellGranularityRatio = state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio
+      postBody.networkConstraints.cellNodeConstraints.minimumRayLength = state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength
       var selectedTile = state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
       if (selectedTile) {
         postBody.networkConstraints.cellNodeConstraints.tileSystemId = selectedTile.id

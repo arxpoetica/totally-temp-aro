@@ -85,6 +85,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       routingMode: 'DIRECT_ROUTING',
       cellNodeConstraints: {
         cellRadius: 300.0,
+        cellGranularityRatio: 0.5,
+        minimumRayLength: 45,
         polygonStrategy: 'FIXED_RADIUS',
         tiles: [],
         selectedTile: null

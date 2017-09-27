@@ -40,6 +40,20 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+        <td class="indent-1">Granularity Ratio</td>
+        <td>
+          <input type="text" class="form-control text-right" placeholder="Granularity Ratio"
+            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio">
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+        <td class="indent-1">Minimum Ray Length</td>
+        <td>
+          <input type="text" class="form-control text-right" placeholder="Minimum Ray Length"
+            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength">
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
         <td class="indent-1">Tile System</td>
         <td> 
           <select class="form-control ng-pristine ng-valid ng-touched"
