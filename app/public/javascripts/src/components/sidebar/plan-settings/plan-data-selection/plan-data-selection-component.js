@@ -94,7 +94,7 @@ class DataSelectionController {
   // Saves the plan configuration to the server
   saveToServer() {
 
-    var postBody = {
+    var putBody = {
       configurationItems: [],
       resourceConfigItems: []
     }
@@ -106,14 +106,12 @@ class DataSelectionController {
           dataType: dataItemKey,
           libraryItems: this.dataItems[dataItemKey].selectedLibraryItems
         }
-        postBody.configurationItems.push(configurationItem)
+        putBody.configurationItems.push(configurationItem)
       }
     })
 
     // Save the configuration to the server
-    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, postBody)
-    console.log(postBody)
-
+    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, putBody)
   }
 }
 
