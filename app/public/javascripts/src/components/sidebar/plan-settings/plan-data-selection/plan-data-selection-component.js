@@ -2,6 +2,7 @@ class DataSelectionController {
   constructor($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
+    this.isDirty = false
     this.dataItems = {}
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -12,6 +13,32 @@ class DataSelectionController {
 
   $onInit() {
     this.loadFromServer()
+  }
+
+  $onDestroy() {
+    // If any selections have been changed, ask the user if they want to save them
+    if (this.isDirty) {
+      swal({
+        title: 'Save modified settings?',
+        text: 'You have changed the data selection settings. Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          // Save the changed settings to aro-service
+          this.saveToServer()
+        }
+        this.isDirty = false  // Technically not required since we are in $onDestroy
+      })
+    }
+  }
+
+  onSelectionChanged() {
+    this.isDirty = true
   }
 
   loadFromServer() {
@@ -62,6 +89,31 @@ class DataSelectionController {
         })
         this.$timeout() // Will safely call $scope.$apply()
       })
+  }
+
+  // Saves the plan configuration to the server
+  saveToServer() {
+
+    var postBody = {
+      configurationItems: [],
+      resourceConfigItems: []
+    }
+
+    Object.keys(this.dataItems).forEach((dataItemKey) => {
+      // An example of dataItemKey is 'location'
+      if (this.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+        var configurationItem = {
+          dataType: dataItemKey,
+          libraryItems: this.dataItems[dataItemKey].selectedLibraryItems
+        }
+        postBody.configurationItems.push(configurationItem)
+      }
+    })
+
+    // Save the configuration to the server
+    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, postBody)
+    console.log(postBody)
+
   }
 }
 

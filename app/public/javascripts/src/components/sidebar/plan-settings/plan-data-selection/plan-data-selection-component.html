@@ -8,6 +8,8 @@
             <ui-select multiple ng-model="itemValue.selectedLibraryItems"
                       theme="bootstrap"
                       close-on-select="true"
+                      on-select="$ctrl.onSelectionChanged()"
+                      on-remove="$ctrl.onSelectionChanged()"
                       style="flex: 1 1 auto;">
               <ui-select-match placeholder="Select {{itemValue.description}}...">{{$item.identifier}}-{{$item.name}}</ui-select-match>
               <ui-select-choices class="ui-select-width-300" repeat="libraryItem in itemValue.allLibraryItems">
