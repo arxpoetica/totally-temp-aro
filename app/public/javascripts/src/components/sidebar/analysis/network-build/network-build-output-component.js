@@ -1,8 +1,9 @@
 class NetworkBuildOutputController {
 
-  constructor($http, state) {
+  constructor($http, state, map_tools) {
     this.state = state
     this.$http = $http
+    this.map_tools = map_tools
     this.networkBuildSummary = {}
     this.config = config
 
@@ -21,12 +22,18 @@ class NetworkBuildOutputController {
   }
 
   showDetailedOutput() {
-
+    var financialProfileConfig = {
+      id: 'financial_profile',
+      name: 'Financial Profile',
+      short_name: 'F',
+      icon: 'fa fa-line-chart fa-2x'
+    }
+    this.map_tools.toggle(financialProfileConfig)
   }
 
 }
 
-NetworkBuildOutputController.$inject = ['$http','state']
+NetworkBuildOutputController.$inject = ['$http','state','map_tools']
 
 app.component('networkBuildOutput', {
   templateUrl: '/components/sidebar/analysis/network-build/network-build-output-component.html',
