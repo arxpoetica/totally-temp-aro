@@ -86,6 +86,9 @@
       <tool-bar-separator class="tool-bar-separator"></tool-bar-separator>
       <tool-bar-button class="tool-bar-button" faimage="$ctrl.toggleImage" data-ng-click="$ctrl.toggleMeasuringStick()"></tool-bar-button>
       <tool-bar-button class="tool-bar-button" faimage="$ctrl.eyeImage" data-ng-click="$ctrl.toggleViewSettings()"></tool-bar-button>
+      <tool-bar-separator class="tool-bar-separator"></tool-bar-separator>
+      <tool-bar-button class="tool-bar-button" enable="$ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY" faimage="$ctrl.singleSelect" data-ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.SINGLE_ENTITY)"></tool-bar-button>
+      <tool-bar-button class="tool-bar-button" enable="$ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.POLYGON" faimage="$ctrl.polygonSelect" data-ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.POLYGON)"></tool-bar-button>
     </div>
 
     <div class="horizontal-toolbar">
@@ -98,20 +101,9 @@
           aria-expanded="false">
             <i class="fa fa-2x fa-caret-down"></i>
           </button>
-        <div class="dropdown-menu" style="min-width:0px;" aria-labelledby="btnGroupDrop1">
+        <div class="dropdown-menu" style="min-width:0px; padding:0px" aria-labelledby="btnGroupDrop1">
         </div>
       </div>
-    </div>
-    
-    <div class="btn-group" ng-hide="$ctrl.state.selectedDisplayMode.getValue() !== $ctrl.state.displayModes.ANALYSIS">
-      <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY }"
-              ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.SINGLE_ENTITY)">
-        <i class="fa fa-2x fa-mouse-pointer"></i>
-      </button>
-      <button ng-class="{ 'btn btn-default': true, 'btn-selected': $ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.POLYGON }"
-              ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.POLYGON)">
-        <i class="fa fa-2x fa-bookmark-o fa-rotate-180"></i>
-      </button>
     </div>
   </div>
 

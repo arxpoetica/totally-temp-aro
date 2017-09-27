@@ -11,18 +11,40 @@ class ToolBarController {
     state.splitterObj
       .subscribe((splitterObj) => {
         setTimeout(function () {
-          refreshToolbar()
+          refreshToolbar(state)
           $scope.timeout = 0
         }, $scope.timeout);
       })
 
-    function refreshToolbar() {
+    this.state.selectedDisplayMode.subscribe(() =>
+      setTimeout(function () {
+        refreshToolbar(state)
+      }, $scope.timeout)
+    )
+
+    function refreshToolbar(state) {
       var logowidth = $("#tool-bar-logo-new").width() + 20//padding
       var toolbarstartpoint = $('.tool-bar').offset().left
       var networkplanstartpoint = $('.network-plan').offset().left
       var availableSpace = networkplanstartpoint - toolbarstartpoint - logowidth
-      var totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50] //Each toolbar tab size
-      var totalToolbarSize = 320
+      var totalbarButtonWidth;
+
+      if($("#map-canvas-container") && $("#map-canvas-container").css('min-width') == '0px') {
+        var minWidth = toolbarstartpoint + 50 /*dropdown button width*/ + logowidth + $('.network-plan').width() + 40 /*slidebar arrow width*/
+        $("#map-canvas-container").css('min-width', minWidth)
+      }
+      
+      if(state.selectedDisplayMode.getValue() !== state.displayModes.ANALYSIS) {
+        totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50]
+      } else {
+        totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50, 10, 50, 50]
+      }
+      
+      var analysisButtonWidth = []
+
+      var totalToolbarSize = totalbarButtonWidth.reduce(function (total, num) {
+        return total + num;
+      })
       
       var horizontalTool = ""
       var dropdownTool = ""
@@ -38,6 +60,7 @@ class ToolBarController {
           dropdownTool += $("#tool-bar-template").children()[i].outerHTML
         }
       }
+
       $(".horizontal-toolbar").html(horizontalTool)
       $(".dropdown-toolbar .dropdown-menu").html(dropdownTool)
 
@@ -61,6 +84,8 @@ class ToolBarController {
     this.toggleImage = 'fa fa-2x fa-arrows-h'
     this.downImage = 'fa fa-2x fa-caret-down'
     this.eyeImage = 'fa fa-2x fa-eye'
+    this.singleSelect = 'fa fa-2x fa-mouse-pointer'
+    this.polygonSelect = 'fa fa-2x fa-bookmark-o fa-rotate-180'
 
     this.latestOverlay = null
     this.drawingManager = new google.maps.drawing.DrawingManager({
