@@ -1,8 +1,13 @@
 class DataSelectionController {
-  constructor($http, $timeout) {
+  constructor($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.dataItems = {}
+    state.plan.subscribe((newPlan) => {
+      if (newPlan) {
+        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+      }
+    })
   }
 
   $onInit() {
@@ -60,7 +65,7 @@ class DataSelectionController {
   }
 }
 
-DataSelectionController.$inject = ['$http', '$timeout']
+DataSelectionController.$inject = ['$http', '$timeout', 'state']
 
 // Component did not work when it was called 'dataSelection'
 app.component('planDataSelection', {
