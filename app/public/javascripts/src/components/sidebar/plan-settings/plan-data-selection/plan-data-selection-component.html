@@ -2,7 +2,7 @@
   <table class="table table-condensed table-striped">
     <tbody>
       <tr ng-repeat="(itemKey, itemValue) in $ctrl.dataItems">
-        <td>{{itemValue.description}}</td>
+        <td style="vertical-align: middle">{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
             <aro-multi-select model="itemValue.selectedLibraryItems"
