@@ -82,7 +82,7 @@ class NetworkAnalysisModalContentController {
           scales: {},
           showLines: true,
           responsive: true,
-          maintainAspectRatio: true
+          maintainAspectRatio: false
         }
 
         if ($scope.selectedOption.key === 'irr') {
@@ -175,16 +175,7 @@ class NetworkAnalysisModalContentController {
     function showChart (id, type, data, options) {
       charts[id] && charts[id].destroy()
       var elem = document.getElementById(id)
-      elem.removeAttribute('width')
-      elem.removeAttribute('height')
-      elem.style.width = '100%'
-      elem.style.maxWidth = '100%'
-      elem.style.height = '250px'
-      //elem.style.maxHeight = '500px'
       var ctx = elem.getContext('2d')
-      // ctx.fillStyle = 'white'
-      // ctx.fillRect(0, 0, elem.offsetWidth, elem.offsetHeight)
-      //charts[id] = new Chart(ctx)[type](data, options)    
       
       charts[id] = new Chart(ctx, {
         type: type,
@@ -212,7 +203,9 @@ app.component('networkAnalysisContent', {
         ng-model="selectedOption"
         ng-options="item as item.name for item in datasets">
       </select>
-      <canvas ng-attr-id= "{{ $ctrl.target }}" style="width:100%; height:200px"></canvas>
+      <div style="position: relative; width: 100%; height: 300px">
+        <canvas ng-attr-id= "{{ $ctrl.target }}"></canvas>
+      </div>
     </div>
   `,
   bindings: {
