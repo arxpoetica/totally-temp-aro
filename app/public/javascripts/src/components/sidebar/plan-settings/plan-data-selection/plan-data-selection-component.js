@@ -44,7 +44,8 @@ class DataSelectionController {
   enableMultiSelects() {
     Object.keys(this.dataItems).forEach((dataItemKey) => {
       setTimeout(() => $(`#${dataItemKey}`).multiselect({
-        buttonWidth: '100%'
+        buttonWidth: '100%',
+        onChange: this.onSelectionChanged.bind(this)
       }), 0);
     })
   }
