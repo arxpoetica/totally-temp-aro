@@ -5,7 +5,7 @@
         <td>{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
-            <select id="{{itemKey}}"
+            <select id="plan_data_selection_multiselect_{{itemKey}}"
                     multiple="multiple"
                     ng-model="itemValue.selectedLibraryItems"
                     ng-options="item.name for item in itemValue.allLibraryItems">
