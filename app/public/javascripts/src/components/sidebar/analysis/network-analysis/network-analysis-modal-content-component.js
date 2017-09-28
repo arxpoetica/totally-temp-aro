@@ -1,10 +1,12 @@
 class NetworkAnalysisModalContentController {
 
-  constructor($document,$http,$filter, state) {
+  constructor($document,$http,$filter,$element,$attrs, state) {
     this.state = state
     this.$http = $http
     this.$filter = $filter
     this.$document = $document
+    this.$element = $element
+    this.$attrs = $attrs
     this.plan = null
 
     this.charts = {}
@@ -56,11 +58,6 @@ class NetworkAnalysisModalContentController {
     })
     
     this.showCashFlowChart()    
-  }
-
-  downloadChart() {
-    if (!this.plan) return
-    window.location.href = `/reports/network_analysis/download/${this.plan.id}/optimization_analysis`
   }
 
   showCashFlowChart() {
@@ -117,7 +114,7 @@ class NetworkAnalysisModalContentController {
           return String(this.$filter('number')(+label/xAxisCategory,0) + (xAxisCategory === 1000000 ? 'M' : 'K'))
         }, autoSkip:true, maxTicksLimit:10 } }]
       options.tooltips = tooltips
-      this.showChart(this.target, 'scatter', data, options)
+      this.showChart(this.$attrs.target, 'scatter', data, options)
     })
   }
 
@@ -175,7 +172,7 @@ class NetworkAnalysisModalContentController {
 
   showChart (id, type, data, options) {
     this.charts[id] && this.charts[id].destroy()
-    var elem = document.getElementById(id)
+    var elem = this.$document[0].getElementById(id)
     var ctx = elem.getContext('2d')
     
     this.charts[id] = new Chart(ctx, {
@@ -187,7 +184,7 @@ class NetworkAnalysisModalContentController {
   }
 }
 
-NetworkAnalysisModalContentController.$inject = ['$document','$http','$filter', 'state']
+NetworkAnalysisModalContentController.$inject = ['$document','$http','$filter','$element','$attrs', 'state']
 
 app.component('networkAnalysisContent', {
   template: `
@@ -198,13 +195,10 @@ app.component('networkAnalysisContent', {
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
       <div style="position: relative; width: 100%; height: 300px">
-        <canvas ng-attr-id= "{{ $ctrl.target }}"></canvas>
+        <canvas ng-attr-id= "{{ $ctrl.$attrs.target }}"></canvas>
       </div>
     </div>
   `,
-  bindings: {
-    target: '@'
-  },
   controller: NetworkAnalysisModalContentController
 })
 
