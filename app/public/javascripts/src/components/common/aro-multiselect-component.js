@@ -15,7 +15,8 @@ class AroMultiSelectController {
           if (this.selectionChanged) {
             this.selectionChanged()
           }
-        }
+        },
+        maxHeight: this.maxHeight ? this.maxHeight : 200
       }), 0);
   }
 }
@@ -23,11 +24,17 @@ class AroMultiSelectController {
 AroMultiSelectController.$inject = ['$element']
 
 app.component('aroMultiSelect', {
-  templateUrl: '/components/common/aro-multiselect-component.html',
+  template: `
+    <select multiple="multiple"
+            ng-model="$ctrl.model"
+            ng-options="item.name for item in $ctrl.allItems">
+    </select>
+  `,
   bindings: {
-    model: '=',             // Will be passed in as a ng-model to our select
-    allItems: '<',          // All the items to show
-    selectionChanged: '&'   // Called when the selected items change
+    model: '=',             // Will be passed in as a ng-model to our select. Two Way binding for now!
+    allItems: '<',          // All the items to show.
+    maxHeightInPixels: '<', // [Optional] The maximum height of the component in pixels
+    selectionChanged: '&'   // [Optional] Called when the selected items change
   },
   controller: AroMultiSelectController
 })

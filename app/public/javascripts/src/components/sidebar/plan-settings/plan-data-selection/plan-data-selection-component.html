@@ -5,11 +5,10 @@
         <td>{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
-            <aro-multi-select id="plan_data_selection_multiselect_{{itemKey}}"
-                    model="itemValue.selectedLibraryItems"
-                    all-items="itemValue.allLibraryItems"
-                    selection-changed="$ctrl.onSelectionChanged()"
-                    style="flex: 1 1 auto;">
+            <aro-multi-select model="itemValue.selectedLibraryItems"
+                              all-items="itemValue.allLibraryItems"
+                              selection-changed="$ctrl.onSelectionChanged()"
+                              style="flex: 1 1 auto;">
             </aro-multi-select>
             <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="addCustomers()">
               <span class="fa fa-upload"></span>
