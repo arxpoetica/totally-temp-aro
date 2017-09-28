@@ -45,12 +45,12 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     celltower: 'cellTower'
   }
   $scope.premisesPercentage = 'false'
-  $scope.routeOpportunitiesDistanceThresholds = [
-    { name: 'On Route', value: 30 },
-    { name: '1/4 ' + config.length.length_units, value: config.length.length_units_to_meters / 4 },
-    { name: '1/2 ' + config.length.length_units, value: config.length.length_units_to_meters / 2 },
-    { name: '1 ' + config.length.length_units, value: config.length.length_units_to_meters / 1 }
-  ]
+  // $scope.routeOpportunitiesDistanceThresholds = [
+  //   { name: 'On Route', value: 30 },
+  //   { name: '1/4 ' + config.length.length_units, value: config.length.length_units_to_meters / 4 },
+  //   { name: '1/2 ' + config.length.length_units, value: config.length.length_units_to_meters / 2 },
+  //   { name: '1 ' + config.length.length_units, value: config.length.length_units_to_meters / 1 }
+  // ]
 
   var dirty = false
 
@@ -163,8 +163,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     } else if (href === '#financialProfileOpex') {
       showOpexRecurringChart(force)
       showOpexCostChart(force)
-    } else if (href === '#financialProfileRouteOpportunities') {
-      loadRouteOpportunities()
+    // } else if (href === '#financialProfileRouteOpportunities') {
+    //   loadRouteOpportunities()
     } else if (href === '#financialProfileFiberDetails') {
       showDistanceToFiber()
     }
@@ -177,7 +177,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     if (!plan) return
     $scope.plan = plan
     $scope.mode = 'global'
-    updateMetadataLabels(plan.metadata);
+    updateMetadataLabels(plan);
 
     $scope.premisesFilterEntityTypes = {}
     $scope.subscribersFilterEntityTypes = {}
@@ -609,20 +609,20 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     })
   }
 
-  function loadRouteOpportunities () {
-    var url = `/financial_profile/${$scope.plan.id}/routeopportunities`
-    var params = {
-      distanceThresholds: $scope.routeOpportunitiesDistanceThresholds.map((item) => item.value)
-    }
-    $http({
-      url: url,
-      method: 'GET',
-      params: params
-    })
-    .then((response) => {
-      $scope.routeOpportunities = response.data
-    })
-  }
+  // function loadRouteOpportunities () {
+  //   var url = `/financial_profile/${$scope.plan.id}/routeopportunities`
+  //   var params = {
+  //     distanceThresholds: $scope.routeOpportunitiesDistanceThresholds.map((item) => item.value)
+  //   }
+  //   $http({
+  //     url: url,
+  //     method: 'GET',
+  //     params: params
+  //   })
+  //   .then((response) => {
+  //     $scope.routeOpportunities = response.data
+  //   })
+  // }
 
   $scope.downloadChart = (id, name) => {
     var canvas = document.getElementById(id)
@@ -643,15 +643,10 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     $('#build-lease').modal('show')
   }
 
-  function updateMetadataLabels(metadata) {
-     if(!metadata || !metadata.premises) return;
-     metadata.premises.map(function (premise) {
-      if(config.ARO_CLIENT == 'reliance'){
-        if(premise.name === 'Tower') premise.name = 'Enterprise'
-      }
-    });
-
-    $scope.metadata = metadata;
+  function updateMetadataLabels(plan) {
+    $http.get(`/service/report/plan/${plan.id}`).then((response) => {
+      $scope.metadata = response.data
+    })
   }
 
   var serviceAreaLayer = new MapLayer({

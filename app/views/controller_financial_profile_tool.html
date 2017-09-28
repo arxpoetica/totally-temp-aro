@@ -13,7 +13,7 @@
       <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
       <li role="presentation"><a href="#financialProfileCapex" role="tab" data-toggle="tab">Capex</a></li>
       <li role="presentation"><a href="#financialProfileCashFlow" role="tab" data-toggle="tab">Cash Flow</a></li>
-      <li role="presentation"><a href="#financialProfileRouteOpportunities" role="tab" data-toggle="tab">Route Opportunities</a></li>
+      <!-- <li role="presentation"><a href="#financialProfileRouteOpportunities" role="tab" data-toggle="tab">Route Opportunities</a></li> -->
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
@@ -22,24 +22,24 @@
             <table class="table">
               <tbody>
                 <tr>
-                  <th colspan="3">Fiber Capex ({{metadata.fiber_length * <%- config.length.meters_to_length_units %> | number : 0}} <%- config.length.length_units %>)</th>
-                  <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
+                  <th colspan="5">Fiber Capex</th>
+                  <!-- <td colspan="2" class="text-right">{{metadata.fiber_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td> -->
                 </tr>
-                <tr ng-repeat="cost in metadata.fiber_summary">
-                  <td colspan="3"><small> ↳ {{cost.description}} ({{cost.lengthMeters * <%- config.length.meters_to_length_units %> | number : 0}} <%- config.length.length_units %>)</small></td>
+                <tr ng-repeat="cost in metadata.priceModel.fiberCosts">
+                  <td colspan="3"><small> ↳ {{cost.fiberType}} ({{cost.lengthMeters * <%- config.length.meters_to_length_units %> | number : 0}} <%- config.length.length_units %>)</small></td>
                   <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <tr>
-                  <th colspan="3">Equipment Capex</th>
-                  <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
+                  <th colspan="5">Equipment Capex</th>
+                  <!-- <td colspan="2" class="text-right">{{metadata.equipment_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td> -->
                 </tr>
-                <tr ng-repeat="cost in metadata.equipment_summary" ng-if="cost.totalCost > 0">
-                  <td colspan="3"><small> ↳ {{cost.description}} (x{{cost.quantity | number }})</small></td>
-                  <td colspan="2" class="text-right">{{cost.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
+                <tr ng-repeat="cost in metadata.priceModel.equipmentCosts" ng-if="cost.total > 0">
+                  <td colspan="3"><small> ↳ {{cost.nodeType}} (x{{cost.quantity | number }})</small></td>
+                  <td colspan="2" class="text-right">{{cost.total / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
                 <tr>
                   <th colspan="3">Total Capex</th>
-                  <td colspan="2" class="text-right">{{metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
+                  <td colspan="2" class="text-right">{{metadata.priceModel.totalCost / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
               </tbody>
             </table>
@@ -49,31 +49,26 @@
               <tbody>
                 <tr>
                   <th colspan="3">Premises Passed</th>
-                  <td colspan="2" class="text-right">{{metadata.total_premises | number}}</td>
+                  <td colspan="2" class="text-right">{{metadata.demandSummary.networkDemands[0].locationDemand.adjustedAtomicUnits | number}}</td>
                 </tr>
-                <tr ng-repeat="premise in metadata.premises">
-                  <td colspan="3"><small> ↳ {{premise.name}}</small></td>
-                  <td colspan="2" class="text-right">{{premise.value | number}}</td>
+                <tr ng-repeat="(key, value) in metadata.demandSummary.networkDemands[0].locationDemand.entityDemands">
+                  <td colspan="3"><small> ↳ {{key}}</small></td>
+                  <td colspan="2" class="text-right">{{value.atomicUnits | number}}</td>
                 </tr>
                 <tr>
                   <th colspan="3"><%- config.currency_symbol %> / Premises Passed</th>
-                  <td colspan="2" class="text-right">{{metadata.total_cost / metadata.total_premises | currency:"<%- config.currency_symbol %>":0}}</td>
+                  <td colspan="2" class="text-right">{{metadata.demandSummary.networkDemands[0].locationDemand.totalRevenue / 1000 | currency:"<%- config.currency_symbol %>":0}}</td>
                 </tr>
-                <tr>
+                <tr ng-repeat="networkStatistic in metadata.networkStatistics" 
+                  ng-if="networkStatistic.networkStatisticType === 'npv'">
                   <th colspan="3">NPV</th>
-                  <td colspan="2" class="text-right">{{metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
+                  <td colspan="2" class="text-right">{{networkStatistic.value / 1000 | currency:"<%- config.currency_symbol %>":1}}K</td>
                 </tr>
-                <tr>
+                <tr ng-repeat="networkStatistic in metadata.networkStatistics"
+                  ng-if="networkStatistic.networkStatisticType === 'irr'">
                   <th colspan="3">IRR</th>
-                  <td colspan="2" class="text-right">{{(metadata.irr * 100) | number : 1}}%</td>
+                  <td colspan="2" class="text-right">{{(networkStatistic.value * 100) | number : 1}}%</td>
                 </tr>
-                <!--
-                <tr>
-                  <th colspan="3">IRR</th>
-                  <td colspan="2" class="text-right" ng-show="hasIRR()">{{metadata.irr * 100 | number: 1}}%</td>
-                  <td colspan="2" class="text-right" ng-hide="hasIRR()">{{metadata.irr}}%</td>
-                </tr>
-                -->
               </tbody>
             </table>
           </div>
@@ -359,7 +354,7 @@
         </button>
         <div id="financial-profile-chart-opex-cost-legend"></div>
       </div>
-      <div role="tabpanel" class="tab-pane" id="financialProfileRouteOpportunities" style="margin-top: 20px">
+      <!-- <div role="tabpanel" class="tab-pane" id="financialProfileRouteOpportunities" style="margin-top: 20px">
         <table class="table">
           <tbody>
             <tr>
@@ -395,7 +390,7 @@
           </tbody>
         </table>
         <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 <%- config.length.length_units %> of route</button>
-      </div>
+      </div> -->
       <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
         <table class="table">
           <thead>
