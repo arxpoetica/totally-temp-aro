@@ -2,14 +2,14 @@
 // The library (css and js) must be included somewhere in the html (index.html?) before using this component.
 
 class AroMultiSelectController {
-  constructor() {
-    // Create an ID for the multiselect that we will use in the selector. Cant have periods in the id.
-    this.multiSelectId = 'multiselect' + Math.random().toString().replace('.', '_')
+  constructor($element) {
+    this.$element = $element
   }
 
   $onInit() {
-    // Call the multiselect() method on our select.
-    setTimeout(() => $(`#${this.multiSelectId}`).multiselect({
+    // Call the bootstrap-multiselect library's multiselect() method on our '<select>' child element.
+    var selectElement = this.$element.find('select')
+    setTimeout(() => selectElement.multiselect({
         buttonWidth: '100%',
         onChange: () => {
           if (this.selectionChanged) {
@@ -20,12 +20,14 @@ class AroMultiSelectController {
   }
 }
 
+AroMultiSelectController.$inject = ['$element']
+
 app.component('aroMultiSelect', {
   templateUrl: '/components/common/aro-multiselect-component.html',
   bindings: {
-    model: '=',
-    allItems: '<',
-    selectionChanged: '&'
+    model: '=',             // Will be passed in as a ng-model to our select
+    allItems: '<',          // All the items to show
+    selectionChanged: '&'   // Called when the selected items change
   },
   controller: AroMultiSelectController
 })
