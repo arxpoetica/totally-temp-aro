@@ -80,7 +80,9 @@ class NetworkAnalysisModalContentController {
           },
           tooltips: {},
           scales: {},
-          showLines: true
+          showLines: true,
+          responsive: true,
+          maintainAspectRatio: true
         }
 
         if ($scope.selectedOption.key === 'irr') {
