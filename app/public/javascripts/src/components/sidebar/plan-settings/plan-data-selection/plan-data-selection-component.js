@@ -41,15 +41,6 @@ class DataSelectionController {
     this.isDirty = true
   }
 
-  enableMultiSelects() {
-    Object.keys(this.dataItems).forEach((dataItemKey) => {
-      setTimeout(() => $(`#plan_data_selection_multiselect_${dataItemKey}`).multiselect({
-        buttonWidth: '100%',
-        onChange: this.onSelectionChanged.bind(this)
-      }), 0);
-    })
-  }
-
   loadFromServer() {
 
     var promises = [
@@ -96,7 +87,6 @@ class DataSelectionController {
             dataItem.selectedLibraryItems = dataItem.selectedLibraryItems.concat(matchedLibraryItem)  // Technically there will be only one matched item
           })
         })
-        setTimeout(() => this.enableMultiSelects(), 2000)
         this.$timeout() // Will safely call $scope.$apply()
       })
   }
