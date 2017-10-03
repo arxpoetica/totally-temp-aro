@@ -14,17 +14,14 @@ class NetworkAnalysisOutputController {
     state.plan
     .subscribe((plan) => {
       this.plan = plan
+
+      this.downloadLink = `/reports/network_analysis/download/${this.plan.id}/optimization_analysis`
     })
 
     state.splitterObj
     .subscribe((splitterObj) => {
       this.splitterObj = splitterObj
     })
-
-    this.downloadChart = () => {
-      if (!this.plan) return
-      window.location.href = `/reports/network_analysis/download/${this.plan.id}/optimization_analysis`
-    }
     
   }
 

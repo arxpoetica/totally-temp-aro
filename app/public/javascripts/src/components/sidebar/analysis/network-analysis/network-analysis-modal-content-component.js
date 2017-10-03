@@ -1,6 +1,6 @@
 class NetworkAnalysisModalContentController {
 
-  constructor($document,$http,$filter,$element,$attrs, state) {
+  constructor($document,$http,$filter,$element,$attrs,$window, state) {
     this.state = state
     this.$http = $http
     this.$filter = $filter
@@ -58,7 +58,38 @@ class NetworkAnalysisModalContentController {
     })
     
     this.showCashFlowChart()    
+
+    window.onresize = function(event){
+      var width = $(this.$attrs.target).parent().width();
+      $(this.$attrs.target).attr("width",width);
+    }
+
+    angular.element($window).on('resize', (onResize) => {
+      var width = $(this.$attrs.target).parent().width();
+      $(this.$attrs.target).attr("width",width);
+    });
+
+    $window.addEventListener('resize', this.onresizeChart());
+
+    $(window).bind("resize", function () { this.onresizeChart() })
+
+    $element.bind('resize', function () {
+      this.onresizeChart()
+    });
+
+    // $scope.$watch($scope.getElementDimensions, function (newValue, oldValue) {
+    //   console("newvalue"+ newValue)
+    // }, true);
   }
+
+  onresizeChart() {
+    var width = $(this.$attrs.target).parent().width();
+    $(this.$attrs.target).attr("width",width);
+  }
+
+  logResize () {
+    console.log('element resized');
+  };
 
   showCashFlowChart() {
     if (!this.plan) return 
@@ -75,7 +106,10 @@ class NetworkAnalysisModalContentController {
         scales: {},
         showLines: true,
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        onResize: (chart,size) => {
+          console.log(chart + ',' + size)
+        }
       }
 
       if (this.selectedOption.key === 'irr') {
@@ -184,17 +218,17 @@ class NetworkAnalysisModalContentController {
   }
 }
 
-NetworkAnalysisModalContentController.$inject = ['$document','$http','$filter','$element','$attrs', 'state']
+NetworkAnalysisModalContentController.$inject = ['$document','$http','$filter','$element','$attrs','$window', 'state']
 
 app.component('networkAnalysisContent', {
   template: `
-    <div>
+    <div on-size-changed="$ctrl.logResize()">
       <select class="form-control" style="width: 20%;float: right"
         ng-change="$ctrl.showCashFlowChart()"
         ng-model="$ctrl.selectedOption"
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
-      <div style="position: relative; width: 100%; height: 350px; top: 35px;">
+      <div style="position: relative; width: 100%; height: 350px; top: 35px;" onresize="$ctrl.onresizeChart()">
         <canvas ng-attr-id= "{{ $ctrl.$attrs.target }}" style="position: absolute;max-height: 300px"></canvas>
       </div>
     </div>
