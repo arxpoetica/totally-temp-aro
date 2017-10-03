@@ -194,8 +194,8 @@ app.component('networkAnalysisContent', {
         ng-model="$ctrl.selectedOption"
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
-      <div style="position: relative; width: 100%; height: 300px">
-        <canvas ng-attr-id= "{{ $ctrl.$attrs.target }}"></canvas>
+      <div style="position: relative; width: 100%; height: 350px; top: 35px;">
+        <canvas ng-attr-id= "{{ $ctrl.$attrs.target }}" style="position: absolute;max-height: 300px"></canvas>
       </div>
     </div>
   `,
