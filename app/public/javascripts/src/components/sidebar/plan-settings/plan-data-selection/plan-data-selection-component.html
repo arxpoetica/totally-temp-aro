@@ -14,6 +14,10 @@
               <span class="fa fa-upload"></span>
             </button>
           </div>
+          <span class="label label-danger"
+                ng-if="!itemValue.isMinValueSelectionValid">Error: At least {{itemValue.minValueInc}} item must be selected</span>
+          <span class="label label-danger"
+                ng-if="!itemValue.isMaxValueSelectionValid">Error: A maximum of {{itemValue.maxValueExc}} items can be selected</span>
         </td>
       </tr>
     </tbody>

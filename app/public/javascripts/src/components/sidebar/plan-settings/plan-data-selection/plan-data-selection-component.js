@@ -18,27 +18,60 @@ class DataSelectionController {
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
     if (this.isDirty) {
-      swal({
-        title: 'Save modified settings?',
-        text: 'You have changed the data selection settings. Do you want to save your changes?',
-        type: 'warning',
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Yes',
-        showCancelButton: true,
-        cancelButtonText: 'No',
-        closeOnConfirm: true
-      }, (result) => {
-        if (result) {
-          // Save the changed settings to aro-service
-          this.saveToServer()
-        }
-        this.isDirty = false  // Technically not required since we are in $onDestroy
-      })
+      if (this.areAllSelectionsValid()) {
+        swal({
+          title: 'Save modified settings?',
+          text: 'You have changed the data selection settings. Do you want to save your changes?',
+          type: 'warning',
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Yes',
+          showCancelButton: true,
+          cancelButtonText: 'No',
+          closeOnConfirm: true
+        }, (result) => {
+          if (result) {
+            // Save the changed settings to aro-service
+            this.saveToServer()
+          }
+          this.isDirty = false  // Technically not required since we are in $onDestroy
+        })
+      } else {
+        // All selections are not valid
+        swal({
+          title: 'Invalid selections',
+          text: 'The data selections are not valid. Correct them before trying to save your changes.',
+          type: 'error',
+          showCancelButton: false,
+          confirmButtonColor: '#DD6B55'
+        })
+      }
     }
   }
 
   onSelectionChanged() {
     this.isDirty = true
+    this.updateSelectionValidation()
+  }
+
+  // Updates the 'valid' flags for all data items
+  updateSelectionValidation() {
+    Object.keys(this.dataItems).forEach((dataItemKey) => {
+      var dataItem = this.dataItems[dataItemKey]
+      dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValueInc
+      dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValueExc
+    })
+    this.$timeout() // Will safely call $scope.$apply()
+  }
+
+  areAllSelectionsValid() {
+    var areAllSelectionsValid = true
+    Object.keys(this.dataItems).forEach((dataItemKey) => {
+      var dataItem = this.dataItems[dataItemKey]
+      if (!dataItem.isMinValueSelectionValid || !dataItem.isMaxValueSelectionValid) {
+        areAllSelectionsValid = false
+      }
+    })
+    return areAllSelectionsValid
   }
 
   loadFromServer() {
@@ -61,6 +94,10 @@ class DataSelectionController {
         dataTypeEntityResult.forEach((dataTypeEntity) => {
           this.dataItems[dataTypeEntity.name] = {
             description: dataTypeEntity.description,
+            minValueInc: dataTypeEntity.minValueInc,
+            maxValueExc: dataTypeEntity.maxValueExc,
+            isMinValueSelectionValid: true,
+            isMaxValueSelectionValid: true,
             selectedLibraryItems: [],
             allLibraryItems: []
           }
@@ -87,6 +124,7 @@ class DataSelectionController {
             dataItem.selectedLibraryItems = dataItem.selectedLibraryItems.concat(matchedLibraryItem)  // Technically there will be only one matched item
           })
         })
+        this.updateSelectionValidation()
         this.$timeout() // Will safely call $scope.$apply()
       })
   }
