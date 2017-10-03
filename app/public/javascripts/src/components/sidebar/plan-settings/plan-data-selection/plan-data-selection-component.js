@@ -58,7 +58,7 @@ class DataSelectionController {
     Object.keys(this.dataItems).forEach((dataItemKey) => {
       var dataItem = this.dataItems[dataItemKey]
       dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValueInc
-      dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValueExc
+      dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length < dataItem.maxValueExc
     })
     this.$timeout() // Will safely call $scope.$apply()
   }
