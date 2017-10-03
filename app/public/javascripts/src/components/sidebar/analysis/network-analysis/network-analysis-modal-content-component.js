@@ -175,11 +175,13 @@ class NetworkAnalysisModalContentController {
     var elem = this.$document[0].getElementById(id)
     var ctx = elem.getContext('2d')
     
-    this.charts[id] = new Chart(ctx, {
-      type: type,
-      data: data,
-      options: options
-    })
+    // Adding setTimeout() for now. Not sure what .destroy() is doing. Will investigate.
+    setTimeout(() => {
+      this.charts[id] = new Chart(ctx, {
+        type: type,
+        data: data,
+        options: options
+      })}, 0)
    
   }
 }
