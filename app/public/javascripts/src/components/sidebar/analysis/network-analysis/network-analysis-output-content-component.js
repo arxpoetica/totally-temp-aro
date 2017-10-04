@@ -8,6 +8,8 @@ class NetworkAnalysisOutputContentController {
     this.$element = $element
     this.$attrs = $attrs
     this.plan = null
+    this.networkAnalysisOutput = null
+    this.labels = []
 
     this.charts = {}
     this.chartStyles = [   
@@ -54,15 +56,15 @@ class NetworkAnalysisOutputContentController {
     .subscribe((show) => {
       if (_.size(this.charts) > 0) this.charts['network-analysis-chart-cash-flow-panel'] && this.charts['network-analysis-chart-cash-flow-panel'].destroy()
       if(show)
-        this.showCashFlowChart()
+        this.showCashFlowChart(true)
     })
     
-    this.showCashFlowChart()
+    this.showCashFlowChart(true)
   }
 
-  showCashFlowChart() {
+  showCashFlowChart(force) {
     if (!this.plan) return 
-    this.request('optimization_analysis', {}, (cashFlow) => {
+    this.request(force, 'optimization_analysis', {}, (cashFlow) => {
       var data = this.buildChartData(cashFlow, this.selectedOption)
 
       var MaxYVal = Math.max(...data.datasets[0].data.map(val => val.y)) 
@@ -148,18 +150,24 @@ class NetworkAnalysisOutputContentController {
     }
   }
 
-  request (key, params, callback) {
+  request (force,key, params, callback) {
     if (!this.plan) return
     var plan_id = this.plan.id
-    this.$http({ url: `/reports/network_analysis/${plan_id}/${key}`, params: params })
-      .then((response) => {
-        callback(response.data)
-      })
+    if (!force && this.networkAnalysisOutput) callback(this.networkAnalysisOutput)
+    else {
+      delete this.networkAnalysisOutput
+      this.$http({ url: `/reports/network_analysis/${plan_id}/${key}`, params: params })
+        .then((response) => {
+          this.networkAnalysisOutput = response.data
+          this.labels = this.networkAnalysisOutput.splice(0, 1)
+          callback(response.data)
+        })
+    }
   }
 
   buildChartData (result, datasets) {
-    var labels = result.splice(0, 1)
-    result = result.map((row) => _.object(labels[0],row.map((value) => +value)))
+    //var labels = result.splice(0, 1)
+    result = result.map((row) => _.object(this.labels[0],row.map((value) => +value)))
     result = _.sortBy(result,'index')
     
     return {
@@ -192,7 +200,7 @@ app.component('networkAnalysisOutputContent', {
   template: `
     <div>
       <select class="form-control" style="width: 20%;float: right"
-        ng-change="$ctrl.showCashFlowChart()"
+        ng-change="$ctrl.showCashFlowChart(false)"
         ng-model="$ctrl.selectedOption"
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
