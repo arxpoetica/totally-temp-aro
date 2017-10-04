@@ -1,12 +1,10 @@
 class NetworkAnalysisOutputContentController {
 
-  constructor($document,$http,$filter,$element,$attrs, state) {
+  constructor($http,$filter,$element, state) {
     this.state = state
     this.$http = $http
     this.$filter = $filter
-    this.$document = $document
     this.$element = $element
-    this.$attrs = $attrs
     this.plan = null
     this.networkAnalysisOutput = null
     this.labels = []
@@ -116,7 +114,7 @@ class NetworkAnalysisOutputContentController {
           return String(this.$filter('number')(+label/xAxisCategory,0) + (xAxisCategory === 1000000 ? 'M' : 'K'))
         }, autoSkip:true, maxTicksLimit:10 } }]
       options.tooltips = tooltips
-      this.showChart(this.$attrs.target, 'scatter', data, options)
+      this.showChart(this.$element.attr('target'), 'scatter', data, options)
     })
   }
 
@@ -180,7 +178,7 @@ class NetworkAnalysisOutputContentController {
 
   showChart (id, type, data, options) {
     this.charts[id] && this.charts[id].destroy()
-    var elem = this.$document[0].getElementById(id)
+    var elem = this.$element.find('canvas')[0]
     var ctx = elem.getContext('2d')
     
     // Adding setTimeout() for now. Not sure what .destroy() is doing. Will investigate.
@@ -194,7 +192,7 @@ class NetworkAnalysisOutputContentController {
   }
 }
 
-NetworkAnalysisOutputContentController.$inject = ['$document','$http','$filter','$element','$attrs', 'state']
+NetworkAnalysisOutputContentController.$inject = ['$http','$filter','$element', 'state']
 
 app.component('networkAnalysisOutputContent', {
   template: `
@@ -205,7 +203,7 @@ app.component('networkAnalysisOutputContent', {
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
       <div style="position: relative; width: 100%; height: 350px; top: 35px;">
-        <canvas ng-attr-id= "{{ $ctrl.$attrs.target }}" style="position: absolute;max-height: 300px"></canvas>
+        <canvas ng-attr-id= "{{ $ctrl.$element.attr('target') }}" style="position: absolute;max-height: 300px"></canvas>
       </div>
     </div>
   `,
