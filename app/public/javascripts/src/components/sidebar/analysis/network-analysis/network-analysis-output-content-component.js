@@ -66,60 +66,62 @@ class NetworkAnalysisOutputContentController {
 
   showCashFlowChart(force) {
     if (!this.plan) return 
-    this.request(force, 'optimization_analysis', {}, (cashFlow) => {
-      var data = this.buildChartData(cashFlow, this.selectedOption)
+    this.getChartData(force, 'optimization_analysis', {})
+      .then((cashFlow) => {
+        var data = this.buildChartData(cashFlow, this.selectedOption)
 
-      var MaxYVal = Math.max(...data.datasets[0].data.map(val => val.y)) 
-      var yAxisCategory = this.assignCategory(MaxYVal)
-    
-      var tooltips = {}
-      var options = {
-        elements: { line: { fill: false, tension: 0, } }, // disables bezier curves
-        tooltips: {},
-        scales: {},
-        showLines: true,
-        responsive: true,
-        maintainAspectRatio: false
-      }
-
-      if (this.selectedOption.key === 'irr') {
-        options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value * 100, 0, yAxisCategory, false, '%') },beginAtZero:  true } }] }
-        tooltips = {
-          callbacks: {
-            label: (tooltipItems, data) => {
-              return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, false, '%')
-            }
-          }
-        }
-      } else if (this.selectedOption.key === 'npv') {
-        options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value, 0, yAxisCategory, true, '$') },beginAtZero:  true } }] }
-        tooltips = {
-          callbacks: {
-            label: (tooltipItems, data) => {
-              return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, true, '$')
-            }
-          }
-        }
-      } else {
-        options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value, 0, yAxisCategory, false) },beginAtZero:  true } }] }
-        tooltips = {
-          callbacks: {
-            label: (tooltipItems, data) => {
-              return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, false)
-            }
-          }
-        }
-      }
+        var MaxYVal = Math.max(...data.datasets[0].data.map(val => val.y))
+        var yAxisCategory = this.assignCategory(MaxYVal)
       
-      options.scales.xAxes = [{ ticks: {
-        userCallback: (label, index, labels) => {
-          var MaxXVal = _.max(labels)
-          var xAxisCategory = this.assignCategory(MaxXVal)
-          return String(this.$filter('number')(+label/xAxisCategory,0) + (xAxisCategory === 1000000 ? 'M' : 'K'))
-        }, autoSkip:true, maxTicksLimit:10 } }]
-      options.tooltips = tooltips
-      this.showChart(this.$element.attr('target'), 'scatter', data, options)
-    })
+        var tooltips = {}
+        var options = {
+          elements: { line: { fill: false, tension: 0, } }, // disables bezier curves
+          tooltips: {},
+          scales: {},
+          showLines: true,
+          responsive: true,
+          maintainAspectRatio: false
+        }
+
+        if (this.selectedOption.key === 'irr') {
+          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value * 100, 0, yAxisCategory, false, '%') },beginAtZero:  true } }] }
+          tooltips = {
+            callbacks: {
+              label: (tooltipItems, data) => {
+                return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, false, '%')
+              }
+            }
+          }
+        } else if (this.selectedOption.key === 'npv') {
+          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value, 0, yAxisCategory, true, '$') },beginAtZero:  true } }] }
+          tooltips = {
+            callbacks: {
+              label: (tooltipItems, data) => {
+                return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, true, '$')
+              }
+            }
+          }
+        } else {
+          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value, 0, yAxisCategory, false) },beginAtZero:  true } }] }
+          tooltips = {
+            callbacks: {
+              label: (tooltipItems, data) => {
+                return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, false)
+              }
+            }
+          }
+        }
+
+        options.scales.xAxes = [{ ticks: {
+          userCallback: (label, index, labels) => {
+            var MaxXVal = _.max(labels)
+            var xAxisCategory = this.assignCategory(MaxXVal)
+            return String(this.$filter('number')(+label/xAxisCategory,0) + (xAxisCategory === 1000000 ? 'M' : 'K'))
+          }, autoSkip:true, maxTicksLimit:10 } }]
+        options.tooltips = tooltips
+        this.showChart(this.$element.attr('target'), 'scatter', data, options)
+      }
+    )
   }
 
   assignCategory(maxVal) {
@@ -152,17 +154,21 @@ class NetworkAnalysisOutputContentController {
     }
   }
 
-  request (force,key, params, callback) {
-    if (!this.plan) return
+  getChartData (force, key, params, callback) {
+    if (!this.plan) {
+      return Promise.reject()
+    }
+
     var plan_id = this.plan.id
-    if (!force && this.networkAnalysisOutput) callback(this.networkAnalysisOutput)
-    else {
-      delete this.networkAnalysisOutput
-      this.$http({ url: `/reports/network_analysis/${plan_id}/${key}`, params: params })
+    if (!force && this.networkAnalysisOutput) {
+      return Promise.resolve(this.networkAnalysisOutput)
+    } else {
+      this.networkAnalysisOutput = null
+      return this.$http({ url: `/reports/network_analysis/${plan_id}/${key}`, params: params })
         .then((response) => {
           this.networkAnalysisOutput = response.data
           this.labels = this.networkAnalysisOutput.splice(0, 1)
-          callback(response.data)
+          return Promise.resolve(this.networkAnalysisOutput)
         })
     }
   }
