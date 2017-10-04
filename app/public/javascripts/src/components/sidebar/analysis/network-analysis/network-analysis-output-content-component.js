@@ -119,7 +119,7 @@ class NetworkAnalysisOutputContentController {
             return String(this.$filter('number')(+label/xAxisCategory,0) + (xAxisCategory === 1000000 ? 'M' : 'K'))
           }, autoSkip:true, maxTicksLimit:10 } }]
         options.tooltips = tooltips
-        this.showChart(this.$element.attr('target'), 'scatter', data, options)
+        this.showChart('scatter', data, options)
       }
     )
   }
@@ -186,7 +186,7 @@ class NetworkAnalysisOutputContentController {
     }
   }
 
-  showChart (id, type, data, options) {
+  showChart (type, data, options) {
     if (this.chart) {
       this.chart.destroy()
     }
