@@ -354,43 +354,6 @@
         </button>
         <div id="financial-profile-chart-opex-cost-legend"></div>
       </div>
-      <!-- <div role="tabpanel" class="tab-pane" id="financialProfileRouteOpportunities" style="margin-top: 20px">
-        <table class="table">
-          <tbody>
-            <tr>
-              <th>Telco Buildings - (Off Net buildings incurring > <%- config.currency_symbol %>2K MRCs)</th>
-              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
-            </tr>
-            <tr ng-repeat="item in routeOpportunities.totals">
-              <td>
-                <span ng-show="item.key === 'MRC'">Total MRC</span>
-                <span ng-hide="item.key === 'MRC'">{{item.key}}</span>
-              </td>
-              <td class="text-right" ng-repeat="value in item.items">
-                <span ng-show="item.key === 'MRC'">{{value.value | currency:"<%- config.currency_symbol %>":0}}</span>
-                <span ng-hide="item.key === 'MRC'">{{value.value | number}}</span>
-              </td>
-            </tr>
-            <tr>
-              <th>Count of Total Businesses by Number of Employees</th>
-              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
-            </tr>
-            <tr ng-repeat="item in routeOpportunities.buildings">
-              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
-              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
-            </tr>
-            <tr>
-              <th>Count of Total Buildings by Number of Employees</th>
-              <th class="text-right" ng-repeat="threshold in routeOpportunitiesDistanceThresholds">{{threshold.name}}</th>
-            </tr>
-            <tr ng-repeat="item in routeOpportunities.businesses">
-              <td>{{routeOpportunities.businessSizes[item.key].description}}</td>
-              <td class="text-right" ng-repeat="value in item.items">{{value.value | number}}</td>
-            </tr>
-          </tbody>
-        </table>
-        <button class="btn btn-default" ng-click="downloadBusinesses()">Download all businesses within 1 <%- config.length.length_units %> of route</button>-->
-      </div>
       <div role="tabpanel" class="tab-pane" id="financialProfileFiberDetails" style="margin-top: 20px">
         <table class="table">
           <thead>
