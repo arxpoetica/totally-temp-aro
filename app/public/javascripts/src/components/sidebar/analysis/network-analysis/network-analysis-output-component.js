@@ -1,7 +1,8 @@
 class NetworkAnalysisOutputController {
 
-  constructor($element, state) {
+  constructor($element, $timeout, state) {
     this.$element = $element
+    this.$timeout = $timeout
     this.showGraph = false
     
     this.showOutput = () => {
@@ -16,7 +17,19 @@ class NetworkAnalysisOutputController {
 
   $doCheck() {
     // Show the graph only if the element width is large enough
-    this.showGraph = this.$element[0].offsetWidth > 300
+    var oldShowGraph = this.showGraph
+
+    // A convoluted implementation for a reason - When the component is shown for the first time,
+    // this.$element[0].offsetWidth isn't set to the width of the container. setTimeout() takes
+    // care of that. IF the showGraph value has changed, then we want to do a $timeout() which
+    // calls $scope.$apply(). If we wrap everything in a $timeout(), the digest cycle will keep
+    // getting called all the time.
+    setTimeout(() => {
+      this.showGraph = this.$element[0].offsetWidth > 300
+      if (oldShowGraph !== this.showGraph) {
+        this.$timeout()
+      }
+    })
   }
 
   $onInit() {
@@ -25,7 +38,7 @@ class NetworkAnalysisOutputController {
   }
 }
 
-NetworkAnalysisOutputController.$inject = ['$element', 'state']
+NetworkAnalysisOutputController.$inject = ['$element', '$timeout', 'state']
 
 app.component('networkAnalysisOutput', {
   templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis-output-component.html',
