@@ -1,11 +1,8 @@
 class NetworkAnalysisOutputController {
 
-  constructor($scope,$rootScope, $http, state, optimization, regions) {
-    this.$http = $http
-    this.state = state
-    this.optimization = optimization
-    this.regions = regions
-    this.plan = null
+  constructor($element, state) {
+    this.$element = $element
+    this.showGraph = false
     
     this.showOutput = () => {
       state.showNetworkAnalysisOutput.next(true)
@@ -13,21 +10,22 @@ class NetworkAnalysisOutputController {
 
     state.plan
     .subscribe((plan) => {
-      this.plan = plan
-
-      this.downloadLink = `/reports/network_analysis/download/${this.plan.id}/optimization_analysis`
+      this.downloadLink = `/reports/network_analysis/download/${plan.id}/optimization_analysis`
     })
-
-    state.splitterObj
-    .subscribe((splitterObj) => {
-      this.splitterObj = splitterObj
-    })
-    
   }
 
+  $doCheck() {
+    // Show the graph only if the element width is large enough
+    this.showGraph = this.$element[0].offsetWidth > 300
+  }
+
+  $onInit() {
+    // We must apply display:block on $element[0] in order for its size to be reported correctly in $doCheck
+    this.$element[0].style.display = 'block'
+  }
 }
 
-NetworkAnalysisOutputController.$inject = ['$scope','$rootScope', '$http', 'state', 'optimization', 'regions']
+NetworkAnalysisOutputController.$inject = ['$element', 'state']
 
 app.component('networkAnalysisOutput', {
   templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis-output-component.html',

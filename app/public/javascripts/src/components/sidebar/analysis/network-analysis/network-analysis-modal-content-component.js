@@ -68,18 +68,6 @@ class NetworkAnalysisModalContentController {
       var width = $(this.$attrs.target).parent().width();
       $(this.$attrs.target).attr("width",width);
     });
-
-    $window.addEventListener('resize', this.onresizeChart());
-
-    $(window).bind("resize", function () { this.onresizeChart() })
-
-    $element.bind('resize', function () {
-      this.onresizeChart()
-    });
-
-    // $scope.$watch($scope.getElementDimensions, function (newValue, oldValue) {
-    //   console("newvalue"+ newValue)
-    // }, true);
   }
 
   onresizeChart() {
@@ -106,10 +94,7 @@ class NetworkAnalysisModalContentController {
         scales: {},
         showLines: true,
         responsive: true,
-        maintainAspectRatio: false,
-        onResize: (chart,size) => {
-          console.log(chart + ',' + size)
-        }
+        maintainAspectRatio: false
       }
 
       if (this.selectedOption.key === 'irr') {

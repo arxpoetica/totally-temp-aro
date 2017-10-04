@@ -1,18 +1,16 @@
 <div>
-  <!-- <p class="pull-right"> -->
-    <div style="display: inline-block;width: 100%">
-      <em ng-if="$ctrl.splitterObj.getSizes()[1] <= 34">Ouput is too large to display at this width</em>
-      <div ng-if="$ctrl.splitterObj.getSizes()[1] <= 34">
-        <button class="pull-left btn btn-primary" ng-click="$ctrl.showOutput()">Expand Results</button>
-      </div>
-      <div>
-        <a class="pull-right btn btn-default btn-sm" ng-href="{{$ctrl.downloadLink}}">
-          <span style="color:#4d99e5" class="fa fa-download"></span>
-        </a>
-      </div>
+  <div ng-if="!$ctrl.showGraph" style="display: inline-block;width: 100%">
+    <em>Ouput is too large to display at this width</em>
+    <div>
+      <button class="pull-left btn btn-primary" ng-click="$ctrl.showOutput()">Expand Results</button>
     </div>
-    <div ng-if="$ctrl.splitterObj.getSizes()[1] > 34">
-      <network-analysis-content target="network-analysis-chart-cash-flow-panel"></network-analysis-content>
+    <div>
+      <a class="pull-right btn btn-default btn-sm" ng-href="{{$ctrl.downloadLink}}">
+        <span style="color:#4d99e5" class="fa fa-download"></span>
+      </a>
     </div>
-  <!-- </p> -->
+  </div>
+  <div ng-if="$ctrl.showGraph">
+    <network-analysis-content target="network-analysis-chart-cash-flow-panel"></network-analysis-content>
+  </div>
 </div>
