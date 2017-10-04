@@ -8,8 +8,9 @@ class NetworkAnalysisOutputContentController {
     this.plan = null
     this.networkAnalysisOutput = null
     this.labels = []
+    this.chartId = 'networkAnalysisOutputChart'
 
-    this.charts = {}
+    this.chart = null
     this.chartStyles = [   
       {
         borderColor: 'rgba(121,127,121,0.5)',
@@ -52,9 +53,12 @@ class NetworkAnalysisOutputContentController {
     
     state.showNetworkAnalysisOutput
     .subscribe((show) => {
-      if (_.size(this.charts) > 0) this.charts['network-analysis-chart-cash-flow-panel'] && this.charts['network-analysis-chart-cash-flow-panel'].destroy()
-      if(show)
+      if (this.chart) {
+        this.chart.destroy()
+      }
+      if(show) {
         this.showCashFlowChart(true)
+      }
     })
     
     this.showCashFlowChart(true)
@@ -177,13 +181,14 @@ class NetworkAnalysisOutputContentController {
   }
 
   showChart (id, type, data, options) {
-    this.charts[id] && this.charts[id].destroy()
-    var elem = this.$element.find('canvas')[0]
-    var ctx = elem.getContext('2d')
-    
+    if (this.chart) {
+      this.chart.destroy()
+    }
+    var canvasElement = this.$element.find('canvas')[0]
+    var ctx = canvasElement.getContext('2d')
     // Adding setTimeout() for now. Not sure what .destroy() is doing. Will investigate.
     setTimeout(() => {
-      this.charts[id] = new Chart(ctx, {
+      this.chart = new Chart(ctx, {
         type: type,
         data: data,
         options: options
@@ -192,7 +197,7 @@ class NetworkAnalysisOutputContentController {
   }
 }
 
-NetworkAnalysisOutputContentController.$inject = ['$http','$filter','$element', 'state']
+NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state']
 
 app.component('networkAnalysisOutputContent', {
   template: `
@@ -203,7 +208,7 @@ app.component('networkAnalysisOutputContent', {
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
       <div style="position: relative; width: 100%; height: 350px; top: 35px;">
-        <canvas ng-attr-id= "{{ $ctrl.$element.attr('target') }}" style="position: absolute;max-height: 300px"></canvas>
+        <canvas style="position: absolute;max-height: 300px"></canvas>
       </div>
     </div>
   `,

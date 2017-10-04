@@ -1,29 +1,17 @@
 class NetworkAnalysisModalController {
-
-  constructor($scope, state) {
+  constructor(state) {
     this.state = state
-    $scope.close = () => {
-      state.showNetworkAnalysisOutput.next(false)
-    }
-
-    $scope.modalShown = () => {
-      state.showNetworkAnalysisOutput.next(true)
-    }
-
-    $scope.modalHide = () => {
-      state.showNetworkAnalysisOutput.next(false)
-    }
   }
 }
 
-NetworkAnalysisModalController.$inject = ['$scope', 'state']
+NetworkAnalysisModalController.$inject = ['state']
 
 app.component('networkAnalysisModal', {
   template: `
-    <modal visible="$ctrl.state.showNetworkAnalysisOutput.value" backdrop="static" on-show="modalShown()" on-hide="modalHide()" >
+    <modal visible="$ctrl.state.showNetworkAnalysisOutput.value" backdrop="static">
       <modal-header title="Network Analysis"></modal-header>
       <modal-body>
-        <network-analysis-output-content target="network-analysis-chart-cash-flow"></network-analysis-output-content>
+        <network-analysis-output-content></network-analysis-output-content>
       </modal-body>
     </modal>
       `,
