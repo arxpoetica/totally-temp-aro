@@ -25,7 +25,8 @@ class NetworkAnalysisOutputController {
     // calls $scope.$apply(). If we wrap everything in a $timeout(), the digest cycle will keep
     // getting called all the time.
     setTimeout(() => {
-      this.showGraph = this.$element[0].offsetWidth > 300
+      var collapseThresholdInPixels = 300
+      this.showGraph = this.$element[0].offsetWidth > collapseThresholdInPixels
       if (oldShowGraph !== this.showGraph) {
         this.$timeout()
       }
