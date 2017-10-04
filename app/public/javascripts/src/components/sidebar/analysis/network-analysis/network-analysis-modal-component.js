@@ -17,11 +17,12 @@ app.component('networkAnalysisModal', {
     <modal visible="$ctrl.state.showNetworkAnalysisOutput.value" backdrop="static" on-hide="$ctrl.onHideModal()" >
       <modal-header title="Network Analysis"></modal-header>
       <modal-body>
-        <network-analysis-output-content></network-analysis-output-content>
+        <!-- Use a ng-if on the output content, so that the component will be initialized when the modal is shown (this
+             will then create and show the graph). Without this we have to explicitly ask Chart.js to render the graph -->
+        <network-analysis-output-content ng-if="$ctrl.state.showNetworkAnalysisOutput.value"></network-analysis-output-content>
       </modal-body>
     </modal>
       `,
   bindings: {},
   controller: NetworkAnalysisModalController
 })
-

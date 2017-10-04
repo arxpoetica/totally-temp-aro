@@ -51,16 +51,6 @@ class NetworkAnalysisOutputContentController {
         this.plan = plan
       })
     
-    state.showNetworkAnalysisOutput
-    .subscribe((show) => {
-      if (this.chart) {
-        this.chart.destroy()
-      }
-      if(show) {
-        this.showCashFlowChart(true)
-      }
-    })
-    
     this.showCashFlowChart(true)
   }
 
@@ -199,7 +189,6 @@ class NetworkAnalysisOutputContentController {
         data: data,
         options: options
       })}, 0)
-   
   }
 }
 
