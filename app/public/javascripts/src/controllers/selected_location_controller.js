@@ -307,7 +307,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     }
     var ctx = document.getElementById('location_market_size_chart').getContext('2d')
     destroyMarketSizeChart()
-    market_size_chart = new Chart(ctx).Line(data, options)
+    market_size_chart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: options
+    })
   };
 
   function showFairShareCharts () {
@@ -335,7 +339,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     var el = document.getElementById(`location_fair_share_chart_${type}`)
     if (!el) return
     var ctx = el.getContext('2d')
-    var chart = new Chart(ctx).Pie(data, options)
+    var chart = new Chart(ctx,{
+      type: 'pie',
+      data: data,
+      options: options
+    });
     fairShareCharts[type] = chart
     document.getElementById(`location_fair_share_chart_legend_${type}`).innerHTML = chart.generateLegend()
   }
