@@ -1,6 +1,6 @@
-class NetworkAnalysisModalContentController {
+class NetworkAnalysisOutputContentController {
 
-  constructor($document,$http,$filter,$element,$attrs,$window, state) {
+  constructor($document,$http,$filter,$element,$attrs, state) {
     this.state = state
     this.$http = $http
     this.$filter = $filter
@@ -57,27 +57,8 @@ class NetworkAnalysisModalContentController {
         this.showCashFlowChart()
     })
     
-    this.showCashFlowChart()    
-
-    window.onresize = function(event){
-      var width = $(this.$attrs.target).parent().width();
-      $(this.$attrs.target).attr("width",width);
-    }
-
-    angular.element($window).on('resize', (onResize) => {
-      var width = $(this.$attrs.target).parent().width();
-      $(this.$attrs.target).attr("width",width);
-    });
+    this.showCashFlowChart()
   }
-
-  onresizeChart() {
-    var width = $(this.$attrs.target).parent().width();
-    $(this.$attrs.target).attr("width",width);
-  }
-
-  logResize () {
-    console.log('element resized');
-  };
 
   showCashFlowChart() {
     if (!this.plan) return 
@@ -205,21 +186,21 @@ class NetworkAnalysisModalContentController {
   }
 }
 
-NetworkAnalysisModalContentController.$inject = ['$document','$http','$filter','$element','$attrs','$window', 'state']
+NetworkAnalysisOutputContentController.$inject = ['$document','$http','$filter','$element','$attrs', 'state']
 
-app.component('networkAnalysisContent', {
+app.component('networkAnalysisOutputContent', {
   template: `
-    <div on-size-changed="$ctrl.logResize()">
+    <div>
       <select class="form-control" style="width: 20%;float: right"
         ng-change="$ctrl.showCashFlowChart()"
         ng-model="$ctrl.selectedOption"
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
-      <div style="position: relative; width: 100%; height: 350px; top: 35px;" onresize="$ctrl.onresizeChart()">
+      <div style="position: relative; width: 100%; height: 350px; top: 35px;">
         <canvas ng-attr-id= "{{ $ctrl.$attrs.target }}" style="position: absolute;max-height: 300px"></canvas>
       </div>
     </div>
   `,
-  controller: NetworkAnalysisModalContentController
+  controller: NetworkAnalysisOutputContentController
 })
 
