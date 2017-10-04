@@ -197,7 +197,7 @@ NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element'
 app.component('networkAnalysisOutputContent', {
   template: `
     <div>
-      <select class="form-control" style="width: 20%;float: right"
+      <select class="form-control" style="width: 120px; float: right"
         ng-change="$ctrl.showCashFlowChart(false)"
         ng-model="$ctrl.selectedOption"
         ng-options="item as item.name for item in $ctrl.datasets">
