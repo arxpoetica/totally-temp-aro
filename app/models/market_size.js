@@ -338,16 +338,6 @@ module.exports = class MarketSize {
 
         var params = []
         var sql = this._prepareMarketSizeQuery(plan_id, type, options, params)
-
-        sql += ', distances AS ( SELECT'
-        carriers.forEach((carrier) => {
-          sql += `
-            (SELECT distance FROM client.locations_distance_to_carrier ldtc
-              WHERE ldtc.carrier_id = ${carrier.id}
-              AND ldtc.location_id = b.location_id
-            ) AS distance_${carrier.id},
-          `
-        })
         sql += `
           b.id AS business_id FROM biz b)
 
@@ -441,16 +431,6 @@ module.exports = class MarketSize {
         var params = [location_id]
         var sql = 'WITH biz AS (SELECT * FROM businesses b WHERE b.location_id=$1)\n'
 
-        sql += ', distances AS ( SELECT'
-        carriers.forEach((carrier) => {
-          sql += `
-            (SELECT distance
-              FROM client.locations_distance_to_carrier ldtc
-              WHERE ldtc.carrier_id = ${carrier.id}
-              AND ldtc.location_id = b.location_id
-            ) AS distance_${carrier.id},
-          `
-        })
         sql += `
           b.id AS business_id FROM biz b)
 
@@ -474,7 +454,6 @@ module.exports = class MarketSize {
           FROM
             biz b
           JOIN locations l ON b.location_id = l.id
-          JOIN distances d ON d.business_id = b.id
           JOIN industries ON industries.id = b.industry_id
           JOIN client.business_customer_types bct ON bct.business_id = b.id
           JOIN client.customer_types ct ON ct.id=bct.customer_type_id
@@ -603,11 +582,7 @@ module.exports = class MarketSize {
               '#' ||
                 to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
                 to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
-              AS color,
-              (SELECT distance FROM client.locations_distance_to_carrier ldtc
-                WHERE ldtc.carrier_id = c.id
-                AND ldtc.location_id = $1
-              )
+              AS color
             FROM ${table} biz
             JOIN locations l ON l.id = biz.location_id AND l.id = $1
             JOIN client.location_competitors lc ON lc.location_id = biz.location_id

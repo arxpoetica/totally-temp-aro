@@ -21,6 +21,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     addLocationTypesToBody(state, optimization, optimizationBody)
+    addSelectedExistingFiberToBody(state, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
@@ -66,16 +67,36 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     })
     var libraryItems = []
     setOfSelectedDataSources.forEach((libraryId) => libraryItems.push({ identifier: libraryId }))
-    postBody.overridenConfiguration = [{
+    if (!postBody.overridenConfiguration) {
+      postBody.overridenConfiguration = []
+    }
+    postBody.overridenConfiguration.push({
       dataType: 'location',
       libraryItems: libraryItems
-    }]
+    })
 
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
       analysisSelectionMode: (state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
     }
+  }
+
+  // Add selected existing fiber to a POST body that we will send to aro-service for performing optimization
+  var addSelectedExistingFiberToBody = (state, postBody) => {
+    if (state.selectedExistingFibers.length === 0) {
+      return  // Nothing to do
+    }
+    var libraryItems = []
+    state.selectedExistingFibers.forEach((selectedExistingFiber) => libraryItems.push({ identifier: selectedExistingFiber.libraryId }))
+
+    if (!postBody.overridenConfiguration) {
+      postBody.overridenConfiguration = []
+    }
+    postBody.overridenConfiguration.push({
+      dataType: 'fiber',
+      libraryItems: libraryItems
+    })
   }
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
@@ -171,6 +192,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     var postBody = JSON.parse(json)
 
     loadLocationTypesFromBody(state, postBody)
+    loadSelectedExistingFiberFromBody(state, postBody)
     loadAlgorithmParametersFromBody(state, optimization, postBody)
     loadFiberNetworkConstraintsFromBody(state, postBody)
     loadTechnologiesFromBody(state, postBody)
@@ -231,6 +253,23 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     state.allDataSources.forEach((dataSource) => mapDataSourceIdToObj[dataSource.libraryId] = dataSource)
     state.selectedDataSources = []
     dataSourceIdsToSelect.forEach((dataSourceId) => state.selectedDataSources.push(mapDataSourceIdToObj[dataSourceId]))
+  }
+
+  // Load the selected existing fiber from a POST body object that is sent to the optimization engine
+  var loadSelectedExistingFiberFromBody = (state, postBody) => {
+    state.selectedExistingFibers = []
+    if (postBody.overridenConfiguration) {
+      postBody.overridenConfiguration.forEach((overridenConfiguration) => {
+        if (overridenConfiguration.dataType === 'fiber') {
+          overridenConfiguration.libraryItems.forEach((libraryItem) => {
+            var matchingFibers = state.allExistingFibers.filter((item) => item.libraryId === libraryItem.identifier)
+            if (matchingFibers.length === 1) {
+              state.selectedExistingFibers.push(matchingFibers[0])
+            }
+          })
+        }
+      })
+    }
   }
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine

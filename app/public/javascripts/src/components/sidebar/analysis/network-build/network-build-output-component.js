@@ -10,8 +10,8 @@ class NetworkBuildOutputController {
     state.plan
     .subscribe((plan) => {
       this.plan = plan
-
-      this.getNetworkBuildReport()
+      if(plan.planState === 'COMPLETED')
+        this.getNetworkBuildReport()
     })
   }
 
