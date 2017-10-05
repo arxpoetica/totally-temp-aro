@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, configuration, map_layers, tracker, map_tools,state) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, configuration, map_layers, tracker, map_tools,state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -307,9 +307,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
 
     var options = {
       scaleBeginAtZero: 1,
-      scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' },beginAtZero:  true } }] },
+      tooltips: { mode: 'label', callbacks: {
+          label: function (tooltipItems, data) {
+            return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
+          }
+      } }
     }
     var ctx = document.getElementById('location_market_size_chart').getContext('2d')
     destroyMarketSizeChart()
@@ -456,8 +459,12 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
 
     var options = {
       scaleBeginAtZero: 1,
-      scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' },beginAtZero:  true } }] },
+      tooltips: { callbacks: {
+          label: function (tooltipItems, data) {
+            return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
+          }
+      } }
     }
     destroyBusinessMarketSizeChart()
     var ctx = document.getElementById('business_market_size_chart').getContext('2d')
