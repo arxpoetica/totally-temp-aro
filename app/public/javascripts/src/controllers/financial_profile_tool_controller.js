@@ -16,6 +16,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.details = false
   $scope.arpuFilter = 'household'
   $scope.opexCostFilter = 'household'
+  $scope.state = state
 
 
   // Load the location filters only after the configuration has been loaded

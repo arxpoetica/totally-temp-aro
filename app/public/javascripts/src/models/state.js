@@ -726,5 +726,24 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return hasLocationType
   }
 
+  service.networkNodeTypesEntity = {}
+  //Load NetworkNodeTypesEntity
+  service.loadNetworkNodeTypesEntity = () => {
+    return new Promise((resolve, reject) => {
+      $http.get('/service/odata/NetworkNodeTypesEntity')
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
+            response.data.forEach((entityType) => {
+              service.networkNodeTypesEntity[entityType.name] = entityType.description
+            })
+            resolve()
+          } else {
+            reject(response)
+          }
+        })
+    })
+  }
+  service.loadNetworkNodeTypesEntity()
+
   return service
 }])
