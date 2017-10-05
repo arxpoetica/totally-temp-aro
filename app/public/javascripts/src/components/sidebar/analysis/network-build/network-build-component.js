@@ -1,14 +1,13 @@
 class NetworkBuildController {
 
-  constructor($http, state, optimization, regions) {
+  constructor($http, state, optimization) {
     this.$http = $http
     this.state = state
     this.optimization = optimization
-    this.regions = regions
     this.targets = []
     this.targetsTotal = 0
-    this.selectedLocations = new Set()
     this.serviceAreas = []
+    this.config = config
 
     this.initializeConfigurations()
 
@@ -68,7 +67,7 @@ class NetworkBuildController {
   }
 }
 
-NetworkBuildController.$inject = ['$http', 'state', 'optimization', 'regions']
+NetworkBuildController.$inject = ['$http', 'state', 'optimization']
 
 app.component('networkBuild', {
   templateUrl: '/components/sidebar/analysis/network-build/network-build-component.html',

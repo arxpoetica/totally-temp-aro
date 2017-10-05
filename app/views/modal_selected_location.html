@@ -41,12 +41,12 @@
         <div style="width: 100%; text-align: center">
           <!-- Note: if you changed "nav-pills" back to "nav-tabs" you also have to make the same change in the controller JS. Leaving it this way for now -->
           <ul class="nav nav-pills" style="display: inline-block;" role="tablist">
-            <li role="presentation" class="active">
+            <!-- <li role="presentation">
               <a href="#selected_location_customer_profile" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Customer profile</a>
-            </li>
+            </li> -->
             <% if (config.ui.locations_modal && config.ui.locations_modal.market_profile) { %>
-            <li role="presentation">
-              <a href="#selected_location_market_profile" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Market profile</a>
+            <li role="presentation" class="active">
+              <a href="#selected_location_market_profile" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Business Spend</a>
             </li>
             <% } %>
             <li role="presentation">
@@ -65,7 +65,7 @@
         </div>
 
         <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
+          <!-- <div role="tabpanel" class="tab-pane active" id="selected_location_customer_profile">
             <div class="row" style="margin-top: 30px">
               <div class="col-md-4">
                 <p class="text-center">Businesses</p>
@@ -98,9 +98,9 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
           <% if (config.ui.locations_modal && config.ui.locations_modal.market_profile) { %>
-          <div role="tabpanel" class="tab-pane" id="selected_location_market_profile">
+          <div role="tabpanel" class="tab-pane active" id="selected_location_market_profile">
             <br>
             <div class="row">
               <!-- Entity type dropdown -->
