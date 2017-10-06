@@ -13,19 +13,15 @@
         <th colspan="2">Fiber Capex</th>
       </tr>
       <tr ng-repeat="fiberCost in $ctrl.networkBuildSummary.priceModel.fiberCosts">
-        <td class="indent-1">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}} {{$ctrl.config.length.length_units}})</td>
+        <td class="indent-1 text-capitalize">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}} {{$ctrl.config.length.length_units}})</td>
         <td>{{fiberCost.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
       </tr>
       <tr>
         <th colspan="2">Equipment Capex</th>
       </tr>
       <tr ng-repeat="equipmentCost in $ctrl.networkBuildSummary.priceModel.equipmentCosts">
-        <td class="indent-1">{{$ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
+        <td class="indent-1 text-capitalize">{{$ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
         <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-      </tr>
-      <tr>
-        <th>Total Capex</th>
-        <td>{{$ctrl.networkBuildSummary.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
       </tr>
 
       <tr>
@@ -33,18 +29,23 @@
         <td> {{$ctrl.networkBuildSummary.demandSummary.networkDemands[0].locationDemand.adjustedAtomicUnits | number}} </td>
       </tr>
       <tr ng-repeat="(key, value) in $ctrl.networkBuildSummary.demandSummary.networkDemands[0].locationDemand.entityDemands">
-        <td class="indent-1"> {{key}} </th>
+        <td class="indent-1 text-capitalize"> {{key}} Business </th>
         <td> {{value.atomicUnits}} </td>
       </tr>
 
       <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics">
-        <th>{{networkStatistic.networkStatisticType}}</th>
-        <td ng-if="networkStatistic.networkStatisticType === 'roic_npv' || networkStatistic.networkStatisticType === 'npv'">
+        <th ng-if="networkStatistic.networkStatisticType === 'roic_npv'">NPV</th>
+        <th ng-if="networkStatistic.networkStatisticType === 'roic_irr'">IRR</th>
+        <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
           {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}}K
         </td>
-        <td ng-if="networkStatistic.networkStatisticType === 'roic_irr' || networkStatistic.networkStatisticType === 'irr'">
+        <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
           {{(networkStatistic.value * 100) | number : 1}}%
         </td>
+      </tr>
+      <tr>
+        <th>Total Capex</th>
+        <td>{{$ctrl.networkBuildSummary.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
       </tr>
     </tbody>
   </table>

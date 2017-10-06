@@ -178,7 +178,8 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     if (!plan) return
     $scope.plan = plan
     $scope.mode = 'global'
-    updateMetadataLabels(plan);
+    if(plan.planState === 'COMPLETED')
+      updateMetadataLabels(plan);
 
     $scope.premisesFilterEntityTypes = {}
     $scope.subscribersFilterEntityTypes = {}
