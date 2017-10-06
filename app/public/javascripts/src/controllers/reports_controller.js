@@ -97,6 +97,11 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
           name : 'Equipment Summary',
           type: '.csv',
           url: '/reports/'+plan.id+'/network/csv/nodes'
+        },
+        {
+          name: 'Service Area Summary',
+          type: '.csv',
+          url: `/service/v1/report/plan/${plan.id}/service_area_summary`
         }
       ])
       if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin') {
