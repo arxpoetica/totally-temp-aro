@@ -187,29 +187,22 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, optimization, regions, json) => {
+  stateSerializationHelper.loadStateFromJSON = (state, optimization, regions, planInputs) => {
+    loadAnalysisTypeFromBody(state, planInputs)
+    loadLocationTypesFromBody(state, planInputs)
+    loadSelectedExistingFiberFromBody(state, planInputs)
+    loadAlgorithmParametersFromBody(state, optimization, planInputs)
+    loadFiberNetworkConstraintsFromBody(state, planInputs)
+    loadTechnologiesFromBody(state, planInputs)
+  }
 
-    var postBody = JSON.parse(json)
-
-    loadLocationTypesFromBody(state, postBody)
-    loadSelectedExistingFiberFromBody(state, postBody)
-    loadAlgorithmParametersFromBody(state, optimization, postBody)
-    loadFiberNetworkConstraintsFromBody(state, postBody)
-    loadTechnologiesFromBody(state, postBody)
-
-    // Select geographies
-    regions.removeAllGeographies()
-    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
-      var geographyIds = []
-      postBody.geographies.forEach((geography) => geographyIds.push(geography.id))
-      // Note that we are returning a promise that will be resolved when the UI loads all selected regions
-      return regions.selectGeographyFromIds(geographyIds)
-    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
-      // Immediately resolve and return a promise. Nothing to do when we are in target builder mode
-      return $q.when()
-    } else {
-      throw 'Unexpected selection mode in stateSerializationHelper.js'
-    }
+  // Load analysis type from a POST body object that is sent to the optimization engine
+  var loadAnalysisTypeFromBody = (state, planInputs) => {
+    state.networkAnalysisTypes.forEach((analysisType) => {
+      if (analysisType.id === planInputs.analysis_type) {
+        state.networkAnalysisType = analysisType
+      }
+    })
   }
 
   // Load location types from a POST body object that is sent to the optimization engine
@@ -295,8 +288,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
+      state.activeSelectionMode.next(state.selectionModes.POLYGON)
     } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       optimization.setMode('targets')
+      state.activeSelectionMode.next(state.selectionModes.SINGLE_ENTITY)
     }
   }
 
@@ -322,9 +317,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load technologies from a POST body object that is sent to the optimization engine
   var loadTechnologiesFromBody = (state, postBody) => {
-    Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey] = false)
+    Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey].checked = false)
     postBody.networkConstraints.networkTypes.forEach((networkType) => {
-      var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())
+      var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())[0]
       state.optimizationOptions.technologies[matchedTechnology].checked = true
     })
   }

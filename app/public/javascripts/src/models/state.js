@@ -551,9 +551,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
-    // Note that we are NOT returning the state (the state is set after the call), but a promise
-    // that resolves once all the geographies have been loaded
-    return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
+    return Promise.reject('loadOptimizationOptionsFromJSON() no longer supported in the new UI')
+    // // Note that we are NOT returning the state (the state is set after the call), but a promise
+    // // that resolves once all the geographies have been loaded
+    // return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
   }
 
   $document.ready(() => {
@@ -644,6 +645,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((ephemeralPlan) => {
       service.setPlan(ephemeralPlan)
+      service.loadPlanInputs(ephemeralPlan.id)
     })
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
@@ -662,6 +664,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         if (result.status >= 200 && result.status <= 299) {
           // Plan has been saved in the DB. Reload it
           service.setPlan(result.data)
+          service.loadPlanInputs(result.data.id)
         } else {
           console.error('Unable to make plan permanent')
           console.error(result)
@@ -699,6 +702,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)
+          service.loadPlanInputs(planId)
           service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
           service.requestSetMapZoom.next(result.data.zoomIndex)
         }
@@ -709,6 +713,18 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.plan.next(plan)
     service.reloadSelectedLocations()
     service.reloadSelectedServiceAreas()
+  }
+
+  // Load the plan inputs for the given plan and populate them in state
+  service.loadPlanInputs = (planId) => {
+    var userId = service.getUserId()
+    $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          stateSerializationHelper.loadStateFromJSON(service, optimization, regions, result.data)
+        }
+      })
+      .catch((err) => console.log(err))
   }
 
   service.isDataSourceSelected = function (ds) {
