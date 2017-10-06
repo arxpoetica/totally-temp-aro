@@ -169,7 +169,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
-  service.showNetworkAnalysisOutput = new Rx.BehaviorSubject(false)
+  service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })

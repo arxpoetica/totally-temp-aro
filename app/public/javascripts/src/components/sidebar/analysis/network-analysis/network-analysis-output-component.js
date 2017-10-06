@@ -6,7 +6,7 @@ class NetworkAnalysisOutputController {
     this.showGraph = false
     
     this.showOutput = () => {
-      state.showNetworkAnalysisOutput.next(true)
+      state.showNetworkAnalysisOutput = true
     }
 
     state.plan
