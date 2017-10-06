@@ -4,10 +4,14 @@
     z-index: 3;
     left: 395px;
     position: fixed;
+    top: 8px;
+    background-color: rgba(50, 50, 50, 0.7);
+    border-color: rgb(50, 50, 50);
   }
 
   .tool-bar-button {
     float:left;
+    margin: 1px;
   }
 
   .tool-bar-separator {
@@ -17,13 +21,9 @@
   }
 
   .tool-bar button {
-    padding: 10px;
-    background-color: rgba(50, 50, 50, 0.7);
-    border-color: rgb(50, 50, 50);
-    width: 48px;
-    color: white;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
+    padding: 4px;
+    width: 28px;
+    border-radius: 25px;
   }
 
   .tool-bar .btn-group {
@@ -98,10 +98,10 @@
     <div ng-show="showDropDown" class="dropdown-toolbar btn-group" style="float: left; position: absolute;" role="group" aria-label="Button group with nested dropdown">
       <div class="btn-group" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-          aria-expanded="false">
-            <i class="fa fa-2x fa-caret-down"></i>
+          aria-expanded="false" style="background-color: white;">
+            <i class="fa fa-caret-down"></i>
           </button>
-        <div class="dropdown-menu" style="min-width:0px; padding:0px" aria-labelledby="btnGroupDrop1">
+        <div class="dropdown-menu" style="min-width:0px; padding:0px; background-color:rgba(50, 50, 50, 0.7);" aria-labelledby="btnGroupDrop1">
         </div>
       </div>
     </div>

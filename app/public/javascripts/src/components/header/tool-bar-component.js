@@ -77,15 +77,15 @@ class ToolBarController {
     }
 
     //Toolbar button icons
-    this.openImage = 'fa fa-2x fa-th'
-    this.createImage = 'fa fa-2x fa-file'
-    this.saveImage = 'fa fa-2x fa-floppy-o'
-    this.showImage = 'fa fa-2x fa-folder-open'
-    this.toggleImage = 'fa fa-2x fa-arrows-h'
-    this.downImage = 'fa fa-2x fa-caret-down'
-    this.eyeImage = 'fa fa-2x fa-eye'
-    this.singleSelect = 'fa fa-2x fa-mouse-pointer'
-    this.polygonSelect = 'fa fa-2x fa-bookmark-o fa-rotate-180'
+    this.openImage = 'fa fa-th'
+    this.createImage = 'fa fa-file'
+    this.saveImage = 'fa fa-floppy-o'
+    this.showImage = 'fa fa-folder-open'
+    this.toggleImage = 'fa fa-arrows-h'
+    this.downImage = 'fa fa-caret-down'
+    this.eyeImage = 'fa fa-eye'
+    this.singleSelect = 'fa fa-mouse-pointer'
+    this.polygonSelect = 'fa fa-bookmark-o fa-rotate-180'
 
     this.latestOverlay = null
     this.drawingManager = new google.maps.drawing.DrawingManager({
