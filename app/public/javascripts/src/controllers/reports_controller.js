@@ -101,7 +101,7 @@ app.controller('reports_controller', ['$scope', '$rootScope', '$http', ($scope, 
         {
           name: 'Service Area Summary',
           type: '.csv',
-          url: `/service/v1/report/plan/${plan.id}/service_area_summary`
+          url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${plan.id}.csv`
         }
       ])
       if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin') {
