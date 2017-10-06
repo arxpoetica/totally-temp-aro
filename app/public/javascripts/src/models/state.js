@@ -176,7 +176,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
   service.showLocationInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
-  
+  service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
@@ -492,6 +493,13 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     ]
     service.networkAnalysisType = service.networkAnalysisTypes[0]
 
+    //Upload Data Sources
+    service.uploadDataSources = [
+    ]
+    service.uploadDataSource
+    service.dataItems = {}
+    
+
   }
 
   // Load tile information from the server
@@ -593,6 +601,78 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   service.getUserId = () => {
     return globalUser.id // Ugh. Depending on global variable "globalUser"
+  }
+
+  service.getProjectId = () => {
+    return globalUser.projectId // Ugh. Depending on global variable "globalUser"
+  }
+
+  service.loadFromServer = () => {
+
+    if(!service.plan) return
+
+    var promises = [
+      $http.get('/service/odata/datatypeentity'),
+      $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
+      $http.get(`/service/v1/plan/${service.plan.getValue().id}/configuration?user_id=${globalUser.id}`)
+    ]
+
+    return Promise.all(promises)
+      .then((results) => {
+        // Results will be returned in the same order as the promises array
+        var dataTypeEntityResult = results[0].data
+        var libraryResult = results[1].data
+        var configurationResult = results[2].data
+
+        service.uploadDataSources = []
+        dataTypeEntityResult.forEach((dataTypeEntity) => {
+          if(dataTypeEntity.uploadSupported) {
+            service.uploadDataSources.push({
+              id: dataTypeEntity.id,
+              label: dataTypeEntity.description,
+              name: dataTypeEntity.name
+            })
+          }
+        })
+        
+        dataTypeEntityResult.forEach((dataTypeEntity) => {
+          service.dataItems[dataTypeEntity.name] = {
+            id: dataTypeEntity.id,
+            description: dataTypeEntity.description,
+            minValueInc: dataTypeEntity.minValueInc,
+            maxValueExc: dataTypeEntity.maxValueExc,
+            uploadSupported: dataTypeEntity.uploadSupported,
+            isMinValueSelectionValid: true,
+            isMaxValueSelectionValid: true,
+            selectedLibraryItems: [],
+            allLibraryItems: []
+          }
+        })
+
+        // For each data item, construct the list of all available library items
+        Object.keys(service.dataItems).forEach((dataItemKey) => {
+          // Add the list of all library items for this data type
+          libraryResult.forEach((libraryItem) => {
+            if (libraryItem.dataType === dataItemKey) {
+              service.dataItems[dataItemKey].allLibraryItems.push(libraryItem)
+            }
+          })
+        })
+
+        // For each data item, construct the list of selected library items
+        configurationResult.configurationItems.forEach((configurationItem) => {
+          // For this configuration item, find the data item based on the dataType
+          var dataItem = service.dataItems[configurationItem.dataType]
+          // Find the item from the allLibraryItems based on the library id
+          var selectedLibraryItems = configurationItem.libraryItems
+          selectedLibraryItems.forEach((selectedLibraryItem) => {
+            var matchedLibraryItem = dataItem.allLibraryItems.filter((libraryItem) => libraryItem.identifier === selectedLibraryItem.identifier)
+            dataItem.selectedLibraryItems = dataItem.selectedLibraryItems.concat(matchedLibraryItem)  // Technically there will be only one matched item
+          })
+        })
+
+        return Promise.resolve(service.dataItems)
+      })
   }
 
   service.createEphemeralPlan = () => {

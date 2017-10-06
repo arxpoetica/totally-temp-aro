@@ -10,7 +10,7 @@
                               selection-changed="$ctrl.onSelectionChanged()"
                               style="flex: 1 1 auto;">
             </aro-multi-select>
-            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="addCustomers()">
+            <button class="btn btn-sm btn-default" ng-disabled="!itemValue.uploadSupported" style="flex: 0 0 auto;" ng-click="$ctrl.uploadDataSource(itemValue.id)">
               <span class="fa fa-upload"></span>
             </button>
           </div>

@@ -33,7 +33,7 @@ app.component('showTargets', {
             ng-click="$ctrl.zoomLocation(target)">
             <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeLocation(target)" style="margin-right: 5px">
             <span class="fa fa-trash-o"></span>
-          </a> {{ target.address || target.code }}
+          </a> {{ target.address || target.code || target.name }}
           </li>
         </ul>
       </div>
