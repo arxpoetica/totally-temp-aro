@@ -296,6 +296,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load fiber network constraints from a POST body object that is sent to the optimization engine
   var loadFiberNetworkConstraintsFromBody = (state, postBody) => {
+    if (postBody.networkConstraints && postBody.networkConstraints.routingMode) {
+      state.optimizationOptions.networkConstraints.routingMode = postBody.networkConstraints.routingMode
+    }
+
     if (postBody.networkConstraints
         && postBody.networkConstraints.cellNodeConstraints) {
       var cellNodeConstraintsObj = state.optimizationOptions.networkConstraints.cellNodeConstraints
@@ -304,6 +308,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
       if (postBody.networkConstraints.cellNodeConstraints.polygonStrategy) {
         cellNodeConstraintsObj.polygonStrategy = postBody.networkConstraints.cellNodeConstraints.polygonStrategy
+      }
+      if (postBody.networkConstraints.cellNodeConstraints.cellGranularityRatio) {
+        cellNodeConstraintsObj.cellGranularityRatio = postBody.networkConstraints.cellNodeConstraints.cellGranularityRatio
+      }
+      if (postBody.networkConstraints.cellNodeConstraints.minimumRayLength) {
+        cellNodeConstraintsObj.minimumRayLength = postBody.networkConstraints.cellNodeConstraints.minimumRayLength
       }
       if (postBody.networkConstraints.cellNodeConstraints.tileSystemId) {
         var selectedTile = cellNodeConstraintsObj.tiles.filter((item) => item.id === postBody.networkConstraints.cellNodeConstraints.tileSystemId)
