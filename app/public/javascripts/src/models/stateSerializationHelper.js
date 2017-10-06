@@ -78,7 +78,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
-      analysisSelectionMode: (state.optimizationOptions.selectedgeographicalLayer.id === 'SELECTED_AREAS') ? 'SELECTED_AREAS' : 'SELECTED_LOCATIONS'
+      analysisSelectionMode: state.optimizationOptions.analysisSelectionMode
     }
   }
 
@@ -286,12 +286,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     if (postBody.budget) {
       state.optimizationOptions.budget = +postBody.optimization.budget
     }
+    state.optimizationOptions.analysisSelectionMode = postBody.locationConstraints.analysisSelectionMode
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
-      state.activeSelectionMode.next(state.selectionModes.POLYGON)
     } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       optimization.setMode('targets')
-      state.activeSelectionMode.next(state.selectionModes.SINGLE_ENTITY)
     }
   }
 

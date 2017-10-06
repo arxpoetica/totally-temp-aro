@@ -77,6 +77,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   // appReadyPromise will resolve when the map and configuration are loaded
   service.appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
 
+  // The selection modes for the application
+  service.selectionModes = {
+    SELECTED_AREAS: 'Service Areas',
+    SELECTED_LOCATIONS: 'Locations'
+  }
+
   // Optimization options - initialize once
   service.optimizationOptions = {
     uiAlgorithms: [],
@@ -121,8 +127,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     generatedDataRequest: {
       generatePlanLocationLinks : false
     },
-    geographicalLayers: [],
-    selectedgeographicalLayer: null
+    analysisSelectionMode: service.selectionModes.SELECTED_AREAS,
+    geographicalLayers: []
   }
 
   // View Settings layer - define once
@@ -217,13 +223,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     PLAN_SETTINGS: 2
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
-
-  // The selection modes for the application
-  service.selectionModes = Object.freeze({
-    SINGLE_ENTITY: 0,
-    POLYGON: 1
-  })
-  service.activeSelectionMode = new Rx.BehaviorSubject(service.selectionModes.SINGLE_ENTITY)
 
   // Competition display
   service.competition = {
@@ -483,7 +482,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
 
     service.selectedDisplayMode.next(service.displayModes.VIEW)
-    service.activeSelectionMode.next(service.selectionModes.SINGLE_ENTITY)
+    service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_BUILD', label: 'Network Build', type: "NETWORK_PLAN" },

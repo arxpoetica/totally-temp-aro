@@ -10,11 +10,8 @@ class MapSelectorController {
       this.selectedDisplayMode = newValue
       this.updateDrawingManagerState()
     })
+    this.state = state
     this.selectionModes = state.selectionModes
-    state.activeSelectionMode.subscribe((newValue) => {
-      this.activeSelectionMode = newValue
-      this.updateDrawingManagerState()
-    })
 
     // Handle selection events from state
     state.mapFeaturesSelectedEvent.subscribe((event) => {
@@ -96,7 +93,7 @@ class MapSelectorController {
     }
 
     if (this.selectedDisplayMode === this.displayModes.ANALYSIS
-        && this.activeSelectionMode === this.selectionModes.POLYGON) {
+        && this.analysisSelectionMode === this.selectionModes.SELECTED_AREAS) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
@@ -109,6 +106,15 @@ class MapSelectorController {
   $onInit() {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
+    }
+  }
+
+  $doCheck() {
+    // Do a manual check on analysisSelectionMode, as it is no longer a BehaviorSubject
+    var oldValue = this.analysisSelectionMode
+    this.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
+    if (this.analysisSelectionMode !== oldValue) {
+      this.updateDrawingManagerState()
     }
   }
 }

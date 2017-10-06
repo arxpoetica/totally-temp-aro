@@ -56,14 +56,8 @@ class NetworkBuildController {
 
     this.state.optimizationOptions.uiSelectedAlgorithm = this.state.optimizationOptions.uiAlgorithms[0]
 
-    this.state.optimizationOptions.geographicalLayers = [
-      this.state.GEOGRAPHY_LAYERS.SERVICE_AREAS,
-      this.state.GEOGRAPHY_LAYERS.LOCATIONS
-    ]
-
     this.state.optimizationOptions.selectedgeographicalLayer = this.state.optimizationOptions.geographicalLayers[0]
     this.optimization.setMode('boundaries')
-
   }
 }
 
