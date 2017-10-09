@@ -8,7 +8,7 @@ class PlanSettingsController {
     this.$timeout = $timeout
 
     this.state.loadFromServer().then((dataItems) => {
-      this.allDataItems = this.state.dataItems
+      this.allDataItems = dataItems
       this.isdataItems = true
       this.$timeout() // Will safely call $scope.$apply()
     })

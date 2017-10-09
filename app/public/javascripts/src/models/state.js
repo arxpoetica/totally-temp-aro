@@ -497,9 +497,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.uploadDataSources = [
     ]
     service.uploadDataSource
-    service.dataItems = {}
-    
-
   }
 
   // Load tile information from the server
@@ -616,7 +613,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
       $http.get(`/service/v1/plan/${service.plan.getValue().id}/configuration?user_id=${globalUser.id}`)
     ]
-
+    var dataItems = {}
+    
     return Promise.all(promises)
       .then((results) => {
         // Results will be returned in the same order as the promises array
@@ -636,7 +634,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
         
         dataTypeEntityResult.forEach((dataTypeEntity) => {
-          service.dataItems[dataTypeEntity.name] = {
+          dataItems[dataTypeEntity.name] = {
             id: dataTypeEntity.id,
             description: dataTypeEntity.description,
             minValueInc: dataTypeEntity.minValueInc,
@@ -650,11 +648,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
 
         // For each data item, construct the list of all available library items
-        Object.keys(service.dataItems).forEach((dataItemKey) => {
+        Object.keys(dataItems).forEach((dataItemKey) => {
           // Add the list of all library items for this data type
           libraryResult.forEach((libraryItem) => {
             if (libraryItem.dataType === dataItemKey) {
-              service.dataItems[dataItemKey].allLibraryItems.push(libraryItem)
+              dataItems[dataItemKey].allLibraryItems.push(libraryItem)
             }
           })
         })
@@ -662,7 +660,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         // For each data item, construct the list of selected library items
         configurationResult.configurationItems.forEach((configurationItem) => {
           // For this configuration item, find the data item based on the dataType
-          var dataItem = service.dataItems[configurationItem.dataType]
+          var dataItem = dataItems[configurationItem.dataType]
           // Find the item from the allLibraryItems based on the library id
           var selectedLibraryItems = configurationItem.libraryItems
           selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -671,7 +669,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           })
         })
 
-        return Promise.resolve(service.dataItems)
+        return Promise.resolve(dataItems)
       })
   }
 

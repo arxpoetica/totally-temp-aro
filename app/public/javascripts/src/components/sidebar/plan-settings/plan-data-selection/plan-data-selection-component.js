@@ -12,7 +12,6 @@ class DataSelectionController {
   }
 
   $onInit() {
-    this.dataItems = this.allDataItems
     this.updateSelectionValidation()
   }
 
@@ -56,8 +55,8 @@ class DataSelectionController {
 
   // Updates the 'valid' flags for all data items
   updateSelectionValidation() {
-    Object.keys(this.dataItems).forEach((dataItemKey) => {
-      var dataItem = this.dataItems[dataItemKey]
+    Object.keys(this.allDataItems).forEach((dataItemKey) => {
+      var dataItem = this.allDataItems[dataItemKey]
       dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValueInc
       dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length < dataItem.maxValueExc
     })
@@ -66,8 +65,8 @@ class DataSelectionController {
 
   areAllSelectionsValid() {
     var areAllSelectionsValid = true
-    Object.keys(this.dataItems).forEach((dataItemKey) => {
-      var dataItem = this.dataItems[dataItemKey]
+    Object.keys(this.allDataItems).forEach((dataItemKey) => {
+      var dataItem = this.allDataItems[dataItemKey]
       if (!dataItem.isMinValueSelectionValid || !dataItem.isMaxValueSelectionValid) {
         areAllSelectionsValid = false
       }
@@ -93,12 +92,12 @@ class DataSelectionController {
       resourceConfigItems: []
     }
 
-    Object.keys(this.dataItems).forEach((dataItemKey) => {
+    Object.keys(this.allDataItems).forEach((dataItemKey) => {
       // An example of dataItemKey is 'location'
-      if (this.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+      if (this.allDataItems[dataItemKey].selectedLibraryItems.length > 0) {
         var configurationItem = {
           dataType: dataItemKey,
-          libraryItems: this.dataItems[dataItemKey].selectedLibraryItems
+          libraryItems: this.allDataItems[dataItemKey].selectedLibraryItems
         }
         putBody.configurationItems.push(configurationItem)
       }
