@@ -8,7 +8,8 @@ class DataSourceUploadController {
     this.editingDataset = {
       name: ''
     }
-    
+    this.isUpLoad = false
+
     var form;
 
     var isDataManagementView = false
@@ -79,6 +80,7 @@ class DataSourceUploadController {
   }
 
   submit(libraryId) {
+    this.isUpLoad = true
     var fd = new FormData();
     fd.append("file", $('#data_source_upload_modal input[type=file]').get(0).files[0]);
     var url = '/uploadservice/v1/library/' + libraryId + '?userId=' + this.userId + '&media=CSV'
@@ -89,8 +91,10 @@ class DataSourceUploadController {
       transformRequest: angular.identity
     }).then((e) => {
       this.updateDataSource(e.data)
+      this.isUpLoad = false
       this.close()
     }).catch((e) => {
+      this.isUpLoad = false
       swal('Error', e.statusText, 'error')
     });
     
@@ -147,7 +151,7 @@ app.component('globalDataSourceUploadModal', {
         </form>
       </modal-body>
       <modal-footer ng-show="!$ctrl.isDataManagementView">
-        <button class="btn btn-primary" ng-click="$ctrl.save()">Save</button>
+        <button class="btn btn-primary" ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="spin fa fa-repeat"></span> Save</button>
       </modal-footer>
     </modal>
   `,
