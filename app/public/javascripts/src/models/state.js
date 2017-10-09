@@ -604,7 +604,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return globalUser.projectId // Ugh. Depending on global variable "globalUser"
   }
 
-  service.loadFromServer = () => {
+  service.loadPlanDataSelectionFromServer = () => {
 
     if(!service.plan) return
 
