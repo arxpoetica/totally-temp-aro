@@ -1,108 +1,108 @@
-class dataSourceUploadController {
+class DataSourceUploadController {
   
-  constructor($scope, $http, state) {
+  constructor($http, state) {
     this.state = state
+    this.$http = $http
     this.userId = state.getUserId()
     this.projectId = state.getProjectId()
+    this.editingDataset = {
+      name: ''
+    }
     
     var form;
 
     var isDataManagementView = false
-
-    $scope.close = () => {
-      state.showDataSourceUploadModal.next(false)
-    }
-
-    $scope.modalShown = () => {
-      state.showDataSourceUploadModal.next(true)
-    }
-
-    $scope.modalHide = () => {
-      state.showDataSourceUploadModal.next(false)
-    }
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
         $('#data_source_upload_modal input[type=file]').get(0).value = ''
         $('#data_source_upload_modal input[type=text]').get(0).value = ''
         
-        $scope.editingDataset = {
-          name: ''
-        }
-
         isDataManagementView = false;
-        // $compile($('#data_source_upload_modal form'))($scope)
-        
         form = $('#data_source_upload_modal form').get(0)
       }, 0)
     })
 
-    $scope.save = () => {
-      var files = $('#data_source_upload_modal input[type=file]').get(0).files
-      if ($scope.editingDataset.id && files.length > 0) {
-        return swal({
-          title: 'Are you sure?',
-          text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
-          type: 'warning',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes',
-          showCancelButton: true,
-          closeOnConfirm: true
-        }, submit)
-      }
-
-      $scope.getLibraryId()
-      .then((libraryId) => {
-        $scope.submit(libraryId)
-      })
-      
-    }
-
-    $scope.updateDataSource = (data) => {
-      //update the data
-    }
-
-    $scope.getLibraryId = () => {
-      var libraryOptions = {
-        url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
-        method: 'POST',
-        data: {
-          dataType: this.state.uploadDataSource.name
-        },
-        json: true
-      }
-
-      return $http(libraryOptions)
-      .then((response) => {
-        return Promise.resolve(response.data.identifier)
-      })
-    }
-
-    $scope.submit = (libraryId) => {
-      var fd = new FormData();
-      fd.append("file", $('#data_source_upload_modal input[type=file]').get(0).files[0]);
-      var url = '/uploadservice/v1/library/' + libraryId + '?userId=' + this.userId + '&media=CSV'
-      
-      $http.post(url, fd, {
-        withCredentials: true,
-        headers: { 'Content-Type': undefined },
-        transformRequest: angular.identity
-      }).then(function (e) {
-        $scope.updateDataSource(e.data)
-        $scope.close()
-      }).catch(function (e) {
-        swal('Error', err.message, 'error')
-      });
-      
-    }
   }
+
+  close() {
+    this.state.showDataSourceUploadModal.next(false)
+  }
+
+  modalShown() {
+    this.state.showDataSourceUploadModal.next(true)
+  }
+
+  modalHide() {
+    this.state.showDataSourceUploadModal.next(false)
+  }
+
+  save() {
+    var files = $('#data_source_upload_modal input[type=file]').get(0).files
+    if (this.editingDataset.id && files.length > 0) {
+      return swal({
+        title: 'Are you sure?',
+        text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, submit)
+    }
+
+    this.getLibraryId()
+      .then((libraryId) => {
+        this.submit(libraryId)
+      })
+    
+  }
+
+  updateDataSource(data) {
+    //update the data
+  }
+
+  getLibraryId() {
+    var libraryOptions = {
+      url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
+      method: 'POST',
+      data: {
+        dataType: this.state.uploadDataSource.name
+      },
+      json: true
+    }
+
+    return this.$http(libraryOptions)
+    .then((response) => {
+      return Promise.resolve(response.data.identifier)
+    })
+  }
+
+  submit(libraryId) {
+    var fd = new FormData();
+    fd.append("file", $('#data_source_upload_modal input[type=file]').get(0).files[0]);
+    var url = '/uploadservice/v1/library/' + libraryId + '?userId=' + this.userId + '&media=CSV'
+    
+    this.$http.post(url, fd, {
+      withCredentials: true,
+      headers: { 'Content-Type': undefined },
+      transformRequest: angular.identity
+    }).then((e) => {
+      this.updateDataSource(e.data)
+      this.close()
+    }).catch((e) => {
+      swal('Error', e.statusText, 'error')
+    });
+    
+  }  
+
 }
 
-dataSourceUploadController.$inject = ['$scope', '$http', 'state']
+DataSourceUploadController.$inject = ['$http', 'state']
 
 app.component('globalDataSourceUploadModal', {
   template: `
-    <modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="modalShown()" on-hide="modalHide()" >
+    <modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
       <modal-header title="{{!$ctrl.isDataManagementView && 'Upload Data Sources' || 'Data Management'}}"></modal-header>
       <modal-body id="data_source_upload_modal">
         <form class="form-horizontal">
@@ -147,10 +147,10 @@ app.component('globalDataSourceUploadModal', {
         </form>
       </modal-body>
       <modal-footer ng-show="!$ctrl.isDataManagementView">
-        <button class="btn btn-primary" ng-click="save()">Save</button>
+        <button class="btn btn-primary" ng-click="$ctrl.save()">Save</button>
       </modal-footer>
     </modal>
   `,
   bindings: {},
-  controller: dataSourceUploadController
+  controller: DataSourceUploadController
 })
