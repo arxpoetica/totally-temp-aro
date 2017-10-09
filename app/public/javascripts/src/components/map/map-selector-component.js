@@ -93,7 +93,7 @@ class MapSelectorController {
     }
 
     if (this.selectedDisplayMode === this.displayModes.ANALYSIS
-        && this.analysisSelectionMode === this.selectionModes.SELECTED_AREAS) {
+        && this.analysisSelectionMode === 'SELECTED_AREAS') {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
