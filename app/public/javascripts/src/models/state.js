@@ -128,8 +128,28 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       generatePlanLocationLinks : false
     },
     analysisSelectionMode: service.selectionModes.SELECTED_AREAS,
-    geographicalLayers: []
+    geographicalLayers: [],
+    selectedgeographicalLayer: null
   }
+
+  //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
+  service.optimizationOptions.uiAlgorithms = [
+    service.OPTIMIZATION_TYPES.UNCONSTRAINED,
+    service.OPTIMIZATION_TYPES.MAX_IRR,
+    service.OPTIMIZATION_TYPES.BUDGET,
+    service.OPTIMIZATION_TYPES.IRR_TARGET,
+    service.OPTIMIZATION_TYPES.IRR_THRESH,
+    service.OPTIMIZATION_TYPES.COVERAGE
+  ]
+
+  service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
+
+  service.optimizationOptions.geographicalLayers = [
+    service.GEOGRAPHY_LAYERS.SERVICE_AREAS,
+    service.GEOGRAPHY_LAYERS.LOCATIONS
+  ]
+
+  service.optimizationOptions.selectedgeographicalLayer = service.optimizationOptions.geographicalLayers[0]
 
   // View Settings layer - define once
   service.viewSetting = {
@@ -762,26 +782,29 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       }
     })
     var userId = service.getUserId()
-    $http.post(`/service/v1/plan?user_id=${userId}&source_plan_id=${newPlan.id}`, newPlan)
+    return $http.post(`/service/v1/plan?user_id=${userId}&source_plan_id=${newPlan.id}`, newPlan)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
-          service.loadPlan(result.data.id)
+          return service.loadPlan(result.data.id)
+          .then(() => {return Promise.resolve()})
         } else {
           console.error('Unable to copy plan')
           console.error(result)
+          return Promise.reject()
         }
       })
   }
 
   service.loadPlan = (planId) => {
     var userId = service.getUserId()
-    $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
+    return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)
           service.loadPlanInputs(planId)
           service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
           service.requestSetMapZoom.next(result.data.zoomIndex)
+          return Promise.resolve()
         }
       })
   }

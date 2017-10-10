@@ -1,13 +1,13 @@
 <div>
   <style scoped>
-    #tblNetworkBuild td {
+    #tblNetworkAnalysis td {
       line-height: 33px;  /* To vertically align text */
     }
     .indent-1 {
       padding-left: 30px !important;
     }
   </style>
-  <table id="tblNetworkBuild" class="table table-condensed table-striped">
+  <table id="tblNetworkAnalysis" class="table table-condensed table-striped">
     <tbody>
       <tr>
         <td>Endpoint Technology</td>
@@ -95,7 +95,7 @@
         <td>Selected Geographies</td>
         <td>
           <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
-          <show-targets targets="$ctrl.serviceAreas"
+          <show-targets id="network-analysis-target-geog" targets="$ctrl.serviceAreas"
                         remove-target="$ctrl.removeServiceArea({target:target})"></show-targets>
         </td>
       </tr>
@@ -103,7 +103,7 @@
         <td>Selected Locations</td>
         <td>
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
-          <show-targets targets="$ctrl.targets"
+          <show-targets id="network-analysis-target-loc" targets="$ctrl.targets"
                         remove-target="$ctrl.removeTarget({target:target})" zoom-target="$ctrl.zoomTarget({target:target})"></show-targets>
         </td>
       </tr>

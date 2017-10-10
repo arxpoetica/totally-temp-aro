@@ -1,5 +1,5 @@
 class OptimizeButtonController {
-  constructor(state, $http, regions, tileDataService) {
+  constructor(state, $http, regions, tileDataService, $rootScope) {
     this.state = state
     this.$http = $http
     this.regions = regions
@@ -23,6 +23,13 @@ class OptimizeButtonController {
         // Optimization is in progress. We can start polling for the results
         this.startPolling()
       }
+    })
+
+    $rootScope.$on('runOptimization', (event, data) => {
+      this.handleModifyClicked()
+      .then(() => {
+        this.runOptimization()
+      })
     })
   }
 
@@ -126,43 +133,54 @@ class OptimizeButtonController {
     if (currentPlan.ephemeral) {
       // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
       var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
-      this.$http.post(url, {})
+      return this.$http.post(url, {})
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
             this.state.setPlan(result.data)
             this.refreshMapTilesCacheAndData()
+            return Promise.resolve()
           }
         })
-        .catch((err) => console.log(err))
+        .catch((err) => {
+          console.log(err)
+          return Promise.reject()
+        })
     } else {
       // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
-      this.showModifyQuestionDialog()
+      return this.showModifyQuestionDialog()
         .then((result) => {
           if (result === this.modifyDialogResult.SAVEAS) {
             // Ask for the name to save this plan as, then save it
-            swal({
-              title: 'Plan name required',
-              text: 'Enter a name for saving the plan',
-              type: 'input',
-              showCancelButton: true,
-              confirmButtonColor: '#DD6B55',
-              confirmButtonText: 'Create Plan'
-            },
-            (planName) => {
-              if (planName) {
-                this.state.copyCurrentPlanTo(planName)
-              }
+            return new Promise((resolve, reject) => {
+              swal({
+                title: 'Plan name required',
+                text: 'Enter a name for saving the plan',
+                type: 'input',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Create Plan'
+              },
+              (planName) => {
+                if (planName) {
+                  return this.state.copyCurrentPlanTo(planName)
+                  .then(()=> {return resolve()})
+                }
+              })
             })
           } else if (result === this.modifyDialogResult.OVERWRITE) {
             // Overwrite the current plan. Delete existing results. Reload the plan from the server.
-            this.$http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
+            return this.$http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
               .then((result) => {
                 this.state.loadPlan(currentPlan.id)
                 this.refreshMapTilesCacheAndData()
+                return Promise.resolve()
               })
           }
         })
-        .catch((err) => console.log(err))
+        .catch((err) => {
+          console.log(err)
+          return Promise.reject()
+        })
     }
   }
 
@@ -180,7 +198,7 @@ class OptimizeButtonController {
   }
 }
 
-OptimizeButtonController.$inject = ['state', '$http', 'regions', 'tileDataService']
+OptimizeButtonController.$inject = ['state', '$http', 'regions', 'tileDataService', '$rootScope']
 
 app.component('optimizeButton', {
   templateUrl: '/components/sidebar/optimize-button-component.html',

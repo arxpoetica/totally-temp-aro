@@ -1,10 +1,11 @@
 class NetworkAnalysisOutputContentController {
 
-  constructor($http,$filter,$element, state) {
+  constructor($http,$filter,$element, state,$rootScope) {
     this.state = state
     this.$http = $http
     this.$filter = $filter
     this.$element = $element
+    this.$rootScope = $rootScope
     this.plan = null
     this.networkAnalysisOutput = null
     this.labels = []
@@ -176,6 +177,62 @@ class NetworkAnalysisOutputContentController {
     }
   }
 
+  buildBudgetOptimization(item) {    
+    if (item) {
+      var value = this.chart.data.datasets[item._datasetIndex].data[item._index]
+      
+      var swalOptions = {
+        title: 'Build Network',
+        text: `Build this network at ${value.x} Budget`,
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Build',
+        closeOnConfirm: false,
+        allowOutsideClick: true          
+      }
+
+      var currentPlan = this.state.plan.getValue()
+      if (currentPlan.ephemeral)
+        swalOptions.closeOnConfirm = true
+      else
+        swalOptions.closeOnConfirm = false
+      // var swalPlanOptions = {
+      //   title: 'Plan name required',
+      //   text: 'Enter a name for saving the plan',
+      //   type: 'input',
+      //   showCancelButton: true,
+      //   confirmButtonColor: '#DD6B55',
+      //   confirmButtonText: 'Create Plan'
+      // }    
+
+      swal(swalOptions,
+        () => {
+          // var currentPlan = this.state.plan.getValue()
+          // //If Current plan is ephemeral save the plan
+          // if (currentPlan.ephemeral) {
+          //   swal(swalPlanOptions,
+          //     (planName) => {
+          //       if (planName) {
+          //         this.state.makeCurrentPlanNonEphemeral(planName)
+          //       }
+          //     })
+          // }
+
+          //Assign Analysis type as Network Build 
+          this.state.networkAnalysisType = this.state.networkAnalysisTypes[0]
+
+          // Assigning optimization type as Budget
+          this.state.optimizationOptions.uiSelectedAlgorithm = this.state.OPTIMIZATION_TYPES.BUDGET
+
+          // Assigning Target Capital
+          this.state.optimizationOptions.budget = value.x
+
+          this.$rootScope.$broadcast('runOptimization');
+        })
+
+    }
+  }
+
   showChart (type, data, options) {
     if (this.chart) {
       this.chart.destroy()
@@ -189,10 +246,15 @@ class NetworkAnalysisOutputContentController {
         data: data,
         options: options
       })}, 0)
+
+    canvasElement.onclick = function(evt) {
+      var item = this.chart.getElementAtEvent(evt)[0];
+      if(item) this.buildBudgetOptimization(item)
+    }.bind(this)
   }
 }
 
-NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state']
+NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state', '$rootScope']
 
 app.component('networkAnalysisOutputContent', {
   template: `
