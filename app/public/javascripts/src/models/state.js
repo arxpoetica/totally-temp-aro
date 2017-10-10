@@ -483,7 +483,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
 
     service.selectedDisplayMode.next(service.displayModes.VIEW)
-    service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
+    service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_BUILD', label: 'Network Build', type: "NETWORK_PLAN" },
