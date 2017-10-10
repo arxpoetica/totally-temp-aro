@@ -637,8 +637,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           dataItems[dataTypeEntity.name] = {
             id: dataTypeEntity.id,
             description: dataTypeEntity.description,
-            minValueInc: dataTypeEntity.minValueInc,
-            maxValueExc: dataTypeEntity.maxValueExc,
+            minValue: dataTypeEntity.minValue,
+            maxValue: dataTypeEntity.maxValue,
             uploadSupported: dataTypeEntity.uploadSupported,
             isMinValueSelectionValid: true,
             isMaxValueSelectionValid: true,
