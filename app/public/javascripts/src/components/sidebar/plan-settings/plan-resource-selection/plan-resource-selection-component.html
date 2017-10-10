@@ -5,19 +5,16 @@
         <td style="vertical-align: middle">{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
-            <select model="itemValue.selectedLibraryItem"
-                    ng-options="item.label for item in itemValue.allLibraryItems"
+            <select class="form-control"
+                    ng-model="itemValue.selectedManager"
+                    ng-options="item.description for item in itemValue.allManagers"
                     selection-changed="$ctrl.onSelectionChanged()"
                     style="flex: 1 1 auto;">
             </select>
-            <button class="btn btn-sm btn-default" ng-disabled="!itemValue.uploadSupported" style="flex: 0 0 auto;" ng-click="$ctrl.uploadDataSource(itemValue.id)">
+            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="$ctrl.uploadDataSource(itemValue.id)">
               <span class="fa fa-upload"></span>
             </button>
           </div>
-          <span class="label label-danger"
-                ng-if="!itemValue.isMinValueSelectionValid">Error: At least {{itemValue.minValueInc}} item must be selected</span>
-          <span class="label label-danger"
-                ng-if="!itemValue.isMaxValueSelectionValid">Error: A maximum of {{itemValue.maxValueExc}} items can be selected</span>
         </td>
       </tr>
     </tbody>
