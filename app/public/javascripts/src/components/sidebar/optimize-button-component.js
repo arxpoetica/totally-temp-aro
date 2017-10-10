@@ -64,7 +64,6 @@ class OptimizeButtonController {
     var apiUrl = (this.state.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
     this.$http.post(apiUrl, optimizationBody)
       .then((response) => {
-        console.log(response)
         if (response.status >= 200 && response.status <= 299) {
           this.plan.optimizationId = response.data.optimizationIdentifier
           this.startPolling()
@@ -75,6 +74,7 @@ class OptimizeButtonController {
   }
 
   cancelOptimization() {
+    this.stopPolling()
     this.isCanceling = true
     this.$http.delete(`/service/optimization/processes/${this.plan.optimizationId}`)
       .then((response) => {
@@ -85,7 +85,7 @@ class OptimizeButtonController {
         this.isCanceling = false
         if (response.status >= 200 && response.status <= 299) {
           this.plan.planState = response.data.planState
-          this.plan.optimizationId = response.data.optimizationId
+          delete this.plan.optimizationId
           this.refreshMapTilesCacheAndData()
         }
       })
