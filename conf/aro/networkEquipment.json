@@ -35,8 +35,8 @@
         },
         "planned_bulk_distribution_terminal": {
           "label": "Bulk Distribution Terminal",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distrubution_terminal/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/bulk_distrubution_terminal.png",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distribution_terminal/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
           "equipmentType": "point",
           "drawingOptions": {
