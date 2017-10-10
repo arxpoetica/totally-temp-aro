@@ -60,6 +60,7 @@ class ResourceSelectionController {
           result.data.forEach((resourceItem) => {
             this.resourceItems[resourceItem.name] = {
               id: resourceItem.id,
+              key: resourceItem.name,
               description: resourceItem.description,
               allManagers: [],
               selectedManager: null
