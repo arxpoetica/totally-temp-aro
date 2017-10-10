@@ -177,6 +177,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showLocationInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+  service.resourceItemForEditorModal = null
+  service.showResourceEditorModal = false
 
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})

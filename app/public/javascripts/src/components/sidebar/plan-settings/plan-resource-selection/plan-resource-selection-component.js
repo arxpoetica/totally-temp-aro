@@ -47,7 +47,6 @@ class ResourceSelectionController {
     }
   }
 
-
   loadPlanResourceSelectionFromServer() {
 
     this.resourceItems = {}
@@ -63,7 +62,12 @@ class ResourceSelectionController {
               key: resourceItem.name,
               description: resourceItem.description,
               allManagers: [],
-              selectedManager: null
+              selectedManager: null,
+              showResourceEditorModal: (resourceKey) => {
+                // Doing it this way because this.resourceItems goes into a ng-repeat, and calling the function this way is easier.
+                this.state.resourceItemForEditorModal = this.resourceItems[resourceKey]
+                this.state.showResourceEditorModal = true
+              }
             }
             var endpointId = resourceItem.name.replace('_', '-')  // e.g. 'arpu_manager' becomes 'arpu-manager'
             allManagerPromises.push(this.mockResourceService.get(`/service/v1/${endpointId}`))

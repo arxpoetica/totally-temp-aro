@@ -11,7 +11,7 @@
                     selection-changed="$ctrl.onSelectionChanged()"
                     style="flex: 1 1 auto;">
             </select>
-            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="$ctrl.uploadDataSource(itemValue.id)">
+            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="itemValue.showResourceEditorModal(itemKey)">
               <span class="fa fa-upload"></span>
             </button>
           </div>
