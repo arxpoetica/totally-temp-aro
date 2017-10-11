@@ -93,7 +93,7 @@ class MapSelectorController {
     }
 
     if (this.selectedDisplayMode === this.displayModes.ANALYSIS
-        && this.analysisSelectionMode === 'SELECTED_AREAS') {
+        && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
@@ -110,10 +110,10 @@ class MapSelectorController {
   }
 
   $doCheck() {
-    // Do a manual check on analysisSelectionMode, as it is no longer a BehaviorSubject
-    var oldValue = this.analysisSelectionMode
-    this.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
-    if (this.analysisSelectionMode !== oldValue) {
+    // Do a manual check on selectedTargetSelectionMode, as it is no longer a BehaviorSubject
+    var oldValue = this.targetSelectionMode
+    this.targetSelectionMode = this.state.selectedTargetSelectionMode
+    if (this.targetSelectionMode !== oldValue) {
       this.updateDrawingManagerState()
     }
   }

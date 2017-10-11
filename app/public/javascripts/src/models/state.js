@@ -226,6 +226,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     PLAN_SETTINGS: 2
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
+  service.targetSelectionModes = Object.freeze({
+    SINGLE: 0,
+    POLYGON: 1
+  })
+  service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
 
   // Competition display
   service.competition = {

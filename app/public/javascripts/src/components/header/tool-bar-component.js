@@ -36,7 +36,7 @@ class ToolBarController {
   }
 
   setSelectionMode(selectionMode) {
-    this.state.optimizationOptions.analysisSelectionMode = selectionMode
+    this.state.selectedTargetSelectionMode = selectionMode
   }
 
   showPlanModal() {
