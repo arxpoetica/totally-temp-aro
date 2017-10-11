@@ -1,0 +1,26 @@
+<div style="position: relative">
+  <table class="table table-condensed table-striped">
+    <tbody>
+      <tr ng-repeat="(itemKey, itemValue) in $ctrl.resourceItems">
+        <td style="vertical-align: middle">{{itemValue.description}}</td>
+        <td>
+          <div style="display:flex">
+            <select class="form-control"
+                    ng-model="itemValue.selectedManager"
+                    ng-options="item.description for item in itemValue.allManagers"
+                    selection-changed="$ctrl.onSelectionChanged()"
+                    style="flex: 1 1 auto;">
+            </select>
+            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="itemValue.showResourceEditorModal(itemKey)">
+              <span class="fa fa-upload"></span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+  <div class="disable-sibling-controls"
+      ng-hide="$ctrl.areControlsEnabled">
+  </div>
+</div>

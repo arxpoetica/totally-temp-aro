@@ -197,6 +197,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showLocationInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+  service.resourceItemForEditorModal = null
+  service.showResourceEditorModal = false
 
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
@@ -241,9 +243,15 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.displayModes = Object.freeze({
     VIEW: 0,
     ANALYSIS: 1,
-    PLAN_SETTINGS: 2
+    PLAN_SETTINGS: 2,
+    DEBUG: 3
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
+  service.targetSelectionModes = Object.freeze({
+    SINGLE: 0,
+    POLYGON: 1
+  })
+  service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
 
   // Competition display
   service.competition = {
@@ -503,7 +511,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
 
     service.selectedDisplayMode.next(service.displayModes.VIEW)
-    service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
+    service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_BUILD', label: 'Network Build', type: "NETWORK_PLAN" },
@@ -517,6 +525,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.uploadDataSources = [
     ]
     service.uploadDataSource
+    service.dataItems = {}
+
   }
 
   // Load tile information from the server
@@ -624,7 +634,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     return globalUser.projectId // Ugh. Depending on global variable "globalUser"
   }
 
-  service.loadFromServer = () => {
+  service.loadPlanDataSelectionFromServer = () => {
 
     if(!service.plan) return
 
@@ -633,8 +643,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
       $http.get(`/service/v1/plan/${service.plan.getValue().id}/configuration?user_id=${globalUser.id}`)
     ]
-    var dataItems = {}
-    
+
     return Promise.all(promises)
       .then((results) => {
         // Results will be returned in the same order as the promises array
@@ -654,11 +663,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
         
         dataTypeEntityResult.forEach((dataTypeEntity) => {
-          dataItems[dataTypeEntity.name] = {
+          service.dataItems[dataTypeEntity.name] = {
             id: dataTypeEntity.id,
             description: dataTypeEntity.description,
-            minValueInc: dataTypeEntity.minValueInc,
-            maxValueExc: dataTypeEntity.maxValueExc,
+            minValue: dataTypeEntity.minValue,
+            maxValue: dataTypeEntity.maxValue,
             uploadSupported: dataTypeEntity.uploadSupported,
             isMinValueSelectionValid: true,
             isMaxValueSelectionValid: true,
@@ -668,11 +677,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
 
         // For each data item, construct the list of all available library items
-        Object.keys(dataItems).forEach((dataItemKey) => {
+        Object.keys(service.dataItems).forEach((dataItemKey) => {
           // Add the list of all library items for this data type
           libraryResult.forEach((libraryItem) => {
             if (libraryItem.dataType === dataItemKey) {
-              dataItems[dataItemKey].allLibraryItems.push(libraryItem)
+              service.dataItems[dataItemKey].allLibraryItems.push(libraryItem)
             }
           })
         })
@@ -680,7 +689,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         // For each data item, construct the list of selected library items
         configurationResult.configurationItems.forEach((configurationItem) => {
           // For this configuration item, find the data item based on the dataType
-          var dataItem = dataItems[configurationItem.dataType]
+          var dataItem = service.dataItems[configurationItem.dataType]
           // Find the item from the allLibraryItems based on the library id
           var selectedLibraryItems = configurationItem.libraryItems
           selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -689,7 +698,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           })
         })
 
-        return Promise.resolve(dataItems)
+        return Promise.resolve(service.dataItems)
       })
   }
 
@@ -1004,6 +1013,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   }
 
   service.cancelOptimization = () => {
+    service.stopPolling()
     service.isCanceling = true
     $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
       .then((response) => {
@@ -1014,7 +1024,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         service.isCanceling = false
         if (response.status >= 200 && response.status <= 299) {
           service.Optimizingplan.planState = response.data.planState
-          service.Optimizingplan.optimizationId = response.data.optimizationId
+          delete service.Optimizingplan.optimizationId
           service.refreshMapTilesCacheAndData()
         }
       })

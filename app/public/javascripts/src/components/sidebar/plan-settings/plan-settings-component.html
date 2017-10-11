@@ -45,10 +45,12 @@
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'DATA_SELECTION'">
     <accordion-panel-title title="'Data Selection'" panel-id="'DATA_SELECTION'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'DATA_SELECTION'">
-      <plan-data-selection ng-if="$ctrl.isdataItems" project-id="1" user-id="$ctrl.userId" plan-id="$ctrl.plan.id" all-data-items="$ctrl.allDataItems"></plan-data-selection>
+      <plan-data-selection project-id="1" user-id="$ctrl.userId" plan-id="$ctrl.plan.id" all-data-items="$ctrl.allDataItems"></plan-data-selection>
     </accordion-panel-contents>
     <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'RESOURCE_SELECTION'"></accordion-panel-contents>
+    <accordion-panel-contents panel-id="'RESOURCE_SELECTION'">
+      <plan-resource-selection project-id="1" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-resource-selection>
+    </accordion-panel-contents>
     <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'"></accordion-panel-contents>
     <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'"></accordion-panel-title>
