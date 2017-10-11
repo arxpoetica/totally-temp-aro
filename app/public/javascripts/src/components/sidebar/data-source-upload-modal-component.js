@@ -64,7 +64,8 @@ class DataSourceUploadController {
       url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
       method: 'POST',
       data: {
-        dataType: this.state.uploadDataSource.name
+        dataType: this.state.uploadDataSource.name,
+        name: $('#data_source_upload_modal input[type=text]').get(0).value
       },
       json: true
     }
