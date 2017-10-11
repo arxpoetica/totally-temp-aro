@@ -1,10 +1,91 @@
 class ToolBarController {
 
-  constructor($scope, state, map_tools) {
+  constructor($scope, $compile, state, map_tools) {
     this.state = state
     this.map_tools = map_tools
     this.state.showGlobalSettings
     .subscribe((newValue) => {})
+
+    $scope.showDropDown = false
+    $scope.timeout = 500
+    state.splitterObj
+      .subscribe((splitterObj) => {
+        setTimeout(function () {
+          refreshToolbar(state)
+          $scope.timeout = 0
+        }, $scope.timeout);
+      })
+
+    this.state.selectedDisplayMode.subscribe(() =>
+      setTimeout(function () {
+        refreshToolbar(state)
+      }, $scope.timeout)
+    )
+
+    function refreshToolbar(state) {
+      var logowidth = $("#tool-bar-logo-new").width() + 20//padding
+      var toolbarstartpoint = $('.tool-bar').offset().left
+      var networkplanstartpoint = $('.network-plan').offset().left
+      var availableSpace = networkplanstartpoint - toolbarstartpoint - logowidth
+      var totalbarButtonWidth;
+
+      if($("#map-canvas-container") && $("#map-canvas-container").css('min-width') == '0px') {
+        var minWidth = toolbarstartpoint + 50 /*dropdown button width*/ + logowidth + $('.network-plan').width() + 40 /*slidebar arrow width*/
+        $("#map-canvas-container").css('min-width', minWidth)
+      }
+      
+      if(state.selectedDisplayMode.getValue() !== state.displayModes.ANALYSIS) {
+        totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50]
+      } else {
+        totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50, 10, 50, 50]
+      }
+      
+      var analysisButtonWidth = []
+
+      var totalToolbarSize = totalbarButtonWidth.reduce(function (total, num) {
+        return total + num;
+      })
+      
+      var horizontalTool = ""
+      var dropdownTool = ""
+      var consumedSpace = 0
+
+      consumedSpace = (availableSpace < totalToolbarSize) ? $(".dropdown-toolbar").width() : 0
+
+      for (var i = 0; i < totalbarButtonWidth.length; i++) {
+        consumedSpace += totalbarButtonWidth[i]
+        if(availableSpace > consumedSpace) {
+          horizontalTool += $("#tool-bar-template").children()[i].outerHTML
+        } else {
+          dropdownTool += $("#tool-bar-template").children()[i].outerHTML
+        }
+      }
+
+      $(".horizontal-toolbar").html(horizontalTool)
+      $(".dropdown-toolbar .dropdown-menu").html(dropdownTool)
+
+      $compile($(".horizontal-toolbar"))($scope)
+      $compile($(".dropdown-toolbar .dropdown-menu"))($scope)
+      
+      $scope.showDropDown = dropdownTool ? true : false
+      $scope.$apply()
+      
+      var dropdownbutton = (availableSpace < totalToolbarSize) ? $(".dropdown-toolbar").width() : 0
+      var toolbarendpoint = dropdownbutton + $('.tool-bar').offset().left + $('.tool-bar').width()
+
+      $('#tool-bar-logo-new').css('left', (toolbarendpoint + ((networkplanstartpoint - toolbarendpoint) / 2)) - (logowidth / 2));
+    }
+
+    //Toolbar button icons
+    this.openImage = 'fa fa-th'
+    this.createImage = 'fa fa-file'
+    this.saveImage = 'fa fa-floppy-o'
+    this.showImage = 'fa fa-folder-open'
+    this.toggleImage = 'fa fa-arrows-h'
+    this.downImage = 'fa fa-caret-down'
+    this.eyeImage = 'fa fa-eye'
+    this.singleSelect = 'fa fa-mouse-pointer'
+    this.polygonSelect = 'fa fa-bookmark-o fa-rotate-180'
 
     this.latestOverlay = null
     this.drawingManager = new google.maps.drawing.DrawingManager({
@@ -105,7 +186,7 @@ class ToolBarController {
 
 }
 
-ToolBarController.$inject = ['$scope','state','map_tools']
+ToolBarController.$inject = ['$scope','$compile','state','map_tools']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',
