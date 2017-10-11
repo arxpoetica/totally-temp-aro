@@ -9,8 +9,6 @@ class NetworkBuildController {
     this.serviceAreas = []
     this.config = config
 
-    //this.initializeConfigurations()
-
     this.areControlsEnabled = true
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -71,22 +69,6 @@ class NetworkBuildController {
         $(targetId).css('max-height', '100px')
       }
     }
-  }
-
-  initializeConfigurations() {
-    this.state.optimizationOptions.uiAlgorithms = [
-      this.state.OPTIMIZATION_TYPES.UNCONSTRAINED,
-      this.state.OPTIMIZATION_TYPES.MAX_IRR,
-      this.state.OPTIMIZATION_TYPES.BUDGET,
-      this.state.OPTIMIZATION_TYPES.IRR_TARGET,
-      this.state.OPTIMIZATION_TYPES.IRR_THRESH,
-      this.state.OPTIMIZATION_TYPES.COVERAGE
-    ]
-
-    this.state.optimizationOptions.uiSelectedAlgorithm = this.state.optimizationOptions.uiAlgorithms[0]
-
-    this.state.optimizationOptions.selectedgeographicalLayer = this.state.optimizationOptions.geographicalLayers[0]
-    this.optimization.setMode('boundaries')
   }
 }
 

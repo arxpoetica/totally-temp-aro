@@ -1,11 +1,10 @@
 class NetworkAnalysisOutputContentController {
 
-  constructor($http,$filter,$element, state,$rootScope) {
+  constructor($http,$filter,$element, state) {
     this.state = state
     this.$http = $http
     this.$filter = $filter
     this.$element = $element
-    this.$rootScope = $rootScope
     this.plan = null
     this.networkAnalysisOutput = null
     this.labels = []
@@ -196,27 +195,9 @@ class NetworkAnalysisOutputContentController {
         swalOptions.closeOnConfirm = true
       else
         swalOptions.closeOnConfirm = false
-      // var swalPlanOptions = {
-      //   title: 'Plan name required',
-      //   text: 'Enter a name for saving the plan',
-      //   type: 'input',
-      //   showCancelButton: true,
-      //   confirmButtonColor: '#DD6B55',
-      //   confirmButtonText: 'Create Plan'
-      // }    
 
       swal(swalOptions,
         () => {
-          // var currentPlan = this.state.plan.getValue()
-          // //If Current plan is ephemeral save the plan
-          // if (currentPlan.ephemeral) {
-          //   swal(swalPlanOptions,
-          //     (planName) => {
-          //       if (planName) {
-          //         this.state.makeCurrentPlanNonEphemeral(planName)
-          //       }
-          //     })
-          // }
 
           //Assign Analysis type as Network Build 
           this.state.networkAnalysisType = this.state.networkAnalysisTypes[0]
@@ -227,7 +208,11 @@ class NetworkAnalysisOutputContentController {
           // Assigning Target Capital
           this.state.optimizationOptions.budget = value.x
 
-          this.$rootScope.$broadcast('runOptimization');
+          this.state.handleModifyClicked()
+          .then(() => {
+            this.state.runOptimization()
+          })
+
         })
 
     }
@@ -254,7 +239,7 @@ class NetworkAnalysisOutputContentController {
   }
 }
 
-NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state', '$rootScope']
+NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state']
 
 app.component('networkAnalysisOutputContent', {
   template: `

@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter) => {
+app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter, tileDataService) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -860,6 +860,179 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     })
   }
   service.loadNetworkNodeTypesEntity()
+
+
+  // optimization services
+  service.modifyDialogResult = Object.freeze({
+    SAVEAS: 0,
+    OVERWRITE: 1
+  })
+  service.progressPollingInterval = null
+  service.progressMessage = ''
+  service.progressPercent = 0
+  service.isCanceling = false  // True when we have requested the server to cancel a request
+  service.Optimizingplan = null
+
+  service.handleModifyClicked = () => {
+    var currentPlan = service.plan.getValue()
+    var userId = service.getUserId()
+    if (currentPlan.ephemeral) {
+      // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
+      var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
+      return $http.post(url, {})
+        .then((result) => {
+          if (result.status >= 200 && result.status <= 299) {
+            service.setPlan(result.data)
+            service.refreshMapTilesCacheAndData()
+            return Promise.resolve()
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          return Promise.reject()
+        })
+    } else {
+      // This is not an ephemeral plan. Show a dialog to the user asking whether to overwrite current plan or save as a new one.
+      return service.showModifyQuestionDialog()
+        .then((result) => {
+          if (result === service.modifyDialogResult.SAVEAS) {
+            // Ask for the name to save this plan as, then save it
+            return new Promise((resolve, reject) => {
+              swal({
+                title: 'Plan name required',
+                text: 'Enter a name for saving the plan',
+                type: 'input',
+                showCancelButton: true,
+                confirmButtonColor: '#DD6B55',
+                confirmButtonText: 'Create Plan'
+              },
+              (planName) => {
+                if (planName) {
+                  return service.copyCurrentPlanTo(planName)
+                  .then(()=> {return resolve()})
+                }
+              })
+            })
+          } else if (result === service.modifyDialogResult.OVERWRITE) {
+            // Overwrite the current plan. Delete existing results. Reload the plan from the server.
+            return $http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
+              .then((result) => {
+                service.loadPlan(currentPlan.id)
+                service.refreshMapTilesCacheAndData()
+                return Promise.resolve()
+              })
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+          return Promise.reject()
+        })
+    }
+  }
+
+  service.refreshMapTilesCacheAndData = () => {
+    // Refresh the tile data cache and redraw the tiles
+    tileDataService.clearDataCache()
+    tileDataService.markHtmlCacheDirty()
+    service.requestMapLayerRefresh.next({})
+  }
+
+  service.showModifyQuestionDialog = () => {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: '',
+        text: 'You are modifying a plan with a completed analysis. Do you wish to save into a new plan or overwrite the existing plan?  Overwriting will clear all results which were previously run.',
+        type: 'info',
+        confirmButtonColor: '#b9b9b9',
+        confirmButtonText: 'Save as',
+        cancelButtonColor: '#DD6B55',
+        cancelButtonText: 'Overwrite',
+        showCancelButton: true,
+        closeOnConfirm: false
+      }, (wasConfirmClicked) => {
+        resolve(wasConfirmClicked ? service.modifyDialogResult.SAVEAS : service.modifyDialogResult.OVERWRITE)
+      })
+    })
+  }
+
+  service.runOptimization = () => {
+    
+    service.refreshMapTilesCacheAndData()
+    // Get the optimization options that we will pass to the server
+    var optimizationBody = service.getOptimizationBody()
+    // Make the API call that starts optimization calculations on aro-service
+    var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
+    $http.post(apiUrl, optimizationBody)
+      .then((response) => {
+        console.log(response)
+        if (response.status >= 200 && response.status <= 299) {
+          service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
+          service.startPolling()
+        } else {
+          console.error(response)
+        }
+      })
+  }
+
+  service.startPolling = () => {
+    service.stopPolling()
+    service.progressPollingInterval = setInterval(() => {
+      $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
+        var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
+        newPlan.planState = response.data.optimizationState
+        service.plan.next(newPlan)
+        if (response.data.optimizationState === 'COMPLETED'
+            || response.data.optimizationState === 'CANCELED'
+            || response.data.optimizationState === 'FAILED') {
+          service.stopPolling()
+          service.refreshMapTilesCacheAndData()
+        }
+        var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
+        var minutes = Math.floor(diff / 60)
+        var seconds = Math.ceil(diff % 60)
+        service.progressPercent = response.data.progress * 100
+        service.progressMessage = `${minutes < 10 ? '0': ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+      })
+    }, 1000)
+  }
+
+  service.stopPolling = () => {
+    if (service.progressPollingInterval) {
+      clearInterval(service.progressPollingInterval)
+      service.progressPollingInterval = null
+    }
+  }
+
+  service.cancelOptimization = () => {
+    service.isCanceling = true
+    $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
+      .then((response) => {
+        // Optimization process was cancelled. Get the plan status from the server
+        return $http.get(`/service/v1/plan/${service.Optimizingplan.plan.id}?user_id=${state.getUserId()}`)
+      })
+      .then((response) => {
+        service.isCanceling = false
+        if (response.status >= 200 && response.status <= 299) {
+          service.Optimizingplan.planState = response.data.planState
+          service.Optimizingplan.optimizationId = response.data.optimizationId
+          service.refreshMapTilesCacheAndData()
+        }
+      })
+      .catch((err) => {
+        console.error(err)
+        service.isCanceling = false
+      })
+  }
+
+  service.plan.subscribe((newPlan) => {
+    service.stopPolling()
+    service.Optimizingplan = newPlan
+    service.isCanceling = false
+    if (service.Optimizingplan && service.Optimizingplan.planState === 'STARTED') {
+      // Optimization is in progress. We can start polling for the results
+      service.startPolling()
+    }
+  })
 
   return service
 }])
