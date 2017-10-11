@@ -4,12 +4,14 @@
 class AroMultiSelectController {
   constructor($element) {
     this.$element = $element
+    this.selectElement = null 
+    this.previousItemsLength
   }
 
   $onInit() {
     // Call the bootstrap-multiselect library's multiselect() method on our '<select>' child element.
-    var selectElement = this.$element.find('select')
-    setTimeout(() => selectElement.multiselect({
+    this.selectElement = this.$element.find('select')
+    setTimeout(() => this.selectElement.multiselect({
         buttonWidth: '100%',
         onChange: () => {
           if (this.selectionChanged) {
@@ -18,6 +20,15 @@ class AroMultiSelectController {
         },
         maxHeight: this.maxHeight ? this.maxHeight : 200
       }), 0);
+  }
+
+  $doCheck() {
+    if (this.previousItemsLength != this.allItems.length) {
+      this.previousItemsLength = this.allItems.length
+      setTimeout(() => {
+        this.selectElement.multiselect('rebuild');
+      }, 0);
+    }
   }
 }
 
