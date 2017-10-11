@@ -28,16 +28,18 @@ class ToolBarController {
       var networkplanstartpoint = $('.network-plan').offset().left
       var availableSpace = networkplanstartpoint - toolbarstartpoint - logowidth
       var totalbarButtonWidth;
-
+      var toolBarButtonWidth = 28
+      var separatorWidth = 14
+      
       if($("#map-canvas-container") && $("#map-canvas-container").css('min-width') == '0px') {
-        var minWidth = toolbarstartpoint + 50 /*dropdown button width*/ + logowidth + $('.network-plan').width() + 40 /*slidebar arrow width*/
+        var minWidth = toolbarstartpoint + 28 /*dropdown button width*/ + logowidth + $('.network-plan').width() + 40 /*slidebar arrow width*/
         $("#map-canvas-container").css('min-width', minWidth)
       }
-      
+
       if(state.selectedDisplayMode.getValue() !== state.displayModes.ANALYSIS) {
-        totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50]
+        totalbarButtonWidth = [28, 14, 28, 28, 28, 14, 28, 28]
       } else {
-        totalbarButtonWidth = [50, 10, 50, 50, 50, 10, 50, 50, 10, 50, 50]
+        totalbarButtonWidth = [28, 14, 28, 28, 28, 14, 28, 28, 14, 28, 28]
       }
       
       var analysisButtonWidth = []
@@ -50,14 +52,17 @@ class ToolBarController {
       var dropdownTool = ""
       var consumedSpace = 0
 
-      consumedSpace = (availableSpace < totalToolbarSize) ? $(".dropdown-toolbar").width() : 0
+      consumedSpace = (availableSpace < totalToolbarSize) ? 39 /*$(".dropdown-toolbar").width()*/ : 0
 
       for (var i = 0; i < totalbarButtonWidth.length; i++) {
         consumedSpace += totalbarButtonWidth[i]
-        if(availableSpace > consumedSpace) {
+        if (availableSpace > consumedSpace) {
           horizontalTool += $("#tool-bar-template").children()[i].outerHTML
         } else {
-          dropdownTool += $("#tool-bar-template").children()[i].outerHTML
+          //Skip to load the seperator in dropdown
+          if (totalbarButtonWidth[i] != 14) {
+            dropdownTool += $("#tool-bar-template").children()[i].outerHTML
+          }
         }
       }
 
