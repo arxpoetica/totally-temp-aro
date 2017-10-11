@@ -9,17 +9,17 @@ class DataSourceUploadController {
       name: ''
     }
     this.isUpLoad = false
+    this.dataSources
 
     var form;
 
-    var isDataManagementView = false
+    this.isDataManagementView = false
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
         $('#data_source_upload_modal input[type=file]').get(0).value = ''
         $('#data_source_upload_modal input[type=text]').get(0).value = ''
         
-        isDataManagementView = false;
         form = $('#data_source_upload_modal form').get(0)
       }, 0)
     })
@@ -59,10 +59,6 @@ class DataSourceUploadController {
     
   }
 
-  updateDataSource(data) {
-    //update the data
-  }
-
   getLibraryId() {
     var libraryOptions = {
       url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
@@ -90,15 +86,35 @@ class DataSourceUploadController {
       headers: { 'Content-Type': undefined },
       transformRequest: angular.identity
     }).then((e) => {
-      this.updateDataSource(e.data)
+      this.addDatasource(JSON.parse(e.data))
       this.isUpLoad = false
       this.close()
     }).catch((e) => {
       this.isUpLoad = false
       swal('Error', e.statusText, 'error')
     });
-    
-  }  
+  }
+
+  removeDatasource(target) {
+    this.$http.delete(`/service/v1/project/${this.projectId}/library/${target.target.identifier}?user_id=${this.userId}`).then(() => {
+        var index = this.state.dataItems[target.target.dataType].allLibraryItems.indexOf(target.target)
+        if(index > -1) {
+          this.state.dataItems[target.target.dataType].allLibraryItems.splice(index, 1)
+        }
+    })
+  }
+
+  addDatasource(data) {
+    this.state.dataItems[data.dataType].allLibraryItems.push(data)
+  }
+
+  loadDataSources() {
+    this.isDataManagementView = !this.isDataManagementView
+
+    if(this.isDataManagementView) {
+      this.dataSources = this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems
+    }
+  }
 
 }
 
@@ -111,13 +127,13 @@ app.component('globalDataSourceUploadModal', {
       <modal-body id="data_source_upload_modal">
         <form class="form-horizontal">
           <div class="form-group">
-            <a class="btn pull-right" style="margin-right:15px"  ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]" ng-click="$ctrl.isDataManagementView = !$ctrl.isDataManagementView">{{!$ctrl.isDataManagementView && 'Data Management' || 'File Upload'}}</a>
+            <a class="btn pull-right" style="margin-right:15px"  ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]" ng-click="$ctrl.loadDataSources()">{{!$ctrl.isDataManagementView && 'Data Management' || 'File Upload'}}</a>
           </div>
 
           <div class="form-group">
             <label class="col-sm-4 control-label">Data Type</label>
             <div class="col-sm-8">
-              <select class="form-control"
+              <select class="form-control" ng-change="$ctrl.loadDataSources()"
                 ng-model="$ctrl.state.uploadDataSource"
                 ng-options="item as item.label for item in $ctrl.state.uploadDataSources">
               </select>
@@ -143,7 +159,8 @@ app.component('globalDataSourceUploadModal', {
             <div class="form-group">
               <label class="col-sm-4 control-label">Data Sources</label>
               <div class="col-sm-8">
-                <show-targets targets="$ctrl.state.allDataSources"></show-targets>
+                <show-targets remove-target="$ctrl.removeDatasource({target:target})"
+                  targets="$ctrl.dataSources"></show-targets>
               </div>
             </div>
           </div>
