@@ -87,8 +87,8 @@
       <tool-bar-button class="tool-bar-button" faimage="$ctrl.toggleImage" data-ng-click="$ctrl.toggleMeasuringStick()"></tool-bar-button>
       <tool-bar-button class="tool-bar-button" faimage="$ctrl.eyeImage" data-ng-click="$ctrl.toggleViewSettings()"></tool-bar-button>
       <tool-bar-separator class="tool-bar-separator"></tool-bar-separator>
-      <tool-bar-button class="tool-bar-button" enable="$ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.SINGLE_ENTITY" faimage="$ctrl.singleSelect" data-ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.SINGLE_ENTITY)"></tool-bar-button>
-      <tool-bar-button class="tool-bar-button" enable="$ctrl.state.activeSelectionMode.getValue() === $ctrl.state.selectionModes.POLYGON" faimage="$ctrl.polygonSelect" data-ng-click="$ctrl.setSelectionMode($ctrl.state.selectionModes.POLYGON)"></tool-bar-button>
+      <tool-bar-button class="tool-bar-button" enable="$ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE" faimage="$ctrl.singleSelect" data-ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"></tool-bar-button>
+      <tool-bar-button class="tool-bar-button" enable="$ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON" faimage="$ctrl.polygonSelect" data-ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"></tool-bar-button>
     </div>
 
     <div class="horizontal-toolbar">
