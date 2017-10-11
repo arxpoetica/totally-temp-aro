@@ -223,7 +223,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.displayModes = Object.freeze({
     VIEW: 0,
     ANALYSIS: 1,
-    PLAN_SETTINGS: 2
+    PLAN_SETTINGS: 2,
+    DEBUG: 3
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
   service.targetSelectionModes = Object.freeze({

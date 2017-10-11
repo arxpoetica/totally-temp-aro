@@ -172,6 +172,7 @@ app.component('mapSplit', {
             <location-detail ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"></location-detail>
             <analysis-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS"></analysis-mode>
             <plan-settings ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.PLAN_SETTINGS"></plan-settings>
+            <aro-debug ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.DEBUG"></aro-debug>
           </div>
         </div>
       </div>

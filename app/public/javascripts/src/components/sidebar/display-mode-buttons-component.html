@@ -28,6 +28,16 @@
 <div class="btn-group pull-right">
   <button type="button"
           ng-class="{ 'btn display-mode-button': true,
+                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.DEBUG }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.DEBUG)">
+            <div class="fa fa-2x fa-bug"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Debugging Mode"></div>
+  </button>
+  <button type="button"
+          ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.PLAN_SETTINGS)">
