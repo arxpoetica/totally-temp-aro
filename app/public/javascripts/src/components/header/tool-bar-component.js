@@ -7,12 +7,11 @@ class ToolBarController {
     .subscribe((newValue) => {})
 
     $scope.showDropDown = false
-    $scope.timeout = 500
+    $scope.timeout = 200
     state.splitterObj
       .subscribe((splitterObj) => {
         setTimeout(function () {
           refreshToolbar(state)
-          $scope.timeout = 0
         }, $scope.timeout);
       })
 
@@ -31,11 +30,6 @@ class ToolBarController {
       var toolBarButtonWidth = 28
       var separatorWidth = 14
       
-      if($("#map-canvas-container") && $("#map-canvas-container").css('min-width') == '0px') {
-        var minWidth = toolbarstartpoint + 28 /*dropdown button width*/ + logowidth + $('.network-plan').width() + 40 /*slidebar arrow width*/
-        $("#map-canvas-container").css('min-width', minWidth)
-      }
-
       if(state.selectedDisplayMode.getValue() !== state.displayModes.ANALYSIS) {
         totalbarButtonWidth = [28, 14, 28, 28, 28, 14, 28, 28]
       } else {
