@@ -944,10 +944,10 @@ class TileComponentController {
             var canSelectSA   = false
             
             switch (this.state.optimizationOptions.analysisSelectionMode) {
-              case this.state.GEOGRAPHY_LAYERS.SERVICE_AREAS.id:
+              case 'SELECTED_AREAS':
                 canSelectSA = !canSelectSA
                 break
-              case this.state.GEOGRAPHY_LAYERS.LOCATIONS.id:
+              case 'SELECTED_LOCATIONS':
                 canSelectLoc = !canSelectLoc
                 break
             }
