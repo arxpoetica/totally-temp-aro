@@ -171,6 +171,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
+  service.reportModal =  new Rx.BehaviorSubject(false)
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
@@ -179,6 +180,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.resourceItemForEditorModal = null
   service.showResourceEditorModal = false
+  //This modal will be used to toogle from report modal to current modal 
+  service.previousModal
+
 
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
