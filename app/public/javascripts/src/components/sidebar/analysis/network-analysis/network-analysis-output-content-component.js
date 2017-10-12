@@ -199,17 +199,20 @@ class NetworkAnalysisOutputContentController {
       swal(swalOptions,
         () => {
 
-          //Assign Analysis type as Network Build 
-          this.state.networkAnalysisType = this.state.networkAnalysisTypes[0]
-
-          // Assigning optimization type as Budget
-          this.state.optimizationOptions.uiSelectedAlgorithm = this.state.OPTIMIZATION_TYPES.BUDGET
-
-          // Assigning Target Capital
-          this.state.optimizationOptions.budget = value.x
-
           this.state.handleModifyClicked()
           .then(() => {
+            return this.state.changeAnalysisType()
+          })
+          .then(() => {
+            //Assign Analysis type as Network Build 
+            this.state.networkAnalysisType = this.state.networkAnalysisTypes[0]
+
+            // Assigning optimization type as Budget
+            this.state.optimizationOptions.uiSelectedAlgorithm = this.state.OPTIMIZATION_TYPES.BUDGET
+
+            // Assigning Target Capital
+            this.state.optimizationOptions.budget = value.x
+
             this.state.runOptimization()
           })
 

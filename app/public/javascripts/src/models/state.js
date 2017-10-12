@@ -514,7 +514,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 
     service.networkAnalysisTypes = [
-      { id: 'NETWORK_BUILD', label: 'Network Build', type: "NETWORK_PLAN" },
+      { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
       { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: "NETWORK_ANALYSIS" },
       { id: 'Coverage_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
       { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" }
@@ -778,7 +778,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       })
   }
 
+  service.isCopyCurrentPlan = false
   service.copyCurrentPlanTo = (planName) => {
+    service.isCopyCurrentPlan = true
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
     newPlan.name = planName
     newPlan.ephemeral = false
@@ -791,7 +793,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       }
     })
     var userId = service.getUserId()
-    return $http.post(`/service/v1/plan?user_id=${userId}&source_plan_id=${newPlan.id}`, newPlan)
+    var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.getValue().id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+    return $http.post(url, {})
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           return service.loadPlan(result.data.id)
@@ -810,10 +813,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)
-          service.loadPlanInputs(planId)
-          service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
-          service.requestSetMapZoom.next(result.data.zoomIndex)
-          return Promise.resolve()
+          return service.loadPlanInputs(planId)
+          .then(() => {
+            service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
+            service.requestSetMapZoom.next(result.data.zoomIndex)
+            return Promise.resolve()
+          })
         }
       })
   }
@@ -827,13 +832,17 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   // Load the plan inputs for the given plan and populate them in state
   service.loadPlanInputs = (planId) => {
     var userId = service.getUserId()
-    $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
+    return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           stateSerializationHelper.loadStateFromJSON(service, optimization, regions, result.data)
         }
+        return Promise.resolve()
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err)
+        return Promise.reject()
+      })
   }
 
   service.isDataSourceSelected = function (ds) {
@@ -926,9 +935,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
             // Overwrite the current plan. Delete existing results. Reload the plan from the server.
             return $http.delete(`/service/v1/plan/${currentPlan.id}/analysis?user_id=${userId}`)
               .then((result) => {
-                service.loadPlan(currentPlan.id)
-                service.refreshMapTilesCacheAndData()
-                return Promise.resolve()
+                return service.loadPlan(currentPlan.id)
+                .then(() => {
+                  service.refreshMapTilesCacheAndData()
+                  return Promise.resolve()
+                })
               })
           }
         })
@@ -937,6 +948,16 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           return Promise.reject()
         })
     }
+  }
+
+  service.changeAnalysisType = () => {
+    var analysisSettings = {
+      analysis_type: 'NETWORK_PLAN'
+    }
+
+    return $http.put(`/service/v1/plan/${service.plan.getValue().id}/inputs?user_id=` + service.getUserId(), analysisSettings).then((response) => {
+      return Promise.resolve()
+    })
   }
 
   service.refreshMapTilesCacheAndData = () => {

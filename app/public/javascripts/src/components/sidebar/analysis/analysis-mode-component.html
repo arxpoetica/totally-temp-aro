@@ -51,7 +51,7 @@
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>
       </div>
-      <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
+      <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
         <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
           remove-service-area="$ctrl.removeServiceArea(target)"></network-build>
       </div>
@@ -62,7 +62,7 @@
     </accordion-panel-contents>
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="'OUTPUT'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'OUTPUT'">
-      <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_BUILD'">
+      <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
         <network-build-output></network-build-output>
       </div>
       <div ng-show="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
