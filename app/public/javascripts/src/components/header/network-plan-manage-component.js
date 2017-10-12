@@ -146,6 +146,13 @@ app.directive('networkPlanManage', function () {
         interval = setInterval(load, 100000)
       }
 
+      $scope.openReport = (plan) => {
+        state.networkPlanModal.next(false)
+        //This previous modal will show after close the report
+        state.previousModal = state.networkPlanModal
+        state.reportModal.next(true)
+      }
+
       $scope.saveNewPlan = () => {
         var params = {
           name: $scope.new_plan_name,

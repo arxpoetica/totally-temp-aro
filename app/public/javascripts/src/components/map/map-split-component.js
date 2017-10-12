@@ -15,7 +15,7 @@ class MapSplitController {
       if (!this.splitterObj) {
         this.splitterObj = Split(['#map-canvas-container', '#sidebar'], {
           sizes: [75, 25],
-          minSize: 250,
+          minSize: [680, 250],
           onDragEnd: () => {
             // Trigger a resize so that any tiles that have been uncovered will be loaded
             if (map) {
@@ -43,7 +43,7 @@ class MapSplitController {
     } else {
       // Save the current sizes and then collapse the sidebar
       this.sizesBeforeCollapse = this.splitterObj.getSizes()
-      this.splitterObj.setSizes([99, 1])
+      this.splitterObj.setSizes([99.5, 0.5])
     }
     this.isCollapsed = !this.isCollapsed
     // Trigger a resize so that any tiles that have been uncovered will be loaded
@@ -51,6 +51,7 @@ class MapSplitController {
       // Call the resize a litle bit after animations finish, so that the right width is loaded
       this.$timeout(() => google.maps.event.trigger(map, "resize"), this.transitionTimeMsec + 50)
     }
+    this.state.splitterObj.next(this.splitterObj)    
   }
 }
 
@@ -140,7 +141,7 @@ app.component('mapSplit', {
       </div>
 
       <!-- Define the sidebar -->
-      <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px', 'padding-left': '0px', transition: $ctrl.transitionCSS}">
+      <div id="sidebar" ng-style="{ float: 'left', 'background-color': '#fff', height: '100%', padding: '10px 0px', transition: $ctrl.transitionCSS}">
         <!-- Define the "expander widget" that can be clicked to collapse/uncollapse the sidebar. Note that putting
                 the expander in one div affects the flow of elements in the sidebar, so we create a 0px by 0px div, and
                 use this div to position the contents of the expander. This makes sure we don't affect flow. -->
@@ -161,7 +162,7 @@ app.component('mapSplit', {
           </div>
         </div>
         <!-- Add a wrapping div because the expander changes the layout even though it is outside the panel -->
-        <div ng-show="!$ctrl.isCollapsed" style="display: flex; flex-direction: column; height: 100%">
+        <div ng-show="!$ctrl.isCollapsed" style="display: flex; flex-direction: column; height: 100%; padding-right: 10px;">
           <div style="overflow: auto; flex: 0 0 auto">
             <!-- this is necessary to make the display-mode-buttons flow correctly -->
             <display-mode-buttons></display-mode-buttons>

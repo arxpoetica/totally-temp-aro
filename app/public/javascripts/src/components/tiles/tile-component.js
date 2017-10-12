@@ -939,13 +939,25 @@ class TileComponentController {
             var hitFeatures = []
             var serviceAreaFeatures = []
             var roadFeatures = []
+
+            var canSelectLoc  = false
+            var canSelectSA   = false
             
-            results.forEach((result) => {
-              if(result.length > 0 && result[0].location_id) {
+            switch (this.state.optimizationOptions.analysisSelectionMode) {
+              case this.state.GEOGRAPHY_LAYERS.SERVICE_AREAS.id:
+                canSelectSA = !canSelectSA
+                break
+              case this.state.GEOGRAPHY_LAYERS.LOCATIONS.id:
+                canSelectLoc = !canSelectLoc
+                break
+            }
+
+            results[0].forEach((result) => {
+              if(result.location_id && canSelectLoc) {
                 hitFeatures = hitFeatures.concat(result)
-              } else if (result.length > 0 && result[0].code) {
+              } else if (result.code && canSelectSA) {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
-              } else if (result.length > 0 && result[0].gid) {
+              } else if (result.gid) {
                 roadFeatures = roadFeatures.concat(result)
               }
             })
