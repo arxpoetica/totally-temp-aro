@@ -940,20 +940,16 @@ class TileComponentController {
             var serviceAreaFeatures = []
             var roadFeatures = []
 
-            var canSelectLoc  = true
-            var canSelectSA   = true
+            var canSelectLoc  = false
+            var canSelectSA   = false
             
-            var totalLayer = Object.keys(this.mapRef.overlayMapTypes.getAt(0).mapLayers).length
-            if (totalLayer > 1) {
-              var optimizationLayer = this.state.optimizationOptions.analysisSelectionMode
-              switch (optimizationLayer) {
-                case this.state.GEOGRAPHY_LAYERS.SERVICE_AREAS.id:
-                  canSelectLoc = !canSelectLoc
-                  break
-                case this.state.GEOGRAPHY_LAYERS.LOCATIONS.id:
-                  canSelectSA = !canSelectSA
-                  break
-              }
+            switch (this.state.optimizationOptions.analysisSelectionMode) {
+              case this.state.GEOGRAPHY_LAYERS.SERVICE_AREAS.id:
+                canSelectSA = !canSelectSA
+                break
+              case this.state.GEOGRAPHY_LAYERS.LOCATIONS.id:
+                canSelectLoc = !canSelectLoc
+                break
             }
 
             results[0].forEach((result) => {
