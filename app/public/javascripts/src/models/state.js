@@ -83,6 +83,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     SELECTED_LOCATIONS: 'Locations'
   }
 
+  service.routingModes = {
+    DIRECT_ROUTING: 'Direct Routing',
+    ODN_1: 'Hub-only split',
+    ODN_2: 'Hub-distribution split'
+  }
+
   // Optimization options - initialize once
   service.optimizationOptions = {
     uiAlgorithms: [],

@@ -143,7 +143,7 @@
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
         <td class="indent-1">Tile System</td>
         <td> 
-          <select class="form-control ng-pristine ng-valid ng-touched"
+          <select class="form-control"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile"
             ng-change="changeTileSelected(tileselected)"
             ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles">
@@ -153,10 +153,9 @@
       <tr>
         <td width="48%">Network Construction</td>
         <td> 
-          <select class="form-control ng-pristine ng-valid ng-touched" ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode">
-            <option value="DIRECT_ROUTING">Unsplit Routing</option>
-            <option value="ODN_1" >Hub-Only Split</option>
-            <option value="ODN_2">Hub-Distribution Split</option>
+          <select class="form-control"
+                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
+                  ng-options="key as value for (key, value) in $ctrl.state.routingModes">
           </select>
         </td>
       </tr>
