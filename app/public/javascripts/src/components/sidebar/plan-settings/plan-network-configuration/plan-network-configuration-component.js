@@ -2,7 +2,7 @@ class PlanNetworkConfigurationController {
   constructor($http, state) {
     this.$http = $http
     this.state = state
-    this.networkConfigurations = this.pristineNetworkConfigurations = []
+    this.networkConfigurations = this.pristineNetworkConfigurations = {}
     this.selectedRoutingMode = 'DIRECT_ROUTING'
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -51,8 +51,11 @@ class PlanNetworkConfigurationController {
   loadNetworkConfigurationFromServer() {
     this.$http.get(`/service/v1/project/${this.projectId}/network_configuration?user_id=${this.userId}`)
       .then((result) => {
-        this.networkConfigurations = result.data
-        this.pristineNetworkConfigurations = angular.copy(result.data)
+        this.networkConfigurations = {}
+        result.data.forEach((networkConfiguration) => {
+          this.networkConfigurations[networkConfiguration.routingMode] = networkConfiguration
+        })
+        this.pristineNetworkConfigurations = angular.copy(this.networkConfigurations)
       })
       .catch((err) => console.log(err))
   }

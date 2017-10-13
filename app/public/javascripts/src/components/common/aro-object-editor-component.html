@@ -1,0 +1,12 @@
+<div ng-style="{ border: '1px solid black', 'padding-left': $ctrl.paddingLeftPixels + 'px' }">
+  <div ng-repeat="(key, value) in $ctrl.objectToEdit">
+
+    <div class="form-group form-inline">
+      <label>{{key}}</label>
+      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="value" class="form-control">
+      <div ng-if="$ctrl.isExpandable(value)">
+        <aro-object-editor object-to-edit="value" padding-left-pixels="$ctrl.paddingLeftPixels + 10"></aro-object-editor>
+      </div>
+    </div>
+  </div>
+</div>
