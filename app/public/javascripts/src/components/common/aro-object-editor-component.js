@@ -2,11 +2,11 @@ class AroObjectEditorController {
   constructor() {
     // Store the "Object.keys()" function so we can use it in the markup
     this.ObjectKeys = Object.keys
+    this.pixelsPerIndentationLevel = 20
   }
 
   $onInit() {
-    this.paddingLeftPixels = this.paddingLeftPixels || 0
-    console.log(this.objectToEdit)
+    this.indentationLevel = this.indentationLevel || 0
   }
 
   isEditable(obj) {
@@ -24,7 +24,7 @@ app.component('aroObjectEditor', {
   templateUrl: '/components/common/aro-object-editor-component.html',
   bindings: {
     objectToEdit: '=',      // Two Way binding, we will directly edit object values for now!
-    paddingLeftPixels: '<'
+    indentationLevel: '<'
   },
   controller: AroObjectEditorController
 })
