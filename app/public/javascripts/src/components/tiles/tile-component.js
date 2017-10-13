@@ -340,6 +340,9 @@ class MapTileRenderer {
             // This is a point
             var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
             var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
+
+            //Draw the location icons with its original color
+            ctx.globalCompositeOperation = 'source-over'
             if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
               // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
               if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)) {
