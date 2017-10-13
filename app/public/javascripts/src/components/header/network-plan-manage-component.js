@@ -110,10 +110,21 @@ app.directive('networkPlanManage', function () {
             method: 'GET',
             params: {
               user_id: $scope.user_id
-              // search: $scope.search_text
-              // project_id: $scope.projectId
             }
           }
+
+          if($scope.projectId) {
+            planOptions.params.$filter = 'projectId eq ' + $scope.projectId
+          }
+
+          if($scope.search_text) {
+            if(planOptions.params.$filter) {
+              planOptions.params.$filter += ' and substringof(name, \'' + $scope.search_text + '\')'
+            } else {
+              planOptions.params.$filter = 'substringof(name, \'' + $scope.search_text + '\')'
+            }
+          }
+
           $http(planOptions)
             .then((response) => {
               $http.get('/optimization/processes').then((running) => {
