@@ -1,10 +1,21 @@
+<!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
 <div ng-style="{ 'padding-left': $ctrl.indentationLevel * $ctrl.pixelsPerIndentationLevel + 'px', width: '100%' }">
+
+  <!-- Loop through all the key-value pairs in the object to be edited -->
   <div ng-repeat="(key, value) in $ctrl.objectToEdit" style="width: 100%">
 
+    <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
+         RECURSIVELY show the object editor for the sub-object -->
     <div ng-if="$ctrl.isExpandable(value)" style="width: 100%;">
       <div style="background-color: #ddd; width: 100%; padding-left: 5px; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px solid #888">{{key}}</div>
-      <aro-object-editor object-to-edit="value" indentation-level="$ctrl.indentationLevel + 1"></aro-object-editor>
+      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
+      <aro-object-editor ng-if="$ctrl.indentationLevel <= 200"
+                         object-to-edit="value"
+                         indentation-level="$ctrl.indentationLevel + 1">
+      </aro-object-editor>
     </div>
+
+    <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
     <div ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" style="display: flex; align-items: center; width: 100%; padding-top: 3px; padding-bottom: 3px; border-bottom: 1px solid #888">
       <div style="flex: 1 1 auto;">{{key}}</div>
       <!-- Note that our ng-model is "$ctrl.objectToEdit[key]" and not "value" so the two way binding updates the actual object -->
