@@ -17,34 +17,30 @@ class PlanNetworkConfigurationController {
 
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
-    if (this.isDirty) {
-      if (this.areAllSelectionsValid()) {
-        swal({
-          title: 'Save modified settings?',
-          text: 'You have changed the network configuration. Do you want to save your changes?',
-          type: 'warning',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes',
-          showCancelButton: true,
-          cancelButtonText: 'No',
-          closeOnConfirm: true
-        }, (result) => {
-          if (result) {
-            // Save the changed settings to aro-service
-            this.saveToServer()
-          }
-          this.isDirty = false  // Technically not required since we are in $onDestroy
-        })
-      } else {
-        // All selections are not valid
-        swal({
-          title: 'Invalid selections',
-          text: 'The resource selections are not valid. Correct them before trying to save your changes.',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: '#DD6B55'
-        })
-      }
+    if (!angular.equals(this.networkConfigurations, this.pristineNetworkConfigurations)) {
+      swal({
+        title: 'Save modified settings?',
+        text: 'You have changed the network configuration. Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          // Save the changed settings to aro-service
+          var configSavePromises = []
+          Object.keys(this.networkConfigurations).forEach((networkConfigurationKey) => {
+            // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
+            if (!angular.equals(this.networkConfigurations[networkConfigurationKey], this.pristineNetworkConfigurations[networkConfigurationKey])) {
+              var url = `/service/v1/project/${this.projectId}/network_configuration/${networkConfigurationKey}?user_id=${this.userId}`
+              configSavePromises.push(this.$http.put(url, this.networkConfigurations[networkConfigurationKey]))
+            }
+          })
+          Promise.all(configSavePromises)
+        }
+      })
     }
   }
 
