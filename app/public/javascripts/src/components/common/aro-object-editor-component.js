@@ -1,3 +1,7 @@
+// A component for editing values in any generic javascript object. The component will display input
+// boxes for string, boolean and integer types. Objects can be nested as deep as required (though it
+// will get unweildy to use with too much nesting). Editing of arrays is NOT supported as of now.
+
 class AroObjectEditorController {
   constructor() {
     // Store the "Object.keys()" function so we can use it in the markup
