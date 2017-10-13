@@ -1,9 +1,8 @@
 class ResourceSelectionController {
-  constructor($http, $timeout, state, mockResourceService) {
+  constructor($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.mockResourceService = mockResourceService
     this.resourceItems = {}
     this.pristineResourceItems = {}
     this.isDirty = false
@@ -117,7 +116,7 @@ class ResourceSelectionController {
   }
 }
 
-ResourceSelectionController.$inject = ['$http', '$timeout', 'state', 'mockResourceService']
+ResourceSelectionController.$inject = ['$http', '$timeout', 'state']
 
 // Component did not work when it was called 'dataSelection'
 app.component('planResourceSelection', {
