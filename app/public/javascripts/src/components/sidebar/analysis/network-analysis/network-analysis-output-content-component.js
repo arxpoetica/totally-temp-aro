@@ -205,7 +205,9 @@ class NetworkAnalysisOutputContentController {
           })
           .then(() => {
             //Assign Analysis type as Network Build 
-            this.state.networkAnalysisType = this.state.networkAnalysisTypes[0]
+            this.state.networkAnalysisType = this.state.networkAnalysisTypes.filter(
+              (item) => item.id === 'NETWORK_PLAN'
+            )[0]
 
             // Assigning optimization type as Budget
             this.state.optimizationOptions.uiSelectedAlgorithm = this.state.OPTIMIZATION_TYPES.BUDGET
@@ -235,11 +237,13 @@ class NetworkAnalysisOutputContentController {
         options: options
       })}, 0)
 
-    canvasElement.onclick = function(evt) {
-      var item = this.chart.getElementAtEvent(evt)[0];
-      if(item) this.buildBudgetOptimization(item)
-    }.bind(this)
   }
+
+  onClick (event) {
+    var item = this.chart.getElementAtEvent(event)[0];
+    if(item) this.buildBudgetOptimization(item)
+  }
+
 }
 
 NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state']
@@ -253,7 +257,7 @@ app.component('networkAnalysisOutputContent', {
         ng-options="item as item.name for item in $ctrl.datasets">
       </select>
       <div style="position: relative; width: 100%; height: 350px; top: 35px;">
-        <canvas style="position: absolute;max-height: 300px"></canvas>
+        <canvas style="position: absolute;max-height: 300px" ng-click="$ctrl.onClick($event)"></canvas>
       </div>
     </div>
   `,

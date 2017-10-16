@@ -774,7 +774,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         if (result.status >= 200 && result.status <= 299) {
           // Plan has been saved in the DB. Reload it
           service.setPlan(result.data)
-          service.loadPlanInputs(result.data.id)
+          return service.loadPlanInputs(result.data.id)
         } else {
           console.error('Unable to make plan permanent')
           console.error(result)
@@ -802,7 +802,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           return service.loadPlan(result.data.id)
-          .then(() => {return Promise.resolve()})
         } else {
           console.error('Unable to copy plan')
           console.error(result)
