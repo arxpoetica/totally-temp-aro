@@ -106,22 +106,12 @@ app.directive('networkPlanManage', function () {
         var load = (callback) => {
 
           var planOptions = {
-            url: '/service/v1/plan-summary',
+            url: '/service/v1/plan',
             method: 'GET',
             params: {
-              user_id: $scope.user_id
-            }
-          }
-
-          if($scope.projectId) {
-            planOptions.params.$filter = 'projectId eq ' + $scope.projectId
-          }
-
-          if($scope.search_text) {
-            if(planOptions.params.$filter) {
-              planOptions.params.$filter += ' and substringof(name, \'' + $scope.search_text + '\')'
-            } else {
-              planOptions.params.$filter = 'substringof(name, \'' + $scope.search_text + '\')'
+              user_id: $scope.user_id,
+              search: $scope.search_text,
+              project_Id: $scope.projectId
             }
           }
 
@@ -163,6 +153,25 @@ app.directive('networkPlanManage', function () {
         state.previousModal = state.networkPlanModal
         state.reportModal.next(true)
       }
+
+      $scope.deletePlan = (plan) => {
+        if (!plan) return
+        tracker.track('Manage Analyses / Delete Analysis')
+    
+        swal({
+          title: 'Are you sure?',
+          text: 'You will not be able to recover the deleted plan!',
+          type: 'warning',
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Yes, delete it!',
+          showCancelButton: true,
+          closeOnConfirm: true
+        }, () => {
+          $http.delete(`/service/v1/plan/${plan.id}?user_id=${$scope.user_id}`).then((response) => {
+            $scope.loadPlans()
+          })
+        })
+      }      
 
       $scope.saveNewPlan = () => {
         var params = {
