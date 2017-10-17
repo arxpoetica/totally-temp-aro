@@ -20,6 +20,7 @@ app.component('showTargets', {
     <style scoped>
       #show-targets{
           height: 100%;
+          width: 97%;
           position: absolute;
           overflow: hidden;
           min-height: 100px;
