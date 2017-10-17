@@ -190,6 +190,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showLocationInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+  service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.resourceItemForEditorModal = null
   service.showResourceEditorModal = false
   //This modal will be used to toogle from report modal to current modal 
@@ -696,6 +697,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
 
         service.dataItems = newDataItems
+        service.dataItemsChanged.next(service.dataItems)
       })
   }
 
