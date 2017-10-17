@@ -774,7 +774,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     var userId = service.getUserId()
     $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
-        var planInputs = Object.keys(result.data) > 0 ? result.data : service.getDefaultPlanInputs()
+        var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
         stateSerializationHelper.loadStateFromJSON(service, optimization, regions, planInputs)
       })
       .catch((err) => {
