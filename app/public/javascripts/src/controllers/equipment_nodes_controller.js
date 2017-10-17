@@ -49,7 +49,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createdMapLayerKeys.clear()
 
     // Only add planned equipment if we have a valid plan selected
-    var planId = state.plan.getValue().id
+    var planId = state.plan && state.plan.getValue() && state.plan.getValue().id
     if (planId) {
 
       // Loop through all network equipment categories (e.g. "Existing Equipment")
@@ -84,19 +84,21 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
 
     // Create layers for existing fiber (the ones that are selected for display)
-    var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
-    state.selectedExistingFibers.forEach((selectedExistingFiber) => {
+    if (state.dataItems.fiber) {
+      var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
-      var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
-      oldMapLayers[mapLayerKey] = {
-        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.libraryId}/${lineTransform}/`],
-        iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
-        renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-        strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
-        lineWidth: 2
-      }
-      createdMapLayerKeys.add(mapLayerKey)
-    })
+      state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
+        var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
+        oldMapLayers[mapLayerKey] = {
+          dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedLibraryItem.identifier}/${lineTransform}/`],
+          iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
+          renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+          strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
+          lineWidth: 2
+        }
+        createdMapLayerKeys.add(mapLayerKey)
+      })
+    }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
@@ -115,6 +117,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   state.appReadyPromise.then(() => {
     updateMapLayers()
   })
+
+  // Update map layers when the dataItems property of state changes
+  state.dataItemsChanged
+    .subscribe((newValue) => updateMapLayers())
 
   // Subscribe to different plan events
   $rootScope.$on('plan_selected', (e, plan) => updateMapLayers())
