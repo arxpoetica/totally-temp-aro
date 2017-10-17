@@ -211,11 +211,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
     // Select data source ids from the list of all data sources
     var mapLibraryIdToLibrary = {}
-    state.dataItems.location.allLibraryItems.forEach((libraryItem) => {
-      mapLibraryIdToLibrary[libraryItem.identifier] = libraryItem
-    })
-    state.dataItems.location.selectedLibraryItems = []
-    libraryIdsToSelect.forEach((libraryId) => state.dataItems.location.selectedLibraryItems.push(mapLibraryIdToLibrary[libraryId]))
+    if (state.dataItems && state.dataItems.location) {
+      state.dataItems.location.allLibraryItems.forEach((libraryItem) => {
+        mapLibraryIdToLibrary[libraryItem.identifier] = libraryItem
+      })
+      state.dataItems.location.selectedLibraryItems = []
+      libraryIdsToSelect.forEach((libraryId) => state.dataItems.location.selectedLibraryItems.push(mapLibraryIdToLibrary[libraryId]))
+    }
   }
 
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
