@@ -5,7 +5,6 @@ class PlanSettingsController {
     this.state = state
     this.userId = state.getUserId()
     this.$timeout = $timeout
-    this.state.loadPlanDataSelectionFromServer()
   }
 }
 

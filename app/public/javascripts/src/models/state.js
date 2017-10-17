@@ -7,9 +7,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
-  service.DS_GLOBAL_BUSINESSES = -3
-  service.DS_GLOBAL_HOUSEHOLDS = -2
-  service.DS_GLOBAL_CELLTOWER = -1
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
@@ -190,6 +187,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showLocationInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
+  service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.resourceItemForEditorModal = null
   service.showResourceEditorModal = false
   //This modal will be used to toogle from report modal to current modal 
@@ -218,22 +216,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     tileLayers: [],
     areaLayers: []
   }
-
-  // Default data sources - define once
-  service.defaultDataSources = [
-    {
-      libraryId: service.DS_GLOBAL_BUSINESSES,
-      name: "Global Businesses"
-    },
-    {
-      libraryId: service.DS_GLOBAL_HOUSEHOLDS,
-      name: "Global Households"
-    },
-    {
-      libraryId: service.DS_GLOBAL_CELLTOWER,
-      name: "Global CellTower"
-    }
-  ]
 
   // The display modes for the application
   service.displayModes = Object.freeze({
@@ -460,12 +442,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
-    
-    // A list of location types to show in the locations layer
-    service.allDataSources = service.defaultDataSources.slice()
-
-    // A list of location data sources to show in the locations layer
-    service.selectedDataSources = service.defaultDataSources.slice()
 
     var locationTypes = []
     if (configuration && configuration.locationCategories && configuration.locationCategories.v2) {
@@ -538,41 +514,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         : null
 	})
 
-  // Load existing fibers list from the server
-  service.allExistingFibers = []
-  service.selectedExistingFibers = []
-  service.loadExistingFibersList = () => {
-    service.selectedExistingFibers = [] // Dont want to hold on to any earlier objects
-    return new Promise((resolve, reject) => {
-      $http.get('/user_fiber/list')
-        .then((response) => {
-          if (response.status >= 200 && response.status <= 299) {
-            service.allExistingFibers = response.data
-            resolve()
-          } else {
-            reject(response)
-          }
-        })
-    })
-  }
-  service.loadExistingFibersList()
-
   initializeState()
 
   // When configuration is loaded from the server, update it in the state
   $rootScope.$on('configuration_loaded', () => {
     initializeState()
   })
-
-  // Reload uploaded data sources
-  service.reloadDatasources = (callback) => {
-    $http.get('/datasources').then((response) => {
-      service.allDataSources = service.defaultDataSources.slice()
-      service.selectedDataSources = service.defaultDataSources.slice()   // Always keep the global data sources selected
-      service.allDataSources = service.allDataSources.concat(response.data)
-      callback && callback(response.data)
-    })
-  }
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
@@ -696,6 +643,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
 
         service.dataItems = newDataItems
+        service.dataItemsChanged.next(service.dataItems)
       })
   }
 
@@ -826,18 +774,13 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     var userId = service.getUserId()
     $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          stateSerializationHelper.loadStateFromJSON(service, optimization, regions, result.data)
-        }
+        var planInputs = Object.keys(result.data) > 0 ? result.data : service.getDefaultPlanInputs()
+        stateSerializationHelper.loadStateFromJSON(service, optimization, regions, planInputs)
       })
       .catch((err) => {
         console.log(err)
       })
-  }
-
-  service.isDataSourceSelected = function (ds) {
-    var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');
-    return existingDataSources.indexOf(ds) != -1;
+    service.loadPlanDataSelectionFromServer()
   }
 
   service.hasLocationType = (locationKey) => {
@@ -868,7 +811,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     })
   }
   service.loadNetworkNodeTypesEntity()
-
 
   // optimization services
   service.modifyDialogResult = Object.freeze({
@@ -1045,6 +987,31 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       service.startPolling()
     }
   })
+
+  service.getDefaultPlanInputs = () => {
+    return {
+      analysis_type: "NETWORK_PLAN",
+      financialConstraints: {
+        cashFlowStrategyType: "EXTERNAL",
+          discountRate: 0.06,
+            years: 15
+        },
+      locationConstraints: {
+        locationTypes: [],
+        analysisSelectionMode: "SELECTED_AREAS"
+      },
+      networkConstraints: {
+        networkTypes: [
+          "Fiber"
+        ],
+        routingMode: "DIRECT_ROUTING"
+      },
+      optimization: {
+        algorithmType: "DEFAULT",
+        algorithm: "UNCONSTRAINED"
+      },
+    }
+  }
 
   return service
 }])

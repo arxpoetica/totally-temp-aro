@@ -25,42 +25,6 @@
     </div>
   </div>
 
-  <!-- New implementation of existing fiber -->
-  <div class="row">
-    <div class="col-md-12">
-        <table class="table table-condensed">
-          <thead>
-            <tr style="background-color:#eee">
-              <td>Existing Fiber</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <div style="clear: both"></div>
-                <div style="width: 250px;margin: 5px">
-                  <ui-select multiple ng-model="planState.selectedExistingFibers"
-                              theme="bootstrap"
-                              close-on-select="true"
-                              on-select="selectedFibersChanged()"
-                              on-remove="selectedFibersChanged()">
-                    <ui-select-match placeholder="Select data sources...">{{$item.name}} [id {{$item.libraryId}}]</ui-select-match>
-                    <ui-select-choices class="ui-select-width-250" repeat="existingFiber in planState.allExistingFibers">
-                      <div>{{existingFiber.name}}</div>
-                    </ui-select-choices>
-                  </ui-select>
-                </div>
-
-                <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addFiber()">
-                  <span class="fa fa-plus"></span> Add fiber
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-    </div>
-  </div>
-
   <% if (env_is_test) { %>
     <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>
     <a href="javascript:void(0)" ng-click="show_number_of_features()">.</a>

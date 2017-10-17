@@ -79,8 +79,10 @@ class DataSourceUploadController {
   submit(libraryId) {
     this.isUpLoad = true
     var fd = new FormData();
-    fd.append("file", $('#data_source_upload_modal input[type=file]').get(0).files[0]);
-    var url = '/uploadservice/v1/library/' + libraryId + '?userId=' + this.userId + '&media=CSV'
+    var file = $('#data_source_upload_modal input[type=file]').get(0).files[0]
+    fd.append("file", file);
+    var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
+    var url = `/uploadservice/v1/library/${libraryId}?userId=${this.userId}&media=${fileExtension}`
     
     this.$http.post(url, fd, {
       withCredentials: true,

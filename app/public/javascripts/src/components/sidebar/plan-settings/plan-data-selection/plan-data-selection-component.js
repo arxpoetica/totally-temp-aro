@@ -57,6 +57,7 @@ class DataSelectionController {
 
   onSelectionChanged() {
     this.isDirty = true
+    this.state.dataItemsChanged.next(this.state.dataItems)
     this.updateSelectionValidation()
   }
 
