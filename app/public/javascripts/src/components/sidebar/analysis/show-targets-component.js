@@ -19,8 +19,10 @@ app.component('showTargets', {
   template: `
     <style scoped>
       #show-targets{
-          max-height: 100px;
+          height: 100%;
+          position: absolute;
           overflow: hidden;
+          min-height: 100px;
       }   
       #show-targets:hover {
           overflow: auto;

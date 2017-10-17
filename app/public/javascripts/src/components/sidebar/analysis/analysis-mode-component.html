@@ -51,11 +51,11 @@
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>
       </div>
-      <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
         <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
           remove-service-area="$ctrl.removeServiceArea(target)"></network-build>
       </div>
-      <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
           remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
       </div>
