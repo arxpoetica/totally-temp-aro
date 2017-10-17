@@ -780,6 +780,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .catch((err) => {
         console.log(err)
       })
+    service.loadPlanDataSelectionFromServer()
   }
 
   service.hasLocationType = (locationKey) => {
