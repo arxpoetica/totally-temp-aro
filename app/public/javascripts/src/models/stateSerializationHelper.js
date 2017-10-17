@@ -66,19 +66,18 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add selected existing fiber to a POST body that we will send to aro-service for performing optimization
   var addSelectedExistingFiberToBody = (state, postBody) => {
-    if (state.selectedExistingFibers.length === 0) {
-      return  // Nothing to do
-    }
-    var libraryItems = []
-    state.selectedExistingFibers.forEach((selectedExistingFiber) => libraryItems.push({ identifier: selectedExistingFiber.libraryId }))
+    if (state.dataItems.fiber) {
+      var libraryItems = []
+      state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => libraryItems.push({ identifier: selectedLibraryItem.identifier }))
 
-    if (!postBody.overridenConfiguration) {
-      postBody.overridenConfiguration = []
+      if (!postBody.overridenConfiguration) {
+        postBody.overridenConfiguration = []
+      }
+      postBody.overridenConfiguration.push({
+        dataType: 'fiber',
+        libraryItems: libraryItems
+      })
     }
-    postBody.overridenConfiguration.push({
-      dataType: 'fiber',
-      libraryItems: libraryItems
-    })
   }
 
   //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
@@ -222,14 +221,17 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load the selected existing fiber from a POST body object that is sent to the optimization engine
   var loadSelectedExistingFiberFromBody = (state, postBody) => {
-    state.selectedExistingFibers = []
+    if (!state.dataItems.fiber) {
+      return
+    }
+    state.dataItems.fiber.selectedLibraryItems = []
     if (postBody.overridenConfiguration) {
       postBody.overridenConfiguration.forEach((overridenConfiguration) => {
         if (overridenConfiguration.dataType === 'fiber') {
           overridenConfiguration.libraryItems.forEach((libraryItem) => {
-            var matchingFibers = state.allExistingFibers.filter((item) => item.libraryId === libraryItem.identifier)
+            var matchingFibers = state.dataItems.fiber.allLibraryItems.filter((item) => item.identifier === libraryItem.identifier)
             if (matchingFibers.length === 1) {
-              state.selectedExistingFibers.push(matchingFibers[0])
+              state.dataItems.fiber.selectedLibraryItems.push(matchingFibers[0])
             }
           })
         }

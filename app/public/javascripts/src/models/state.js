@@ -514,25 +514,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         : null
 	})
 
-  // Load existing fibers list from the server
-  service.allExistingFibers = []
-  service.selectedExistingFibers = []
-  service.loadExistingFibersList = () => {
-    service.selectedExistingFibers = [] // Dont want to hold on to any earlier objects
-    return new Promise((resolve, reject) => {
-      $http.get('/user_fiber/list')
-        .then((response) => {
-          if (response.status >= 200 && response.status <= 299) {
-            service.allExistingFibers = response.data
-            resolve()
-          } else {
-            reject(response)
-          }
-        })
-    })
-  }
-  service.loadExistingFibersList()
-
   initializeState()
 
   // When configuration is loaded from the server, update it in the state
