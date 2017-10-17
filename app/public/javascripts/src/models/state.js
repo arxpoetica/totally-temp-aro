@@ -774,9 +774,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     var userId = service.getUserId()
     $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          stateSerializationHelper.loadStateFromJSON(service, optimization, regions, result.data)
-        }
+        var planInputs = Object.keys(result.data) > 0 ? result.data : service.getDefaultPlanInputs()
+        stateSerializationHelper.loadStateFromJSON(service, optimization, regions, planInputs)
       })
       .catch((err) => {
         console.log(err)
@@ -811,7 +810,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     })
   }
   service.loadNetworkNodeTypesEntity()
-
 
   // optimization services
   service.modifyDialogResult = Object.freeze({
@@ -988,6 +986,31 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       service.startPolling()
     }
   })
+
+  service.getDefaultPlanInputs = () => {
+    return {
+      analysis_type: "NETWORK_PLAN",
+      financialConstraints: {
+        cashFlowStrategyType: "EXTERNAL",
+          discountRate: 0.06,
+            years: 15
+        },
+      locationConstraints: {
+        locationTypes: [],
+        analysisSelectionMode: "SELECTED_AREAS"
+      },
+      networkConstraints: {
+        networkTypes: [
+          "Fiber"
+        ],
+        routingMode: "DIRECT_ROUTING"
+      },
+      optimization: {
+        algorithmType: "DEFAULT",
+        algorithm: "UNCONSTRAINED"
+      },
+    }
+  }
 
   return service
 }])
