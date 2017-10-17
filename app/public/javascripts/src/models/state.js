@@ -20,11 +20,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
-
-  service.GEOGRAPHY_LAYERS = {
-    SERVICE_AREAS: { id: 'SELECTED_AREAS', label: 'Service Areas' },
-    LOCATIONS: { id: 'SELECTED_LOCATIONS', label: 'Locations' }
-  }
   
   service.viewFiberOptions = [
     {
@@ -83,6 +78,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     SELECTED_LOCATIONS: 'Locations'
   }
 
+  service.routingModes = {
+    DIRECT_ROUTING: 'Direct Routing',
+    ODN_1: 'Hub-only split',
+    ODN_2: 'Hub-distribution split'
+  }
+
   // Optimization options - initialize once
   service.optimizationOptions = {
     uiAlgorithms: [],
@@ -127,9 +128,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     generatedDataRequest: {
       generatePlanLocationLinks : false
     },
-    analysisSelectionMode: service.selectionModes.SELECTED_AREAS,
-    geographicalLayers: [],
-    selectedgeographicalLayer: null
+    analysisSelectionMode: service.selectionModes.SELECTED_AREAS
   }
 
   //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
@@ -143,13 +142,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   ]
 
   service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
-
-  service.optimizationOptions.geographicalLayers = [
-    service.GEOGRAPHY_LAYERS.SERVICE_AREAS,
-    service.GEOGRAPHY_LAYERS.LOCATIONS
-  ]
-
-  service.optimizationOptions.selectedgeographicalLayer = service.optimizationOptions.geographicalLayers[0]
 
   // View Settings layer - define once
   service.viewSetting = {
@@ -648,7 +640,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       $http.get(`/service/v1/plan/${service.plan.getValue().id}/configuration?user_id=${globalUser.id}`)
     ]
 
-    return Promise.all(promises)
+    Promise.all(promises)
       .then((results) => {
         // Results will be returned in the same order as the promises array
         var dataTypeEntityResult = results[0].data
@@ -666,8 +658,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           }
         })
         
+        var newDataItems = {}
         dataTypeEntityResult.forEach((dataTypeEntity) => {
-          service.dataItems[dataTypeEntity.name] = {
+          newDataItems[dataTypeEntity.name] = {
             id: dataTypeEntity.id,
             description: dataTypeEntity.description,
             minValue: dataTypeEntity.minValue,
@@ -681,11 +674,11 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         })
 
         // For each data item, construct the list of all available library items
-        Object.keys(service.dataItems).forEach((dataItemKey) => {
+        Object.keys(newDataItems).forEach((dataItemKey) => {
           // Add the list of all library items for this data type
           libraryResult.forEach((libraryItem) => {
             if (libraryItem.dataType === dataItemKey) {
-              service.dataItems[dataItemKey].allLibraryItems.push(libraryItem)
+              newDataItems[dataItemKey].allLibraryItems.push(libraryItem)
             }
           })
         })
@@ -693,7 +686,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         // For each data item, construct the list of selected library items
         configurationResult.configurationItems.forEach((configurationItem) => {
           // For this configuration item, find the data item based on the dataType
-          var dataItem = service.dataItems[configurationItem.dataType]
+          var dataItem = newDataItems[configurationItem.dataType]
           // Find the item from the allLibraryItems based on the library id
           var selectedLibraryItems = configurationItem.libraryItems
           selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -702,7 +695,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           })
         })
 
-        return Promise.resolve(service.dataItems)
+        service.dataItems = newDataItems
       })
   }
 

@@ -1,231 +1,225 @@
-app.directive('networkPlanManage', function () {
-  return {
-    restrict: 'E',
-    transclude: true,
-    replace: true,
-    templateUrl: '/components/header/network-plan-manage-component.html',
-    bindings: {},
-    scope: { visible: '=' },
-    controller: function ($scope, $http, $q, state, tracker) {
-      this.state = state
-      this.user = globalUser
-      $scope.config = config
+class NetworkPlanModalController {
+  constructor($http, $q, state, tracker) {
+    this.state     = state
+    this.$http     = $http
+    this.$q        = $q
+    this.tracker   = tracker
+    
+    this.user      = globalUser
+    this.user_id   = user_id
+    
+    this.allPlans  = false
+    this.projectId = globalUser.projectId
 
-      this.tracker = tracker;
-      $scope.allPlans = false
-      $scope.user_id = user_id
-      $scope.projectId = globalUser.projectId
-      $scope.new_plan_name = 'Untitled Plan'
+    this.plan      = null
+    this.plans     = []
 
-      $scope.plan = null
-      $scope.plans = []
+    this.ids       = 0
+    this.customLoc = {};
 
-      var ids = 0
-      var customLoc = {};
+    this.interval  = null
+    this.search
+    this.search_text
+  }
 
-      var search;
+  $onInit() {
+    this.showCombo()
+  }
 
-      this.$onInit = function () {
-        $scope.showCombo()
-      };
+  showCombo() {
+    this.loadPlans(1, () => {
+      //Load search value
+      this.loadSearch()
+      this.tracker.track('Open Analysis')
 
-      $scope.showCombo = () => {
-        $scope.loadPlans(1, () => {
-          //Load search value
-          loadSearch()
-          tracker.track('Open Analysis')
+      reloadCurrentLocation();
+    })
+  }
 
-          reloadCurrentLocation();
-        })
-      }
+  loadSearch() {
+    this.search = $('#create-new-plan .select2')
 
-      function loadSearch() {
-        search = $('#create-new-plan .select2')
-
-        search.select2({
-          placeholder: 'Search an address, city, state or CLLI code', // config.ui.default_form_values.create_plan.select_area_text,
-          ajax: {
-            url: '/search/addresses',
-            dataType: 'json',
-            delay: 250,
-            data: (term) => ({ text: term }),
-            results: (data, params) => {
-              var items = [];
-              data.forEach((location) => {
-                items.push(
-                  {
-                    id: 'id-' + (++ids),
-                    text: location.name,
-                    bounds: location.bounds,
-                    centroid: location.centroid
-                  }
-                );
-              })
-
-              $scope.search_results = items
-              return {
-                results: items,
-                pagination: {
-                  more: false
-                }
+    this.search.select2({
+      placeholder: 'Search an address, city, state or CLLI code', // config.ui.default_form_values.create_plan.select_area_text,
+      ajax: {
+        url: '/search/addresses',
+        dataType: 'json',
+        delay: 250,
+        data: (term) => ({ text: term }),
+        results: (data, params) => {
+          var items = [];
+          data.forEach((location) => {
+            items.push(
+              {
+                id: 'id-' + (++this.ids),
+                text: location.name,
+                bounds: location.bounds,
+                centroid: location.centroid
               }
-            },
-            cache: true
-          },
-          initSelection: function (select, callback) {
-            callback(customLoc)
-          },
-        }).on('change', (e) => {
-          var selected = e.added
-          if (selected) {
-            $scope.new_plan_area_name = selected.text
-            $scope.new_plan_area_bounds = selected.bounds
-            $scope.new_plan_area_centroid = selected.centroid
-          }
-        })
-      }
+            );
+          })
 
-      // If we use this more than once it should be more generalized...
-      $scope.clear_default_text = () => {
-        $scope.new_plan_name = ''
-      }
-
-      var interval = null
-
-      $scope.loadPlans = function (page, callback) {
-        clearInterval(interval)
-        $scope.currentPage = page || 1
-        $scope.maxResults = 10
-        if (page > 1) {
-          var start = $scope.maxResults * (page - 1);
-          var end = start + $scope.maxResults;
-          $scope.plans = $scope.allPlans.slice(start, end);
-          return;
-        }
-
-        var load = (callback) => {
-
-          var planOptions = {
-            url: '/service/v1/plan-summary',
-            method: 'GET',
-            params: {
-              user_id: $scope.user_id
-              // search: $scope.search_text
-              // project_id: $scope.projectId
+          this.search_results = items
+          return {
+            results: items,
+            pagination: {
+              more: false
             }
           }
-          $http(planOptions)
-            .then((response) => {
-              $http.get('/optimization/processes').then((running) => {
-                response.data.forEach((plan) => {
-                  var info = running.data.find((status) => status.planId === +plan.id)
-                  if (info) {
-                    var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
-                    var min = Math.floor(diff / 60)
-                    var sec = Math.ceil(diff % 60)
-                    plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
-                    plan.progress = info.progress
-                    plan.startDate = info.startDate
-                    plan.optimizationState = info.optimizationState
-                  }
-                })
-                $scope.allPlans = response.data
-                $scope.plans = response.data.slice(0, $scope.maxResults);
-                // $scope.pages = response.data.pages
-                $scope.pages = [];
-                var pageSize = Math.floor(response.data.length / $scope.maxResults) + (response.data.length % $scope.maxResults > 0 ? 1 : 0);
-                for (var i = 1; i <= pageSize; i++) {
-                  $scope.pages.push(i);
-                }
+        },
+        cache: true
+      },
+      initSelection: function (select, callback) {
+        callback(this.customLoc)
+      },
+    }).on('change', (e) => {
+      var selected = e.added
+      if (selected) {
+        this.new_plan_area_name = selected.text
+        this.new_plan_area_bounds = selected.bounds
+        this.new_plan_area_centroid = selected.centroid
+      }
+    })
+  }
 
-                callback && callback()
-              })
+  loadPlans(page, callback) {
+    clearInterval(this.interval)
+    this.currentPage = page || 1
+    this.maxResults = 10
+    if (page > 1) {
+      var start = this.maxResults * (page - 1);
+      var end = start + this.maxResults;
+      this.plans = this.allPlans.slice(start, end);
+      return;
+    }
+
+    var load = (callback) => {
+
+      var planOptions = {
+        url: '/service/v1/plan',
+        method: 'GET',
+        params: {
+          user_id: this.user_id,
+          search: this.search_text,
+          project_Id: this.projectId
+        }
+      }
+
+      this.$http(planOptions)
+        .then((response) => {
+          this.$http.get('/optimization/processes').then((running) => {
+            response.data.forEach((plan) => {
+              var info = running.data.find((status) => status.planId === +plan.id)
+              if (info) {
+                var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
+                var min = Math.floor(diff / 60)
+                var sec = Math.ceil(diff % 60)
+                plan.progressString = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec} Runtime`
+                plan.progress = info.progress
+                plan.startDate = info.startDate
+                plan.optimizationState = info.optimizationState
+              }
             })
-        }
-        load(callback)
-        interval = setInterval(load, 100000)
-      }
+            this.allPlans = response.data
+            this.plans = response.data.slice(0, this.maxResults);
+            // this.pages = response.data.pages
+            this.pages = [];
+            var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
+            for (var i = 1; i <= pageSize; i++) {
+              this.pages.push(i);
+            }
 
-      $scope.openReport = (plan) => {
-        state.networkPlanModal.next(false)
-        //This previous modal will show after close the report
-        state.previousModal = state.networkPlanModal
-        state.reportModal.next(true)
-      }
-
-      $scope.saveNewPlan = () => {
-        var params = {
-          name: $scope.new_plan_name,
-          areaName: $scope.new_plan_area_name,
-          latitude: $scope.new_plan_area_centroid.coordinates[1],
-          longitude: $scope.new_plan_area_centroid.coordinates[0],
-          projectId: $scope.projectId
-        }
-
-        $http.post('/service/v1/plan?user_id=' + $scope.user_id, params).then((response) => {
-          $scope.selectPlan(response.data)
-          $scope.loadPlans()
-        })
-      }
-
-      $scope.selectPlan = function (plan) {
-        $scope.plan = plan
-        state.loadPlan(plan.id)
-        state.networkPlanModal.next(false)
-      }
-
-      function reloadCurrentLocation() {
-        var center = map.getCenter();
-        geoCode(center).then(function (address) {
-          fetchLocation(address).then(function (location) {
-            customLoc = location
-            $(search[0]).select2('val', location, true);
+            callback && callback()
           })
         })
-      }
-
-      function geoCode(latlng) {
-        var promise = $q.defer()
-
-        var geocoder = new google.maps.Geocoder;
-        geocoder.geocode({ 'location': latlng }, function (results, status) {
-          if (status === 'OK') {
-            if (results[1]) {
-              promise.resolve({ message: results[0].formatted_address });
-            } else {
-              promise.reject({ error: 'No results found' });
-            }
-          } else {
-            promise.reject({ error: 'Geocoder failed due to: ' + status })
-          }
-        });
-
-        return promise.promise;
-      }
-
-      function fetchLocation(location) {
-        return $http.get("/search/addresses", { params: { text: location.message } }).then(function (results) {
-
-          var location = results.data[0];
-          var loc = {
-            id: 'id-' + (++ids),
-            text: location.name,
-            bounds: location.bounds,
-            centroid: location.centroid,
-            geocoded: true
-          };
-
-          return loc;
-
-        });
-      }
-
-
-      $scope.$watch(function () { return $scope.visible; }, function (value) {
-        if (value == true) {
-          $scope.saveNewPlan()
-        }
-      });
     }
+    load(callback)
+    this.interval = setInterval(load, 100000)
   }
+
+  openReport(plan) {
+    this.state.networkPlanModal.next(false)
+    //This previous modal will show after close the report
+    this.state.previousModal = this.state.networkPlanModal
+    this.state.reportModal.next(true)
+  }
+
+  deletePlan(plan) {
+    if (!plan) return
+    this.tracker.track('Manage Analyses / Delete Analysis')
+
+    swal({
+      title: 'Are you sure?',
+      text: 'You will not be able to recover the deleted plan!',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, delete it!',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, () => {
+      this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.user_id}`).then((response) => {
+        this.loadPlans()
+      })
+    })
+  }
+
+  selectPlan(plan) {
+    this.plan = plan
+    this.state.loadPlan(plan.id)
+    this.state.networkPlanModal.next(false)
+  }
+
+  reloadCurrentLocation() {
+    var center = map.getCenter();
+    geoCode(center).then(function (address) {
+      fetchLocation(address).then(function (location) {
+        this.customLoc = location
+        $(this.search[0]).select2('val', location, true);
+      })
+    })
+  }
+
+  geoCode(latlng) {
+    var promise = this.$q.defer()
+
+    var geocoder = new google.maps.Geocoder;
+    geocoder.geocode({ 'location': latlng }, function (results, status) {
+      if (status === 'OK') {
+        if (results[1]) {
+          promise.resolve({ message: results[0].formatted_address });
+        } else {
+          promise.reject({ error: 'No results found' });
+        }
+      } else {
+        promise.reject({ error: 'Geocoder failed due to: ' + status })
+      }
+    });
+
+    return promise.promise;
+  }
+
+  fetchLocation(location) {
+    return this.$http.get("/search/addresses", { params: { text: location.message } }).then(function (results) {
+
+      var location = results.data[0];
+      var loc = {
+        id: 'id-' + (++this.ids),
+        text: location.name,
+        bounds: location.bounds,
+        centroid: location.centroid,
+        geocoded: true
+      };
+
+      return loc;
+
+    });
+  }
+
+}
+
+NetworkPlanModalController.$inject = ['$http', '$q', 'state', 'tracker']
+
+app.component('networkPlanManage', {
+  templateUrl: '/components/header/network-plan-manage-component.html',
+  controller: NetworkPlanModalController
 })

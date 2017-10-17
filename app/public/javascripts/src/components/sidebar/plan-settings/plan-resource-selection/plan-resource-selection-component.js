@@ -1,111 +1,122 @@
 class ResourceSelectionController {
-  constructor($http, $timeout, state, mockResourceService) {
+  constructor($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.mockResourceService = mockResourceService
     this.resourceItems = {}
+    this.pristineResourceItems = {}
     this.isDirty = false
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+  }
+
+  $onInit() {
     this.loadPlanResourceSelectionFromServer()
   }
 
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
-    if (this.isDirty) {
-      if (this.areAllSelectionsValid()) {
-        swal({
-          title: 'Save modified settings?',
-          text: 'You have changed the resource selection settings. Do you want to save your changes?',
-          type: 'warning',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes',
-          showCancelButton: true,
-          cancelButtonText: 'No',
-          closeOnConfirm: true
-        }, (result) => {
-          if (result) {
-            // Save the changed settings to aro-service
-            this.saveToServer()
-          }
-          this.isDirty = false  // Technically not required since we are in $onDestroy
-        })
-      } else {
-        // All selections are not valid
-        swal({
-          title: 'Invalid selections',
-          text: 'The resource selections are not valid. Correct them before trying to save your changes.',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: '#DD6B55'
-        })
-      }
+    if (!angular.equals(this.resourceItems, this.pristineResourceItems)) {
+      swal({
+        title: 'Save modified settings?',
+        text: 'You have changed the resource selection settings. Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          // Save the changed settings to aro-service
+          this.savePlanResourceSelectionToServer()
+        }
+        this.isDirty = false  // Technically not required since we are in $onDestroy
+      })
     }
   }
 
+  // Load the plan resource selections from the server
   loadPlanResourceSelectionFromServer() {
 
     this.resourceItems = {}
-    var resourceItemOrder = {}  // The order of promises
-    this.mockResourceService.get('/service/odata/resourcetypeentity')
-      .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          // Save all our resource items
-          var allManagerPromises = []
-          result.data.forEach((resourceItem) => {
-            this.resourceItems[resourceItem.name] = {
-              id: resourceItem.id,
-              key: resourceItem.name,
-              description: resourceItem.description,
-              allManagers: [],
-              selectedManager: null,
-              showResourceEditorModal: (resourceKey) => {
-                // Doing it this way because this.resourceItems goes into a ng-repeat, and calling the function this way is easier.
-                this.state.resourceItemForEditorModal = this.resourceItems[resourceKey]
-                this.state.showResourceEditorModal = true
-              }
-            }
-            var endpointId = resourceItem.name.replace('_', '-')  // e.g. 'arpu_manager' becomes 'arpu-manager'
-            allManagerPromises.push(this.mockResourceService.get(`/service/v1/${endpointId}`))
-            // Save the resource item name corresponding to the index of this promise, as we will do a Promise.all() later
-            resourceItemOrder[Object.keys(resourceItemOrder).length] = resourceItem.name
-          })
-          return Promise.all(allManagerPromises)
-        } else {
-          return Promise.reject(result)
-        }
-      })
-      .then((allManagers) => {
-        // Save the list of "all managers" in our object
-        for (var iManager = 0; iManager < allManagers.length; ++iManager) {
-          var resourceName = resourceItemOrder[iManager]
-          this.resourceItems[resourceName].allManagers = allManagers[iManager].data || []
-        }
-        // Now get the project configuration that will contain a list of the selected managers
-        return this.$http.get(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`)
-      })
-      .then((planConfiguration) =>{
-        // Add the "selected" managers to our resourceItem object
-        planConfiguration.data.resourceConfigItems.forEach((resourceConfigItem) => {
-          var resourceName = resourceConfigItem.aroResourceType
-          if (this.resourceItems[resourceName]) { // This condition is only because the names in aro-service are currently mismatched
-            var matchingResources = this.resourceItems[resourceName].allManagers.filter((item) => item.id === resourceConfigItem.resourceManagerId)
-            if (matchingResources.length === 1) {
-              this.resourceItems[resourceName].selectedManager = matchingResources[0]
-            }
+    Promise.all([
+      this.$http.get('/service/odata/resourcetypeentity'), // The types of resource managers
+      this.$http.get('/service/odata/resourcemanager?$select=name,id,description,managerType'), // All resource managers in the system
+      this.$http.get(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`)
+    ])
+    .then((results) => {
+      var resourceManagerTypes = results[0].data
+      var allResourceManagers = results[1].data
+      var selectedResourceManagers = results[2].data.resourceConfigItems
+
+      // First set up the resource items so that we display all types in the UI
+      resourceManagerTypes.forEach((resourceManager) => {
+        this.resourceItems[resourceManager.name] = {
+          id: resourceManager.id,
+          description: resourceManager.description,
+          allManagers: [],
+          selectedManager: null,
+          showResourceEditorModal: (resourceKey) => {
+            // Doing it this way because this.resourceItems goes into a ng-repeat, and calling the function this way is easier.
+            this.state.resourceItemForEditorModal = this.resourceItems[resourceKey]
+            this.state.showResourceEditorModal = true
           }
-        })
-        console.log(this.resourceItems)
+        }
       })
-      .catch((err) => console.log(err))
+
+      // Then add all the managers in the system to the appropriate type
+      allResourceManagers.forEach((resourceManager) => {
+        this.resourceItems[resourceManager.managerType].allManagers.push(resourceManager)
+      })
+
+      // Then select the appropriate manager for each type
+      selectedResourceManagers.forEach((selectedResourceManager) => {
+        var allManagers = this.resourceItems[selectedResourceManager.aroResourceType].allManagers
+        var matchedManagers = allManagers.filter((item) => item.id === selectedResourceManager.resourceManagerId)
+        if (matchedManagers.length === 1) {
+          this.resourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
+        }
+      })
+
+      // Save a deep copy of the pristine state, so we can check if it has changed
+      this.pristineResourceItems = angular.copy(this.resourceItems)
+    })
+  }
+
+  // Save the plan resource selections to the server
+  savePlanResourceSelectionToServer() {
+    var putBody = {
+      configurationItems: [],
+      resourceConfigItems: []
+    }
+
+    Object.keys(this.resourceItems).forEach((resourceItemKey) => {
+      var selectedManager = this.resourceItems[resourceItemKey].selectedManager
+      if (selectedManager) {
+        // We have a selected manager
+        putBody.resourceConfigItems.push({
+          aroResourceType: resourceItemKey,
+          resourceManagerId: selectedManager.id,
+          name: selectedManager.name,
+          description: selectedManager.description
+        })
+      }
+    })
+
+    // Save the configuration to the server
+    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, putBody)
+      .then((result) => {
+        // Save a deep copy of the pristine state, so we can check if it has changed
+        this.pristineResourceItems = angular.copy(this.resourceItems)
+      })
   }
 }
 
-ResourceSelectionController.$inject = ['$http', '$timeout', 'state', 'mockResourceService']
+ResourceSelectionController.$inject = ['$http', '$timeout', 'state']
 
 // Component did not work when it was called 'dataSelection'
 app.component('planResourceSelection', {

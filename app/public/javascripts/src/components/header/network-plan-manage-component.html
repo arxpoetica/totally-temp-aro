@@ -3,8 +3,8 @@
     <div class="row">
       <div class="col-md-6">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search for Plan Names, Owners, or Geographies" ng-model="search_text"
-            ng-change="loadPlans()">
+          <input type="text" class="form-control" placeholder="Search for Plan Names, Owners, or Geographies" ng-model="$ctrl.search_text"
+            ng-change="$ctrl.loadPlans()">
           <span class="input-group-addon">
         <span class="glyphicon glyphicon-search"></span>
           </span>
@@ -13,13 +13,13 @@
       <div class="col-md-3">
         <div class="input-group">
           <span class="input-group-addon">{{ config.currency_symbol }}</span>
-          <input type="text" class="form-control" placeholder="Minimum cost" ng-model="minimumCost" ng-change="loadPlans()">
+          <input type="text" class="form-control" placeholder="Minimum cost" ng-model="$ctrl.minimumCost" ng-change="$ctrl.loadPlans()">
         </div>
       </div>
       <div class="col-md-3">
         <div class="input-group">
           <span class="input-group-addon">{{ config.currency_symbol }}</span>
-          <input type="text" class="form-control" placeholder="Maximum cost" ng-model="maximumCost" ng-change="loadPlans()">
+          <input type="text" class="form-control" placeholder="Maximum cost" ng-model="$ctrl.maximumCost" ng-change="$ctrl.loadPlans()">
         </div>
       </div>
     </div>
@@ -33,10 +33,10 @@
         <hr>
   </form>
 
-  <p ng-show="plans.length < 1" class="text-center">
+  <p ng-show="$ctrl.plans.length < 1" class="text-center">
     No plans found
   </p>
-  <div ng-show="plans.length > 0">
+  <div ng-show="$ctrl.plans.length > 0">
     <div class="table-responsive">
       <table id="tblSelectPlans" class="table table-striped">
         <thead>
@@ -68,8 +68,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="plan in plans">
-            <td><a href="javascript:void(0)" ng-click="selectPlan(plan)">{{plan.name}}</a></td>
+          <tr ng-repeat="plan in $ctrl.plans">
+            <td><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></td>
             <td>
               <div ng-if="plan.progress">
                 <div style="float:left; width:200px">
@@ -87,11 +87,11 @@
               </div>
             </td>
             <td>
-              <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="stopOptimization(plan)"><span class="fa fa-stop"></span></a>
-              <a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="openReport(plan)"><span class="fa fa-folder"></span></a>
+              <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
+              <a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="$ctrl.openReport(plan)"><span class="fa fa-folder"></span></a>
               <!--Commenting out "plan sharing" for now. Until we get ACL sorted out in aro-service-->
               <!--<a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>-->
-              <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
+              <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
             </td>
             <td>{{plan.updated_at | date:'shortDate'}}</td>
             <td>{{plan.created_at | date:'shortDate'}}</td>
@@ -103,18 +103,18 @@
         </tbody>
       </table>
     </div>
-    <nav class="text-center">
-      <ul class="pagination">
+    <nav class="text-center" style="max-height: 35px">
+      <ul class="pagination" style="margin: 0px">
         <li ng-class="{ disabled: currentPage === 1 }">
-          <a href="javascript:void(0)" aria-label="Previous" ng-click="loadPlans(currentPage - 1)">
+          <a href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans(currentPage - 1)">
                 <span aria-hidden="true">&laquo;</span>
               </a>
         </li>
-        <li ng-repeat="page in pages" ng-class="{ active: page === currentPage }">
-          <a href="javascript:void(0)" ng-click="loadPlans(page)">{{ page }}</a>
+        <li ng-repeat="page in $ctrl.pages" ng-class="{ active: page === currentPage }">
+          <a href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
         </li>
-        <li ng-class="{ disabled: currentPage === pages[pages.length - 1] }">
-          <a href="javascript:void(0)" aria-label="Next" ng-click="loadPlans(pages[pages.length - 1])">
+        <li ng-class="{ disabled: currentPage === $ctrl.pages[pages.length - 1] }">
+          <a href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
                 <span aria-hidden="true">&raquo;</span>
               </a>
         </li>

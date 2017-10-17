@@ -40,36 +40,8 @@ class NetworkAnalysisController {
         })
       })
 
-    var numberOfRows = $("#tblNetworkAnalysis>tbody>tr").length;
-    $("#tblNetworkAnalysis").bind("DOMSubtreeModified", function() {
-        if($("#tblNetworkAnalysis>tbody>tr").length !== numberOfRows){
-            numberOfRows = $("#tblNetworkAnalysis>tbody>tr").length;
-            setTimeout(() => this.updateShowTargetHeight(), 100)
-        }
-    }.bind(this))
-
   }
 
-  $onInit() {
-    this.updateShowTargetHeight()
-  }
-
-  updateShowTargetHeight() {
-    var targetId
-    if (this.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS') {
-      targetId = '#network-analysis-target-geog>#show-targets'
-    } else if (this.state.optimizationOptions.analysisSelectionMode === 'SELECTED_LOCATIONS') {
-      targetId = '#network-analysis-target-loc>#show-targets'
-    }
-
-    if ($(targetId).offset()) {
-      if ($('#output-bar').offset().top - $(targetId).offset().top > 100) {
-        $(targetId).css('max-height', ($('#output-bar').offset().top - $(targetId).offset().top - 25) + 'px')
-      } else {
-        $(targetId).css('max-height', '100px')
-      }
-    }
-  }
 }
 
 NetworkAnalysisController.$inject = ['$http', 'state', 'optimization']

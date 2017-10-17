@@ -15,6 +15,13 @@ class DataSelectionController {
     this.updateSelectionValidation()
   }
 
+  $doCheck() {
+    if (this.allDataItems != this.cachedDataItems) {
+      this.updateSelectionValidation()
+      this.cachedDataItems = this.allDataItems
+    }
+  }
+
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
     if (this.isDirty) {
