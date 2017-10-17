@@ -774,7 +774,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         if (result.status >= 200 && result.status <= 299) {
           // Plan has been saved in the DB. Reload it
           service.setPlan(result.data)
-          return service.loadPlanInputs(result.data.id)
+          service.loadPlanInputs(result.data.id)
         } else {
           console.error('Unable to make plan permanent')
           console.error(result)
@@ -782,9 +782,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       })
   }
 
-  service.isCopyCurrentPlan = false
   service.copyCurrentPlanTo = (planName) => {
-    service.isCopyCurrentPlan = true
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
     newPlan.name = planName
     newPlan.ephemeral = false
@@ -816,12 +814,10 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)
-          return service.loadPlanInputs(planId)
-          .then(() => {
-            service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
-            service.requestSetMapZoom.next(result.data.zoomIndex)
-            return Promise.resolve()
-          })
+          service.loadPlanInputs(planId)
+          service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
+          service.requestSetMapZoom.next(result.data.zoomIndex)
+          return Promise.resolve()
         }
       })
   }
@@ -835,16 +831,14 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   // Load the plan inputs for the given plan and populate them in state
   service.loadPlanInputs = (planId) => {
     var userId = service.getUserId()
-    return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
+    $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
           stateSerializationHelper.loadStateFromJSON(service, optimization, regions, result.data)
         }
-        return Promise.resolve()
       })
       .catch((err) => {
         console.log(err)
-        return Promise.reject()
       })
   }
 
@@ -953,16 +947,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     }
   }
 
-  service.changeAnalysisType = () => {
-    var analysisSettings = {
-      analysis_type: 'NETWORK_PLAN'
-    }
-
-    return $http.put(`/service/v1/plan/${service.plan.getValue().id}/inputs?user_id=` + service.getUserId(), analysisSettings).then((response) => {
-      return Promise.resolve()
-    })
-  }
-
   service.refreshMapTilesCacheAndData = () => {
     // Refresh the tile data cache and redraw the tiles
     tileDataService.clearDataCache()
@@ -1019,6 +1003,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
             || response.data.optimizationState === 'FAILED') {
           service.stopPolling()
           service.refreshMapTilesCacheAndData()
+          service.loadPlanInputs(newPlan.id)
         }
         var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
         var minutes = Math.floor(diff / 60)

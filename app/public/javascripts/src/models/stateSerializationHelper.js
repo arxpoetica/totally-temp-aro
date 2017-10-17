@@ -268,22 +268,40 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   var loadAlgorithmParametersFromBody = (state, optimization, postBody) => {
     // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
-    state.optimizationOptions.uiAlgorithms.forEach((uiAlgorithm) => {
-      if (uiAlgorithm.id === postBody.uiSelectedAlgorithmId) {
-        state.optimizationOptions.uiSelectedAlgorithm = uiAlgorithm
+    // state.optimizationOptions.uiAlgorithms.forEach((uiAlgorithm) => {
+    //   if (uiAlgorithm.algorithm === postBody.optimization.algorithm) {
+    //     state.optimizationOptions.uiSelectedAlgorithm = uiAlgorithm
+    //   }
+    // })
+
+    if (postBody.optimization.algorithm === 'UNCONSTRAINED') {
+      state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.UNCONSTRAINED
+    } else if (postBody.optimization.algorithm === 'COVERAGE') {
+      state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.COVERAGE
+    } else {
+      if (postBody.optimization.algorithm === 'IRR') {
+        if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold && 
+          !Number.isFinite(+postBody.optimization.budget))
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR
+        else if ( !postBody.optimization.preIrrThreshold && !postBody.optimization.threshold )
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET  
+        else if (!postBody.optimization.preIrrThreshold)
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET
+        else
+          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH  
       }
-    })
+    }
 
     if (postBody.financialConstraints) {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
-    if (postBody.threshold) {
+    if (postBody.optimization.threshold) {
       state.optimizationOptions.threshold = +postBody.optimization.threshold
     }
-    if (postBody.preIrrThreshold) {
+    if (postBody.optimization.preIrrThreshold) {
       state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
     }
-    if (postBody.budget) {
+    if (postBody.optimization.budget && Number.isFinite(+postBody.optimization.budget)) {
       state.optimizationOptions.budget = +postBody.optimization.budget
     }
     state.optimizationOptions.analysisSelectionMode = postBody.locationConstraints.analysisSelectionMode
