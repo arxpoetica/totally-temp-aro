@@ -243,8 +243,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     reload: 'always'
   }
 
-  state.reloadDatasources() // Reload data sources even without a plan
-
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
@@ -323,13 +321,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     if (plan) {
       plan.location_types = plan.location_types || []
     }
-
-    state.reloadDatasources()
-  })
-
-  $rootScope.$on('uploaded_data_sources', (e, info) => {
-    state.reloadDatasources()
-    $scope.planState.selectedDataSources.push(info);
   })
 
   $scope.overlay_is_loading = () => {

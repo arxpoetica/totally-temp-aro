@@ -239,9 +239,7 @@ app.controller('area-network-planning-controller', ['$scope', '$rootScope', '$ht
     })
 
     // Check if any of the global data sources area selected
-    var hasGlobalSources = state.isDataSourceSelected(state.DS_GLOBAL_BUSINESSES)
-                           || state.isDataSourceSelected(state.DS_GLOBAL_HOUSEHOLDS)
-                           || state.isDataSourceSelected(state.DS_GLOBAL_CELLTOWER)
+    var hasGlobalSources = state.dataItems.location.selectedLibraries.filter((item) => item.identifier === 1).length > 0
     if (isWirecenterBoundarySelected === isUserDefinedBoundarySelected) {
       // This means that either "wirecenter" and "user_defined" are both checked or both unchecked
       swal({

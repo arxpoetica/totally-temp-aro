@@ -7,9 +7,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
-  service.DS_GLOBAL_BUSINESSES = -3
-  service.DS_GLOBAL_HOUSEHOLDS = -2
-  service.DS_GLOBAL_CELLTOWER = -1
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
@@ -219,22 +216,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     tileLayers: [],
     areaLayers: []
   }
-
-  // Default data sources - define once
-  service.defaultDataSources = [
-    {
-      libraryId: service.DS_GLOBAL_BUSINESSES,
-      name: "Global Businesses"
-    },
-    {
-      libraryId: service.DS_GLOBAL_HOUSEHOLDS,
-      name: "Global Households"
-    },
-    {
-      libraryId: service.DS_GLOBAL_CELLTOWER,
-      name: "Global CellTower"
-    }
-  ]
 
   // The display modes for the application
   service.displayModes = Object.freeze({
@@ -461,12 +442,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
-    
-    // A list of location types to show in the locations layer
-    service.allDataSources = service.defaultDataSources.slice()
-
-    // A list of location data sources to show in the locations layer
-    service.selectedDataSources = service.defaultDataSources.slice()
 
     var locationTypes = []
     if (configuration && configuration.locationCategories && configuration.locationCategories.v2) {
@@ -564,16 +539,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   $rootScope.$on('configuration_loaded', () => {
     initializeState()
   })
-
-  // Reload uploaded data sources
-  service.reloadDatasources = (callback) => {
-    $http.get('/datasources').then((response) => {
-      service.allDataSources = service.defaultDataSources.slice()
-      service.selectedDataSources = service.defaultDataSources.slice()   // Always keep the global data sources selected
-      service.allDataSources = service.allDataSources.concat(response.data)
-      callback && callback(response.data)
-    })
-  }
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
@@ -835,11 +800,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       .catch((err) => {
         console.log(err)
       })
-  }
-
-  service.isDataSourceSelected = function (ds) {
-    var existingDataSources = _.pluck(service.selectedDataSources , 'libraryId');
-    return existingDataSources.indexOf(ds) != -1;
   }
 
   service.hasLocationType = (locationKey) => {
