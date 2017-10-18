@@ -20,6 +20,9 @@ class NetworkPlanModalController {
     this.interval  = null
     this.search
     this.search_text
+
+    this.sortField
+    this.descending
   }
 
   $onInit() {
@@ -161,6 +164,11 @@ class NetworkPlanModalController {
         this.loadPlans()
       })
     })
+  }
+
+  sortBy(key, descending) {
+    this.sortField = key
+    this.descending = descending
   }
 
   selectPlan(plan) {
