@@ -18,18 +18,6 @@
   .tool-bar .ng-hide-add {
     animation: fadeOutUp 300ms;
   }
-
-  .tool-bar input {
-    flex: 0 1 200px;
-    margin: 4px;
-    color: #eee;
-    border: #eee 1px solid;
-    background-color: #1f7de6;
-    padding: 2px
-  }
-  .tool-bar input::placeholder {
-    color: #eee;
-  }
   .tool-bar .separator {
     border-left: #eee 1px dotted;
   }
@@ -48,27 +36,64 @@
     background-color: #eee;
     color: #1f7de6;
   }
-
 </style>
-  <div class="tool-bar">
-    <img src="images/logos/aro/logo_navbar.png" style="align-self: center; padding-left: 10px; padding-right: 10px">
-    <input type="text" placeholder="Search for locations...">
-    <div class="fa fa-search" style="padding-left: 5px; padding-right: 10px; margin: auto;"></div>
-    <div class="separator"></div>
-    <button class="btn" ng-click="$ctrl.createEphemeralPlan()"><i class="fa fa-file"></i></button>
-    <button class="btn" ng-click="$ctrl.savePlanAs()"><i class="fa fa-floppy-o"></i></button>
-    <button class="btn" ng-click="$ctrl.showPlanModal()"><i class="fa fa-folder-open"></i></button>
-    <div class="separator"></div>
-    <button class="btn" ng-click="$ctrl.toggleMeasuringStick()"><i class="fa fa-arrows-h"></i></button>
-    <button class="btn" ng-click="$ctrl.toggleViewSettings()"><i class="fa fa-eye"></i></button>
-    <div class="separator"></div>
-    <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
-            ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)">
-      <i class="fa fa-mouse-pointer"></i>
-    </button>
-    <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
-            ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)">
-      <i class="fa fa-bookmark-o fa-rotate-180"></i>
-    </button>
+
+<style scoped>
+  #global-search-toolbutton .select2-container {
+    border-radius: 0px;
+  }
+  #global-search-toolbutton .select2-choice {
+    padding-left: 0px;
+    color: white;
+    border-radius: 0px;
+  }
+  #global-search-toolbutton .select2-chosen {
+    background-color: #1f7de6;
+    padding-left: 10px;
+    margin-right: 0px;
+    color: #eee;
+  }
+  #global-search-toolbutton .select2-arrow {
+    display: none;  /* Hiding the arrow completely for now */
+  }
+  #global-search-toolbutton .select2-input {
+    background-color: #1f7de6;
+  }
+  .select2-search {
+    padding: 0px;
+    background-color: #1f7de6;
+  }
+  .select2-results {
+    background-color: #1f7de6;
+    color: #eee;
+    margin: 0px;
+  }
+  .select2-results .select2-highlighted {
+    background-color: white;
+    color: #1f7de6;
+  }
+</style>
+
+<div class="tool-bar">
+  <img src="images/logos/aro/logo_navbar.png" style="align-self: center; padding-left: 10px; padding-right: 10px">
+  <div ng-controller="global-search-controller" id="global-search-toolbutton" style="flex: 0 0 300px; margin: auto;">
+    <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
   </div>
+  <div class="fa fa-search" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
+  <div class="separator"></div>
+  <button class="btn" ng-click="$ctrl.createEphemeralPlan()"><i class="fa fa-file"></i></button>
+  <button class="btn" ng-click="$ctrl.savePlanAs()"><i class="fa fa-floppy-o"></i></button>
+  <button class="btn" ng-click="$ctrl.showPlanModal()"><i class="fa fa-folder-open"></i></button>
+  <div class="separator"></div>
+  <button class="btn" ng-click="$ctrl.toggleMeasuringStick()"><i class="fa fa-arrows-h"></i></button>
+  <button class="btn" ng-click="$ctrl.toggleViewSettings()"><i class="fa fa-eye"></i></button>
+  <div class="separator"></div>
+  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)">
+    <i class="fa fa-mouse-pointer"></i>
+  </button>
+  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)">
+    <i class="fa fa-bookmark-o fa-rotate-180"></i>
+  </button>
 </div>

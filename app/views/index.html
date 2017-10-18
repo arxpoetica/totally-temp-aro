@@ -223,12 +223,6 @@
       </div>
     </div>
 
-    <% if (config.ui.layout === 'default') { %>
-      <div id="global-search">
-        <% include controller_global_search.html %>
-      </div>
-    <% } %>
-
     <div ng-controller="selected_location_controller">
 
       <% if (env_is_test) { %>
