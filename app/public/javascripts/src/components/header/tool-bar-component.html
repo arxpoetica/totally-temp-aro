@@ -77,25 +77,74 @@
 </style>
 
 <div class="tool-bar">
+
   <img src="images/logos/aro/logo_navbar.png" style="align-self: center; padding-left: 10px; padding-right: 10px">
+
   <div ng-controller="global-search-controller" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
     <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
   </div>
+
   <div class="fa fa-search" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
+
   <div class="separator"></div>
-  <button class="btn" ng-click="$ctrl.createEphemeralPlan()"><i class="fa fa-file"></i></button>
-  <button class="btn" ng-click="$ctrl.savePlanAs()"><i class="fa fa-floppy-o"></i></button>
-  <button class="btn" ng-click="$ctrl.showPlanModal()"><i class="fa fa-folder-open"></i></button>
+
+  <button class="btn"
+          ng-click="$ctrl.createEphemeralPlan()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Create a new plan">
+    <i class="fa fa-file"></i>
+  </button>
+
+  <button class="btn"
+          ng-click="$ctrl.savePlanAs()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Save plan as...">
+    <i class="fa fa-floppy-o"></i>
+  </button>
+
+  <button class="btn"
+          ng-click="$ctrl.showPlanModal()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Open an existing plan...">
+    <i class="fa fa-folder-open"></i>
+  </button>
+
   <div class="separator"></div>
-  <button class="btn" ng-click="$ctrl.toggleMeasuringStick()"><i class="fa fa-arrows-h"></i></button>
-  <button class="btn" ng-click="$ctrl.toggleViewSettings()"><i class="fa fa-eye"></i></button>
+
+  <button class="btn"
+          ng-click="$ctrl.toggleMeasuringStick()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Measure distances on the map">
+    <i class="fa fa-arrows-h"></i>
+  </button>
+
+  <button class="btn"
+          ng-click="$ctrl.toggleViewSettings()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Show view settings...">
+    <i class="fa fa-eye"></i>
+  </button>
+
   <div class="separator"></div>
+
   <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)">
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select individual locations">
     <i class="fa fa-mouse-pointer"></i>
   </button>
+
   <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)">
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select multiple locations">
     <i class="fa fa-bookmark-o fa-rotate-180"></i>
   </button>
 </div>
