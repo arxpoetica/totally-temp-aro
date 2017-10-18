@@ -11,13 +11,13 @@ class ToolBarController {
     state.splitterObj
       .subscribe((splitterObj) => {
         setTimeout(function () {
-          refreshToolbar(state)
+          // refreshToolbar(state)
         }, $scope.timeout);
       })
 
     this.state.selectedDisplayMode.subscribe(() =>
       setTimeout(function () {
-        refreshToolbar(state)
+        // refreshToolbar(state)
       }, $scope.timeout)
     )
 

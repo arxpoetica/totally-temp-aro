@@ -276,70 +276,6 @@
     <plan-resource-editor-modal show-modal="state.showResourceEditorModal"
                                 plan-resource="state.resourceItemForEditorModal">
     </plan-resource-editor-modal>
-
-
-
-
-
-
-    <style scoped>
-      .toolbar {
-        display: flex;
-        flex-direction: row;
-        position: absolute;
-        top: 10px;
-        left: 100px;
-        background-color: #1f7de6;
-        color: #eee;
-      }
-      .toolbar input {
-        flex: 0 1 200px;
-        margin: 4px;
-        color: #eee;
-        border: #eee 1px solid;
-        background-color: #1f7de6;
-        padding: 2px
-      }
-      .toolbar input::placeholder {
-        color: #eee;
-      }
-      .toolbar .separator {
-        border-left: #eee 1px dotted;
-      }
-      .toolbar .btn {
-        flex: 0 0 30px;
-        background-color: #1f7de6;
-        border: none;
-        border-radius: 0px;
-        color: #eee;
-      }
-      .toolbar .btn:hover {
-        flex: 0 0 30px;
-        background-color: #eee;
-        border: none;
-        color: #1f7de6;
-      }
-    </style>
-    <div class="toolbar">
-      <img src="images/logos/aro/logo_navbar.png" style="align-self: center; padding-left: 10px; padding-right: 10px">
-      <input type="text" placeholder="Search for locations...">
-      <div class="fa fa-search" style="padding-left: 5px; padding-right: 10px; margin: auto;"></div>
-      <div class="separator"></div>
-      <button class="btn"><i class="fa fa-file"></i></button>
-      <button class="btn"><i class="fa fa-floppy-o"></i></button>
-      <button class="btn"><i class="fa fa-folder-open"></i></button>
-      <div class="separator"></div>
-      <button class="btn"><i class="fa fa-arrows-h"></i></button>
-      <button class="btn"><i class="fa fa-eye"></i></button>
-      <div class="separator"></div>
-      <button class="btn"><i class="fa fa-mouse-pointer"></i></button>
-      <button class="btn"><i class="fa fa-bookmark-o fa-rotate-180"></i></button>
-    </div>
-
-
-
-
-
   </body>
 
   <!-- Angular controllers and services -->
@@ -458,8 +394,6 @@
   <script src="javascripts/lib/components/global-settings/user-account-settings-component.js"></script>
 
   <script src="javascripts/lib/components/header/tool-bar-component.js"></script>
-  <script src="javascripts/lib/components/header/tool-bar-button-component.js"></script>
-  <script src="javascripts/lib/components/header/tool-bar-separator-component.js"></script>
   <script src="javascripts/lib/components/header/network-plan-component.js"></script>
   <script src="javascripts/lib/components/header/network-plan-manage-component.js"></script>
   <script src="javascripts/lib/components/header/report-modal-component.js"></script>
