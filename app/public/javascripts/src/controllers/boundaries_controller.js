@@ -117,13 +117,12 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     
   var countySubdivisionsLayer
   var censusBlocksLayer
-  var cmaBoundariesLayer
   var userDefinedLayer
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
       short_name: 'CS',
-      name: 'County Subdivisions',
+      name: 'Counties',
       type: 'county_subdivisions',
       api_endpoint: '/county_subdivisions/36',
       highlighteable: true,
@@ -187,39 +186,33 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     map_layers.addFeatureLayer(censusBlocksLayer);
   }
 
-  $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
-    short_name: 'UD',
-    name: 'User-defined boundaries',
-    type: 'user_defined',
-    style_options: {
-      normal: {
-        fillColor: 'green',
-        strokeColor: 'green',
-        strokeWeight: 2,
-        fillOpacity: 0.1
-      },
-      highlight: {
-        fillColor: 'green',
-        strokeColor: 'green',
-        strokeWeight: 2,
-        fillOpacity: 0.1
-      }
-    },
-    reload: 'always',
-    threshold: 0,
-    minZoom: 9,
-    hoverField: 'name',
-    visibilityThreshold : 1,
-    isBoundaryLayer : true
-  })
+  // $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
+  //   short_name: 'UD',
+  //   name: 'User-defined boundaries',
+  //   type: 'user_defined',
+  //   style_options: {
+  //     normal: {
+  //       fillColor: 'green',
+  //       strokeColor: 'green',
+  //       strokeWeight: 2,
+  //       fillOpacity: 0.1
+  //     },
+  //     highlight: {
+  //       fillColor: 'green',
+  //       strokeColor: 'green',
+  //       strokeWeight: 2,
+  //       fillOpacity: 0.1
+  //     }
+  //   },
+  //   reload: 'always',
+  //   threshold: 0,
+  //   minZoom: 9,
+  //   hoverField: 'name',
+  //   visibilityThreshold : 1,
+  //   isBoundaryLayer : true
+  // })
 
-  map_layers.addFeatureLayer(userDefinedLayer);
-
-  state.boundaries.areaLayers = [
-    censusBlocksLayer,
-    countySubdivisionsLayer,
-    cmaBoundariesLayer
-  ].filter((layer) => layer)
+  //map_layers.addFeatureLayer(userDefinedLayer);
 
   var analysisLayersColors = [
     'coral'
@@ -253,6 +246,11 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     map_layers.addFeatureLayer(layer);
   })
 
+  state.boundaries.areaLayers = state.boundaries.areaLayers.concat([
+    countySubdivisionsLayer,
+    censusBlocksLayer
+  ].filter((layer) => layer))
+
   var serviceLayersColors = [
     '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
   ]
@@ -270,7 +268,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     state.boundaries.tileLayers.push(wirecenter_layer)
   })
 
-  state.boundaries.areaLayers.push(userDefinedLayer)
+  //state.boundaries.areaLayers.push(userDefinedLayer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -347,18 +345,18 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     boundary.overlay.setMap(boundary.overlay.getMap() ? null : map)
   }
 
-  $scope.changeUserDefinedBoundary = () => {
-    $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
-    if (!$scope.selectedUserDefinedBoundary) {
-      userDefinedLayer.setApiEndpoint(null)
-    } else {
-      var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
-      userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
-      userDefinedLayer.setApiEndpoint(url)
-      userDefinedLayer.show()
-      userDefinedLayer.reloadData()
-    }
-  }
+  // $scope.changeUserDefinedBoundary = () => {
+  //   $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
+  //   if (!$scope.selectedUserDefinedBoundary) {
+  //     userDefinedLayer.setApiEndpoint(null)
+  //   } else {
+  //     var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
+  //     userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
+  //     userDefinedLayer.setApiEndpoint(url)
+  //     userDefinedLayer.show()
+  //     userDefinedLayer.reloadData()
+  //   }
+  // }
 
   $scope.toggleTool = () => {
     $scope.selected_tool = !$scope.selected_tool
@@ -620,13 +618,13 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     updateMapLayers()
   }
 
-  $scope.createUserDefinedBoundary = () => {
-    $rootScope.$broadcast('edit_user_defined_boundary', null)
-  }
+  // $scope.createUserDefinedBoundary = () => {
+  //   $rootScope.$broadcast('edit_user_defined_boundary', null)
+  // }
 
-  $scope.editUserDefinedBoundary = (boundary) => {
-    $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
-  }
+  // $scope.editUserDefinedBoundary = (boundary) => {
+  //   $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
+  // }
 
   $scope.selectAllInLayer = () => {
     $http.get(`/service_areas/${$scope.selectedUserDefinedBoundary.name}/all`)
@@ -643,19 +641,19 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       })
   }
 
-  $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
-    var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
-    if (existing) {
-      existing.name = boundary.name
-      $scope.selectedUserDefinedBoundary = existing
-    } else {
-      $scope.userDefinedBoundaries.push(boundary)
-      $scope.selectedUserDefinedBoundary = boundary
-      var select = document.getElementById('userDefinedBoundariesSelect')
-      select.scrollTop = select.scrollHeight
-    }
-    $scope.changeUserDefinedBoundary()
-  })
+  // $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
+  //   var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
+  //   if (existing) {
+  //     existing.name = boundary.name
+  //     $scope.selectedUserDefinedBoundary = existing
+  //   } else {
+  //     $scope.userDefinedBoundaries.push(boundary)
+  //     $scope.selectedUserDefinedBoundary = boundary
+  //     var select = document.getElementById('userDefinedBoundariesSelect')
+  //     select.scrollTop = select.scrollHeight
+  //   }
+  //   $scope.changeUserDefinedBoundary()
+  // })
 
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', (e, mode) => {
