@@ -19,7 +19,6 @@ app.component('accordionPanelTitle', {
       .accordion-title, .accordion-title:focus, .accordion-title:hover {
         background-color: #333;
         color: white;
-        font-weight: 700;
         font-size: 18px;
         border-radius: 0px;
       }
