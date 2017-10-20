@@ -199,7 +199,7 @@ class BoundariesController {
           // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
           oldMapLayers[mapLayerKey] = {
             dataUrls: mergedLayerUrls,
-            renderMode: 'HEATMAP',
+            renderMode: 'PRIMITIVE_FEATURES',
             selectable: true,
             aggregateMode: 'FLATTEN',
             strokeStyle: '#00ff00',
