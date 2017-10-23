@@ -5,8 +5,9 @@
     display: flex;
     flex-direction: row;
     position: absolute;
-    top: 10px;
-    left: 75px;
+    top: 0px;
+    left: 0px;
+    margin: 10px;
     background-color: #1f7de6;
     color: #eee;
   }
@@ -147,4 +148,15 @@
           title="Select multiple locations">
     <i class="fa fa-bookmark-o fa-rotate-180"></i>
   </button>
+
+
+  <div class="dropdown" ng-hide="!$ctrl.showDropDown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      Dropdown
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    </ul>
+  </div>
+
 </div>

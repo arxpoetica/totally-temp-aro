@@ -1,12 +1,14 @@
 class ToolBarController {
 
-  constructor($scope, $compile, state, map_tools) {
+  constructor($scope, $element, $compile, $timeout, state, map_tools) {
     this.state = state
+    this.$element = $element
+    this.$timeout = $timeout
     this.map_tools = map_tools
     this.state.showGlobalSettings
     .subscribe((newValue) => {})
 
-    $scope.showDropDown = false
+    this.showDropDown = false
     $scope.timeout = 200
     state.splitterObj
       .subscribe((splitterObj) => {
@@ -66,7 +68,7 @@ class ToolBarController {
       $compile($(".horizontal-toolbar"))($scope)
       $compile($(".dropdown-toolbar .dropdown-menu"))($scope)
       
-      $scope.showDropDown = dropdownTool ? true : false
+      //$scope.showDropDown = dropdownTool ? true : false
       $scope.$apply()
       
       var dropdownbutton = (availableSpace < totalToolbarSize) ? $(".dropdown-toolbar").width() : 0
@@ -183,9 +185,64 @@ class ToolBarController {
     this.map_tools.toggle(viewSettingConfig)
   }
 
+  $doCheck() {
+    if (this.$element) {
+      // console.log(`${this.$element[0].clientWidth}, ${this.$element[0].scrollWidth}`)
+
+      var toolbarRoot = this.$element.find('.tool-bar')[0]
+      var clientWidth = this.$element[0].clientWidth
+
+      // First move any buttons in the dropdown into the main toolbar
+      var dropdownRoot = this.$element.find('.tool-bar .dropdown')[0]
+      var dropdownUL = this.$element.find('.tool-bar .dropdown ul')[0]
+      var dropdownItems = this.$element.find('.tool-bar .dropdown ul li')
+      for (var i = 0; i < dropdownItems.length; ++i) {
+        if (dropdownItems[i].childNodes.length > 0) {
+          toolbarRoot.insertBefore(dropdownItems[i].childNodes[0], dropdownRoot)
+        }
+      }
+      while(dropdownUL.hasChildNodes()) {
+        dropdownUL.removeChild(dropdownUL.lastChild)
+      }
+
+      var cumulativeWidth = 0
+      var expandedButtons = 0, collapsedButtons = 0
+      var toolbarButtons = []
+      toolbarRoot.childNodes.forEach((toolbarButton) => {
+        if (toolbarButton.scrollWidth && !isNaN(toolbarButton.scrollWidth)) {
+          toolbarButtons.push(toolbarButton)
+          cumulativeWidth += toolbarButton.scrollWidth
+          if (cumulativeWidth < clientWidth) {
+            ++expandedButtons
+          } else {
+            ++collapsedButtons
+          }
+        }
+      })
+      this.showDropDown = true
+      // var oldShowDropDown = this.showDropDown
+      // this.showDropDown = this.$element[0].scrollWidth > clientWidth
+      // if (oldShowDropDown !== this.showDropDown) {
+      //   this.$timeout()
+      // }
+
+      console.log(`${expandedButtons}, ${collapsedButtons}`)
+      if (collapsedButtons > 0) {
+        // Move the collapsed buttons onto the dropdown
+        for (var i = toolbarButtons.length - collapsedButtons - 1; i < toolbarButtons.length - 1; ++i) {
+          var li = document.createElement('li')
+          li.appendChild(toolbarButtons[i])
+          dropdownUL.appendChild(li)
+        }
+      }
+
+
+    }
+  }
+
 }
 
-ToolBarController.$inject = ['$scope','$compile','state','map_tools']
+ToolBarController.$inject = ['$scope', '$element', '$compile', '$timeout', 'state', 'map_tools']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',
