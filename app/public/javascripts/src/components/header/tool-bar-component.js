@@ -4,6 +4,7 @@ class ToolBarController {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
+    this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.map_tools = map_tools
     this.state.showGlobalSettings
     .subscribe((newValue) => {})
@@ -187,56 +188,62 @@ class ToolBarController {
 
   $doCheck() {
     if (this.$element) {
-      // console.log(`${this.$element[0].clientWidth}, ${this.$element[0].scrollWidth}`)
 
+      var clientWidth = this.$element[0].clientWidth - this.marginPixels * 2.0  // Subtract margins from left and right
+
+      // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
+      // Move them into the main toolbar before checking for button sizes.
       var toolbarRoot = this.$element.find('.tool-bar')[0]
-      var clientWidth = this.$element[0].clientWidth
-
-      // First move any buttons in the dropdown into the main toolbar
       var dropdownRoot = this.$element.find('.tool-bar .dropdown')[0]
       var dropdownUL = this.$element.find('.tool-bar .dropdown ul')[0]
+      // Loop through all the <li> elements in the dropdown. These <li> elements contain the buttons.
       var dropdownItems = this.$element.find('.tool-bar .dropdown ul li')
       for (var i = 0; i < dropdownItems.length; ++i) {
         if (dropdownItems[i].childNodes.length > 0) {
           toolbarRoot.insertBefore(dropdownItems[i].childNodes[0], dropdownRoot)
         }
       }
+      // Clear all <li> elements from the dropdown.
       while(dropdownUL.hasChildNodes()) {
         dropdownUL.removeChild(dropdownUL.lastChild)
       }
 
+      // All buttons are in the toolbar. Go through all of them and mark the ones to be collapsed (if any).
       var cumulativeWidth = 0
-      var expandedButtons = 0, collapsedButtons = 0
-      var toolbarButtons = []
+      var collapsedButtons = 0  // Counted from the right side.
+      var toolbarButtons = []   // A list of toolbar buttons
       toolbarRoot.childNodes.forEach((toolbarButton) => {
-        if (toolbarButton.scrollWidth && !isNaN(toolbarButton.scrollWidth)) {
+        // There may also be markup like newlines which show up as "text" elements that have a NaN scrollWidth.
+        // Ignore these elements (also ignore the dropdown button itself - this may be shown or hidden).
+        var isDropDown = toolbarButton.className && toolbarButton.className.indexOf('dropdown') >= 0
+        if (!isDropDown && !isNaN(toolbarButton.scrollWidth)) {
           toolbarButtons.push(toolbarButton)
           cumulativeWidth += toolbarButton.scrollWidth
-          if (cumulativeWidth < clientWidth) {
-            ++expandedButtons
-          } else {
+          if (cumulativeWidth > clientWidth) {
             ++collapsedButtons
           }
         }
       })
-      this.showDropDown = true
-      // var oldShowDropDown = this.showDropDown
-      // this.showDropDown = this.$element[0].scrollWidth > clientWidth
-      // if (oldShowDropDown !== this.showDropDown) {
-      //   this.$timeout()
-      // }
-
-      console.log(`${expandedButtons}, ${collapsedButtons}`)
+      // If we are collapsing any buttons, then we add the "dropdown" button. That means we have to collapse
+      // another one to account for the dropdown button width.
       if (collapsedButtons > 0) {
-        // Move the collapsed buttons onto the dropdown
-        for (var i = toolbarButtons.length - collapsedButtons - 1; i < toolbarButtons.length - 1; ++i) {
+        ++collapsedButtons
+      }
+
+      var oldShowDropDown = this.showDropDown
+      this.showDropDown = collapsedButtons > 0
+      if (oldShowDropDown !== this.showDropDown) {
+        this.$timeout()
+      }
+
+      // If we have any collapsed buttons, then move them into the dropdown
+      if (collapsedButtons > 0) {
+        for (var i = toolbarButtons.length - collapsedButtons; i < toolbarButtons.length; ++i) {
           var li = document.createElement('li')
           li.appendChild(toolbarButtons[i])
           dropdownUL.appendChild(li)
         }
       }
-
-
     }
   }
 

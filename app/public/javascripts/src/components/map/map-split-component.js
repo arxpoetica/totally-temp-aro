@@ -141,7 +141,8 @@ app.component('mapSplit', {
       <div id="header-bar-container" style="position: absolute; top: 0px; width: 100%; height: 55px; background-color: red; display: flex; flex-direction: row;">
         <div style="background-color: green; flex: 0 0 100px;"></div>
         <tool-bar style="flex: 1 1 auto; position: relative;"></tool-bar>
-        <network-plan style="flex: 0 0 auto;" ng-click="$event.stopPropagation()"></network-plan>
+        <network-plan style="flex: 0 0 auto; margin: auto;" ng-click="$event.stopPropagation()"></network-plan>
+        <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
       </div>
       <map-selector map-global-object-name="map"></map-selector>
     </div>

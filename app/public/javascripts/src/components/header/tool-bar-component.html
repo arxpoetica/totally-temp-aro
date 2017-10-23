@@ -7,7 +7,6 @@
     position: absolute;
     top: 0px;
     left: 0px;
-    margin: 10px;
     background-color: #1f7de6;
     color: #eee;
   }
@@ -30,6 +29,7 @@
     color: #eee;
     padding-top: 8px;
     padding-bottom: 8px;
+    width: 36px;
   }
   .tool-bar .btn:hover {
     background-color: #eee;
@@ -77,7 +77,7 @@
   }
 </style>
 
-<div class="tool-bar">
+<div class="tool-bar" ng-style="{ margin: $ctrl.marginPixels + 'px' }">
 
   <img src="images/logos/aro/logo_navbar.png" style="align-self: center; padding-left: 10px; padding-right: 10px">
 
@@ -149,13 +149,12 @@
     <i class="fa fa-bookmark-o fa-rotate-180"></i>
   </button>
 
-
-  <div class="dropdown" ng-hide="!$ctrl.showDropDown">
+  <div class="dropdown" ng-hide="!$ctrl.showDropDown" style="border-left: #eee 1px dotted;">
     <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-      Dropdown
-      <span class="caret"></span>
+      <i class="fa fa-angle-double-down"></i>
     </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc -->
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="padding: 0px; min-width: 0px;">
     </ul>
   </div>
 
