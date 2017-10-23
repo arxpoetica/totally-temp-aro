@@ -1,93 +1,12 @@
 class ToolBarController {
 
-  constructor($scope, $element, $compile, $timeout, state, map_tools) {
+  constructor($element, state, map_tools) {
     this.state = state
     this.$element = $element
-    this.$timeout = $timeout
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
+    this.dropdownWidthPixels = 36 // The width of the dropdown button
     this.map_tools = map_tools
-    this.state.showGlobalSettings
-    .subscribe((newValue) => {})
-
     this.showDropDown = false
-    $scope.timeout = 200
-    state.splitterObj
-      .subscribe((splitterObj) => {
-        setTimeout(function () {
-          // refreshToolbar(state)
-        }, $scope.timeout);
-      })
-
-    this.state.selectedDisplayMode.subscribe(() =>
-      setTimeout(function () {
-        // refreshToolbar(state)
-      }, $scope.timeout)
-    )
-
-    function refreshToolbar(state) {
-      var logowidth = $("#tool-bar-logo-new").width() + 20//padding
-      var toolbarstartpoint = $('.tool-bar').offset().left
-      var networkplanstartpoint = $('.network-plan').offset().left
-      var availableSpace = networkplanstartpoint - toolbarstartpoint - logowidth
-      var totalbarButtonWidth;
-      var toolBarButtonWidth = 28
-      var separatorWidth = 14
-      
-      if(state.selectedDisplayMode.getValue() !== state.displayModes.ANALYSIS) {
-        totalbarButtonWidth = [28, 14, 28, 28, 28, 14, 28, 28]
-      } else {
-        totalbarButtonWidth = [28, 14, 28, 28, 28, 14, 28, 28, 14, 28, 28]
-      }
-      
-      var analysisButtonWidth = []
-
-      var totalToolbarSize = totalbarButtonWidth.reduce(function (total, num) {
-        return total + num;
-      })
-      
-      var horizontalTool = ""
-      var dropdownTool = ""
-      var consumedSpace = 0
-
-      consumedSpace = (availableSpace < totalToolbarSize) ? 39 /*$(".dropdown-toolbar").width()*/ : 0
-
-      for (var i = 0; i < totalbarButtonWidth.length; i++) {
-        consumedSpace += totalbarButtonWidth[i]
-        if (availableSpace > consumedSpace) {
-          horizontalTool += $("#tool-bar-template").children()[i].outerHTML
-        } else {
-          //Skip to load the seperator in dropdown
-          if (totalbarButtonWidth[i] != 14) {
-            dropdownTool += $("#tool-bar-template").children()[i].outerHTML
-          }
-        }
-      }
-
-      $(".horizontal-toolbar").html(horizontalTool)
-      $(".dropdown-toolbar .dropdown-menu").html(dropdownTool)
-
-      $compile($(".horizontal-toolbar"))($scope)
-      $compile($(".dropdown-toolbar .dropdown-menu"))($scope)
-      
-      //$scope.showDropDown = dropdownTool ? true : false
-      $scope.$apply()
-      
-      var dropdownbutton = (availableSpace < totalToolbarSize) ? $(".dropdown-toolbar").width() : 0
-      var toolbarendpoint = dropdownbutton + $('.tool-bar').offset().left + $('.tool-bar').width()
-
-      $('#tool-bar-logo-new').css('left', (toolbarendpoint + ((networkplanstartpoint - toolbarendpoint) / 2)) - (logowidth / 2));
-    }
-
-    //Toolbar button icons
-    this.openImage = 'fa fa-th'
-    this.createImage = 'fa fa-file'
-    this.saveImage = 'fa fa-floppy-o'
-    this.showImage = 'fa fa-folder-open'
-    this.toggleImage = 'fa fa-arrows-h'
-    this.downImage = 'fa fa-caret-down'
-    this.eyeImage = 'fa fa-eye'
-    this.singleSelect = 'fa fa-mouse-pointer'
-    this.polygonSelect = 'fa fa-bookmark-o fa-rotate-180'
 
     this.latestOverlay = null
     this.drawingManager = new google.maps.drawing.DrawingManager({
@@ -188,13 +107,13 @@ class ToolBarController {
 
   $doCheck() {
     if (this.$element) {
-
-      var clientWidth = this.$element[0].clientWidth - this.marginPixels * 2.0  // Subtract margins from left and right
-
       // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
       // Move them into the main toolbar before checking for button sizes.
       var toolbarRoot = this.$element.find('.tool-bar')[0]
       var dropdownRoot = this.$element.find('.tool-bar .dropdown')[0]
+      // The width of the toolbar is the clientWidth minus the margins minus the width of the dropdown.
+      // We assume that the dropdown is shown while computing which buttons to collapse.
+      var toolbarWidth = this.$element[0].clientWidth - this.marginPixels * 2.0 - this.dropdownWidthPixels
       var dropdownUL = this.$element.find('.tool-bar .dropdown ul')[0]
       // Loop through all the <li> elements in the dropdown. These <li> elements contain the buttons.
       var dropdownItems = this.$element.find('.tool-bar .dropdown ul li')
@@ -219,22 +138,19 @@ class ToolBarController {
         if (!isDropDown && !isNaN(toolbarButton.scrollWidth)) {
           toolbarButtons.push(toolbarButton)
           cumulativeWidth += toolbarButton.scrollWidth
-          if (cumulativeWidth > clientWidth) {
+          if (cumulativeWidth > toolbarWidth) {
             ++collapsedButtons
           }
         }
       })
-      // If we are collapsing any buttons, then we add the "dropdown" button. That means we have to collapse
-      // another one to account for the dropdown button width.
-      if (collapsedButtons > 0) {
-        ++collapsedButtons
+      // Our toolbar width was calculated assuming that the dropdown button is visible. If we are going
+      // to collapse exactly one button, that is the dropdown. In this case don't collapse any buttons.
+      // This is done so that the "number of buttons to collapse" is computed correctly, including separators, etc.
+      if (collapsedButtons === 1) {
+        collapsedButtons = 0
       }
 
-      var oldShowDropDown = this.showDropDown
       this.showDropDown = collapsedButtons > 0
-      if (oldShowDropDown !== this.showDropDown) {
-        this.$timeout()
-      }
 
       // If we have any collapsed buttons, then move them into the dropdown
       if (collapsedButtons > 0) {
@@ -249,7 +165,7 @@ class ToolBarController {
 
 }
 
-ToolBarController.$inject = ['$scope', '$element', '$compile', '$timeout', 'state', 'map_tools']
+ToolBarController.$inject = ['$element', 'state', 'map_tools']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',
