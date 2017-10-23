@@ -83,11 +83,11 @@ class NetworkAnalysisOutputContentController {
             }
           }
         } else if (this.selectedOption.key === 'npv') {
-          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value, 0, yAxisCategory, true, '$') },beginAtZero:  true } }] }
+          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value, 0, yAxisCategory, true, config.currency_symbol) },beginAtZero:  true } }] }
           tooltips = {
             callbacks: {
               label: (tooltipItems, data) => {
-                return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, true, '$')
+                return this.buildTooltipLabel(tooltipItems,data, 2, yAxisCategory, true, config.currency_symbol)
               }
             }
           }
@@ -182,7 +182,7 @@ class NetworkAnalysisOutputContentController {
       
       var swalOptions = {
         title: 'Build Network',
-        text: `Build this network at ${value.x} Budget`,
+        text: `Build this network at ${ this.$filter('currency')(value.x/1000,config.currency_symbol,2) + 'K' } Budget`,
         showCancelButton: true,
         confirmButtonColor: '#DD6B55',
         confirmButtonText: 'Build',
