@@ -380,23 +380,10 @@ module.exports = class Location {
                 ORDER BY existing_fiber.geom <#> locations.geom ASC
                 LIMIT 10
               ) as ef_closest_fibers
-            ) AS distance_to_client_fiber,
-            (SELECT min(ST_Distance(fr_closest_fibers.geom::geography, locations.geog))
-              FROM (
-                SELECT geom
-                FROM client.fiber_route fr
-                WHERE fr.plan_id IN (
-                  (SELECT p.id FROM client.plan p WHERE p.parent_plan_id IN (
-	                  (SELECT id FROM client.plan WHERE parent_plan_id=$2)
-	                ))
-                  ORDER BY fr.geom <#> locations.geom ASC
-                  LIMIT 10
-                )
-              ) as fr_closest_fibers
-            ) as distance_to_planned_network
+            ) AS distance_to_client_fiber
           FROM locations WHERE id=$1
         `
-        return database.findOne(sql, [location_id, plan_id])
+        return database.findOne(sql, [location_id])
       })
       .then((location) => Object.assign(info, location))
   }
