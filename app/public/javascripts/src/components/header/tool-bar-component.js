@@ -1,10 +1,12 @@
 class ToolBarController {
 
-  constructor($element, state, map_tools) {
+  constructor($element, $timeout, state, map_tools) {
     this.state = state
     this.$element = $element
+    this.$timeout = $timeout
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
+    this.numPreviousCollapsedButtons = 0
     this.map_tools = map_tools
     this.showDropDown = false
 
@@ -105,7 +107,7 @@ class ToolBarController {
     this.map_tools.toggle(viewSettingConfig)
   }
 
-  $doCheck() {
+  refreshToolbar() {
     if (this.$element) {
       // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
       // Move them into the main toolbar before checking for button sizes.
@@ -151,6 +153,10 @@ class ToolBarController {
       }
 
       this.showDropDown = collapsedButtons > 0
+      if (this.numPreviousCollapsedButtons !== collapsedButtons) {
+        this.$timeout() // Trigger a digest cycle as the toolbar state has changed
+      }
+      this.numPreviousCollapsedButtons = collapsedButtons
 
       // If we have any collapsed buttons, then move them into the dropdown
       if (collapsedButtons > 0) {
@@ -163,9 +169,13 @@ class ToolBarController {
     }
   }
 
+  $doCheck() {
+    // Call refreshToolbar() after a timeout, to allow the browser layout/rendering to catch up with splitter changes.
+    setTimeout(() => this.refreshToolbar(), 0)
+  }
 }
 
-ToolBarController.$inject = ['$element', 'state', 'map_tools']
+ToolBarController.$inject = ['$element', '$timeout', 'state', 'map_tools']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',
