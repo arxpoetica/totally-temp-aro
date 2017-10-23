@@ -570,43 +570,6 @@ module.exports = class MarketSize {
       })
       .then((market_size) => {
         output.market_size = market_size
-        output.fair_share = {
-          towers: []
-        }
-
-        var tables = ['businesses', 'households'] // TODO: towers
-        return pync.series(tables, (table) => {
-          var params = [location_id]
-          var sql = `
-            SELECT MAX(c.name) AS name, COUNT(*)::integer AS value,
-              '#' ||
-                to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) ||
-                to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int)) || to_hex(cast(random()*16 as int))
-              AS color
-            FROM ${table} biz
-            JOIN locations l ON l.id = biz.location_id AND l.id = $1
-            JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-            JOIN network_provider.carrier c ON lc.carrier_id = c.id
-              ${table === 'households' ? 'AND c.route_type=\'ilec\'' : ''}
-              ${table === 'businesses' ? 'AND c.route_type=\'fiber\'' : ''}
-            GROUP BY c.id ORDER BY c.name
-          `
-          return database.query(sql, params)
-            .then((fairShare) => {
-              this._sortFairShare(fairShare)
-              output.fair_share[table] = fairShare
-            })
-        })
-      })
-      .then(() => {
-        // var current_carrier = 0
-        // var total = output.fair_share.reduce((total, item) => {
-        //   if (item.name === config.client_carrier_name) {
-        //     current_carrier = item.value
-        //   }
-        //   return item.value + total
-        // }, 0)
-        // output.share = current_carrier / total
         return output
       })
   }
@@ -653,20 +616,6 @@ module.exports = class MarketSize {
       })
       .then((market_size) => {
         output.market_size = market_size
-
-        var params = [business_id]
-        var sql = `
-          SELECT MAX(c.name) AS name, COUNT(*)::integer AS value FROM businesses biz
-          JOIN locations l ON l.id = biz.location_id AND l.id = 1
-          JOIN client.location_competitors lc ON lc.location_id = biz.location_id
-          JOIN network_provider.carrier c ON lc.carrier_id = c.id
-          WHERE biz.id = $1
-          GROUP BY c.id
-        `
-        return database.query(sql, params)
-      })
-      .then((fair_share) => {
-        output.fair_share = fair_share
         return output
       })
   }

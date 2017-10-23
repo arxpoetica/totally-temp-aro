@@ -956,7 +956,8 @@ class TileComponentController {
             }
 
             results[0].forEach((result) => {
-              if(result.location_id && canSelectLoc) {
+              if(result.location_id && (canSelectLoc || 
+                  state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)
               } else if (result.code && canSelectSA) {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
