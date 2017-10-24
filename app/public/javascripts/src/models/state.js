@@ -963,7 +963,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
       .then((response) => {
         // Optimization process was cancelled. Get the plan status from the server
-        return $http.get(`/service/v1/plan/${service.Optimizingplan.plan.id}?user_id=${state.getUserId()}`)
+        return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.getUserId()}`)
       })
       .then((response) => {
         service.isCanceling = false
