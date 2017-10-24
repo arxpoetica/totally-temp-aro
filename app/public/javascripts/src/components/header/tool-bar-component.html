@@ -90,6 +90,14 @@
   <div class="separator"></div>
 
   <button class="btn"
+          ng-click="$ctrl.openGlobalSettings()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Global Settings...">
+    <i class="fa fa-th"></i>
+  </button>
+
+  <button class="btn"
           ng-click="$ctrl.createEphemeralPlan()"
           data-toggle="tooltip"
           data-placement="bottom"
