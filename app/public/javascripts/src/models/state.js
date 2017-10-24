@@ -938,6 +938,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
             || response.data.optimizationState === 'FAILED') {
           service.stopPolling()
           service.refreshMapTilesCacheAndData()
+          delete service.Optimizingplan.optimizationId
           service.loadPlanInputs(newPlan.id)
         }
         var diff = (Date.now() - new Date(response.data.startDate).getTime()) / 1000
