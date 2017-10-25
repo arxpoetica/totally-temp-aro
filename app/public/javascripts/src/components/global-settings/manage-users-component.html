@@ -1,0 +1,51 @@
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>
+          Name
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('first_name', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('first_name', false)">↑</a>
+        </th>
+        <th>
+          Email
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('email', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('email', false)">↑</a>
+        </th>
+        <th>
+          Rol
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', false)">↑</a>
+        </th>
+        <th>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="user in $ctrl.users">
+        <td>{{user.first_name}} {{user.last_name}}</td>
+        <td>{{user.email}}</td>
+        <td>
+          <select ng-show="user.id !== $ctrl.user_id" class="form-control" ng-options="type.rol as type.name for type in $ctrl.userTypes" ng-model="user.rol"
+            ng-change="$ctrl.changeRol(user)">
+              <option value="">Basic</option>
+          </select>
+          <span ng-show="user.id === $ctrl.user_id">Admin</span>
+        </td>
+        <td>
+          <div class="pull-right">
+            <input type="text" id="resend-link-input-{{ user.id }}" value="{{user.resend_link}}" style="position: absolute; margin-left: -999999px">
+            <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-sm btn-default"
+              ng-click="$ctrl.copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
+            <a class="btn btn-sm btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
+            <a class="btn btn-sm btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <a type="button" class="btn btn-default" ng-href='/admin/users/csv'>Download CSV</a>
+  <a type="button" class="btn btn-default" ng-click="openSendMail()">Send email to all users</a>
+  <a type="button" class="btn btn-default" ng-click="openNewUser()">Register a new user</a>
+  <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleView()">Back</button>
+</div>
