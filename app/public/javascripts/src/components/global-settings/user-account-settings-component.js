@@ -37,7 +37,9 @@ UserAccountSettingsController.$inject = ['$scope', '$http', 'state']
 
 app.component('userAccountSettings', {
   templateUrl: '/components/global-settings/user-account-settings-component.html',
-  bindings: {},
+  bindings: {
+    toggleView: '&'
+  },
   controller: UserAccountSettingsController
 })
 
