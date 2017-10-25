@@ -18,6 +18,12 @@ class ManageUsersController {
         rol: 'biz-dev'
       }
     ]
+    this.ManageUserViews = Object.freeze({
+      Users: 0,
+      Send_Email: 1,
+      Register_User: 2
+    })
+    this.currentManageUserView = this.ManageUserViews.Users
   }
 
   $onInit() {
@@ -102,6 +108,41 @@ class ManageUsersController {
     })
   }
 
+  openUserView() {
+    this.currentManageUserView = this.ManageUserViews.Users
+  }
+
+  openNewUserView() {
+    this.currentManageUserView = this.ManageUserViews.Register_User
+  }
+
+  openSendMailView() {
+    this.currentManageUserView = this.ManageUserViews.Send_Email
+  }
+
+  sendMail() {
+    this.$http.post('/admin/users/mail', { subject: this.mailSubject, text: this.mailBody })
+      .then((response) => {
+        swal({ title: 'Emails sent', type: 'success' })
+        this.openUserView()
+      })
+  }
+
+  register_user() {
+    if (this.new_user.email !== this.new_user.email_confirm) {
+      return swal({
+        title: 'Error',
+        text: 'Emails do not match',
+        type: 'error'
+      })
+    }
+    this.$http.post('/admin/users/register', this.new_user)
+      .then((response) => {
+        this.new_user = {}
+        swal({ title: 'User registered', type: 'success' })
+        this.openUserView()
+      })
+  }
 
 }
 

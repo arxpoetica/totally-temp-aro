@@ -1,4 +1,4 @@
-<div>
+<div ng-if="$ctrl.currentManageUserView === $ctrl.ManageUserViews.Users">
   <table class="table table-striped">
     <thead>
       <tr>
@@ -45,7 +45,69 @@
     </tbody>
   </table>
   <a type="button" class="btn btn-default" ng-href='/admin/users/csv'>Download CSV</a>
-  <a type="button" class="btn btn-default" ng-click="openSendMail()">Send email to all users</a>
-  <a type="button" class="btn btn-default" ng-click="openNewUser()">Register a new user</a>
+  <a type="button" class="btn btn-default" ng-click="$ctrl.openSendMailView()">Send email to all users</a>
+  <a type="button" class="btn btn-default" ng-click="$ctrl.openNewUserView()">Register a new user</a>
   <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleView()">Back</button>
 </div>
+
+<div ng-if="$ctrl.currentManageUserView === $ctrl.ManageUserViews.Send_Email">
+  <div>
+    <label>Subject</label>
+    <input type="text" class="form-control" ng-model="$ctrl.mailSubject">
+  </div>
+  <div>
+    <label>Text</label>
+    <textarea class="form-control" rows="10" ng-model="$ctrl.mailBody"></textarea>
+  </div>
+  <br>
+  <button type="button" class="btn btn-primary" ng-click="$ctrl.sendMail()">Send mail</button>
+  <button class="btn btn-primary pull-right" ng-click="$ctrl.openUserView()">Back</button>
+</div>  
+
+<div ng-if="$ctrl.currentManageUserView === $ctrl.ManageUserViews.Register_User">
+
+  <form class="form-horizontal">  
+  <div class="form-group">
+    <label class="col-sm-4 control-label">First name</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.new_user.first_name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Last name</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.new_user.last_name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Email</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.new_user.email">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Confirm email</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.new_user.email_confirm">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Company name</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.new_user.company_name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Permissions</label>
+    <div class="col-sm-8">
+      <select class="form-control" ng-model="$ctrl.new_user.rol">
+        <option value="">No permissions</option>
+        <option value="biz-dev">Biz-Dev</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+  </div>
+  </form>
+  <button type="button" class="btn btn-primary" ng-click="$ctrl.register_user()">Register user</button>
+  <button class="btn btn-primary pull-right" ng-click="$ctrl.openUserView()">Back</button>
+</div> 
