@@ -46,7 +46,7 @@ class ResourceSelectionController {
     Promise.all([
       this.$http.get('/service/odata/resourcetypeentity'), // The types of resource managers
       this.$http.get('/service/odata/resourcemanager?$select=name,id,description,managerType'), // All resource managers in the system
-      this.$http.get(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`)
+      this.$http.get(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`)
     ])
     .then((results) => {
       var resourceManagerTypes = results[0].data
@@ -108,7 +108,7 @@ class ResourceSelectionController {
     })
 
     // Save the configuration to the server
-    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, putBody)
+    this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
       .then((result) => {
         // Save a deep copy of the pristine state, so we can check if it has changed
         this.pristineResourceItems = angular.copy(this.resourceItems)

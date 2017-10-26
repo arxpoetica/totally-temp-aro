@@ -112,7 +112,7 @@ class DataSelectionController {
     })
 
     // Save the configuration to the server
-    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, putBody)
+    this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
   }
 }
 

@@ -584,7 +584,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
     var promises = [
       $http.get('/service/odata/datatypeentity'),
       $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
-      $http.get(`/service/v1/plan/${service.plan.getValue().id}/configuration?user_id=${globalUser.id}`)
+      $http.get(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`)
     ]
 
     Promise.all(promises)
