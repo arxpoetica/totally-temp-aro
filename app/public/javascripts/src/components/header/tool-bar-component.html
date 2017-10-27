@@ -97,6 +97,8 @@
     <i class="fa fa-th"></i>
   </button>
 
+  <div class="separator"></div>
+
   <button class="btn"
           ng-click="$ctrl.createEphemeralPlan()"
           data-toggle="tooltip"
@@ -139,9 +141,9 @@
     <i class="fa fa-eye"></i>
   </button>
 
-  <div class="separator"></div>
+  <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS" class="separator"></div>
 
-  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
+  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
           ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -149,7 +151,7 @@
     <i class="fa fa-mouse-pointer"></i>
   </button>
 
-  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
+  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
           ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
           data-toggle="tooltip"
           data-placement="bottom"
