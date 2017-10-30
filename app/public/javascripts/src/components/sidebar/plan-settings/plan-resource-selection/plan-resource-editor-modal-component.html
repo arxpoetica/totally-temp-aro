@@ -1,7 +1,8 @@
 <modal visible="$ctrl.state.showPlanResourceEditorModal" backdrop="static" on-show="$ctrl.modalShow()" on-hide="$ctrl.modalHide()" >
   <modal-header title="Plan Resource Editor"></modal-header>
     <modal-body>
-      <pricebook-editor price-book-id="1"></pricebook-editor>
+      <resource-manager resource-items="$ctrl.state.resourceItems"></resource-manager>
+      <!-- <pricebook-editor price-book-id="1"></pricebook-editor> -->
     </modal-body>
   <modal-footer>
     <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>

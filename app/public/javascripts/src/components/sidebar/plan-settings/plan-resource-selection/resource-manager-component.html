@@ -1,0 +1,12 @@
+<form class="form-horizontal">
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Resource Type</label>
+    <div class="col-sm-8">
+      <select class="form-control"
+              ng-change="$ctrl.loadDataSources()"
+              ng-model="$ctrl.state.uploadDataSource"
+              ng-options="key as value.description for (key, value) in $ctrl.resourceItems">
+      </select>
+    </div>
+  </div>
+</form>

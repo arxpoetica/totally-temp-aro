@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter, tileDataService) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, $timeout, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter, tileDataService) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -694,6 +694,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
           service.resourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
         }
       })
+      // $timeout(() => $rootScope.$apply())
+      $rootScope.$apply()
     })
   }
 
