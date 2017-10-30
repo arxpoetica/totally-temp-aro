@@ -33,6 +33,9 @@
       <button class="btn btn-primary btn-block" ng-click="$ctrl.createBlankManager()">
         <i class="fa fa-file action-button-icon"></i>Create a new blank {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
+      <button class="btn btn-primary btn-block" ng-click="$ctrl.editManager()">
+        <i class="fa fa-pencil action-button-icon"></i>Edit the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
+      </button>
       <button class="btn btn-primary btn-block" ng-click="$ctrl.cloneManager()">
         <i class="fa fa-copy action-button-icon"></i>Clone the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>

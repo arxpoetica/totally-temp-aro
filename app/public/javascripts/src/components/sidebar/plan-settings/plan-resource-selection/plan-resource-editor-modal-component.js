@@ -7,6 +7,7 @@ class PlanResourceEditorController {
     })
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.selectedResourceKey = 'price_book'
+    this.modalTitle = 'Resource Managers'
   }
 
   modalHide() {
@@ -15,6 +16,13 @@ class PlanResourceEditorController {
 
   setEditingMode(newEditingMode) {
     this.selectedEditingMode = newEditingMode
+    if (newEditingMode === this.editingModes.LIST_RESOURCE_MANAGERS) {
+      this.modalTitle = 'Resource Managers'
+    }
+  }
+
+  priceBookNameChanged(name) {
+    this.modalTitle = name
   }
 }
 

@@ -4,6 +4,7 @@ class PriceBookEditorController {
     this.$timeout = $timeout
     this.priceBookDefinitions = []
     this.pristineAssignments = []
+    this.priceBookName = ''
   }
 
   $onChanges(changesObj) {
@@ -16,6 +17,13 @@ class PriceBookEditorController {
     if (!this.priceBookId) {
       return
     }
+    this.$http.get(`/service/v1/pricebook/${this.priceBookId}`)
+    .then((result) => {
+      this.priceBookName = result.data.name
+      this.priceBookNameChanged({ name: this.priceBookName })
+    })
+    .catch((err) => console.log(err))
+
     Promise.all([
       this.$http.get(`/service/v1/pricebook/${this.priceBookId}/definition`),
       this.$http.get(`/service/v1/pricebook/${this.priceBookId}/assignment`)
@@ -136,7 +144,8 @@ app.component('pricebookEditor', {
     priceBookId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&'
+    setEditingMode: '&',
+    priceBookNameChanged: '&'
   },
   controller: PriceBookEditorController
 })
