@@ -129,6 +129,8 @@ class PriceBookEditorController {
     })
     // Save assignments to the server
     this.$http.put(`/service/v1/pricebook/${this.priceBookId}/assignment`, assignments)
+      .then((result) => this.exitEditingMode())
+      .catch((err) => console.error(err))
   }
 
   exitEditingMode() {

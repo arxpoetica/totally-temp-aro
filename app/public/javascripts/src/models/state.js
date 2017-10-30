@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter, tileDataService) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, $timeout, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter, tileDataService) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -660,7 +660,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       return
     }
     var currentPlan = service.plan.getValue()
-    service.resourceItems = {}
     Promise.all([
       $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
       $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType'), // All resource managers in the system
@@ -672,8 +671,9 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       var selectedResourceManagers = results[2].data.resourceConfigItems
 
       // First set up the resource items so that we display all types in the UI
+      var newResourceItems = {}
       resourceManagerTypes.forEach((resourceManager) => {
-        service.resourceItems[resourceManager.name] = {
+        newResourceItems[resourceManager.name] = {
           id: resourceManager.id,
           description: resourceManager.description,
           allManagers: [],
@@ -683,17 +683,19 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
       // Then add all the managers in the system to the appropriate type
       allResourceManagers.forEach((resourceManager) => {
-        service.resourceItems[resourceManager.managerType].allManagers.push(resourceManager)
+        newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
       })
 
       // Then select the appropriate manager for each type
       selectedResourceManagers.forEach((selectedResourceManager) => {
-        var allManagers = service.resourceItems[selectedResourceManager.aroResourceType].allManagers
+        var allManagers = newResourceItems[selectedResourceManager.aroResourceType].allManagers
         var matchedManagers = allManagers.filter((item) => item.id === selectedResourceManager.resourceManagerId)
         if (matchedManagers.length === 1) {
-          service.resourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
+          newResourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
         }
       })
+      service.resourceItems = newResourceItems
+      $timeout()  // Trigger a digest cycle so that components can update
     })
   }
 
@@ -719,7 +721,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
 
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
-    this.$http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
   }
 
   service.createEphemeralPlan = () => {

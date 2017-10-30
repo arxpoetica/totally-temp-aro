@@ -16,6 +16,29 @@ class ResourceManagerController {
     }
   }
 
+  $onInit() {
+    this.selectFirstResourceManager()
+  }
+
+  selectFirstResourceManager() {
+    if (this.resourceItems
+        && this.resourceItems[this.selectedResourceKey]
+        && this.resourceItems[this.selectedResourceKey].allManagers.length > 0) {
+      this.selectedResourceManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
+    }
+  }
+
+  onSelectedResourceKeyChanged() {
+    this.selectFirstResourceManager()
+  }
+
+  $doCheck() {
+    if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
+      this.selectFirstResourceManager()
+      this.oldResourceItems = this.resourceItems
+    }
+  }
+
   createBlankManager() {
     // Create a resource manager
     var url = this.managerEndpoints[this.selectedResourceKey].createManager
@@ -55,6 +78,7 @@ class ResourceManagerController {
       this.setEditingManagerId({ newId: createdManagerId })
       this.setEditingMode({ mode: this.editMode })
       this.onManagersChanged && this.onManagersChanged()
+      this.selectFirstResourceManager()
     })
     .catch((err) => console.error(err))
   }
@@ -85,6 +109,7 @@ class ResourceManagerController {
       this.setEditingManagerId({ newId: createdManagerId })
       this.setEditingMode({ mode: this.editMode })
       this.onManagersChanged && this.onManagersChanged()
+      this.selectFirstResourceManager()
     })
     .catch((err) => console.error(err))
   }
@@ -99,6 +124,7 @@ class ResourceManagerController {
     this.$http.delete(url)
     .then((result) => {
       this.onManagersChanged && this.onManagersChanged()
+      this.selectFirstResourceManager()
     })
     .catch((err) => console.error(err))
   }
