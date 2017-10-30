@@ -1,6 +1,7 @@
 class ResourceManagerController {
-  constructor($http) {
+  constructor($http, $document) {
     this.$http = $http
+    this.$document = $document
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
     this.managerEndpoints = {
@@ -107,31 +108,56 @@ class ResourceManagerController {
       .then((result) => Promise.resolve(result.data[0].id))
   }
 
+  // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
+  // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
+  // Call this function before showing the SweetAlert
+  fixBootstrapModal() {
+    var modalNodes = this.$document[0].querySelectorAll('.modal[tabindex="-1"]');
+    if (!modalNodes) return;
+
+    modalNodes.forEach((modalNode) => {
+      modalNode.removeAttribute('tabindex');
+      modalNode.classList.add('js-swal-fixed');
+    })
+  }
+
+  // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
+  // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
+  // Call this function before hiding the SweetAlert
+  restoreBootstrapModal() {
+    var modalNode = this.$document[0].querySelector('.modal.js-swal-fixed');
+    if (!modalNode) return;
+
+    modalNode.setAttribute('tabindex', '-1');
+    modalNode.classList.remove('js-swal-fixed');
+  }
+
   getNewPlanDetailsFromUser() {
-    return Promise.resolve('Resource' + Math.random())
-    // // Get the details (name, description) for a new plan from the user
-    // return new Promise((resolve, reject) => {
-    //   var swalOptions = {
-    //     title: 'Resource name required',
-    //     text: 'Enter the name of the new resource',
-    //     type: 'input',
-    //     showCancelButton: true,
-    //     confirmButtonColor: '#DD6B55',
-    //     confirmButtonText: 'OK'
-    //   }
-    //   swal(swalOptions, (resourceName) => {
-    //     if (resourceName) {
-    //       reject(resourceName)
-    //     } else {
-    //       reject('Cancelled')
-    //     }
-    //   })
-    // })
+    // Get the name for a new plan from the user
+    this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
+    return new Promise((resolve, reject) => {
+      var swalOptions = {
+        title: 'Resource name required',
+        text: 'Enter the name of the new resource',
+        type: 'input',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'OK'
+      }
+      swal(swalOptions, (resourceName) => {
+        this.restoreBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
+        if (resourceName) {
+          resolve(resourceName)
+        } else {
+          reject('Cancelled')
+        }
+      })
+    })
   }
 
 }
 
-ResourceManagerController.$inject = ['$http']
+ResourceManagerController.$inject = ['$http', '$document']
 
 app.component('resourceManager', {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.html',
