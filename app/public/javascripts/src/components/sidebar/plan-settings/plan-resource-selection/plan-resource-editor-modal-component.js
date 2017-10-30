@@ -29,6 +29,10 @@ class PlanResourceEditorController {
   priceBookNameChanged(name) {
     this.modalTitle = name
   }
+
+  onManagersChanged() {
+    this.state.loadPlanResourceSelectionFromServer()
+  }
 }
 
 PlanResourceEditorController.$inject = ['state']
