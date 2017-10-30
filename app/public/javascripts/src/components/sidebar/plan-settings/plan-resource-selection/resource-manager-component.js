@@ -20,6 +20,12 @@ class ResourceManagerController {
     this.selectFirstResourceManager()
   }
 
+  $onChanges(changesObj) {
+    if (changesObj.selectedResourceKey) {
+      this.selectFirstResourceManager()
+    }
+  }
+
   selectFirstResourceManager() {
     if (this.resourceItems
         && this.resourceItems[this.selectedResourceKey]
@@ -189,7 +195,7 @@ app.component('resourceManager', {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.html',
   bindings: {
     resourceItems: '<',
-    selectedResourceKey: '=',
+    selectedResourceKey: '<',
     listMode: '<',
     editMode: '<',
     setEditingMode: '&',

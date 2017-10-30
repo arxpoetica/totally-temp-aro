@@ -6,7 +6,6 @@ class PlanResourceEditorController {
       EDIT_RESOURCE_MANAGER: 1
     })
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
-    this.selectedResourceKey = 'price_book'
     this.modalTitle = 'Resource Managers'
     this.editingManagerId = 1
   }
@@ -39,6 +38,8 @@ PlanResourceEditorController.$inject = ['state']
 
 app.component('planResourceEditorModal', {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal-component.html',
-  bindings: {},
+  bindings: {
+    selectedResourceKey: '<'
+  },
   controller: PlanResourceEditorController
 })
