@@ -53,10 +53,16 @@ class PriceBookEditorController {
             subItems: []
           }
           definitionItem.subItems.forEach((subItem) => {
-            item.subItems.push({
+            var subItemToPush = {
               item: subItem.item,
-              detailAssignment: itemDetailIdToDetailAssignment[subItem.id]
-            })
+              detailType: subItem.detailType
+            }
+            if (subItem.detailType === 'reference') {
+              subItemToPush.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
+            } else if (subItem.detailType === 'value') {
+              subItemToPush.costAssignment = itemIdToCostAssignment[subItem.item.id]
+            }
+            item.subItems.push(subItemToPush)
           })
           definition.items.push(item)
         })
