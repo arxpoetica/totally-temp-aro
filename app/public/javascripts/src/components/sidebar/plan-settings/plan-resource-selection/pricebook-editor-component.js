@@ -2,6 +2,7 @@ class PriceBookEditorController {
   constructor($http) {
     this.$http = $http
     this.priceBookDefinitions = []
+    this.pristineAssignments = []
   }
 
   $onChanges(changesObj) {
@@ -21,6 +22,8 @@ class PriceBookEditorController {
     .then((results) => {
       var definitionResult = results[0].data
       var assignmentResult = results[1].data
+      // Save a deep copy of the result, we can use this later if we save modifications to the server
+      this.pristineAssignments = angular.copy(assignmentResult)
 
       // Build a map of cost assignment ids to objects
       var itemIdToCostAssignment = {}
@@ -54,6 +57,7 @@ class PriceBookEditorController {
           }
           definitionItem.subItems.forEach((subItem) => {
             var subItemToPush = {
+              id: subItem.id,
               item: subItem.item,
               detailType: subItem.detailType
             }
@@ -71,6 +75,50 @@ class PriceBookEditorController {
       console.log(this.priceBookDefinitions)
     })
     .catch((err) => console.log(err))
+  }
+
+  saveAssignmentsToServer() {
+
+    // Build a map of cost assignment ids to their index within the array
+    var assignments = angular.copy(this.pristineAssignments)
+    var itemIdToCostAssignmentIndex = {}
+    var itemDetailIdToDetailAssignmentIndex = {}
+    assignments.costAssignments.forEach((costAssignment, index) => {
+      itemIdToCostAssignmentIndex[costAssignment.itemId] = index
+    })
+
+    // Build a map of detail assignment ids to their index within the array
+    assignments.detailAssignments.forEach((detailAssignment, index) => {
+      itemDetailIdToDetailAssignmentIndex[detailAssignment.itemDetailId] = index
+    })
+
+    // Loop through the pricebook definitions
+    this.priceBookDefinitions.forEach((priceBookDefinition) => {
+
+      // Loop through items in this definition
+      priceBookDefinition.items.forEach((item) => {
+        if (item.costAssignment) {
+          // Item has a cost assignment. Save it.
+          var costAssignmentIndex = itemIdToCostAssignmentIndex[item.id]
+          assignments.costAssignments[costAssignmentIndex] = item.costAssignment
+        }
+        // Loop through all subitems
+        item.subItems.forEach((subItem) => {
+          if (subItem.costAssignment) {
+            // Sub item has a cost assignment. Save it.
+            var costAssignmentIndex = itemIdToCostAssignmentIndex[subItem.item.id]
+            assignments.costAssignments[costAssignmentIndex] = subItem.costAssignment
+          }
+          if (subItem.detailAssignment) {
+            // Sub item has a detail assignment. Save it.
+            var detailAssignmentIndex = itemDetailIdToDetailAssignmentIndex[subItem.id]
+            assignments.detailAssignments[detailAssignmentIndex] = subItem.detailAssignment
+          }
+        })
+      })
+    })
+    // Save assignments to the server
+    this.$http.put(`/service/v1/pricebook/${this.priceBookId}/assignment`, assignments)
   }
 }
 
