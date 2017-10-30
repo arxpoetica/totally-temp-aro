@@ -1,3 +1,9 @@
+<style scoped>
+  .action-button-icon {
+    padding-right: 10px;
+  }
+</style>
+
 <!-- Create tabs for each priceBookDefinition -->
 <ul class="nav nav-tabs" role="tablist">
   <li ng-repeat="priceBookDefinition in $ctrl.priceBookDefinitions"
@@ -78,6 +84,11 @@
   </div>
 </div>
 
-<button class="btn btn-primary" ng-click="$ctrl.saveAssignmentsToServer()">
-  Save
-</button>
+<div style="text-align:right">
+  <button class="btn btn-default" ng-click="$ctrl.exitEditingMode()">
+    <i class="fa fa-undo action-button-icon"></i>Discard changes
+  </button>
+  <button class="btn btn-primary" ng-click="$ctrl.saveAssignmentsToServer()">
+    <i class="fa fa-save action-button-icon"></i>Save
+  </button>
+</div>

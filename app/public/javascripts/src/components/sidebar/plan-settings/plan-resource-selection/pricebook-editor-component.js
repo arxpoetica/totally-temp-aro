@@ -1,6 +1,7 @@
 class PriceBookEditorController {
-  constructor($http) {
+  constructor($http, $timeout) {
     this.$http = $http
+    this.$timeout = $timeout
     this.priceBookDefinitions = []
     this.pristineAssignments = []
   }
@@ -72,6 +73,7 @@ class PriceBookEditorController {
         })
         this.priceBookDefinitions.push(definition)
       })
+      this.$timeout()
       console.log(this.priceBookDefinitions)
     })
     .catch((err) => console.log(err))
@@ -120,14 +122,21 @@ class PriceBookEditorController {
     // Save assignments to the server
     this.$http.put(`/service/v1/pricebook/${this.priceBookId}/assignment`, assignments)
   }
+
+  exitEditingMode() {
+    this.setEditingMode({ mode: this.listMode })
+  }
 }
 
-PriceBookEditorController.$inject = ['$http']
+PriceBookEditorController.$inject = ['$http', '$timeout']
 
 app.component('pricebookEditor', {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor-component.html',
   bindings: {
-    priceBookId: '<'
+    priceBookId: '<',
+    listMode: '<',
+    editMode: '<',
+    setEditingMode: '&'
   },
   controller: PriceBookEditorController
 })

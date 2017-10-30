@@ -1,14 +1,13 @@
 class ResourceManagerController {
   constructor() {
-    this.selectedResourceItem = null
   }
 
-  $doCheck() {
-    if (this.resourceItems !== this.previousResourceItems) {
-      var keys = Object.keys(this.resourceItems)
-      this.selectedResourceItem = keys.length > 0 ? keys[0] : null
-      this.previousResourceItems = this.resourceItems
-    }
+  onSelectedResourceItemChanged() {
+    this.selectedResourceManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
+  }
+
+  createBlankManager() {
+    this.setEditingMode({ mode: this.editMode })
   }
 }
 
@@ -17,7 +16,11 @@ class ResourceManagerController {
 app.component('resourceManager', {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.html',
   bindings: {
-    resourceItems: '<'
+    resourceItems: '<',
+    selectedResourceKey: '=',
+    listMode: '<',
+    editMode: '<',
+    setEditingMode: '&'
   },
   controller: ResourceManagerController
 })
