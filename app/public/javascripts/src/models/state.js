@@ -189,7 +189,6 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.resourceItemForEditorModal = null
-  service.showResourceEditorModal = false
   //This modal will be used to toogle from report modal to current modal 
   service.previousModal
 
@@ -647,6 +646,75 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
       })
   }
 
+  // Load the plan resource selections from the server
+  service.loadPlanResourceSelectionFromServer = () => {
+
+    if (!service.plan) {
+      return
+    }
+    var currentPlan = service.plan.getValue()
+    service.resourceItems = {}
+    Promise.all([
+      $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
+      $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType'), // All resource managers in the system
+      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
+    ])
+    .then((results) => {
+      var resourceManagerTypes = results[0].data
+      var allResourceManagers = results[1].data
+      var selectedResourceManagers = results[2].data.resourceConfigItems
+
+      // First set up the resource items so that we display all types in the UI
+      resourceManagerTypes.forEach((resourceManager) => {
+        service.resourceItems[resourceManager.name] = {
+          id: resourceManager.id,
+          description: resourceManager.description,
+          allManagers: [],
+          selectedManager: null
+        }
+      })
+
+      // Then add all the managers in the system to the appropriate type
+      allResourceManagers.forEach((resourceManager) => {
+        service.resourceItems[resourceManager.managerType].allManagers.push(resourceManager)
+      })
+
+      // Then select the appropriate manager for each type
+      selectedResourceManagers.forEach((selectedResourceManager) => {
+        var allManagers = service.resourceItems[selectedResourceManager.aroResourceType].allManagers
+        var matchedManagers = allManagers.filter((item) => item.id === selectedResourceManager.resourceManagerId)
+        if (matchedManagers.length === 1) {
+          service.resourceItems[selectedResourceManager.aroResourceType].selectedManager = matchedManagers[0]
+        }
+      })
+    })
+  }
+
+  // Save the plan resource selections to the server
+  service.savePlanResourceSelectionToServer = () => {
+    var putBody = {
+      configurationItems: [],
+      resourceConfigItems: []
+    }
+
+    Object.keys(service.resourceItems).forEach((resourceItemKey) => {
+      var selectedManager = service.resourceItems[resourceItemKey].selectedManager
+      if (selectedManager) {
+        // We have a selected manager
+        putBody.resourceConfigItems.push({
+          aroResourceType: resourceItemKey,
+          resourceManagerId: selectedManager.id,
+          name: selectedManager.name,
+          description: selectedManager.description
+        })
+      }
+    })
+
+    // Save the configuration to the server
+    var currentPlan = service.plan.getValue()
+    this.$http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+  }
+
   service.createEphemeralPlan = () => {
     // Use reverse geocoding to get the address at the current center of the map
     var planOptions = {
@@ -781,6 +849,7 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         console.log(err)
       })
     service.loadPlanDataSelectionFromServer()
+    service.loadPlanResourceSelectionFromServer()
   }
 
   service.hasLocationType = (locationKey) => {
