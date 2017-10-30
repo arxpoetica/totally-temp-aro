@@ -6,11 +6,12 @@
                       selected-resource-key="$ctrl.selectedResourceKey"
                       list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
                       edit-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
-                      set-editing-mode="$ctrl.setEditingMode(mode)">
+                      set-editing-mode="$ctrl.setEditingMode(mode)"
+                      set-editing-manager-id="$ctrl.setEditingManagerId(newId)">
     </resource-manager>
 
     <pricebook-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'price_book'"
-                      price-book-id="1"
+                      price-book-id="$ctrl.editingManagerId"
                       list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
                       edit-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
                       set-editing-mode="$ctrl.setEditingMode(mode)"
