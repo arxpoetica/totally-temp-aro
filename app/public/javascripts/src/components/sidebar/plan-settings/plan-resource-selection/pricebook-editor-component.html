@@ -7,13 +7,42 @@
     </a>
   </li>
 </ul>
-<div class="tab-content">
+<div class="tab-content" style="max-height: 500px; overflow-y: auto">
   <div ng-repeat="priceBookDefinition in $ctrl.priceBookDefinitions"
        role="tabpanel"
        ng-class="{ 'tab-pane': true, 'active': $index === 0 }"
        id="{{priceBookDefinition.id}}">
-    <div ng-repeat="item in priceBookDefinition.items">
-      {{item.description}}
-    </div>
+    <table class="table table-striped">
+      <tr ng-repeat="definitionItem in priceBookDefinition.items">
+        <td>
+          <div style="font-weight: 700">{{definitionItem.description}}</div>
+          <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
+            <table class="table table-bordered" style="margin-bottom: 0px">
+              <tr>
+                <td style="vertical-align: middle">Cost:</td>
+                <td style="width: 100px; border-right: none;"><input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control"></td>
+                <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
+                <td style="vertical-align: middle">State:</td>
+                <td style="width: 100px;"><input type="text" ng-model="definitionItem.costAssignment.state" class="form-control"></td>
+              </tr>
+            </table>
+            </div>
+          <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
+            SubItems:
+          </div>
+          <div style="padding-left: 20px; width: 100%">
+            <table class="table table-bordered" style="margin-bottom: 0px">
+              <tr ng-repeat="subItem in definitionItem.subItems">
+                <td style="vertical-align: middle;">{{subItem.item.description}}</td>
+                <td style="vertical-align: middle; border-left: #ddd 1px solid;">Quantity:</td>
+                <td style="width: 70px;"><input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control"></td>
+                <td style="vertical-align: middle; border-left: #ddd 1px solid;">Fixed Ratio:</td>
+                <td style="width: 70px;"><input type="text" ng-model="subItem.detailAssignment.ratioFixed" class="form-control"></td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
   </div>
 </div>

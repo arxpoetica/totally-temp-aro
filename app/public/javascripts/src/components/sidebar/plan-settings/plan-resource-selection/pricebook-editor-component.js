@@ -45,11 +45,20 @@ class PriceBookEditorController {
         }
         definitionItems.forEach((definitionItem) => {
           // If this item id is in cost assignments, add it
-          definitionItem.costAssignment = itemIdToCostAssignment[definitionItem.id] // This can be 'undefined'
+          var item = {
+            id: definitionItem.id,
+            description: definitionItem.description,
+            unitOfMeasure: definitionItem.unitOfMeasure,
+            costAssignment: itemIdToCostAssignment[definitionItem.id],
+            subItems: []
+          }
           definitionItem.subItems.forEach((subItem) => {
-            subItem.detailAssignment = itemDetailIdToDetailAssignment[subItem.id]
+            item.subItems.push({
+              item: subItem.item,
+              detailAssignment: itemDetailIdToDetailAssignment[subItem.id]
+            })
           })
-          definition.items.push(definitionItem)
+          definition.items.push(item)
         })
         this.priceBookDefinitions.push(definition)
       })

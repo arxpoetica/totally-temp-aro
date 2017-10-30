@@ -1,5 +1,5 @@
 <!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
-<div ng-style="{ 'padding-left': $ctrl.indentationLevel * $ctrl.pixelsPerIndentationLevel + 'px', width: '100%' }">
+<div ng-style="{ 'padding-left': $ctrl.pixelsPerIndentationLevel + 'px', width: '100%' }">
 
   <!-- Loop through all the key-value pairs in the object to be edited -->
   <div ng-repeat="(key, value) in $ctrl.objectToEdit" style="width: 100%">
