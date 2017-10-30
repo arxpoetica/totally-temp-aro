@@ -1,0 +1,19 @@
+<ul class="nav nav-tabs" role="tablist">
+  <li ng-repeat="priceBookDefinition in $ctrl.priceBookDefinitions"
+      role="presentation"
+      ng-class="{ 'active': $index === 0 }">
+    <a href="#{{priceBookDefinition.id}}" role="tab" data-toggle="tab">
+      {{priceBookDefinition.description}}
+    </a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div ng-repeat="priceBookDefinition in $ctrl.priceBookDefinitions"
+       role="tabpanel"
+       ng-class="{ 'tab-pane': true, 'active': $index === 0 }"
+       id="{{priceBookDefinition.id}}">
+    <div ng-repeat="item in priceBookDefinition.items">
+      {{item.description}}
+    </div>
+  </div>
+</div>

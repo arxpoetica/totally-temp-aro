@@ -188,7 +188,8 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
-  service.resourceItemForEditorModal = null
+  service.showPlanResourceEditorModal = false
+  service.editingPlanResourceKey = null
   //This modal will be used to toogle from report modal to current modal 
   service.previousModal
 
@@ -644,6 +645,12 @@ app.service('state', ['$rootScope', '$http', '$document', 'map_layers', 'configu
         service.dataItems = newDataItems
         service.dataItemsChanged.next(service.dataItems)
       })
+  }
+
+  // Shows the modal for editing plan resources
+  service.showPlanResourceEditor = (resourceKey) => {
+    service.editingPlanResourceKey = resourceKey
+    service.showPlanResourceEditorModal = true
   }
 
   // Load the plan resource selections from the server
