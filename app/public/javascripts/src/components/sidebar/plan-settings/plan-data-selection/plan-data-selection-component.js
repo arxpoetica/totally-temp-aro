@@ -115,10 +115,6 @@ class DataSelectionController {
     // Save the configuration to the server
     this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
   }
-
-  showUpload() {
-    this.$rootScope.$broadcast('upload_morphology')
-  }
 }
 
 DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state']
