@@ -206,12 +206,13 @@ exports.configure = (api, middleware) => {
 
   function saveMorphology (request, response, next) {
     var name = request.body.name
-    var id = request.params.id || null
+    var tileSystemId = request.params.id || null
+    var projectId = request.body.projectId || 1
     var user = request.user
     var fullpath = request.file && request.file.path
     var mappings = JSON.parse(request.body.mappings);
 
-    models.Location.saveMorphology(user, id, name, fullpath, mappings)
+    models.Location.saveMorphology(user, tileSystemId, projectId, name, fullpath, mappings)
       .then(jsonSuccess(response, next))
       .catch(next)
   }

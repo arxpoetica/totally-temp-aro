@@ -13,6 +13,22 @@ class ConicTileSystemUploaderController {
     .catch((err) => console.log(err))
   }
 
+  $onInit() {
+    if (this.onInitControl) {
+      this.onInitControl({
+        api: {
+          save: this.saveImpedances.bind(this)
+        }
+      })
+    }
+  }
+
+  $onDestroy() {
+    if (this.onDestroyControl) {
+      this.onDestroyControl()
+    }
+  }
+
   initImpedances() {
     this.impedances = [{
       code: -9999,
@@ -42,6 +58,7 @@ class ConicTileSystemUploaderController {
       code: 65535,
       value: '0.35'
     }]
+    this.defaultImpedanceCode = 1
   }
 
   removeImpedanceAt(index) {
@@ -61,9 +78,10 @@ class ConicTileSystemUploaderController {
     var formData = new FormData()
     formData.append('name', this.datasetName)
     formData.append('file', fileToUpload.files[0])
+    formData.append('projectId', this.projectId)
     if (this.impedances.length > 0) {
       var defaultImpedance = 1
-      var noData = this.impedances.filter((imp) => { return imp.code == defaultImpedance })
+      var noData = this.impedances.filter((imp) => { return imp.code == this.defaultImpedanceCode })
       formData.append('mappings', JSON.stringify({ mappings: this.impedances, default: noData }))
     }
     var xhr = new XMLHttpRequest()
@@ -92,6 +110,10 @@ ConicTileSystemUploaderController.$inject = ['$element', '$http']
 
 app.component('conicTileSystemUploader', {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader-component.html',
-  bindings: {},
+  bindings: {
+    projectId: '<',
+    onInitControl: '&',
+    onDestroyControl: '&'
+  },
   controller: ConicTileSystemUploaderController
 })

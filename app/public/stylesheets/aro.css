@@ -928,6 +928,10 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   max-height: 358px;
   overflow-y: scroll;
 }
+.morp_impedance_table {
+  max-height: 358px;
+  overflow-y: scroll;
+}
 
 .morph_table_header {
   padding-left: 6px;
