@@ -55,6 +55,7 @@ class DataSourceUploadController {
     if (this.conicTileSystemUploaderApi) {
       // We have a conic system uploader API, so the upload will be handled by the control
       this.conicTileSystemUploaderApi.save()
+      this.close()
     } else {
       var files = $('#data_source_upload_modal input[type=file]').get(0).files
       if (this.editingDataset.id && files.length > 0) {
