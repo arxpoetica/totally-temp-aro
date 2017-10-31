@@ -17,10 +17,13 @@ class DataSourceUploadController {
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
-        $('#data_source_upload_modal input[type=file]').get(0).value = ''
-        $('#data_source_upload_modal input[type=text]').get(0).value = ''
-        
-        form = $('#data_source_upload_modal form').get(0)
+        if ($('#data_source_upload_modal input[type=file]').get(0)
+            && $('#data_source_upload_modal input[type=text]').get(0)) {  // Added IF for now. All this must go!
+          $('#data_source_upload_modal input[type=file]').get(0).value = ''
+          $('#data_source_upload_modal input[type=text]').get(0).value = ''
+          
+          form = $('#data_source_upload_modal form').get(0)
+        }
       }, 0)
     })
 
@@ -124,57 +127,7 @@ class DataSourceUploadController {
 DataSourceUploadController.$inject = ['$http', 'state']
 
 app.component('globalDataSourceUploadModal', {
-  template: `
-    <modal visible="$ctrl.state.showDataSourceUploadModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
-      <modal-header title="{{!$ctrl.isDataManagementView && 'Upload Data Sources' || 'Data Management'}}"></modal-header>
-      <modal-body id="data_source_upload_modal">
-        <form class="form-horizontal">
-          <div class="form-group">
-            <a class="btn pull-right" style="margin-right:15px"  ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]" ng-click="$ctrl.loadDataSources()">{{!$ctrl.isDataManagementView && 'Data Management' || 'File Upload'}}</a>
-          </div>
-
-          <div class="form-group">
-            <label class="col-sm-4 control-label">Data Type</label>
-            <div class="col-sm-8">
-              <select class="form-control" ng-change="$ctrl.loadDataSources()"
-                ng-model="$ctrl.state.uploadDataSource"
-                ng-options="item as item.label for item in $ctrl.state.uploadDataSources">
-              </select>
-            </div>
-          </div>
-        
-          <div ng-show="!$ctrl.isDataManagementView">
-            <div class="form-group">
-              <label class="col-sm-4 control-label">Data Source Name</label>
-              <div class="col-sm-8">
-                <input type="text" name="name" class="form-control" placeholder="Data Source Name">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="col-sm-4 control-label">File Location</label>
-              <div class="col-sm-8">
-                <input name="file" type="file" name="dataset" class="form-control">
-              </div>
-            </div>
-          </div>
-
-          <div ng-show="$ctrl.isDataManagementView">
-            <div class="form-group">
-              <label class="col-sm-4 control-label">Data Sources</label>
-              <div class="col-sm-8">
-                <show-targets remove-target="$ctrl.removeDatasource({target:target})"
-                  targets="$ctrl.dataSources"></show-targets>
-              </div>
-            </div>
-          </div>
-          
-        </form>
-      </modal-body>
-      <modal-footer ng-show="!$ctrl.isDataManagementView">
-        <button class="btn btn-primary" ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="spin fa fa-repeat"></span> Save</button>
-      </modal-footer>
-    </modal>
-  `,
+  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal-component.html',
   bindings: {},
   controller: DataSourceUploadController
 })

@@ -1,0 +1,51 @@
+<div class="form-group">
+    <label class="col-sm-4 control-label">Dataset name</label>
+    <div class="col-sm-8">
+      <input class="form-control" ng-model="$ctrl.datasetName">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Dataset</label>
+    <div class="col-sm-8">
+      <input id="conicTileSystemFile" type="file" class="form-control">
+      <br>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Tile System</label>
+    <div class="col-sm-8">
+    <select class="form-control ng-pristine ng-valid ng-touched"
+            ng-model="selectedTileSystemId"
+            ng-options="tileSystem.id as tileSystem.name for tileSystem in $ctrl.tileSystems">
+    </select>
+   </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Impedance Mapping</label>
+    <div class="col-sm-8">
+      <div class="morp_impedance_table">
+        <table ng-show="$ctrl.impedances.length > 0">
+          <thead>
+          <tr>
+            <th class="morph_table_header">Code</th>
+            <th class="morph_table_header">Impedance Per 100m</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr class="morp_impedance_row" ng-repeat="impedance in $ctrl.impedances">
+            <td><input name="code" class="form-control col-sm-7 morp_impedance_item" style="width: 75%" ng-model="impedance.code"></td>
+            <td>
+              <div class="imp_item_1 inp_txt">  <input name="impr" class="form-control col-sm-7 morp_impedance_item" style="width: 75%" ng-model="impedance.value"></div>
+              <div class="imp_item_1 inp_radio"><input class="" ng-model="$parent.imp_default" type="radio" value="{{impedance.code}}" title="Mark as default"/></div>
+            </td>
+            <td><button class="btn_remove_imp" title="Remove mapping" ng-click="$ctrl.removeImpedanceAt($index)"><i class="fa fa-trash"></i></button></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <button type="button" class="btn btn-sm btn-primary btn-add-impc" ng-click="$ctrl.addImpedance()"><i class="fa fa-plus btn-add-impd"></i></button>
+      </div>
+    </div>
+    <button type="button" class="btn btn-danger" ng-click="$ctrl.saveImpedances()">Save</button>
+  </div>

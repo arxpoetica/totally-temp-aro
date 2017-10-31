@@ -1,7 +1,8 @@
 class DataSelectionController {
-  constructor($http, $timeout, state) {
+  constructor($http, $timeout, $rootScope, state) {
     this.$http = $http
     this.$timeout = $timeout
+    this.$rootScope = $rootScope
     this.state = state
     this.isDirty = false
     state.plan.subscribe((newPlan) => {
@@ -114,9 +115,13 @@ class DataSelectionController {
     // Save the configuration to the server
     this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
   }
+
+  showUpload() {
+    this.$rootScope.$broadcast('upload_morphology')
+  }
 }
 
-DataSelectionController.$inject = ['$http', '$timeout', 'state']
+DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state']
 
 // Component did not work when it was called 'dataSelection'
 app.component('planDataSelection', {
