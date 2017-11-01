@@ -36,7 +36,8 @@ cd $DIR/../db
 (cd etl/schema && make etl_reload_auth) # this is a hack for now
 
 make reset_schema
-psql -c "CREATE EXTENSION hstore;" # this is also a hack. for some reason resetting the schema drops this extension.
+psql -c "CREATE EXTENSION IF NOT EXISTS hstore;" # this is also a hack. for some reason resetting the schema drops this extension.
+psql -c "CREATE EXTENSION IF NOT EXISTS "\"uuid-ossp\"";" # this is also a hack. for some reason resetting the schema drops this extension.
 make load_schema
 
 make reset_stage_reference
@@ -45,7 +46,9 @@ make stage_reference
 make reset_view
 make load_view
 
-make reset_private
-make load_private
+make reset_public
+make load_public
+
+make refresh_materialized_view
 
 node ../app/cli/register_user -f Admin -l User -e $ADMIN_USER_EMAIL -p $ADMIN_USER_PASSWORD -r admin

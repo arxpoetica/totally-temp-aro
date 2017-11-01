@@ -6,7 +6,7 @@
   "displayable_client_carrier_name": "ENA",
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
-  "currency_symbol": "&#8377;",
+  "currency_symbol": "₹",
   "from_email_address": "aro-demo@app.altvil.com",
   "length": {
 		"length_units": "Km",
