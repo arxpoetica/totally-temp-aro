@@ -149,13 +149,25 @@ class ResourceManagerController {
   }
 
   deleteSelectedManager() {
-    var url = this.managerEndpoints[this.selectedResourceKey].deleteManager.replace(this.managerIdString, this.selectedResourceManager.id)
-    this.$http.delete(url)
-    .then((result) => {
-      this.onManagersChanged && this.onManagersChanged()
-      this.selectFirstResourceManager()
+    swal({
+      title: 'Delete resource manager?',
+      text: `Are you sure you want to delete ${this.selectedResourceManager.name}`,
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No'
+    }, (result) => {
+      if (result) {
+        var url = this.managerFunctions[this.selectedResourceKey].deleteManager.replace(this.managerIdString, this.selectedResourceManager.id)
+        this.$http.delete(url)
+        .then((result) => {
+          this.onManagersChanged && this.onManagersChanged()
+          this.selectFirstResourceManager()
+        })
+        .catch((err) => console.error(err))
+          }
     })
-    .catch((err) => console.error(err))
   }
 
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
