@@ -7,15 +7,15 @@ class ResourceManagerController {
       price_book: {
         createBlank: this.createBlankPriceBook.bind(this),
         cloneSelected: this.cloneSelectedPriceBook.bind(this),
-        deleteSelected: this.deleteSelectedManager.bind(this)
+        deleteSelected: this.deleteSelectedPriceBook.bind(this)
       },
       roic_manager: {
         cloneSelected: this.cloneSelectedRoicManager.bind(this),
-        deleteSelected: this.deleteSelectedManager.bind(this)
+        deleteSelected: this.deleteSelectedRoicManager.bind(this)
       },
       arpu_manager: {
         cloneSelected: this.cloneSelectedArpuManager.bind(this),
-        deleteSelected: this.deleteSelectedManager.bind(this)
+        deleteSelected: this.deleteSelectedArpuManager.bind(this)
       }
     }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
@@ -148,26 +148,63 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.editMode })
   }
 
-  deleteSelectedManager() {
-    swal({
-      title: 'Delete resource manager?',
-      text: `Are you sure you want to delete ${this.selectedResourceManager.name}`,
-      type: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No'
-    }, (result) => {
-      if (result) {
-        var url = this.managerFunctions[this.selectedResourceKey].deleteManager.replace(this.managerIdString, this.selectedResourceManager.id)
-        this.$http.delete(url)
-        .then((result) => {
-          this.onManagersChanged && this.onManagersChanged()
-          this.selectFirstResourceManager()
-        })
-        .catch((err) => console.error(err))
-          }
+  askUserToConfirmManagerDelete(managerName) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete resource manager?',
+        text: `Are you sure you want to delete ${managerName}`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
     })
+  }
+
+  deleteManager(deleteUrl) {
+    this.$http.delete(deleteUrl)
+      .then((result) => {
+        this.onManagersChanged && this.onManagersChanged()
+        this.selectFirstResourceManager()
+      })
+      .catch((err) => console.error(err))
+  }
+
+  deleteSelectedPriceBook() {
+    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteManager(`/service/v1/pricebook/${this.selectedResourceManager.id}`)
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  deleteSelectedRoicManager() {
+    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteManager(`/service/v1/roic-manager/${this.selectedResourceManager.id}`)
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  deleteSelectedArpuManager() {
+    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteManager(`/service/v1/arpu-manager/${this.selectedResourceManager.id}`)
+        }
+      })
+      .catch((err) => console.error(err))
   }
 
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).

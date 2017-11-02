@@ -662,7 +662,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var currentPlan = service.plan.getValue()
     Promise.all([
       $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
-      $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType'), // All resource managers in the system
+      $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
       $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
     ])
     .then((results) => {
@@ -683,7 +683,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
       // Then add all the managers in the system to the appropriate type
       allResourceManagers.forEach((resourceManager) => {
-        newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
+        if (!resourceManager.deleted) {
+          newResourceItems[resourceManager.managerType].allManagers.push(resourceManager)
+        }
       })
 
       // Then select the appropriate manager for each type
