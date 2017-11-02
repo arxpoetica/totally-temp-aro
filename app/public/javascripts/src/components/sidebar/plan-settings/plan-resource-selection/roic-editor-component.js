@@ -12,6 +12,12 @@ class RoicEditorController {
   }
 
   reloadRoicManagerConfiguration() {
+    this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}`)
+    .then((result) => {
+      this.roicManagerName = result.data.name
+      this.roicManagerNameChanged({ name: this.roicManagerName })
+    })
+
     this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}/configuration`)
     .then((result) => this.roicManagerConfiguration = result.data)
     .catch((err) => console.error(err))
