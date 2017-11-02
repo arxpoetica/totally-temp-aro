@@ -49,7 +49,6 @@ class ArpuEditorController {
     })
 
     if (changedModels.length > 0) {
-      console.log(changedModels)
       this.$http.put(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`, changedModels)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
