@@ -12,6 +12,10 @@ class ResourceManagerController {
       roic_manager: {
         cloneSelected: this.cloneSelectedRoicManager.bind(this),
         deleteSelected: this.deleteSelectedManager.bind(this)
+      },
+      arpu_manager: {
+        cloneSelected: this.cloneSelectedArpuManager.bind(this),
+        deleteSelected: this.deleteSelectedManager.bind(this)
       }
     }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
@@ -113,6 +117,18 @@ class ResourceManagerController {
     .then((resourceName) => {
       // Create a new ROIC manager with the specified name and description
       return this.$http.post(`/service/v1/roic-manager?source_manager=${this.selectedResourceManager.id}`,
+                             { name: resourceName, description: resourceName })
+    })
+    .then((result) => this.onManagerCreated(result.data.id))
+    .catch((err) => console.error(err))
+  }
+
+  cloneSelectedArpuManager() {
+    // Create a resource manager
+    this.getNewResourceDetailsFromUser()
+    .then((resourceName) => {
+      // Create a new ARPU manager with the specified name and description
+      return this.$http.post(`/service/v1/arpu-manager?source_manager=${this.selectedResourceManager.id}`,
                              { name: resourceName, description: resourceName })
     })
     .then((result) => this.onManagerCreated(result.data.id))

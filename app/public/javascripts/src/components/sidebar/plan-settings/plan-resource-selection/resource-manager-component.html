@@ -32,7 +32,7 @@
     <div class="col-sm-8">
       <button class="btn btn-primary btn-block"
               ng-click="$ctrl.managerFunctions[$ctrl.selectedResourceKey].createBlank()"
-              ng-if="$ctrl.selectedResourceKey !== 'roic_manager'">
+              ng-if="$ctrl.selectedResourceKey === 'price_book'">
         <i class="fa fa-file action-button-icon"></i>Create a new blank {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
       <button class="btn btn-primary btn-block" ng-click="$ctrl.editSelectedManager()">
