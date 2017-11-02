@@ -8,6 +8,10 @@ class ResourceManagerController {
         createBlank: this.createBlankPriceBook.bind(this),
         cloneSelected: this.cloneSelectedPriceBook.bind(this),
         deleteSelected: this.deleteSelectedManager.bind(this)
+      },
+      roic_manager: {
+        cloneSelected: this.cloneSelectedRoicManager.bind(this),
+        deleteSelected: this.deleteSelectedManager.bind(this)
       }
     }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
@@ -51,13 +55,13 @@ class ResourceManagerController {
   createBlankPriceBook() {
     var createdManagerId = -1 // Save for later use
     // Get the name of the new plan from the user
-    this.getNewPlanDetailsFromUser()
+    this.getNewResourceDetailsFromUser()
     .then((resourceName) => {
-      // Create a new plan with the specified name and description
+      // Create a new pricebook with the specified name and description
       return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName })
     })
     .then((result) => {
-      // Save the created plan id for later use, and return the list of all pricebooks
+      // Save the created pricebook id for later use, and return the list of all pricebooks
       createdManagerId = result.data.id
       return this.$http.get('/service/v1/pricebook')
     })
@@ -85,13 +89,13 @@ class ResourceManagerController {
   cloneSelectedPriceBook() {
     // Create a resource manager
     var createdManagerId = -1
-    this.getNewPlanDetailsFromUser()
+    this.getNewResourceDetailsFromUser()
     .then((resourceName) => {
-      // Create a new plan with the specified name and description
+      // Create a new pricebook with the specified name and description
       return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName })
     })
     .then((result) => {
-      // Save the created plan id for later use, and return the assignments for the selected manager
+      // Save the created pricebook id for later use, and return the assignments for the selected manager
       createdManagerId = result.data.id
       return this.$http.get(`/service/v1/pricebook/${this.selectedResourceManager.id}/assignment`)
     })
@@ -100,6 +104,18 @@ class ResourceManagerController {
       return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, result.data)
     })
     .then(() => this.onManagerCreated(createdManagerId))
+    .catch((err) => console.error(err))
+  }
+
+  cloneSelectedRoicManager() {
+    // Create a resource manager
+    this.getNewResourceDetailsFromUser()
+    .then((resourceName) => {
+      // Create a new ROIC manager with the specified name and description
+      return this.$http.post(`/service/v1/roic-manager?source_manager=${this.selectedResourceManager.id}`,
+                             { name: resourceName, description: resourceName })
+    })
+    .then((result) => this.onManagerCreated(result.data.id))
     .catch((err) => console.error(err))
   }
 
@@ -130,12 +146,12 @@ class ResourceManagerController {
   // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
   // Call this function before showing the SweetAlert
   fixBootstrapModal() {
-    var modalNodes = this.$document[0].querySelectorAll('.modal[tabindex="-1"]');
-    if (!modalNodes) return;
+    var modalNodes = this.$document[0].querySelectorAll('.modal')
+    if (!modalNodes) return
 
     modalNodes.forEach((modalNode) => {
-      modalNode.removeAttribute('tabindex');
-      modalNode.classList.add('js-swal-fixed');
+      modalNode.removeAttribute('tabindex')
+      modalNode.classList.add('js-swal-fixed')
     })
   }
 
@@ -143,14 +159,14 @@ class ResourceManagerController {
   // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
   // Call this function before hiding the SweetAlert
   restoreBootstrapModal() {
-    var modalNode = this.$document[0].querySelector('.modal.js-swal-fixed');
-    if (!modalNode) return;
+    var modalNode = this.$document[0].querySelector('.modal.js-swal-fixed')
+    if (!modalNode) return
 
-    modalNode.setAttribute('tabindex', '-1');
-    modalNode.classList.remove('js-swal-fixed');
+    modalNode.setAttribute('tabindex', '-1')
+    modalNode.classList.remove('js-swal-fixed')
   }
 
-  getNewPlanDetailsFromUser() {
+  getNewResourceDetailsFromUser() {
     // Get the name for a new plan from the user
     this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
     return new Promise((resolve, reject) => {
