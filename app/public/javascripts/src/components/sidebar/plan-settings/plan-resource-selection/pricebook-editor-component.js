@@ -145,7 +145,6 @@ app.component('pricebookEditor', {
   bindings: {
     priceBookId: '<',
     listMode: '<',
-    editMode: '<',
     setEditingMode: '&',
     priceBookNameChanged: '&'
   },

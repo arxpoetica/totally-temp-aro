@@ -14,11 +14,11 @@ class AroObjectEditorController {
   }
 
   isEditable(obj) {
-    return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean')
+    return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
   }
 
   isExpandable(obj) {
-    return (typeof obj === 'object') && (!Array.isArray(obj))
+    return (typeof obj === 'object')
   }
 }
 
