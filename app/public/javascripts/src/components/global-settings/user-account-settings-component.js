@@ -1,6 +1,6 @@
 class UserAccountSettingsController {
 
-  constructor($scope, $http, state) {
+  constructor($http, state) {
     this.state = state
     this.$http = $http
     this.user = globalUser
@@ -33,7 +33,7 @@ class UserAccountSettingsController {
 
 }
 
-UserAccountSettingsController.$inject = ['$scope', '$http', 'state']
+UserAccountSettingsController.$inject = ['$http', 'state']
 
 app.component('userAccountSettings', {
   templateUrl: '/components/global-settings/user-account-settings-component.html',
