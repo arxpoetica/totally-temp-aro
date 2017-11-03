@@ -20,8 +20,8 @@ class ManageUsersController {
     ]
     this.ManageUserViews = Object.freeze({
       Users: 0,
-      Send_Email: 1,
-      Register_User: 2
+      SendEmail: 1,
+      RegisterUser: 2
     })
     this.currentManageUserView = this.ManageUserViews.Users
   }
@@ -113,11 +113,11 @@ class ManageUsersController {
   }
 
   openNewUserView() {
-    this.currentManageUserView = this.ManageUserViews.Register_User
+    this.currentManageUserView = this.ManageUserViews.RegisterUser
   }
 
   openSendMailView() {
-    this.currentManageUserView = this.ManageUserViews.Send_Email
+    this.currentManageUserView = this.ManageUserViews.SendEmail
   }
 
   sendMail() {
