@@ -96,15 +96,17 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
     var layer = $scope.roadLayer;
-
-    if (layer.visible) {
+    var selectedEdgeLibraries = state.dataItems.edge.selectedLibraryItems
+    
+    if(layer.visible && selectedEdgeLibraries) {
+      selectedEdgeLibraries.forEach((selectedEdgeLibrary) => {
       // Location type is visible
       var mapZoom = map.getZoom()
       var pointTransform = (mapZoom > layer.aggregateZoomThreshold) ? 'select' : 'smooth_relative'
-      var mapLayerKey = `${pointTransform}_${layer.type}_${layer.libraryId}`
+      var mapLayerKey = `${pointTransform}_${layer.type}_${selectedEdgeLibrary.identifier}`
 
       var url = layer.api_endpoint.replace('${lineTransform}', pointTransform)
-      url = url.replace('${libraryId}', layer.libraryId)
+      url = url.replace('${libraryId}', selectedEdgeLibrary.identifier)
 
       if (pointTransform === 'smooth_relative') {
         // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
@@ -144,6 +146,7 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
         }
         createdRoadMapLayerKeys.add(mapLayerKey)
       }
+    })
     }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
