@@ -25,7 +25,7 @@ class PlanResourceEditorController {
     this.editingManagerId = newId
   }
 
-  priceBookNameChanged(name) {
+  resourceManagerNameChanged(name) {
     this.modalTitle = name
   }
 

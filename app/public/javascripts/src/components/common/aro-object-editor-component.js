@@ -7,6 +7,7 @@ class AroObjectEditorController {
     // Store the "Object.keys()" function so we can use it in the markup
     this.ObjectKeys = Object.keys
     this.pixelsPerIndentationLevel = 20
+    this.isKeyExpanded = {}
   }
 
   $onInit() {
@@ -14,11 +15,15 @@ class AroObjectEditorController {
   }
 
   isEditable(obj) {
-    return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean')
+    return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
   }
 
   isExpandable(obj) {
-    return (typeof obj === 'object') && (!Array.isArray(obj))
+    return (typeof obj === 'object')
+  }
+
+  toggleIsKeyExpanded(index) {
+    this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
 }
 

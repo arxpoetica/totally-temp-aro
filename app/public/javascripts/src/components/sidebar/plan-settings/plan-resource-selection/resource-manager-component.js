@@ -2,16 +2,27 @@ class ResourceManagerController {
   constructor($http, $document) {
     this.$http = $http
     this.$document = $document
+    // Define the functions for creating, cloning, etc. managers that the UI will bind to
+    this.managerFunctions = {
+      price_book: {
+        createBlank: this.createBlankPriceBook.bind(this),
+        cloneSelected: this.cloneSelectedPriceBook.bind(this),
+        deleteSelected: this.deleteSelectedPriceBook.bind(this)
+      },
+      roic_manager: {
+        cloneSelected: this.cloneSelectedRoicManager.bind(this),
+        deleteSelected: this.deleteSelectedRoicManager.bind(this)
+      },
+      arpu_manager: {
+        cloneSelected: this.cloneSelectedArpuManager.bind(this),
+        deleteSelected: this.deleteSelectedArpuManager.bind(this)
+      }
+    }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
     this.managerEndpoints = {
       price_book: {
-        getAllManagers: '/service/v1/pricebook',
-        getManager: `/service/v1/pricebook/${this.managerIdString}`,
-        createManager: '/service/v1/pricebook',
-        deleteManager: `/service/v1/pricebook/${this.managerIdString}`,
-        getManagerAssignments: `/service/v1/pricebook/${this.managerIdString}/assignment`,
-        putManagerAssignments: `/service/v1/pricebook/${this.managerIdString}/assignment`
+        deleteManager: `/service/v1/pricebook/${this.managerIdString}`
       }
     }
   }
@@ -45,26 +56,22 @@ class ResourceManagerController {
     }
   }
 
-  createBlankManager() {
-    // Create a resource manager
-    var url = this.managerEndpoints[this.selectedResourceKey].createManager
-    var createdManagerId = -1
-    this.getNewPlanDetailsFromUser()
+  createBlankPriceBook() {
+    var createdManagerId = -1 // Save for later use
+    // Get the name of the new plan from the user
+    this.getNewResourceDetailsFromUser()
     .then((resourceName) => {
-      return this.$http.post(url, {
-        name: resourceName,
-        description: resourceName
-      })
+      // Create a new pricebook with the specified name and description
+      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName })
     })
     .then((result) => {
-      // Get the default manager id
+      // Save the created pricebook id for later use, and return the list of all pricebooks
       createdManagerId = result.data.id
-      return this.getDefaultManagerId()
+      return this.$http.get('/service/v1/pricebook')
     })
-    .then((defaultManagerId) => {
-      // Get the assignments for the default manager
-      var url = this.managerEndpoints[this.selectedResourceKey].getManagerAssignments.replace(this.managerIdString, defaultManagerId)
-      return this.$http.get(url)
+    .then((result) => {
+      // Get the assignments for the default (0th) pricebook in the system
+      return this.$http.get(`/service/v1/pricebook/${result.data[0].id}/assignment`)
     })
     .then((result) => {
       // Take the assignments of the default manager, set all values to 0 and then assign that to the newly created manager
@@ -77,47 +84,63 @@ class ResourceManagerController {
         detailAssignment.quantity = 0
         detailAssignment.ratioFixed = 1
       })
-      var url = this.managerEndpoints[this.selectedResourceKey].putManagerAssignments.replace(this.managerIdString, createdManagerId)
-      return this.$http.put(url, newManagerAssignments)
+      return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
     })
-    .then(() => {
-      this.setEditingManagerId({ newId: createdManagerId })
-      this.setEditingMode({ mode: this.editMode })
-      this.onManagersChanged && this.onManagersChanged()
-      this.selectFirstResourceManager()
-    })
+    .then(() => this.onManagerCreated(createdManagerId))
     .catch((err) => console.error(err))
   }
 
-  cloneSelectedManager() {
+  cloneSelectedPriceBook() {
     // Create a resource manager
-    var url = this.managerEndpoints[this.selectedResourceKey].createManager
     var createdManagerId = -1
-    this.getNewPlanDetailsFromUser()
+    this.getNewResourceDetailsFromUser()
     .then((resourceName) => {
-      return this.$http.post(url, {
-        name: resourceName,
-        description: resourceName
-      })
+      // Create a new pricebook with the specified name and description
+      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName })
     })
     .then((result) => {
+      // Save the created pricebook id for later use, and return the assignments for the selected manager
       createdManagerId = result.data.id
-      // Get the assignments for the selected manager
-      var url = this.managerEndpoints[this.selectedResourceKey].getManagerAssignments.replace(this.managerIdString, this.selectedResourceManager.id)
-      return this.$http.get(url)
+      return this.$http.get(`/service/v1/pricebook/${this.selectedResourceManager.id}/assignment`)
     })
     .then((result) => {
       // Take the assignments for the selected manager and overwrite them onto the created manager
-      var url = this.managerEndpoints[this.selectedResourceKey].putManagerAssignments.replace(this.managerIdString, createdManagerId)
-      return this.$http.put(url, result.data)
+      return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, result.data)
     })
-    .then(() => {
-      this.setEditingManagerId({ newId: createdManagerId })
-      this.setEditingMode({ mode: this.editMode })
-      this.onManagersChanged && this.onManagersChanged()
-      this.selectFirstResourceManager()
-    })
+    .then(() => this.onManagerCreated(createdManagerId))
     .catch((err) => console.error(err))
+  }
+
+  cloneSelectedRoicManager() {
+    // Create a resource manager
+    this.getNewResourceDetailsFromUser()
+    .then((resourceName) => {
+      // Create a new ROIC manager with the specified name and description
+      return this.$http.post(`/service/v1/roic-manager?source_manager=${this.selectedResourceManager.id}`,
+                             { name: resourceName, description: resourceName })
+    })
+    .then((result) => this.onManagerCreated(result.data.id))
+    .catch((err) => console.error(err))
+  }
+
+  cloneSelectedArpuManager() {
+    // Create a resource manager
+    this.getNewResourceDetailsFromUser()
+    .then((resourceName) => {
+      // Create a new ARPU manager with the specified name and description
+      return this.$http.post(`/service/v1/arpu-manager?source_manager=${this.selectedResourceManager.id}`,
+                             { name: resourceName, description: resourceName })
+    })
+    .then((result) => this.onManagerCreated(result.data.id))
+    .catch((err) => console.error(err))
+  }
+
+  onManagerCreated(createdManagerId) {
+    this.setEditingManagerId({ newId: createdManagerId })
+    this.setEditingMode({ mode: this.editMode })
+    this.onManagersChanged && this.onManagersChanged()
+    this.selectFirstResourceManager()
+    return Promise.resolve()
   }
 
   editSelectedManager() {
@@ -125,31 +148,75 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.editMode })
   }
 
-  deleteSelectedManager() {
-    var url = this.managerEndpoints[this.selectedResourceKey].deleteManager.replace(this.managerIdString, this.selectedResourceManager.id)
-    this.$http.delete(url)
-    .then((result) => {
-      this.onManagersChanged && this.onManagersChanged()
-      this.selectFirstResourceManager()
+  askUserToConfirmManagerDelete(managerName) {
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Delete resource manager?',
+        text: `Are you sure you want to delete ${managerName}`,
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No'
+      }, (result) => {
+        if (result) {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      })
     })
-    .catch((err) => console.error(err))
   }
 
-  getDefaultManagerId() {
-    return this.$http.get(this.managerEndpoints[this.selectedResourceKey].getAllManagers)
-      .then((result) => Promise.resolve(result.data[0].id))
+  deleteManager(deleteUrl) {
+    this.$http.delete(deleteUrl)
+      .then((result) => {
+        this.onManagersChanged && this.onManagersChanged()
+        this.selectFirstResourceManager()
+      })
+      .catch((err) => console.error(err))
+  }
+
+  deleteSelectedPriceBook() {
+    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteManager(`/service/v1/pricebook/${this.selectedResourceManager.id}`)
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  deleteSelectedRoicManager() {
+    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteManager(`/service/v1/roic-manager/${this.selectedResourceManager.id}`)
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  deleteSelectedArpuManager() {
+    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+      .then((okToDelete) => {
+        if (okToDelete) {
+          this.deleteManager(`/service/v1/arpu-manager/${this.selectedResourceManager.id}`)
+        }
+      })
+      .catch((err) => console.error(err))
   }
 
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
   // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
   // Call this function before showing the SweetAlert
   fixBootstrapModal() {
-    var modalNodes = this.$document[0].querySelectorAll('.modal[tabindex="-1"]');
-    if (!modalNodes) return;
+    var modalNodes = this.$document[0].querySelectorAll('.modal')
+    if (!modalNodes) return
 
     modalNodes.forEach((modalNode) => {
-      modalNode.removeAttribute('tabindex');
-      modalNode.classList.add('js-swal-fixed');
+      modalNode.removeAttribute('tabindex')
+      modalNode.classList.add('js-swal-fixed')
     })
   }
 
@@ -157,14 +224,14 @@ class ResourceManagerController {
   // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
   // Call this function before hiding the SweetAlert
   restoreBootstrapModal() {
-    var modalNode = this.$document[0].querySelector('.modal.js-swal-fixed');
-    if (!modalNode) return;
+    var modalNode = this.$document[0].querySelector('.modal.js-swal-fixed')
+    if (!modalNode) return
 
-    modalNode.setAttribute('tabindex', '-1');
-    modalNode.classList.remove('js-swal-fixed');
+    modalNode.setAttribute('tabindex', '-1')
+    modalNode.classList.remove('js-swal-fixed')
   }
 
-  getNewPlanDetailsFromUser() {
+  getNewResourceDetailsFromUser() {
     // Get the name for a new plan from the user
     this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
     return new Promise((resolve, reject) => {

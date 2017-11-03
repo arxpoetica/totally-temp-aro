@@ -1,0 +1,20 @@
+<style scoped>
+    .action-button-icon {
+      padding-right: 10px;
+    }
+  </style>
+  
+  <div style="max-height: 500px; overflow-y: auto;">
+    <aro-object-editor object-to-edit="$ctrl.arpuManagerConfiguration">
+    </aro-object-editor>
+  </div>
+  
+  <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+    <button class="btn btn-default" ng-click="$ctrl.exitEditingMode()">
+      <i class="fa fa-undo action-button-icon"></i>Discard changes
+    </button>
+    <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+      <i class="fa fa-save action-button-icon"></i>Save
+    </button>
+  </div>
+  
