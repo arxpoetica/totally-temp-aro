@@ -17,12 +17,6 @@ class GlobalSettingsController {
     this.isGlobalSettingsView = !this.isGlobalSettingsView
   }
 
-  manageUsers() {
-    // Show the old dialog for now. When this component is done, the old dialog will be migrated to this one.
-    this.state.showGlobalSettings.next(false);
-    $('#manage-users').modal('show');
-    console.log('done');
-  }
 }
 
 GlobalSettingsController.$inject = ['state']
@@ -52,7 +46,7 @@ app.component('globalSettings', {
           </button>
 
           <button class="btn settings-btn"
-                  ng-click="$ctrl.manageUsers()">
+            ng-click="$ctrl.usersSettings()">
               <i class="fa fa-2x fa-users"></i>
               <br>Manage Users
           </button>
