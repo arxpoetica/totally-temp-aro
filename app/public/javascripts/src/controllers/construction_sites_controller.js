@@ -96,7 +96,7 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
     var layer = $scope.roadLayer;
-    var selectedEdgeLibraries = state.dataItems.edge.selectedLibraryItems
+    var selectedEdgeLibraries = state.dataItems && state.dataItems.edge && state.dataItems.edge.selectedLibraryItems
     
     if(layer.visible && selectedEdgeLibraries) {
       selectedEdgeLibraries.forEach((selectedEdgeLibrary) => {
@@ -152,5 +152,9 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldRoadMapLayers)
   }
+
+  // Update map layers when the dataItems property of state changes
+  state.dataItemsChanged
+  .subscribe((newValue) => updateRoadMapLayers())
 
 }])
