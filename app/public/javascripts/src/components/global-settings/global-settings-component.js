@@ -1,7 +1,8 @@
 class GlobalSettingsController {
 
-  constructor(state) {
+  constructor(state,globalSettingsService) {
     this.state = state
+    this.globalSettingsService = globalSettingsService
 
     this.views = Object.freeze({
       Global_Settings: 0,
@@ -33,7 +34,7 @@ class GlobalSettingsController {
 
 }
 
-GlobalSettingsController.$inject = ['state']
+GlobalSettingsController.$inject = ['state','globalSettingsService']
 
 app.component('globalSettings', {
   template: `
@@ -45,12 +46,13 @@ app.component('globalSettings', {
   }
   .settings-btn {
     width: calc(33.33333% - 20px);
-    margin: 10px
+    margin: 10px;
+    height: 100px
   }
   </style>
     <modal visible="$ctrl.state.showGlobalSettings.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
       <modal-header title="Global Settings"></modal-header>
-      <modal-body>
+      <modal-body style="height: 500px;overflow: auto;">
 
         <div id="global-settings" ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">  
           <button class="btn settings-btn"
@@ -66,13 +68,35 @@ app.component('globalSettings', {
           </button>
         </div>
 
-        <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.My_Account" 
-          toggle-view="$ctrl.toggleViewMode()"></user-account-settings>
+        <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.My_Account"></user-account-settings>
 
-        <manage-users ng-if="$ctrl.currentView === $ctrl.views.Manage_Users" 
-          toggle-view="$ctrl.toggleViewMode()"></manage-users>  
+        <manage-users ng-if="$ctrl.currentView === $ctrl.views.Manage_Users"
+          manager-view="$ctrl.globalSettingsService.currentManageUserView"></manage-users>  
 
       </modal-body>
+
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">
+        <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.My_Account">
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Manage_Users && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users">
+        <a type="button" class="btn btn-default" ng-href='/admin/users/csv'>Download CSV</a>
+        <a type="button" class="btn btn-default" ng-click="$ctrl.globalSettingsService.openSendMailView()">Send email to all users</a>
+        <a type="button" class="btn btn-default" ng-click="$ctrl.globalSettingsService.openNewUserView()">Register a new user</a>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.SendEmail">
+        <button type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.sendMail()">Send mail</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.RegisterUser">
+        <button type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.register_user()">Register user</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
+      </modal-footer>
+
     </modal>
   `,
   bindings: {},
