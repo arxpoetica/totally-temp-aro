@@ -19,6 +19,9 @@ class BoundariesController {
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
 
+    // Update map layers when the dataItems property of state changes
+    this.state.dataItemsChanged.subscribe((newValue) => this.updateMapLayers())
+    
     if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
       countySubdivisionsLayer = new MapLayer({
         short_name: 'CS',
@@ -124,7 +127,7 @@ class BoundariesController {
       var wirecenter_layer = {
         name: serviceLayer.description,
         type: serviceLayer.name,
-        api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
+        api_endpoint: "/tile/v1/service_area_by_library/tiles/${layerId}/${tilePointTransform}/",
         layerId: serviceLayer.id,
         aggregateZoomThreshold: 10
       }
@@ -161,62 +164,66 @@ class BoundariesController {
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
 
-    this.state.boundaries.tileLayers.forEach((layer) => {
+    // Add map layers based on the selection
+    var selectedServiceAreaLibraries = this.state.dataItems && this.state.dataItems.service_layer && this.state.dataItems.service_layer.selectedLibraryItems
+    if (selectedServiceAreaLibraries) {
+      selectedServiceAreaLibraries.forEach((selectedServiceAreaLibrary) => {
+        
+        this.state.boundaries.tileLayers.forEach((layer) => {
 
-      if (layer.visible) {
-        // Location type is visible
-        //var mapLayerKey = `${locationType.key}_${dataSourceId}`
-        var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
-        var mapLayerKey = `${pointTransform}_${layer.type}_${layer.layerId}`
+          if (layer.visible) {
+            var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
+            var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
 
-        var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
-        url = url.replace('${layerId}', layer.layerId)
+            var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
+            url = url.replace('${layerId}', selectedServiceAreaLibrary.identifier)
 
-        if (pointTransform === 'smooth') {
-          // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-          mergedLayerUrls.push(url)
-        } else {
-          // We want to create an individual layer
-          oldMapLayers[mapLayerKey] = {
-            dataUrls: [url],
-            renderMode: 'PRIMITIVE_FEATURES',
-            selectable: true,
-            strokeStyle: '#00ff00',
-            lineWidth: 4,
-            fillStyle: "transparent",
-            opacity: 0.7,
-            highlightStyle: {
-              strokeStyle: '#000000',
-              fillStyle: 'green',
-              opacity: 0.3
+            if (pointTransform === 'smooth') {
+              mergedLayerUrls.push(url)
+            } else {
+              // We want to create an individual layer
+              oldMapLayers[mapLayerKey] = {
+                dataUrls: [url],
+                renderMode: 'PRIMITIVE_FEATURES',
+                selectable: true,
+                strokeStyle: '#00ff00',
+                lineWidth: 4,
+                fillStyle: "transparent",
+                opacity: 0.7,
+                highlightStyle: {
+                  strokeStyle: '#000000',
+                  fillStyle: 'green',
+                  opacity: 0.3
+                }
+              }
+              this.createdMapLayerKeys.add(mapLayerKey)
             }
           }
-          this.createdMapLayerKeys.add(mapLayerKey)
-        }
+        })
+      })
+    }
 
-        if (mergedLayerUrls.length > 0) {
-          // We have some business layers that need to be merged into one
-          // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
-          oldMapLayers[mapLayerKey] = {
-            dataUrls: mergedLayerUrls,
-            renderMode: 'PRIMITIVE_FEATURES',
-            selectable: true,
-            aggregateMode: 'FLATTEN',
-            strokeStyle: '#00ff00',
-            lineWidth: 4,
-            fillStyle: "transparent",
-            opacity: 0.7,
-            highlightStyle: {
-              strokeStyle: '#000000',
-              fillStyle: 'green',
-              opacity: 0.3
-            }
-          }
-          this.createdMapLayerKeys.add(mapLayerKey)
+    if (mergedLayerUrls.length > 0) {
+      // We have some business layers that need to be merged into one
+      // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
+      var mapLayerKey = 'aggregated_wirecenters'
+      oldMapLayers[mapLayerKey] = {
+        dataUrls: mergedLayerUrls,
+        renderMode: 'PRIMITIVE_FEATURES',
+        selectable: true,
+        aggregateMode: 'FLATTEN',
+        strokeStyle: '#00ff00',
+        lineWidth: 4,
+        fillStyle: "transparent",
+        opacity: 0.7,
+        highlightStyle: {
+          strokeStyle: '#000000',
+          fillStyle: 'green',
+          opacity: 0.3
         }
       }
-
-    })
+      this.createdMapLayerKeys.add(mapLayerKey)
+    }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)
