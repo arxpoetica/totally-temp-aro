@@ -1,13 +1,11 @@
 class ManageUsersController {
 
-  constructor($http, state) {
+  constructor($http, state, globalSettingsService) {
     this.state = state
+    this.globalSettingsService = globalSettingsService
     this.$http = $http
     this.users = []
     this.user_id = user_id
-    this.new_user = {}
-    this.mailSubject = ''
-    this.mailBody = ''
     this.userTypes = [
       {
         name: 'Admin',
@@ -18,12 +16,6 @@ class ManageUsersController {
         rol: 'biz-dev'
       }
     ]
-    this.ManageUserViews = Object.freeze({
-      Users: 0,
-      SendEmail: 1,
-      RegisterUser: 2
-    })
-    this.currentManageUserView = this.ManageUserViews.Users
   }
 
   $onInit() {
@@ -108,50 +100,14 @@ class ManageUsersController {
     })
   }
 
-  openUserView() {
-    this.currentManageUserView = this.ManageUserViews.Users
-  }
-
-  openNewUserView() {
-    this.currentManageUserView = this.ManageUserViews.RegisterUser
-  }
-
-  openSendMailView() {
-    this.currentManageUserView = this.ManageUserViews.SendEmail
-  }
-
-  sendMail() {
-    this.$http.post('/admin/users/mail', { subject: this.mailSubject, text: this.mailBody })
-      .then((response) => {
-        swal({ title: 'Emails sent', type: 'success' })
-        this.openUserView()
-      })
-  }
-
-  register_user() {
-    if (this.new_user.email !== this.new_user.email_confirm) {
-      return swal({
-        title: 'Error',
-        text: 'Emails do not match',
-        type: 'error'
-      })
-    }
-    this.$http.post('/admin/users/register', this.new_user)
-      .then((response) => {
-        this.new_user = {}
-        swal({ title: 'User registered', type: 'success' })
-        this.openUserView()
-      })
-  }
-
 }
 
-ManageUsersController.$inject = ['$http', 'state']
+ManageUsersController.$inject = ['$http', 'state', 'globalSettingsService']
 
 app.component('manageUsers', {
   templateUrl: '/components/global-settings/manage-users-component.html',
   bindings: {
-    toggleView: '&'
+    managerView: '='
   },
   controller: ManageUsersController
 })

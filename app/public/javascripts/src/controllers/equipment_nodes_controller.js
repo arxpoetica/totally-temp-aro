@@ -75,7 +75,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
               strokeStyle: networkEquipment.drawingOptions.strokeStyle,
               lineWidth: 2,
-              fillStyle: networkEquipment.drawingOptions.fillStyle
+              fillStyle: networkEquipment.drawingOptions.fillStyle,
+              opacity: 0.5
             }
             createdMapLayerKeys.add(networkEquipment.key)
           }

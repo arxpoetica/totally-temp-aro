@@ -22,6 +22,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     addLocationTypesToBody(state, optimization, optimizationBody)
     addSelectedExistingFiberToBody(state, optimizationBody)
+    addSelectedEdgesToBody(state, optimizationBody)
     addConstructionSitesToBody(state,optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
@@ -75,6 +76,22 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
       postBody.overridenConfiguration.push({
         dataType: 'fiber',
+        libraryItems: libraryItems
+      })
+    }
+  }
+
+  // Add selected Road Segment to a POST body that we will send to aro-service for performing optimization
+  var addSelectedEdgesToBody = (state, postBody) => {
+    if (state.dataItems.edge) {
+      var libraryItems = []
+      state.dataItems.edge.selectedLibraryItems.forEach((selectedLibraryItem) => libraryItems.push({ identifier: selectedLibraryItem.identifier }))
+
+      if (!postBody.overridenConfiguration) {
+        postBody.overridenConfiguration = []
+      }
+      postBody.overridenConfiguration.push({
+        dataType: 'edge',
         libraryItems: libraryItems
       })
     }

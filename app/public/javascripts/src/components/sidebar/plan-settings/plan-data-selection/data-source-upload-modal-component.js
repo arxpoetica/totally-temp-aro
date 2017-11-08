@@ -12,6 +12,9 @@ class DataSourceUploadController {
     this.isUpLoad = false
     this.dataSources
 
+    //Default Polygon radius in meters
+    this.radius = 20000
+
     var form;
 
     this.isDataManagementView = false
@@ -32,6 +35,7 @@ class DataSourceUploadController {
 
   close() {
     this.state.showDataSourceUploadModal.next(false)
+    this.isDataManagementView = false    
   }
 
   modalShown() {
@@ -40,6 +44,7 @@ class DataSourceUploadController {
 
   modalHide() {
     this.state.showDataSourceUploadModal.next(false)
+    this.isDataManagementView = false    
   }
 
   onInitConicUploader(api) {
@@ -107,13 +112,38 @@ class DataSourceUploadController {
       headers: { 'Content-Type': undefined },
       transformRequest: angular.identity
     }).then((e) => {
-      this.addDatasource(JSON.parse(e.data))
+
+      if(this.state.uploadDataSource.name === 'equipment') {
+        //load the eqipment boundary layer
+        this.layerBoundary(libraryId)
+      } else {
+        this.addDatasource(JSON.parse(e.data))
+      }
       this.isUpLoad = false
       this.close()
     }).catch((e) => {
       this.isUpLoad = false
       swal('Error', e.statusText, 'error')
     });
+  }
+
+  layerBoundary(libraryId) {
+    var boundaryOptions = {
+      url: '/service/v1/project/' + this.projectId + '/serviceLayers-cmd?user_id=' + this.userId,
+      method: 'POST',
+      data: {
+        action: 'GENERATE_POLYGONS',
+        maxDistanceMeters: $('#data_source_upload_modal input[type=number]').get(0).value,
+        equipmentLibraryId: libraryId
+        // serviceLayerLibraryId: libraryId
+      },
+      json: true
+    }
+
+    return this.$http(boundaryOptions)
+    .then((e) => {
+      this.state.dataItems['service_layer'].allLibraryItems.push(e.data.serviceLayerLibrary)
+    })
   }
 
   removeDatasource(target) {
@@ -130,11 +160,14 @@ class DataSourceUploadController {
   }
 
   loadDataSources() {
-    this.isDataManagementView = !this.isDataManagementView
-
     if(this.isDataManagementView) {
       this.dataSources = this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems
     }
+  }
+
+  toggleView() {
+    this.isDataManagementView = !this.isDataManagementView
+    this.loadDataSources()
   }
 
 }
