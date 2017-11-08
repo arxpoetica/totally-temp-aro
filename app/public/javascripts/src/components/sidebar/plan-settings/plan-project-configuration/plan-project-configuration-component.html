@@ -1,0 +1,24 @@
+<style scoped>
+    .container {
+      display: flex;
+      flex-direction: column;
+      width: -webkit-fill-available;
+    }
+    .indent {
+      margin: 5px;
+    }
+  </style>
+<div style="position: relative; padding: 10px">
+  
+  <!-- <div class="btn-group-vertical"> -->
+  <div class="container">  
+    <button class="btn btn-primary indent" ng-click="$ctrl.planToProjectDefaults()">Reset Plan to Project Defaults</button>
+    <button class="btn btn-primary indent" ng-click="$ctrl.commitToProject()">Commit Changes to Project</button>
+    <button class="btn btn-secondary indent" ng-click="$ctrl.createNewProject()" disabled>Create New Project With Settings</button>
+  </div>
+  
+  <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+  <div class="disable-sibling-controls"
+      ng-hide="$ctrl.areControlsEnabled">
+  </div>
+</div>
