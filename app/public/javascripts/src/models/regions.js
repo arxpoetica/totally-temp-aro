@@ -224,11 +224,11 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
 
   regions.regionsSelected = regionsSelected
 
-  $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
-    //if (!map_tools.is_visible(tool)) return
+  // $rootScope.$on('map_layer_clicked_feature', (e, event, layer) => {
+  //   //if (!map_tools.is_visible(tool)) return
 
-    regionsSelected(event.feature, layer);
-  })
+  //   regionsSelected(event.feature, layer);
+  // })
 
   regions.setSearchOption = (type, enabled) => {
     searchOptions[type] = enabled
