@@ -601,6 +601,16 @@ module.exports = class Location {
     return database.query(sql, [location_id])
   }
 
+  static showHouseholds (location_id) {
+    var sql = `
+      SELECT
+        address
+       FROM households
+      WHERE location_id = $1
+    `
+    return database.query(sql, [location_id])
+  }
+
   static showTowers (location_id) {
     var sql = `
       SELECT

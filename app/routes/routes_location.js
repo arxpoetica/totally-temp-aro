@@ -111,6 +111,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/locations/households/:location_id', (request, response, next) => {
+    var location_id = request.params.location_id
+    models.Location.showHouseholds(location_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/locations/towers/:location_id', (request, response, next) => {
     var location_id = request.params.location_id
     models.Location.showTowers(location_id)

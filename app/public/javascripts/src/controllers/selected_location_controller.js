@@ -143,6 +143,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
       $scope.towers = response.data
     })
     $scope.households = []
+    $http.get('/locations/households/' + location.id).then((response) => {
+      preserveBusinessDetail()
+      $scope.households = response.data
+    })
   }
 
   function preserveBusinessDetail () {
