@@ -10,6 +10,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
   $scope.planState = state;
 
+  $scope.existingFiberLayer = {
+    name: 'Existing Fiber',
+    iconUrl: '/images/map_icons/aro/fiber_backhaul.png',
+    visible: false
+  }
+
+  $scope.toggleExistingFiberLayer = () => {
+    updateMapLayers()
+  }
+
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
@@ -84,15 +94,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     }
 
+    var layer = $scope.existingFiberLayer
     // Create layers for existing fiber (the ones that are selected for display)
-    if (state.dataItems.fiber) {
+    if (layer.visible && state.dataItems.fiber) {
       var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
       state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
         var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
         oldMapLayers[mapLayerKey] = {
           dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedLibraryItem.identifier}/${lineTransform}/`],
-          iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
+          iconUrl: layer.iconUrl, // Hack because we need some icon
           renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
           strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
           lineWidth: 2
