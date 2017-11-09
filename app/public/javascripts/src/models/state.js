@@ -184,7 +184,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
-  service.showLocationInfo = new Rx.BehaviorSubject({})
+  service.showViewModeInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
@@ -434,7 +434,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.reloadSelectedRoadSegments = (road) => {
     service.selectedRoadSegments.next(road)
     service.requestMapLayerRefresh.next({})
-    swal({ title: '', text: `gid: ${road[0].gid}`, type: 'info' })
   }
 
   // Plan - define once

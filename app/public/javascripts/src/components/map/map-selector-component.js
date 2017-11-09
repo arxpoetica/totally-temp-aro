@@ -92,7 +92,7 @@ class MapSelectorController {
       return
     }
 
-    if (this.selectedDisplayMode === this.displayModes.ANALYSIS
+    if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW)
         && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)

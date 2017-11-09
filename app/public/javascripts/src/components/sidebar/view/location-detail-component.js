@@ -11,7 +11,7 @@ class ViewModeController {
       this.plan = plan
     })
 
-    state.showLocationInfo
+    state.showViewModeInfo
     .subscribe((options) => {
       var locationId = null
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
@@ -35,8 +35,8 @@ class ViewModeController {
           this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
             _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
         })
-        
-
+      } else {
+        this.selectedLocationInfo = null
       }
     })
 

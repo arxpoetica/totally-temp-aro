@@ -373,7 +373,10 @@ class MapTileRenderer {
               ctx.globalAlpha = 1.0
             } else {
               // This is not a closed polygon. Render lines only
-              if (this.selectedRoadSegment.length > 0 && this.selectedRoadSegment[0].gid === feature.properties.gid) {
+              if (this.selectedRoadSegment.length > 0 && 
+                this.selectedRoadSegment.filter(function (road) {
+                   return road.gid === feature.properties.gid
+                }).length > 0) {
                 //Highlight the selected Selected RoadSegments
                 var drawingStyles = {
                   lineWidth: mapLayer.highlightStyle.lineWidth
@@ -532,10 +535,6 @@ class MapTileRenderer {
                 }
               }
             })
-            
-            if (this.selectedRoadSegment) {
-              hitFeatures.push(this.selectedRoadSegment)
-            }
           })
           // We have a list of features that are 'hit', i.e. under the specified point. Return them.
           resolve(hitFeatures)
@@ -557,6 +556,17 @@ class MapTileRenderer {
           if (pointInPolygon(locationCoords, polygonCoords)) {
             selectFeature = true
           }
+        } else if (feature.properties.gid) {
+          var roadGeom = feature.loadGeometry()[0];
+          for (var i = 0; i < roadGeom.length; i++) {
+            if (pointInPolygon([roadGeom[i].x, roadGeom[i].y], polygonCoords)) {
+              selectFeature = true;
+              break;
+            }
+            //Check the fiber start or end point is with in polygon
+            //Skip all middle points and set to last point.
+            i += roadGeom.length - 2;
+          }
         } else if (feature.properties.code) {
           //Check the SA boundary inside the drew polygon 
           //This will be uses when draw the polygon with more than one SA. (With touch the SA boundary)
@@ -573,7 +583,7 @@ class MapTileRenderer {
             })
           })
 
-          if(!selectFeature) {
+          if(!selectFeature && feature.properties.code) {
             //Check the drew polygon coordinate inside SA boundary
             //This will be uses when draw the polygon with in one SA. (Without touch the SA boundary)
             feature.loadGeometry().forEach(function (areaGeom) {
@@ -623,7 +633,7 @@ class MapTileRenderer {
       distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY)       //calling function to find the shortest distance
 
       if(distance <= minimumRoadDistance) {
-        this.selectedRoadSegment = feature.properties
+        return true
       }
     }
 
@@ -689,7 +699,7 @@ class MapTileRenderer {
       })
 
       if(feature.properties.gid) {
-        this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance)
+        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance)
       }
 
       //Load the selected service area 
@@ -877,6 +887,7 @@ class TileComponentController {
           .then((results) => {
             var selectedLocations = new Set()
             var selectedServiceAreas = new Set()
+            var selectedRoadSegments = []
             
             results.forEach((result) => {
               result.forEach((selectedObj) => {
@@ -884,15 +895,21 @@ class TileComponentController {
                   selectedLocations.add(selectedObj.location_id)
                 } else if(selectedObj.id) {
                   selectedServiceAreas.add(selectedObj.id)
+                } else if (selectedObj.gid) {
+                  if (!_.findWhere(selectedRoadSegments, selectedObj)) {
+                    selectedRoadSegments.push(selectedObj);
+                  }
                 }
               })
             })
 
             var selectedLocationsIds = []
             var selectedServiceAreaIds = []
-            
+            var selectedRoadSegmentIds = []
+
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+            selectedRoadSegments.forEach((road) => selectedRoadSegmentIds.push({ gid: road.gid }))
             
             state.hackRaiseEvent(selectedLocationsIds)
 
@@ -902,6 +919,19 @@ class TileComponentController {
                 locations: selectedLocationsIds,
                 serviceAreas: selectedServiceAreaIds
               })
+            }
+
+            if (selectedRoadSegmentIds.length > 0) {
+              state.mapFeaturesSelectedEvent.next({
+                roadSegment: selectedRoadSegmentIds
+              });
+            }
+
+            //Locations Info is shown in View Mode
+            if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+              state.showViewModeInfo.next({
+                roadSegments: selectedRoadSegments
+              });
             }
           })
 
@@ -980,8 +1010,9 @@ class TileComponentController {
 
             //Locations Info is shown in View Mode
             if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-              state.showLocationInfo.next({
-                locations: hitFeatures
+              state.showViewModeInfo.next({
+                locations: hitFeatures,
+                roadSegments: roadFeatures
               })
             }
 
@@ -990,7 +1021,6 @@ class TileComponentController {
                 roadSegment: roadFeatures
               })
             }
-
           })
       })
     })
