@@ -3,8 +3,8 @@
     <div class="row">
       <div class="col-md-6">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search for Plan Names, Owners, or Geographies" ng-model="$ctrl.search_text"
-            ng-change="$ctrl.loadPlans()">
+          <input type="text" class="form-control" placeholder="Search for Plan Names" ng-model="$ctrl.search_text"
+            ng-model-options="{ debounce: 500 }" ng-change="$ctrl.loadPlans()">
           <span class="input-group-addon">
         <span class="glyphicon glyphicon-search"></span>
           </span>
@@ -43,8 +43,8 @@
           <tr>
             <th>
               Name
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('name', false)">↓</a>
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('name', true)">↑</a>
+              <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'asc')">↓</a>
+              <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'desc')">↑</a>
             </th>
             <th>Status</th>
             <th>Actions</th>
@@ -105,15 +105,15 @@
     </div>
     <nav class="text-center" style="max-height: 35px">
       <ul class="pagination" style="margin: 0px">
-        <li ng-class="{ disabled: currentPage === 1 }">
-          <a href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans(currentPage - 1)">
+        <li ng-class="{ disabled: $ctrl.currentPage === 1 }">
+          <a href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
                 <span aria-hidden="true">&laquo;</span>
               </a>
         </li>
-        <li ng-repeat="page in $ctrl.pages" ng-class="{ active: page === currentPage }">
+        <li ng-repeat="page in $ctrl.pages" ng-class="{ active: page === $ctrl.currentPage }">
           <a href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
         </li>
-        <li ng-class="{ disabled: currentPage === $ctrl.pages[pages.length - 1] }">
+        <li ng-class="{ disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
           <a href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
                 <span aria-hidden="true">&raquo;</span>
               </a>

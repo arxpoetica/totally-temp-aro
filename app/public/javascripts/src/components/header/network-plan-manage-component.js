@@ -23,6 +23,13 @@ class NetworkPlanModalController {
 
     this.sortField
     this.descending
+
+    this.planOptions = {
+      url: '/service/v1/plan-summary',
+      method: 'GET',
+      params: {}
+    }
+
   }
 
   $onInit() {
@@ -35,7 +42,7 @@ class NetworkPlanModalController {
       this.loadSearch()
       this.tracker.track('Open Analysis')
 
-      reloadCurrentLocation();
+      this.reloadCurrentLocation();
     })
   }
 
@@ -98,18 +105,23 @@ class NetworkPlanModalController {
 
     var load = (callback) => {
 
-      var planOptions = {
-        url: '/service/v1/plan',
-        method: 'GET',
-        params: {
-          user_id: this.user_id,
-          search: this.search_text,
-          project_Id: this.projectId
+      this.planOptions.params.user_id = this.user_id
+
+      if(!this.planOptions.params.$orderby)
+        this.planOptions.params.$orderby = "name"
+
+      this.planOptions.params.$filter = "ephemeral ne true"
+      if (this.search_text) {
+        if (this.planOptions.params.$filter) {
+          this.planOptions.params.$filter += ' and substringof(name, \'' + this.search_text + '\')'
+        } else {
+          this.planOptions.params.$filter = 'substringof(name, \'' + this.search_text + '\')'
         }
       }
 
-      this.$http(planOptions)
+      this.$http(this.planOptions)
         .then((response) => {
+          this.planOptions.params = {}
           this.$http.get('/optimization/processes').then((running) => {
             response.data.forEach((plan) => {
               var info = running.data.find((status) => status.planId === +plan.id)
@@ -171,6 +183,11 @@ class NetworkPlanModalController {
     this.descending = descending
   }
 
+  loadSortBy(key, descending) {
+    this.planOptions.params.$orderby = key + " " + descending
+    this.loadPlans()
+  }
+
   selectPlan(plan) {
     this.plan = plan
     this.state.loadPlan(plan.id)
@@ -179,8 +196,8 @@ class NetworkPlanModalController {
 
   reloadCurrentLocation() {
     var center = map.getCenter();
-    geoCode(center).then(function (address) {
-      fetchLocation(address).then(function (location) {
+    this.geoCode(center).then((address) => {
+      this.fetchLocation(address).then(function (location) {
         this.customLoc = location
         $(this.search[0]).select2('val', location, true);
       })
