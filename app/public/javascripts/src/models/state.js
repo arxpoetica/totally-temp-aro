@@ -723,6 +723,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
     $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
   }
 
   service.createEphemeralPlan = () => {
