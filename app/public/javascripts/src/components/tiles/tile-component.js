@@ -159,53 +159,6 @@ class MapTileRenderer {
     return div
   }
 
-  // Renders a single layer on a tile
-  renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, canvas, heatmapCanvas) {
-    var ctx = canvas.getContext('2d')
-    ctx.lineWidth = 1
-    var heatMapData = []
-
-    // Render all features
-    Object.keys(renderingData).forEach((mapLayerKey) => {
-      var mapLayer = this.mapLayers[mapLayerKey]
-      if (mapLayer) { // Its possible that this.mapLayers has changed until we reach this point
-        renderingData[mapLayerKey].data.forEach((featureData, index) => {
-          var features = []
-          Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-          this.renderFeatures(ctx, features, featureData.icon, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
-        })
-      }
-    })
-
-    if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
-      // Note that we render the heatmap to another canvas, then copy that image over to the main canvas. This
-      // is because the heatmap library clears the canvas before rendering
-      var heatmapCtx = heatmapCanvas.getContext('2d')
-      heatmapCtx.globalAlpha = 1.0
-      var heatMapRenderer = simpleheat(heatmapCanvas)
-      heatMapRenderer.data(heatMapData)
-      var maxValue = 1.0
-      if (this.mapTileOptions.heatMap.useAbsoluteMax) {
-        // Simply use the maximum value for the heatmap
-        maxValue = this.mapTileOptions.heatMap.maxValue
-      } else {
-        // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-        maxValue = this.mapTileOptions.heatMap.worldMaxValue / Math.pow(2.0, zoom)
-      }
-      heatMapRenderer.max(maxValue)
-      heatMapRenderer.radius(20, 20)
-      heatMapRenderer.draw(0.0)
-      heatmapCtx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-      heatmapCtx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-      heatmapCtx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-      heatmapCtx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-      // Draw the heatmap onto the main canvas
-      ctx.drawImage(heatmapCanvas, 0, 0)
-    }
-    var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
-    this.renderTileInformation(canvas, ctx, tileCoordinateString)
-  }
-
   // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
 
@@ -242,7 +195,7 @@ class MapTileRenderer {
       }
     })
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
-    
+
     // Get all the data for this tile
     Promise.all(singleTilePromises)
       .then((singleTileResults) => {
@@ -288,6 +241,53 @@ class MapTileRenderer {
           }
         }
       })
+  }
+
+  // Renders a single layer on a tile
+  renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, canvas, heatmapCanvas) {
+    var ctx = canvas.getContext('2d')
+    ctx.lineWidth = 1
+    var heatMapData = []
+
+    // Render all features
+    Object.keys(renderingData).forEach((mapLayerKey) => {
+      var mapLayer = this.mapLayers[mapLayerKey]
+      if (mapLayer) { // Its possible that this.mapLayers has changed until we reach this point
+        renderingData[mapLayerKey].data.forEach((featureData, index) => {
+          var features = []
+          Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
+          this.renderFeatures(ctx, features, featureData.icon, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+        })
+      }
+    })
+
+    if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
+      // Note that we render the heatmap to another canvas, then copy that image over to the main canvas. This
+      // is because the heatmap library clears the canvas before rendering
+      var heatmapCtx = heatmapCanvas.getContext('2d')
+      heatmapCtx.globalAlpha = 1.0
+      var heatMapRenderer = simpleheat(heatmapCanvas)
+      heatMapRenderer.data(heatMapData)
+      var maxValue = 1.0
+      if (this.mapTileOptions.heatMap.useAbsoluteMax) {
+        // Simply use the maximum value for the heatmap
+        maxValue = this.mapTileOptions.heatMap.maxValue
+      } else {
+        // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
+        maxValue = this.mapTileOptions.heatMap.worldMaxValue / Math.pow(2.0, zoom)
+      }
+      heatMapRenderer.max(maxValue)
+      heatMapRenderer.radius(20, 20)
+      heatMapRenderer.draw(0.0)
+      heatmapCtx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+      heatmapCtx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
+      heatmapCtx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+      heatmapCtx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
+      // Draw the heatmap onto the main canvas
+      ctx.drawImage(heatmapCanvas, 0, 0)
+    }
+    var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
+    this.renderTileInformation(canvas, ctx, tileCoordinateString)
   }
 
   // Render tile information
