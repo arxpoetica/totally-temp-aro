@@ -98,11 +98,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('plan_selected', (e, plan) => {
 
-    // Clear the client side tile cache
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    state.requestMapLayerRefresh.next({})
-
     $scope.plan = plan
     state.loadPlan(plan.id)
     $location.path(plan ? '/plan/' + plan.id : '/')
@@ -119,20 +114,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   
   $rootScope.$on('route_planning_changed', (e, plan) => {
     $scope.plan = plan
-  })
-
-  $rootScope.$on('plan_cleared', (e, plan) => {
-    // Clear the client side tile cache
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    state.requestMapLayerRefresh.next({})
-  })
-
-  // When a plan is done, clear the tile cache
-  $rootScope.$on('optimization_stopped_polling', () => {
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    state.requestMapLayerRefresh.next({})
   })
 
   $rootScope.$on('route_changed', (e) => {

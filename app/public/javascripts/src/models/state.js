@@ -202,15 +202,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
-  // Sets (or adds) a map layer with the given key
-  service.setMapLayer = (layerKey, data) => {
-    // Get a copy of the current maplayers. A little Redux-ey
-    var newMapLayers = angular.copy(service.mapLayers.getValue(), {})
-    // Set the mapLayer (can be a new layer)
-    newMapLayers[layerKey] = data
-    service.mapLayers.next(newMapLayers)
-  }
-
   // Boundaries layer data - define once
   service.boundaries = {
     tileLayers: [],
@@ -399,7 +390,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
   service.selectedLocations = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedLocations = () => {
+  service.reloadSelectedLocations = (suppressTileRefresh) => {
     var plan = service.plan.getValue()
     if (plan) {
       $http.get(`/locations/${plan.id}/selectedLocationIds`)
@@ -408,7 +399,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
             var selectedLocationsSet = new Set()
             result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
             service.selectedLocations.next(selectedLocationsSet)
-            service.requestMapLayerRefresh.next({})
+            if (!suppressTileRefresh) {
+              service.requestMapLayerRefresh.next({})
+            }
           }
         })
     }
@@ -424,7 +417,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
             var selectedSASet = new Set()
             result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
             service.selectedServiceAreas.next(selectedSASet)
-            service.requestMapLayerRefresh.next({})
+            if (!suppressTileRefresh) {
+              service.requestMapLayerRefresh.next({})
+            }
           }
         })
     }
@@ -842,10 +837,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
-  service.setPlan = (plan) => {
+  service.setPlan = (plan, suppressTileRefresh = false) => {
     service.plan.next(plan)
-    service.reloadSelectedLocations()
-    service.reloadSelectedServiceAreas()
+    service.reloadSelectedLocations(suppressTileRefresh)
+    service.reloadSelectedServiceAreas(suppressTileRefresh)
   }
 
   // Load the plan inputs for the given plan and populate them in state
@@ -912,7 +907,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return $http.post(url, {})
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
-            service.setPlan(result.data)
+            service.setPlan(result.data, true)
             service.refreshMapTilesCacheAndData()
             return Promise.resolve()
           }

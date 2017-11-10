@@ -134,11 +134,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   state.dataItemsChanged
     .subscribe((newValue) => updateMapLayers())
 
-  // Subscribe to different plan events
-  $rootScope.$on('plan_selected', (e, plan) => updateMapLayers())
-  $rootScope.$on('plan_cleared', (e, plan) => updateMapLayers())
-  $rootScope.$on('route_planning_changed', (e, plan) => updateMapLayers())
-
   const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {
     layer.showFeederFiber = false
