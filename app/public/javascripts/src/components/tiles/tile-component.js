@@ -160,7 +160,7 @@ class MapTileRenderer {
   }
 
   // Renders a single layer on a tile
-  renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, canvas, heatmapCanvas) {
+  renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, canvas, heatmapCanvas) {
     var ctx = canvas.getContext('2d')
     ctx.lineWidth = 1
     var heatMapData = []
@@ -171,7 +171,7 @@ class MapTileRenderer {
       renderingData[mapLayerKey].data.forEach((featureData, index) => {
         var features = []
         Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-        this.renderFeatures(ctx, features, entityImage, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+        this.renderFeatures(ctx, features, featureData.icon, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
       })
     })
 
@@ -217,6 +217,7 @@ class MapTileRenderer {
         numNeighbors: numNeighbors,
         dataPromises: [],
         data: [],
+        entityImages: [],
         dataOffsets: []
       }
 
@@ -243,7 +244,6 @@ class MapTileRenderer {
     // Get all the data for this tile
     Promise.all(singleTilePromises)
       .then((singleTileResults) => {
-        var entityImage = singleTileResults[0].icon
         var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
 
         // Reconstruct rendering data
@@ -262,7 +262,7 @@ class MapTileRenderer {
               console.log('Single render')
               backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
               heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
-              this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+              this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, backBufferCanvas, heatmapCanvas)
     
               // Copy the back buffer image onto the front buffer
               var ctx = frontBufferCanvas.getContext('2d')
@@ -273,7 +273,7 @@ class MapTileRenderer {
             if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
               backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
               heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
-              this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+              this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, backBufferCanvas, heatmapCanvas)
 
               // Copy the back buffer image onto the front buffer
               var ctx = frontBufferCanvas.getContext('2d')
