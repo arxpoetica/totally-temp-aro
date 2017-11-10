@@ -150,10 +150,6 @@ class BoundariesController {
 
   updateMapLayers() {
 
-    if (this.state.isLoadingPlan) {
-      return  // Do not change map layers while plan is loading
-    }
-
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 

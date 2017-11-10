@@ -49,10 +49,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
 
-    if (state.isLoadingPlan) {
-      return  // Do not change map layers while plan is loading
-    }
-
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())
 

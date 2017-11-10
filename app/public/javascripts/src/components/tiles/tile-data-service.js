@@ -246,11 +246,16 @@ app.service('tileDataService', ['$http', ($http) => {
     })
   }
 
+  // Mark all tiles in the HTML cache as dirty
   tileDataService.markHtmlCacheDirty = () => {
     Object.keys(tileDataService.tileHtmlCache).forEach((cacheId) => {
-      // Mark all tiles in the HTML cache as dirty
       tileDataService.tileHtmlCache[cacheId].isDirty = true
     })
+  }
+
+  // Completely erase the entire cache of HTML elements associated with tiles
+  tileDataService.deleteHtmlCache = () => {
+    tileDataService.tileHtmlCache = {}
   }
 
   return tileDataService
