@@ -580,10 +580,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     if(!service.plan) return
 
+    var currentPlan = service.plan.getValue()
     var promises = [
       $http.get('/service/odata/datatypeentity'),
       $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
-      $http.get(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`)
+      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
     ]
 
     Promise.all(promises)
@@ -731,8 +732,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       }
     })
 
+    var currentPlan = service.plan.getValue()
     // Save the configuration to the server
-    return $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
   }
 
   // Save the plan resource selections to the server
@@ -757,9 +759,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
-    return $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody).then(() => {
-      return $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
-    })
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
   }
 
   // Save the Network Configurations to the server
