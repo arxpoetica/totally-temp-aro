@@ -908,7 +908,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
             service.setPlan(result.data, true)
-            service.refreshMapTilesCacheAndData()
+            tileDataService.clearDataCache()
+            tileDataService.markHtmlCacheDirty()
+            service.requestMapLayerRefresh.next({})
             return Promise.resolve()
           }
         })
@@ -944,7 +946,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
               .then((result) => {
                 return service.loadPlan(currentPlan.id)
                 .then(() => {
-                  service.refreshMapTilesCacheAndData()
+                  tileDataService.clearDataCache()
+                  tileDataService.markHtmlCacheDirty()
+                  service.requestMapLayerRefresh.next({})
                   return Promise.resolve()
                 })
               })
@@ -957,11 +961,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
   }
 
-  service.refreshMapTilesCacheAndData = () => {
-    // Refresh the tile data cache and redraw the tiles
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    service.requestMapLayerRefresh.next({})
+  // Clear the tile cache for plan outputs like fiber, 5G nodes, etc.
+  service.clearTileCachePlanOutputs = () => {
+    // The tile cache will clear all cache entries whose keys contain the given keywords
+    tileDataService.clearDataCacheContaining(configuration.networkEquipment.tileCacheKeywords)
   }
 
   service.showModifyQuestionDialog = () => {
@@ -984,7 +987,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.runOptimization = () => {
     
-    service.refreshMapTilesCacheAndData()
+    service.clearTileCachePlanOutputs()
+    tileDataService.markHtmlCacheDirty()
+    service.requestMapLayerRefresh.next({})
+
     // Get the optimization options that we will pass to the server
     var optimizationBody = service.getOptimizationBody()
     // Make the API call that starts optimization calculations on aro-service
@@ -1012,7 +1018,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
             || response.data.optimizationState === 'CANCELED'
             || response.data.optimizationState === 'FAILED') {
           service.stopPolling()
-          service.refreshMapTilesCacheAndData()
+          service.clearTileCachePlanOutputs()
+          tileDataService.markHtmlCacheDirty()
+          service.requestMapLayerRefresh.next({})
           delete service.Optimizingplan.optimizationId
           service.loadPlanInputs(newPlan.id)
         }
@@ -1045,7 +1053,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         if (response.status >= 200 && response.status <= 299) {
           service.Optimizingplan.planState = response.data.planState
           delete service.Optimizingplan.optimizationId
-          service.refreshMapTilesCacheAndData()
+          service.clearTileCachePlanOutputs()
+          tileDataService.markHtmlCacheDirty()
+          service.requestMapLayerRefresh.next({})
         }
       })
       .catch((err) => {

@@ -81,43 +81,7 @@ class MapTileRenderer {
     return `mapTile_${zoom}_${tileX}_${tileY}`
   }
 
-  // // Starts the render queue. Does nothing if it has already started
-  // startRenderingRecursive() {
-
-  //   // Rendering requests can come in from multiple sources - when Google Maps calls the getTile() method,
-  //   // when the mapLayers change, or any other request. If we start rendering a tile WHILE a previous
-  //   // request is still rendering it, then we get multiple renders on the same canvas. To prevent this,
-  //   // we render tiles in "batches". A batch consists of an array of functions, and each function renders
-  //   // one tile completely. Each render function in a batch is independent of the other tiles, so all of
-  //   // them can be run asynchronously.
-  //   // When a rendering request comes in, we push a rendering batch onto the queue. This function then
-  //   // renders each batch one after the other. This also allows batches to be pushed onto the queue while
-  //   // tiles are being rendered.
-
-  //   if (this.isRendering) {
-  //     return  // Nothing to do
-  //   }
-
-  //   if (this.renderBatches.length === 0) {
-  //     this.isRendering = false  // We are done rendering all elements in the queue
-  //     return
-  //   }
-
-  //   // Rendering batches are always added in pairs (one for 0-neighbours, one for 1-neighbours).
-  //   // If we have more than two batches in the queue, skip to the last one.
-  //   this.isRendering = true
-  //   var renderingFunctions = this.renderBatches[0]
-  //   this.renderBatches.splice(0, 1)
-  //   var renderingPromises = []
-  //   renderingFunctions.forEach((fn) => renderingPromises.push(fn()))
-  //   Promise.all(renderingPromises)  // Wait for all rendering in this batch to be completed
-  //     .then(() => {
-  //       this.isRendering = false
-  //       this.startRenderingRecursive()  // Call this function again. Until the queue is empty
-  //     })
-  // }
-
-  // // Redraws cached tiles with the specified tile IDs
+  // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
     tiles.forEach((tile) => {
       var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
@@ -129,38 +93,9 @@ class MapTileRenderer {
         backBufferCanvas = cachedTile.backBufferCanvas
         heatmapCanvas = cachedTile.heatmapCanvas
         var coord = { x: tile.x, y: tile.y }
-        this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
         this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
       }
     })
-
-
-
-  //   var renderBatch0 = [], renderBatch1 = []
-  //   tiles.forEach((tile) => {
-  //     var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
-  //     var cachedTile = this.tileDataService.tileHtmlCache[tileId]
-  //     if (cachedTile) {
-  //       var frontBufferCanvas = cachedTile.frontBufferCanvas
-  //       var backBufferCanvas = cachedTile.backBufferCanvas
-  //       var heatmapCanvas = cachedTile.heatmapCanvas
-  //       // Re-render only if the tile is marked as dirty
-  //       if (cachedTile.isDirty && frontBufferCanvas && backBufferCanvas) {
-  //         var coord = { x: tile.x, y: tile.y }
-  //         // We first render the tile without using data from neighbouring tiles. AFTER that is done, we render with
-  //         // data from neighbouring tiles. All tile data is cached, so we don't make multiple trips to the server.
-  //         // Ideally we could fire the two renders in parallel, but one some tiles, the 0-neighbour tile shows up
-  //         // instead of the 1-neighbour tile. Debugging shows that they 1-neighbour tile has rendered after the
-  //         // 0-neighbour tile, but thats not how it shows up on the screen. There is something going on with the
-  //         // back buffer of the canvas. For now, just render them in order.
-  //         renderBatch0.push(this.renderTile.bind(this, tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas))   // 0-neighbour tile
-  //         renderBatch1.push(this.renderTile.bind(this, tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas))    // 1-neighbour tile
-  //       }
-  //     }
-  //   })
-  //   this.renderBatches.push(renderBatch0)
-  //   this.renderBatches.push(renderBatch1)
-  //   this.startRenderingRecursive()
   }
 
   // Creates a tile canvas element
@@ -210,14 +145,17 @@ class MapTileRenderer {
       }
     }
 
-    this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
-    this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
-    // // Pass this tile to redrawCachedTiles(), that will take care of scheduling the render
-    // this.redrawCachedTiles([{
-    //   zoom: zoom,
-    //   x: coord.x,
-    //   y: coord.y
-    // }])
+    // Why use a timeout? This function (getTile()) is called by the Google Maps API on zoom or pan.
+    // Rendering the tile right away will render with the current value of this.mapLayers.
+    // The app may also change this.mapLayers and re-render when when zoom changes (e.g. to start dissolving fibers).
+    // If this happens, we will see a "flicker", when the old layers are rendered followed by the new ones.
+    // If we don't render the tile at all from here, that won't work because this.mapLayers may not change
+    // (e.g. if we are simply panning and not zoom) and the system may not render the new tiles at all.
+    // So, we use a timeout - If the app renders tiles, then this.renderTile() won't do anything as the dirty
+    // flag on the tile will be reset by the app render. But if the app does not render tiles, then
+    // the tiles will still be rendered, although with a delay (specified in setTimeout())
+    var RENDER_TIMEOUT_MILLISECONDS = 100
+    setTimeout(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas), RENDER_TIMEOUT_MILLISECONDS)
     return div
   }
 
@@ -269,22 +207,10 @@ class MapTileRenderer {
   // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
 
-    // var tileData = {
-    //   layerkey1: {
-    //     numNeighbors: 1,
-    //     dataPromises: [],
-    //     dataOffsets: []
-    //   },
-    //   layerkey2: {
-
-    //   }
-    // }
-
     var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
     Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
-      // var numNeighbors = useNeighbouringTileData ? 1 : 0
       var mapLayer = this.mapLayers[mapLayerKey]
       var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
@@ -360,31 +286,6 @@ class MapTileRenderer {
           }
         }
       })
-
-
-    // // Render each tile synchronously (one after the other). Return a promise of the last rendered data layer
-    // var renderPromise = Promise.resolve()
-    // backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
-    // Object.keys(this.mapLayers).forEach((mapLayerKey) => {
-    //   var mapLayer = this.mapLayers[mapLayerKey]
-    //   if (mapLayer) {
-    //     // This check is only when this.mapLayers gets modified by another thread while this loop is completing
-    //     renderPromise = renderPromise.then(() => this.renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, backBufferCanvas, heatmapCanvas, mapLayerKey, mapLayer))
-    //   }
-    // })
-    // return new Promise((resolve, reject) => {
-    //   renderPromise
-    //     .then(() => {
-    //       // Copy the back buffer image onto the front buffer
-    //       var ctx = frontBufferCanvas.getContext('2d')
-    //       ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
-    //       ctx.drawImage(backBufferCanvas, 0, 0)
-    //       // All rendering has been done. Mark the cached HTML tile as not-dirty
-    //       var tileId = this.getTileId(zoom, coord.x, coord.y)
-    //       this.tileDataService.tileHtmlCache[tileId].isDirty = false
-    //       resolve()
-    //     })
-    // })
   }
 
   // Renders a single map layer onto this tile

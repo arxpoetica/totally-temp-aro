@@ -230,13 +230,25 @@ app.service('tileDataService', ['$http', ($http) => {
     return entityImagePromise
   }
 
+  // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
   }
 
+  // Clear only those entries in the tile data cache containing the specified keywords
+  tileDataService.clearDataCacheContaining = (keywords) => {
+    Object.keys(tileDataService.tileDataCache).forEach((cacheKey) => {
+      var shouldDelete = false
+      keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
+      if (shouldDelete) {
+        delete tileDataService.tileDataCache[cacheKey]
+      }
+    })
+  }
+
   tileDataService.markHtmlCacheDirty = () => {
-    // Mark all tiles in the HTML cache as dirty
     Object.keys(tileDataService.tileHtmlCache).forEach((cacheId) => {
+      // Mark all tiles in the HTML cache as dirty
       tileDataService.tileHtmlCache[cacheId].isDirty = true
     })
   }

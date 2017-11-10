@@ -112,5 +112,16 @@
     "drawingOptions": {
       "strokeStyle": "#000000"
     }
-  }
+  },
+  "tileCacheKeywords": [
+    "central_office",
+    "fiber_distribution_hub",
+    "fiber_distribution_terminal",
+    "bulk_distribution_terminal",
+    "splice_point",
+    "cell_5g",
+    "FEEDER",
+    "DISTRIBUTION",
+    "BACKBONE"
+  ]
 }
