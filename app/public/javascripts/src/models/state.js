@@ -700,6 +700,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
+  service.loadNetworkConfigurationFromServer = () => {
+    $http.get(`/service/v1/project/${globalUser.projectId}/network_configuration?user_id=${globalUser.id}`)
+    .then((result) => {
+      service.networkConfigurations = {}
+      result.data.forEach((networkConfiguration) => {
+        service.networkConfigurations[networkConfiguration.routingMode] = networkConfiguration
+      })
+      service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
+    })
+    .catch((err) => console.log(err))
+  }
+
   // Saves the plan Data Selection configuration to the server
   service.saveDataSelectionToServer = () => {
 
@@ -745,9 +757,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
-    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody).then(() => {
-      $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
+    return $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody).then(() => {
+      return $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
     })
+  }
+
+  // Save the Network Configurations to the server
+  service.saveNetworkConfigurationToServer = () => {
+    var configSavePromises = []
+    Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
+      // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
+      if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
+        var url = `/service/v1/project/${globalUser.projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
+        configSavePromises.push($http.put(url, service.networkConfigurations[networkConfigurationKey]))
+      }
+    })
+    Promise.all(configSavePromises)
   }
 
   service.createEphemeralPlan = () => {
@@ -885,6 +910,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
     service.loadPlanDataSelectionFromServer()
     service.loadPlanResourceSelectionFromServer()
+    service.loadNetworkConfigurationFromServer()
   }
 
   service.hasLocationType = (locationKey) => {

@@ -4,7 +4,7 @@
           ng-model="$ctrl.selectedRoutingMode"
           ng-options="key as value for (key, value) in $ctrl.state.routingModes">
   </select>
-  <aro-object-editor object-to-edit="$ctrl.networkConfigurations[$ctrl.selectedRoutingMode]"></aro-object-editor>
+  <aro-object-editor object-to-edit="$ctrl.state.networkConfigurations[$ctrl.selectedRoutingMode]"></aro-object-editor>
   <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
   <div class="disable-sibling-controls"
       ng-hide="$ctrl.areControlsEnabled">

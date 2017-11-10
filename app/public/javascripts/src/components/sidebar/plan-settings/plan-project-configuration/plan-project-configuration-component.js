@@ -18,7 +18,9 @@ class PlanProjectConfigurationController {
 
   commitToProject() {
     this.state.saveDataSelectionToServer().then(() => {
-      this.state.savePlanResourceSelectionToServer()
+      return this.state.savePlanResourceSelectionToServer()
+    }).then(() => {
+      this.state.saveNetworkConfigurationToServer()
     })
   }
 
