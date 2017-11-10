@@ -8,6 +8,28 @@ class PlanProjectConfigurationController {
       }
     })
   }
+
+  planToProjectDefaults() {
+    this.loadProjectDataAndResourceSelection()
+    .then((response)=> {
+      this.SaveToPlanDataAndResourceSelection(response.data)
+    })
+  }
+
+  commitToProject() {
+    this.state.saveDataSelectionToServer().then(() => {
+      this.state.savePlanResourceSelectionToServer()
+    })
+  }
+
+  loadProjectDataAndResourceSelection() {
+    return this.$http.get(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`)
+  }
+
+  SaveToPlanDataAndResourceSelection(configuration) {
+    this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, configuration)
+  }
+
 }
 
 PlanProjectConfigurationController.$inject = ['$http', 'state']

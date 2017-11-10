@@ -700,6 +700,29 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
+  // Saves the plan Data Selection configuration to the server
+  service.saveDataSelectionToServer = () => {
+
+    var putBody = {
+      configurationItems: [],
+      resourceConfigItems: []
+    }
+
+    Object.keys(service.dataItems).forEach((dataItemKey) => {
+      // An example of dataItemKey is 'location'
+      if (service.dataItems[dataItemKey].selectedLibraryItems.length > 0) {
+        var configurationItem = {
+          dataType: dataItemKey,
+          libraryItems: service.dataItems[dataItemKey].selectedLibraryItems
+        }
+        putBody.configurationItems.push(configurationItem)
+      }
+    })
+
+    // Save the configuration to the server
+    return $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
+  }
+
   // Save the plan resource selections to the server
   service.savePlanResourceSelectionToServer = () => {
     var putBody = {
@@ -722,8 +745,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
-    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
-    $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody).then(() => {
+      $http.put(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`, putBody)
+    })
   }
 
   service.createEphemeralPlan = () => {
