@@ -14,6 +14,26 @@ app.service('tileDataService', ['$http', ($http) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
   }
 
+  tileDataService.hasNeighbouringData = (mapLayers, zoom, tileX, tileY) => {
+    var hasAllNeighbouringData = true
+    for (var dx = -1; dx <= 1; ++dx) {
+      for (var dy = -1; dy <= 1; ++dy) {
+        var x = tileX + dx
+        var y = tileY + dy
+        Object.keys(mapLayers).forEach((mapLayerKey) => {
+          var mapLayer = mapLayers[mapLayerKey]
+          mapLayer.dataUrls.forEach((url) => {
+            var urlKey = url + `${zoom}/${x}/${y}.mvt`
+            var tileCacheKey = tileDataService.getTileCacheKey(urlKey)
+            var hasData = tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)
+            hasAllNeighbouringData = hasAllNeighbouringData && hasData
+          })
+        })
+      }
+    }
+    return hasAllNeighbouringData
+  }
+
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
       // We have one or multiple URLs where data is coming from, and we want a simple union of the results
