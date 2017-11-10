@@ -319,7 +319,7 @@ class MapTileRenderer {
       .then((singleTileResults) => {
         var entityImage = singleTileResults[0].icon
         var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
-        
+
         // Reconstruct rendering data
         singleTileResults.forEach((singleTileResult, index) => {
           var mapLayerKey = globalIndexToLayer[index]
@@ -329,33 +329,34 @@ class MapTileRenderer {
         var tileId = this.getTileId(zoom, coord.x, coord.y)
         // We have all the data. Now check the dirty flag. The next call (where we render features)
         // MUST be synchronous for this to work correctly
-        if (!useNeighbouringTileData) {
-          // This is a single tile render. Render only if we do not have neighbouring data yet
-          if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)
-              && this.tileDataService.tileHtmlCache[tileId].isDirty) {
-            console.log('Single render')
-            backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
-            heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
-            this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
-  
-            // Copy the back buffer image onto the front buffer
-            var ctx = frontBufferCanvas.getContext('2d')
-            ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
-            ctx.drawImage(backBufferCanvas, 0, 0)
-          }
-        } else {
-          if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
-            backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
-            heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
-            this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+        if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
+          if (!useNeighbouringTileData) {
+            // This is a single tile render. Render only if we do not have neighbouring data yet
+            if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)) {
+              console.log('Single render')
+              backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
+              heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
+              this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+    
+              // Copy the back buffer image onto the front buffer
+              var ctx = frontBufferCanvas.getContext('2d')
+              ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
+              ctx.drawImage(backBufferCanvas, 0, 0)
+            }
+          } else {
+            if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
+              backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
+              heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
+              this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
 
-            // Copy the back buffer image onto the front buffer
-            var ctx = frontBufferCanvas.getContext('2d')
-            ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
-            ctx.drawImage(backBufferCanvas, 0, 0)
-            // All rendering has been done. Mark the cached HTML tile as not-dirty
-            // Mark as "not dirty" only if neighbouring tile data has been rendered
-            this.tileDataService.tileHtmlCache[tileId].isDirty = !useNeighbouringTileData
+              // Copy the back buffer image onto the front buffer
+              var ctx = frontBufferCanvas.getContext('2d')
+              ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
+              ctx.drawImage(backBufferCanvas, 0, 0)
+              // All rendering has been done. Mark the cached HTML tile as not-dirty
+              // Mark as "not dirty" only if neighbouring tile data has been rendered
+              this.tileDataService.tileHtmlCache[tileId].isDirty = !useNeighbouringTileData
+            }
           }
         }
       })
