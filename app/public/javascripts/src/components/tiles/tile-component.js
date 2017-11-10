@@ -168,11 +168,13 @@ class MapTileRenderer {
     // Render all features
     Object.keys(renderingData).forEach((mapLayerKey) => {
       var mapLayer = this.mapLayers[mapLayerKey]
-      renderingData[mapLayerKey].data.forEach((featureData, index) => {
-        var features = []
-        Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-        this.renderFeatures(ctx, features, featureData.icon, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
-      })
+      if (mapLayer) { // Its possible that this.mapLayers has changed until we reach this point
+        renderingData[mapLayerKey].data.forEach((featureData, index) => {
+          var features = []
+          Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
+          this.renderFeatures(ctx, features, featureData.icon, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+        })
+      }
     })
 
     if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
@@ -255,11 +257,11 @@ class MapTileRenderer {
         var tileId = this.getTileId(zoom, coord.x, coord.y)
         // We have all the data. Now check the dirty flag. The next call (where we render features)
         // MUST be synchronous for this to work correctly
-        if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
+        var htmlCache = this.tileDataService.tileHtmlCache[tileId]  // This may be undefined, we are in a async call
+        if (htmlCache && htmlCache.isDirty) {
           if (!useNeighbouringTileData) {
             // This is a single tile render. Render only if we do not have neighbouring data yet
             if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)) {
-              console.log('Single render')
               backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
               heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
               this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, backBufferCanvas, heatmapCanvas)
@@ -270,7 +272,7 @@ class MapTileRenderer {
               ctx.drawImage(backBufferCanvas, 0, 0)
             }
           } else {
-            if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
+            if (htmlCache && htmlCache.isDirty) {
               backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
               heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
               this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, backBufferCanvas, heatmapCanvas)
@@ -286,76 +288,6 @@ class MapTileRenderer {
           }
         }
       })
-  }
-
-  // Renders a single map layer onto this tile
-  renderTileSingleMapLayer(zoom, coord, useNeighbouringTileData, canvas, heatmapCanvas, mapLayerId, mapLayer) {
-
-    // Use neighbouring tile data only for heatmaps
-    var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
-
-    var tileDataPromises = []
-    var tileDataOffsets = []
-    for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
-      for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
-        tileDataOffsets.push({
-          x: deltaX * this.tileSize.width,
-          y: deltaY * this.tileSize.height
-        })
-        var xTile = coord.x + deltaX
-        var yTile = coord.y + deltaY
-        tileDataPromises.push(this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile, mapLayer))
-      }
-    }
-    tileDataPromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
-
-    // Return a promise that resolves when all the rendering is finished
-    return new Promise((resolve, reject) => {
-      Promise.all(tileDataPromises)
-        .then((promiseResults) => {
-
-          var entityImage = promiseResults[0].icon
-          var selectedLocationImage = promiseResults[promiseResults.length - 1]
-          var ctx = canvas.getContext('2d')
-          ctx.lineWidth = 1
-          var heatMapData = []
-
-          for (var iResult = 0; iResult < promiseResults.length - 1; ++iResult) {
-            var layerToFeatures = promiseResults[iResult].layerToFeatures
-            var features = []
-            Object.keys(layerToFeatures).forEach((layerKey) => features = features.concat(layerToFeatures[layerKey]))
-            this.renderFeatures(ctx, features, entityImage, selectedLocationImage, tileDataOffsets[iResult], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
-          }
-          if (heatMapData.length > 0 && this.mapTileOptions.selectedHeatmapOption.id === 'HEATMAP_ON') {
-            // Note that we render the heatmap to another canvas, then copy that image over to the main canvas. This
-            // is because the heatmap library clears the canvas before rendering
-            var heatmapCtx = heatmapCanvas.getContext('2d')
-            heatmapCtx.globalAlpha = 1.0
-            var heatMapRenderer = simpleheat(heatmapCanvas)
-            heatMapRenderer.data(heatMapData)
-            var maxValue = 1.0
-            if (this.mapTileOptions.heatMap.useAbsoluteMax) {
-              // Simply use the maximum value for the heatmap
-              maxValue = this.mapTileOptions.heatMap.maxValue
-            } else {
-              // We have an input from the user specifying the max value at zoom level 1. Find the max value at our zoom level
-              maxValue = this.mapTileOptions.heatMap.worldMaxValue / Math.pow(2.0, zoom)
-            }
-            heatMapRenderer.max(maxValue)
-            heatMapRenderer.radius(20, 20)
-            heatMapRenderer.draw(0.0)
-            heatmapCtx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-            heatmapCtx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-            heatmapCtx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-            heatmapCtx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-            // Draw the heatmap onto the main canvas
-            ctx.drawImage(heatmapCanvas, 0, 0)
-          }
-          var tileCoordinateString = `z / x / y : ${zoom} / ${coord.x} / ${coord.y}`
-          this.renderTileInformation(canvas, ctx, tileCoordinateString)
-          resolve() // All rendering has finished
-      })
-    })
   }
 
   // Render tile information
