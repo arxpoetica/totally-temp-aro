@@ -190,6 +190,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
+  service.isLoadingPlan = false
   //This modal will be used to toogle from report modal to current modal 
   service.previousModal
 
@@ -390,38 +391,39 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
   service.selectedLocations = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedLocations = (suppressTileRefresh) => {
+  service.reloadSelectedLocations = () => {
     var plan = service.plan.getValue()
     if (plan) {
-      $http.get(`/locations/${plan.id}/selectedLocationIds`)
+      return $http.get(`/locations/${plan.id}/selectedLocationIds`)
         .then((result) => {
-          if (result.status >= 200 && result.status <= 299) {
-            var selectedLocationsSet = new Set()
-            result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
-            service.selectedLocations.next(selectedLocationsSet)
-            if (!suppressTileRefresh) {
-              service.requestMapLayerRefresh.next({})
-            }
-          }
+          var selectedLocationsSet = new Set()
+          result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
+          service.selectedLocations.next(selectedLocationsSet)
+          return Promise.resolve()
         })
+    } else {
+      return Promise.resolve()
     }
   }
 
   service.selectedServiceAreas = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedServiceAreas = () => {
+  service.reloadSelectedServiceAreas = (forceMapRefresh = false) => {
     var plan = service.plan.getValue()
     if (plan) {
       $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
         .then((result) => {
-          if (result.status >= 200 && result.status <= 299) {
-            var selectedSASet = new Set()
-            result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
-            service.selectedServiceAreas.next(selectedSASet)
-            if (!suppressTileRefresh) {
-              service.requestMapLayerRefresh.next({})
-            }
+          var selectedSASet = new Set()
+          result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
+          service.selectedServiceAreas.next(selectedSASet)
+          if (forceMapRefresh) {
+            tileDataService.clearDataCache()
+            tileDataService.markHtmlCacheDirty()
+            service.requestMapLayerRefresh.next({})
           }
+          return Promise.resolve()
         })
+    } else {
+      return Promise.resolve()
     }
   }
 
@@ -573,7 +575,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.loadPlanDataSelectionFromServer = () => {
 
-    if(!service.plan) return
+    if(!service.plan) {
+      return Promise.resolve()
+    }
 
     var promises = [
       $http.get('/service/odata/datatypeentity'),
@@ -581,7 +585,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       $http.get(`/service/v1/project/${globalUser.projectId}/configuration?user_id=${globalUser.id}`)
     ]
 
-    Promise.all(promises)
+    return Promise.all(promises)
       .then((results) => {
         // Results will be returned in the same order as the promises array
         var dataTypeEntityResult = results[0].data
@@ -638,6 +642,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
         service.dataItems = newDataItems
         service.dataItemsChanged.next(service.dataItems)
+        return Promise.resolve()
       })
   }
 
@@ -651,10 +656,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.loadPlanResourceSelectionFromServer = () => {
 
     if (!service.plan) {
-      return
+      return Promise.resolve()
     }
     var currentPlan = service.plan.getValue()
-    Promise.all([
+    return Promise.all([
       $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
       $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
       $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
@@ -692,6 +697,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
       service.resourceItems = newResourceItems
       $timeout()  // Trigger a digest cycle so that components can update
+      return Promise.resolve()
     })
   }
 
@@ -770,10 +776,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((ephemeralPlan) => {
       service.setPlan(ephemeralPlan)
-      service.loadPlanInputs(ephemeralPlan.id)
-      tileDataService.clearDataCache()
-      tileDataService.markHtmlCacheDirty()
-      service.requestMapLayerRefresh.next({})
   })
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
@@ -792,10 +794,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         if (result.status >= 200 && result.status <= 299) {
           // Plan has been saved in the DB. Reload it
           service.setPlan(result.data)
-          service.loadPlanInputs(result.data.id)
-          tileDataService.clearDataCache()
-          tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next({})
       } else {
           console.error('Unable to make plan permanent')
           console.error(result)
@@ -830,41 +828,49 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadPlan = (planId) => {
+    service.isLoadingPlan = true
     var userId = service.getUserId()
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          service.setPlan(result.data)
-          service.loadPlanInputs(planId)
-          tileDataService.clearDataCache()
-          tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next({})
-          service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
-          service.requestSetMapZoom.next(result.data.zoomIndex)
-          return Promise.resolve()
-        }
+        return service.setPlan(result.data)
+      })
+      .then(() => {
+        var plan = service.plan.getValue()
+        service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
+        service.requestSetMapZoom.next(plan.zoomIndex)
+        return Promise.resolve()
       })
   }
 
-  service.setPlan = (plan, suppressTileRefresh = false) => {
+  service.setPlan = (plan) => {
     service.plan.next(plan)
-    service.reloadSelectedLocations(suppressTileRefresh)
-    service.reloadSelectedServiceAreas(suppressTileRefresh)
+    return service.loadPlanInputs(plan.id)
+    .then(() => {
+      service.isLoadingPlan = false
+      tileDataService.clearDataCache()
+      tileDataService.markHtmlCacheDirty()
+      service.requestMapLayerRefresh.next({})
+      return Promise.resolve()
+    })
   }
 
   // Load the plan inputs for the given plan and populate them in state
   service.loadPlanInputs = (planId) => {
     var userId = service.getUserId()
-    $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
+    return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
         stateSerializationHelper.loadStateFromJSON(service, optimization, regions, planInputs)
+        return Promise.all([
+          service.reloadSelectedLocations(),
+          service.reloadSelectedServiceAreas(),
+          service.loadPlanDataSelectionFromServer(),
+          service.loadPlanResourceSelectionFromServer()
+        ])
       })
       .catch((err) => {
         console.log(err)
       })
-    service.loadPlanDataSelectionFromServer()
-    service.loadPlanResourceSelectionFromServer()
   }
 
   service.hasLocationType = (locationKey) => {
@@ -917,9 +923,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         .then((result) => {
           if (result.status >= 200 && result.status <= 299) {
             service.setPlan(result.data, true)
-            tileDataService.clearDataCache()
-            tileDataService.markHtmlCacheDirty()
-            service.requestMapLayerRefresh.next({})
             return Promise.resolve()
           }
         })

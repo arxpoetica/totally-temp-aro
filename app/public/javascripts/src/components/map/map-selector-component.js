@@ -59,7 +59,7 @@ class MapSelectorController {
         Promise.all(addRemoveTargetPromises)
           .then((response) => {
             // Reload selected locations from database
-            state.reloadSelectedServiceAreas()
+            state.reloadSelectedServiceAreas(true)
           })
       }
 
