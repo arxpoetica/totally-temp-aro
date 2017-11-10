@@ -119,6 +119,23 @@ class MapTileRenderer {
 
   // // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
+    tiles.forEach((tile) => {
+      var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
+      var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null, isDirty = false
+      var cachedTile = this.tileDataService.tileHtmlCache[tileId]
+      if (cachedTile) {
+        div = cachedTile.div
+        frontBufferCanvas = cachedTile.frontBufferCanvas
+        backBufferCanvas = cachedTile.backBufferCanvas
+        heatmapCanvas = cachedTile.heatmapCanvas
+        var coord = { x: tile.x, y: tile.y }
+        this.renderTile(tile.zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
+        this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
+      }
+    })
+
+
+
   //   var renderBatch0 = [], renderBatch1 = []
   //   tiles.forEach((tile) => {
   //     var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
@@ -193,6 +210,7 @@ class MapTileRenderer {
       }
     }
 
+    this.renderTile(zoom, coord, false, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
     this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
     // // Pass this tile to redrawCachedTiles(), that will take care of scheduling the render
     // this.redrawCachedTiles([{
@@ -251,8 +269,6 @@ class MapTileRenderer {
   // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
 
-    backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
-    
     // var tileData = {
     //   layerkey1: {
     //     numNeighbors: 1,
@@ -268,14 +284,15 @@ class MapTileRenderer {
     var singleTilePromises = []
     Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
-      var numNeighbors = useNeighbouringTileData ? 1 : 0
+      // var numNeighbors = useNeighbouringTileData ? 1 : 0
+      var mapLayer = this.mapLayers[mapLayerKey]
+      var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,
         dataPromises: [],
         data: [],
         dataOffsets: []
       }
-      var mapLayer = this.mapLayers[mapLayerKey]
 
       for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
         for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
@@ -309,28 +326,37 @@ class MapTileRenderer {
           var dataIndex = globalIndexToIndex[index]
           renderingData[mapLayerKey].data[dataIndex] = singleTileResult
         })
-
-        this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
-        // Object.keys(renderingData).forEach((mapLayerKey) => {
-        //   var renderingDataSingleLayer = renderingData[mapLayerKey]
-        //   var mapLayer = this.mapLayers[mapLayerKey]
-        //   this.renderSingleTileFull(zoom, coord, renderingDataSingleLayer, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas, mapLayer)
-          
-        // })
-
-
-        // // Render the single tile
-        // var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
-        // var arrayLayerToFeatures = []
-        // singleTileResults.forEach((singleTileResult) => arrayLayerToFeatures.push(singleTileResult.layerToFeatures))
-
-        // Copy the back buffer image onto the front buffer
-        var ctx = frontBufferCanvas.getContext('2d')
-        ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
-        ctx.drawImage(backBufferCanvas, 0, 0)
-        // All rendering has been done. Mark the cached HTML tile as not-dirty
         var tileId = this.getTileId(zoom, coord.x, coord.y)
-        this.tileDataService.tileHtmlCache[tileId].isDirty = false
+        // We have all the data. Now check the dirty flag. The next call (where we render features)
+        // MUST be synchronous for this to work correctly
+        if (!useNeighbouringTileData) {
+          // This is a single tile render. Render only if we do not have neighbouring data yet
+          if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)) {
+            console.log('Single render')
+            backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
+            heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
+            this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+  
+            // Copy the back buffer image onto the front buffer
+            var ctx = frontBufferCanvas.getContext('2d')
+            ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
+            ctx.drawImage(backBufferCanvas, 0, 0)
+          }
+        } else {
+          if (this.tileDataService.tileHtmlCache[tileId].isDirty) {
+            backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
+            heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
+            this.renderSingleTileFull(zoom, coord, renderingData, entityImage, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+
+            // Copy the back buffer image onto the front buffer
+            var ctx = frontBufferCanvas.getContext('2d')
+            ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
+            ctx.drawImage(backBufferCanvas, 0, 0)
+            // All rendering has been done. Mark the cached HTML tile as not-dirty
+            // Mark as "not dirty" only if neighbouring tile data has been rendered
+            this.tileDataService.tileHtmlCache[tileId].isDirty = !useNeighbouringTileData
+          }
+        }
       })
 
 
