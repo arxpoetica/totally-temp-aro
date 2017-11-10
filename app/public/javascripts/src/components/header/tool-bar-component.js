@@ -50,7 +50,7 @@ class ToolBarController {
   createEphemeralPlan() {
     this.state.createEphemeralPlan()
     .then((ephemeralPlan) => {
-      this.state.setPlan(ephemeralPlan)
+      this.state.loadPlan(ephemeralPlan.id)
     })
     .catch((err) => console.error(err))
   }

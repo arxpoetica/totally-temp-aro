@@ -771,7 +771,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((ephemeralPlan) => {
       service.setPlan(ephemeralPlan)
       service.loadPlanInputs(ephemeralPlan.id)
-    })
+      tileDataService.clearDataCache()
+      tileDataService.markHtmlCacheDirty()
+      service.requestMapLayerRefresh.next({})
+  })
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
@@ -790,7 +793,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           // Plan has been saved in the DB. Reload it
           service.setPlan(result.data)
           service.loadPlanInputs(result.data.id)
-        } else {
+          tileDataService.clearDataCache()
+          tileDataService.markHtmlCacheDirty()
+          service.requestMapLayerRefresh.next({})
+      } else {
           console.error('Unable to make plan permanent')
           console.error(result)
         }
@@ -830,6 +836,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         if (result.status >= 200 && result.status <= 299) {
           service.setPlan(result.data)
           service.loadPlanInputs(planId)
+          tileDataService.clearDataCache()
+          tileDataService.markHtmlCacheDirty()
+          service.requestMapLayerRefresh.next({})
           service.requestSetMapCenter.next({ latitude: result.data.latitude, longitude: result.data.longitude })
           service.requestSetMapZoom.next(result.data.zoomIndex)
           return Promise.resolve()
