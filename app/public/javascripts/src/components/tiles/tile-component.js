@@ -914,24 +914,31 @@ class TileComponentController {
             state.hackRaiseEvent(selectedLocationsIds)
 
             //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            if (this.areControlsEnabled) {
-              state.mapFeaturesSelectedEvent.next({
-                locations: selectedLocationsIds,
-                serviceAreas: selectedServiceAreaIds
-              })
+            if (state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS && this.areControlsEnabled) {
+              if(this.state.optimizationOptions.analysisSelectionMode == 'SELECTED_AREAS') {
+                state.mapFeaturesSelectedEvent.next({
+                  serviceAreas: selectedServiceAreaIds
+                })
+              } else {
+                state.mapFeaturesSelectedEvent.next({
+                  locations: selectedLocationsIds
+                })
+              }
             }
 
-            if (selectedRoadSegmentIds.length > 0) {
-              state.mapFeaturesSelectedEvent.next({
-                roadSegment: selectedRoadSegmentIds
-              });
-            }
-
-            //Locations Info is shown in View Mode
+            //Show Road Segment information in View Mode
             if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+              //View Road Segment Info
               state.showViewModeInfo.next({
                 roadSegments: selectedRoadSegments
-              });
+              })
+
+              //Higlight the selected road segments
+              if (selectedRoadSegmentIds.length > 0) {
+                state.mapFeaturesSelectedEvent.next({
+                  roadSegment: selectedRoadSegmentIds
+                })
+              }
             }
           })
 
@@ -1016,7 +1023,7 @@ class TileComponentController {
               })
             }
 
-            if(roadFeatures) {
+            if(roadFeatures.length > 0 && state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
               state.mapFeaturesSelectedEvent.next({
                 roadSegment: roadFeatures
               })
