@@ -331,7 +331,8 @@ class MapTileRenderer {
         // MUST be synchronous for this to work correctly
         if (!useNeighbouringTileData) {
           // This is a single tile render. Render only if we do not have neighbouring data yet
-          if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)) {
+          if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)
+              && this.tileDataService.tileHtmlCache[tileId].isDirty) {
             console.log('Single render')
             backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
             heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
