@@ -61,7 +61,7 @@ module.exports = class Wirecenter {
     return database.query(sql, [service_area_ids, plan_id])
   }
 
-  static removeAllServiceAreaTargets (service_area_id) {
+  static removeAllServiceAreaTargets (plan_id) {
     var sql = 'DELETE FROM client.selected_service_area WHERE plan_id=$1'    
     return database.query(sql, [plan_id])
   }

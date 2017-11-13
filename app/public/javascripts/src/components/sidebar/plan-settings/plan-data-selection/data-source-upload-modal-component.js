@@ -83,11 +83,15 @@ class DataSourceUploadController {
   }
 
   getLibraryId() {
+    //To polpulate the service area we have to generate the equipment
+    //Finally function (layerBoundary) populate the service area
+    var dataType = this.state.uploadDataSource.name === 'service_layer' ? 'equipment' : this.state.uploadDataSource.name
+
     var libraryOptions = {
       url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
       method: 'POST',
       data: {
-        dataType: this.state.uploadDataSource.name,
+        dataType: dataType,
         name: $('#data_source_upload_modal input[type=text]').get(0).value
       },
       json: true
@@ -113,7 +117,7 @@ class DataSourceUploadController {
       transformRequest: angular.identity
     }).then((e) => {
 
-      if(this.state.uploadDataSource.name === 'equipment') {
+      if(this.state.uploadDataSource.name === 'service_layer') {
         //load the eqipment boundary layer
         this.layerBoundary(libraryId)
       } else {

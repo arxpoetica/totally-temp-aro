@@ -40,6 +40,8 @@ class DataSelectionController {
           if (result) {
             // Save the changed settings to aro-service
             this.state.saveDataSelectionToServer()
+            //Clear the selected Service area when modify the optimization
+            this.clearAllSelectedSA()
           }
           this.isDirty = false  // Technically not required since we are in $onDestroy
         })
@@ -54,6 +56,19 @@ class DataSelectionController {
         })
       }
     }
+  }
+
+  clearAllSelectedSA() {
+    var plan = this.state.plan.getValue()
+
+    this.$http.delete(`/service_areas/${plan.id}/removeAllServiceAreaTargets`, { })
+    .then(() => {
+      //Refresh the selected service areas on UI
+      //value true will refresh the tile cache 
+      this.state.reloadSelectedServiceAreas(true)
+
+      return Promise.resolve()
+    })
   }
 
   onSelectionChanged() {

@@ -19,7 +19,7 @@
       <!-- For all data sources other than 'conic_tile_system', just upload a file --> 
       <div ng-if="$ctrl.state.uploadDataSource.name !== 'conic_tile_system'">
         <div ng-show="!$ctrl.isDataManagementView">
-          <div class="form-group" ng-if="$ctrl.state.uploadDataSource.name === 'equipment'">
+          <div class="form-group" ng-if="$ctrl.state.uploadDataSource.name === 'service_layer'">
             <label class="col-sm-4 control-label">Polygon radius (meters)</label>
             <div class="col-sm-8">
               <input name="radius" type="number" ng-value="$ctrl.radius" class="form-control">
