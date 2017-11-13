@@ -49,15 +49,12 @@ app.service('tileDataService', ['$http', ($http) => {
   var getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
     url += `${zoom}/${tileX}/${tileY}.mvt`
     var tileCacheKey = tileDataService.getTileCacheKey(url)
-    if (tileDataService.tileDataCache[tileCacheKey]) {
-      // Tile data exists in cache
-      return Promise.resolve(tileDataService.tileDataCache[tileCacheKey])
-    } else {
+    if (!tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)) {
       // Tile data does not exist in cache. Get it from a server
-      return new Promise((resolve, reject) => {
+      tileDataService.tileDataCache[tileCacheKey] = new Promise((resolve, reject) => {
 
         // Getting binary data from the server. Directly use XMLHttpRequest()
-        var oReq = new XMLHttpRequest();
+        var oReq = new XMLHttpRequest()
         oReq.open("GET", url, true);
         oReq.responseType = "arraybuffer";
 
@@ -79,13 +76,14 @@ app.service('tileDataService', ['$http', ($http) => {
             layerToFeatures: layerToFeatures
           }
           resolve(tileDataService.tileDataCache[tileCacheKey])
-        };
+        }
         oReq.onerror = function(error) { reject(error) }
         oReq.onabort = function() { reject('XMLHttpRequest abort') }
         oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
-        oReq.send();
+        oReq.send()
       })
     }
+    return tileDataService.tileDataCache[tileCacheKey]
   }
 
   // Flattens all URLs and returns tile data that is a simple union of all features
