@@ -6,6 +6,7 @@ class AroMultiSelectController {
     this.$element = $element
     this.selectElement = null 
     this.previousItemsLength
+    this.previousSelectedItems = []
   }
 
   $onInit() {
@@ -23,8 +24,9 @@ class AroMultiSelectController {
   }
 
   $doCheck() {
-    if (this.previousItemsLength != this.allItems.length) {
+    if (this.previousItemsLength != this.allItems.length || !angular.equals(this.previousSelectedItems, this.currentSelectedItems)) {
       this.previousItemsLength = this.allItems.length
+      this.previousSelectedItems = this.currentSelectedItems
       setTimeout(() => {
         this.selectElement.multiselect('rebuild');
       }, 0);
@@ -44,6 +46,7 @@ app.component('aroMultiSelect', {
   bindings: {
     model: '=',             // Will be passed in as a ng-model to our select. Two Way binding for now!
     allItems: '<',          // All the items to show.
+    currentSelectedItems: '<', // currently Selected Items
     maxHeightInPixels: '<', // [Optional] The maximum height of the component in pixels
     selectionChanged: '&'   // [Optional] Called when the selected items change
   },
