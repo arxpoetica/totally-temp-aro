@@ -39,7 +39,7 @@ class DataSelectionController {
         }, (result) => {
           if (result) {
             // Save the changed settings to aro-service
-            this.saveToServer()
+            this.state.saveDataSelectionToServer()
           }
           this.isDirty = false  // Technically not required since we are in $onDestroy
         })
@@ -91,29 +91,6 @@ class DataSelectionController {
         this.state.uploadDataSource = value
       }
     });
-  }
-
-  // Saves the plan configuration to the server
-  saveToServer() {
-
-    var putBody = {
-      configurationItems: [],
-      resourceConfigItems: []
-    }
-
-    Object.keys(this.allDataItems).forEach((dataItemKey) => {
-      // An example of dataItemKey is 'location'
-      if (this.allDataItems[dataItemKey].selectedLibraryItems.length > 0) {
-        var configurationItem = {
-          dataType: dataItemKey,
-          libraryItems: this.allDataItems[dataItemKey].selectedLibraryItems
-        }
-        putBody.configurationItems.push(configurationItem)
-      }
-    })
-
-    // Save the configuration to the server
-    this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
   }
 }
 
