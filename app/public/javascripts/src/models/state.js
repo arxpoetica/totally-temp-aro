@@ -103,7 +103,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     },
     threshold: 0, // This will be converted to a precentage when sending to the UI
     preIrrThreshold: 1.0,
-    budget: 100000000,
+    budget: 100000,
     customOptimization: null,
     routeGenerationOptions: [
       { id: 'T', value: 'A Route', checked: false },

@@ -28,7 +28,7 @@
         <td>IRR Threshold</td>
         <td>
           <div class="row">
-              <div class="col-md-7">
+              <div class="col-md-5">
                 <input
                   type="range"
                   min="0"
@@ -37,7 +37,7 @@
                   ng-model="$ctrl.state.optimizationOptions.financialConstraints.preIrrThreshold"
                   style="margin-top: 10px">
               </div>
-              <div class="col-md-5">
+              <div class="col-md-7">
                 <div class="form-group form-group-sm">
                   <div class="input-group input-group-sm">
                     <input
@@ -53,10 +53,10 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>IRR Target</td>
+        <td>IRR Target(%)</td>
         <td> 
           <div class="row">
-              <div class="col-md-7">
+              <div class="col-md-5">
                 <input
                   type="range"
                   min="0"
@@ -65,15 +65,14 @@
                   ng-model="$ctrl.state.optimizationOptions.threshold"
                   style="margin-top: 10px">
               </div>
-              <div class="col-md-5">
+              <div class="col-md-7">
                 <div class="form-group form-group-sm">
                   <div class="input-group input-group-sm">
                     <input
                       type="number"
                       ng-model="$ctrl.state.optimizationOptions.threshold"
-                      class="form-control text-right"
-                      percentage-input>
-                    <div class="input-group-addon">%</div>
+                      step="0.01"
+                      class="form-control text-right">
                   </div>
                 </div>
               </div>
@@ -81,10 +80,12 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || $ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>Target Capital ({{ $ctrl.config.currency_symbol }})</td>
+        <td>Target Capital ({{ $ctrl.config.currency_symbol }}000s)</td>
         <td> 
           <input type="text" class="form-control text-right" placeholder="Amount"
-            ng-model="$ctrl.state.optimizationOptions.budget">
+            ng-model="$ctrl.state.optimizationOptions.budget"
+            ng-model-options="{ debounce: 500 }"
+            format="number">
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">

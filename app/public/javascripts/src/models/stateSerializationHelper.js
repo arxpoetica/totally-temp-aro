@@ -84,7 +84,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       uiSelectedAlgorithmId: state.optimizationOptions.uiSelectedAlgorithm.id,
       threshold: state.optimizationOptions.threshold,
       preIrrThreshold: state.optimizationOptions.preIrrThreshold,
-      budget: state.optimizationOptions.budget
+      budget: state.optimizationOptions.budget * 1000
     }
     if (state.optimizationOptions.uiSelectedAlgorithm.algorithm === 'TABC') {
       var generations = state.optimizationOptions.routeGenerationOptions.filter((item) => item.checked)
@@ -264,7 +264,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
     }
     if (postBody.optimization.budget && Number.isFinite(+postBody.optimization.budget)) {
-      state.optimizationOptions.budget = +postBody.optimization.budget
+      state.optimizationOptions.budget = +postBody.optimization.budget/1000
     }
     state.optimizationOptions.analysisSelectionMode = postBody.locationConstraints.analysisSelectionMode
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
