@@ -3,21 +3,14 @@ class ConicTileSystemUploaderController {
     this.$element = $element
     this.$http = $http
     this.datasetName = ''
-    this.selectedTileSystemId = null
-    this.initImpedances()
-    $http.get('/morphology/tiles')
-    .then((result) => {
-      this.tileSystems = result.data
-      this.selectedTileSystemId = this.tileSystems.length > 0 ? this.tileSystems[0].id : null
-    })
-    .catch((err) => console.log(err))
+    this.initTileSystemParams()
   }
 
   $onInit() {
     if (this.onInitControl) {
       this.onInitControl({
         api: {
-          save: this.saveImpedances.bind(this)
+          save: this.saveTileSystem.bind(this)
         }
       })
     }
@@ -29,80 +22,52 @@ class ConicTileSystemUploaderController {
     }
   }
 
-  initImpedances() {
-    this.impedances = [{
-      code: -9999,
-      value: '.35'
-    },
-    {
-      code: 0,
-      value: '0.35'
-    },
-    {
-      code: 1,
-      value: '0.225'
-    },
-    {
-      code: 3,
-      value: '0.35'
-    },
-    {
-      code: 4,
-      value: '0.823346304'
-    },
-    {
-      code: 5,
-      value: '1'
-    },
-    {
-      code: 65535,
-      value: '0.35'
-    }]
-    this.defaultImpedanceCode = 1
-  }
-
-  removeImpedanceAt(index) {
-    this.impedances.splice(index, 1)
-  }
-
-  addImpedance() {
-    this.impedances.push({
-      code: this.impedances.length,
-      value: '0.35'
-    })
-  }
-
-  saveImpedances() {
-    var fileToUpload = this.$element.find('#conicTileSystemFile')[0]
-    var url = `/locations/morphology/${this.selectedTileSystemId}`
-    var formData = new FormData()
-    formData.append('name', this.datasetName)
-    formData.append('file', fileToUpload.files[0])
-    formData.append('projectId', this.projectId)
-    if (this.impedances.length > 0) {
-      var defaultImpedance = 1
-      var noData = this.impedances.filter((imp) => { return imp.code == this.defaultImpedanceCode })
-      formData.append('mappings', JSON.stringify({ mappings: this.impedances, default: noData }))
+  initTileSystemParams() {
+    this.tileSystemParams = {
+      conicSystem: {
+        code: "EPSG:5070",
+        srid: 5070
+      },
+      cellSize: 30,
+      systemOriginX: "-96.0009191593717",
+      systemOriginY: "23.0002109131773",
+      tileWidth: 300
     }
-    var xhr = new XMLHttpRequest()
-    xhr.open('POST', url, true)
-    xhr.addEventListener('error', (err) => {
-      console.log('error', err)
-      swal('Error', err.message, 'error')
+  }
+
+  createLibraryId() {
+    // First, add some hardcoded values to the tile system params before sending it to the API.
+    var postBody = {
+      libraryItem: {
+        dataType: 'tile_system',
+        name: this.datasetName
+      },
+      param: angular.copy(this.tileSystemParams)
+    }
+    postBody.param.param_type = 'ts'
+
+    // Then make the call that will provide us with the library id
+    return this.$http.post(`/service/v1/project/${this.projectId}/library_ts?user_id=${this.userId}`, postBody)
+           .then((result) => Promise.resolve(result.data.libraryItem.identifier))
+           .catch((err) => console.error(err))
+  }
+
+  saveTileSystem() {
+
+    return this.createLibraryId()
+    .then((libraryId) => {
+      var fileToUpload = this.$element.find('#conicTileSystemFile')[0]
+      var url = `/uploadservice/v1/library/${libraryId}?userId=${this.userId}`
+      var formData = new FormData()
+      formData.append('file', fileToUpload.files[0])
+      // Return the POST request so that it resolves only after the request is complete
+      return this.$http.post(url, formData, {
+          withCredentials: true,
+          headers: { 'Content-Type': undefined },
+          transformRequest: angular.identity
+        })
     })
-    xhr.addEventListener('load', function (e) {
-      try {
-        var data = JSON.parse(this.responseText)
-        if (data.error) return swal('Error', data.error, 'error')
-      } catch (e) {
-        console.log(e, e)
-        return swal('Error', 'Unexpected response from server', 'error')
-      }
-      if (this.status !== 200) {
-        return swal('Error', data.error || 'Unknown error', 'error')
-      }
-    })
-    xhr.send(formData)
+    .catch((err) => console.error(err))
   }
 }
 
@@ -112,6 +77,7 @@ app.component('conicTileSystemUploader', {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader-component.html',
   bindings: {
     projectId: '<',
+    userId: '<',
     onInitControl: '&',
     onDestroyControl: '&'
   },
