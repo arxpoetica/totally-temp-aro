@@ -31,17 +31,17 @@
     <label class="col-sm-4 control-label">Actions</label>
     <div class="col-sm-8">
       <button class="btn btn-primary btn-block"
-              ng-click="$ctrl.managerFunctions[$ctrl.selectedResourceKey].createBlank()"
+              ng-click="$ctrl.createBlankPriceBook()"
               ng-if="$ctrl.selectedResourceKey === 'price_book'">
         <i class="fa fa-file action-button-icon"></i>Create a new blank {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
       <button class="btn btn-primary btn-block" ng-click="$ctrl.editSelectedManager()">
         <i class="fa fa-pencil action-button-icon"></i>Edit the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
-      <button class="btn btn-primary btn-block" ng-click="$ctrl.managerFunctions[$ctrl.selectedResourceKey].cloneSelected()">
+      <button class="btn btn-primary btn-block" ng-click="$ctrl.cloneSelectedManagerFromSource($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
         <i class="fa fa-copy action-button-icon"></i>Clone the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
-      <button class="btn btn-danger btn-block" ng-click="$ctrl.managerFunctions[$ctrl.selectedResourceKey].deleteSelected()">
+      <button class="btn btn-danger btn-block" ng-click="$ctrl.deleteSelectedResourceManager($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
         <i class="fa fa-trash action-button-icon"></i>Delete the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
     </div>

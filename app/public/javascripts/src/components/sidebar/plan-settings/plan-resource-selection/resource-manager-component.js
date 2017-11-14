@@ -2,25 +2,12 @@ class ResourceManagerController {
   constructor($http, $document) {
     this.$http = $http
     this.$document = $document
-    // Define the functions for creating, cloning, etc. managers that the UI will bind to
-    this.managerFunctions = {
-      price_book: {
-        createBlank: this.createBlankPriceBook.bind(this),
-        cloneSelected: this.cloneSelectedPriceBook.bind(this),
-        deleteSelected: this.deleteSelectedResourceManager.bind(this, 'pricebook')
-      },
-      roic_manager: {
-        cloneSelected: this.cloneSelectedManagerFromSource.bind(this, 'roic-manager'),
-        deleteSelected: this.deleteSelectedResourceManager.bind(this, 'roic-manager')
-      },
-      arpu_manager: {
-        cloneSelected: this.cloneSelectedManagerFromSource.bind(this, 'arpu-manager'),
-        deleteSelected: this.deleteSelectedResourceManager.bind(this, 'arpu-manager')
-      },
-      impedance_mapping_manager: {
-        cloneSelected: this.cloneSelectedManagerFromSource.bind(this, 'impedance-manager'),
-        deleteSelected: this.deleteSelectedResourceManager.bind(this, 'impedance-manager')
-      }
+    // Hold a mapping that we use to map from resource keys to endpoints
+    this.resourceKeyToEndpointId = {
+      price_book: 'pricebook',
+      roic_manager: 'roic-manager',
+      arpu_manager: 'arpu-manager',
+      impedance_mapping_manager: 'impedance-manager'
     }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
@@ -116,15 +103,21 @@ class ResourceManagerController {
   }
 
   cloneSelectedManagerFromSource(managerId) {
-    // Create a resource manager
-    this.getNewResourceDetailsFromUser()
-    .then((resourceName) => {
-      // Create a new manager with the specified name and description
-      return this.$http.post(`/service/v1/${managerId}?source_manager=${this.selectedResourceManager.id}`,
-                             { name: resourceName, description: resourceName })
-    })
-    .then((result) => this.onManagerCreated(result.data.id))
-    .catch((err) => console.error(err))
+
+    if (managerId === 'pricebook') {
+      // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
+      this.cloneSelectedPriceBook()
+    } else {
+      // Create a resource manager
+      this.getNewResourceDetailsFromUser()
+      .then((resourceName) => {
+        // Create a new manager with the specified name and description
+        return this.$http.post(`/service/v1/${managerId}?source_manager=${this.selectedResourceManager.id}`,
+                              { name: resourceName, description: resourceName })
+      })
+      .then((result) => this.onManagerCreated(result.data.id))
+      .catch((err) => console.error(err))
+    }
   }
 
   onManagerCreated(createdManagerId) {
