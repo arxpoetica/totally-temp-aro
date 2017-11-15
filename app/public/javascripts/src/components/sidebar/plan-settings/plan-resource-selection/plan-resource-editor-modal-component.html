@@ -9,7 +9,7 @@
                       set-editing-mode="$ctrl.setEditingMode(mode)"
                       set-editing-manager-id="$ctrl.setEditingManagerId(newId)"
                       on-managers-changed="$ctrl.onManagersChanged()"
-                      set-current-selected-resource-key="$ctrl.setSelectedResourceKey({resourceKey:resourceKey})">
+                      set-current-selected-resource-key="$ctrl.setSelectedResourceKey(resourceKey)">
     </resource-manager>
 
     <pricebook-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'price_book'"

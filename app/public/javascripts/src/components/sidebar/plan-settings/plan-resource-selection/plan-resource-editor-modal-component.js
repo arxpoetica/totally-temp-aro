@@ -34,7 +34,7 @@ class PlanResourceEditorController {
   }
 
   setSelectedResourceKey(resourceKey) {
-    this.selectedResourceKey = resourceKey.resourceKey
+    this.selectedResourceKey = resourceKey
   }
 }
 
