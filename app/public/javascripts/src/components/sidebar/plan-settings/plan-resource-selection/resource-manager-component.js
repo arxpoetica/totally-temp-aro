@@ -146,6 +146,7 @@ class ResourceManagerController {
   editSelectedManager() {
     this.setEditingManagerId({ newId: this.selectedResourceManager.id })
     this.setEditingMode({ mode: this.editMode })
+    this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
   }
 
   askUserToConfirmManagerDelete(managerName) {
@@ -267,7 +268,8 @@ app.component('resourceManager', {
     editMode: '<',
     setEditingMode: '&',
     setEditingManagerId: '&',
-    onManagersChanged: '&'
+    onManagersChanged: '&',
+    setCurrentSelectedResourceKey: '&'
   },
   controller: ResourceManagerController
 })
