@@ -32,6 +32,10 @@ class PlanResourceEditorController {
   onManagersChanged() {
     this.state.loadPlanResourceSelectionFromServer()
   }
+
+  setSelectedResourceKey(resourceKey) {
+    this.selectedResourceKey = resourceKey.resourceKey
+  }
 }
 
 PlanResourceEditorController.$inject = ['state']
