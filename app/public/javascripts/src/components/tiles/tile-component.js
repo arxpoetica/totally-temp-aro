@@ -370,7 +370,8 @@ class MapTileRenderer {
                 }).length > 0) {
                 //Highlight the selected Selected RoadSegments
                 var drawingStyles = {
-                  lineWidth: mapLayer.highlightStyle.lineWidth
+                  lineWidth: mapLayer.highlightStyle.lineWidth,
+                  strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
                 this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles)
               } else {

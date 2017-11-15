@@ -61,6 +61,7 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
         strokeWeight: 2
       },
       highlight: {
+        strokeColor: '#b34d4d',
         strokeWeight: 4
       }
     },
@@ -120,7 +121,8 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
           strokeStyle: layer.style_options.normal.strokeColor,
           lineWidth: layer.style_options.normal.strokeWeight,
           highlightStyle: {
-            lineWidth: layer.style_options.highlight.strokeWeight
+            lineWidth: layer.style_options.highlight.strokeWeight,
+            strokeStyle: layer.style_options.highlight.strokeColor
           },
           fillStyle: "transparent",
           opacity: 0.7
@@ -139,7 +141,8 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
           strokeStyle: layer.style_options.normal.strokeColor,
           lineWidth: layer.style_options.normal.strokeWeight,
           highlightStyle: {
-            lineWidth: layer.style_options.highlight.strokeWeight
+            lineWidth: layer.style_options.highlight.strokeWeight,
+            strokeStyle: layer.style_options.highlight.strokeColor
           },
           fillStyle: "transparent",
           opacity: 0.7
