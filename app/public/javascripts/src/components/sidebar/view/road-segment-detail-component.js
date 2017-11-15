@@ -63,7 +63,7 @@ app.component('roadSegmentDetail', {
       flex-direction: column;
     }
     .road-info > div {
-      margin-top: 10px;
+      margin-top: 10px; /*Line  break for each div*/
     }    
   </style>
   <div class="plan-settings-container" ng-if="$ctrl.selectedEdgeInfo">
@@ -78,27 +78,26 @@ app.component('roadSegmentDetail', {
           <div>Total Length: {{$ctrl.selectedEdgeInfo.totalLength}}m</div>
           <div>Count: {{$ctrl.selectedEdgeInfo.count}}</div>
         </div>
+
+        <div class="road-info">
+          <div>Construction Type:</div>
+          <table class="table table-condensed table-striped">
+            <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.constructionTypes">
+              <td>{{x}}</td>
+              <td>{{y}}</td>  
+            </tr>
+          </table>
+
+          <div>Road Type:</div>
+          <table class="table table-condensed table-striped">
+            <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.roadTypes">
+              <td>{{x}}</td>
+              <td>{{y}}</td>  
+            </tr>
+          </table>
+        </div>
       </accordion-panel-contents>
 
-      <accordion-panel-title title="'Construction Type'" panel-id="'CONSTRUCTION_TYPE'"></accordion-panel-title>
-      <accordion-panel-contents panel-id="'CONSTRUCTION_TYPE'">
-        <table class="table table-condensed table-striped">
-          <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.constructionTypes">
-            <td>{{x}}</td>
-            <td>{{y}}</td>  
-          </tr>
-        </table>
-      </accordion-panel-contents>
-
-      <accordion-panel-title title="'Road Type'" panel-id="'ROAD_TYPE'"></accordion-panel-title>
-      <accordion-panel-contents panel-id="'ROAD_TYPE'">
-        <table class="table table-condensed table-striped">
-          <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.roadTypes">
-            <td>{{x}}</td>
-            <td>{{y}}</td>  
-          </tr>
-        </table>
-      </accordion-panel-contents>
     </accordion>
   </div>
   `,
