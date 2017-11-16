@@ -400,6 +400,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           var selectedLocationsSet = new Set()
           result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
           service.selectedLocations.next(selectedLocationsSet)
+          service.requestMapLayerRefresh.next({})
           return Promise.resolve()
         })
     } else {
@@ -416,10 +417,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           var selectedSASet = new Set()
           result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
           service.selectedServiceAreas.next(selectedSASet)
+          service.requestMapLayerRefresh.next({})
           if (forceMapRefresh) {
             tileDataService.clearDataCache()
             tileDataService.markHtmlCacheDirty()
-            service.requestMapLayerRefresh.next({})
           }
           return Promise.resolve()
         })

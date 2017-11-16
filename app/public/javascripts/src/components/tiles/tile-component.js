@@ -338,7 +338,7 @@ class MapTileRenderer {
               // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
               if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)) {
                 // Draw selected icon
-                ctx.drawImage(selectedLocationImage, x, y)
+                ctx.drawImage(selectedLocationImage[0], x, y)
               } else {
                 ctx.drawImage(entityImage, x, y)
               }
