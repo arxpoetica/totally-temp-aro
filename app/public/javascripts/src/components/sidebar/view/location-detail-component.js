@@ -1,4 +1,4 @@
-class ViewModeController {
+class ViewModeLocationController {
 
   constructor($http,state,configuration) {
     this.state = state
@@ -56,7 +56,7 @@ class ViewModeController {
   }  
 }
 
-ViewModeController.$inject = ['$http','state','configuration']
+ViewModeLocationController.$inject = ['$http','state','configuration']
 
 app.component('locationDetail', {
   template: `
@@ -64,6 +64,9 @@ app.component('locationDetail', {
     .view-mode-container {
       position: relative; /* This will require the parent to have position: relative or absolute */
       height: 100%;
+    }
+    .view-mode-container > div {
+      margin-top: 10px;
     }
   </style>
   <div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
@@ -81,5 +84,5 @@ app.component('locationDetail', {
   </div>
   `,
   bindings: {},
-  controller: ViewModeController
+  controller: ViewModeLocationController
 })

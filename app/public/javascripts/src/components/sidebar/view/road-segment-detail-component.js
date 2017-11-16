@@ -55,50 +55,38 @@ ViewModeRoadSegmentController.$inject = ['state', '$timeout', 'configuration']
 app.component('roadSegmentDetail', {
   template: `
   <style>
-    .plan-settings-container {
-      position: absolute;
-      height: 100%;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-    }
     .road-info > div {
       margin-top: 10px; /*Line  break for each div*/
-    }    
+    }
   </style>
+  
   <div class="plan-settings-container" ng-if="$ctrl.selectedEdgeInfo">
-    <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'ROAD_SEGMENT_INFO'">
-      <accordion-panel-title title="'Road Segment Info'" panel-id="'ROAD_SEGMENT_INFO'"></accordion-panel-title>
-      <accordion-panel-contents panel-id="'ROAD_SEGMENT_INFO'">
-        <div class="road-info" ng-if="$ctrl.singleRoad">
-          <div>Road Segment Id: {{$ctrl.selectedEdgeInfo.gid}}</div>
-          <div>Length: {{$ctrl.selectedEdgeInfo.edge_length}}m</div>
-        </div>
-        <div class="road-info" ng-if="!$ctrl.singleRoad">
-          <div>Total Length: {{$ctrl.selectedEdgeInfo.totalLength}}m</div>
-          <div>Count: {{$ctrl.selectedEdgeInfo.count}}</div>
-        </div>
+    <div class="road-info" ng-if="$ctrl.singleRoad">
+      <div>Road Segment Id: {{$ctrl.selectedEdgeInfo.gid}}</div>
+      <div>Length: {{$ctrl.selectedEdgeInfo.edge_length}}m</div>
+    </div>
+    <div class="road-info" ng-if="!$ctrl.singleRoad">
+      <div>Total Length: {{$ctrl.selectedEdgeInfo.totalLength}}m</div>
+      <div>Count: {{$ctrl.selectedEdgeInfo.count}}</div>
+    </div>
 
-        <div class="road-info">
-          <div>Construction Type:</div>
-          <table class="table table-condensed table-striped">
-            <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.constructionTypes">
-              <td>{{x}}</td>
-              <td>{{y}}</td>  
-            </tr>
-          </table>
+    <div class="road-info">
+      <div>Construction Type:</div>
+      <table class="table table-condensed table-striped">
+        <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.constructionTypes">
+          <td>{{x}}</td>
+          <td>{{y}}</td>  
+        </tr>
+      </table>
 
-          <div>Road Type:</div>
-          <table class="table table-condensed table-striped">
-            <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.roadTypes">
-              <td>{{x}}</td>
-              <td>{{y}}</td>  
-            </tr>
-          </table>
-        </div>
-      </accordion-panel-contents>
-
-    </accordion>
+      <div>Road Type:</div>
+      <table class="table table-condensed table-striped">
+        <tr ng-repeat="(x, y) in $ctrl.selectedEdgeInfo.roadTypes">
+          <td>{{x}}</td>
+          <td>{{y}}</td>  
+        </tr>
+      </table>
+    </div>
   </div>
   `,
   bindings: {},
