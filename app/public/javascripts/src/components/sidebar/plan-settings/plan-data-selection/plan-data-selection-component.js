@@ -63,10 +63,7 @@ class DataSelectionController {
 
     this.$http.delete(`/service_areas/${plan.id}/removeAllServiceAreaTargets`, { })
     .then(() => {
-      //Refresh the selected service areas on UI
-      //value true will refresh the tile cache 
-      this.state.reloadSelectedServiceAreas(true)
-
+      this.state.reloadSelectedServiceAreas()
       return Promise.resolve()
     })
   }

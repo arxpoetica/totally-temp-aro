@@ -9,6 +9,14 @@ class AccordionController {
     this.expandedAccordionId = this.initialExpandedPanel
   }
 
+  $doCheck() {
+    //Toggle the panel when programatically change the initialExpandedPanel
+    if (this.initialExpandedPanel && this.tooglePanel != this.initialExpandedPanel) {
+      this.tooglePanel = this.initialExpandedPanel
+      this.setExpandedAccordionId(this.initialExpandedPanel)
+    }
+  }
+
   // Returns the next available child ID.
   getNextChildId() {
     // Set the expanded accordion ID if this is the first child being added
