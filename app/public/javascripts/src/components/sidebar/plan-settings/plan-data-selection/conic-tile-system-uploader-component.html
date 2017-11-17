@@ -16,31 +16,9 @@
       <aro-object-editor object-to-edit="$ctrl.tileSystemParams"></aro-object-editor>
     </div>
   </div>
-  <!-- <div class="form-group">
-    <label class="col-sm-4 control-label">Impedance Mapping</label>
-    <div class="col-sm-8">
-      <div class="morp_impedance_table">
-        <table ng-show="$ctrl.impedances.length > 0">
-          <thead>
-          <tr>
-            <th class="morph_table_header">Code</th>
-            <th class="morph_table_header">Impedance Per 100m</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="morp_impedance_row" ng-repeat="impedance in $ctrl.impedances">
-            <td><input name="code" class="form-control col-sm-7 morp_impedance_item" style="width: 75%" ng-model="impedance.code"></td>
-            <td>
-              <div class="imp_item_1 inp_txt"><input name="impr" class="form-control col-sm-7 morp_impedance_item" style="width: 75%" ng-model="impedance.value"></div>
-              <div class="imp_item_1 inp_radio" style="padding-left: 10px"><input class="" ng-model="$ctrl.defaultImpedanceCode" type="radio" value="{{impedance.code}}" title="Mark as default"/></div>
-            </td>
-            <td><button class="btn_remove_imp" title="Remove mapping" ng-click="$ctrl.removeImpedanceAt($index)"><i class="fa fa-trash"></i></button></td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <button type="button" class="btn btn-sm btn-primary btn-add-impc" ng-click="$ctrl.addImpedance()"><i class="fa fa-plus btn-add-impd"></i></button>
-      </div>
-    </div> -->
+</div>
+<div ng-if="$ctrl.isUploading" style="position: absolute; top: 0px; left: 0px; right: 0px; bottom: 0px; background-color: rgba(255, 255, 255, 0.7); display: flex; align-items: center; justify-content: center;">
+  <div style="color: white;background-color: rgba(0, 0, 0, 0.7);padding: 20px;">
+    <span style="font-size: 20px;">Building tile system on the server.<br>This can take a few minutes...</span>
   </div>
+</div>

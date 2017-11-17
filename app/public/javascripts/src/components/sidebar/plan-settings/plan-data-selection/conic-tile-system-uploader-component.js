@@ -3,6 +3,7 @@ class ConicTileSystemUploaderController {
     this.$element = $element
     this.$http = $http
     this.datasetName = ''
+    this.isUploading = false
     this.initTileSystemParams()
   }
 
@@ -54,6 +55,10 @@ class ConicTileSystemUploaderController {
 
   saveTileSystem() {
 
+    if (this.isUploading) {
+      return  // Nothing to do until the last upload is done
+    }
+    this.isUploading = true
     return this.createLibraryId()
     .then((libraryId) => {
       var fileToUpload = this.$element.find('#conicTileSystemFile')[0]
@@ -67,7 +72,14 @@ class ConicTileSystemUploaderController {
           transformRequest: angular.identity
         })
     })
-    .catch((err) => console.error(err))
+    .then((result) => {
+      this.isUploading = false
+      return Promise.resolve(result)
+    })
+    .catch((err) => {
+      this.isUploading = false
+      console.error(err)
+    })
   }
 }
 
