@@ -5,6 +5,7 @@ class NetworkBuildOutputController {
     this.$http = $http
     this.map_tools = map_tools
     this.networkBuildSummary = {}
+    this.plannedNetworkDemand = {}
     this.config = config
 
     state.plan
@@ -18,6 +19,7 @@ class NetworkBuildOutputController {
   getNetworkBuildReport() {
     this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
       this.networkBuildSummary = response.data
+      this.plannedNetworkDemand = this.networkBuildSummary.demandSummary.networkDemands.filter((item) => item.demandType === 'planned_demand')[0]
     })  
   }
 
