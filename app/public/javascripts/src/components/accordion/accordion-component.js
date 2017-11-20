@@ -10,10 +10,11 @@ class AccordionController {
   }
 
   $doCheck() {
-    //Toggle the panel when programatically change the initialExpandedPanel
-    if (this.initialExpandedPanel && this.tooglePanel != this.initialExpandedPanel) {
-      this.tooglePanel = this.initialExpandedPanel
-      this.setExpandedAccordionId(this.initialExpandedPanel)
+    //Toggle the panel in the following two ways
+    //Programatically change the toggleExpandedPanel value.
+    //When click the specific panel.
+    if (this.toggleExpandedPanel && this.expandedAccordionId != this.toggleExpandedPanel) {
+      this.setExpandedAccordionId(this.toggleExpandedPanel)
     }
   }
 
@@ -29,6 +30,7 @@ class AccordionController {
   // Sets the ID of the accordion to be expanded
   setExpandedAccordionId(id) {
     this.expandedAccordionId = id
+    this.toggleExpandedPanel = id
     // Notify listeners (child elements) so that they can expand/collapse themselves
     this.expandedAccordionIdListeners.forEach((listener) => listener())
   }
@@ -58,7 +60,8 @@ app.component('accordion', {
   `,
   transclude: true,
   bindings: {
-    initialExpandedPanel: '<'
+    initialExpandedPanel: '<',
+    toggleExpandedPanel: '=' // [Optional] When we wants to toggle the panel programatically.
   },
   controller: AccordionController
 })

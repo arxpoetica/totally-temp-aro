@@ -2,14 +2,14 @@ class ViewModeController {
   
   constructor(state) {
     this.state = state
-    this.initialPanel
+    this.togglePanel
 
     this.state.showViewModeInfo
       .subscribe((options) => {
         if (options.locations && options.locations.length > 0) {
-          this.initialPanel = 'LOCATION_INFO'
+          this.togglePanel = 'LOCATION_INFO'
         } else if (options.roadSegments && options.roadSegments.length > 0) {
-          this.initialPanel = 'ROAD_SEGMENT_INFO'
+          this.togglePanel = 'ROAD_SEGMENT_INFO'
         }
       })
   }
@@ -33,10 +33,10 @@ app.component('viewMode', {
   </style>
 
   <div class="plan-settings-container">
-    <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="$ctrl.initialPanel">
+    <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.togglePanel">
       <accordion-panel-title title="'Location Info'" panel-id="'LOCATION_INFO'"></accordion-panel-title>
       <accordion-panel-contents panel-id="'LOCATION_INFO'">
-        <location-detail></road-segment-detail>
+        <location-detail></location-detail>
       </accordion-panel-contents>
       <accordion-panel-title title="'Road Segment Info'" panel-id="'ROAD_SEGMENT_INFO'"></accordion-panel-title>
       <accordion-panel-contents panel-id="'ROAD_SEGMENT_INFO'">
