@@ -79,15 +79,15 @@
 
 <div class="tool-bar" ng-style="{ margin: $ctrl.marginPixels + 'px' }">
 
-  <img src="images/logos/aro/logo_navbar.png" style="align-self: center; padding-left: 10px; padding-right: 10px">
+  <img src="images/logos/aro/logo_navbar.png" class="no-collapse" style="align-self: center; padding-left: 10px; padding-right: 10px">
 
-  <div ng-controller="global-search-controller" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
+  <div ng-controller="global-search-controller" class="no-collapse" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
     <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
   </div>
 
-  <div class="fa fa-search" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
+  <div class="fa fa-search no-collapse" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
 
-  <div class="separator"></div>
+  <div class="separator" class="no-collapse"></div>
 
   <button class="btn"
           ng-click="$ctrl.openGlobalSettings()"

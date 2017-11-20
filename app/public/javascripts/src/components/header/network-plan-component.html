@@ -11,6 +11,14 @@
     cursor: default;
     color: white;
   }
+
+  .non-ephemeral {
+    font-size: 25px;
+    line-height: 55px;
+    width: 170px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 </style>
 
 <div class="network-plan">
@@ -20,7 +28,7 @@
   </div>
 
   <!-- For saved plans, display the plan name only -->
-  <div ng-if="$ctrl.plan && !$ctrl.plan.ephemeral" style="font-size: 25px; line-height: 55px">
+  <div ng-if="$ctrl.plan && !$ctrl.plan.ephemeral" title="{{$ctrl.plan.name}}" class="non-ephemeral">
     {{$ctrl.plan.name}}
   </div>
 </div>

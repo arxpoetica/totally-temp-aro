@@ -140,7 +140,7 @@ class ToolBarController {
         if (!isDropDown && !isNaN(toolbarButton.scrollWidth)) {
           toolbarButtons.push(toolbarButton)
           cumulativeWidth += toolbarButton.scrollWidth
-          if (cumulativeWidth > toolbarWidth) {
+          if (cumulativeWidth > toolbarWidth && toolbarButton.className.indexOf('no-collapse') < 0) {
             ++collapsedButtons
           }
         }
