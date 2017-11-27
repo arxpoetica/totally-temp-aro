@@ -2,21 +2,12 @@ class ResourceManagerController {
   constructor($http, $document) {
     this.$http = $http
     this.$document = $document
-    // Define the functions for creating, cloning, etc. managers that the UI will bind to
-    this.managerFunctions = {
-      price_book: {
-        createBlank: this.createBlankPriceBook.bind(this),
-        cloneSelected: this.cloneSelectedPriceBook.bind(this),
-        deleteSelected: this.deleteSelectedPriceBook.bind(this)
-      },
-      roic_manager: {
-        cloneSelected: this.cloneSelectedRoicManager.bind(this),
-        deleteSelected: this.deleteSelectedRoicManager.bind(this)
-      },
-      arpu_manager: {
-        cloneSelected: this.cloneSelectedArpuManager.bind(this),
-        deleteSelected: this.deleteSelectedArpuManager.bind(this)
-      }
+    // Hold a mapping that we use to map from resource keys to endpoints
+    this.resourceKeyToEndpointId = {
+      price_book: 'pricebook',
+      roic_manager: 'roic-manager',
+      arpu_manager: 'arpu-manager',
+      impedance_mapping_manager: 'impedance-manager'
     }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
@@ -111,28 +102,22 @@ class ResourceManagerController {
     .catch((err) => console.error(err))
   }
 
-  cloneSelectedRoicManager() {
-    // Create a resource manager
-    this.getNewResourceDetailsFromUser()
-    .then((resourceName) => {
-      // Create a new ROIC manager with the specified name and description
-      return this.$http.post(`/service/v1/roic-manager?source_manager=${this.selectedResourceManager.id}`,
-                             { name: resourceName, description: resourceName })
-    })
-    .then((result) => this.onManagerCreated(result.data.id))
-    .catch((err) => console.error(err))
-  }
+  cloneSelectedManagerFromSource(managerId) {
 
-  cloneSelectedArpuManager() {
-    // Create a resource manager
-    this.getNewResourceDetailsFromUser()
-    .then((resourceName) => {
-      // Create a new ARPU manager with the specified name and description
-      return this.$http.post(`/service/v1/arpu-manager?source_manager=${this.selectedResourceManager.id}`,
-                             { name: resourceName, description: resourceName })
-    })
-    .then((result) => this.onManagerCreated(result.data.id))
-    .catch((err) => console.error(err))
+    if (managerId === 'pricebook') {
+      // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
+      this.cloneSelectedPriceBook()
+    } else {
+      // Create a resource manager
+      this.getNewResourceDetailsFromUser()
+      .then((resourceName) => {
+        // Create a new manager with the specified name and description
+        return this.$http.post(`/service/v1/${managerId}?source_manager=${this.selectedResourceManager.id}`,
+                              { name: resourceName, description: resourceName })
+      })
+      .then((result) => this.onManagerCreated(result.data.id))
+      .catch((err) => console.error(err))
+    }
   }
 
   onManagerCreated(createdManagerId) {
@@ -178,31 +163,11 @@ class ResourceManagerController {
       .catch((err) => console.error(err))
   }
 
-  deleteSelectedPriceBook() {
+  deleteSelectedResourceManager(managerId) {
     this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          this.deleteManager(`/service/v1/pricebook/${this.selectedResourceManager.id}`)
-        }
-      })
-      .catch((err) => console.error(err))
-  }
-
-  deleteSelectedRoicManager() {
-    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
-      .then((okToDelete) => {
-        if (okToDelete) {
-          this.deleteManager(`/service/v1/roic-manager/${this.selectedResourceManager.id}`)
-        }
-      })
-      .catch((err) => console.error(err))
-  }
-
-  deleteSelectedArpuManager() {
-    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
-      .then((okToDelete) => {
-        if (okToDelete) {
-          this.deleteManager(`/service/v1/arpu-manager/${this.selectedResourceManager.id}`)
+          this.deleteManager(`/service/v1/${managerId}/${this.selectedResourceManager.id}`)
         }
       })
       .catch((err) => console.error(err))
