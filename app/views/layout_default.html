@@ -135,22 +135,6 @@
   </div>
 </div>
 
-<div class="map-tool-wrapper" ng-controller="area-network-planning-controller">
-  <div ng-show="map_tools.is_visible(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)" class="map-tool panel panel-primary">
-    <div class="panel-heading" ng-bind="map_tools.get_tool_name(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)" ng-click="map_tools.collapse(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)" ng-click="map_tools.expand(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-    </div>
-    <div class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded(map_tools.TOOL_IDS.AREA_NETWORK_PLANNING)">
-      <% include controller_area_network_planning.html %>
-    </div>
-  </div>
-</div>
-
 <div class="map-tool-wrapper" ng-controller="financial-profile-tool-controller">
   <div ng-show="map_tools.is_visible('financial_profile')" class="map-tool panel panel-primary" id="financial_profile_controller" style="width: 1000px">
     <div class="panel-heading">
@@ -172,40 +156,6 @@
       </span>      
     </div>
     <% include controller_financial_profile_tool.html %>
-  </div>
-</div>
-
-<% if (!config.ui.map_tools.target_builder.disabled) { %>
-<div class="map-tool-wrapper" ng-controller="target-builder-controller">
-  <div ng-show="map_tools.is_visible('target_builder')" class="map-tool panel panel-primary">
-    <div class="panel-heading" ng-bind="map_tools.get_tool_name('target_builder')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('target_builder')" ng-click="map_tools.collapse('target_builder')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('target_builder')" ng-click="map_tools.expand('target_builder')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-    </div>
-    <div class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded('target_builder')">
-      <% include controller_target_builder.html %>
-    </div>
-  </div>
-</div>
-<% } %>
-
-<div class="map-tool-wrapper" ng-controller="backhaul-controller">
-  <div ng-show="map_tools.is_visible('backhaul')" class="map-tool panel panel-primary">
-    <div class="panel-heading" ng-bind="map_tools.get_tool_name('backhaul')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('backhaul')" ng-click="map_tools.collapse('backhaul')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('backhaul')" ng-click="map_tools.expand('backhaul')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-    </div>
-    <div class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded('backhaul')">
-      <% include controller_backhaul.html %>
-    </div>
   </div>
 </div>
 
