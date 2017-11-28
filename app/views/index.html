@@ -60,10 +60,6 @@
       <% include modal_upload_morphology.html %>
     </div>
 
-    <div ng-controller="upload_fiber_controller">
-      <% include modal_upload_fiber.html %>
-    </div>
-
     <% if (user.rol === 'admin') { %>
       <div ng-controller="admin_users_controller">
         <% include modal_manage_users.html %>
@@ -336,7 +332,6 @@
   <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/controllers/user_defined_boundary_controller.js"></script>
   <script src="javascripts/lib/controllers/upload_morphology_controller.js"></script>
-  <script src="javascripts/lib/controllers/upload_fiber_controller.js"></script>
   <script src="javascripts/lib/controllers/reports_controller.js"></script>
   <script src="javascripts/lib/controllers/data_management_controller.js"></script>
   <script src="javascripts/lib/controllers/construction_sites_controller.js"></script>
