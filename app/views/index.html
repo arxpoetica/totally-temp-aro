@@ -56,14 +56,6 @@
       <% include modal_upload_morphology.html %>
     </div>
 
-    <% if (user.rol === 'admin') { %>
-      <div ng-controller="admin_users_controller">
-        <% include modal_manage_users.html %>
-        <% include modal_new_user.html %>
-        <% include modal_send_mail.html %>
-      </div>
-    <% } %>
-
     <!-- Remove controller for now. Later, the whole navigation div should be gone<div ng-controller="navigation_menu_controller">-->
     <div>
 
@@ -317,7 +309,6 @@
   <script src="javascripts/lib/controllers/expert_mode_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_fiber_controller.js"></script>
   <script src="javascripts/lib/controllers/contextual_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
   <script src="javascripts/lib/controllers/legend_controller.js"></script>
