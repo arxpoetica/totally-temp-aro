@@ -3,14 +3,6 @@ var helpers = require('../helpers')
 var public_config = helpers.public_config
 
 exports.configure = (app, middleware) => {
-  app.get('/settings/show', (request, response, next) => {
-    response.render('settings.html', {
-      user: request.user,
-      error: request.flash('error'),
-      success: request.flash('success'),
-      config: public_config
-    })
-  })
 
   app.post('/settings/update_settings', (request, response, next) => {
     var user = request.user
@@ -25,7 +17,6 @@ exports.configure = (app, middleware) => {
 
     if (oldPassword && password && passwordConfirm) {
       if (password !== passwordConfirm) {
-        //request.flash('error', 'Passwords do not match')
         response.status(500)
         response.json({
           error: 'Passwords do not match'
@@ -40,15 +31,11 @@ exports.configure = (app, middleware) => {
         models.User.updateSettings(user.id, firstName, lastName, email)
       ))
       .then(() => {
-        //request.flash('success', 'Settings changed successfully')
-        //response.redirect('/settings/show')
         response.json({
           success: 'Settings changed successfully'
         })
       })
       .catch((err) => {
-        //request.flash('error', err.message)
-        //response.redirect('/settings/show')
         response.status(500)
         response.json({
           error: err.message
