@@ -32,10 +32,6 @@
       <% include modal_data_management.html %>
     </div>
 
-    <div ng-controller="reports_controller">
-      <% include modal_reports.html %>
-    </div>
-
     <div ng-controller="build_lease_controller">
       <% include modal_build_lease.html %>
     </div>
@@ -61,44 +57,8 @@
 
       <% include modal_build_sequence.html %>
 
-      <% include modal_select_plan.html %>
-
-      <% include modal_new_plan.html %>
-
-      <% include modal_edit_plan.html %>
-
       <% include modal_share_plan.html %>
 
-      <% include modal_plan_combo.html %>
-
-      <div class="modal" id="export-plan" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Export route</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label class="col-sm-3 control-label">Filename</label>
-                  <div class="col-sm-9">
-                    <div class="input-group">
-                      <input type="text" class="form-control" ng-model="kml_file_name">
-                      <span class="input-group-addon">.kml</span>
-                    </div>
-                  </div>
-                </div>
-                <span id="export-error" style="display: none">Filename can only contain letters and numbers!</span>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" ng-click="export_kml()">Export file</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
 
@@ -318,7 +278,6 @@
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/controllers/upload_morphology_controller.js"></script>
-  <script src="javascripts/lib/controllers/reports_controller.js"></script>
   <script src="javascripts/lib/controllers/data_management_controller.js"></script>
   <script src="javascripts/lib/controllers/construction_sites_controller.js"></script>
   <script src="javascripts/lib/controllers/map_settings_controller.js"></script>
