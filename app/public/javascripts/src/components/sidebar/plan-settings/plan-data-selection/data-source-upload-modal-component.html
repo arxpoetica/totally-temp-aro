@@ -17,7 +17,7 @@
       </div>
       
       <!-- For all data sources other than 'conic_tile_system', just upload a file --> 
-      <div ng-if="$ctrl.state.uploadDataSource.name !== 'conic_tile_system'">
+      <div ng-if="$ctrl.state.uploadDataSource.name !== 'tile_system'">
         <div ng-show="!$ctrl.isDataManagementView">
           <div class="form-group" ng-if="$ctrl.state.uploadDataSource.name === 'service_layer'">
             <label class="col-sm-4 control-label">Polygon radius (meters)</label>
@@ -53,7 +53,7 @@
       </div>
 
       <!-- For conic tile system, show a custom control -->
-      <conic-tile-system-uploader ng-if="$ctrl.state.uploadDataSource.name === 'conic_tile_system' && !$ctrl.isDataManagementView"
+      <conic-tile-system-uploader ng-if="$ctrl.state.uploadDataSource.name === 'tile_system' && !$ctrl.isDataManagementView"
                                   project-id="$ctrl.state.getProjectId()"
                                   on-init-control="$ctrl.onInitConicUploader(api)"
                                   on-destroy-control="$ctrl.onDestroyConicUploader()">
