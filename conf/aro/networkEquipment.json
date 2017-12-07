@@ -35,8 +35,8 @@
         },
         "planned_bulk_distribution_terminal": {
           "label": "Bulk Distribution Terminal",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distrubution_terminal/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/bulk_distrubution_terminal.png",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distribution_terminal/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
           "equipmentType": "point",
           "drawingOptions": {
@@ -78,7 +78,7 @@
           "label": "Feeder Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/FEEDER/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/fiber_feeder.png",
-          "aggregateZoomThreshold": "13",
+          "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
@@ -88,7 +88,7 @@
           "label": "Distribution Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/DISTRIBUTION/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/fiber_distribution.png",
-          "aggregateZoomThreshold": "13",
+          "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#ff0000"
@@ -98,7 +98,7 @@
           "label": "Backhaul Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/BACKBONE/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
-          "aggregateZoomThreshold": "13",
+          "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#000000"
@@ -108,9 +108,20 @@
     }
   },
   "existingFiberOptions" : {
-    "aggregateZoomThreshold": "12",
+    "aggregateZoomThreshold": "10",
     "drawingOptions": {
       "strokeStyle": "#000000"
     }
-  }
+  },
+  "tileCacheKeywords": [
+    "central_office",
+    "fiber_distribution_hub",
+    "fiber_distribution_terminal",
+    "bulk_distribution_terminal",
+    "splice_point",
+    "cell_5g",
+    "FEEDER",
+    "DISTRIBUTION",
+    "BACKBONE"
+  ]
 }

@@ -1,7 +1,7 @@
 /* Override some bootstrap styles */
 
 body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: 'Lato', sans-serif !important;
+  font-family: 'Exo', sans-serif;
 }
 
 /* -- */
@@ -24,16 +24,16 @@ html, body {
   right: 0px;
 }
 
-#aro-header {
+/* #aro-header {
   background-color: white;
   box-shadow: 0px 3px 15px #888888;
-  z-index: 1; /* This is needed to show the "box-shadow" on top of the google map */
+  z-index: 1; This is needed to show the "box-shadow" on top of the google map
   position:absolute;
   top: 50px;
   left: 0px;
   height: 50px;
   right: 0px;
-}
+} */
 
 #map-canvas {
   height: 100%;
@@ -42,7 +42,7 @@ html, body {
 
 #left-col-wrapper {
   position: absolute;
-  top: 100px;
+  top: 0px;
   bottom: 0px; /* footer height */
   left: 0;
   z-index: 3;
@@ -75,7 +75,7 @@ html, body {
 .map-tool {
   border: 2px solid #eee;
   width: 320px;
-  margin: 0;
+  margin-top: 8%;
 }
 
 .map-tool.ng-hide-remove {
@@ -466,12 +466,11 @@ footer nav {
   border-bottom: 0;
 }
 
-
 #global-search {
   position: absolute;
   left: 76px;
   width: 319px;
-  top: 105px;
+  top: 200px;
   z-index: 1;
 }
 
@@ -625,8 +624,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 #map-extras {
   position:fixed;
-  right: 10px;
-  top: 180px;
+  left: 200px;
+  bottom: 10px;
 }
 
 .popover-content {
@@ -929,6 +928,10 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   max-height: 358px;
   overflow-y: scroll;
 }
+.morp_impedance_table {
+  max-height: 358px;
+  overflow-y: scroll;
+}
 
 .morph_table_header {
   padding-left: 6px;
@@ -1151,4 +1154,28 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
      * top: 0;
      * left: 0;
      */
+}
+
+.progress-bar-optimization {
+  background-color: #1a79db;
+}
+
+.modify-analysis-button, .modify-analysis-button:hover, .modify-analysis-button:focus {
+  background-color: #4cae4c;
+  color: white;
+}
+
+/* Class to disable sibling controls. Use with hatched background */
+.disable-sibling-controls {
+  position:absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  opacity: 0.4;
+  /* Define a hatched background for a div, from https://codepen.io/themitchy/pen/sHxdf */
+  background-image: linear-gradient(45deg, transparent 45%, #919195 50%, transparent 55%, transparent 100%),
+                    linear-gradient(-45deg, transparent 45%, #919195 50%, transparent 55%, transparent 100%);
+  background-size: 8px 8px;
+  background-position: 4px 4px;
 }

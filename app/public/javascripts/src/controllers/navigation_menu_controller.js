@@ -90,7 +90,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
     $('#plan-saving').stop().hide()
     $('#plan-saved').stop().hide()
     $('#plan-saving-progress').hide()
-    state.loadPlan(plan)
+    state.loadPlan(plan.id)
     $rootScope.$broadcast('plan_selected', plan)
     $('#select-plan').modal('hide')
     $('#plan-combo').modal('hide')
@@ -98,13 +98,8 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
 
   $rootScope.$on('plan_selected', (e, plan) => {
 
-    // Clear the client side tile cache
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    state.requestMapLayerRefresh.next({})
-
     $scope.plan = plan
-    state.loadPlan(plan)
+    state.loadPlan(plan.id)
     $location.path(plan ? '/plan/' + plan.id : '/')
 
     $scope.market_profile = {}
@@ -119,20 +114,6 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   
   $rootScope.$on('route_planning_changed', (e, plan) => {
     $scope.plan = plan
-  })
-
-  $rootScope.$on('plan_cleared', (e, plan) => {
-    // Clear the client side tile cache
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    state.requestMapLayerRefresh.next({})
-  })
-
-  // When a plan is done, clear the tile cache
-  $rootScope.$on('optimization_stopped_polling', () => {
-    tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
-    state.requestMapLayerRefresh.next({})
   })
 
   $rootScope.$on('route_changed', (e) => {
@@ -250,7 +231,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
         .then((response) => {
             $http.get('/optimization/processes').then((running) => {
               response.data.forEach((plan) => {
-                var info = running.data.find((status) => status.planId === +plan.id)
+                var info = running.data.find((status) => status.plan.id === +plan.id)
                 if (info) {
                   var diff = (Date.now() - new Date(info.startDate).getTime()) / 1000
                   var min = Math.floor(diff / 60)

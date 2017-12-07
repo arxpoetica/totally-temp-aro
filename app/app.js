@@ -17,6 +17,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(express.static('public'))
 app.set('views', './views')
+app.use('/components', express.static('./public/javascripts/lib/components'))
 app.engine('html', ejs.renderFile)
 if (process.env.NODE_ENV === 'staging') {
   app.set('env', 'production')

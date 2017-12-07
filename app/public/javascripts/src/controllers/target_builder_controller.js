@@ -72,8 +72,8 @@ app.controller('target-builder-controller', ['$scope', '$rootScope', '$http', '$
       })
       // Make these changes to the database, then reload targets from the DB
       var addRemoveTargetPromises = [
-        $http.post(`/network_plan/${state.planId}/addTargets`, { locationIds: Array.from(idsToAdd) }),
-        $http.post(`/network_plan/${state.planId}/removeTargets`, { locationIds: Array.from(idsToRemove) })
+        $http.post(`/network_plan/${state.plan.id}/addTargets`, { locationIds: Array.from(idsToAdd) }),
+        $http.post(`/network_plan/${state.plan.id}/removeTargets`, { locationIds: Array.from(idsToRemove) })
       ]
       Promise.all(addRemoveTargetPromises)
         .then((response) => {

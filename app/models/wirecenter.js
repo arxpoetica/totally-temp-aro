@@ -4,6 +4,7 @@
 
 var helpers = require('../helpers')
 var database = helpers.database
+var _ = require('underscore')
 
 module.exports = class Wirecenter {
 
@@ -32,6 +33,49 @@ module.exports = class Wirecenter {
         ${database.intersects(viewport, 'geom', 'WHERE')}
     `
     return database.polygons(sql, [type], true, viewport)
+  }
+
+  static addServiceAreaTargets (plan_id, service_area_ids) {
+    if (!_.isArray(service_area_ids) || service_area_ids.length === 0) return Promise.resolve()
+
+    var sql = `
+      INSERT INTO client.selected_service_area(service_area_id, plan_id)
+      (
+        SELECT id, $2
+        FROM client.service_area
+        WHERE id IN ($1)
+        AND id NOT IN (SELECT service_area_id FROM client.selected_service_area WHERE plan_id=$2)  -- We don't want duplicate servicearea targets
+      )
+    `
+    return database.query(sql, [service_area_ids, plan_id])
+  }
+
+  static removeServiceAreaTargets (plan_id, service_area_ids) {
+    if (!_.isArray(service_area_ids) || service_area_ids.length === 0) return Promise.resolve()
+
+    var sql = `
+      DELETE FROM client.selected_service_area
+      WHERE service_area_id in ($1)
+      AND plan_id = $2
+    `
+    return database.query(sql, [service_area_ids, plan_id])
+  }
+
+  static removeAllServiceAreaTargets (plan_id) {
+    var sql = 'DELETE FROM client.selected_service_area WHERE plan_id=$1'    
+    return database.query(sql, [plan_id])
+  }
+
+  /*
+   * Returns a list of SA IDs that are selected for this plan and the given viewport
+   */
+  static selectedServiceAreaIds(planId) {
+    var sql = `
+      SELECT service_area_id
+      FROM client.selected_service_area
+      WHERE plan_id=$1
+    `
+    return database.query(sql, [planId])
   }
 
 }

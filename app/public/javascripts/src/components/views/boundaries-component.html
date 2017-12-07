@@ -1,0 +1,44 @@
+<div class="map-tool-wrapper">
+  <div ng-show="$ctrl.map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
+    <div class="panel-heading" ng-bind="$ctrl.map_tools.get_tool_name('boundaries')"></div>
+    <div class="panel-body map-tool-panel-body" ng-show="$ctrl.map_tools.is_expanded('boundaries')">
+
+      <div>
+        <div ng-repeat="layer in $ctrl.state.boundaries.tileLayers">
+          <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
+            <div class="pull-right">
+              <input type="checkbox" class="checkboxfill" ng-model="layer.visible_check" name="ctype-name" ng-change="$ctrl.tilesToggleVisibility(layer)"
+                ng-disabled="layer.disabled">
+            </div>
+            <div class="pull-right" style="margin-right: 30px">
+              <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
+            </div>
+            <label>
+              Service Areas
+            </label>
+          </div>
+        </div>
+
+        <hr>
+
+        <div ng-show="$ctrl.state.boundaries.areaLayers.length > 0 || boundaries.length > 0">
+          <div ng-repeat="layer in $ctrl.state.boundaries.areaLayers">
+            <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
+              <div class="pull-right">
+                <input type="checkbox" class="checkboxfill" ng-model="layer.visible_check" name="ctype-name" ng-change="$ctrl.toggleVisibility(layer)"
+                  ng-disabled="layer.disabled">
+              </div>
+              <div class="pull-right" style="margin-right: 30px">
+                <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
+              </div>
+              <label>
+                {{layer.name}}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

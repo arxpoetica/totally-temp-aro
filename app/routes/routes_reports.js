@@ -2,6 +2,7 @@ var helpers = require('../helpers')
 var models = require('../models')
 var config = helpers.config
 var database = helpers.database
+var parse = require('csv-parse')
 
 function listTABC (plan_id) {
   var names = ['T', 'A', 'B', 'C']
@@ -175,5 +176,36 @@ exports.configure = (api, middleware) => {
        })
 
   });
+
+  api.get('/reports/network_analysis/:plan_id/:name', (request, response, next) => {
+    var name = request.params.name
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'GET',
+      url: config.aro_service_url + `/v1/report-extended/${name}/${plan_id}.csv`
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        parse(output,function(err, jsonoutput){
+          response.send(jsonoutput)
+        })
+      })
+      .catch(next)
+  })
+
+  api.get('/reports/network_analysis/download/:plan_id/:name', (request, response, next) => {
+    var name = request.params.name
+    var plan_id = request.params.plan_id
+    var req = {
+      method: 'GET',
+      url: config.aro_service_url + `/v1/report-extended/${name}/${plan_id}.csv`
+    }
+    return models.AROService.request(req)
+      .then((output) => {
+        response.attachment('NetworkAnalysis.csv')
+        response.send(output)
+      })
+      .catch(next)
+  })
 
 }

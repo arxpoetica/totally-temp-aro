@@ -10,6 +10,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
   $scope.planState = state;
 
+  $scope.existingFiberLayer = {
+    name: 'Existing Fiber',
+    iconUrl: '/images/map_icons/aro/fiber_backhaul.png',
+    visible: false
+  }
+
+  $scope.toggleExistingFiberLayer = () => {
+    updateMapLayers()
+  }
+
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
@@ -49,7 +59,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createdMapLayerKeys.clear()
 
     // Only add planned equipment if we have a valid plan selected
-    if (state.planId !== state.INVALID_PLAN_ID) {
+    var planId = state.plan && state.plan.getValue() && state.plan.getValue().id
+    if (planId) {
 
       // Loop through all network equipment categories (e.g. "Existing Equipment")
       state.networkEquipments.forEach((category) => {
@@ -57,7 +68,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // Loop through all the layers in this category
         category.layers.forEach((networkEquipment) => {
           if (networkEquipment.checked) {
-            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', state.planId)
+            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
             if (networkEquipment.equipmentType === 'point') {
               var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
               tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
@@ -74,7 +85,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
               strokeStyle: networkEquipment.drawingOptions.strokeStyle,
               lineWidth: 2,
-              fillStyle: networkEquipment.drawingOptions.fillStyle
+              fillStyle: networkEquipment.drawingOptions.fillStyle,
+              opacity: 0.5
             }
             createdMapLayerKeys.add(networkEquipment.key)
           }
@@ -82,20 +94,23 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       })
     }
 
+    var layer = $scope.existingFiberLayer
     // Create layers for existing fiber (the ones that are selected for display)
-    var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
-    state.selectedExistingFibers.forEach((selectedExistingFiber) => {
+    if (layer.visible && state.dataItems.fiber) {
+      var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
       var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
-      var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedExistingFiber.libraryId}`
-      oldMapLayers[mapLayerKey] = {
-        dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedExistingFiber.libraryId}/${lineTransform}/`],
-        iconUrl: '/images/map_icons/aro/central_office.png', // Hack because we need some icon
-        renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-        strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
-        lineWidth: 2
-      }
-      createdMapLayerKeys.add(mapLayerKey)
-    })
+      state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
+        var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
+        oldMapLayers[mapLayerKey] = {
+          dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedLibraryItem.identifier}/${lineTransform}/`],
+          iconUrl: layer.iconUrl, // Hack because we need some icon
+          renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+          strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
+          lineWidth: 2
+        }
+        createdMapLayerKeys.add(mapLayerKey)
+      })
+    }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
@@ -115,36 +130,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     updateMapLayers()
   })
 
-  // Subscribe to different plan events
-  $rootScope.$on('plan_selected', (e, plan) => updateMapLayers())
-  $rootScope.$on('plan_cleared', (e, plan) => updateMapLayers())
-  $rootScope.$on('route_planning_changed', (e, plan) => updateMapLayers())
-
-  var fiberGraphForPlan = fiberGraph
-  // reload fiber graph when plan changes
-  var reloadFiberGraph = () => {
-    // return  // Hack to get this working for the demo
-    // Get the data again from the server. This is because some geometries are empty and are not
-    // put into the map, so we cant get it from mapLayer.features
-    fiberGraphForPlan = fiberGraph
-    if (state.planId !== state.INVALID_PLAN_ID) {
-      $http.get(`/network/fiber/connectivityForPlan/${state.planId}`)
-        .then((response) => {
-          if (response.status >= 200 && response.status <= 299) {
-            var links = response.data
-            links.forEach((link) => {
-              // Add an edge with id, from_node_id, to_node_id and with the actual feature object
-              fiberGraphForPlan.addEdge(link.id, link.from_node_id, link.to_node_id, link.geo_json ,link.name)
-            })
-          }
-        })
-    }
-  }
-
-  // Subscribe to different plan events
-  $rootScope.$on('plan_selected', (e, plan) => reloadFiberGraph())
-  $rootScope.$on('plan_cleared', (e, plan) => reloadFiberGraph())
-  $rootScope.$on('route_planning_changed', (e, plan) => reloadFiberGraph())
+  // Update map layers when the dataItems property of state changes
+  state.dataItemsChanged
+    .subscribe((newValue) => updateMapLayers())
 
   const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {
@@ -250,80 +238,4 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       routeLayer.setDeclarativeStyle(routeStyles(layer))
     }
   }
-
-  var fiberLayers = []
-  function reloadDatasources () {
-
-    // Remove older fiber layers (if any)
-    fiberLayers.forEach((fiberLayer) => {
-      fiberLayer.hide()     // Without this, data will be reloaded on map events. Needs to be fixed in map_layer.js.
-      fiberLayer.remove()
-    })
-    fiberLayers = []
-
-    $http.get('/user_fiber/list').then((response) => {
-      $scope.remainingDatasources = []
-      response.data.map(function (ds) {
-        $scope.remainingDatasources.push(ds);
-      })
-      //load existing fibers to fiberLayer
-      $scope.existingFibers.map(function (fib) {
-        $http.get('/fiberSourceIdOfExistingFiber/' + fib.name)
-          .then((response2) => {
-            var fiberSystemId = response2.data[0].id
-            $scope.remainingDatasources.push({
-              systemId : fiberSystemId,
-              name : fib.name
-            })
-          fiberLayers[fiberSystemId] = fib;
-        })
-          .catch((error) => console.log(error))
-      })
-
-      response.data.forEach(initDatasource)
-    })
-  }
-
-  $rootScope.$on('uploaded_fiber', (e, info) => {
-
-    // Reload data sources into state
-    var selectedFiberIds = _.pluck(state.selectedExistingFibers, 'libraryId')
-    state.loadExistingFibersList()
-      .then(() => {
-        state.allExistingFibers.forEach((existingFiber) => {
-          // Select the fibers that were selected earlier.
-          if (selectedFiberIds.indexOf(existingFiber.libraryId) >= 0) {
-            state.selectedExistingFibers.push(existingFiber)
-          }
-          // Select the currently uploaded fiber
-          if (existingFiber.libraryId === info.libraryId) {
-            state.selectedExistingFibers.push(existingFiber)
-          }
-        })
-        updateMapLayers()
-      })
-
-    //initDatasource(info)
-    //info.toggleVisibility()
-    reloadDatasources();
-  })
-
-  // Additional variable required ($scope.fibers.selectedFibers) because ui-select creates a new scope via ng-repeat
-  $scope.fibers = { selectedFibers: [] }
-  $scope.selectedFibersChanged = () => {
-    updateMapLayers()
-    // Set visibility of fiber layers
-    fiberLayers.forEach((fiberLayer) => fiberLayer.hide())
-    $scope.fibers.selectedFibers.forEach((selectedFiber) => fiberLayers[selectedFiber.systemId].show())
-  }
-
-  $scope.selectedExistingFiberIds = []    // For now, save fiber source ids in state.js. Later we should store everything in state.js
-
-  $scope.addFiber = () => {
-    $('#upload_fiber_modal').modal('show')
-  }
-
-  $scope.$on("map_loaded" , ()=>{
-    reloadDatasources();
-  })
 }])

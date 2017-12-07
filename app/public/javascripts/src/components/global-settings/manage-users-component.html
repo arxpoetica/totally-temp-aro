@@ -1,0 +1,106 @@
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.Users">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>
+          Name
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('first_name', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('first_name', false)">↑</a>
+        </th>
+        <th>
+          Email
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('email', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('email', false)">↑</a>
+        </th>
+        <th>
+          Rol
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', true)">↓</a>
+          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', false)">↑</a>
+        </th>
+        <th>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="user in $ctrl.users">
+        <td>{{user.first_name}} {{user.last_name}}</td>
+        <td>{{user.email}}</td>
+        <td>
+          <select ng-show="user.id !== $ctrl.user_id" class="form-control" ng-options="type.rol as type.name for type in $ctrl.userTypes" ng-model="user.rol"
+            ng-change="$ctrl.changeRol(user)">
+              <option value="">Basic</option>
+          </select>
+          <span ng-show="user.id === $ctrl.user_id">Admin</span>
+        </td>
+        <td>
+          <div class="pull-right">
+            <input type="text" id="resend-link-input-{{ user.id }}" value="{{user.resend_link}}" style="position: absolute; margin-left: -999999px">
+            <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-sm btn-default"
+              ng-click="$ctrl.copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
+            <a class="btn btn-sm btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
+            <a class="btn btn-sm btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.SendEmail">
+  <form>
+    <div class="form-group">
+      <label>Subject</label>
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.mailSubject">
+    </div>
+    <div class="form-group">
+      <label>Text</label>
+      <textarea class="form-control" rows="10" ng-model="$ctrl.globalSettingsService.mailBody"></textarea>
+    </div>
+  </form>
+</div>  
+
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.RegisterUser">
+
+  <form class="form-horizontal">  
+  <div class="form-group">
+    <label class="col-sm-4 control-label">First name</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.first_name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Last name</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.last_name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Email</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.email">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Confirm email</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.email_confirm">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Company name</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.company_name">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Permissions</label>
+    <div class="col-sm-8">
+      <select class="form-control" ng-model="$ctrl.globalSettingsService.new_user.rol">
+        <option value="">No permissions</option>
+        <option value="biz-dev">Biz-Dev</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+  </div>
+  </form>
+</div> 

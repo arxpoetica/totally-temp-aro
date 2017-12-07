@@ -12,7 +12,7 @@ parser.add_argument('env_type', metavar='E', type=str)
 args = parser.parse_args()
 
 environment = args.env_type.upper()
-PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-',
+PROJECT_BASE_NAME = {'QA': 'S-ARO-QA-APP-',
                      'PRODUCTION': 'P-ARO-APP-',
                      'STAGING': 'S-ARO-APP-'}
 branch_name = os.environ['CIRCLE_BRANCH']

@@ -35,49 +35,36 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     var mergedLayerUrls = []
 
     // Add map layers based on the selection
-    state.selectedDataSources.forEach((selectedDataSource) => {
+    var selectedLocationLibraries = state.dataItems && state.dataItems.location && state.dataItems.location.selectedLibraryItems
+    if (selectedLocationLibraries) {
+      selectedLocationLibraries.forEach((selectedLocationLibrary) => {
+        // Loop through the location types
+        state.locationTypes.getValue().forEach((locationType) => {
 
-      //selectedDataSource = JSON.parse(JSON.stringify(selectedDataSource).replace("\"libraryId\":", "\"dataSourceId\":"))
-      // Loop through the location types
-      state.locationTypes.getValue().forEach((locationType) => {
+          if (locationType.checked) {
+            // Location type is visible
+            var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
+            var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
+            var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
+            url = url.replace('${libraryId}', selectedLocationLibrary.identifier)
 
-        // Determine whether we want to add this locationtype + datasource combo
-        var createLayer = true
-        var dataSourceId = selectedDataSource.libraryId
-        if (selectedDataSource.libraryId === state.DS_GLOBAL_BUSINESSES) {
-          dataSourceId = 1  // This is the global data source id
-          createLayer = locationType.key.indexOf('business') >= 0
-        } else if (selectedDataSource.libraryId === state.DS_GLOBAL_HOUSEHOLDS) {
-          dataSourceId = 1  // This is the global data source id
-          createLayer = locationType.key.indexOf('household') >= 0
-        } else if (selectedDataSource.libraryId === state.DS_GLOBAL_CELLTOWER) {
-          dataSourceId = 1  // This is the global data source id
-          createLayer = locationType.key.indexOf('tower') >= 0
-        }
-
-        if (locationType.checked && createLayer) {
-          // Location type is visible
-          var mapLayerKey = `${locationType.key}_${dataSourceId}`
-          var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
-          var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
-          url = url.replace('${libraryId}', dataSourceId)
-
-          if (pointTransform === 'aggregate') {
-            // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-            mergedLayerUrls.push(url)
-          } else {
-            // We want to create an individual layer
-            oldMapLayers[mapLayerKey] = {
-              dataUrls: [url],
-              iconUrl: `${baseUrl}${locationType.iconUrl}`,
-              renderMode: 'PRIMITIVE_FEATURES',
-              selectable: true
+            if (pointTransform === 'aggregate') {
+              // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+              mergedLayerUrls.push(url)
+            } else {
+              // We want to create an individual layer
+              oldMapLayers[mapLayerKey] = {
+                dataUrls: [url],
+                iconUrl: `${baseUrl}${locationType.iconUrl}`,
+                renderMode: 'PRIMITIVE_FEATURES',
+                selectable: true
+              }
+              createdMapLayerKeys.add(mapLayerKey)
             }
-            createdMapLayerKeys.add(mapLayerKey)
           }
-        }
+        })
       })
-    })
+    }
 
     if (mergedLayerUrls.length > 0) {
       // We have some business layers that need to be merged into one
@@ -131,14 +118,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   state.mapTileOptions
     .subscribe((newValue) => updateMapLayers())
 
-  // Debugging information for heatmaps
-  $scope.debugClickedLocations = null
-  $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
-    var clickedLocationsDescripton = ''
-    options.forEach((feature) => clickedLocationsDescripton += JSON.stringify(feature) + '\n')
-    $scope.debugClickedLocations = clickedLocationsDescripton
-    $scope.$apply()
-  })
+  // Update map layers when the dataItems property of state changes
+  state.dataItemsChanged
+    .subscribe((newValue) => updateMapLayers())
 
   $scope.map_tools = map_tools
   $scope.selected_tool = null
@@ -157,21 +139,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     }
   ]
   $scope.overlay = 'none'
-  $scope.roadLayer = new MapLayer({
-    short_name: 'RS',
-    name: 'Road Segments',
-    type: 'road_segments',
-    style_options: {
-      normal: {
-        strokeColor: 'teal',
-        strokeWeight: 2
-      }
-    },
-    api_endpoint: '/network/road_segments',
-    threshold: 12,
-    reload: 'always'
-  })
-  state.reloadDatasources() // Reload data sources even without a plan
 
   $scope.available_tools = _.reject($scope.available_tools, (tool) => {
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
@@ -251,13 +218,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     if (plan) {
       plan.location_types = plan.location_types || []
     }
-
-    state.reloadDatasources()
-  })
-
-  $rootScope.$on('uploaded_data_sources', (e, info) => {
-    state.reloadDatasources()
-    $scope.planState.selectedDataSources.push(info);
   })
 
   $scope.overlay_is_loading = () => {

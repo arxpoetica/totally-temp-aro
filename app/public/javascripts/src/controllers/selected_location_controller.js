@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, configuration, map_layers, tracker, map_tools) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, configuration, map_layers, tracker, map_tools,state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -44,7 +44,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     }
     if (options.length > 0 && options[0].location_id) {
       var id = options[0].location_id
-      openLocation(id)
+      //openLocation(id) In project2.0 version on click of location in view mode -> more info w'll display the location detail modal
       tracker.track('Location selected')
     }
   })
@@ -57,13 +57,33 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     $http.get(`/locations/${$scope.plan.id}/${id}/show`).then((response) => {
       response.data.id = id
       setSelectedLocation(response.data)
-      $('#selected_location_controller').modal('show')
-      $('#selected_location_market_profile select[multiple]').select2('val', [])
       $scope.market_size = null
       $scope.fair_share = null
       $scope.calculateMarketSize()
+      .then(() => {
+        $('#selected_location_controller').modal('show')
+        $('#selected_location_market_profile select[multiple]').select2('val', [])
+      })
     })
   }
+
+  state.plan
+  .subscribe((plan) => {
+    $scope.plan = plan
+  })
+
+  state.showDetailedLocationInfo
+  .subscribe((locationInfo) => {
+    if(!locationInfo) return
+    setSelectedLocation(locationInfo)
+    $scope.market_size = null
+    $scope.fair_share = null
+    $scope.calculateMarketSize()
+    .then(() => {
+      $('#selected_location_controller').modal('show')
+      $('#selected_location_market_profile select[multiple]').select2('val', [])
+    })
+  })
 
   $('#selected_location_controller').on('shown.bs.modal', (e) => {
     $('#selected_location_controller a[href="#selected_location_customer_profile"]').tab('show')
@@ -123,6 +143,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
       $scope.towers = response.data
     })
     $scope.households = []
+    $http.get('/locations/households/' + location.id).then((response) => {
+      preserveBusinessDetail()
+      $scope.households = response.data
+    })
   }
 
   function preserveBusinessDetail () {
@@ -157,13 +181,14 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     var args = {
       params: params
     }
-    $http.get('/market_size/location/' + $scope.location.id, args).then((response) => {
+    return $http.get('/market_size/location/' + $scope.location.id, args).then((response) => {
       $scope.market_size = response.data.market_size
       $scope.fair_share = response.data.fair_share
       $scope.share = response.data.share
       $scope.loading = false
       destroyCharts()
       showCurrentChart()
+      return Promise.resolve()
     })
   }
 
@@ -217,19 +242,19 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     })
   }
 
-  function destroyCustomerProfileChart (type) {
-    customerProfileCharts[type] && customerProfileCharts[type].destroy()
-    $(`#location_customer_profile_chart_${type}`).css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
-  }
+  // function destroyCustomerProfileChart (type) {
+  //   customerProfileCharts[type] && customerProfileCharts[type].destroy()
+  //   $(`#location_customer_profile_chart_${type}`).css({ width: '100%', height: '200px' }).removeAttr('width').removeAttr('height')
+  // }
 
-  function destroyCustomerProfileCharts () {
-    Object.keys(customerProfileCharts).forEach(destroyCustomerProfileChart)
-  }
+  // function destroyCustomerProfileCharts () {
+  //   Object.keys(customerProfileCharts).forEach(destroyCustomerProfileChart)
+  // }
 
   function destroyCharts () {
     destroyMarketSizeChart()
     destroyFairShareCharts()
-    destroyCustomerProfileCharts()
+    //destroyCustomerProfileCharts()
   }
 
   function arr (value) {
@@ -243,9 +268,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
       showFairShareCharts()
     } else if (href === '#selected_location_market_profile') {
       showMarketProfileCharts()
-    } else if (href === '#selected_location_customer_profile') {
-      showCustomerProfileCharts()
-    }
+    } 
+    // else if (href === '#selected_location_customer_profile') {
+    //   showCustomerProfileCharts()
+    // }
   }
 
   var market_size_chart
@@ -285,13 +311,20 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
 
     var options = {
       scaleBeginAtZero: 1,
-      scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' },beginAtZero:  true } }] },
+      tooltips: { mode: 'label', callbacks: {
+          label: function (tooltipItems, data) {
+            return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
+          }
+      } }
     }
     var ctx = document.getElementById('location_market_size_chart').getContext('2d')
     destroyMarketSizeChart()
-    market_size_chart = new Chart(ctx).Line(data, options)
+    market_size_chart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: options
+    })
   };
 
   function showFairShareCharts () {
@@ -319,48 +352,58 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
     var el = document.getElementById(`location_fair_share_chart_${type}`)
     if (!el) return
     var ctx = el.getContext('2d')
-    var chart = new Chart(ctx).Pie(data, options)
+    var chart = new Chart(ctx,{
+      type: 'pie',
+      data: data,
+      options: options
+    });
     fairShareCharts[type] = chart
     document.getElementById(`location_fair_share_chart_legend_${type}`).innerHTML = chart.generateLegend()
   }
 
   var customerProfileCharts = {}
-  function showCustomerProfileCharts () {
-    ['households', 'businesses', 'towers'].forEach(showCustomerProfileChart)
-  }
+  // function showCustomerProfileCharts () {
+  //   ['households', 'businesses', 'towers'].forEach(showCustomerProfileChart)
+  // }
 
-  var customerTypeColor = {}
-  function showCustomerProfileChart (type) {
-    var customerTypes = $scope.location.customer_profile[type]
-    var customerTypeColorsArray = [
-      'rgb(242, 252, 148)',
-      'rgb(181, 111, 19)',
-      'rgb(29, 183, 244)',
-      'rgb(59, 86, 186)',
-      'rgb(178, 7, 35)'
-    ]
+  // var customerTypeColor = {}
+  // function showCustomerProfileChart (type) {
+  //   var customerTypes = $scope.location.customer_profile[type]
+  //   var customerTypeColorsArray = [
+  //     'rgb(242, 252, 148)',
+  //     'rgb(181, 111, 19)',
+  //     'rgb(29, 183, 244)',
+  //     'rgb(59, 86, 186)',
+  //     'rgb(178, 7, 35)'
+  //   ]
 
-    var data = []
-    customerTypes.forEach((customerType) => {
-      var color = customerTypeColor[customerType.name] || customerTypeColorsArray.shift()
-      customerTypeColor[customerType.name] = color
-      data.push({
-        label: customerType.name,
-        value: customerType.total,
-        color: color,
-        highlight: tinycolor(color).lighten().toString()
-      })
-    })
+  //   var data = []
+  //   customerTypes.forEach((customerType) => {
+  //     var color = customerTypeColor[customerType.name] || customerTypeColorsArray.shift()
+  //     customerTypeColor[customerType.name] = color
+  //     data.push({
+  //       label: customerType.name,
+  //       value: customerType.total,
+  //       color: color,
+  //       highlight: tinycolor(color).lighten().toString()
+  //     })
+  //   })
 
-    var options = {
-      tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value %>',
-      tooltipFontSize : 12
-    }
-    var ctx = document.getElementById('location_customer_profile_chart_' + type).getContext('2d')
-    destroyCustomerProfileChart(type)
-    customerProfileCharts[type] = new Chart(ctx).Pie(data, options)
-    document.getElementById('location_customer_profile_chart_legend_' + type).innerHTML = customerProfileCharts[type].generateLegend()
-  }
+  //   var options = {
+  //     tooltipTemplate: '<%if (label){%><%=label%>: <%}%><%= value %>',
+  //     tooltipFontSize : 12
+  //   }
+  //   var ctx = document.getElementById('location_customer_profile_chart_' + type).getContext('2d')
+  //   destroyCustomerProfileChart(type)
+  //   //customerProfileCharts[type] = new Chart(ctx).Pie(data, options)
+  //   //Using 2.7.0 version of Chart.js
+  //   customerProfileCharts[type] = new Chart(ctx, {
+  //     type: 'pie',
+  //     data: data,
+  //     options: options
+  //   });
+  //   document.getElementById('location_customer_profile_chart_legend_' + type).innerHTML = customerProfileCharts[type].generateLegend()
+  // }
 
   $scope.show_market_profile = (business) => {
     if ($scope.selected_business && $scope.selected_business.id === business.id) {
@@ -420,11 +463,19 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, confi
 
     var options = {
       scaleBeginAtZero: 1,
-      scaleLabel: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>`, // eslint-disable-line
-      tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value) %>` // eslint-disable-line
+      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' },beginAtZero:  true } }] },
+      tooltips: { callbacks: {
+          label: function (tooltipItems, data) {
+            return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
+          }
+      } }
     }
     destroyBusinessMarketSizeChart()
     var ctx = document.getElementById('business_market_size_chart').getContext('2d')
-    business_market_size_chart = new Chart(ctx).Line(data, options)
+    business_market_size_chart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: options
+    })
   }
 })

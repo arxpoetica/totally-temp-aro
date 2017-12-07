@@ -1,0 +1,63 @@
+<style>
+  .plan-settings-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .analysis-type {
+    flex: 0 0 auto;
+  }
+  .old-accordion-title {
+    flex: 0 0 auto;
+  }
+  .old-accordion-contents {
+    flex: 1 1 auto;
+    transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
+    overflow: hidden;
+    height: 450px;
+    max-height: 500px;
+    overflow: auto;
+  }
+  .old-accordion-contents.collapsed {
+    flex: 0 0 auto;
+    height: 0px;
+    visibility: hidden;
+  }
+  .old-accordion-title {
+    background-color: #333;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    border-radius: 0px;
+  }
+  .old-accordion-title:hover, .old-accordion-title:focus {
+    background-color: #333;
+    color: white;
+  }
+</style>
+<div class="plan-settings-container">
+  <div class="analysis-type">
+    <h4 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
+    <optimize-button></optimize-button>
+  </div>
+  <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'DATA_SELECTION'">
+    <accordion-panel-title title="'Data Selection'" panel-id="'DATA_SELECTION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'DATA_SELECTION'">
+      <plan-data-selection project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id" all-data-items="$ctrl.state.dataItems"></plan-data-selection>
+    </accordion-panel-contents>
+    <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'RESOURCE_SELECTION'">
+      <plan-resource-selection project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-resource-selection>
+    </accordion-panel-contents>
+    <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'">
+      <plan-network-configuration project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-network-configuration>
+    </accordion-panel-contents>
+    <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'">
+      <plan-project-configuration project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-project-configuration>
+    </accordion-panel-contents>
+  </accordion>
+</div>

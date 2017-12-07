@@ -4,8 +4,9 @@
     <title ng-bind="appTitle"></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Exo:400" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap-multiselect.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2-bootstrap.css">
@@ -22,9 +23,10 @@
     <!-- Include bundles with vendor scripts -->
     <script src="javascripts/vendors/vendor-bundle.min.js"></script>
   </head>
-  <body>
+  <body ng-controller="body_controller">
+
     <!-- The tile component subscribes to map layer events raised from state.js. Include it before changing the state -->
-    <tile></tile>
+    <tile map-global-object-name="map"></tile>
 
     <div ng-controller="data_management_controller">
       <% include modal_data_management.html %>
@@ -74,48 +76,10 @@
       </div>
     <% } %>
 
-    <div ng-controller="navigation_menu_controller">
+    <!-- Remove controller for now. Later, the whole navigation div should be gone<div ng-controller="navigation_menu_controller">-->
+    <div>
 
       <% include modal_build_sequence.html %>
-
-      <!--<div id="home_screen" ng-show="!plan">-->
-        <!--<div class="container">-->
-          <!--<div class="row">-->
-            <!--<div class="col-sm-12">-->
-              <!--<img id="aro_logo" src="/images/logos/<%= config.ARO_CLIENT %>/logo.png">-->
-            <!--</div>-->
-            <!--<div class="col-sm-8">-->
-              <!--<a id="btnNewPlan" href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="new_plan()">Create New Network Plan</a>-->
-              <!--<br>-->
-            <!--</div>-->
-            <!--<div class="col-sm-8">-->
-              <!--<a id="btnExistingPlans" href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showPlans()">Existing Plans</a>-->
-              <!--<br>-->
-            <!--</div>-->
-            <!--&lt;!&ndash;-->
-            <!--<div class="col-sm-8">-->
-              <!--<a href="javascript:void(0)" class="btn btn-primary btn-block" ng-click="showReports()">Reports</a>-->
-              <!--<br>-->
-            <!--</div>-->
-            <!--&ndash;&gt;-->
-            <!--<% if (user.rol === 'admin') { %>-->
-              <!--<div class="col-sm-8">-->
-                <!--<a href="#manage-users" class="btn btn-primary btn-block" data-toggle="modal">Manage Users</a>-->
-                <!--<br>-->
-              <!--</div>-->
-              <!--<div class="col-sm-8">-->
-                <!--<a href="#application-settings" class="btn btn-primary btn-block" data-toggle="modal">Application Settings</a>-->
-                <!--<br>-->
-              <!--</div>-->
-            <!--<% } %>-->
-
-            <!--<div class="col-sm-8">-->
-              <!--<a href="#data-management" class="btn btn-primary btn-block" data-toggle="modal">Data Management</a>-->
-              <!--<br>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
-      <!--</div>-->
 
       <% include modal_select_plan.html %>
 
@@ -155,128 +119,6 @@
           </div>
         </div>
       </div>
-
-      <nav class="navbar navbar-default" id="top-navbar">
-        <div class="container-fluid navbar-container">
-
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#" id="brand" ng-click="selectPlan(null)"></a>
-          </div>
-
-          <div class="collapse navbar-collapse">
-            <div class="nav navbar-nav navbar-right">
-              <% if (config.ARO_CLIENT === 'verizon') { %>
-                <img src="/images/logos/verizon/fimlogo.png" style="padding-top: 20px; max-height: 70px">
-              <% } %>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <nav class="navbar navbar-default">
-        <div class="container-fluid navbar-container">
-
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <!-- Navbar brand. Hacky solution to get everything vertically centered -->
-            <a class="navbar-brand" href="#">
-              <span style="line-height: 50px"><img src="images/logos/aro/logo_navbar.png" style="margin-top: -4px"></span>
-              &nbsp;ARO
-            </a>
-          </div>
-
-          <div class="collapse navbar-collapse">
-            <ul class="nav navbar-nav navbar-right">
-              <li class="dropdown">
-                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  <%= user.first_name %> <%= user.last_name %>
-                  <span class="caret"></span> &nbsp;
-                  <span class="fa fa-user"></span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a href="/settings/show">
-                    <span class="fa fa-cog"></span>
-                    Account settings
-                  </a></li>
-                  <li><a href="/logout">
-                    <span class="fa fa-power-off"></span>
-                    Log out
-                  </a></li>
-                </ul>
-              </li>
-              <li class="dropdown" id="network_plan_menu">
-                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                  <span class="fa fa-cog"></span>
-                  <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a href="javascript:;" ng-click="openReports()">Reports…</a></li>
-                  <li><a href="javascript:void(0)" ng-click="save_as()" ng-show="plan.owner_id === user_id">Save as…</a></li>
-                  <li role="separator" class="divider"></li>
-                    <% if (user.rol === 'admin') { %>
-                    <li><a href="#manage-users"  data-toggle="modal">Manage Users</a></li>
-                    <li> <a href="#application-settings" data-toggle="modal">Application Settings</a></li>
-                    <% } %>
-                    <li>  <a href="#data-management" data-toggle="modal">Data Management</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li><a href="javascript:void(0)" ng-show="plan" ng-click="clearPlan()"
-                    <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Clear plan</a></li>
-                  <li><a href="javascript:void(0)" ng-show="plan" ng-click="delete_plan(plan)"
-                    <% if (!env_is_test) { %>ng-show="plan.owner_id === user_id"<% } %> >Delete plan</a></li>
-                  <li role="separator" class="divider" ng-show="plan" ng-show="plan.owner_id === user_id"></li>
-                  <li><a href="javascript:void(0)" ng-show="plan" ng-click="show_share_plan(plan)">Share…</a></li>
-                  <% if (config.route_planning.length > 0) { %>
-                  <li><a href="javascript:void(0)" ng-show="plan" ng-click="exportKmlName()">Export KML…</a></li>
-                  <% } %>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-      <div id="aro-header">
-        <div class="header-container">
-          <div class="header-column-child-width">
-            <div class="header-plan" ng-click="showCombo()">
-              <span ng-if="plan.name">{{plan.name}}</span>
-              <span ng-if="!plan.name"><i class="fa fa-plus f-select-plan" style="font-size: 12px"></i> Select a plan</span>
-            </div>
-          </div>
-          <div class="header-column-child-width">
-            <div class="header-plan-location"><span class="fa fa-map-marker pad10"></span>{{plan.area_name}}</div>
-          </div>
-          <div class="header-column-child-width" id="plan-saving-progress">
-            <div class="progress plan-progress">
-              <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="header-column-fill-width">
-            <p ng-show="plan" class="pull-right header-financials-container" id="top_bar_tools">
-
-              <span ng-show="plan.ranOptimization" class="header-financials-item">{{plan.metadata.npv / 1000 | currency:"<%- config.currency_symbol %>":0}}K NPV</span>
-              <span ng-hide="plan.ranOptimization" class="header-financials-item"><%- config.currency_symbol %>0K NPV</span>
-              |
-              <span ng-show="plan.ranOptimization" class="header-financials-item">{{(plan.metadata.irr * 100) | number : 1}}% IRR</span>
-              <span ng-hide="plan.ranOptimization" class="header-financials-item">0% IRR</span>
-              |
-              <span ng-show="plan.ranOptimization" id="shortest_path_total_cost" class="header-financials-item header-financials-capex">{{plan.metadata.total_cost / 1000 | currency:"<%- config.currency_symbol %>":0}}K CapEx</span>
-              <span ng-hide="plan.ranOptimization" id="shortest_path_total_cost" class="header-financials-item header-financials-capex">0K CapEx</span>
-
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
 
 
@@ -291,12 +133,6 @@
         </div>
       </div>
     </div>
-
-    <% if (config.ui.layout === 'default') { %>
-      <div id="global-search">
-        <% include controller_global_search.html %>
-      </div>
-    <% } %>
 
     <div ng-controller="selected_location_controller">
 
@@ -323,9 +159,7 @@
       <% include modal_market_profile.html %>
     </div>
 
-    <div id="map-canvas-wrapper">
-      <div id="map-canvas"></div>
-    </div>
+    <map-split></map-split>
 
     <div ng-controller="contextual_menu_controller">
       <ul class="dropdown-menu" id="contextual_menu">
@@ -339,6 +173,14 @@
     <div growl></div>
     <div class="infobox" desc="shows fiber strand count">0</div>
     <fiber-strand-info></fiber-strand-info>
+    <global-data-source-upload-modal></global-data-source-upload-modal> 
+    <global-settings></global-settings>
+    <network-plan-modal></network-plan-modal>
+    <report-modal></report-modal>
+    <network-analysis-modal></network-analysis-modal>
+    <plan-resource-editor-modal show-modal="state.showPlanResourceEditorModal"
+                                selected-resource-key="state.editingPlanResourceKey">
+    </plan-resource-editor-modal>
   </body>
 
   <!-- Angular controllers and services -->
@@ -360,6 +202,7 @@
     var map;
 
     function initialize() {
+
       var styles = [];
       styles.push({
         featureType: 'poi',
@@ -371,15 +214,19 @@
         zoom: 12,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         panControl: false,
+        mapTypeControlOptions: {
+          position: google.maps.ControlPosition.BOTTOM_RIGHT
+        },
         zoomControlOptions: {
           style: google.maps.ZoomControlStyle.SMALL,
-          position: google.maps.ControlPosition.TOP_RIGHT
+          position: google.maps.ControlPosition.RIGHT_BOTTOM
         },
-        mapTypeControlOptions: {
-          position: google.maps.ControlPosition.TOP_RIGHT
+        streetViewControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM
         },
         styles: styles,
       });
+      var splitterInitialized = false
       map.ready = function(callback) {
 
         if (map.getBounds()) {
@@ -403,6 +250,7 @@
     $(document).ready(initialize);
   </script>
   <script src="javascripts/vendors/bootstrap.min.js"></script>
+  <script src="javascripts/vendors/bootstrap-multiselect.js"></script>
   <script src="javascripts/vendors/underscore.js"></script>
   <script src="javascripts/vendors/sweetalert.min.js"></script>
   <script src="javascripts/vendors/Chart.min.js"></script>
@@ -410,17 +258,70 @@
   <script src="javascripts/vendors/angular-ui-select.min.js"></script>
   <script src="javascripts/vendors/tinycolor.js"></script>
   <script src="javascripts/vendors/randomColor.min.js"></script>
-  <script src="javascripts/vendors/Chart.StackedBar.js"></script>
   <script src="javascripts/vendors/nouislider.min.js"></script>
   <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
   <script src="javascripts/vendors/ng-currency.js"></script>
   <script src="javascripts/vendors/simpleheat.js"></script>
+  <script src="javascripts/vendors/split.min.js"></script>
+  
+  <!-- Components -->
+  <script src="javascripts/lib/components/views/boundaries-component.js"></script>
+
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
   <script src="javascripts/lib/components/tiles/tile-component.js"></script>
+
+  <script src="javascripts/lib/components/accordion/accordion-component.js"></script>
+  <script src="javascripts/lib/components/accordion/accordion-panel-title-component.js"></script>
+  <script src="javascripts/lib/components/accordion/accordion-panel-contents-component.js"></script>
+
+  <script src="javascripts/lib/components/common/aro-multiselect-component.js"></script>
+  <script src="javascripts/lib/components/common/aro-object-editor-component.js"></script>
+
+  <script src="javascripts/lib/components/sidebar/optimize-button-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/display-mode-buttons-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/analysis-mode-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/show-targets-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-modal-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-content-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-output-component.js"></script>  
+  <script src="javascripts/lib/components/sidebar/debug/aro-debug-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-settings-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-data-selection/plan-data-selection-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal-component.js"></script> 
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader-component.js"></script> 
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/roic-editor-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/arpu-editor-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/impedance-editor-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/view/view-mode-component.js"></script>  
+  <script src="javascripts/lib/components/sidebar/view/location-detail-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/view/road-segment-detail-component.js"></script>
+
+  <script src="javascripts/lib/components/global-settings/global-settings-component.js"></script>
+  <script src="javascripts/lib/components/global-settings/user-account-settings-component.js"></script>
+  <script src="javascripts/lib/components/global-settings/manage-users-component.js"></script>
+
+  <script src="javascripts/lib/components/header/tool-bar-component.js"></script>
+  <script src="javascripts/lib/components/header/network-plan-component.js"></script>
+  <script src="javascripts/lib/components/header/network-plan-manage-component.js"></script>
+  <script src="javascripts/lib/components/header/report-modal-component.js"></script>
+  <script src="javascripts/lib/components/header/network-plan-modal-component.js"></script>
+
+  <script src="javascripts/lib/components/map/map-split-component.js"></script>
+  <script src="javascripts/lib/components/map/map-selector-component.js"></script>
+  
+  <script src="javascripts/lib/controllers/body_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
   <script src="javascripts/lib/controllers/navigation_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/route_controller.js"></script>
-  <script src="javascripts/lib/controllers/boundaries_controller.js"></script>
   <script src="javascripts/lib/controllers/locations_controller.js"></script>
   <script src="javascripts/lib/controllers/market_size_controller.js"></script>
   <script src="javascripts/lib/controllers/equipment_nodes_controller.js"></script>
@@ -462,16 +363,18 @@
   <script src="javascripts/lib/models/state.js"></script>
   <script src="javascripts/lib/models/stateSerializationHelper.js"></script>
   <script src="javascripts/lib/models/optimization.js"></script>
+  <script src="javascripts/lib/models/globalSettingsService.js"></script>
   <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
   <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
   <script src="javascripts/lib/directives/percentageInput.js"></script>
   <script src="javascripts/lib/directives/dialogs.js"></script>
+  <script src="javascripts/lib/directives/modal.js"></script>
   <script src="javascripts/lib/factories/fiberGraph.js"></script>
   <script>app.run(function($rootScope,loader){$rootScope.appTitle = "<%= config.ui.title %>"})</script>
   <script>
     $(function () {
-      var tooltips = $('#left-col [data-toggle="tooltip"]')
-      tooltips.tooltip()
+      var tooltips = $('[data-toggle="tooltip"]')
+      tooltips.tooltip({ container: 'body' })
       tooltips.on('click mouseout', function () {
         $(this).tooltip('hide')
       })

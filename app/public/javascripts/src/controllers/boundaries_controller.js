@@ -1,6 +1,6 @@
 /* global $ app user_id swal _ google map config globalServiceLayers globalAnalysisLayers */
 // Boundaries Controller
-app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', 'state', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization, map_layers, state) => {
+app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_tools', 'map_utils', 'MapLayer', 'tracker', 'regions', '$timeout', 'optimization', 'map_layers', 'state', '$location', ($scope, $rootScope, $http, map_tools, map_utils, MapLayer, tracker, regions, $timeout, optimization, map_layers, state, $location) => {
   $scope.map_tools = map_tools
   $scope.user_id = user_id
 
@@ -24,15 +24,105 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
   // --
 
+  // Get the point transformation mode with the current zoom level
+  var getPointTransformForLayer = (zoomThreshold) => {
+    var mapZoom = map.getZoom()
+    // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
+    // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
+    return (mapZoom > zoomThreshold) ? 'select' : 'smooth'
+  }
+  
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+
+  // Creates map layers based on selection in the UI
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
+
+    // Make a copy of the state mapLayers. We will update this
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
+    
+    // Remove all the map layers previously created by this controller
+    createdMapLayerKeys.forEach((createdMapLayerKey) => {
+      delete oldMapLayers[createdMapLayerKey]
+    })
+
+    createdMapLayerKeys.clear()
+
+    // Hold a list of layers that we want merged
+    var mergedLayerUrls = []
+
+    state.boundaries.tileLayers.forEach((layer) => { 
+
+      if (layer.visible) {
+        // Location type is visible
+        //var mapLayerKey = `${locationType.key}_${dataSourceId}`
+        var pointTransform = getPointTransformForLayer(+layer.aggregateZoomThreshold)
+        var mapLayerKey = `${pointTransform}_${layer.type}_${layer.layerId}`
+        
+        var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
+        url = url.replace('${layerId}', layer.layerId)
+
+        if (pointTransform === 'smooth') {
+          // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+          mergedLayerUrls.push(url)
+        } else {
+          // We want to create an individual layer
+          oldMapLayers[mapLayerKey] = {
+            dataUrls: [url],
+            renderMode: 'PRIMITIVE_FEATURES',
+            selectable: true,
+            strokeStyle: '#00ff00',
+            lineWidth: 4,
+            fillStyle: "transparent",
+            opacity: 0.7,
+            highlightStyle: {
+              strokeStyle: '#000000',
+              fillStyle: 'green',
+              opacity: 0.3
+            }
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+
+        if (mergedLayerUrls.length > 0) {
+          // We have some business layers that need to be merged into one
+          // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
+          oldMapLayers[mapLayerKey] = {
+            dataUrls: mergedLayerUrls,
+            renderMode: 'HEATMAP',
+            selectable: true,
+            aggregateMode: 'FLATTEN',
+            strokeStyle: '#00ff00',
+            lineWidth: 4,
+            fillStyle: "transparent",
+            opacity: 0.7,
+            highlightStyle: {
+              strokeStyle: '#000000',
+              fillStyle: 'green',
+              opacity: 0.3
+            }
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+      }
+      
+    })
+
+    // "oldMapLayers" now contains the new layers. Set it in the state
+    state.mapLayers.next(oldMapLayers)
+  }
+
+  // When the map zoom changes, map layers can change
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
+    
   var countySubdivisionsLayer
   var censusBlocksLayer
-  var cmaBoundariesLayer
   var userDefinedLayer
 
   if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
     countySubdivisionsLayer = new MapLayer({
       short_name: 'CS',
-      name: 'County Subdivisions',
+      name: 'Counties',
       type: 'county_subdivisions',
       api_endpoint: '/county_subdivisions/36',
       highlighteable: true,
@@ -96,39 +186,33 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     map_layers.addFeatureLayer(censusBlocksLayer);
   }
 
-  $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
-    short_name: 'UD',
-    name: 'User-defined boundaries',
-    type: 'user_defined',
-    style_options: {
-      normal: {
-        fillColor: 'green',
-        strokeColor: 'green',
-        strokeWeight: 2,
-        fillOpacity: 0.1
-      },
-      highlight: {
-        fillColor: 'green',
-        strokeColor: 'green',
-        strokeWeight: 2,
-        fillOpacity: 0.1
-      }
-    },
-    reload: 'always',
-    threshold: 0,
-    minZoom: 9,
-    hoverField: 'name',
-    visibilityThreshold : 1,
-    isBoundaryLayer : true
-  })
+  // $scope.userDefinedLayer = userDefinedLayer = new MapLayer({
+  //   short_name: 'UD',
+  //   name: 'User-defined boundaries',
+  //   type: 'user_defined',
+  //   style_options: {
+  //     normal: {
+  //       fillColor: 'green',
+  //       strokeColor: 'green',
+  //       strokeWeight: 2,
+  //       fillOpacity: 0.1
+  //     },
+  //     highlight: {
+  //       fillColor: 'green',
+  //       strokeColor: 'green',
+  //       strokeWeight: 2,
+  //       fillOpacity: 0.1
+  //     }
+  //   },
+  //   reload: 'always',
+  //   threshold: 0,
+  //   minZoom: 9,
+  //   hoverField: 'name',
+  //   visibilityThreshold : 1,
+  //   isBoundaryLayer : true
+  // })
 
-  map_layers.addFeatureLayer(userDefinedLayer);
-
-  state.boundaries.areaLayers = [
-    censusBlocksLayer,
-    countySubdivisionsLayer,
-    cmaBoundariesLayer
-  ].filter((layer) => layer)
+  //map_layers.addFeatureLayer(userDefinedLayer);
 
   var analysisLayersColors = [
     'coral'
@@ -162,43 +246,29 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     map_layers.addFeatureLayer(layer);
   })
 
+  state.boundaries.areaLayers = state.boundaries.areaLayers.concat([
+    countySubdivisionsLayer,
+    censusBlocksLayer
+  ].filter((layer) => layer))
+
   var serviceLayersColors = [
     '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
   ]
 
   globalServiceLayers.forEach((serviceLayer) => {
     if (!serviceLayer.show_in_boundaries) return
-    var color = serviceLayersColors.shift() || 'black'
-    var layer = new MapLayer({
+    var wirecenter_layer = {
       name: serviceLayer.description,
       type: serviceLayer.name,
-      api_endpoint: `/service_areas/${serviceLayer.name}`,
-      highlighteable: true,
-      style_options: {
-        normal: {
-          strokeColor: color,
-          strokeWeight: 4,
-          fillOpacity: 0
-        },
-        highlight: {
-          strokeColor: color,
-          strokeWeight: 6,
-          fillOpacity: 0.1
-        }
-      },
-      reload: 'always',
-      threshold: 0,
-      minZoom: 6,
-      hoverField: 'name',
-      visibilityThreshold : 1,
-      isBoundaryLayer : true
-    })
-    layer.layerId = serviceLayer.id // Hack to get the id for now
-    if (serviceLayer.show_in_boundaries) state.boundaries.areaLayers.push(layer)
-    map_layers.addFeatureLayer(layer);
+      api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
+      layerId: serviceLayer.id,
+      aggregateZoomThreshold: 10
+    }
+  
+    state.boundaries.tileLayers.push(wirecenter_layer)
   })
 
-  state.boundaries.areaLayers.push(userDefinedLayer)
+  //state.boundaries.areaLayers.push(userDefinedLayer)
 
   var drawingManager = new google.maps.drawing.DrawingManager({
     drawingMode: google.maps.drawing.OverlayType.POLYGON,
@@ -275,18 +345,18 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     boundary.overlay.setMap(boundary.overlay.getMap() ? null : map)
   }
 
-  $scope.changeUserDefinedBoundary = () => {
-    $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
-    if (!$scope.selectedUserDefinedBoundary) {
-      userDefinedLayer.setApiEndpoint(null)
-    } else {
-      var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
-      userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
-      userDefinedLayer.setApiEndpoint(url)
-      userDefinedLayer.show()
-      userDefinedLayer.reloadData()
-    }
-  }
+  // $scope.changeUserDefinedBoundary = () => {
+  //   $rootScope.selectedUserDefinedBoundary = $scope.selectedUserDefinedBoundary
+  //   if (!$scope.selectedUserDefinedBoundary) {
+  //     userDefinedLayer.setApiEndpoint(null)
+  //   } else {
+  //     var url = `/service_areas/${$scope.selectedUserDefinedBoundary.name}`
+  //     userDefinedLayer.layerId = $scope.selectedUserDefinedBoundary.id
+  //     userDefinedLayer.setApiEndpoint(url)
+  //     userDefinedLayer.show()
+  //     userDefinedLayer.reloadData()
+  //   }
+  // }
 
   $scope.toggleTool = () => {
     $scope.selected_tool = !$scope.selected_tool
@@ -543,13 +613,18 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     regions.setSearchOption(layer.type, layer.visible)
   }
 
-  $scope.createUserDefinedBoundary = () => {
-    $rootScope.$broadcast('edit_user_defined_boundary', null)
+  $scope.tilesToggleVisibility = (layer) => {
+    layer.visible = layer.visible_check;
+    updateMapLayers()
   }
 
-  $scope.editUserDefinedBoundary = (boundary) => {
-    $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
-  }
+  // $scope.createUserDefinedBoundary = () => {
+  //   $rootScope.$broadcast('edit_user_defined_boundary', null)
+  // }
+
+  // $scope.editUserDefinedBoundary = (boundary) => {
+  //   $rootScope.$broadcast('edit_user_defined_boundary', $scope.selectedUserDefinedBoundary)
+  // }
 
   $scope.selectAllInLayer = () => {
     $http.get(`/service_areas/${$scope.selectedUserDefinedBoundary.name}/all`)
@@ -566,19 +641,19 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       })
   }
 
-  $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
-    var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
-    if (existing) {
-      existing.name = boundary.name
-      $scope.selectedUserDefinedBoundary = existing
-    } else {
-      $scope.userDefinedBoundaries.push(boundary)
-      $scope.selectedUserDefinedBoundary = boundary
-      var select = document.getElementById('userDefinedBoundariesSelect')
-      select.scrollTop = select.scrollHeight
-    }
-    $scope.changeUserDefinedBoundary()
-  })
+  // $rootScope.$on('saved_user_defined_boundary', (e, boundary) => {
+  //   var existing = $scope.userDefinedBoundaries.find((item) => item.id === boundary.id)
+  //   if (existing) {
+  //     existing.name = boundary.name
+  //     $scope.selectedUserDefinedBoundary = existing
+  //   } else {
+  //     $scope.userDefinedBoundaries.push(boundary)
+  //     $scope.selectedUserDefinedBoundary = boundary
+  //     var select = document.getElementById('userDefinedBoundariesSelect')
+  //     select.scrollTop = select.scrollHeight
+  //   }
+  //   $scope.changeUserDefinedBoundary()
+  // })
 
   $scope.optimizationMode = optimization.getMode()
   $rootScope.$on('optimization_mode_changed', (e, mode) => {

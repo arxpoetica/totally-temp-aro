@@ -345,7 +345,7 @@ module.exports = class Network {
 
     var req = {
       method: 'POST',
-      url: `${config.aro_service_url}/v1/optimize/masterplan`,
+      //url: `${config.aro_service_url}/v1/optimize/masterplan`,
       json: true,
       body: options
     }
@@ -353,6 +353,12 @@ module.exports = class Network {
     return database.execute('UPDATE client.active_plan SET optimization_type=$3, location_types=ARRAY[$2]::varchar[] WHERE id=$1',
                        [plan_id, options.locationTypes, options.algorithm])
       .then((results) => {
+        if (options.analysis_type === 'NETWORK_PLAN') {
+          req.url = `${config.aro_service_url}/v1/optimize/masterplan`
+        } else if (options.analysis_type === 'NETWORK_ANALYSIS') {
+          req.url = `${config.aro_service_url}/v1/analyze/masterplan`
+          delete options.backhaulOptimization
+        }
         return this._callService(req)
       })
   }

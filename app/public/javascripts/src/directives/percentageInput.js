@@ -25,3 +25,26 @@ app.directive('percentageInput', function () {
     }
   }
 })
+
+/**
+ * Directive to show a value formated by commas.
+ * For example, a value of 10000 will correspond to a value of 10,000
+ */
+app.directive('format', ['$filter', function ($filter) {
+  return {
+      require: '?ngModel',
+      link: function (scope, elem, attrs, ctrl) {
+        if (!ctrl) return;
+
+        ctrl.$formatters.unshift(function (a) {
+          return $filter(attrs.format)(ctrl.$modelValue)
+        });
+
+        ctrl.$parsers.unshift(function (viewValue) {
+          var plainNumber = viewValue.replace(/[^\d|\-+|\.+]/g, '');
+          elem.val($filter(attrs.format)(+plainNumber));
+          return plainNumber;
+        });
+      }
+  };
+}]);

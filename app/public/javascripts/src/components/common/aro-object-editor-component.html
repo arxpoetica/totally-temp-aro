@@ -1,0 +1,45 @@
+<style scoped>
+  .aro-object-editor-title {
+    background-color: #ddd;
+    width: 100%;
+    padding-left: 5px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #888;
+    cursor: pointer;
+  }
+  .expand-collapse-icon {
+    padding-left: 5px;
+    padding-right: 10px;
+  }
+</style>
+<!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
+<div ng-style="{ 'padding-left': $ctrl.pixelsPerIndentationLevel + 'px', width: '100%' }">
+
+  <!-- Loop through all the key-value pairs in the object to be edited -->
+  <div ng-repeat="(key, value) in $ctrl.objectToEdit" style="width: 100%">
+
+    <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
+         RECURSIVELY show the object editor for the sub-object -->
+    <div ng-if="$ctrl.isExpandable(value)" style="width: 100%;">
+      <div class="aro-object-editor-title" ng-click="$ctrl.toggleIsKeyExpanded($index)">
+        <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
+        <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
+        {{key}}
+      </div>
+      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
+      <aro-object-editor ng-if="$ctrl.indentationLevel <= 200"
+                         object-to-edit="value"
+                         indentation-level="$ctrl.indentationLevel + 1"
+                         ng-style="{ display: $ctrl.isKeyExpanded[$index] ? 'inline' : 'none' }">
+      </aro-object-editor>
+    </div>
+
+    <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
+    <div ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" style="display: flex; align-items: center; width: 100%; padding-top: 3px; padding-bottom: 3px; border-bottom: 1px solid #888">
+      <div style="flex: 1 1 auto;">{{key}}</div>
+      <!-- Note that our ng-model is "$ctrl.objectToEdit[key]" and not "value" so the two way binding updates the actual object -->
+      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToEdit[key]" class="form-control input-sm" style="flex: 0 0 100px">
+    </div>
+  </div>
+</div>

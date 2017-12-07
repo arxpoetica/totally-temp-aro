@@ -14,6 +14,26 @@ app.service('tileDataService', ['$http', ($http) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
   }
 
+  tileDataService.hasNeighbouringData = (mapLayers, zoom, tileX, tileY) => {
+    var hasAllNeighbouringData = true
+    for (var dx = -1; dx <= 1; ++dx) {
+      for (var dy = -1; dy <= 1; ++dy) {
+        var x = tileX + dx
+        var y = tileY + dy
+        Object.keys(mapLayers).forEach((mapLayerKey) => {
+          var mapLayer = mapLayers[mapLayerKey]
+          mapLayer.dataUrls.forEach((url) => {
+            var urlKey = url + `${zoom}/${x}/${y}.mvt`
+            var tileCacheKey = tileDataService.getTileCacheKey(urlKey)
+            var hasData = tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)
+            hasAllNeighbouringData = hasAllNeighbouringData && hasData
+          })
+        })
+      }
+    }
+    return hasAllNeighbouringData
+  }
+
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
       // We have one or multiple URLs where data is coming from, and we want a simple union of the results
@@ -29,15 +49,12 @@ app.service('tileDataService', ['$http', ($http) => {
   var getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
     url += `${zoom}/${tileX}/${tileY}.mvt`
     var tileCacheKey = tileDataService.getTileCacheKey(url)
-    if (tileDataService.tileDataCache[tileCacheKey]) {
-      // Tile data exists in cache
-      return Promise.resolve(tileDataService.tileDataCache[tileCacheKey])
-    } else {
+    if (!tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)) {
       // Tile data does not exist in cache. Get it from a server
-      return new Promise((resolve, reject) => {
+      tileDataService.tileDataCache[tileCacheKey] = new Promise((resolve, reject) => {
 
         // Getting binary data from the server. Directly use XMLHttpRequest()
-        var oReq = new XMLHttpRequest();
+        var oReq = new XMLHttpRequest()
         oReq.open("GET", url, true);
         oReq.responseType = "arraybuffer";
 
@@ -59,13 +76,14 @@ app.service('tileDataService', ['$http', ($http) => {
             layerToFeatures: layerToFeatures
           }
           resolve(tileDataService.tileDataCache[tileCacheKey])
-        };
+        }
         oReq.onerror = function(error) { reject(error) }
         oReq.onabort = function() { reject('XMLHttpRequest abort') }
         oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
-        oReq.send();
+        oReq.send()
       })
     }
+    return tileDataService.tileDataCache[tileCacheKey]
   }
 
   // Flattens all URLs and returns tile data that is a simple union of all features
@@ -210,15 +228,32 @@ app.service('tileDataService', ['$http', ($http) => {
     return entityImagePromise
   }
 
+  // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
   }
 
+  // Clear only those entries in the tile data cache containing the specified keywords
+  tileDataService.clearDataCacheContaining = (keywords) => {
+    Object.keys(tileDataService.tileDataCache).forEach((cacheKey) => {
+      var shouldDelete = false
+      keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
+      if (shouldDelete) {
+        delete tileDataService.tileDataCache[cacheKey]
+      }
+    })
+  }
+
+  // Mark all tiles in the HTML cache as dirty
   tileDataService.markHtmlCacheDirty = () => {
-    // Mark all tiles in the HTML cache as dirty
     Object.keys(tileDataService.tileHtmlCache).forEach((cacheId) => {
       tileDataService.tileHtmlCache[cacheId].isDirty = true
     })
+  }
+
+  // Completely erase the entire cache of HTML elements associated with tiles
+  tileDataService.deleteHtmlCache = () => {
+    tileDataService.tileHtmlCache = {}
   }
 
   return tileDataService

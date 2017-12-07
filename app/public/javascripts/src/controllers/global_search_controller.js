@@ -2,7 +2,7 @@
 // Search Controller
 app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', ($scope, $rootScope, $http, map_tools, $timeout) => {
   var ids = 0
-  var search = $('#global-search-controller .select2')
+  var search = $('#global-search-toolbutton .select2')
   search.select2({
     placeholder: 'Search an address, city, state or CLLI code', // config.ui.default_form_values.create_plan.select_area_text,
     initSelection : function (select, callback) {

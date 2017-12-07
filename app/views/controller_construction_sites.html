@@ -21,6 +21,22 @@
             >
           </div>
         </li>
+
+        <li>
+          <div class="text-center">
+            <div class="fa fa-road" style="width:16px;margin-right:10px"></div>
+          </div>
+          <div class="ctype-name">
+            Road Segments
+          </div>
+          <div class="ctype-checkbox">
+            <input type="checkbox" class="checkboxfill"
+              ng-model="roadLayer.visible"
+              name="ctype-name"
+              ng-change="toggleRoadLayer()"
+            >
+          </div>
+        </li>
       </ul>
 
       <!-- Data sources -->

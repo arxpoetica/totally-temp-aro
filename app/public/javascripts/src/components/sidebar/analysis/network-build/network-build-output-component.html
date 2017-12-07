@@ -1,0 +1,61 @@
+<div>
+  <style scoped>
+    #tblNetworkBuildOutput td {
+      line-height: 33px; /* To vertically align text */
+    }
+    .indent-1 {
+      padding-left: 30px !important;
+    }
+  </style>
+  <table id="tblNetworkBuildOutput" class="table table-condensed table-striped">
+    <tbody>
+
+      <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics"
+        ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
+        <th ng-if="networkStatistic.networkStatisticType === 'roic_npv'">NPV</th>
+        <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
+          {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}}K
+        </td>
+      </tr>
+      
+      <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics"
+        ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
+        <th ng-if="networkStatistic.networkStatisticType === 'roic_irr'">IRR</th>
+        <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
+          {{(networkStatistic.value * 100) | number : 1}}%
+        </td>
+      </tr>
+
+      <tr>
+        <th>Total Capex</th>
+        <td>{{$ctrl.networkBuildSummary.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
+      </tr>
+
+      <tr>
+        <th colspan="2">Fiber Capex</th>
+      </tr>
+      <tr ng-repeat="fiberCost in $ctrl.networkBuildSummary.priceModel.fiberCosts">
+        <td class="indent-1 text-capitalize">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}} {{$ctrl.config.length.length_units}})</td>
+        <td>{{fiberCost.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
+      </tr>
+      <tr>
+        <th colspan="2">Equipment Capex</th>
+      </tr>
+      <tr ng-repeat="equipmentCost in $ctrl.networkBuildSummary.priceModel.equipmentCosts">
+        <td class="indent-1 text-capitalize">{{$ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
+        <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
+      </tr>
+
+      <tr>
+        <th>Premises Passed</th>
+        <td> {{$ctrl.plannedNetworkDemand.locationDemand.rawCoverage | number}} </td>
+      </tr>
+      <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
+        <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
+        <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
+        <td> {{value.rawCoverage}} </td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn btn-primary pull-right" ng-click="$ctrl.showDetailedOutput()">Expand Results</button>
+</div>

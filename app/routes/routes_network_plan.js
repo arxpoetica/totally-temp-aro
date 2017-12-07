@@ -193,4 +193,12 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Get addresses for the specified service areas
+  api.post('/network_plan/service_area/addresses', (request, response, next) => {
+    var serviceAreaIds = request.body.serviceAreaIds
+    models.NetworkPlan.getServiceAreaAddresses(serviceAreaIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

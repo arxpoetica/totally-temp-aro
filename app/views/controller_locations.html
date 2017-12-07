@@ -69,9 +69,6 @@
   <div id="locations_controller" ng-show="!isLoadingConfiguration">
 
     <form>
-      <div class="customer-type shaded">
-        <label>Locations</label>
-      </div>
       <ul class="customer-type">
         <!-- Loop through all location types -->
         <li ng-repeat="locationType in derivedLocationTypes">
@@ -84,34 +81,7 @@
           </div>
         </li>
       </ul>
-      <!-- Data sources -->
-      <!-- Global businesses -->
-      <div class="customer-type shaded">
-        <label>Location data sources</label>
-      </div>
-      <!-- Uploaded data sources -->
-      <div class="customer-type">
-        <ui-select multiple ng-model="planState.selectedDataSources"
-                   theme="bootstrap"
-                   close-on-select="true"
-                   on-select="onSelectedDataSourcesChanged()"
-                   on-remove="onSelectedDataSourcesChanged()">
-          <!-- We will only show data source ids for uploaded data sources -->
-          <ui-select-match placeholder="Select data sources...">{{$item.name}} {{$item.dataSourceId >= 0 ? '[id ' + $item.dataSourceId + ']' : ''}}</ui-select-match>
-          <ui-select-choices class="ui-select-width-300" repeat="uploadedDataSource in planState.allDataSources">
-            <div>{{uploadedDataSource.name}}</div>
-          </ui-select-choices>
-        </ui-select>
-        <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addCustomers()">
-          <span class="fa fa-plus"></span> Add data sources...
-        </button>
-      </div>
     </form>
-
-    <div class="alert alert-info text-center" role="alert" ng-show="debugClickedLocations">
-      <strong>Heatmap debugging information</strong>
-      <pre>{{debugClickedLocations}}</pre>
-    </div>
 
     <a ng-if="env_is_test" href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">Test</a>
   </div>

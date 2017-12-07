@@ -77,11 +77,22 @@ module.exports = class NetworkPlan {
     if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
 
     var sql = `
-      SELECT id, address
+      SELECT id, address,ST_X(geom) as lng, ST_Y(geom) as lat
       FROM locations
       WHERE id IN ($1)
     `
     return database.query(sql, [locationIds])
+  }
+
+  static getServiceAreaAddresses (serviceAreaIds) {
+    if (!_.isArray(serviceAreaIds) || serviceAreaIds.length === 0) return Promise.resolve()
+
+    var sql = `
+      SELECT id, code
+      FROM client.service_area
+      WHERE id IN ($1)
+    `
+    return database.query(sql, [serviceAreaIds])
   }
 
   static _deleteSources (plan_id, network_node_ids) {
