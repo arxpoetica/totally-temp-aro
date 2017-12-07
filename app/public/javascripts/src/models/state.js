@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'regions', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, $timeout, map_layers, configuration, regions, optimization, stateSerializationHelper, $filter, tileDataService) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -521,7 +521,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
-    return stateSerializationHelper.getOptimizationBody(service, optimization, regions)
+    return stateSerializationHelper.getOptimizationBody(service, optimization)
   }
 
   // Load optimization options from a JSON string
@@ -912,7 +912,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-        stateSerializationHelper.loadStateFromJSON(service, optimization, regions, planInputs)
+        stateSerializationHelper.loadStateFromJSON(service, optimization, planInputs)
         return Promise.all([
           service.reloadSelectedLocations(),
           service.reloadSelectedServiceAreas(),
