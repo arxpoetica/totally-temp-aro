@@ -32,7 +32,14 @@
                  set-editing-mode="$ctrl.setEditingMode(mode)"
                  arpu-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
     </arpu-editor>
-  </modal-body>
+
+    <impedance-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'impedance_mapping_manager'"
+                 impedance-manager-id="$ctrl.editingManagerId"
+                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                 set-editing-mode="$ctrl.setEditingMode(mode)"
+                 impedance-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
+    </impedance-editor>
+</modal-body>
   <!-- Show modal footer only if we are listing resource managers. Editors will show their own buttons -->
   <modal-footer ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS">
     <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>

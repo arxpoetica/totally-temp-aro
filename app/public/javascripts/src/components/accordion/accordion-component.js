@@ -30,7 +30,11 @@ class AccordionController {
   // Sets the ID of the accordion to be expanded
   setExpandedAccordionId(id) {
     this.expandedAccordionId = id
-    this.toggleExpandedPanel = id
+    //Can set toggle panel when it is available.
+    //We are using it in location/road segment select.
+    if(this.toggleExpandedPanel) {
+      this.toggleExpandedPanel = id
+    }
     // Notify listeners (child elements) so that they can expand/collapse themselves
     this.expandedAccordionIdListeners.forEach((listener) => listener())
   }

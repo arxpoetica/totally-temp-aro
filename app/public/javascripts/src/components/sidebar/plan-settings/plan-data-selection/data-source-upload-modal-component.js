@@ -10,6 +10,7 @@ class DataSourceUploadController {
       name: ''
     }
     this.isUpLoad = false
+    this.isUpLoading = false
     this.dataSources
 
     //Default Polygon radius in meters
@@ -59,8 +60,17 @@ class DataSourceUploadController {
 
     if (this.conicTileSystemUploaderApi) {
       // We have a conic system uploader API, so the upload will be handled by the control
+      // Close dialog only after save is done, otherwise the FileList in the child control resets to 0
+      this.isUploading = true
       this.conicTileSystemUploaderApi.save()
-      this.close()
+      .then(() => {
+        this.isUploading = false
+        this.close()
+      })
+      .catch((err) => {
+        this.isUploading = false
+        console.error(err)
+      })
     } else {
       var files = $('#data_source_upload_modal input[type=file]').get(0).files
       if (this.editingDataset.id && files.length > 0) {

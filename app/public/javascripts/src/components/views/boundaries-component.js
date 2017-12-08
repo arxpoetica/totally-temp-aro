@@ -127,7 +127,7 @@ class BoundariesController {
       var wirecenter_layer = {
         name: serviceLayer.description,
         type: serviceLayer.name,
-        api_endpoint: "/tile/v1/service_area_by_library/tiles/${layerId}/${tilePointTransform}/",
+        api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
         layerId: serviceLayer.id,
         aggregateZoomThreshold: 10
       }
