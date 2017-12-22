@@ -149,67 +149,67 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   $scope.new_location_data = null
 
-  $('#create-location').on('shown.bs.modal', () => {
-    $('#create-location select').val('').trigger('change')
-  })
+  // $('#create-location').on('shown.bs.modal', () => {
+  //   $('#create-location select').val('').trigger('change')
+  // })
 
-  $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
-    if (tool === 'locations') {
-      if (!map_tools.is_visible('locations')) {
-        $scope.selected_tool = null
-        map.setOptions({ draggableCursor: null })
-      }
-    }
-  })
+  // $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
+  //   if (tool === 'locations') {
+  //     if (!map_tools.is_visible('locations')) {
+  //       $scope.selected_tool = null
+  //       map.setOptions({ draggableCursor: null })
+  //     }
+  //   }
+  // })
 
-  $scope.create_location = () => {
-    $http.post('/locations/create', $scope.new_location_data)
-      .then((response) => {
-        $('#create-location').modal('hide')
-        $scope.new_location_data = {}
-        locationsLayer.data_layer.addGeoJson(response.data)
-      })
-  }
+  // $scope.create_location = () => {
+  //   $http.post('/locations/create', $scope.new_location_data)
+  //     .then((response) => {
+  //       $('#create-location').modal('hide')
+  //       $scope.new_location_data = {}
+  //       locationsLayer.data_layer.addGeoJson(response.data)
+  //     })
+  // }
 
-  $scope.select_tool = (tool) => {
-    if ($scope.selected_tool === tool) {
-      $scope.selected_tool = null
-    } else {
-      $scope.selected_tool = tool
-    }
-    map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
-  }
+  // $scope.select_tool = (tool) => {
+  //   if ($scope.selected_tool === tool) {
+  //     $scope.selected_tool = null
+  //   } else {
+  //     $scope.selected_tool = tool
+  //   }
+  //   map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
+  // }
 
-  $rootScope.$on('map_click', (e, event) => {
-    if (!map_tools.is_visible('locations') || !$scope.selected_tool) return
-    var lat = event.latLng.lat()
-    var lng = event.latLng.lng()
-    var address = encodeURIComponent(lat + ',' + lng)
-    $scope.new_location_data = {
-      type: $scope.selected_tool,
-      lat: lat,
-      lon: lng
-    }
-    $('#create-location').modal('show')
-    $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
-      .then((response) => {
-        var results = response.data.results
-        var result = results[0]
-        if (!result) return
-        $scope.new_location_data.address = result.formatted_address
-        var components = result.address_components
-        components.forEach((component) => {
-          var types = component.types
-          if (types.indexOf('postal_code') >= 0) {
-            $scope.new_location_data.zipcode = component.long_name
-          } else if (types.indexOf('locality') >= 0) {
-            $scope.new_location_data.city = component.long_name.toUpperCase()
-          } else if (types.indexOf('administrative_area_level_1') >= 0) {
-            $scope.new_location_data.state = component.short_name.toUpperCase()
-          }
-        })
-      })
-  })
+  // $rootScope.$on('map_click', (e, event) => {
+  //   if (!map_tools.is_visible('locations') || !$scope.selected_tool) return
+  //   var lat = event.latLng.lat()
+  //   var lng = event.latLng.lng()
+  //   var address = encodeURIComponent(lat + ',' + lng)
+  //   $scope.new_location_data = {
+  //     type: $scope.selected_tool,
+  //     lat: lat,
+  //     lon: lng
+  //   }
+  //   $('#create-location').modal('show')
+  //   $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
+  //     .then((response) => {
+  //       var results = response.data.results
+  //       var result = results[0]
+  //       if (!result) return
+  //       $scope.new_location_data.address = result.formatted_address
+  //       var components = result.address_components
+  //       components.forEach((component) => {
+  //         var types = component.types
+  //         if (types.indexOf('postal_code') >= 0) {
+  //           $scope.new_location_data.zipcode = component.long_name
+  //         } else if (types.indexOf('locality') >= 0) {
+  //           $scope.new_location_data.city = component.long_name.toUpperCase()
+  //         } else if (types.indexOf('administrative_area_level_1') >= 0) {
+  //           $scope.new_location_data.state = component.short_name.toUpperCase()
+  //         }
+  //       })
+  //     })
+  // })
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
@@ -280,8 +280,4 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
       $scope.toggleMeasuringStick()
     }
   })
-
-  $scope.addCustomers = () => {
-    $rootScope.$broadcast('upload_customers')
-  }
 }])

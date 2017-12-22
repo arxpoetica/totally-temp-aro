@@ -13,7 +13,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, optimization, regions) => {
+  stateSerializationHelper.getOptimizationBody = (state, optimization) => {
 
     var optimizationBody = {
       planId: state.plan.getValue().id,
@@ -156,7 +156,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, optimization, regions, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, optimization, planInputs) => {
     loadAnalysisTypeFromBody(state, planInputs)
     loadLocationTypesFromBody(state, planInputs)
     loadSelectedExistingFiberFromBody(state, planInputs)

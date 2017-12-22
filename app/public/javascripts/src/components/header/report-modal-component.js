@@ -105,7 +105,7 @@ class ReportModalController {
           url: '/reports/'+this.plan.id+'/network/csv/nodes'
         },
         {
-          name: 'Ser  vice Area Summary',
+          name: 'Service Area Summary',
           type: '.csv',
           url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${this.plan.id}.csv`
         }

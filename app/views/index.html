@@ -32,10 +32,6 @@
       <% include modal_data_management.html %>
     </div>
 
-    <div ng-controller="reports_controller">
-      <% include modal_reports.html %>
-    </div>
-
     <div ng-controller="build_lease_controller">
       <% include modal_build_lease.html %>
     </div>
@@ -52,73 +48,13 @@
       <% include modal_customer_profile.html %>
     </div>
 
-    <div ng-controller="user_defined_boundary_controller">
-      <% include modal_user_defined_boundaries.html %>
-    </div>
-
-    <div ng-controller="upload_customers_controller">
-      <% include modal_upload_customers.html %>
-    </div>
-    
-    <div ng-controller="upload_morphology_controller">
-      <% include modal_upload_morphology.html %>
-    </div>
-
-    <div ng-controller="upload_fiber_controller">
-      <% include modal_upload_fiber.html %>
-    </div>
-
-    <% if (user.rol === 'admin') { %>
-      <div ng-controller="admin_users_controller">
-        <% include modal_manage_users.html %>
-        <% include modal_new_user.html %>
-        <% include modal_send_mail.html %>
-      </div>
-    <% } %>
-
     <!-- Remove controller for now. Later, the whole navigation div should be gone<div ng-controller="navigation_menu_controller">-->
     <div>
 
       <% include modal_build_sequence.html %>
 
-      <% include modal_select_plan.html %>
-
-      <% include modal_new_plan.html %>
-
-      <% include modal_edit_plan.html %>
-
       <% include modal_share_plan.html %>
 
-      <% include modal_plan_combo.html %>
-
-      <div class="modal" id="export-plan" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Export route</h4>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <div class="form-group">
-                  <label class="col-sm-3 control-label">Filename</label>
-                  <div class="col-sm-9">
-                    <div class="input-group">
-                      <input type="text" class="form-control" ng-model="kml_file_name">
-                      <span class="input-group-addon">.kml</span>
-                    </div>
-                  </div>
-                </div>
-                <span id="export-error" style="display: none">Filename can only contain letters and numbers!</span>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" ng-click="export_kml()">Export file</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
 
@@ -330,23 +266,14 @@
   <script src="javascripts/lib/controllers/expert_mode_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_fiber_controller.js"></script>
   <script src="javascripts/lib/controllers/contextual_menu_controller.js"></script>
-  <script src="javascripts/lib/controllers/admin_users_controller.js"></script>
   <script src="javascripts/lib/controllers/search_controller.js"></script>
-  <script src="javascripts/lib/controllers/area_network_planning_controller.js"></script>
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
-  <script src="javascripts/lib/controllers/target_builder_controller.js"></script>
   <script src="javascripts/lib/controllers/legend_controller.js"></script>
   <script src="javascripts/lib/controllers/global_search_controller.js"></script>
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
   <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
-  <script src="javascripts/lib/controllers/user_defined_boundary_controller.js"></script>
-  <script src="javascripts/lib/controllers/upload_customers_controller.js"></script>
-  <script src="javascripts/lib/controllers/upload_morphology_controller.js"></script>
-  <script src="javascripts/lib/controllers/upload_fiber_controller.js"></script>
-  <script src="javascripts/lib/controllers/reports_controller.js"></script>
-  <script src="javascripts/lib/controllers/backhaul_controller.js"></script>
   <script src="javascripts/lib/controllers/data_management_controller.js"></script>
   <script src="javascripts/lib/controllers/construction_sites_controller.js"></script>
   <script src="javascripts/lib/controllers/map_settings_controller.js"></script>
