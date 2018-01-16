@@ -648,6 +648,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   function updateMetadataLabels(plan) {
     $http.get(`/service/report/plan/${plan.id}`).then((response) => {
       $scope.metadata = response.data
+      $scope.plannedNetworkDemand = $scope.metadata.demandSummary.networkDemands.filter((item) => item.demandType === 'planned_demand')[0]
     })
   }
 
