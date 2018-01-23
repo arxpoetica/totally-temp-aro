@@ -189,12 +189,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
+  service.selectionTypeChanged = new Rx.BehaviorSubject()
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
   //This modal will be used to toogle from report modal to current modal 
   service.previousModal
 
+  service.selectionTypeChanged.next(service.selectionModes.SELECTED_AREAS)
 
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})

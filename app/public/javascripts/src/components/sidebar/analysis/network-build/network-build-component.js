@@ -10,6 +10,7 @@ class NetworkBuildController {
     this.config = config
 
     this.areControlsEnabled = true
+    
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
@@ -39,8 +40,12 @@ class NetworkBuildController {
               this.serviceAreas = result.data
             }
           })
-      }) 
+      })  
   }
+
+  onSelectionTypeChange(selectionType) {
+    this.state.selectionTypeChanged.next(selectionType)
+  } 
 
 }
 

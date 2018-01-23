@@ -21,6 +21,9 @@ class BoundariesController {
 
     // Update map layers when the dataItems property of state changes
     this.state.dataItemsChanged.subscribe((newValue) => this.updateMapLayers())
+
+    // Update map layers when the selection type in analysis mode changes
+    this.state.selectionTypeChanged.subscribe((newValue) => this.updateMapLayers())
     
     if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
       countySubdivisionsLayer = new MapLayer({
@@ -163,6 +166,8 @@ class BoundariesController {
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
 
+    var isSelectedSA = this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS ? this.state.optimizationOptions.analysisSelectionMode == "SELECTED_AREAS" : true
+
     // Add map layers based on the selection
     var selectedServiceAreaLibraries = this.state.dataItems && this.state.dataItems.service_layer && this.state.dataItems.service_layer.selectedLibraryItems
     if (selectedServiceAreaLibraries) {
@@ -170,7 +175,7 @@ class BoundariesController {
         
         this.state.boundaries.tileLayers.forEach((layer) => {
 
-          if (layer.visible) {
+          if (layer.visible && isSelectedSA) {
             var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
 
