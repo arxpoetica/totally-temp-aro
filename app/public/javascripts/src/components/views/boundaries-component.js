@@ -24,6 +24,9 @@ class BoundariesController {
 
     // Update map layers when the selection type in analysis mode changes
     this.state.selectionTypeChanged.subscribe((newValue) => this.updateMapLayers())
+
+    // Update map layers when the display mode button changes
+    this.state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
     
     if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
       countySubdivisionsLayer = new MapLayer({

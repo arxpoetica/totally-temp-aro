@@ -125,7 +125,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     .subscribe((newValue) => updateMapLayers())
 
   // Update map layers when the selection type in analysis mode changes
-  state.selectionTypeChanged.subscribe((newValue) => updateMapLayers())  
+  state.selectionTypeChanged.subscribe((newValue) => updateMapLayers())
+  
+  // Update map layers when the display mode button changes
+  state.selectedDisplayMode.subscribe((newValue) => updateMapLayers())
 
   $scope.map_tools = map_tools
   $scope.selected_tool = null
