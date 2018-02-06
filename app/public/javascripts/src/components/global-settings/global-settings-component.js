@@ -3,6 +3,7 @@ class GlobalSettingsController {
   constructor(state,globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
+    this.currentUser = globalUser
 
     this.views = Object.freeze({
       Global_Settings: 0,
@@ -62,6 +63,7 @@ app.component('globalSettings', {
           </button>
 
           <button class="btn settings-btn"
+            ng-if="$ctrl.currentUser.rol === 'admin'"
             ng-click="$ctrl.toggleManageUsersMode()">
               <i class="fa fa-2x fa-users"></i>
               <br>Manage Users
