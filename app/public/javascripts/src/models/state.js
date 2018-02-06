@@ -167,7 +167,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       useAbsoluteMax: true,
       maxValue: 100,
       powerExponent: 0.5,
-      worldMaxValue: 100000000
+      worldMaxValue: 500000
     },
     selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
   })
