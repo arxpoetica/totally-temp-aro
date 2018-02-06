@@ -42,6 +42,10 @@ class NetworkAnalysisController {
 
   }
 
+  onSelectionTypeChange(selectionType) {
+    this.state.selectionTypeChanged.next(selectionType)
+  } 
+
 }
 
 NetworkAnalysisController.$inject = ['$http', 'state', 'optimization']

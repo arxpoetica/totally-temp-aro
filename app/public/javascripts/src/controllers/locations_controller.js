@@ -34,6 +34,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
 
+    var isSelectedLoc = state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS ? state.optimizationOptions.analysisSelectionMode == "SELECTED_LOCATIONS" : true
+
     // Add map layers based on the selection
     var selectedLocationLibraries = state.dataItems && state.dataItems.location && state.dataItems.location.selectedLibraryItems
     if (selectedLocationLibraries) {
@@ -41,7 +43,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         // Loop through the location types
         state.locationTypes.getValue().forEach((locationType) => {
 
-          if (locationType.checked) {
+          if (locationType.checked && isSelectedLoc) {
             // Location type is visible
             var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
             var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
@@ -121,6 +123,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
     .subscribe((newValue) => updateMapLayers())
+
+  // Update map layers when the selection type in analysis mode changes
+  state.selectionTypeChanged.subscribe((newValue) => updateMapLayers())
+  
+  // Update map layers when the display mode button changes
+  state.selectedDisplayMode.subscribe((newValue) => updateMapLayers())
 
   $scope.map_tools = map_tools
   $scope.selected_tool = null
