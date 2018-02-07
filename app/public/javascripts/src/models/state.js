@@ -164,7 +164,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.mapTileOptions = new Rx.BehaviorSubject({
     showTileExtents: false,
     heatMap: {
-      useAbsoluteMax: true,
+      useAbsoluteMax: false,
       maxValue: 100,
       powerExponent: 0.5,
       worldMaxValue: 500000
