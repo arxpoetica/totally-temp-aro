@@ -13,6 +13,12 @@ class DataSourceUploadController {
     this.isUpLoading = false
     this.dataSources
 
+    this.saCreationTypes = [
+      {id:"upload_file",label:"Upload From File"},
+      {id:"polygon_equipment",label:"Create Polygon From Equipment"}
+    ]
+    this.saCreationType
+    this.selectedEquipment
     //Default Polygon radius in meters
     this.radius = 20000
 
@@ -72,30 +78,32 @@ class DataSourceUploadController {
         console.error(err)
       })
     } else {
-      var files = $('#data_source_upload_modal input[type=file]').get(0).files
-      if (this.editingDataset.id && files.length > 0) {
-        return swal({
-          title: 'Are you sure?',
-          text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
-          type: 'warning',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes',
-          showCancelButton: true,
-          closeOnConfirm: true
-        }, submit)
+      if (this.state.uploadDataSource.name != 'service_layer' || this.saCreationType.id != 'polygon_equipment') {
+        var files = $('#data_source_upload_modal input[type=file]').get(0).files
+        if (this.editingDataset.id && files.length > 0) {
+          return swal({
+            title: 'Are you sure?',
+            text: 'Are you sure you want to overwrite the data which is currently in this boundary layer?',
+            type: 'warning',
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes',
+            showCancelButton: true,
+            closeOnConfirm: true
+          }, submit)
+        }
       }
-
       this.getLibraryId()
         .then((libraryId) => {
-          this.submit(libraryId)
+          if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'polygon_equipment')
+            this.layerBoundary(this.selectedEquipment.identifier,libraryId)
+          else  
+            this.submit(libraryId)
         })
     }
   }
 
   getLibraryId() {
-    //To polpulate the service area we have to generate the equipment
-    //Finally function (layerBoundary) populate the service area
-    var dataType = this.state.uploadDataSource.name === 'service_layer' ? 'equipment' : this.state.uploadDataSource.name
+    var dataType = this.state.uploadDataSource.name
 
     var libraryOptions = {
       url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
@@ -126,13 +134,7 @@ class DataSourceUploadController {
       headers: { 'Content-Type': undefined },
       transformRequest: angular.identity
     }).then((e) => {
-
-      if(this.state.uploadDataSource.name === 'service_layer') {
-        //load the eqipment boundary layer
-        this.layerBoundary(libraryId)
-      } else {
-        this.addDatasource(JSON.parse(e.data))
-      }
+      this.addDatasource(JSON.parse(e.data))
       this.isUpLoad = false
       this.close()
     }).catch((e) => {
@@ -141,15 +143,15 @@ class DataSourceUploadController {
     });
   }
 
-  layerBoundary(libraryId) {
+  layerBoundary(equipmentLibraryId,serviceLayerLibraryId) {
     var boundaryOptions = {
       url: '/service/v1/project/' + this.projectId + '/serviceLayers-cmd?user_id=' + this.userId,
       method: 'POST',
       data: {
         action: 'GENERATE_POLYGONS',
         maxDistanceMeters: $('#data_source_upload_modal input[type=number]').get(0).value,
-        equipmentLibraryId: libraryId
-        // serviceLayerLibraryId: libraryId
+        equipmentLibraryId: equipmentLibraryId,
+        serviceLayerLibraryId: serviceLayerLibraryId
       },
       json: true
     }
@@ -157,6 +159,8 @@ class DataSourceUploadController {
     return this.$http(boundaryOptions)
     .then((e) => {
       this.state.dataItems['service_layer'].allLibraryItems.push(e.data.serviceLayerLibrary)
+      this.isUpLoad = false
+      this.close()
     })
   }
 
