@@ -82,7 +82,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       algorithmType: 'DEFAULT',
       algorithm: state.optimizationOptions.uiSelectedAlgorithm.algorithm,
       uiSelectedAlgorithmId: state.optimizationOptions.uiSelectedAlgorithm.id,
-      threshold: state.optimizationOptions.threshold,
+      threshold: state.optimizationOptions.threshold / 100,
       preIrrThreshold: state.optimizationOptions.preIrrThreshold,
       budget: state.optimizationOptions.budget * 1000
     }
@@ -258,7 +258,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
     if (postBody.optimization.threshold) {
-      state.optimizationOptions.threshold = +postBody.optimization.threshold
+      state.optimizationOptions.threshold = +postBody.optimization.threshold * 100
     }
     if (postBody.optimization.preIrrThreshold) {
       state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
