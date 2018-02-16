@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedRoadSegment, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -17,6 +17,8 @@ class MapTileRenderer {
     this.selectedLocations = selectedLocations
     this.selectedServiceAreas = selectedServiceAreas
     this.selectedRoadSegment = selectedRoadSegment
+    this.selectedDisplayMode = selectedDisplayMode
+    this.analysisSelectionMode = analysisSelectionMode
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -44,9 +46,21 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
-  // Sets the selected service area ids
+  // Sets the selected Road Segment ids
   setSelectedRoadSegment(selectedRoadSegment) {
     this.selectedRoadSegment = selectedRoadSegment
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected display mode
+  setselectedDisplayMode(selectedDisplayMode) {
+    this.selectedDisplayMode = selectedDisplayMode
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected analysis selection type
+  setAnalysisSelectionMode(analysisSelectionMode) {
+    this.analysisSelectionMode = analysisSelectionMode
     this.tileDataService.markHtmlCacheDirty()
   }
 
@@ -336,7 +350,9 @@ class MapTileRenderer {
             ctx.globalCompositeOperation = 'source-over'
             if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
               // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
-              if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)) {
+              if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
+                //show selected location icon at analysis mode -> selection type is locations    
+                  && this.selectedDisplayMode == 1 && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
                 // Draw selected icon
                 ctx.drawImage(selectedLocationImage[0], x, y)
               } else {
@@ -817,6 +833,22 @@ class TileComponentController {
       }
     })
 
+    // If Display Mode change, set that in the tile data
+    state.selectedDisplayMode
+      .subscribe((selectedDisplayMode) => {
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
+        }
+      })
+
+    // If analysis selection Type change, set that in the tile data
+    state.selectionTypeChanged
+      .subscribe((analysisSelectionMode) => {
+        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(analysisSelectionMode)
+        }
+      })
+
     // Set the map zoom level
     state.requestSetMapZoom
       .subscribe((zoom) => {
@@ -955,7 +987,9 @@ class TileComponentController {
                                                            this.state.mapTileOptions.getValue(),
                                                            this.state.selectedLocations.getValue(),
                                                            this.state.selectedServiceAreas.getValue(),
-                                                           this.state.selectedRoadSegments.getValue()
+                                                           this.state.selectedRoadSegments.getValue(),
+                                                           this.state.selectedDisplayMode.getValue(),
+                                                           this.state.optimizationOptions.analysisSelectionMode
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
