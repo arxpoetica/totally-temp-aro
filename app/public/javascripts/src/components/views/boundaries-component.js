@@ -169,7 +169,7 @@ class BoundariesController {
     // Hold a list of layers that we want merged
     var mergedLayerUrls = []
 
-    var isSelectedSA = this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS ? this.state.optimizationOptions.analysisSelectionMode == "SELECTED_AREAS" : true
+    //var isSelectedSA = this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS ? this.state.optimizationOptions.analysisSelectionMode == "SELECTED_AREAS" : true
 
     // Add map layers based on the selection
     var selectedServiceAreaLibraries = this.state.dataItems && this.state.dataItems.service_layer && this.state.dataItems.service_layer.selectedLibraryItems
@@ -178,7 +178,7 @@ class BoundariesController {
         
         this.state.boundaries.tileLayers.forEach((layer) => {
 
-          if (layer.visible && isSelectedSA) {
+          if (layer.visible) {
             var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
 
