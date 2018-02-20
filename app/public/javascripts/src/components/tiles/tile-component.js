@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -19,6 +19,7 @@ class MapTileRenderer {
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
+    this.displayModes = displayModes
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -352,7 +353,7 @@ class MapTileRenderer {
               // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
               if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
                 //show selected location icon at analysis mode -> selection type is locations    
-                  && this.selectedDisplayMode == 1 && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
+                  && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
                 // Draw selected icon
                 ctx.drawImage(selectedLocationImage[0], x, y)
               } else {
@@ -436,7 +437,9 @@ class MapTileRenderer {
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
 
     //Highlight the selected SA
-    if(this.selectedServiceAreas.has(feature.properties.id)) {
+    if(this.selectedServiceAreas.has(feature.properties.id)
+      //highlight if analysis mode -> selection type is service areas 
+      && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_AREAS") {
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
@@ -989,7 +992,8 @@ class TileComponentController {
                                                            this.state.selectedServiceAreas.getValue(),
                                                            this.state.selectedRoadSegments.getValue(),
                                                            this.state.selectedDisplayMode.getValue(),
-                                                           this.state.optimizationOptions.analysisSelectionMode
+                                                           this.state.optimizationOptions.analysisSelectionMode,
+                                                           this.state.displayModes
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
