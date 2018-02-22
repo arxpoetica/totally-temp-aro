@@ -40,24 +40,33 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
     }
   })
 
-
-    //set the default search to the location in config
+  //set the default search to the location in config
   $timeout(function () {
-    $http.get("/search/addresses" , {params : {text : config.ui.defaultSearch}}).then(function (results) {
-
-        var location = results.data[0];
-        var loc = {
-            id: 'id-' + (++ids),
-            text: location.name,
-            bounds: location.bounds,
-            centroid: location.centroid
-        };
-
-        $scope.firstLocation = loc;
-        search.select2("val" , loc , true)
-    });
+    $scope.searchRetry = 0
+    searchAddress()
   },10);
 
+  function searchAddress () {
+    $http.get("/search/addresses", { params: { text: config.ui.defaultSearch } }).then(function (results) {
+
+      var location = results.data[0];
+
+      if (location != null) {
+        var loc = {
+          id: 'id-' + (++ids),
+          text: location.name,
+          bounds: location.bounds,
+          centroid: location.centroid
+        };
+        $scope.firstLocation = loc;
+        search.select2("val", loc, true)
+      } else if ($scope.searchRetry < 5) {
+        $scope.searchRetry++
+        searchAddress()
+      }
+
+    });
+  }
 
 
 }]);
