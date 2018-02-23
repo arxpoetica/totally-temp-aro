@@ -381,6 +381,7 @@ class MapTileRenderer {
               ctx.globalAlpha = 1.0
             } else {
               // This is not a closed polygon. Render lines only
+              ctx.globalAlpha = 1.0
               if (this.selectedRoadSegment.length > 0 && 
                 this.selectedRoadSegment.filter(function (road) {
                    return road.gid === feature.properties.gid
@@ -390,9 +391,9 @@ class MapTileRenderer {
                   lineWidth: mapLayer.highlightStyle.lineWidth,
                   strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
-                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles)
+                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false)
               } else {
-                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer)
+                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, false)
               }
             }
             break;
@@ -402,7 +403,7 @@ class MapTileRenderer {
   }
 
   // Renders a polyline feature onto the canvas
-  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles) {
+  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, isPolygonBorder) {
 
     ctx.strokeStyle = drawingStyles ? drawingStyles.strokeStyle : mapLayer.strokeStyle
     ctx.lineWidth = drawingStyles ? drawingStyles.lineWidth : (mapLayer.lineWidth || 1)
@@ -414,11 +415,17 @@ class MapTileRenderer {
     for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
       var xNext = shape[iCoord].x + geometryOffset.x
       var yNext = shape[iCoord].y + geometryOffset.y
-      var isAlongXMin = (xPrev === 0 && xNext === 0)
-      var isAlongXMax = (xPrev === this.tileSize.width && xNext === this.tileSize.width)
-      var isAlongYMin = (yPrev === 0 && yNext === 0)
-      var isAlongYMax = (yPrev === this.tileSize.height && yNext === this.tileSize.height)
-      if (!isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax) {
+      var shouldRenderLine = true
+      // ONLY for polygon borders, skip rendering the line segment if it is along the tile extents.
+      // Without this, polygons that are clipped (like 5G boundaries) will have internal lines.
+      if (isPolygonBorder) {
+        var isAlongXMin = (xPrev === 0 && xNext === 0)
+        var isAlongXMax = (xPrev === this.tileSize.width && xNext === this.tileSize.width)
+        var isAlongYMin = (yPrev === 0 && yNext === 0)
+        var isAlongYMax = (yPrev === this.tileSize.height && yNext === this.tileSize.height)
+        shouldRenderLine = !isAlongXMin && !isAlongXMax && !isAlongYMin && !isAlongYMax
+      }
+      if (shouldRenderLine) {
         // Segment is not along the tile extents. Draw it. We do this because polygons can be
         // clipped by the tile extents, and we don't want to draw segments along tile extents.
         ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
@@ -466,7 +473,7 @@ class MapTileRenderer {
 
     // Then draw a polyline except for the lines that are along the tile extents
     // Override the layers drawing styles by passing it through to the rendering function
-    this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles)
+    this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, true)
   }
 
   // Computes the fill and stroke styles for polygon features
