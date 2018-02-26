@@ -148,8 +148,9 @@ This will start containers for all parts of the application, including the `aro-
 ```shell
 $ docker exec -it docker_app_1 /bin/bash
 ```
-Once inside the container, make sure you are in folder /srv/www/aro. Then run
+Once inside the container, run
 ```shell
+cd /srv/www/aro/app
 npm run dev
 ```
 This will start the nodejs application and keep the debug log in the foreground. You can now connect to the application at https://localhost:8000. The script runs two processes - The first one starts the NodeJS server and watches for changes. On detecting
