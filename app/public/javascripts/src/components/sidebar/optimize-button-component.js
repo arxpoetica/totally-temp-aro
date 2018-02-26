@@ -15,6 +15,11 @@ class OptimizeButtonController {
 
     return isValid
   }
+
+  saveExpertMode(){
+    this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertModeBody))
+  }
+
 }
 
 OptimizeButtonController.$inject = ['state']

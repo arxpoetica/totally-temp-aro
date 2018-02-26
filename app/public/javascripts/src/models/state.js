@@ -193,6 +193,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
+  service.expertModeBody = null
   //This modal will be used to toogle from report modal to current modal 
   service.previousModal
 
@@ -489,7 +490,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
       { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: "NETWORK_ANALYSIS" },
       { id: 'Coverage_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
-      { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" }
+      { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" },
+      { id: 'EXPERT_MODE', label: 'Expert Mode', type: "Expert" }
     ]
     service.networkAnalysisType = service.networkAnalysisTypes[0]
 
@@ -528,10 +530,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
-    return Promise.reject('loadOptimizationOptionsFromJSON() no longer supported in the new UI')
+    //return Promise.reject('loadOptimizationOptionsFromJSON() no longer supported in the new UI')
     // // Note that we are NOT returning the state (the state is set after the call), but a promise
     // // that resolves once all the geographies have been loaded
     // return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
+    return stateSerializationHelper.loadStateFromJSON(service, optimization, json)
   }
 
   $document.ready(() => {
