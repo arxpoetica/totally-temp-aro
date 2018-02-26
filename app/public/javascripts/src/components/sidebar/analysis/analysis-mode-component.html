@@ -59,6 +59,9 @@
         <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
           remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
       </div>
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'">
+        <analysis-expert-mode></analysis-expert-mode>
+      </div>
     </accordion-panel-contents>
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="'OUTPUT'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'OUTPUT'">
