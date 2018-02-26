@@ -146,9 +146,16 @@ $ docker-compose up -d
 ```
 This will start containers for all parts of the application, including the `aro-service` and run them in the background. However, the applciation server itself is not yet running. To start the application in local/debug mode, use the following command:
 ```shell
-$ docker exec -it docker_app_1 runserver.sh
+$ docker exec -it docker_app_1 /bin/bash
 ```
-This will start the nodejs application and keep the debug log in the foreground. You can now connect to the application at https://localhost:8000. If you change the code, you'll need to Ctrl+C to kill the running task and then start it again in order to see the changes reflected.  
+Once inside the container, run
+```shell
+cd /srv/www/aro/app
+npm run dev
+```
+This will start the nodejs application and keep the debug log in the foreground. You can now connect to the application at https://localhost:8000. The script runs two processes - The first one starts the NodeJS server and watches for changes. On detecting
+a change, the NodeJS server is restarted. The second process transpiles JavaScript files and places them in the right folder. On
+detecting a change in the JS (or HTML) files, the changed files are transpiled and copied over to the right folder. 
 
 ## Pulling in updates to Docker images (aro-service and aro-app-base)
 Occasionally these images are updated. To incorporate the newest versions of the images into your local environment, you need to first bring down the environment and remove the current containers. This can be accomplished as follows:
