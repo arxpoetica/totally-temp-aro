@@ -2,16 +2,7 @@ class ViewModeController {
   
   constructor(state) {
     this.state = state
-    this.togglePanel
-
-    this.state.showViewModeInfo
-      .subscribe((options) => {
-        if (options.locations && options.locations.length > 0) {
-          this.togglePanel = 'LOCATION_INFO'
-        } else if (options.roadSegments && options.roadSegments.length > 0) {
-          this.togglePanel = 'ROAD_SEGMENT_INFO'
-        }
-      })
+    this.togglePanel = 'LOCATION_INFO'
   }
 }
 

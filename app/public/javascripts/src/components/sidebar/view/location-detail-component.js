@@ -11,7 +11,7 @@ class ViewModeLocationController {
       this.plan = plan
     })
 
-    state.showViewModeInfo
+    state.mapFeaturesSelectedEvent
     .subscribe((options) => {
       var locationId = null
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {

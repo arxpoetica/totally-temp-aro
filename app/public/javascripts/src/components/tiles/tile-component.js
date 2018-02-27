@@ -382,8 +382,8 @@ class MapTileRenderer {
             } else {
               // This is not a closed polygon. Render lines only
               ctx.globalAlpha = 1.0
-              if (this.selectedRoadSegment.length > 0 && 
-                this.selectedRoadSegment.filter(function (road) {
+              if (this.selectedRoadSegment.size > 0 && 
+                [...this.selectedRoadSegment].filter(function (road) {
                    return road.gid === feature.properties.gid
                 }).length > 0) {
                 //Highlight the selected Selected RoadSegments
@@ -932,7 +932,7 @@ class TileComponentController {
           .then((results) => {
             var selectedLocations = new Set()
             var selectedServiceAreas = new Set()
-            var selectedRoadSegments = []
+            var selectedRoadSegments = new Set()
             
             results.forEach((result) => {
               result.forEach((selectedObj) => {
@@ -941,52 +941,26 @@ class TileComponentController {
                 } else if(selectedObj.id) {
                   selectedServiceAreas.add(selectedObj.id)
                 } else if (selectedObj.gid) {
-                  if (!_.findWhere(selectedRoadSegments, selectedObj)) {
-                    selectedRoadSegments.push(selectedObj);
-                  }
+                  selectedRoadSegments.add(selectedObj);
                 }
               })
             })
 
             var selectedLocationsIds = []
             var selectedServiceAreaIds = []
-            var selectedRoadSegmentIds = []
 
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
-            selectedRoadSegments.forEach((road) => selectedRoadSegmentIds.push({ gid: road.gid }))
             
             state.hackRaiseEvent(selectedLocationsIds)
 
             //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            if (state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS && this.areControlsEnabled) {
-              if(this.state.optimizationOptions.analysisSelectionMode == 'SELECTED_AREAS') {
-                state.mapFeaturesSelectedEvent.next({
-                  serviceAreas: selectedServiceAreaIds
-                })
-              } else {
-                state.mapFeaturesSelectedEvent.next({
-                  locations: selectedLocationsIds
-                })
-              }
-            }
-
-            //Show Road Segment information in View Mode
-            if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-              //View Road Segment Info
-              state.showViewModeInfo.next({
-                roadSegments: selectedRoadSegments
-              })
-
-              //Higlight the selected road segments
-              if (selectedRoadSegmentIds.length > 0) {
-                state.mapFeaturesSelectedEvent.next({
-                  roadSegment: selectedRoadSegmentIds
-                })
-              }
-            }
+            state.mapFeaturesSelectedEvent.next({
+              locations: selectedLocations,
+              serviceAreas: selectedServiceAreaIds,
+              roadSegments: selectedRoadSegments
+            })
           })
-
       })
 
     $document.ready(() => {
@@ -1026,7 +1000,7 @@ class TileComponentController {
           .then((results) => {
             var hitFeatures = []
             var serviceAreaFeatures = []
-            var roadFeatures = []
+            var roadSegments = this.state.selectedRoadSegments.getValue()
 
             var canSelectLoc  = false
             var canSelectSA   = false
@@ -1047,7 +1021,7 @@ class TileComponentController {
               } else if (result.code && canSelectSA) {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
               } else if (result.gid) {
-                roadFeatures = roadFeatures.concat(result)
+                roadSegments.add(result)
               }
             })
 
@@ -1056,26 +1030,11 @@ class TileComponentController {
             }
 
             //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            if (state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS && this.areControlsEnabled) {
-              state.mapFeaturesSelectedEvent.next({
-                locations: hitFeatures,
-                serviceAreas: serviceAreaFeatures
-              })
-            }
-
-            //Locations Info is shown in View Mode
-            if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-              state.showViewModeInfo.next({
-                locations: hitFeatures,
-                roadSegments: roadFeatures
-              })
-            }
-
-            if(roadFeatures.length > 0 && state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-              state.mapFeaturesSelectedEvent.next({
-                roadSegment: roadFeatures
-              })
-            }
+            state.mapFeaturesSelectedEvent.next({
+              locations: hitFeatures,
+              serviceAreas: serviceAreaFeatures,
+              roadSegments: roadSegments
+            })
           })
       })
     })
