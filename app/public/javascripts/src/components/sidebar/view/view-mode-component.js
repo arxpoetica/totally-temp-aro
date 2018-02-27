@@ -3,6 +3,8 @@ class ViewModeController {
   constructor(state) {
     this.state = state
     this.togglePanel = 'LOCATION_INFO'
+
+    state.requestEditLocations.subscribe(() => this.togglePanel = 'EDIT_LOCATIONS')
   }
 }
 

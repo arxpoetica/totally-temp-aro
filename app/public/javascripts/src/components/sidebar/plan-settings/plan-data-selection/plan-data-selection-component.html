@@ -11,9 +11,14 @@
                               selection-changed="$ctrl.onSelectionChanged()"
                               style="flex: 1 1 auto;">
             </aro-multi-select>
-            <button class="btn btn-sm btn-default" ng-disabled="!itemValue.uploadSupported" style="flex: 0 0 auto;" ng-click="$ctrl.uploadDataSource(itemValue.id)">
-              <span class="fa fa-upload"></span>
-            </button>
+            <div class="btn-group" style="flex: 0 0 auto;">
+              <button class="btn btn btn-default" ng-disabled="!itemValue.uploadSupported" ng-click="$ctrl.uploadDataSource(itemValue.id)">
+                <span class="fa fa-upload"></span>
+              </button>
+              <button class="btn btn btn-default" ng-if="itemKey === 'location' && itemValue.selectedLibraryItems.length === 1" ng-click="$ctrl.editLocations()">
+                <span class="fa fa-edit"></span>
+              </button>
+            </div>
           </div>
           <span class="label label-danger"
                 ng-if="!itemValue.isMinValueSelectionValid">Error: At least {{itemValue.minValue}} items must be selected</span>
