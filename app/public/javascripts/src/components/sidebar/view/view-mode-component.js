@@ -35,7 +35,7 @@ app.component('viewMode', {
       </accordion-panel-contents>
       <accordion-panel-title title="'Edit Locations'" panel-id="'EDIT_LOCATIONS'"></accordion-panel-title>
       <accordion-panel-contents panel-id="'EDIT_LOCATIONS'">
-        <location-editor></location-editor>
+        <location-editor ng-if="$ctrl.togglePanel === 'EDIT_LOCATIONS'" map-global-object-name="map"></location-editor>
       </accordion-panel-contents>
     </accordion>
   </div>

@@ -1,22 +1,100 @@
-class ViewModeLocationController {
+var CommandTypes = Object.freeze({
+  ADD_LOCATION: 'ADD_LOCATION',
+  MOVE_LOCATION: 'MOVE_LOCATION'
+})
 
-  constructor() {
+class CommandAddLocation {
+  execute(params) {
+    this.newLocationMarker = new google.maps.Marker({
+      position: params.locationLatLng,
+      icon: '/images/map_icons/aro/households_default.png',
+      draggable: true,
+      map: params.map
+    })
+    return this.newLocationMarker
+  }
+}
+
+class CommandMoveLocation {
+  execute(params) {
+    this.params = params
+  }
+}
+
+class LocationEditorController {
+
+  constructor($document, $timeout) {
+    this.$timeout = $timeout
     this.addLocationData = {
       types: [
         'Business',
         'Household',
         'Cell tower'
       ],
-      selectedType: 'Business',
+      selectedType: 'Household',
       numberOfLocations: 1
     }
+    this.commandStack = []
+  }
+
+  $onInit() {
+    // We should have a map variable at this point
+    if (!window[this.mapGlobalObjectName]) {
+      console.error('ERROR: Location Editor component initialized, but a map object is not available at this time.')
+      return
+    }
+    this.mapRef = window[this.mapGlobalObjectName]
+
+    // Handler for map click - this is when we create a new location
+    var self = this
+    google.maps.event.addListener(this.mapRef, 'click', function(event) {
+      // Create a new marker for the location
+      var command = new CommandAddLocation()
+      var newLocationMarker = command.execute({
+        locationLatLng: event.latLng,
+        map: self.mapRef
+      })
+      self.commandStack.push(command)
+      self.$timeout() // Trigger change detection
+
+      // Monitor events on the marker for dragstart and dragend
+      newLocationMarker.addListener('dragstart', (event) => {
+        self.handleDragStart(event)
+      })
+      newLocationMarker.addListener('dragend', (event) => {
+        self.handleDragEnd(newLocationMarker, event)
+      })
+    });
+  }
+
+  handleDragStart(event) {
+    this.dragStartLatLng = new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())
+  }
+
+  handleDragEnd(marker, event) {
+    var command = new CommandMoveLocation()
+    command.execute({
+      marker: marker,
+      oldLocation: this.dragStartLatLng,
+      newLocation: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())
+    })
+    this.dragStartLatLng = null
+    this.commandStack.push(command)
+    this.$timeout() // Trigger change detection
+  }
+
+  $onDestroy() {
+    // Unsubscribe all map listeners
+    google.maps.event.removeListener(this.clickListener)
   }
 }
 
-// ViewModeLocationController.$inject = []
+LocationEditorController.$inject = ['$document', '$timeout']
 
 app.component('locationEditor', {
   templateUrl: '/components/sidebar/view/location-editor-component.html',
-  bindings: {},
-  controller: ViewModeLocationController
+  bindings: {
+    mapGlobalObjectName: '@'
+  },
+  controller: LocationEditorController
 })

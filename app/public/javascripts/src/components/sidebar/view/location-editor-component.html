@@ -33,4 +33,27 @@
       </td>
     </tr>
   </table>
+  <table class="table table-condensed table-striped">
+    <thead>
+      <td>Command</td>
+      <td>Parameters</td>
+    </thead>
+    <tbody>
+      <tr ng-repeat="command in $ctrl.commandStack">
+        <td>
+          <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
+          <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
+        </td>
+        <td>
+          <div ng-if="command.constructor.name === 'CommandAddLocation'">
+            Type: Household, at {{command.newLocationMarker.position.lat() | number: 5}}, {{command.newLocationMarker.position.lng() | number: 5}}
+          </div>
+          <div ng-if="command.constructor.name === 'CommandMoveLocation'">
+            From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>
+            to {{command.params.newLocation.lat() | number: 5}}, {{command.params.newLocation.lng() | number: 5}}
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
