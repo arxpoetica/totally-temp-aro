@@ -29,7 +29,7 @@
     <tr>
       <td>Number of locations:</td>
       <td>
-        <input class="form-control" ng-model="$ctrl.addLocationData.numberOfLocations">
+        <input class="form-control" ng-model="$ctrl.addLocationData.numberOfLocations" ng-change="$ctrl.handleNumLocationsChanged()">
       </td>
     </tr>
   </table>
@@ -42,11 +42,15 @@
       <tr ng-repeat="command in $ctrl.commandStack">
         <td>
           <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
+          <div ng-if="command.constructor.name === 'CommandEditLocation'">Edit Location</div>
           <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
         </td>
         <td>
           <div ng-if="command.constructor.name === 'CommandAddLocation'">
-            Type: Household, at {{command.newLocationMarker.position.lat() | number: 5}}, {{command.newLocationMarker.position.lng() | number: 5}}
+           {{command.params.numLocations | number: 0}} household(s), at {{command.params.locationLatLng.lat() | number: 5}}, {{command.params.locationLatLng.lng() | number: 5}}
+          </div>
+          <div ng-if="command.constructor.name === 'CommandEditLocation'">
+            Changed to {{command.params.numLocations | number: 0}} household(s)
           </div>
           <div ng-if="command.constructor.name === 'CommandMoveLocation'">
             From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>

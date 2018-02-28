@@ -9,13 +9,22 @@ class CommandAddLocation {
       position: params.locationLatLng,
       icon: '/images/map_icons/aro/households_default.png',
       draggable: true,
-      map: params.map
+      map: params.map,
+      numLocations: params.numLocations,
+      commandParams: params
     })
+    this.params = params
     return this.newLocationMarker
   }
 }
 
 class CommandMoveLocation {
+  execute(params) {
+    this.params = params
+  }
+}
+
+class CommandEditLocation {
   execute(params) {
     this.params = params
   }
@@ -33,9 +42,10 @@ class LocationEditorController {
         'Cell tower'
       ],
       selectedType: 'Household',
-      numberOfLocations: 1
+      numberOfLocations: 5
     }
     this.commandStack = []
+    this.selectedLocation = null
   }
 
   $onInit() {
@@ -57,6 +67,7 @@ class LocationEditorController {
       var command = new CommandAddLocation()
       var newLocationMarker = command.execute({
         locationLatLng: event.latLng,
+        numLocations: self.addLocationData.numberOfLocations,
         map: self.mapRef
       })
       self.commandStack.push(command)
@@ -68,6 +79,15 @@ class LocationEditorController {
       })
       newLocationMarker.addListener('dragend', (event) => {
         self.handleDragEnd(newLocationMarker, event)
+      })
+      newLocationMarker.addListener('mousedown', (event) => {
+        if (self.selectedLocation) {
+          self.selectedLocation.setIcon('/images/map_icons/aro/households_default.png')
+        }
+        self.selectedLocation = newLocationMarker
+        self.selectedLocation.setIcon('/images/map_icons/aro/households_selected.png')
+        self.addLocationData.numberOfLocations = newLocationMarker.commandParams.numLocations
+        self.$timeout()
       })
     });
   }
@@ -86,6 +106,17 @@ class LocationEditorController {
     this.dragStartLatLng = null
     this.commandStack.push(command)
     this.$timeout() // Trigger change detection
+  }
+
+  handleNumLocationsChanged() {
+    if (this.selectedLocation) {
+      this.selectedLocation.numLocations = this.addLocationData.numberOfLocations
+      var command = new CommandEditLocation()
+      command.execute({
+        numLocations: this.addLocationData.numberOfLocations
+      })
+      this.commandStack.push(command)
+    }
   }
 
   $onDestroy() {
