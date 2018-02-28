@@ -108,7 +108,7 @@ class DataSelectionController {
   editLocations() {
     // Put the application in "Edit Location" mode
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
-    this.state.requestEditLocations.next({})
+    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS
   }
 }
 

@@ -75,6 +75,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     SELECTED_LOCATIONS: 'Locations'
   }
 
+  // The selected panel when in the View mode
+  service.viewModePanels = Object.freeze({
+    LOCATION_INFO: 'LOCATION_INFO',
+    ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
+    EDIT_LOCATIONS: 'EDIT_LOCATIONS'
+  })
+  service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
+
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
     ODN_1: 'Hub-only split',
@@ -191,7 +199,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.selectionTypeChanged = new Rx.BehaviorSubject()
-  service.requestEditLocations = new Rx.BehaviorSubject({})
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
