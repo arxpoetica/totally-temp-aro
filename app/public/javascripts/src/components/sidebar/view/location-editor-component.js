@@ -23,8 +23,9 @@ class CommandMoveLocation {
 
 class LocationEditorController {
 
-  constructor($document, $timeout) {
+  constructor($document, $timeout, state) {
     this.$timeout = $timeout
+    this.state = state
     this.addLocationData = {
       types: [
         'Business',
@@ -44,11 +45,15 @@ class LocationEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.CREATE
 
     // Handler for map click - this is when we create a new location
     var self = this
     google.maps.event.addListener(this.mapRef, 'click', function(event) {
-      // Create a new marker for the location
+      if (self.state.selectedTargetSelectionMode !== self.state.targetSelectionModes.CREATE) {
+        return
+      }
+      // Create a new marker for the location, only if we are in the right selection mode
       var command = new CommandAddLocation()
       var newLocationMarker = command.execute({
         locationLatLng: event.latLng,
@@ -86,10 +91,13 @@ class LocationEditorController {
   $onDestroy() {
     // Unsubscribe all map listeners
     google.maps.event.removeListener(this.clickListener)
+
+    // Reset selection mode to single select mode
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
   }
 }
 
-LocationEditorController.$inject = ['$document', '$timeout']
+LocationEditorController.$inject = ['$document', '$timeout', 'state']
 
 app.component('locationEditor', {
   templateUrl: '/components/sidebar/view/location-editor-component.html',

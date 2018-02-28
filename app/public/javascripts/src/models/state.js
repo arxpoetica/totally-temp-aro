@@ -232,7 +232,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
   service.targetSelectionModes = Object.freeze({
     SINGLE: 0,
-    POLYGON: 1
+    POLYGON: 1,
+    CREATE: 2
   })
   service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
 

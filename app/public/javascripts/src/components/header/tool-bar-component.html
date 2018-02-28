@@ -143,12 +143,24 @@
 
   <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" class="separator"></div>
 
-  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
+  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
           ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Select individual locations">
     <i class="fa fa-mouse-pointer"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.CREATE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.CREATE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Add locations">
+    <i class="fa fa-plus"></i>
   </button>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
