@@ -6,11 +6,11 @@ class ViewModeRoadSegmentController {
     this.selectedEdgeInfo = null
     this.singleRoad
 
-    state.showViewModeInfo
-    .subscribe((options) => {
-      if (options.roadSegments && options.roadSegments.length > 0) {
-        this.singleRoad = (options.roadSegments.length == 1) ? true : false
-        this.selectedEdgeInfo = this.generateRoadSegmentsInfo(options.roadSegments)
+    state.selectedRoadSegments
+    .subscribe((selectedRoadSegments) => {
+      if (selectedRoadSegments.size > 0) {
+        this.singleRoad = (selectedRoadSegments.size == 1) ? true : false
+        this.selectedEdgeInfo = this.generateRoadSegmentsInfo(selectedRoadSegments)
       } else {
         this.selectedEdgeInfo = null
       }
@@ -24,23 +24,23 @@ class ViewModeRoadSegmentController {
     var roadSegmentsInfo = {
     }
 
-    if(roadSegments.length == 1) {
+    if(roadSegments.size == 1) {
       roadSegmentsInfo.gid = roadSegments[0].gid
       roadSegmentsInfo.edge_length = roadSegments[0].edge_length.toFixed(2)
     } else {
-      roadSegmentsInfo.totalLength = roadSegments.reduce((total, item) => { return total + item.edge_length }, 0).toFixed(2)
+      roadSegmentsInfo.totalLength = [...roadSegments].reduce((total, item) => { return total + item.edge_length }, 0).toFixed(2)
       roadSegmentsInfo.count = roadSegments.length
     }
 
     //Temp values
     //Later we have to load it from response
     var constructionTypes = {
-      aerial: Math.floor(roadSegments.length/2),
-      buried: Math.floor(roadSegments.length/2)
+      aerial: Math.floor(roadSegments.size / 2),
+      buried: Math.floor(roadSegments.size / 2)
     }
 
     var roadTypes = {
-      highWay: roadSegments.length
+      highWay: roadSegments.size
     }
 
     roadSegmentsInfo.constructionTypes = constructionTypes

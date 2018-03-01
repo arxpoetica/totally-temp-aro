@@ -1,0 +1,63 @@
+<style>
+  .view-mode-container {
+    position: relative; /* This will require the parent to have position: relative or absolute */
+    height: 100%;
+    padding-top: 10px;
+  }
+  #tblLocationProperties td {
+    line-height: 33px;  /* To vertically align text */
+  }
+</style>
+<div class="view-mode-container">
+  <div class="text-center">
+    <div class="btn-group ">
+      <button class="btn btn-default"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+      <button class="btn btn-default"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+    </div>
+  </div>
+  <br>
+  <table id="tblLocationProperties" class="table table-condensed table-striped">
+    <tr>
+      <td>Location type:</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.addLocationData.selectedType"
+                ng-options="item for item in $ctrl.addLocationData.types">
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Number of locations:</td>
+      <td>
+        <input class="form-control" ng-model="$ctrl.addLocationData.numLocations" ng-change="$ctrl.handleNumLocationsChanged()">
+      </td>
+    </tr>
+  </table>
+  <table class="table table-condensed table-striped">
+    <thead>
+      <td>Command</td>
+      <td>Parameters</td>
+    </thead>
+    <tbody>
+      <tr ng-repeat="command in $ctrl.store.commandStack">
+        <td>
+          <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
+          <div ng-if="command.constructor.name === 'CommandEditLocation'">Edit Location</div>
+          <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
+        </td>
+        <td>
+          <div ng-if="command.constructor.name === 'CommandAddLocation'">
+           {{command.params.numLocations | number: 0}} household(s), at {{command.params.locationLatLng.lat() | number: 5}}, {{command.params.locationLatLng.lng() | number: 5}}
+          </div>
+          <div ng-if="command.constructor.name === 'CommandEditLocation'">
+            Changed to {{command.params.numLocations | number: 0}} household(s)
+          </div>
+          <div ng-if="command.constructor.name === 'CommandMoveLocation'">
+            From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>
+            to {{command.params.newLocation.lat() | number: 5}}, {{command.params.newLocation.lng() | number: 5}}
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

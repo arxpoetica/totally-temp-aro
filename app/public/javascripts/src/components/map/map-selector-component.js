@@ -63,8 +63,8 @@ class MapSelectorController {
           })
       }
 
-      if (event.roadSegment && event.roadSegment.length > 0) {
-          state.reloadSelectedRoadSegments(event.roadSegment)
+      if (event.roadSegments && event.roadSegments.size > 0) {
+          state.reloadSelectedRoadSegments(event.roadSegments)
       }
 
     })
