@@ -143,16 +143,6 @@
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength">
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
-        <td class="indent-1">Tile System</td>
-        <td> 
-          <select class="form-control"
-            ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile"
-            ng-change="changeTileSelected(tileselected)"
-            ng-options="tile_system.name for tile_system in $ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.tiles">
-          </select>
-        </td>
-      </tr>
       <tr>
         <td width="48%">Network Construction</td>
         <td> 

@@ -64,6 +64,24 @@ class ToolBarController {
       option.value = item;   
       list.appendChild(option);
     });
+
+    //toggle view settings dropdown
+    $('.myDropdown1').on('show.bs.dropdown', function (e) {
+        $(this).find('.view-dropdown').toggle()
+        e.stopPropagation();
+        //e.preventDefault();
+    })
+
+    //toggle toolbar dropdown
+    $('.dropdown').on('show.bs.dropdown', function (e) {
+      $(this).find('.tool-bar-dropdown').toggle()
+      e.stopPropagation();
+    })
+
+    // hide toolbar dropdown 
+    $(document).on('click',function(){
+      $('.tool-bar-dropdown').hide()
+    })
   }
 
   openGlobalSettings() {
