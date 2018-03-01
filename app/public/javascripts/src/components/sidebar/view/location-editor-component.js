@@ -19,7 +19,6 @@ class TransactionStore {
   executeCommand(command, params) {
     var result = command.execute(this, params)
     this.commandStack.push(command)
-    console.log(this.uuidToFeatures)
     return result
   }
 
@@ -76,9 +75,10 @@ class CommandEditLocation {
 
 class LocationEditorController {
 
-  constructor($document, $timeout, state) {
+  constructor($document, $timeout, state, tileDataService) {
     this.$timeout = $timeout
     this.state = state
+    this.tileDataService = tileDataService
     this.addLocationData = {
       types: [
         'Business',
@@ -122,7 +122,11 @@ class LocationEditorController {
     }
 
     // Note that UUID and object revision should come from aro-service
-    this.createEditableMarker(event.latLng, event.locations[0].location_id, 2)
+    var locationId = event.locations[0].location_id
+    this.createEditableMarker(event.latLng, locationId, 2)
+    // Stop rendering this location in the tile
+    this.tileDataService.addFeatureToExclude(locationId)
+    this.state.requestMapLayerRefresh.next({})
   }
 
   createEditableMarker(coordinateLatLng, uuid, objectRevision) {
@@ -198,7 +202,7 @@ class LocationEditorController {
   }
 }
 
-LocationEditorController.$inject = ['$document', '$timeout', 'state']
+LocationEditorController.$inject = ['$document', '$timeout', 'state', 'tileDataService']
 
 app.component('locationEditor', {
   templateUrl: '/components/sidebar/view/location-editor-component.html',

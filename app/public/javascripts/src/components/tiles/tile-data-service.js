@@ -9,6 +9,7 @@ app.service('tileDataService', ['$http', ($http) => {
   tileDataService.tileHtmlCache = {}  // A cache of HTML elements created. Used to prevent flicker.
   // Hold a map of layer keys to image urls (and image data once it is loaded)
   tileDataService.entityImageCache = {}
+  tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
 
   tileDataService.getTileCacheKey = (url) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
@@ -228,9 +229,15 @@ app.service('tileDataService', ['$http', ($http) => {
     return entityImagePromise
   }
 
+  // Add a specified location ID to the set of features to be excluded from the render
+  tileDataService.addFeatureToExclude = (featureId) => {
+    tileDataService.featuresToExclude.add(featureId)
+  }
+
   // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
+    tileDataService.featuresToExclude = new Set()
   }
 
   // Clear only those entries in the tile data cache containing the specified keywords
