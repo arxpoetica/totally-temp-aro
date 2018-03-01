@@ -79,9 +79,10 @@ class ToolBarController {
     })
 
     // hide toolbar dropdown 
-    $(document).on('click',function(){
-      $('.tool-bar-dropdown').hide()
-    })
+    // $(document).on('click',function(){
+    //   if($('.tool-bar-dropdown').is(":visible"))
+    //     $('.tool-bar-dropdown').hide()
+    // })
   }
 
   openGlobalSettings() {
