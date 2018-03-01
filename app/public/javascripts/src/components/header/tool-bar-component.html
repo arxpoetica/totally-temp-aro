@@ -141,6 +141,27 @@
     <i class="fa fa-eye"></i>
   </button>
 
+  <div class="btn-group">
+    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="fa fa-eye"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right">
+      <button
+        ng-class="{ 'btn-block dropdown-item': true, 'btn-default': !$ctrl.heatMapOption, 'btn-primary': $ctrl.heatMapOption }"
+        ng-click="$ctrl.toggleHeatMapOptions()">
+        <i class="fa fa-fire"></i> 
+      </button>
+      <!-- <input ng-if="$ctrl.heatMapOption" type="range" min="0" max="5000000" step="500000" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" style="margin-top: 10px"
+        ng-model-options="{ debounce: 500 }" ng-change="$ctrl.changeHeatMapOptions()"> -->
+      <!-- <input ng-if="$ctrl.heatMapOption" type="range" min="0" max="5000000" list="tickmarks" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" style="margin-top: 10px"
+        ng-model-options="{ debounce: 500 }" ng-change="$ctrl.changeHeatMapOptions()">  
+        <datalist id="tickmarks"></datalist> -->
+      <input ng-if="$ctrl.heatMapOption" type="range" min="0" max="5000000" step= {{$ctrl.step}} list="tickmarks" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" style="margin-top: 10px"
+        ng-model-options="{ debounce: 500 }" ng-change="$ctrl.changeHeatMapOptions()">  
+        <datalist id="tickmarks"></datalist>  
+    </div>
+  </div>
+
   <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"

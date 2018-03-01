@@ -1,16 +1,23 @@
 class ToolBarController {
 
-  constructor($element, $timeout, state, map_tools) {
+  constructor($element, $timeout,$document ,state, map_tools) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
+    this.$document = $document
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
     this.numPreviousCollapsedButtons = 0
     this.map_tools = map_tools
     this.showDropDown = false
+    this.heatMapOption = true
 
     this.latestOverlay = null
+    this.step = 100000
+    // Map tile settings used for debugging
+    this.state.mapTileOptions
+      .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
+
     this.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYLINE,
       drawingControl: false
@@ -33,6 +40,30 @@ class ToolBarController {
       swal({ title: 'Measured Distance', text: `${total * 0.000621371} mi` })
       if (!$scope.$$phase) { $scope.$apply() } // refresh UI
     })
+
+    this.rangeValues = []
+    const initial = 1000
+    const final = 5000000
+    var incrementby = 1000
+    for(var i=initial;i<=final;i=i+incrementby){
+      this.rangeValues.push(i)
+      if(i < 5000) incrementby=1000
+      else if(i < 30000) incrementby = 5000
+      else if(i < 100000) incrementby = 10000
+      else if(i < 200000) incrementby = 25000
+      else if(i < 500000) incrementby = 50000
+      else if(i < 1000000) incrementby = 100000
+      else if(i < 2000000) incrementby = 250000
+      else incrementby=500000
+    }
+
+    const list = this.$document[0].getElementById('tickmarks')
+    
+    this.rangeValues.forEach(item => {
+      let option = this.$document[0].createElement('option')
+      option.value = item;   
+      list.appendChild(option);
+    });
   }
 
   openGlobalSettings() {
@@ -173,9 +204,42 @@ class ToolBarController {
     // Call refreshToolbar() after a timeout, to allow the browser layout/rendering to catch up with splitter changes.
     setTimeout(() => this.refreshToolbar(), 0)
   }
+
+  // Take the mapTileOptions defined and set it on the state
+  toggleHeatMapOptions() {
+    var newMapTileOptions = angular.copy(this.mapTileOptions)
+    this.heatMapOption = !this.heatMapOption
+    newMapTileOptions.selectedHeatmapOption = this.heatMapOption ? this.state.viewSetting.heatmapOptions[0] : this.state.viewSetting.heatmapOptions[2]
+    this.state.mapTileOptions.next(newMapTileOptions)
+  }
+
+  changeHeatMapOptions() {
+    var newMapTileOptions = angular.copy(this.mapTileOptions)
+
+    if(newMapTileOptions.heatMap.worldMaxValue > this.state.mapTileOptions.value.heatMap.worldMaxValue) {
+      if(newMapTileOptions.heatMap.worldMaxValue < 5000) this.step=1000
+      else if(newMapTileOptions.heatMap.worldMaxValue < 30000) this.step = 5000
+      else if(newMapTileOptions.heatMap.worldMaxValue < 100000) this.step = 10000
+      else if(newMapTileOptions.heatMap.worldMaxValue < 200000) this.step = 25000
+      else if(newMapTileOptions.heatMap.worldMaxValue < 500000) this.step = 50000
+      else if(newMapTileOptions.heatMap.worldMaxValue < 1000000) this.step = 100000
+      else if(newMapTileOptions.heatMap.worldMaxValue < 2000000) this.step = 250000
+      else this.step=500000
+    } else {
+      if(newMapTileOptions.heatMap.worldMaxValue <= 5000) this.step=1000
+      else if(newMapTileOptions.heatMap.worldMaxValue <= 30000) this.step = 5000
+      else if(newMapTileOptions.heatMap.worldMaxValue <= 100000) this.step = 10000
+      else if(newMapTileOptions.heatMap.worldMaxValue <= 200000) this.step = 25000
+      else if(newMapTileOptions.heatMap.worldMaxValue <= 500000) this.step = 50000
+      else if(newMapTileOptions.heatMap.worldMaxValue <= 1000000) this.step = 100000
+      else if(newMapTileOptions.heatMap.worldMaxValue <= 2000000) this.step = 250000
+    }
+
+    this.state.mapTileOptions.next(newMapTileOptions)
+  }
 }
 
-ToolBarController.$inject = ['$element', '$timeout', 'state', 'map_tools']
+ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',
