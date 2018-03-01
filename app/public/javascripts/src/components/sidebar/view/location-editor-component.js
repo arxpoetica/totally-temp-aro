@@ -19,7 +19,7 @@ class TransactionStore {
   executeCommand(command, params) {
     var result = command.execute(this, params)
     this.commandStack.push(command)
-    console.log(JSON.stringify(this.uuidToFeatures))
+    console.log(this.uuidToFeatures)
     return result
   }
 
@@ -29,7 +29,8 @@ class CommandAddLocation {
 
     // Create a new feature object
     var featureObj = {
-      uuid: store.getUUID(),
+      uuid: params.uuid ? params.uuid : store.getUUID(),  // Create a new UUID if this is a new object, else reuse it
+      objectRevision: params.objectRevision,
       position: {
         lat: params.locationLatLng.lat(),
         lng: params.locationLatLng.lng()
@@ -90,6 +91,7 @@ class LocationEditorController {
 
     this.store = new TransactionStore()
     this.selectedLocation = null
+    state.mapFeaturesSelectedEvent.subscribe((event) => this.handleMapEntitySelected(event))
   }
 
   $onInit() {
@@ -107,28 +109,46 @@ class LocationEditorController {
       if (self.state.selectedTargetSelectionMode !== self.state.targetSelectionModes.CREATE) {
         return
       }
-      // Create a new marker for the location, only if we are in the right selection mode
-      var command = new CommandAddLocation()
-      var params = {
-        locationLatLng: event.latLng,
-        numLocations: self.addLocationData.numLocations,
-        map: self.mapRef
-      }
-      var newLocationMarker = self.store.executeCommand(command, params)
-      self.selectMarker(newLocationMarker)
-      self.$timeout() // Trigger change detection
-
-      // Monitor events on the marker for dragstart and dragend
-      newLocationMarker.addListener('dragstart', (event) => {
-        self.handleDragStart(event)
-      })
-      newLocationMarker.addListener('dragend', (event) => {
-        self.handleDragEnd(newLocationMarker, event)
-      })
-      newLocationMarker.addListener('mousedown', (event) => {
-        self.selectMarker(newLocationMarker)
-      })
+      self.createEditableMarker(event.latLng, null, null)
     });
+  }
+
+  handleMapEntitySelected(event) {
+    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE) {
+      return  // Currently only supporting editing of single entities
+    }
+    if (!event.latLng || !event.locations || event.locations.length === 0) {
+      return  // Only supporting editing of a single location
+    }
+
+    // Note that UUID and object revision should come from aro-service
+    this.createEditableMarker(event.latLng, event.locations[0].location_id, 2)
+  }
+
+  createEditableMarker(coordinateLatLng, uuid, objectRevision) {
+    // Create a new marker for the location, only if we are in the right selection mode
+    var command = new CommandAddLocation()
+    var params = {
+      uuid: uuid,
+      objectRevision: objectRevision,
+      locationLatLng: coordinateLatLng,
+      numLocations: this.addLocationData.numLocations,
+      map: this.mapRef
+    }
+    var newLocationMarker = this.store.executeCommand(command, params)
+    this.selectMarker(newLocationMarker)
+    this.$timeout() // Trigger change detection
+
+    // Monitor events on the marker for dragstart and dragend
+    newLocationMarker.addListener('dragstart', (event) => {
+      this.handleDragStart(event)
+    })
+    newLocationMarker.addListener('dragend', (event) => {
+      this.handleDragEnd(newLocationMarker, event)
+    })
+    newLocationMarker.addListener('mousedown', (event) => {
+      this.selectMarker(newLocationMarker)
+    })
   }
 
   selectMarker(marker) {
