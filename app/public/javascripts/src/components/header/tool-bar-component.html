@@ -39,6 +39,14 @@
     background-color: #eee;
     color: #1f7de6;
   }
+  .dropdown-submenu {
+    position: relative;
+  }
+  .dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+  }
 </style>
 
 <style scoped>
@@ -141,6 +149,22 @@
     <i class="fa fa-eye"></i>
   </button>
 
+  <div class="myDropdown1">
+    <button type="button" class="btn btn-secondary dropdown-toggle test" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="fa fa-eye"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right view-dropdown">
+      <button
+        ng-class="{ 'btn-block dropdown-item': true, 'btn-default': !$ctrl.heatMapOption, 'btn-primary': $ctrl.heatMapOption }"
+        ng-click="$ctrl.toggleHeatMapOptions()">
+        <i class="fa fa-fire"></i> 
+      </button>
+      <input ng-if="$ctrl.heatMapOption" type="range" min="0" max="5000000" step= {{$ctrl.step}} list="tickmarks" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" style="margin-top: 10px"
+        ng-model-options="{ debounce: 500 }" ng-change="$ctrl.changeHeatMapOptions()">  
+        <datalist id="tickmarks"></datalist>  
+    </div>
+  </div>
+
   <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
@@ -164,7 +188,7 @@
       <i class="fa fa-angle-double-down"></i>
     </button>
     <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc -->
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="padding: 0px; min-width: 0px;">
+    <ul class="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style="padding: 0px; min-width: 0px;">
     </ul>
   </div>
 

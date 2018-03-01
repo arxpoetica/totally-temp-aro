@@ -503,19 +503,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   }
 
-  // Load tile information from the server
-  $http({
-	 url: '/morphology/tiles',
-	 method: 'GET'
-	})
-	.then((response) => {
-	  service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles = response.data
-    service.optimizationOptions.networkConstraints.cellNodeConstraints.selectedTile
-      = (service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles.length > 0)
-        ? service.optimizationOptions.networkConstraints.cellNodeConstraints.tiles[0]
-        : null
-	})
-
   initializeState()
 
   // When configuration is loaded from the server, update it in the state
