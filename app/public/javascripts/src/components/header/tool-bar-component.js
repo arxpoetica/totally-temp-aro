@@ -69,13 +69,14 @@ class ToolBarController {
     $('.myDropdown1').on('show.bs.dropdown', function (e) {
         $(this).find('.view-dropdown').toggle()
         e.stopPropagation();
-        //e.preventDefault();
+        e.preventDefault();
     })
 
     //toggle toolbar dropdown
     $('.dropdown').on('show.bs.dropdown', function (e) {
       $(this).find('.tool-bar-dropdown').toggle()
       e.stopPropagation();
+      e.preventDefault();
     })
 
     // hide toolbar dropdown 
