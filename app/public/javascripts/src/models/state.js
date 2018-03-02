@@ -75,6 +75,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     SELECTED_LOCATIONS: 'Locations'
   }
 
+  // The selected panel when in the View mode
+  service.viewModePanels = Object.freeze({
+    LOCATION_INFO: 'LOCATION_INFO',
+    ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
+    EDIT_LOCATIONS: 'EDIT_LOCATIONS'
+  })
+  service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
+
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
     ODN_1: 'Hub-only split',
@@ -159,6 +167,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     ]
   }
 
+  // The panels in the view mode
+
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
   service.mapLayers = new Rx.BehaviorSubject({})
   service.mapTileOptions = new Rx.BehaviorSubject({
@@ -185,7 +195,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
-  service.showViewModeInfo = new Rx.BehaviorSubject({})
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
@@ -223,7 +232,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
   service.targetSelectionModes = Object.freeze({
     SINGLE: 0,
-    POLYGON: 1
+    POLYGON: 1,
+    CREATE: 2
   })
   service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
 

@@ -104,6 +104,13 @@ class DataSelectionController {
       }
     });
   }
+
+  editLocations() {
+    // Put the application in "Edit Location" mode
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.CREATE
+  }
 }
 
 DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state']
