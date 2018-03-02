@@ -39,14 +39,39 @@
     background-color: #eee;
     color: #1f7de6;
   }
-  .dropdown-submenu {
-    position: relative;
+  .view-dropdown {
+    min-width: 170px
   }
-  .dropdown-submenu .dropdown-menu {
-    top: 0;
-    left: 100%;
-    margin-top: -1px;
+  .dropdown-divider {
+    height: 1px;
+    margin: .5rem 0;
+    overflow: hidden;
+    background-color: #eceeef;
   }
+  
+  /* http://jsfiddle.net/JnrvG/1/ */
+  .myDropdown1 input[type="range"]{
+    -webkit-appearance: none;
+    -moz-apperance: none;
+    border-radius: 6px;
+    height: 6px;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        right top,
+        color-stop(0.15, #1f7de6),
+        color-stop(0.15, #C5C5C5)
+    );
+    margin: 10px 0px;
+  }
+  .myDropdown1 input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    background-color: #E9E9E9;
+    border: 1px solid #CECECE;
+    height: 15px;
+    width: 10px;
+  }
+
 </style>
 
 <style scoped>
@@ -154,14 +179,13 @@
       <i class="fa fa-eye"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right view-dropdown">
-      <button
-        ng-class="{ 'btn-block dropdown-item': true, 'btn-default': !$ctrl.heatMapOption, 'btn-primary': $ctrl.heatMapOption }"
-        ng-click="$ctrl.toggleHeatMapOptions()">
-        <i class="fa fa-fire"></i> 
-      </button>
-      <input ng-if="$ctrl.heatMapOption" type="range" min="0" max="5000000" step= {{$ctrl.step}} list="tickmarks" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" style="margin-top: 10px"
-        ng-model-options="{ debounce: 500 }" ng-change="$ctrl.changeHeatMapOptions()">  
-        <datalist id="tickmarks"></datalist>  
+      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.heatMapOption" ng-change="$ctrl.toggleHeatMapOptions()" name="ctype-name"
+        style="margin-left: 2px;">
+      <font color="#1f7de6">Location Heatmap On</font>
+      <div class="dropdown-divider" ng-if="$ctrl.heatMapOption"></div>
+      <font color="#1f7de6" ng-if="$ctrl.heatMapOption">Heatmap Intensity</font>
+      <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
+        style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">  
     </div>
   </div>
 
