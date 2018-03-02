@@ -144,10 +144,10 @@ class LocationEditorController {
     }
 
     // Note that UUID and object revision should come from aro-service
-    var locationId = event.locations[0].location_id
-    this.createEditableMarker(event.latLng, locationId, 2)
+    var featureId = event.locations[0].uuid ? event.locations[0].uuid : event.locations[0].location_id
+    this.createEditableMarker(event.latLng, featureId, 2)
     // Stop rendering this location in the tile
-    this.tileDataService.addFeatureToExclude(locationId)
+    this.tileDataService.addFeatureToExclude(featureId)
     this.state.requestMapLayerRefresh.next({})
   }
 
