@@ -256,6 +256,10 @@ class LocationEditorController {
     })
   }
 
+  discardTransaction() {
+    this.currentTransaction = null
+  }
+
   $onDestroy() {
     // Unsubscribe all map listeners
     google.maps.event.removeListener(this.clickListener)
