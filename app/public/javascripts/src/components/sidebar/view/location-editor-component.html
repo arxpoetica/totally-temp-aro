@@ -11,7 +11,7 @@
 <div class="view-mode-container">
   <div class="text-center">
     <div class="btn-group ">
-      <button class="btn btn-default"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+      <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
       <button class="btn btn-default"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
     </div>
   </div>
@@ -60,4 +60,32 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- A div that overlays over the control. Prevents the user from interacting with the control. This is shown
+       when the number of selected data sources is not equal to 1 -->
+  <div ng-if="$ctrl.state.dataItems.location && $ctrl.state.dataItems.location.selectedLibraryItems.length !== 1"
+       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
+    <div class="alert alert-warning" role="alert">
+      <strong>Warning:</strong> You must have exactly one library selected in order to edit locations.
+    </div>
+  </div>
+
+  <!-- A div that overlays over the control. Prevents the user from interacting with the control. This is shown
+       when the control is in an error state (for e.g. if a transaction cannot be created) -->
+  <div ng-if="$ctrl.isInErrorState"
+       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
+    <div class="alert alert-error" role="alert">
+      <strong>Error:</strong> Control is in error state. See developer console in your browser for details.
+    </div>
+  </div>
+
+  <!-- A div that overlays over the control. Prevents the user from interacting with the control. This is shown
+       when there is no current transaction in progress. This can happen after the user commits a transaction, or
+       after some unknown error condition -->
+  <div ng-if="!$ctrl.currentTransaction"
+       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
+    <div class="alert alert-info" role="alert">
+      <strong>No transaction in progress:</strong> Start a transaction if you want to add/edit locations.
+    </div>
+  </div>
 </div>

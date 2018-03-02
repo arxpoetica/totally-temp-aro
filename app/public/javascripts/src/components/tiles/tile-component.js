@@ -882,7 +882,7 @@ class TileComponentController {
       })
     
     // Force a re-creation of all map tiles
-    state.forceRecreateTiles
+    state.requestRecreateTiles
       .subscribe((newValue) => {
         if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
           // First clear our HTML cache. Tiles where the rendering is in progress will keep rendering to the old tiles.
