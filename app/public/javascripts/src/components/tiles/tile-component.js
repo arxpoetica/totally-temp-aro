@@ -335,8 +335,10 @@ class MapTileRenderer {
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
-      if (feature.properties && feature.properties.location_id) {
-        if (this.tileDataService.featuresToExclude.has(feature.properties.location_id)) {
+      if (feature.properties) {
+        // Try UUID first, else try location_id
+        var featureId = feature.properties.uuid || feature.properties.location_id
+        if (this.tileDataService.featuresToExclude.has(featureId)) {
           // This feature is to be excluded. Do not render it.
           continue
         }
@@ -882,7 +884,7 @@ class TileComponentController {
       })
     
     // Force a re-creation of all map tiles
-    state.forceRecreateTiles
+    state.requestRecreateTiles
       .subscribe((newValue) => {
         if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
           // First clear our HTML cache. Tiles where the rendering is in progress will keep rendering to the old tiles.

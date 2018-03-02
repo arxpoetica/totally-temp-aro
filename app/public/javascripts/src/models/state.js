@@ -187,7 +187,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     longitude: -122.3321    // Seattle, WA by default. For no particular reason.
   }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
-  service.forceRecreateTiles = new Rx.BehaviorSubject({})
+  service.requestRecreateTiles = new Rx.BehaviorSubject({})
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
@@ -894,16 +894,20 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
+    // The Nuclear option - Delete the tile data and HTML elements cache and force Google Maps to call
+    // our getTile() method again. Any rendering that is in process for the existing tiles will
+    // continue but will not be shown on our map.
+  service.recreateTilesAndCache = () => {
+    tileDataService.clearDataCache()
+    service.requestRecreateTiles.next({})
+    service.requestMapLayerRefresh.next({})
+  }
+
   service.setPlan = (plan) => {
     service.plan.next(plan)
     return service.loadPlanInputs(plan.id)
     .then(() => {
-      tileDataService.clearDataCache()
-      // The Nuclear option - Delete the HTML tile elements cache and force Google Maps to call
-      // our getTile() method again. Any rendering that is in process for the existing tiles will
-      // continue but will not be shown on our map.
-      service.forceRecreateTiles.next({})
-      service.requestMapLayerRefresh.next({})
+      service.recreateTilesAndCache()
       return Promise.resolve()
     })
   }
