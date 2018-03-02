@@ -143,8 +143,9 @@ class LocationEditorController {
       return  // Only supporting editing of a single location
     }
 
-    // Note that UUID and object revision should come from aro-service
-    var featureId = event.locations[0].uuid ? event.locations[0].uuid : event.locations[0].location_id
+    // Note that UUID and object revision should come from aro-service.
+    // Use UUID for featureId. If not found, use location_id
+    var featureId = event.locations[0].uuid || event.locations[0].location_id
     this.createEditableMarker(event.latLng, featureId, 2)
     // Stop rendering this location in the tile
     this.tileDataService.addFeatureToExclude(featureId)
