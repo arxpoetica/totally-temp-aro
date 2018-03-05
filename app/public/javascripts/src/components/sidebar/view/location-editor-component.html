@@ -2,73 +2,120 @@
   .view-mode-container {
     position: relative; /* This will require the parent to have position: relative or absolute */
     height: 100%;
-    padding-top: 10px;
+    padding: 10px;
   }
   #tblLocationProperties td {
     line-height: 33px;  /* To vertically align text */
   }
 </style>
 <div class="view-mode-container">
-  <div class="text-center">
-    <div class="btn-group ">
-      <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-      <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+
+  <!-- BEGIN section edit/create transaction.
+       The user must select a transaction to edit or create a new one for editing -->
+  <div ng-if="!$ctrl.transactions.current">
+
+    <!-- List out existing transactions and allow the user to edit them (or create a new one) -->
+    <div class="row">
+      <div class="col-md-4">
+        Resume editing an existing transaction
+      </div>
+      <div class="col-md-5">
+        <select class="form-control"
+                ng-model="$ctrl.transactions.selectedExisting"
+                ng-options="item.libraryName for item in $ctrl.transactions.allExisting">
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary btn-block" ng-click="$ctrl.resumeSelectedTransaction()">
+          Resume
+        </button>
+      </div>
+    </div>
+    <div class="row" style="text-align: center; padding: 30px">
+      - OR -
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        Create a new transaction for
+      </div>
+      <div class="col-md-5">
+        <select class="form-control"
+                ng-model="$ctrl.transactions.selectedNew"
+                ng-options="item.name for item in $ctrl.state.dataItems.location.allLibraryItems">
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-default btn-block" ng-click="$ctrl.createNewTransaction()">
+          Create
+        </button>
+      </div>
     </div>
   </div>
-  <br>
-  <table id="tblLocationProperties" class="table table-condensed table-striped">
-    <tr>
-      <td>Location type:</td>
-      <td>
-        <select class="form-control"
-                ng-model="$ctrl.addLocationData.selectedType"
-                ng-options="item for item in $ctrl.addLocationData.types">
-        </select>
-      </td>
-    </tr>
-    <tr>
-      <td>Number of locations:</td>
-      <td>
-        <input class="form-control" ng-model="$ctrl.addLocationData.numLocations" ng-change="$ctrl.handleNumLocationsChanged()">
-      </td>
-    </tr>
-  </table>
-  <table class="table table-condensed table-striped">
-    <thead>
-      <td>Command</td>
-      <td>Parameters</td>
-    </thead>
-    <tbody>
-      <tr ng-repeat="command in $ctrl.store.commandStack">
+  <!-- END section edit/create transaction. -->
+
+  <!-- BEGIN section transaction details -->
+  <div ng-if="$ctrl.transactions.current">
+    <div class="row">
+      <div class="col-md-12">
+        <p>
+        You are editing transaction:  <span class="label label-default">ID: {{$ctrl.transactions.current.id}}</span>
+        <span class="label label-default">Name: {{$ctrl.transactions.current.libraryName}}</span>
+        </p>
+      </div>
+    </div>
+    <div class="text-center">
+      <div class="btn-group ">
+        <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+        <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+      </div>
+    </div>
+    <br>
+    <table id="tblLocationProperties" class="table table-condensed table-striped">
+      <tr>
+        <td>Location type:</td>
         <td>
-          <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
-          <div ng-if="command.constructor.name === 'CommandEditLocation'">Edit Location</div>
-          <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
-        </td>
-        <td>
-          <div ng-if="command.constructor.name === 'CommandAddLocation'">
-           {{command.params.numLocations | number: 0}} household(s), at {{command.params.locationLatLng.lat() | number: 5}}, {{command.params.locationLatLng.lng() | number: 5}}
-          </div>
-          <div ng-if="command.constructor.name === 'CommandEditLocation'">
-            Changed to {{command.params.numLocations | number: 0}} household(s)
-          </div>
-          <div ng-if="command.constructor.name === 'CommandMoveLocation'">
-            From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>
-            to {{command.params.newLocation.lat() | number: 5}}, {{command.params.newLocation.lng() | number: 5}}
-          </div>
+          <select class="form-control"
+                  ng-model="$ctrl.addLocationData.selectedType"
+                  ng-options="item for item in $ctrl.addLocationData.types">
+          </select>
         </td>
       </tr>
-    </tbody>
-  </table>
-
-  <!-- A div that overlays over the control. Prevents the user from interacting with the control. This is shown
-       when the number of selected data sources is not equal to 1 -->
-  <div ng-if="$ctrl.state.dataItems.location && $ctrl.state.dataItems.location.selectedLibraryItems.length !== 1"
-       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
-    <div class="alert alert-warning" role="alert">
-      <strong>Warning:</strong> You must have exactly one library selected in order to edit locations.
-    </div>
+      <tr>
+        <td>Number of locations:</td>
+        <td>
+          <input class="form-control" ng-model="$ctrl.addLocationData.numLocations" ng-change="$ctrl.handleNumLocationsChanged()">
+        </td>
+      </tr>
+    </table>
+    <table class="table table-condensed table-striped">
+      <thead>
+        <td>Command</td>
+        <td>Parameters</td>
+      </thead>
+      <tbody>
+        <tr ng-repeat="command in $ctrl.store.commandStack">
+          <td>
+            <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
+            <div ng-if="command.constructor.name === 'CommandEditLocation'">Edit Location</div>
+            <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
+          </td>
+          <td>
+            <div ng-if="command.constructor.name === 'CommandAddLocation'">
+              {{command.params.numLocations | number: 0}} household(s), at {{command.params.locationLatLng.lat() | number: 5}}, {{command.params.locationLatLng.lng() | number: 5}}
+            </div>
+            <div ng-if="command.constructor.name === 'CommandEditLocation'">
+              Changed to {{command.params.numLocations | number: 0}} household(s)
+            </div>
+            <div ng-if="command.constructor.name === 'CommandMoveLocation'">
+              From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>
+              to {{command.params.newLocation.lat() | number: 5}}, {{command.params.newLocation.lng() | number: 5}}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+  <!-- END section transaction details -->
 
   <!-- A div that overlays over the control. Prevents the user from interacting with the control. This is shown
        when the control is in an error state (for e.g. if a transaction cannot be created) -->
@@ -76,16 +123,6 @@
        style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
     <div class="alert alert-error" role="alert">
       <strong>Error:</strong> Control is in error state. See developer console in your browser for details.
-    </div>
-  </div>
-
-  <!-- A div that overlays over the control. Prevents the user from interacting with the control. This is shown
-       when there is no current transaction in progress. This can happen after the user commits a transaction, or
-       after some unknown error condition -->
-  <div ng-if="!$ctrl.currentTransaction"
-       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
-    <div class="alert alert-info" role="alert">
-      <strong>No transaction in progress:</strong> Start a transaction if you want to add/edit locations.
     </div>
   </div>
 </div>
