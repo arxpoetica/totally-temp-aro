@@ -228,7 +228,7 @@ class LocationEditorController {
         objectId: uuid,
         geometry: {
           type: 'Point',
-          coordinates: [rawFeature.position.lat, rawFeature.position.lng]
+          coordinates: [rawFeature.position.lng, rawFeature.position.lat]
         },
         attributes: {
           number_of_households: rawFeature.numLocations
