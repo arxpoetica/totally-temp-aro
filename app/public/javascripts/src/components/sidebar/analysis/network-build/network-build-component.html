@@ -12,8 +12,11 @@
     .indent-1 {
       padding-left: 30px !important;
     }
+    .trash {
+      cursor: pointer
+    }
   </style>
-  <div ng-style="!$ctrl.areControlsEnabled && {'position':'relative'}">
+  <div ng-style="!$ctrl.areControlsEnabled && {'position':'relative'}" style="height: 100%">
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
     <tbody>
       <tr>
@@ -172,7 +175,9 @@
         </td>
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS'">
-        <td>Selected Geographies</td>
+        <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
+          <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
+        </td>
         <td style="position: relative"> 
           <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
           <show-targets targets="$ctrl.serviceAreas"
@@ -180,7 +185,9 @@
         </td>
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_LOCATIONS'">
-        <td>Selected Locations</td>
+        <td>Selected Locations({{$ctrl.targets.length || 0}})
+          <span class="fa fa-trash-o trash" ng-if="$ctrl.targets.length > 0" ng-click="$ctrl.removeTarget({target:$ctrl.targets})"></span>
+        </td>
         <td style="position: relative">
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
           <show-targets targets="$ctrl.targets"
