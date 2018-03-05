@@ -21,7 +21,6 @@ class TransactionStore {
     this.commandStack.push(command)
     return result
   }
-
 }
 class CommandAddLocation {
   execute(store, params) {
@@ -75,7 +74,8 @@ class CommandEditLocation {
 
 class LocationEditorController {
 
-  constructor($document, $timeout, state, tileDataService) {
+  constructor($document, $http, $timeout, state, tileDataService) {
+    this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.tileDataService = tileDataService
@@ -89,6 +89,8 @@ class LocationEditorController {
       numLocations: 5
     }
 
+    this.currentTransaction = null
+    this.isInErrorState = false
     this.store = new TransactionStore()
     this.selectedLocation = null
     state.mapFeaturesSelectedEvent.subscribe((event) => this.handleMapEntitySelected(event))
@@ -100,6 +102,26 @@ class LocationEditorController {
       console.error('ERROR: Location Editor component initialized, but a map object is not available at this time.')
       return
     }
+
+    // We should have exactly one location data source selected. If not, return. The component will
+    // anyways show a warning message and cannot be interacted with.
+    if (this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems.length !== 1) {
+      return
+    }
+    // Create a transaction
+    var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
+    this.$http.post('/service/library/transaction', {
+      libraryId: selectedLibraryItem.identifier,
+      userId: this.state.getUserId()
+    })
+    .then((result) => {
+      this.currentTransaction = result.data
+    })
+    .catch((err) => {
+      console.error(err)
+      this.isInErrorState = true
+    })
+
     this.mapRef = window[this.mapGlobalObjectName]
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.CREATE
 
@@ -121,11 +143,12 @@ class LocationEditorController {
       return  // Only supporting editing of a single location
     }
 
-    // Note that UUID and object revision should come from aro-service
-    var locationId = event.locations[0].location_id
-    this.createEditableMarker(event.latLng, locationId, 2)
+    // Note that UUID and object revision should come from aro-service.
+    // Use UUID for featureId. If not found, use location_id
+    var featureId = event.locations[0].uuid || event.locations[0].location_id
+    this.createEditableMarker(event.latLng, featureId, 2)
     // Stop rendering this location in the tile
-    this.tileDataService.addFeatureToExclude(locationId)
+    this.tileDataService.addFeatureToExclude(featureId)
     this.state.requestMapLayerRefresh.next({})
   }
 
@@ -193,6 +216,51 @@ class LocationEditorController {
     }
   }
 
+  commitTransaction() {
+    if (!this.currentTransaction) {
+      console.error('No current transaction. We should never be in this state. Aborting commit...')
+    }
+
+    var featurePostPromises = []
+    Object.keys(this.store.uuidToFeatures).forEach((uuid) => {
+      var rawFeature = this.store.uuidToFeatures[uuid]
+      var formattedFeature = {
+        objectId: uuid,
+        geometry: {
+          type: 'Point',
+          coordinates: [rawFeature.position.lat, rawFeature.position.lng]
+        },
+        attributes: {
+          number_of_households: rawFeature.numLocations
+        }
+      }
+      featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, formattedFeature))
+    })
+
+    // First, push all features into the transaction
+    Promise.all(featurePostPromises)
+    .then((result) => {
+      // Then commit the transaction
+      return this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
+    })
+    .then((result) => {
+      // Committing will close the transaction. To keep modifying, open a new transaction
+      this.currentTransaction = null
+      this.state.recreateTilesAndCache()
+      this.$timeout()
+    })
+    .catch((err) => {
+      this.currentTransaction = null
+      this.state.recreateTilesAndCache()
+      this.$timeout()
+      console.error(err)
+    })
+  }
+
+  discardTransaction() {
+    this.currentTransaction = null
+  }
+
   $onDestroy() {
     // Unsubscribe all map listeners
     google.maps.event.removeListener(this.clickListener)
@@ -202,7 +270,7 @@ class LocationEditorController {
   }
 }
 
-LocationEditorController.$inject = ['$document', '$timeout', 'state', 'tileDataService']
+LocationEditorController.$inject = ['$document', '$http', '$timeout', 'state', 'tileDataService']
 
 app.component('locationEditor', {
   templateUrl: '/components/sidebar/view/location-editor-component.html',
