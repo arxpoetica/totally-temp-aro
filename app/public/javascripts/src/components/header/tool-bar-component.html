@@ -158,7 +158,7 @@
 
   <div class="separator"></div>
 
-  <button class="btn"
+  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.measuringStickEnabled }"
           ng-click="$ctrl.toggleMeasuringStick()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -167,7 +167,7 @@
   </button>
 
   <div class="myDropdown1">
-    <button type="button" class="btn btn-secondary dropdown-toggle test" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       <i class="fa fa-eye"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right view-dropdown">

@@ -11,6 +11,7 @@ class ToolBarController {
     this.map_tools = map_tools
     this.showDropDown = false
     this.heatMapOption = true
+    this.measuringStickEnabled = false
 
     this.latestOverlay = null
     this.min = 0
@@ -37,7 +38,7 @@ class ToolBarController {
         prev = point
       })
       this.measuredDistance = total
-      swal({ title: 'Measured Distance', text: `${total * 0.000621371} mi` })
+      swal({ title: 'Measured Distance', text: `${total * 3.28084} ft` })
       if (!$scope.$$phase) { $scope.$apply() } // refresh UI
     })
 
@@ -131,6 +132,7 @@ class ToolBarController {
   }
 
   toggleMeasuringStick() {
+    this.measuringStickEnabled = !this.measuringStickEnabled
     var current = this.drawingManager.getMap()
     this.drawingManager.setMap(current ? null : map)
     this.removeLatestOverlay()

@@ -25,14 +25,14 @@ class AnalysisModeController {
     }
 
     this.removeTarget = (target) => {
-      $http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: [target.id] })
+      $http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: target.map((loc) => loc.id) })
         .then((response) => {
           this.state.reloadSelectedLocations()
         })
     }
 
     this.removeServiceArea = (target) => {
-      $http.post(`/service_areas/${this.plan.id}/removeServiceAreaTargets`, { serviceAreaIds: [target.id] })
+      $http.post(`/service_areas/${this.plan.id}/removeServiceAreaTargets`, { serviceAreaIds: target.map((sa) => sa.id) })
         .then((response) => {
           this.state.reloadSelectedServiceAreas()
         })
