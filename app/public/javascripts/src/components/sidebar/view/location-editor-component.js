@@ -89,7 +89,14 @@ class LocationEditorController {
       numLocations: 5
     }
 
-    this.currentTransaction = null
+    this.transactions = {
+      current: null,
+      allExisting: [],
+      selectedExisting: null,
+      selectedNew: null
+    }
+    this.refreshExistingTransactions()
+
     this.isInErrorState = false
     this.store = new TransactionStore()
     this.selectedLocation = null
@@ -108,19 +115,6 @@ class LocationEditorController {
     if (this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems.length !== 1) {
       return
     }
-    // Create a transaction
-    var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
-    this.$http.post('/service/library/transaction', {
-      libraryId: selectedLibraryItem.identifier,
-      userId: this.state.getUserId()
-    })
-    .then((result) => {
-      this.currentTransaction = result.data
-    })
-    .catch((err) => {
-      console.error(err)
-      this.isInErrorState = true
-    })
 
     this.mapRef = window[this.mapGlobalObjectName]
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.CREATE
@@ -133,6 +127,59 @@ class LocationEditorController {
       }
       self.createEditableMarker(event.latLng, null, null)
     });
+  }
+
+  refreshExistingTransactions() {
+    // Get a list of all open transactions for this user
+    this.$http.get(`/service/library/transaction?user_id=${this.state.getUserId()}`)
+    .then((result) => {
+      this.transactions.allExisting = result.data
+      this.transactions.selectedExisting = this.transactions.allExisting[0]
+      this.$timeout()
+    })
+  }
+
+  resumeSelectedTransaction() {
+    if (!this.transactions.selectedExisting) {
+      swal({
+        title: 'Select existing transaction',
+        text: 'You must select an existing transaction to edit. If you don\'t have any existing transactions, create a new one',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+      return
+    }
+    this.transactions.current = this.transactions.selectedExisting
+  }
+
+  createNewTransaction() {
+    if (!this.transactions.selectedNew) {
+      swal({
+        title: 'Select a library',
+        text: 'You must select a library for which you want to create a transaction',
+        type: 'error',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Ok',
+        closeOnConfirm: true
+      })
+      return
+    }
+
+    this.$http.post('/service/library/transaction', {
+      libraryId: this.transactions.selectedNew.identifier,
+      userId: this.state.getUserId()
+    })
+    .then((result) => {
+      this.transactions.current = result.data
+      this.$timeout()
+    })
+    .catch((err) => {
+      console.error(err)
+      this.isInErrorState = true
+      this.$timeout()
+    })
   }
 
   handleMapEntitySelected(event) {
@@ -217,7 +264,7 @@ class LocationEditorController {
   }
 
   commitTransaction() {
-    if (!this.currentTransaction) {
+    if (!this.transactions.current) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
 
@@ -228,37 +275,67 @@ class LocationEditorController {
         objectId: uuid,
         geometry: {
           type: 'Point',
-          coordinates: [rawFeature.position.lat, rawFeature.position.lng]
+          coordinates: [rawFeature.position.lng, rawFeature.position.lat]
         },
         attributes: {
           number_of_households: rawFeature.numLocations
         }
       }
-      featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, formattedFeature))
+      featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.transactions.current.id}/features`, formattedFeature))
     })
 
     // First, push all features into the transaction
     Promise.all(featurePostPromises)
     .then((result) => {
       // Then commit the transaction
-      return this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
+      return this.$http.put(`/service/library/transaction/${this.transactions.current.id}`)
     })
     .then((result) => {
       // Committing will close the transaction. To keep modifying, open a new transaction
-      this.currentTransaction = null
+      this.transactions.current = null
       this.state.recreateTilesAndCache()
+      this.refreshExistingTransactions()
       this.$timeout()
     })
     .catch((err) => {
-      this.currentTransaction = null
+      this.transactions.current = null
       this.state.recreateTilesAndCache()
+      this.refreshExistingTransactions()
       this.$timeout()
       console.error(err)
     })
   }
 
-  discardTransaction() {
-    this.currentTransaction = null
+  closeTransaction() {
+    this.transactions.current = null
+  }
+
+  deleteTransaction() {
+    swal({
+      title: 'Delete transaction?',
+      text: `Are you sure you want to delete transaction with ID ${this.transactions.current.id} for library ${this.transactions.current.libraryName}`,
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, delete',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (deleteTransaction) => {
+      if (deleteTransaction) {
+        // The user has confirmed that the transaction should be deleted
+        this.$http.delete(`/service/library/transaction/${this.transactions.current.id}`)
+        .then((result) => {
+          this.transactions.current = null
+          this.refreshExistingTransactions()
+          this.$timeout()
+        })
+        .catch((err) => {
+          this.transactions.current = null
+          this.refreshExistingTransactions()
+          this.$timeout()
+        })
+      }
+    })
   }
 
   $onDestroy() {
