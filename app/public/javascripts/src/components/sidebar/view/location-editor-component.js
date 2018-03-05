@@ -310,6 +310,34 @@ class LocationEditorController {
     this.transactions.current = null
   }
 
+  deleteTransaction() {
+    swal({
+      title: 'Delete transaction?',
+      text: `Are you sure you want to delete transaction with ID ${this.transactions.current.id} for library ${this.transactions.current.libraryName}`,
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, delete',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (deleteTransaction) => {
+      if (deleteTransaction) {
+        // The user has confirmed that the transaction should be deleted
+        this.$http.delete(`/service/library/transaction/${this.transactions.current.id}`)
+        .then((result) => {
+          this.transactions.current = null
+          this.refreshExistingTransactions()
+          this.$timeout()
+        })
+        .catch((err) => {
+          this.transactions.current = null
+          this.refreshExistingTransactions()
+          this.$timeout()
+        })
+      }
+    })
+  }
+
   $onDestroy() {
     // Unsubscribe all map listeners
     google.maps.event.removeListener(this.clickListener)
