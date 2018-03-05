@@ -306,7 +306,7 @@ class LocationEditorController {
     })
   }
 
-  discardTransaction() {
+  closeTransaction() {
     this.transactions.current = null
   }
 
