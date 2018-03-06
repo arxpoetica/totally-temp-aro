@@ -10,56 +10,13 @@
 </style>
 <div class="view-mode-container">
 
-  <!-- BEGIN section edit/create transaction.
-       The user must select a transaction to edit or create a new one for editing -->
-  <div ng-if="!$ctrl.transactions.current">
-
-    <!-- List out existing transactions and allow the user to edit them (or create a new one) -->
-    <div class="row">
-      <div class="col-md-4">
-        Resume editing an existing transaction
-      </div>
-      <div class="col-md-5">
-        <select class="form-control"
-                ng-model="$ctrl.transactions.selectedExisting"
-                ng-options="item.libraryName for item in $ctrl.transactions.allExisting">
-        </select>
-      </div>
-      <div class="col-md-3">
-        <button class="btn btn-primary btn-block" ng-click="$ctrl.resumeSelectedTransaction()">
-          Resume
-        </button>
-      </div>
-    </div>
-    <div class="row" style="text-align: center; padding: 30px">
-      - OR -
-    </div>
-    <div class="row">
-      <div class="col-md-4">
-        Create a new transaction for
-      </div>
-      <div class="col-md-5">
-        <select class="form-control"
-                ng-model="$ctrl.transactions.selectedNew"
-                ng-options="item.name for item in $ctrl.state.dataItems.location.allLibraryItems">
-        </select>
-      </div>
-      <div class="col-md-3">
-        <button class="btn btn-default btn-block" ng-click="$ctrl.createNewTransaction()">
-          Create
-        </button>
-      </div>
-    </div>
-  </div>
-  <!-- END section edit/create transaction. -->
-
   <!-- BEGIN section transaction details -->
-  <div ng-if="$ctrl.transactions.current">
+  <div ng-if="$ctrl.currentTransaction">
     <div class="row">
       <div class="col-md-12">
         <p>
-        You are editing transaction:  <span class="label label-default">ID: {{$ctrl.transactions.current.id}}</span>
-        <span class="label label-default">Name: {{$ctrl.transactions.current.libraryName}}</span>
+        You are editing transaction:  <span class="label label-default">ID: {{$ctrl.currentTransaction.id}}</span>
+        <span class="label label-default">Name: {{$ctrl.currentTransaction.libraryName}}</span>
         </p>
       </div>
     </div>
