@@ -90,7 +90,6 @@ class LocationEditorController {
     }
 
     this.currentTransaction = null
-    this.refreshExistingTransactions()
 
     this.isInErrorState = false
     this.store = new TransactionStore()
