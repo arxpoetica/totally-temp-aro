@@ -165,10 +165,10 @@ class DataSourceUploadController {
   }
 
   removeDatasource(target) {
-    this.$http.delete(`/service/v1/project/${this.projectId}/library/${target.target.identifier}?user_id=${this.userId}`).then(() => {
-        var index = this.state.dataItems[target.target.dataType].allLibraryItems.indexOf(target.target)
+    this.$http.delete(`/service/v1/project/${this.projectId}/library/${target.target[0].identifier}?user_id=${this.userId}`).then(() => {
+        var index = this.state.dataItems[target.target[0].dataType].allLibraryItems.indexOf(target.target[0])
         if(index > -1) {
-          this.state.dataItems[target.target.dataType].allLibraryItems.splice(index, 1)
+          this.state.dataItems[target.target[0].dataType].allLibraryItems.splice(index, 1)
         }
     })
   }
