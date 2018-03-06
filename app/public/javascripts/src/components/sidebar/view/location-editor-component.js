@@ -295,12 +295,14 @@ class LocationEditorController {
       this.transactions.current = null
       this.state.recreateTilesAndCache()
       this.refreshExistingTransactions()
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
     })
     .catch((err) => {
       this.transactions.current = null
       this.state.recreateTilesAndCache()
       this.refreshExistingTransactions()
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
       console.error(err)
     })
@@ -308,6 +310,7 @@ class LocationEditorController {
 
   closeTransaction() {
     this.transactions.current = null
+    this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
   }
 
   deleteTransaction() {
@@ -327,11 +330,13 @@ class LocationEditorController {
         .then((result) => {
           this.transactions.current = null
           this.refreshExistingTransactions()
+          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
           this.$timeout()
         })
         .catch((err) => {
           this.transactions.current = null
           this.refreshExistingTransactions()
+          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
           this.$timeout()
         })
       }
