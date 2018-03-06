@@ -159,7 +159,7 @@ class LocationEditorController {
 
     // Note that UUID and object revision should come from aro-service.
     // Use UUID for featureId. If not found, use location_id
-    var featureId = event.locations[0].uuid || event.locations[0].location_id
+    var featureId = event.locations[0].object_id || event.locations[0].location_id
     this.createEditableMarker(event.latLng, featureId, 2)
     // Stop rendering this location in the tile
     this.tileDataService.addFeatureToExclude(featureId)
@@ -303,7 +303,9 @@ class LocationEditorController {
 
   $onDestroy() {
     // Remove all markers that we have created
-    this.store.createdMarkers.forEach((marker) => marker.setMap(null))
+    this.store.createdMarkers.forEach((marker) => {
+      marker.setMap(null)
+    })
     this.store.createdMarkers = []
 
     // Reset selection mode to single select mode
