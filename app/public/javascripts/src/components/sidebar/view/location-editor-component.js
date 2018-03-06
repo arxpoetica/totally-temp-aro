@@ -2,6 +2,7 @@ class TransactionStore {
   constructor() {
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
+    this.createdMarkers = []  // Array of all google maps markers created by this component
   }
 
   // Get a UUID. Generating random ones for now. Eventually we need to get these from aro-service
@@ -45,6 +46,7 @@ class CommandAddLocation {
       map: params.map,
       uuid: featureObj.uuid
     })
+    store.createdMarkers.push(newLocationMarker)
 
     this.params = params
     return newLocationMarker
@@ -148,34 +150,6 @@ class LocationEditorController {
       this.$timeout()
     })
   }
-
-  // createNewTransaction() {
-  //   if (!this.transactions.selectedNew) {
-  //     swal({
-  //       title: 'Select a library',
-  //       text: 'You must select a library for which you want to create a transaction',
-  //       type: 'error',
-  //       confirmButtonColor: '#DD6B55',
-  //       confirmButtonText: 'Ok',
-  //       closeOnConfirm: true
-  //     })
-  //     return
-  //   }
-
-  //   this.$http.post('/service/library/transaction', {
-  //     libraryId: this.transactions.selectedNew.identifier,
-  //     userId: this.state.getUserId()
-  //   })
-  //   .then((result) => {
-  //     this.transactions.current = result.data
-  //     this.$timeout()
-  //   })
-  //   .catch((err) => {
-  //     console.error(err)
-  //     this.isInErrorState = true
-  //     this.$timeout()
-  //   })
-  // }
 
   handleMapEntitySelected(event) {
     if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE) {
@@ -339,8 +313,9 @@ class LocationEditorController {
   }
 
   $onDestroy() {
-    // Unsubscribe all map listeners
-    google.maps.event.removeListener(this.clickListener)
+    // Remove all markers that we have created
+    this.store.createdMarkers.forEach((marker) => marker.setMap(null))
+    this.store.createdMarkers = []
 
     // Reset selection mode to single select mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
