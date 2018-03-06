@@ -2,6 +2,7 @@ class TransactionStore {
   constructor() {
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
+    this.createdMarkers = []  // Array of all google maps markers created by this component
   }
 
   // Get a UUID. Generating random ones for now. Eventually we need to get these from aro-service
@@ -45,6 +46,7 @@ class CommandAddLocation {
       map: params.map,
       uuid: featureObj.uuid
     })
+    store.createdMarkers.push(newLocationMarker)
 
     this.params = params
     return newLocationMarker
@@ -81,21 +83,13 @@ class LocationEditorController {
     this.tileDataService = tileDataService
     this.addLocationData = {
       types: [
-        'Business',
-        'Household',
-        'Cell tower'
+        'Household'
       ],
       selectedType: 'Household',
       numLocations: 5
     }
 
-    this.transactions = {
-      current: null,
-      allExisting: [],
-      selectedExisting: null,
-      selectedNew: null
-    }
-    this.refreshExistingTransactions()
+    this.currentTransaction = null
 
     this.isInErrorState = false
     this.store = new TransactionStore()
@@ -111,8 +105,9 @@ class LocationEditorController {
     }
 
     // We should have exactly one location data source selected. If not, return. The component will
-    // anyways show a warning message and cannot be interacted with.
+    // show an error message and cannot be interacted with.
     if (this.state.dataItems.location && this.state.dataItems.location.selectedLibraryItems.length !== 1) {
+      this.isInErrorState = true
       return
     }
 
@@ -127,52 +122,24 @@ class LocationEditorController {
       }
       self.createEditableMarker(event.latLng, null, null)
     });
-  }
 
-  refreshExistingTransactions() {
-    // Get a list of all open transactions for this user
+    // See if we have an existing transaction for the currently selected location library
+    var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction?user_id=${this.state.getUserId()}`)
     .then((result) => {
-      this.transactions.allExisting = result.data
-      this.transactions.selectedExisting = this.transactions.allExisting[0]
-      this.$timeout()
-    })
-  }
-
-  resumeSelectedTransaction() {
-    if (!this.transactions.selectedExisting) {
-      swal({
-        title: 'Select existing transaction',
-        text: 'You must select an existing transaction to edit. If you don\'t have any existing transactions, create a new one',
-        type: 'error',
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Ok',
-        closeOnConfirm: true
-      })
-      return
-    }
-    this.transactions.current = this.transactions.selectedExisting
-  }
-
-  createNewTransaction() {
-    if (!this.transactions.selectedNew) {
-      swal({
-        title: 'Select a library',
-        text: 'You must select a library for which you want to create a transaction',
-        type: 'error',
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'Ok',
-        closeOnConfirm: true
-      })
-      return
-    }
-
-    this.$http.post('/service/library/transaction', {
-      libraryId: this.transactions.selectedNew.identifier,
-      userId: this.state.getUserId()
+      var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
+      if (existingTransactions.length > 0) {
+        // We have an existing transaction for this library item. Use it.
+        return Promise.resolve({ data: existingTransactions[0]})
+      } else {
+        return this.$http.post('/service/library/transaction', {
+          libraryId: selectedLibraryItem.identifier,
+          userId: this.state.getUserId()
+        })
+      }
     })
     .then((result) => {
-      this.transactions.current = result.data
+      this.currentTransaction = result.data
       this.$timeout()
     })
     .catch((err) => {
@@ -192,7 +159,7 @@ class LocationEditorController {
 
     // Note that UUID and object revision should come from aro-service.
     // Use UUID for featureId. If not found, use location_id
-    var featureId = event.locations[0].uuid || event.locations[0].location_id
+    var featureId = event.locations[0].object_id || event.locations[0].location_id
     this.createEditableMarker(event.latLng, featureId, 2)
     // Stop rendering this location in the tile
     this.tileDataService.addFeatureToExclude(featureId)
@@ -264,7 +231,7 @@ class LocationEditorController {
   }
 
   commitTransaction() {
-    if (!this.transactions.current) {
+    if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
 
@@ -281,57 +248,53 @@ class LocationEditorController {
           number_of_households: rawFeature.numLocations
         }
       }
-      featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.transactions.current.id}/features`, formattedFeature))
+      featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, formattedFeature))
     })
 
     // First, push all features into the transaction
     Promise.all(featurePostPromises)
     .then((result) => {
       // Then commit the transaction
-      return this.$http.put(`/service/library/transaction/${this.transactions.current.id}`)
+      return this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
     })
     .then((result) => {
       // Committing will close the transaction. To keep modifying, open a new transaction
-      this.transactions.current = null
+      this.currentTransaction = null
       this.state.recreateTilesAndCache()
-      this.refreshExistingTransactions()
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
     })
     .catch((err) => {
-      this.transactions.current = null
+      this.currentTransaction = null
       this.state.recreateTilesAndCache()
-      this.refreshExistingTransactions()
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
       console.error(err)
     })
   }
 
-  closeTransaction() {
-    this.transactions.current = null
-  }
-
-  deleteTransaction() {
+  discardTransaction() {
     swal({
       title: 'Delete transaction?',
-      text: `Are you sure you want to delete transaction with ID ${this.transactions.current.id} for library ${this.transactions.current.libraryName}`,
+      text: `Are you sure you want to delete transaction with ID ${this.currentTransaction.id} for library ${this.currentTransaction.libraryName}`,
       type: 'warning',
       confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, delete',
+      confirmButtonText: 'Yes, discard',
       cancelButtonText: 'No',
       showCancelButton: true,
       closeOnConfirm: true
     }, (deleteTransaction) => {
       if (deleteTransaction) {
         // The user has confirmed that the transaction should be deleted
-        this.$http.delete(`/service/library/transaction/${this.transactions.current.id}`)
+        this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
         .then((result) => {
-          this.transactions.current = null
-          this.refreshExistingTransactions()
+          this.currentTransaction = null
+          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
           this.$timeout()
         })
         .catch((err) => {
-          this.transactions.current = null
-          this.refreshExistingTransactions()
+          this.currentTransaction = null
+          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
           this.$timeout()
         })
       }
@@ -339,8 +302,11 @@ class LocationEditorController {
   }
 
   $onDestroy() {
-    // Unsubscribe all map listeners
-    google.maps.event.removeListener(this.clickListener)
+    // Remove all markers that we have created
+    this.store.createdMarkers.forEach((marker) => {
+      marker.setMap(null)
+    })
+    this.store.createdMarkers = []
 
     // Reset selection mode to single select mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE

@@ -32,9 +32,14 @@ app.component('viewMode', {
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO">
         <road-segment-detail></road-segment-detail>
       </accordion-panel-contents>
-      <accordion-panel-title title="'Edit Locations'" panel-id="$ctrl.state.viewModePanels.EDIT_LOCATIONS"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EDIT_LOCATIONS">
-        <location-editor ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS" map-global-object-name="map"></location-editor>
+      <!-- Edit Locations is a little different. Show it only if we are in EDIT_LOCATION mode. -->
+      <accordion-panel-title title="'Edit Locations'"
+                             panel-id="$ctrl.state.viewModePanels.EDIT_LOCATIONS"
+                             ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS">
+      </accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EDIT_LOCATIONS"
+                                ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS">
+        <location-editor map-global-object-name="map"></location-editor>
       </accordion-panel-contents>
     </accordion>
   </div>
