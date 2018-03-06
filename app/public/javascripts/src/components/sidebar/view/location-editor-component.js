@@ -133,7 +133,7 @@ class LocationEditorController {
         return Promise.resolve({ data: existingTransactions[0]})
       } else {
         return this.$http.post('/service/library/transaction', {
-          libraryId: this.transactions.selectedNew.identifier,
+          libraryId: selectedLibraryItem.identifier,
           userId: this.state.getUserId()
         })
       }
@@ -261,32 +261,25 @@ class LocationEditorController {
       // Committing will close the transaction. To keep modifying, open a new transaction
       this.currentTransaction = null
       this.state.recreateTilesAndCache()
-      this.refreshExistingTransactions()
       this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
     })
     .catch((err) => {
       this.currentTransaction = null
       this.state.recreateTilesAndCache()
-      this.refreshExistingTransactions()
       this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
       console.error(err)
     })
   }
 
-  closeTransaction() {
-    this.currentTransaction = null
-    this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-  }
-
-  deleteTransaction() {
+  discardTransaction() {
     swal({
       title: 'Delete transaction?',
       text: `Are you sure you want to delete transaction with ID ${this.currentTransaction.id} for library ${this.currentTransaction.libraryName}`,
       type: 'warning',
       confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, delete',
+      confirmButtonText: 'Yes, discard',
       cancelButtonText: 'No',
       showCancelButton: true,
       closeOnConfirm: true
@@ -296,13 +289,11 @@ class LocationEditorController {
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
         .then((result) => {
           this.currentTransaction = null
-          this.refreshExistingTransactions()
           this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
           this.$timeout()
         })
         .catch((err) => {
           this.currentTransaction = null
-          this.refreshExistingTransactions()
           this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
           this.$timeout()
         })
