@@ -38,8 +38,9 @@ class ToolBarController {
         prev = point
       })
       this.measuredDistance = total
-      swal({ title: 'Measured Distance', text: `${total * 3.28084} ft` })
-      if (!$scope.$$phase) { $scope.$apply() } // refresh UI
+      this.state.measuredDistance.next(this.measuredDistance)
+      //swal({ title: 'Measured Distance', text: `${total * 3.28084} ft` })
+      //if (!$scope.$$phase) { $scope.$apply() } // refresh UI
     })
 
     this.rangeValues = []
@@ -136,7 +137,10 @@ class ToolBarController {
     var current = this.drawingManager.getMap()
     this.drawingManager.setMap(current ? null : map)
     this.removeLatestOverlay()
-    if (current) this.measuredDistance = null
+    if (current) {
+      this.measuredDistance = null
+      this.state.measuredDistance.next(this.measuredDistance)
+    }  
   }
 
   toggleViewSettings() {
