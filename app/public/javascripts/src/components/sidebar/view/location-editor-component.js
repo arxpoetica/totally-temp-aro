@@ -83,9 +83,7 @@ class LocationEditorController {
     this.tileDataService = tileDataService
     this.addLocationData = {
       types: [
-        'Business',
-        'Household',
-        'Cell tower'
+        'Household'
       ],
       selectedType: 'Household',
       numLocations: 5
