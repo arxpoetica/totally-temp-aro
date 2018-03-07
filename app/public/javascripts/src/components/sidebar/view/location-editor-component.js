@@ -150,7 +150,8 @@ class LocationEditorController {
   }
 
   handleMapEntitySelected(event) {
-    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.CREATE) {
+    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE
+      || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
       return  // Currently only supporting editing of single entities
     }
     if (!event.latLng || !event.locations || event.locations.length === 0) {
