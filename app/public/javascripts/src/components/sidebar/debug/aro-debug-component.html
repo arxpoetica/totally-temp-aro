@@ -15,12 +15,9 @@
           ng-click="$ctrl.getMorphologyTileInfoForSelectedServiceAreas()">
     Get tile info for all selected service areas
   </button>
-  <div>
-    <span class="ctype-name">Show tile information on map</span>
-    <span class="ctype-checkbox" style="float:right">
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.mapTileOptions.showTileExtents" ng-change="$ctrl.showTile()">
-    </span>
-  </div>
+
+  <view-settings></view-settings>
+  
   <!-- A container to display all the debugging info on the selected service areas -->
   <div style="flex: 1 1 auto; overflow-y: auto">
     <!-- Display the array of debugging infos -->

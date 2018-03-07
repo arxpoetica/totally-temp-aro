@@ -1,0 +1,105 @@
+<style scoped>
+
+.view-settings {
+  margin-top: 10px;
+}
+
+</style>  
+<table class="table table-condensed table-striped view-settings">
+  <tbody>
+    <!-- <tr>
+      <td>HeatMap Options</td>
+      <td>
+        <select class="form-control" ng-model="$ctrl.mapTileOptions.selectedHeatmapOption" ng-options="item as item.label for item in $ctrl.state.viewSetting.heatmapOptions track by item.id"
+          ng-change="$ctrl.updateState()">
+        </select>
+      </td>
+    </tr> -->
+    <tr>
+      <td>Fiber Width</td>
+      <td>
+        <select class="form-control" ng-model="$ctrl.state.viewSetting.selectedFiberOption" ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
+          ng-change="$ctrl.fiberOptionChanged()">
+        </select>
+      </td>
+    </tr>
+
+    <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
+      <td>Max Pixel Width</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.max" placeholder="Max Pixel Width">
+      </td>
+    </tr>
+
+    <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
+      <td>Min Pixel Width</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.min" placeholder="Min Pixel Width">
+      </td>
+    </tr>
+
+    <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.opacity">
+      <td>Max Opacity</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.max" placeholder="Max Opacity">
+      </td>
+    </tr>
+
+    <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.opacity">
+      <td>Min Opacity</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.min" placeholder="Min Opacity">
+      </td>
+    </tr>
+
+    <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
+      <td>Exponent</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.divisor" placeholder="Exponent">
+      </td>
+    </tr>
+
+    <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth &&  $ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor">
+      <td>Atomic Divisor</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" placeholder="Atomic Divisor">
+      </td>
+    </tr>
+
+    <tr>
+      <td>Show tile information on map</td>
+      <td>
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.mapTileOptions.showTileExtents" ng-change="$ctrl.updateState()">
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">Heatmap settings</th>
+    </tr>
+
+    <tr>
+      <td>Power</td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.powerExponent" ng-change="$ctrl.updateState()">
+      </td>
+    </tr>
+
+    <!-- <tr>
+      <td>
+        <input type="radio" name="heatmap" ng-model="$ctrl.mapTileOptions.heatMap.useAbsoluteMax" ng-value="true" ng-change="$ctrl.updateState()">Absolute</div>
+      </td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.maxValue" ng-change="$ctrl.updateState()">
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <input type="radio" name="heatmap" ng-model="$ctrl.mapTileOptions.heatMap.useAbsoluteMax" ng-value="false" ng-change="$ctrl.updateState()">World</div>
+      </td>
+      <td>
+        <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" ng-change="$ctrl.updateState()">
+      </td>
+    </tr> -->
+  </tbody>
+</table>
