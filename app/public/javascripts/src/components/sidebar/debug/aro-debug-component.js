@@ -4,17 +4,7 @@ class AroDebugController {
     this.$http = $http
     this.$timeout = $timeout
     this.morphologyTileInfos = []
-
-    // Map tile settings used for debugging
-    this.state.mapTileOptions
-    .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
   }
-
-    // Take the mapTileOptions defined in $scope and set it on the state
-    showTile() {
-      var newMapTileOptions = angular.copy(this.mapTileOptions)
-      this.state.mapTileOptions.next(newMapTileOptions)
-    }
 
   getMorphologyTileInfoForSelectedServiceAreas() {
     // For all selected service areas, gets the morphology tile debugging info from aro-service
