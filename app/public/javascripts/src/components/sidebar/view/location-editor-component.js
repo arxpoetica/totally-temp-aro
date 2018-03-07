@@ -86,7 +86,7 @@ class LocationEditorController {
         'Household'
       ],
       selectedType: 'Household',
-      numLocations: 5
+      numLocations: 1
     }
 
     this.currentTransaction = null
@@ -116,7 +116,7 @@ class LocationEditorController {
 
     // Handler for map click - this is when we create a new location
     var self = this
-    google.maps.event.addListener(this.mapRef, 'click', function(event) {
+    this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function(event) {
       if (self.state.selectedTargetSelectionMode !== self.state.targetSelectionModes.CREATE) {
         return
       }
@@ -150,7 +150,8 @@ class LocationEditorController {
   }
 
   handleMapEntitySelected(event) {
-    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE) {
+    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE
+      || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
       return  // Currently only supporting editing of single entities
     }
     if (!event.latLng || !event.locations || event.locations.length === 0) {
@@ -310,6 +311,9 @@ class LocationEditorController {
 
     // Reset selection mode to single select mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
+
+    // Remove listener
+    google.maps.event.removeListener(this.clickListener)
   }
 }
 
