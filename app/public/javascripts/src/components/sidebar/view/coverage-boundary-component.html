@@ -6,11 +6,27 @@
   }
 </style>
 <div class="view-mode-container">
+
+  <!-- Spinner that will be shown while the coverage area is being loaded from the server -->
+  <div style="margin:30px;text-align:center;" ng-if="$ctrl.controlState === $ctrl.controlStates.COMPUTING">
+    <p>Calculating coverage area...</p>
+    <div class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
+  </div>
+
   <!-- A div that overlays over the control. Show when the user hasn't selected anything on the map -->
-  <div ng-if="$ctrl.controlState === $ctrl.controlStates.NO_TARGET_SELECTED"
-       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
+  <div ng-if="$ctrl.controlState === $ctrl.controlStates.NO_TARGET_SELECTED">
     <div class="alert alert-info" role="alert">
       Click on the map to calculate a coverage boundary
     </div>
+  </div>
+
+  <div>
+    Households covered: {{$ctrl.householdsCovered || 'N/A'}}
   </div>
 </div>
