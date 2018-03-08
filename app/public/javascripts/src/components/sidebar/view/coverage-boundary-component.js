@@ -15,9 +15,13 @@ class CoverageBoundaryController {
         url: '/images/map_icons/aro/coverage_target.png',
         anchor: new google.maps.Point(16, 16) // Anchor should be at the center of the crosshair icon
       },
-      clickable: false,
+      draggable: true,
       map: null
     })
+    this.targetMarker.addListener('dragend', (event) => {
+      this.handleCoverageTargetUpdated(event.latLng)
+    })
+
     this.coveragePolygon = null
   }
 
@@ -43,13 +47,14 @@ class CoverageBoundaryController {
 
     // If we are still processing a previous click, do nothing
     if (this.controlState === this.controlStates.COMPUTING) {
-      console.warn('Warning: A coverage boundary computation is in process. Ignoring mouse click')
+      console.warn('Warning: A coverage boundary computation is in process. Ignoring handleCoverageTargetUpdated')
       return
     }
 
     // Update the marker position and show it in the map
     this.targetMarker.position = position
     this.targetMarker.setMap(this.mapRef)
+    this.targetMarker.setDraggable(false)   // No dragging while we are computing coverage
     this.controlState = this.controlStates.COMPUTING
     if (this.coveragePolygon) {
       this.coveragePolygon.setMap(null)
@@ -71,9 +76,13 @@ class CoverageBoundaryController {
       this.coveragePolygon.setMap(this.mapRef)
       this.householdsCovered = result.data.householdsCovered
       this.controlState = this.controlStates.COMPUTED
+      this.targetMarker.setDraggable(true)   // Allow dragging the marker
       this.$timeout()
     })
-    .catch((err) => console.error(err))
+    .catch((err) => {
+      console.error(err)
+      this.targetMarker.setDraggable(true)   // Allow dragging the marker
+    })
 
     this.$timeout()
   }
