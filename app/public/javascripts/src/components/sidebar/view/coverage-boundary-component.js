@@ -66,10 +66,10 @@ class CoverageBoundaryController {
       // Draw the polygon onto the screen
       this.coveragePolygon = new google.maps.Polygon({
         paths: result.data.geometry,
-        strokeColor: '#A00000',
+        strokeColor: '#FF1493',
         strokeOpacity: 0.8,
         strokeWeight: 2,
-        fillColor: '#A00000',
+        fillColor: '#FF1493',
         fillOpacity: 0.4,
         clickable: false
       })
@@ -129,7 +129,7 @@ class CoverageBoundaryController {
             geometry: geometry
           }
         })
-      }, 5000)
+      }, 2000)
     })
   }
 }
