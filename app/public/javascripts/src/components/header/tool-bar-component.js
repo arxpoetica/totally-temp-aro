@@ -236,6 +236,12 @@ class ToolBarController {
       + ')'
     );
   }
+
+  openCoverageBoundaryPanel() {
+    this.state.activeViewModePanel = this.state.viewModePanels.COVERAGE_BOUNDARY
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) // Panel is visible only in VIEW mode
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.COVERAGE_BOUNDARY
+  }
 }
 
 ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools']

@@ -32,6 +32,17 @@ app.component('viewMode', {
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO">
         <road-segment-detail></road-segment-detail>
       </accordion-panel-contents>
+      <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
+      <accordion-panel-title title="'Coverage Boundary'"
+                             panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"
+                             ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
+                                    && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY">
+      </accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"
+                                ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
+                                       && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY">
+        <coverage-boundary map-global-object-name="map"></coverage-boundary>
+      </accordion-panel-contents>
       <!-- Edit Locations is a little different. Show it only if we are in EDIT_LOCATION mode. -->
       <accordion-panel-title title="'Edit Locations'"
                              panel-id="$ctrl.state.viewModePanels.EDIT_LOCATIONS"
