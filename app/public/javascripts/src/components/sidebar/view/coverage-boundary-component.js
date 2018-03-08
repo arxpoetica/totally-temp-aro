@@ -104,7 +104,7 @@ class CoverageBoundaryController {
     // Always send radius in meters to the back end
     optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
 
-    return this.$http.post('/service/v1/network-analysis/boundary-debug', optimizationBody)
+    return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
         // Format the result so we can use it to create a polygon
         var polygonPath = []
