@@ -68,7 +68,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
       })
     }
 
-    if (mergedLayerUrls.length > 0) {
+    //Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
+    if (mergedLayerUrls.length > 0 && map && map.getZoom() >= 10) {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
       var firstLocation = state.locationTypes.getValue()[0]
