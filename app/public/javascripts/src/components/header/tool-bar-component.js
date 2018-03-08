@@ -143,16 +143,6 @@ class ToolBarController {
     }  
   }
 
-  toggleViewSettings() {
-    var viewSettingConfig = {
-      id: 'map_settings',
-      name: 'View Settings',
-      short_name: 'V',
-      icon: 'fa fa-eye fa-2x'
-    }
-    this.map_tools.toggle(viewSettingConfig)
-  }
-
   refreshToolbar() {
     if (this.$element) {
       // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
