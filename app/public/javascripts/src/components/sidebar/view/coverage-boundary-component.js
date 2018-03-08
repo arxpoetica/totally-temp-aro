@@ -1,15 +1,17 @@
 class CoverageBoundaryController {
 
-  constructor($http, $timeout, state) {
+  constructor($http, $timeout, state, configuration) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+    this.configuration = configuration
     this.controlStates = Object.freeze({
       NO_TARGET_SELECTED: 'NO_TARGET_SELECTED',
       COMPUTING: 'COMPUTING',
       COMPUTED: 'COMPUTED'
     })
     this.controlState = this.controlStates.NO_TARGET_SELECTED
+    this.coverageRadius = 10000   // In whatever units are specified in the configuration.units service
     this.householdsCovered = null
     this.targetMarker = new google.maps.Marker({
       position: new google.maps.LatLng(-122, 48),
@@ -98,7 +100,8 @@ class CoverageBoundaryController {
       type: 'Point',
       coordinates: [this.targetMarker.position.lng(), this.targetMarker.position.lat()]
     }
-    optimizationBody.radius = 3000
+    // Always send radius in meters to the back end
+    optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
 
     return this.$http.post('/service/v1/network-analysis/boundary-debug', optimizationBody)
       .then((result) => {
@@ -142,7 +145,7 @@ class CoverageBoundaryController {
   }
 }
 
-CoverageBoundaryController.$inject = ['$http', '$timeout', 'state']
+CoverageBoundaryController.$inject = ['$http', '$timeout', 'state', 'configuration']
 
 app.component('coverageBoundary', {
   templateUrl: '/components/sidebar/view/coverage-boundary-component.html',

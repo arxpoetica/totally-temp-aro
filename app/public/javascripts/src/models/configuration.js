@@ -8,7 +8,8 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     // Define a list of configurations we want to get from the server
     var configurationTypes = [
       'locationCategories',
-      'networkEquipment'
+      'networkEquipment',
+      'units'
     ]
     configurationTypes.forEach((configurationType) => {
       configurationPromises.push(
