@@ -94,7 +94,7 @@ class LocationEditorController {
     this.isInErrorState = false
     this.store = new TransactionStore()
     this.selectedLocation = null
-    state.mapFeaturesSelectedEvent.subscribe((event) => this.handleMapEntitySelected(event))
+    this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.subscribe((event) => this.handleMapEntitySelected(event))
   }
 
   $onInit() {
@@ -314,6 +314,9 @@ class LocationEditorController {
 
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
+
+    //unsubscribe map click observer
+    this.mapFeaturesSelectedEventObserver.unsubscribe();
   }
 }
 
