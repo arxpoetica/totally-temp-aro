@@ -1,7 +1,8 @@
 class CoverageBoundaryController {
 
-  constructor($timeout) {
+  constructor($timeout, state) {
     this.$timeout = $timeout
+    this.state = state
     this.controlStates = Object.freeze({
       NO_TARGET_SELECTED: 'NO_TARGET_SELECTED',
       COMPUTING: 'COMPUTING',
@@ -102,6 +103,12 @@ class CoverageBoundaryController {
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
+
+    // Set mapRef to null, in case any async code is running that will draw polygons on the map
+    this.mapRef = null
+
+    // Target selection mode cannot be COVERAGE_BOUNDARY anymore
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
   }
 
   mockCoverageCalculation() {
@@ -134,7 +141,7 @@ class CoverageBoundaryController {
   }
 }
 
-CoverageBoundaryController.$inject = ['$timeout']
+CoverageBoundaryController.$inject = ['$timeout', 'state']
 
 app.component('coverageBoundary', {
   templateUrl: '/components/sidebar/view/coverage-boundary-component.html',

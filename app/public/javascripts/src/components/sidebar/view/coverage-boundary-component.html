@@ -26,7 +26,12 @@
     </div>
   </div>
 
-  <div>
-    Households covered: {{$ctrl.householdsCovered || 'N/A'}}
-  </div>
+  <table class="table table-striped table-condensed">
+    <tbody>
+      <tr>
+        <td>Households covered</td>
+        <td>{{$ctrl.householdsCovered || 'N/A'}}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

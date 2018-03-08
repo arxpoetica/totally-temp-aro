@@ -212,7 +212,10 @@
   </button>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY }"
+          ng-class="{ 'btn': true,
+                      'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
+                                      && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
+                    }"
           ng-click="$ctrl.openCoverageBoundaryPanel()"
           data-toggle="tooltip"
           data-placement="bottom"
