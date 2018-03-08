@@ -211,6 +211,15 @@
     <i class="fa fa-bookmark-o fa-rotate-180"></i>
   </button>
 
+  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
+          ng-click="$ctrl.openCoverageBoundaryPanel()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Calculate coverage boundary">
+    <i class="fa fa-crosshairs fa-rotate-180"></i>
+  </button>
+
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">
     <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <i class="fa fa-angle-double-down"></i>

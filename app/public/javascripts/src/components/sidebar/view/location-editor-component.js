@@ -76,7 +76,7 @@ class CommandEditLocation {
 
 class LocationEditorController {
 
-  constructor($document, $http, $timeout, state, tileDataService) {
+  constructor($http, $timeout, state, tileDataService) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -317,7 +317,7 @@ class LocationEditorController {
   }
 }
 
-LocationEditorController.$inject = ['$document', '$http', '$timeout', 'state', 'tileDataService']
+LocationEditorController.$inject = ['$http', '$timeout', 'state', 'tileDataService']
 
 app.component('locationEditor', {
   templateUrl: '/components/sidebar/view/location-editor-component.html',

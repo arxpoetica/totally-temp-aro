@@ -1,0 +1,16 @@
+<style>
+  .view-mode-container {
+    position: relative; /* This will require the parent to have position: relative or absolute */
+    height: 100%;
+    padding: 0px 10px 10px 10px;
+  }
+</style>
+<div class="view-mode-container">
+  <!-- A div that overlays over the control. Show when the user hasn't selected anything on the map -->
+  <div ng-if="$ctrl.controlState === $ctrl.controlStates.NO_TARGET_SELECTED"
+       style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; background-color: white;">
+    <div class="alert alert-info" role="alert">
+      Click on the map to calculate a coverage boundary
+    </div>
+  </div>
+</div>

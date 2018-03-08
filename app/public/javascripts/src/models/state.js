@@ -79,6 +79,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',
     ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
+    COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
     EDIT_LOCATIONS: 'EDIT_LOCATIONS'
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
