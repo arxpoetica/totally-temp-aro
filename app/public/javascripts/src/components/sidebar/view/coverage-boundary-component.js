@@ -11,7 +11,7 @@ class CoverageBoundaryController {
     this.householdsCovered = null
     this.targetMarker = new google.maps.Marker({
       position: new google.maps.LatLng(-122, 48),
-      icon: '/images/map_icons/aro/households_default.png',
+      icon: '/images/map_icons/aro/coverage_target.png',
       clickable: false,
       map: null
     })
