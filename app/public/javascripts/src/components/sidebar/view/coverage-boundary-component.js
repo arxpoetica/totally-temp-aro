@@ -65,7 +65,8 @@ class CoverageBoundaryController {
     }
     this.householdsCovered = null
 
-    this.calculateCoverage()
+    // this.calculateCoverage()
+    this.mockCalculateCoverage()
     .then((result) => {
       // Draw the polygon onto the screen
       this.coveragePolygon = new google.maps.Polygon({
@@ -119,6 +120,29 @@ class CoverageBoundaryController {
         })
       })
       .catch((err) => console.error(err))
+  }
+
+  mockCalculateCoverage() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        var latCen = this.targetMarker.position.lat()
+        var lngCen = this.targetMarker.position.lng()
+        var radius = 0.000002 * this.coverageRadius // (Very) approximate radius assuming "coverageRadius" is in feet
+        var geometry = []
+        for (var angle = 0.0; angle < Math.PI * 2.0; angle += (4.0 * Math.PI / 180.0)) {
+          var lat = latCen + (radius * 0.7) * Math.cos(angle) // Multiply radius to make it a circle in seattle
+          var lng = lngCen + radius * Math.sin(angle)
+          geometry.push({
+            lat: lat,
+            lng: lng
+          })
+        }
+         resolve({
+          householdsCovered: Math.round(Math.random() * 10000),
+          coveragePolygon: geometry
+        })
+      }, 2000)
+    })
   }
 
   $onDestroy() {
