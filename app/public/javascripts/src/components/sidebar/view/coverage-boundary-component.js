@@ -1,6 +1,7 @@
 class CoverageBoundaryController {
 
-  constructor($timeout, state) {
+  constructor($http, $timeout, state) {
+    this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.controlStates = Object.freeze({
@@ -62,11 +63,11 @@ class CoverageBoundaryController {
     }
     this.householdsCovered = null
 
-    this.mockCoverageCalculation()
+    this.calculateCoverage()
     .then((result) => {
       // Draw the polygon onto the screen
       this.coveragePolygon = new google.maps.Polygon({
-        paths: result.data.geometry,
+        paths: result.coveragePolygon,
         strokeColor: '#FF1493',
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -75,7 +76,7 @@ class CoverageBoundaryController {
         clickable: false
       })
       this.coveragePolygon.setMap(this.mapRef)
-      this.householdsCovered = result.data.householdsCovered
+      this.householdsCovered = result.householdsCovered
       this.controlState = this.controlStates.COMPUTED
       this.targetMarker.setDraggable(true)   // Allow dragging the marker
       this.$timeout()
@@ -86,6 +87,35 @@ class CoverageBoundaryController {
     })
 
     this.$timeout()
+  }
+
+  calculateCoverage() {
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = this.state.getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.analysis_type = 'COVERAGE'
+    optimizationBody.point = {
+      type: 'Point',
+      coordinates: [this.targetMarker.position.lng(), this.targetMarker.position.lat()]
+    }
+    optimizationBody.radius = 3000
+
+    return this.$http.post('/service/v1/network-analysis/boundary-debug', optimizationBody)
+      .then((result) => {
+        // Format the result so we can use it to create a polygon
+        var polygonPath = []
+        result.data.polygon.coordinates[0].forEach((polygonVertex) => {
+          polygonPath.push({
+            lat: polygonVertex[1],
+            lng: polygonVertex[0]
+          })
+        })
+        return Promise.resolve({
+          householdsCovered: result.data.coverageInfo.length,
+          coveragePolygon: polygonPath
+        })
+      })
+      .catch((err) => console.error(err))
   }
 
   $onDestroy() {
@@ -110,38 +140,9 @@ class CoverageBoundaryController {
     // Target selection mode cannot be COVERAGE_BOUNDARY anymore
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
   }
-
-  mockCoverageCalculation() {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        var latCen = this.targetMarker.position.lat()
-        var lngCen = this.targetMarker.position.lng()
-        var outerRadius = 0.02 // In lat/lng coordinates
-        var innerRadius = outerRadius / 3.0 // For random variation in the shape
-
-        var geometry = []
-        for (var angle = 0.0; angle < Math.PI * 2.0; angle += (4.0 * Math.PI / 180.0)) {
-          var radius = outerRadius + (innerRadius * Math.random())
-          var lat = latCen + radius * Math.cos(angle)
-          var lng = lngCen + radius * Math.sin(angle)
-          geometry.push({
-            lat: lat,
-            lng: lng
-          })
-        }
-
-        resolve({
-          data: {
-            householdsCovered: Math.round(Math.random() * 10000),
-            geometry: geometry
-          }
-        })
-      }, 2000)
-    })
-  }
 }
 
-CoverageBoundaryController.$inject = ['$timeout', 'state']
+CoverageBoundaryController.$inject = ['$http', '$timeout', 'state']
 
 app.component('coverageBoundary', {
   templateUrl: '/components/sidebar/view/coverage-boundary-component.html',
