@@ -11,7 +11,10 @@ class CoverageBoundaryController {
     this.householdsCovered = null
     this.targetMarker = new google.maps.Marker({
       position: new google.maps.LatLng(-122, 48),
-      icon: '/images/map_icons/aro/coverage_target.png',
+      icon: {
+        url: '/images/map_icons/aro/coverage_target.png',
+        anchor: new google.maps.Point(16, 16) // Anchor should be at the center of the crosshair icon
+      },
       clickable: false,
       map: null
     })
@@ -25,6 +28,9 @@ class CoverageBoundaryController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
+
+    // Use the cross hair cursor while this control is initialized
+    this.mapRef.setOptions({ draggableCursor: 'crosshair' })
 
     // Handler for map click
     var self = this
@@ -73,11 +79,20 @@ class CoverageBoundaryController {
   }
 
   $onDestroy() {
+
+    // Remove the click event listener that we registered
     google.maps.event.removeListener(this.clickListener)
+
+    // Remove the coverage polygon that we had created
     if (this.coveragePolygon) {
       this.coveragePolygon.setMap(null)
     }
+
+    // Remove the marker we created
     this.targetMarker.setMap(null)
+
+    // Go back to the default map cursor
+    this.mapRef.setOptions({ draggableCursor: null })
   }
 
   mockCoverageCalculation() {
