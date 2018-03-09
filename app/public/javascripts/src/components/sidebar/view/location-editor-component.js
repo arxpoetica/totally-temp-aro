@@ -178,7 +178,7 @@ class LocationEditorController {
     // Use UUID for featureId. If not found, use location_id
     var featureId = event.locations[0].object_id || event.locations[0].location_id
 
-    if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.CREATE) {
+    if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE) {
       this.createEditableMarker(event.latLng, featureId, 2)
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
@@ -283,13 +283,9 @@ class LocationEditorController {
     this.store.deletedFeatures.forEach((uuid) => {
       var rawFeature = this.store.uuidToFeatures[uuid]
       var formattedFeature = {
-        objectId: uuid,
-        geometry: {
-          type: 'Point',
-          coordinates: [-122, 47]
-        }
+        objectId: uuid
       }
-      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/`), formattedFeature)
+      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features`), formattedFeature)
     })
 
     // First, push all features into the transaction
