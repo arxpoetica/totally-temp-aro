@@ -3,7 +3,7 @@ class TransactionStore {
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
     this.deletedFeatures = new Set()  // Set of all existing features that are deleted
-    this.createdMarkers = []  // Array of all google maps markers created by this component
+    this.createdMarkers = {}  // All google maps markers created by this component
   }
 
   // Get a UUID. Generating random ones for now. Eventually we need to get these from aro-service
@@ -47,7 +47,7 @@ class CommandAddLocation {
       map: params.map,
       uuid: featureObj.uuid
     })
-    store.createdMarkers.push(newLocationMarker)
+    store.createdMarkers[featureObj.uuid] = newLocationMarker
 
     this.params = params
     return newLocationMarker
@@ -81,6 +81,8 @@ class CommandDeleteLocation {
       // We have created this feature as part of our transaction (it is not an existing feature).
       // Simply remove it
       delete store.uuidToFeatures[params.uuid]
+      store.createdMarkers[params.uuid].setMap(null)
+      delete store.createdMarkers[params.uuid]
     } else {
       // This is an existing feature. Stop rendering this location in the tile.
       store.deletedFeatures.add(params.uuid)
@@ -215,7 +217,18 @@ class LocationEditorController {
       this.handleDragEnd(newLocationMarker, event)
     })
     newLocationMarker.addListener('mousedown', (event) => {
-      this.selectMarker(newLocationMarker)
+      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
+        // We are in delete mode.
+        var command = new CommandDeleteLocation()
+        var params = {
+          uuid: newLocationMarker.uuid,
+        }
+        this.store.executeCommand(command, params)
+        this.$timeout()
+      } else {
+        // We are not in delete mode. Select the marker
+        this.selectMarker(newLocationMarker)
+      }
     })
   }
 
@@ -340,10 +353,11 @@ class LocationEditorController {
 
   $onDestroy() {
     // Remove all markers that we have created
-    this.store.createdMarkers.forEach((marker) => {
+    Object.keys(this.store.createdMarkers).forEach((key) => {
+      var marker = this.store.createdMarkers[key]
       marker.setMap(null)
     })
-    this.store.createdMarkers = []
+    this.store.createdMarkers = null
 
     // Reset selection mode to single select mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
