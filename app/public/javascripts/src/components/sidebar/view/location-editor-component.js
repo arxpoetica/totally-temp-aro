@@ -2,6 +2,7 @@ class TransactionStore {
   constructor() {
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
+    this.deletedFeatures = new Set()  // Set of all existing features that are deleted
     this.createdMarkers = []  // Array of all google maps markers created by this component
   }
 
@@ -70,6 +71,20 @@ class CommandEditLocation {
     // Update the feature object in the store
     var featureObj = store.uuidToFeatures[params.marker.uuid]
     featureObj.numLocations = params.numLocations
+    this.params = params
+  }
+}
+
+class CommandDeleteLocation {
+  execute(store, params) {
+    if (store.uuidToFeatures[params.uuid]) {
+      // We have created this feature as part of our transaction (it is not an existing feature).
+      // Simply remove it
+      delete store.uuidToFeatures[params.uuid]
+    } else {
+      // This is an existing feature. Stop rendering this location in the tile.
+      store.deletedFeatures.add(params.uuid)
+    }
     this.params = params
   }
 }
@@ -150,8 +165,9 @@ class LocationEditorController {
   }
 
   handleMapEntitySelected(event) {
-    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE
-      || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
+    if (!(this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE
+          || this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE)
+        || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
       return  // Currently only supporting editing of single entities
     }
     if (!event.latLng || !event.locations || event.locations.length === 0) {
@@ -161,7 +177,17 @@ class LocationEditorController {
     // Note that UUID and object revision should come from aro-service.
     // Use UUID for featureId. If not found, use location_id
     var featureId = event.locations[0].object_id || event.locations[0].location_id
-    this.createEditableMarker(event.latLng, featureId, 2)
+
+    if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.CREATE) {
+      this.createEditableMarker(event.latLng, featureId, 2)
+    } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
+      var command = new CommandDeleteLocation()
+      var params = {
+        uuid: featureId
+      }
+      this.store.executeCommand(command, params)
+    }
+
     // Stop rendering this location in the tile
     this.tileDataService.addFeatureToExclude(featureId)
     this.state.requestMapLayerRefresh.next({})
@@ -237,6 +263,7 @@ class LocationEditorController {
     }
 
     var featurePostPromises = []
+    // Promises for created and modified locations
     Object.keys(this.store.uuidToFeatures).forEach((uuid) => {
       var rawFeature = this.store.uuidToFeatures[uuid]
       var formattedFeature = {
@@ -250,6 +277,19 @@ class LocationEditorController {
         }
       }
       featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, formattedFeature))
+    })
+
+    // Promises for deleted locations
+    this.store.deletedFeatures.forEach((uuid) => {
+      var rawFeature = this.store.uuidToFeatures[uuid]
+      var formattedFeature = {
+        objectId: uuid,
+        geometry: {
+          type: 'Point',
+          coordinates: [-122, 47]
+        }
+      }
+      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/`), formattedFeature)
     })
 
     // First, push all features into the transaction

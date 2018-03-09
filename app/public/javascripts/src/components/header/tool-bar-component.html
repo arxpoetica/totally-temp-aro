@@ -203,6 +203,17 @@
     <i class="fa fa-plus"></i>
   </button>
 
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.DELETE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.DELETE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Delete locations">
+    <i class="fa fa-trash"></i>
+  </button>
+
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
           ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
           data-toggle="tooltip"

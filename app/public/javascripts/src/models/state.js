@@ -236,7 +236,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     SINGLE: 0,
     POLYGON: 1,
     CREATE: 2,
-    COVERAGE_BOUNDARY: 3
+    DELETE: 3,
+    COVERAGE_BOUNDARY: 4
   })
   service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
 
