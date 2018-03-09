@@ -35,7 +35,7 @@ app.component('showTargets', {
         <ul ng-show="$ctrl.targets.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
           <li class="item" ng-repeat="target in $ctrl.targets track by $index"
             ng-click="$ctrl.zoomLocation(target)">
-            <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeLocation([target])" style="margin-right: 5px">
+            <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeLocation([target]); $event.stopPropagation()" style="margin-right: 5px">
               <span class="fa fa-trash-o"></span>
             </a> {{ target.address || target.code || target.name }}
           </li>
