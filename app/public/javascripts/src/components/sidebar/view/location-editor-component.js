@@ -1,20 +1,31 @@
 class TransactionStore {
-  constructor() {
+  constructor($http) {
+    this.$http = $http
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
     this.deletedFeatures = new Set()  // Set of all existing features that are deleted
     this.createdMarkers = {}  // All google maps markers created by this component
+    this.uuidStore = []       // A list of UUIDs generated from the server
+    this.getUUIDsFromServer()
   }
 
-  // Get a UUID. Generating random ones for now. Eventually we need to get these from aro-service
+  // Get a list of UUIDs from the server
+  getUUIDsFromServer() {
+    const numUUIDsToFetch = 20
+    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
+    .then((result) => {
+      this.uuidStore = this.uuidStore.concat(result.data)
+    })
+    .catch((err) => console.error(err))
+  }
+
+  // Get a UUID from the store
   getUUID() {
-    // Note that this just returns RANDOM UUIDs, NOT RFC4122 COMPLIANT
-    var s4 = () => {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
+    if (this.uuidStore.length < 7) {
+      // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
+      this.getUUIDsFromServer()
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    return this.uuidStore.pop()
   }
 
   // Executes a command in the store
@@ -109,7 +120,7 @@ class LocationEditorController {
     this.currentTransaction = null
 
     this.isInErrorState = false
-    this.store = new TransactionStore()
+    this.store = new TransactionStore($http)
     this.selectedLocation = null
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.subscribe((event) => this.handleMapEntitySelected(event))
   }
