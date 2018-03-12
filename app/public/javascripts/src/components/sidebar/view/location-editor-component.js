@@ -1,19 +1,31 @@
 class TransactionStore {
-  constructor() {
+  constructor($http) {
+    this.$http = $http
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
-    this.createdMarkers = []  // Array of all google maps markers created by this component
+    this.deletedFeatures = new Set()  // Set of all existing features that are deleted
+    this.createdMarkers = {}  // All google maps markers created by this component
+    this.uuidStore = []       // A list of UUIDs generated from the server
+    this.getUUIDsFromServer()
   }
 
-  // Get a UUID. Generating random ones for now. Eventually we need to get these from aro-service
+  // Get a list of UUIDs from the server
+  getUUIDsFromServer() {
+    const numUUIDsToFetch = 20
+    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
+    .then((result) => {
+      this.uuidStore = this.uuidStore.concat(result.data)
+    })
+    .catch((err) => console.error(err))
+  }
+
+  // Get a UUID from the store
   getUUID() {
-    // Note that this just returns RANDOM UUIDs, NOT RFC4122 COMPLIANT
-    var s4 = () => {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
+    if (this.uuidStore.length < 7) {
+      // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
+      this.getUUIDsFromServer()
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    return this.uuidStore.pop()
   }
 
   // Executes a command in the store
@@ -46,7 +58,7 @@ class CommandAddLocation {
       map: params.map,
       uuid: featureObj.uuid
     })
-    store.createdMarkers.push(newLocationMarker)
+    store.createdMarkers[featureObj.uuid] = newLocationMarker
 
     this.params = params
     return newLocationMarker
@@ -74,6 +86,22 @@ class CommandEditLocation {
   }
 }
 
+class CommandDeleteLocation {
+  execute(store, params) {
+    if (store.uuidToFeatures[params.uuid]) {
+      // We have created this feature as part of our transaction (it is not an existing feature).
+      // Simply remove it
+      delete store.uuidToFeatures[params.uuid]
+      store.createdMarkers[params.uuid].setMap(null)
+      delete store.createdMarkers[params.uuid]
+    } else {
+      // This is an existing feature. Stop rendering this location in the tile.
+      store.deletedFeatures.add(params.uuid)
+    }
+    this.params = params
+  }
+}
+
 class LocationEditorController {
 
   constructor($http, $timeout, state, tileDataService) {
@@ -92,7 +120,7 @@ class LocationEditorController {
     this.currentTransaction = null
 
     this.isInErrorState = false
-    this.store = new TransactionStore()
+    this.store = new TransactionStore($http)
     this.selectedLocation = null
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.subscribe((event) => this.handleMapEntitySelected(event))
   }
@@ -150,8 +178,9 @@ class LocationEditorController {
   }
 
   handleMapEntitySelected(event) {
-    if (this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.SINGLE
-      || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
+    if (!(this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE
+          || this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE)
+        || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
       return  // Currently only supporting editing of single entities
     }
     if (!event.latLng || !event.locations || event.locations.length === 0) {
@@ -161,7 +190,17 @@ class LocationEditorController {
     // Note that UUID and object revision should come from aro-service.
     // Use UUID for featureId. If not found, use location_id
     var featureId = event.locations[0].object_id || event.locations[0].location_id
-    this.createEditableMarker(event.latLng, featureId, 2)
+
+    if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE) {
+      this.createEditableMarker(event.latLng, featureId, 2)
+    } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
+      var command = new CommandDeleteLocation()
+      var params = {
+        uuid: featureId
+      }
+      this.store.executeCommand(command, params)
+    }
+
     // Stop rendering this location in the tile
     this.tileDataService.addFeatureToExclude(featureId)
     this.state.requestMapLayerRefresh.next({})
@@ -189,7 +228,18 @@ class LocationEditorController {
       this.handleDragEnd(newLocationMarker, event)
     })
     newLocationMarker.addListener('mousedown', (event) => {
-      this.selectMarker(newLocationMarker)
+      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
+        // We are in delete mode.
+        var command = new CommandDeleteLocation()
+        var params = {
+          uuid: newLocationMarker.uuid,
+        }
+        this.store.executeCommand(command, params)
+        this.$timeout()
+      } else {
+        // We are not in delete mode. Select the marker
+        this.selectMarker(newLocationMarker)
+      }
     })
   }
 
@@ -237,6 +287,7 @@ class LocationEditorController {
     }
 
     var featurePostPromises = []
+    // Promises for created and modified locations
     Object.keys(this.store.uuidToFeatures).forEach((uuid) => {
       var rawFeature = this.store.uuidToFeatures[uuid]
       var formattedFeature = {
@@ -250,6 +301,15 @@ class LocationEditorController {
         }
       }
       featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, formattedFeature))
+    })
+
+    // Promises for deleted locations
+    this.store.deletedFeatures.forEach((uuid) => {
+      var rawFeature = this.store.uuidToFeatures[uuid]
+      var formattedFeature = {
+        objectId: uuid
+      }
+      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features`), formattedFeature)
     })
 
     // First, push all features into the transaction
@@ -304,13 +364,14 @@ class LocationEditorController {
 
   $onDestroy() {
     // Remove all markers that we have created
-    this.store.createdMarkers.forEach((marker) => {
+    Object.keys(this.store.createdMarkers).forEach((key) => {
+      var marker = this.store.createdMarkers[key]
       marker.setMap(null)
     })
-    this.store.createdMarkers = []
+    this.store.createdMarkers = null
 
     // Reset selection mode to single select mode
-    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.MOVE
 
     // Remove listener
     google.maps.event.removeListener(this.clickListener)

@@ -53,6 +53,7 @@
             <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
             <div ng-if="command.constructor.name === 'CommandEditLocation'">Edit Location</div>
             <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
+            <div ng-if="command.constructor.name === 'CommandDeleteLocation'">Delete Location</div>
           </td>
           <td>
             <div ng-if="command.constructor.name === 'CommandAddLocation'">
@@ -64,6 +65,9 @@
             <div ng-if="command.constructor.name === 'CommandMoveLocation'">
               From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>
               to {{command.params.newLocation.lat() | number: 5}}, {{command.params.newLocation.lng() | number: 5}}
+            </div>
+            <div ng-if="command.constructor.name === 'CommandDeleteLocation'">
+              Deleted household with ID {{command.params.uuid}}
             </div>
           </td>
         </tr>

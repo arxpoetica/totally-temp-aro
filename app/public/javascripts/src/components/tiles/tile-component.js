@@ -336,8 +336,8 @@ class MapTileRenderer {
       // Parse the geometry out.
       var feature = features[iFeature]
       if (feature.properties) {
-        // Try UUID first, else try location_id
-        var featureId = feature.properties.uuid || feature.properties.location_id
+        // Try object_id first, else try location_id
+        var featureId = feature.properties.object_id || feature.properties.location_id
         if (this.tileDataService.featuresToExclude.has(featureId)) {
           // This feature is to be excluded. Do not render it.
           continue

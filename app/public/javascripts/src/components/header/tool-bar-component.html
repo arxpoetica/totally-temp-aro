@@ -183,13 +183,37 @@
 
   <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" class="separator"></div>
 
-  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
           ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Select individual locations">
     <i class="fa fa-mouse-pointer"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select multiple locations">
+    <i class="fa fa-bookmark-o fa-rotate-180"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.MOVE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.MOVE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Move locations">
+    <i class="fa fa-arrows"></i>
   </button>
 
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
@@ -203,13 +227,18 @@
     <i class="fa fa-plus"></i>
   </button>
 
-  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.DELETE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.DELETE)"
           data-toggle="tooltip"
           data-placement="bottom"
-          title="Select multiple locations">
-    <i class="fa fa-bookmark-o fa-rotate-180"></i>
+          title="Delete locations">
+    <i class="fa fa-trash"></i>
   </button>
+
+  <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
           ng-class="{ 'btn': true,
