@@ -178,7 +178,7 @@ class LocationEditorController {
   }
 
   handleMapEntitySelected(event) {
-    if (!(this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE
+    if (!(this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE
           || this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE)
         || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
       return  // Currently only supporting editing of single entities
@@ -191,7 +191,7 @@ class LocationEditorController {
     // Use UUID for featureId. If not found, use location_id
     var featureId = event.locations[0].object_id || event.locations[0].location_id
 
-    if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE) {
+    if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE) {
       this.createEditableMarker(event.latLng, featureId, 2)
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
@@ -371,7 +371,7 @@ class LocationEditorController {
     this.store.createdMarkers = null
 
     // Reset selection mode to single select mode
-    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.MOVE
 
     // Remove listener
     google.maps.event.removeListener(this.clickListener)

@@ -235,9 +235,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.targetSelectionModes = Object.freeze({
     SINGLE: 0,
     POLYGON: 1,
-    CREATE: 2,
-    DELETE: 3,
-    COVERAGE_BOUNDARY: 4
+    MOVE: 2,
+    CREATE: 3,
+    DELETE: 4,
+    COVERAGE_BOUNDARY: 5
   })
   service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
 
