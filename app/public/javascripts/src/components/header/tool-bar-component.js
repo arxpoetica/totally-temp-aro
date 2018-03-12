@@ -1,10 +1,11 @@
 class ToolBarController {
 
-  constructor($element, $timeout,$document ,state, map_tools) {
+  constructor($element, $timeout,$document ,state, map_tools, $window) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
     this.$document = $document
+    this.$window = $window
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
     this.numPreviousCollapsedButtons = 0
@@ -13,35 +14,13 @@ class ToolBarController {
     this.heatMapOption = true
     this.measuringStickEnabled = false
 
-    this.latestOverlay = null
     this.min = 0
     // Map tile settings used for debugging
     this.state.mapTileOptions
       .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
 
-    this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
-      drawingControl: false
-    })
-
-    this.drawingManager.addListener('overlaycomplete', (e) => {
-      this.removeLatestOverlay()
-      this.latestOverlay = e.overlay
-  
-      var points = e.overlay.getPath()
-      var total = 0
-      var prev = null
-      points.forEach((point) => {
-        if (prev) {
-          total += google.maps.geometry.spherical.computeDistanceBetween(prev, point)
-        }
-        prev = point
-      })
-      this.measuredDistance = total
-      this.state.measuredDistance.next(this.measuredDistance)
-      //swal({ title: 'Measured Distance', text: `${total * 3.28084} ft` })
-      //if (!$scope.$$phase) { $scope.$apply() } // refresh UI
-    })
+    this.rulerSegments = []
+    this.rulerPolyLine = null 
 
     this.rangeValues = []
     const initial = 1000
@@ -76,6 +55,10 @@ class ToolBarController {
       e.preventDefault();
     })
   }
+
+  $onInit() {
+    this.mapRef = this.$window[this.mapGlobalObjectName]
+  } 
 
   openGlobalSettings() {
     this.state.showGlobalSettings.next(true)
@@ -127,20 +110,116 @@ class ToolBarController {
     }
   }
 
-  removeLatestOverlay () {
-    this.latestOverlay && this.latestOverlay.setMap(null)
-    this.latestOverlay = null
-  }
-
   toggleMeasuringStick() {
     this.measuringStickEnabled = !this.measuringStickEnabled
-    var current = this.drawingManager.getMap()
-    this.drawingManager.setMap(current ? null : map)
-    this.removeLatestOverlay()
-    if (current) {
-      this.measuredDistance = null
-      this.state.measuredDistance.next(this.measuredDistance)
-    }  
+    this.clearRulers()
+    if(this.measuringStickEnabled) {
+      this.clickListener = google.maps.event.addListener(this.mapRef, 'click', (point) => {
+        this.addToRulerSegments(point.latLng);
+      }); 
+    } else {
+      google.maps.event.removeListener(this.clickListener)      
+    }
+  }
+
+  addToRulerSegments(latLng) {
+    var ruler;
+
+    //add a marker
+    ruler = new google.maps.Marker({
+      position: latLng,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 2
+      },
+      map: this.mapRef,
+      draggable: true,
+      zIndex: 100
+    });
+
+    this.rulerSegments.push(ruler);
+
+    //if this is the first marker, add a label and link it to the first marker
+    if (this.rulerSegments.length === 1) {
+      this.state.measuredDistance.next(0)
+    } else {
+      this.rulerDrawEvent();
+    }
+
+    google.maps.event.addListener(ruler, 'drag', () => {
+      this.rulerDrawEvent();
+    });
+  }
+
+  clearRulerMarker(ruler) {
+    google.maps.event.clearListeners(ruler);
+    ruler.setMap(null);
+  }
+
+  rulerDrawEvent() {
+    this.drawRulerPolyline();
+    this.updateLengthLabel();
+  }
+
+  drawRulerPolyline() {
+    this.clearPolyLine();
+
+    this.rulerPolyLine = new google.maps.Polyline({
+      path: this.rulersToPositions(),
+      strokeColor : '#4d99e5',
+      strokeWeight: 3,
+      clickable: false,
+      map: this.mapRef
+    });
+  }
+
+  updateLengthLabel() {
+    var total;
+
+    if (this.rulerSegments.length) {
+      total = _(this.rulerSegments).reduce((length, ruler, index) => {
+        var prev;
+        //console.log( 'reduce', length, ruler,index )
+        //ignore the first ruler.... work from current ruler to the previous ruler
+        if (index) {
+          prev = this.rulerSegments[index - 1];
+          return length + google.maps.geometry.spherical.computeDistanceBetween(prev.getPosition(), ruler.getPosition())
+        } else {
+          return 0;
+        }
+      }, 0);
+
+      this.state.measuredDistance.next(total)
+    }
+  }
+
+  clearPolyLine() {
+    if (this.rulerPolyLine) {
+      this.rulerPolyLine.setMap(null);
+      this.rulerPolyLine = null;
+    }
+  }
+
+  rulersToPositions() {
+    return _(this.rulerSegments).map(function (ruler) {
+      return ruler.position;
+    });
+  }
+
+  clearRulers() {
+    this.clearPolyLine();
+
+    _(this.rulerSegments).each((ruler) => {
+      this.clearRulerMarker(ruler);
+    });
+
+    this.rulerSegments = null;
+    this.rulerSegments = [];
+
+    this.rulerDrawEvent();
+
+    this.measuredDistance = null
+    this.state.measuredDistance.next(this.measuredDistance)
   }
 
   refreshToolbar() {
@@ -244,11 +323,13 @@ class ToolBarController {
   }
 }
 
-ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools']
+ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools', '$window']
 
 app.component('toolBar', {
   templateUrl: '/components/header/tool-bar-component.html',
-  bindings: {},
+  bindings: {
+    mapGlobalObjectName: '@'
+  },
   controller: ToolBarController
 })
 
