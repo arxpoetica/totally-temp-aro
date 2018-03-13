@@ -3,7 +3,6 @@ class TransactionStore {
     this.$http = $http
     this.commandStack = []    // Stack of all commands executed
     this.uuidToFeatures = {}  // Map of feature UUID to feature object
-    this.deletedFeatures = new Set()  // Set of all existing features that are deleted
     this.createdMarkers = {}  // All google maps markers created by this component
     this.uuidStore = []       // A list of UUIDs generated from the server
     this.getUUIDsFromServer()
@@ -34,19 +33,48 @@ class TransactionStore {
     this.commandStack.push(command)
     return result
   }
+
+  // Sets the features that we are currently editing in this transaction. This can come from aro-service for long running transactions.
+  setFeatures(features) {
+    // Sample feature:
+    // {
+    //   "objectId": "0936eaca-1dcc-11e8-8aaf-4f5a90ed3b18",
+    //   "geometry": {
+    //   "type": "Point",
+    //   "coordinates": [
+    //       -124.664518,
+    //       48.153201
+    //     ],
+    //   },
+    //   "attributes": {
+    //     "number_of_households": "100"
+    //   }
+    // }
+    this.uuidToFeatures = {}
+    features.forEach((feature) => {
+      this.uuidToFeatures[feature.objectId] = feature
+    })
+
+    this.createdMarkers = {}
+  }
+
+  getFeaturesCount() {
+    return Object.keys(this.uuidToFeatures).length
+  }
 }
 class CommandAddLocation {
   execute(store, params) {
 
     // Create a new feature object
     var featureObj = {
-      uuid: params.uuid ? params.uuid : store.getUUID(),  // Create a new UUID if this is a new object, else reuse it
-      objectRevision: params.objectRevision,
-      position: {
-        lat: params.locationLatLng.lat(),
-        lng: params.locationLatLng.lng()
+      objectId: params.uuid ? params.uuid : store.getUUID(),  // Create a new UUID if this is a new object, else reuse it
+      geometry: {
+        type: 'Point',
+        coordinates: [params.locationLatLng.lng(), params.locationLatLng.lat()] // Note - longitude, then latitude
       },
-      numLocations: params.numLocations
+      attributes: {
+        number_of_households: params.numLocations
+      }
     }
     store.uuidToFeatures[featureObj.uuid] = featureObj
 
@@ -60,6 +88,9 @@ class CommandAddLocation {
     })
     store.createdMarkers[featureObj.uuid] = newLocationMarker
 
+    // Save the feature object to aro-service
+    params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
+
     this.params = params
     return newLocationMarker
   }
@@ -69,10 +100,11 @@ class CommandMoveLocation {
   execute(store, params) {
     // Update the feature object in the store
     var featureObj = store.uuidToFeatures[params.marker.uuid]
-    featureObj.position = {
-      lat: params.newLocation.lat(),
-      lng: params.newLocation.lng()
-    }
+    featureObj.geometry.coordinates = [params.newLocation.lng(), params.newLocation.lat()]
+
+    // Save the feature object to aro-service
+    params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
+
     this.params = params
   }
 }
@@ -81,23 +113,30 @@ class CommandEditLocation {
   execute(store, params) {
     // Update the feature object in the store
     var featureObj = store.uuidToFeatures[params.marker.uuid]
-    featureObj.numLocations = params.numLocations
+    featureObj.attributes.number_of_households = params.numLocations
+
+    // Save the feature object to aro-service
+    params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
+
     this.params = params
   }
 }
 
 class CommandDeleteLocation {
   execute(store, params) {
-    if (store.uuidToFeatures[params.uuid]) {
-      // We have created this feature as part of our transaction (it is not an existing feature).
-      // Simply remove it
-      delete store.uuidToFeatures[params.uuid]
+
+    // Every feature creation is immediately pushed to the server. Even if this is a newly created
+    // feature, it will have been pushed to the server.
+
+    // If this is a created marker, remove it from the map
+    if (store.createdMarkers[params.uuid]) {
       store.createdMarkers[params.uuid].setMap(null)
       delete store.createdMarkers[params.uuid]
-    } else {
-      // This is an existing feature. Stop rendering this location in the tile.
-      store.deletedFeatures.add(params.uuid)
     }
+
+    // Save the feature object deletion to aro-service
+    params.$http.delete(`/service/library/transaction/${params.transactionId}/features/${params.uuid}`)
+
     this.params = params
   }
 }
@@ -168,7 +207,10 @@ class LocationEditorController {
     })
     .then((result) => {
       this.currentTransaction = result.data
-      this.$timeout()
+      return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/features`)
+    })
+    .then((result) => {
+      this.store.setFeatures(result.data)
     })
     .catch((err) => {
       console.error(err)
@@ -196,7 +238,9 @@ class LocationEditorController {
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
       var params = {
-        uuid: featureId
+        uuid: featureId,
+        $http: this.$http,
+        transactionId: this.currentTransaction.id
       }
       this.store.executeCommand(command, params)
     }
@@ -214,7 +258,9 @@ class LocationEditorController {
       objectRevision: objectRevision,
       locationLatLng: coordinateLatLng,
       numLocations: this.addLocationData.numLocations,
-      map: this.mapRef
+      map: this.mapRef,
+      $http: this.$http,
+      transactionId: this.currentTransaction.id
     }
     var newLocationMarker = this.store.executeCommand(command, params)
     this.selectMarker(newLocationMarker)
@@ -233,6 +279,8 @@ class LocationEditorController {
         var command = new CommandDeleteLocation()
         var params = {
           uuid: newLocationMarker.uuid,
+          $http: this.$http,
+          transactionId: this.currentTransaction.id
         }
         this.store.executeCommand(command, params)
         this.$timeout()
@@ -263,7 +311,9 @@ class LocationEditorController {
     var params = {
       marker: marker,
       oldLocation: this.dragStartLatLng,
-      newLocation: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())
+      newLocation: new google.maps.LatLng(event.latLng.lat(), event.latLng.lng()),
+      $http: this.$http,
+      transactionId: this.currentTransaction.id
     }
     this.store.executeCommand(command, params)
     this.dragStartLatLng = null
@@ -275,7 +325,9 @@ class LocationEditorController {
       var command = new CommandEditLocation()
       var params = {
         marker: this.selectedLocation,
-        numLocations: this.addLocationData.numLocations
+        numLocations: this.addLocationData.numLocations,
+        $http: this.$http,
+        transactionId: this.currentTransaction.id
       }
       this.store.executeCommand(command, params)
     }
@@ -286,34 +338,8 @@ class LocationEditorController {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
 
-    var featurePostPromises = []
-    // Promises for created and modified locations
-    Object.keys(this.store.uuidToFeatures).forEach((uuid) => {
-      var rawFeature = this.store.uuidToFeatures[uuid]
-      var formattedFeature = {
-        objectId: uuid,
-        geometry: {
-          type: 'Point',
-          coordinates: [rawFeature.position.lng, rawFeature.position.lat]
-        },
-        attributes: {
-          number_of_households: rawFeature.numLocations
-        }
-      }
-      featurePostPromises.push(this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, formattedFeature))
-    })
-
-    // Promises for deleted locations
-    this.store.deletedFeatures.forEach((uuid) => {
-      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${uuid}`))
-    })
-
-    // First, push all features into the transaction
-    Promise.all(featurePostPromises)
-    .then((result) => {
-      // Then commit the transaction
-      return this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
-    })
+    // All modifications will already have been saved to the server. Commit the transaction.
+    this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
     .then((result) => {
       // Committing will close the transaction. To keep modifying, open a new transaction
       this.currentTransaction = null
