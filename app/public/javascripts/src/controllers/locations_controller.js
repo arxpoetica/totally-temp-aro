@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', '$timeout','configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, $timeout, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
@@ -20,6 +20,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
+  $scope.disablelocations = false
   var updateMapLayers = () => {
 
     // Make a copy of the state mapLayers. We will update this
@@ -43,7 +44,11 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         // Loop through the location types
         state.locationTypes.getValue().forEach((locationType) => {
 
-          if (locationType.checked) {
+          if (locationType.checked 
+            //Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
+            && map && map.getZoom() >= 10) {
+            $scope.disablelocations = false
+            $timeout()
             // Location type is visible
             var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
             var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
@@ -64,12 +69,19 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
               createdMapLayerKeys.add(mapLayerKey)
             }
           }
+          else if (map && map.getZoom() < 10){
+            $scope.disablelocations = true
+            $timeout();
+          }
+          else if (map && map.getZoom() >= 10){
+            $scope.disablelocations = false
+            $timeout();
+          }
         })
       })
     }
 
-    //Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
-    if (mergedLayerUrls.length > 0 && map && map.getZoom() >= 10) {
+    if (mergedLayerUrls.length > 0) {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
       var firstLocation = state.locationTypes.getValue()[0]
