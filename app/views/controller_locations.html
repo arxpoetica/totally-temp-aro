@@ -84,6 +84,10 @@
     </form>
 
     <a ng-if="env_is_test" href="javascript:void(0)" ng-click="locations_layer.select_random_features()" ng-attr-data-loaded="{{locations_layer.data_loaded}}">Test</a>
+
+    <div ng-if="disablelocations" class="alert alert-warning" role="alert">
+      Locations not displayed at this zoom level
+    </div>
   </div>
 
   <!-- Spinner that will be shown while the configuration is being loaded from the server -->
