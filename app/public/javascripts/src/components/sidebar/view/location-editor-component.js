@@ -305,11 +305,7 @@ class LocationEditorController {
 
     // Promises for deleted locations
     this.store.deletedFeatures.forEach((uuid) => {
-      var rawFeature = this.store.uuidToFeatures[uuid]
-      var formattedFeature = {
-        objectId: uuid
-      }
-      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features`), formattedFeature)
+      featurePostPromises.push(this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${uuid}`))
     })
 
     // First, push all features into the transaction
