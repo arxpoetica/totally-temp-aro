@@ -72,12 +72,16 @@ app.component('locationDetail', {
   <div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
     <img width="100%" ng-attr-src="{{$ctrl.map_url}}">
     <br>
+    <div>Census Block Code: {{$ctrl.selectedLocationInfo.tabblock_id}}</div>
+    <div>Census Block Name: {{$ctrl.selectedLocationInfo.name}}</div>
     <div>Address: {{$ctrl.selectedLocationInfo.address}}</div>
     <div>HouseHolds: {{$ctrl.selectedLocationInfo.number_of_households}}</div>
     <div>Businesses: {{$ctrl.selectedLocationInfo.number_of_businesses}}</div>
     <div>Towers: {{$ctrl.selectedLocationInfo.number_of_towers}}</div>
     <div>Distance From Existing Network: {{$ctrl.selectedLocationInfo.distance_to_client_fiber | number: 0}}m</div>
     <div>Distance From Planned Network: {{$ctrl.selectedLocationInfo.distance_to_planned_network | number: 0}}m</div>
+    <div>Latitude: {{$ctrl.selectedLocationInfo.geog.coordinates[1]}}</div>
+    <div>Longitude: {{$ctrl.selectedLocationInfo.geog.coordinates[0]}}</div>
     <div>
       <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
     </div>

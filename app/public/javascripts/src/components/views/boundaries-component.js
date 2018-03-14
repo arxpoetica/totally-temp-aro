@@ -88,6 +88,7 @@ class BoundariesController {
         reload: 'dynamic',
         minZoom: 14,
         hoverField: 'name',
+        clickField: 'name',
         visibilityThreshold: 1,
         isBoundaryLayer: true
       })
