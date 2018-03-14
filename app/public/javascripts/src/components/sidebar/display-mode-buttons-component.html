@@ -24,6 +24,16 @@
                 data-placement="bottom"
                 title="Analysis Mode"></div>
   </button>
+  <button type="button"
+          ng-class="{ 'btn display-mode-button': true,
+                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
+                      'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
+          ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)">
+            <div class="fa fa-2x fa-pencil"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Edit Plan"></div>
+  </button>
 </div>
 <div class="btn-group pull-right">
   <button type="button"
