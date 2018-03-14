@@ -42,37 +42,8 @@
         </td>
       </tr>
     </table>
-    <table class="table table-condensed table-striped">
-      <thead>
-        <td>Command</td>
-        <td>Parameters</td>
-      </thead>
-      <tbody>
-        <tr ng-repeat="command in $ctrl.store.commandStack">
-          <td>
-            <div ng-if="command.constructor.name === 'CommandAddLocation'">Add Location</div>
-            <div ng-if="command.constructor.name === 'CommandEditLocation'">Edit Location</div>
-            <div ng-if="command.constructor.name === 'CommandMoveLocation'">Move Location</div>
-            <div ng-if="command.constructor.name === 'CommandDeleteLocation'">Delete Location</div>
-          </td>
-          <td>
-            <div ng-if="command.constructor.name === 'CommandAddLocation'">
-              {{command.params.numLocations | number: 0}} household(s), at {{command.params.locationLatLng.lat() | number: 5}}, {{command.params.locationLatLng.lng() | number: 5}}
-            </div>
-            <div ng-if="command.constructor.name === 'CommandEditLocation'">
-              Changed to {{command.params.numLocations | number: 0}} household(s)
-            </div>
-            <div ng-if="command.constructor.name === 'CommandMoveLocation'">
-              From {{command.params.oldLocation.lat() | number: 5}}, {{command.params.oldLocation.lng() | number: 5}}<br>
-              to {{command.params.newLocation.lat() | number: 5}}, {{command.params.newLocation.lng() | number: 5}}
-            </div>
-            <div ng-if="command.constructor.name === 'CommandDeleteLocation'">
-              Deleted household with ID {{command.params.uuid}}
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <br>
+    Number of changes in transaction: {{$ctrl.store.getFeaturesCount()}}
   </div>
   <!-- END section transaction details -->
 
