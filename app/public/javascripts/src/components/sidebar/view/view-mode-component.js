@@ -29,6 +29,11 @@ app.component('viewMode', {
         <location-detail></location-detail>
       </accordion-panel-contents>
 
+      <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO">
+        <equipment-detail></equipment-detail>
+      </accordion-panel-contents>
+
       <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO">
         <boundary-detail></boundary-detail>

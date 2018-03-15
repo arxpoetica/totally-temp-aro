@@ -396,4 +396,11 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.get('/network/nodes/:id/details', (request, response, next) => {
+    var node_id = request.params.id
+    models.Network.getNetworkNodeDetails(node_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
