@@ -72,6 +72,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
       this.minZoom = options.minZoom
       this.heatmap = options.heatmap
       this.hoverField = options.hoverField
+      this.clickField = options.clickField
       this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
       this.isBoundaryLayer = options.isBoundaryLayer || false
       this.scaleIcon = options.scaleIcon || false
@@ -382,13 +383,14 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
                   })
                   // create a geoJSON for secondary geometry
                   featureCollection = {features : covArr , type : "FeatureCollection"}
-                }
+                } 
                 this.addGeoJson(featureCollection)
                 this.heatmapLayer && this.heatmapLayer.setMap(null)
               }
               this.metadata = data.metadata
               this.data_loaded = true
               this._createHovers()
+              this._createClickListener()
               this.onDataLoaded && this.onDataLoaded(this)
               $rootScope.$broadcast('map_layer_loaded_data', this)
               this.configureFeatureStyles()
@@ -416,6 +418,14 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
         var text = feature.getProperty(this.hoverField)
         marker.setIcon('https://chart.googleapis.com/chart?chst=d_text_outline&chld=000000|16|h|FFFFFF|_|' + encodeURIComponent(text))
       })
+    }
+
+    _createClickListener () {
+      if (!this.clickField) return
+      var dataLayer = this.data_layer
+      this.data_layer.addListener('click', (event) => {
+        $rootScope.$broadcast('map_layer_census_block_click',event.feature)
+      }) 
     }
 
     setApiEndpoint (api_endpoint, params) {

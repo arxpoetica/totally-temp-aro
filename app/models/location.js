@@ -249,11 +249,13 @@ module.exports = class Location {
             union
 
             select
-              location_id, 0, 0, 0, households.number_of_households, 0, 0
+              location_id, 0, 0, 0, sum(households.number_of_households), 0, 0
             from
               aro.households
             where
               households.location_id=$1
+            group by
+              location_id  
 
             UNION ALL
 
@@ -372,7 +374,7 @@ module.exports = class Location {
       })
       .then(() => {
         var sql = `
-          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,
+          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name,
             (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
               FROM (
                 SELECT geom
@@ -381,7 +383,9 @@ module.exports = class Location {
                 LIMIT 10
               ) as ef_closest_fibers
             ) AS distance_to_client_fiber
-          FROM locations WHERE id=$1
+          FROM locations 
+          JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
+          WHERE locations.id=$1
         `
         return database.findOne(sql, [location_id])
       })
