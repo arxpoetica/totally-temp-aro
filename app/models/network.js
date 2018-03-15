@@ -632,4 +632,15 @@ module.exports = class Network {
     return database.query(sql, [fiberName])
   }
 
+  static getNetworkNodeDetails(nodeId) {
+    var sql = `
+      SELECT nn.id,nnt.description,ST_AsGeojson(geog)::json AS geog 
+      FROM client.network_nodes nn 
+      JOIN client.network_node_types nnt
+      ON nnt.id = nn.node_type_id
+      WHERE nn.id = $1
+    `
+    return database.findOne(sql, [nodeId])
+  }
+
 }

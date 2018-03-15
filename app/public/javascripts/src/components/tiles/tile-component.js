@@ -1009,6 +1009,7 @@ class TileComponentController {
             var hitFeatures = []
             var serviceAreaFeatures = []
             var roadSegments = this.state.selectedRoadSegments.getValue()
+            var equipmentFeatures = []
 
             var canSelectLoc  = false
             var canSelectSA   = false
@@ -1030,6 +1031,8 @@ class TileComponentController {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
               } else if (result.gid) {
                 roadSegments.add(result)
+              } else if (result.id) {
+                equipmentFeatures = equipmentFeatures.concat(result)
               }
             })
 
@@ -1042,7 +1045,8 @@ class TileComponentController {
               latLng: event.latLng,
               locations: hitFeatures,
               serviceAreas: serviceAreaFeatures,
-              roadSegments: roadSegments
+              roadSegments: roadSegments,
+              equipmentFeatures: equipmentFeatures
             })
           })
       })

@@ -206,7 +206,7 @@ module.exports = class Location {
 
   // Get summary information for a given location
   static showInformation (plan_id, location_id) {
-    var info
+    var info,locationInfo
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -389,7 +389,18 @@ module.exports = class Location {
         `
         return database.findOne(sql, [location_id])
       })
-      .then((location) => Object.assign(info, location))
+      .then((_location) => {
+        locationInfo = _location
+        var sql = `
+          SELECT array_agg(source_id) as source_ids FROM households
+          WHERE location_id=$1
+        `
+        return database.findOne(sql, [location_id])
+      })
+      .then((_hhsourceId) => {
+        locationInfo.hhsourceIds = _hhsourceId
+        return Object.assign(info, locationInfo)
+      })
   }
 
   static createLocation (values) {

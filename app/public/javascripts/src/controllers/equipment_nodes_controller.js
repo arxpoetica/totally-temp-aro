@@ -86,7 +86,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               strokeStyle: networkEquipment.drawingOptions.strokeStyle,
               lineWidth: 2,
               fillStyle: networkEquipment.drawingOptions.fillStyle,
-              opacity: 0.5
+              opacity: 0.5,
+              selectable: true
             }
             createdMapLayerKeys.add(networkEquipment.key)
           }

@@ -15,6 +15,7 @@ class ViewModeLocationController {
     .subscribe((options) => {
       var locationId = null
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
+        state.activeViewModePanel = state.viewModePanels.LOCATION_INFO
         locationId = options.locations[0].location_id;
 
         getLocationInfo(this.plan.id,locationId)
@@ -66,8 +67,12 @@ app.component('locationDetail', {
       height: 100%;
     }
     .view-mode-container > div {
-      margin-top: 10px;
+      margin-top: 2px;
     }
+    #show-source{
+      overflow: auto;
+      max-height: 100px;
+  }   
   </style>
   <div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
     <img width="100%" ng-attr-src="{{$ctrl.map_url}}">
@@ -82,6 +87,15 @@ app.component('locationDetail', {
     <div>Distance From Planned Network: {{$ctrl.selectedLocationInfo.distance_to_planned_network | number: 0}}m</div>
     <div>Latitude: {{$ctrl.selectedLocationInfo.geog.coordinates[1]}}</div>
     <div>Longitude: {{$ctrl.selectedLocationInfo.geog.coordinates[0]}}</div>
+    <span>SourceId:
+    <div id="show-source">
+      <ul ng-show="$ctrl.selectedLocationInfo.hhsourceIds.source_ids.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
+        <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.hhsourceIds.source_ids track by $index">
+          {{ target }}
+        </li>
+      </ul>
+    </div>
+    <span>
     <div>
       <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
     </div>
