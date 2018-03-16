@@ -232,7 +232,7 @@ class LocationEditorController {
     var objectId = event.locations[0].object_id
 
     if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE) {
-      this.createEditableMarker(event.latLng, featureId, 2)
+      this.createEditableMarker(event.latLng, objectId, 2)
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
       var params = {
@@ -244,7 +244,7 @@ class LocationEditorController {
     }
 
     // Stop rendering this location in the tile
-    this.tileDataService.addFeatureToExclude(featureId)
+    this.tileDataService.addFeatureToExclude(objectId)
     this.state.requestMapLayerRefresh.next({})
   }
 
