@@ -206,7 +206,7 @@ module.exports = class Location {
 
   // Get summary information for a given location
   static showInformation (plan_id, location_id) {
-    var info,locationInfo
+    var info,locationInfo,locationSources
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -391,14 +391,38 @@ module.exports = class Location {
       })
       .then((_location) => {
         locationInfo = _location
-        var sql = `
+        locationSources = {} 
+        var hhSources = `
           SELECT array_agg(source_id) as source_ids FROM households
           WHERE location_id=$1
         `
-        return database.findOne(sql, [location_id])
+        var hhSourceIds = database.findOne(hhSources, [location_id])
+          .then((values) => {
+            locationSources.hhSourceIds = values
+          })
+
+        var bizSources = `
+          SELECT array_agg(source_id) as source_ids FROM businesses
+          WHERE location_id=$1
+        `
+        var bizSourceIds = database.findOne(bizSources, [location_id])
+          .then((values) => {
+            locationSources.bizSourceIds = values
+          })
+
+        var towerSources = `
+          SELECT array_agg(source_id) as source_ids FROM towers
+          WHERE location_id=$1
+        `
+        var towerSourceIds = database.findOne(towerSources, [location_id])
+          .then((values) => {
+            locationSources.towerSourceIds = values
+          })
+
+        return Promise.all([hhSourceIds, bizSourceIds, towerSourceIds])
       })
-      .then((_hhsourceId) => {
-        locationInfo.hhsourceIds = _hhsourceId
+      .then(() => {
+        locationInfo.locSourceIds = locationSources
         return Object.assign(info, locationInfo)
       })
   }
