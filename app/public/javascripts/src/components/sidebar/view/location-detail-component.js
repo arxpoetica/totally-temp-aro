@@ -15,7 +15,6 @@ class ViewModeLocationController {
     .subscribe((options) => {
       var locationId = null
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
-        state.activeViewModePanel = state.viewModePanels.LOCATION_INFO
         locationId = options.locations[0].location_id;
 
         getLocationInfo(this.plan.id,locationId)

@@ -2,7 +2,7 @@ class TransactionStore {
   constructor($http) {
     this.$http = $http
     this.commandStack = []    // Stack of all commands executed
-    this.uuidToFeatures = {}  // Map of feature UUID to feature object
+    this.objectIdToFeatures = {}  // Map of feature UUID to feature object
     this.createdMarkers = {}  // All google maps markers created by this component
     this.uuidStore = []       // A list of UUIDs generated from the server
     this.getUUIDsFromServer()
@@ -50,16 +50,16 @@ class TransactionStore {
     //     "number_of_households": "100"
     //   }
     // }
-    this.uuidToFeatures = {}
+    this.objectIdToFeatures = {}
     features.forEach((feature) => {
-      this.uuidToFeatures[feature.objectId] = feature
+      this.objectIdToFeatures[feature.objectId] = feature
     })
 
     this.createdMarkers = {}
   }
 
   getFeaturesCount() {
-    return Object.keys(this.uuidToFeatures).length
+    return Object.keys(this.objectIdToFeatures).length
   }
 }
 class CommandAddLocation {
@@ -67,7 +67,7 @@ class CommandAddLocation {
 
     // Create a new feature object
     var featureObj = {
-      objectId: params.uuid ? params.uuid : store.getUUID(),  // Create a new UUID if this is a new object, else reuse it
+      objectId: params.objectId || store.getUUID(),  // Create a new UUID if this is a new object, else reuse it
       geometry: {
         type: 'Point',
         coordinates: [params.locationLatLng.lng(), params.locationLatLng.lat()] // Note - longitude, then latitude
@@ -76,7 +76,7 @@ class CommandAddLocation {
         number_of_households: params.numLocations
       }
     }
-    store.uuidToFeatures[featureObj.uuid] = featureObj
+    store.objectIdToFeatures[featureObj.objectId] = featureObj
 
     // Create a new google maps marker
     var newLocationMarker = new google.maps.Marker({
@@ -84,9 +84,9 @@ class CommandAddLocation {
       icon: '/images/map_icons/aro/households_default.png',
       draggable: true,
       map: params.map,
-      uuid: featureObj.uuid
+      objectId: featureObj.objectId
     })
-    store.createdMarkers[featureObj.uuid] = newLocationMarker
+    store.createdMarkers[featureObj.objectId] = newLocationMarker
 
     // Save the feature object to aro-service
     params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
@@ -99,7 +99,7 @@ class CommandAddLocation {
 class CommandMoveLocation {
   execute(store, params) {
     // Update the feature object in the store
-    var featureObj = store.uuidToFeatures[params.marker.uuid]
+    var featureObj = store.objectIdToFeatures[params.marker.objectId]
     featureObj.geometry.coordinates = [params.newLocation.lng(), params.newLocation.lat()]
 
     // Save the feature object to aro-service
@@ -112,7 +112,7 @@ class CommandMoveLocation {
 class CommandEditLocation {
   execute(store, params) {
     // Update the feature object in the store
-    var featureObj = store.uuidToFeatures[params.marker.uuid]
+    var featureObj = store.objectIdToFeatures[params.marker.objectId]
     featureObj.attributes.number_of_households = params.numLocations
 
     // Save the feature object to aro-service
@@ -129,13 +129,13 @@ class CommandDeleteLocation {
     // feature, it will have been pushed to the server.
 
     // If this is a created marker, remove it from the map
-    if (store.createdMarkers[params.uuid]) {
-      store.createdMarkers[params.uuid].setMap(null)
-      delete store.createdMarkers[params.uuid]
+    if (store.createdMarkers[params.objectId]) {
+      store.createdMarkers[params.objectId].setMap(null)
+      delete store.createdMarkers[params.objectId]
     }
 
     // Save the feature object deletion to aro-service
-    params.$http.delete(`/service/library/transaction/${params.transactionId}/features/${params.uuid}`)
+    params.$http.delete(`/service/library/transaction/${params.transactionId}/features/${params.objectId}`)
 
     this.params = params
   }
@@ -229,16 +229,14 @@ class LocationEditorController {
       return  // Only supporting editing of a single location
     }
 
-    // Note that UUID and object revision should come from aro-service.
-    // Use UUID for featureId. If not found, use location_id
-    var featureId = event.locations[0].object_id || event.locations[0].location_id
+    var objectId = event.locations[0].object_id
 
     if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE) {
-      this.createEditableMarker(event.latLng, featureId, 2)
+      this.createEditableMarker(event.latLng, objectId, 2)
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
       var params = {
-        uuid: featureId,
+        objectId: objectId,
         $http: this.$http,
         transactionId: this.currentTransaction.id
       }
@@ -246,15 +244,15 @@ class LocationEditorController {
     }
 
     // Stop rendering this location in the tile
-    this.tileDataService.addFeatureToExclude(featureId)
+    this.tileDataService.addFeatureToExclude(objectId)
     this.state.requestMapLayerRefresh.next({})
   }
 
-  createEditableMarker(coordinateLatLng, uuid, objectRevision) {
+  createEditableMarker(coordinateLatLng, objectId, objectRevision) {
     // Create a new marker for the location, only if we are in the right selection mode
     var command = new CommandAddLocation()
     var params = {
-      uuid: uuid,
+      objectId: objectId,
       objectRevision: objectRevision,
       locationLatLng: coordinateLatLng,
       numLocations: this.addLocationData.numLocations,
@@ -278,7 +276,7 @@ class LocationEditorController {
         // We are in delete mode.
         var command = new CommandDeleteLocation()
         var params = {
-          uuid: newLocationMarker.uuid,
+          objectId: newLocationMarker.objectId,
           $http: this.$http,
           transactionId: this.currentTransaction.id
         }
@@ -297,7 +295,7 @@ class LocationEditorController {
     }
     this.selectedLocation = marker
     this.selectedLocation.setIcon('/images/map_icons/aro/households_selected.png')
-    var featureObj = this.store.uuidToFeatures[marker.uuid]
+    var featureObj = this.store.objectIdToFeatures[marker.objectId]
     this.addLocationData.numLocations = featureObj.numLocations
     this.$timeout()
   }
@@ -373,24 +371,33 @@ class LocationEditorController {
         .then((result) => {
           this.currentTransaction = null
           this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+          this.state.recreateTilesAndCache()
+          this.destroyAllCreatedMarkers()
           this.$timeout()
         })
         .catch((err) => {
           this.currentTransaction = null
           this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+          this.state.recreateTilesAndCache()
+          this.destroyAllCreatedMarkers()
           this.$timeout()
         })
       }
     })
   }
 
-  $onDestroy() {
+  destroyAllCreatedMarkers() {
     // Remove all markers that we have created
     Object.keys(this.store.createdMarkers).forEach((key) => {
       var marker = this.store.createdMarkers[key]
       marker.setMap(null)
     })
-    this.store.createdMarkers = null
+    this.store.createdMarkers = {}
+  }
+
+  $onDestroy() {
+
+    this.destroyAllCreatedMarkers()
 
     // Reset selection mode to single select mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.MOVE

@@ -1179,7 +1179,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.censusBlockSelectedEvent = new Rx.BehaviorSubject({})
   $rootScope.$on('map_layer_census_block_click',(e,cbdata) => {
-    service.activeViewModePanel = service.viewModePanels.BOUNDARIES_INFO
     service.censusBlockSelectedEvent.next(cbdata)
     $timeout()
   })
