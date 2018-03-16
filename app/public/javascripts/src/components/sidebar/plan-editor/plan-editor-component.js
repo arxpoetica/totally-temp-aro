@@ -4,12 +4,13 @@ class EditableMapObject {
     // Object description
     // feature = {
     //   objectId: 'xyz',  // Globally unique object ID
-    //   geometry: {
+    //   geometries: [{
+    //     key: 'asdf', // Sub-key for the geometry. Has to be unique within this object
     //     type: 'point',
     //     coordinates: google.maps.LatLng() // Basically whatever we can pass to maps creation
-    //   },
-    //   draggable: true, //or false
-    //   icon: 'icon'  // For point geometries
+    //     draggable: true, //or false
+    //     icon: 'icon'  // For point geometries
+    //   } ..... ],
     // }
 
     // Event handlers - optional, specify only the ones you want to subscribe to
@@ -23,21 +24,29 @@ class EditableMapObject {
     // }
     this.feature = feature
     this.eventHandlers = eventHandlers
-    this.createMapObject(map)
+    this.createMapObjects(map)
   }
 
-  createMapObject(map) {
+  createMapObjects(map) {
+    this.mapObjects = {}
+    this.feature.geometries.forEach((geometry) => this.createMapObject(map, geometry))
+
+    // Raise the onCreate event
+    this.eventHandlers.onCreate && this.eventHandlers.oncreate(this)
+  }
+
+  createMapObject(map, geometry) {
 
     // Create the map object
-    this.mapObject = null
-    switch(this.feature.geometry.type) {
+    var mapObject = null
+    switch(geometry.type) {
       case 'point':
-        this.mapObject = new google.maps.Marker({
-          position: this.feature.geometry.coordinates,
-          icon: this.feature.icon,
-          draggable: this.feature.draggable,
+        mapObject = new google.maps.Marker({
+          position: geometry.coordinates,
+          icon: geometry.icon,
+          draggable: geometry.draggable,
           map: map,
-          objectId: this.feature.objectId
+          editableMapObject: this
         })
       break;
 
@@ -46,12 +55,11 @@ class EditableMapObject {
     }
     
     // Subscribe to map object events
-    this.mapObject.addListener('dragstart', (event) => this.eventHandlers.onStartEditing && this.eventHandlers.onStartEditing(event))
-    this.mapObject.addListener('dragend', (event) => this.eventHandlers.onEndEditing && this.eventHandlers.onEndEditing(event))
-    this.mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(event))
+    mapObject.addListener('dragstart', (event) => this.eventHandlers.onStartEditing && this.eventHandlers.onStartEditing(event))
+    mapObject.addListener('dragend', (event) => this.eventHandlers.onEndEditing && this.eventHandlers.onEndEditing(event))
+    mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(event))
 
-    // Raise the onCreate event
-    this.eventHandlers.onCreate && this.eventHandlers.oncreate(this)
+    this.mapObjects[geometry.key] = mapObject
   }
 
   setIcon(newIcon) {
@@ -113,15 +121,28 @@ class PlanEditorController {
       // We are in "Add entity" mode
       var feature = {
         objectId: this.getUUID(),
-        geometry: {
+        geometries: [{
+          key: 'coordinate',
           type: 'point',
-          coordinates: event.latLng
-        },
-        draggable: true,
-        icon: '/images/map_icons/aro/coverage_target.png'
+          coordinates: event.latLng,
+          draggable: true,
+          icon: '/images/map_icons/aro/coverage_target.png'
+        }],
       }
       var handlers = {
-
+        onCreate: (editableMapObject) => {
+          // Get the POST body for optimization based on the current application state
+          var optimizationBody = this.state.getOptimizationBody()
+          // Replace analysis_type and add a point and radius
+          optimizationBody.analysis_type = 'COVERAGE'
+          optimizationBody.point = {
+            type: 'Point',
+            coordinates: [this.targetMarker.position.lng(), this.targetMarker.position.lat()]
+          }
+          // Always send radius in meters to the back end
+          optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
+          
+        }
       }
       var mapObject = new EditableMapObject(this.mapRef, feature, handlers)
     }
