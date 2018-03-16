@@ -1,29 +1,33 @@
-class BoundaryDetailController {
+//import bar from './boundaryDetailController.js'
+import {BoundaryDetailController} from 'models/boundaryDetailController';
 
-  constructor($http,state) {
-    this.$http = $http
-    this.state = state
-    this.selectedBoundaryInfo = null
+// class BoundaryDetailController {
 
-    state.censusBlockSelectedEvent.subscribe((cbdata) => {
+//   constructor($http,state) {
+//     this.$http = $http
+//     this.state = state
+//     this.selectedBoundaryInfo = null
 
-    if(_.isEmpty(cbdata)) return
-    this.getCensusBlockInfo(cbdata.getProperty('id'))
-      .then((cbInfo) => {
-        this.selectedBoundaryInfo = cbInfo
-      })
-    })
-  }
+//     state.censusBlockSelectedEvent.subscribe((cbdata) => {
 
-  getCensusBlockInfo(cbId) {
-    return this.$http.get('/census_blocks/' + cbId + '/details')
-    .then((response) => {
-      return response.data
-    })
-  }
-}
+//     if(_.isEmpty(cbdata)) return
+//     this.getCensusBlockInfo(cbdata.getProperty('id'))
+//       .then((cbInfo) => {
+//         console.log(bar())
+//         this.selectedBoundaryInfo = cbInfo
+//       })
+//     })
+//   }
 
-BoundaryDetailController.$inject = ['$http','state']
+//   getCensusBlockInfo(cbId) {
+//     return this.$http.get('/census_blocks/' + cbId + '/details')
+//     .then((response) => {
+//       return response.data
+//     })
+//   }
+// }
+
+// BoundaryDetailController.$inject = ['$http','state']
 
 app.component('boundaryDetail', {
   template: `
