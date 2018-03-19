@@ -30,12 +30,21 @@ class EditableMapObject {
   }
 
   setFeature(feature) {
+    // Clear any previously created geometries
+    if (this.mapGeometries) {
+      Object.keys(this.mapGeometries).forEach((geometryKey) => {
+        this.mapGeometries[geometryKey].setMap(null)
+      })
+    }
+    this.mapGeometries = {}
     this.feature = feature
-    this.createMapObjects(map)
+    if (feature) {
+      this.createMapGeometries(map)
+    }
   }
 
-  createMapObjects(map) {
-    this.mapObjects = {}
+  createMapGeometries(map) {
+    this.mapGeometries = {}
     Object.keys(this.feature.geometries).forEach((geometryKey) => {
       this.createMapObject(map, geometryKey, this.feature.geometries[geometryKey])
     })
@@ -64,7 +73,7 @@ class EditableMapObject {
           strokeWeight: 2,
           fillColor: '#FF1493',
           fillOpacity: 0.4,
-          clickable: false,
+          clickable: true,
           draggable: geometry.draggable
         })
         mapObject.setMap(map)
@@ -76,11 +85,11 @@ class EditableMapObject {
     }
     
     // Subscribe to map object events
-    mapObject.addListener('dragstart', (event) => this.eventHandlers.onStartEditing && this.eventHandlers.onStartEditing(event))
-    mapObject.addListener('dragend', (event) => this.eventHandlers.onEndEditing && this.eventHandlers.onEndEditing(event))
-    mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(event))
+    mapObject.addListener('dragstart', (event) => this.eventHandlers.onStartEditing && this.eventHandlers.onStartEditing(this, mapObject, event))
+    mapObject.addListener('dragend', (event) => this.eventHandlers.onEndEditing && this.eventHandlers.onEndEditing(this, mapObject, event))
+    mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(this, mapObject, event))
 
-    this.mapObjects[geometryKey] = mapObject
+    this.mapGeometries[geometryKey] = mapObject
   }
 }
 
@@ -152,7 +161,7 @@ class PlanEditorController {
       }
       var handlers = {
         onCreate: (editableMapObject) => {
-          var position = editableMapObject.mapObjects.CENTER_POINT.position
+          var position = editableMapObject.mapGeometries.CENTER_POINT.position
           // Get the POST body for optimization based on the current application state
           var optimizationBody = this.state.getOptimizationBody()
           // Replace analysis_type and add a point and radius
@@ -187,6 +196,12 @@ class PlanEditorController {
             // })
           })
           .catch((err) => console.error(err))
+        },
+        onMouseDown: (editableMapObject, geometry, event) => {
+          if (this.selectedEditorMode === this.editorModes.DELETE) {
+            // Remove all geometries from map
+            editableMapObject.setFeature(null)
+          }
         }
       }
       var mapObject = new EditableMapObject(this.mapRef, equipmentFeature, handlers)
