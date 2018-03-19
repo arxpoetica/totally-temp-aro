@@ -16,8 +16,8 @@ class EditableMapObject {
     // Event handlers - optional, specify only the ones you want to subscribe to
     // eventHandlers = {
     //   onCreate,
-    //   onStartEditing,
-    //   onEndEditing,
+    //   onDragStart,
+    //   onDragEnd,
     //   onChangeGeometry,
     //   onChangeProperty,
     //   onMouseDown
@@ -85,8 +85,8 @@ class EditableMapObject {
     }
     
     // Subscribe to map object events
-    mapObject.addListener('dragstart', (event) => this.eventHandlers.onStartEditing && this.eventHandlers.onStartEditing(this, mapObject, event))
-    mapObject.addListener('dragend', (event) => this.eventHandlers.onEndEditing && this.eventHandlers.onEndEditing(this, mapObject, event))
+    mapObject.addListener('dragstart', (event) => this.eventHandlers.onDragStart && this.eventHandlers.onDragStart(this, mapObject, event))
+    mapObject.addListener('dragend', (event) => this.eventHandlers.onDragEnd && this.eventHandlers.onDragEnd(this, mapObject, event))
     mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(this, mapObject, event))
 
     this.mapGeometries[geometryKey] = mapObject
@@ -144,6 +144,40 @@ class PlanEditorController {
     })
   }
 
+  calculateCoverage(editableMapObject) {
+    var position = editableMapObject.mapGeometries.CENTER_POINT.position
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = this.state.getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.analysis_type = 'COVERAGE'
+    optimizationBody.point = {
+      type: 'Point',
+      coordinates: [position.lng(), position.lat()]
+    }
+    // Always send radius in meters to the back end
+    optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
+
+    this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
+    .then((result) => {
+      // Format the result so we can use it to create a polygon
+      var polygonPath = []
+      result.data.polygon.coordinates[0].forEach((polygonVertex) => {
+        polygonPath.push({
+          lat: polygonVertex[1],
+          lng: polygonVertex[0]
+        })
+      })
+      var feature = editableMapObject.feature
+      feature.geometries.COVERAGE_BOUNDARY = {
+        type: 'polygon',
+        polygonPath: polygonPath,
+        draggable: false
+      }
+      editableMapObject.setFeature(feature)
+    })
+    .catch((err) => console.error(err))
+  }
+
   handleMapClick(event) {
     if (this.selectedEditorMode === this.editorModes.ADD) {
       // We are in "Add entity" mode
@@ -160,48 +194,17 @@ class PlanEditorController {
         }
       }
       var handlers = {
-        onCreate: (editableMapObject) => {
-          var position = editableMapObject.mapGeometries.CENTER_POINT.position
-          // Get the POST body for optimization based on the current application state
-          var optimizationBody = this.state.getOptimizationBody()
-          // Replace analysis_type and add a point and radius
-          optimizationBody.analysis_type = 'COVERAGE'
-          optimizationBody.point = {
-            type: 'Point',
-            coordinates: [position.lng(), position.lat()]
-          }
-          // Always send radius in meters to the back end
-          optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
-
-          this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
-          .then((result) => {
-            // Format the result so we can use it to create a polygon
-            var polygonPath = []
-            result.data.polygon.coordinates[0].forEach((polygonVertex) => {
-              polygonPath.push({
-                lat: polygonVertex[1],
-                lng: polygonVertex[0]
-              })
-            })
-            var feature = editableMapObject.feature
-            feature.geometries.COVERAGE_BOUNDARY = {
-              type: 'polygon',
-              polygonPath: polygonPath,
-              draggable: false
-            }
-            editableMapObject.setFeature(feature)
-            // return Promise.resolve({
-            //   householdsCovered: result.data.coverageInfo.length,
-            //   coveragePolygon: polygonPath
-            // })
-          })
-          .catch((err) => console.error(err))
-        },
+        onCreate: (editableMapObject) => this.calculateCoverage(editableMapObject),
         onMouseDown: (editableMapObject, geometry, event) => {
           if (this.selectedEditorMode === this.editorModes.DELETE) {
             // Remove all geometries from map
             editableMapObject.setFeature(null)
           }
+        },
+        onDragEnd: (editableMapObject, geometry, event) => {
+          // Update the coordinates in the feature
+          editableMapObject.feature.geometries.CENTER_POINT.coordinates = event.latLng
+          this.calculateCoverage(editableMapObject)
         }
       }
       var mapObject = new EditableMapObject(this.mapRef, equipmentFeature, handlers)
