@@ -1,145 +1,8 @@
-class TransactionStore {
-  constructor($http) {
-    this.$http = $http
-    this.commandStack = []    // Stack of all commands executed
-    this.uuidToFeatures = {}  // Map of feature UUID to feature object
-    this.createdMarkers = {}  // All google maps markers created by this component
-    this.uuidStore = []       // A list of UUIDs generated from the server
-    this.getUUIDsFromServer()
-  }
-
-  // Get a list of UUIDs from the server
-  getUUIDsFromServer() {
-    const numUUIDsToFetch = 20
-    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
-    .then((result) => {
-      this.uuidStore = this.uuidStore.concat(result.data)
-    })
-    .catch((err) => console.error(err))
-  }
-
-  // Get a UUID from the store
-  getUUID() {
-    if (this.uuidStore.length < 7) {
-      // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
-      this.getUUIDsFromServer()
-    }
-    return this.uuidStore.pop()
-  }
-
-  // Executes a command in the store
-  executeCommand(command, params) {
-    var result = command.execute(this, params)
-    this.commandStack.push(command)
-    return result
-  }
-
-  // Sets the features that we are currently editing in this transaction. This can come from aro-service for long running transactions.
-  setFeatures(features) {
-    // Sample feature:
-    // {
-    //   "objectId": "0936eaca-1dcc-11e8-8aaf-4f5a90ed3b18",
-    //   "geometry": {
-    //   "type": "Point",
-    //   "coordinates": [
-    //       -124.664518,
-    //       48.153201
-    //     ],
-    //   },
-    //   "attributes": {
-    //     "number_of_households": "100"
-    //   }
-    // }
-    this.uuidToFeatures = {}
-    features.forEach((feature) => {
-      this.uuidToFeatures[feature.objectId] = feature
-    })
-
-    this.createdMarkers = {}
-  }
-
-  getFeaturesCount() {
-    return Object.keys(this.uuidToFeatures).length
-  }
-}
-class CommandAddLocation {
-  execute(store, params) {
-
-    // Create a new feature object
-    var featureObj = {
-      objectId: params.uuid ? params.uuid : store.getUUID(),  // Create a new UUID if this is a new object, else reuse it
-      geometry: {
-        type: 'Point',
-        coordinates: [params.locationLatLng.lng(), params.locationLatLng.lat()] // Note - longitude, then latitude
-      },
-      attributes: {
-        number_of_households: params.numLocations
-      }
-    }
-    store.uuidToFeatures[featureObj.uuid] = featureObj
-
-    // Create a new google maps marker
-    var newLocationMarker = new google.maps.Marker({
-      position: params.locationLatLng,
-      icon: '/images/map_icons/aro/households_default.png',
-      draggable: true,
-      map: params.map,
-      uuid: featureObj.uuid
-    })
-    store.createdMarkers[featureObj.uuid] = newLocationMarker
-
-    // Save the feature object to aro-service
-    params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
-
-    this.params = params
-    return newLocationMarker
-  }
-}
-
-class CommandMoveLocation {
-  execute(store, params) {
-    // Update the feature object in the store
-    var featureObj = store.uuidToFeatures[params.marker.uuid]
-    featureObj.geometry.coordinates = [params.newLocation.lng(), params.newLocation.lat()]
-
-    // Save the feature object to aro-service
-    params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
-
-    this.params = params
-  }
-}
-
-class CommandEditLocation {
-  execute(store, params) {
-    // Update the feature object in the store
-    var featureObj = store.uuidToFeatures[params.marker.uuid]
-    featureObj.attributes.number_of_households = params.numLocations
-
-    // Save the feature object to aro-service
-    params.$http.post(`/service/library/transaction/${params.transactionId}/features`, featureObj)
-
-    this.params = params
-  }
-}
-
-class CommandDeleteLocation {
-  execute(store, params) {
-
-    // Every feature creation is immediately pushed to the server. Even if this is a newly created
-    // feature, it will have been pushed to the server.
-
-    // If this is a created marker, remove it from the map
-    if (store.createdMarkers[params.uuid]) {
-      store.createdMarkers[params.uuid].setMap(null)
-      delete store.createdMarkers[params.uuid]
-    }
-
-    // Save the feature object deletion to aro-service
-    params.$http.delete(`/service/library/transaction/${params.transactionId}/features/${params.uuid}`)
-
-    this.params = params
-  }
-}
+import TransactionStore from './transactionStore'
+import CommandAddLocation from './commandAddLocation'
+import CommandMoveLocation from './commandMoveLocation'
+import CommandEditLocation from './commandEditLocation'
+import CommandDeleteLocation from './commandDeleteLocation'
 
 class LocationEditorController {
 
@@ -183,7 +46,7 @@ class LocationEditorController {
 
     // Handler for map click - this is when we create a new location
     var self = this
-    this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function(event) {
+    this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function (event) {
       if (self.state.selectedTargetSelectionMode !== self.state.targetSelectionModes.CREATE) {
         return
       }
@@ -193,36 +56,36 @@ class LocationEditorController {
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction?user_id=${this.state.getUserId()}`)
-    .then((result) => {
-      var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
-      if (existingTransactions.length > 0) {
-        // We have an existing transaction for this library item. Use it.
-        return Promise.resolve({ data: existingTransactions[0]})
-      } else {
-        return this.$http.post('/service/library/transaction', {
-          libraryId: selectedLibraryItem.identifier,
-          userId: this.state.getUserId()
-        })
-      }
-    })
-    .then((result) => {
-      this.currentTransaction = result.data
-      return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/features`)
-    })
-    .then((result) => {
-      this.store.setFeatures(result.data)
-    })
-    .catch((err) => {
-      console.error(err)
-      this.isInErrorState = true
-      this.$timeout()
-    })
+      .then((result) => {
+        var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
+        if (existingTransactions.length > 0) {
+          // We have an existing transaction for this library item. Use it.
+          return Promise.resolve({ data: existingTransactions[0] })
+        } else {
+          return this.$http.post('/service/library/transaction', {
+            libraryId: selectedLibraryItem.identifier,
+            userId: this.state.getUserId()
+          })
+        }
+      })
+      .then((result) => {
+        this.currentTransaction = result.data
+        return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/features`)
+      })
+      .then((result) => {
+        this.store.setFeatures(result.data)
+      })
+      .catch((err) => {
+        console.error(err)
+        this.isInErrorState = true
+        this.$timeout()
+      })
   }
 
   handleMapEntitySelected(event) {
     if (!(this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE
-          || this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE)
-        || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
+      || this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE)
+      || this.state.activeViewModePanel !== this.state.viewModePanels.EDIT_LOCATIONS) {
       return  // Currently only supporting editing of single entities
     }
     if (!event.latLng || !event.locations || event.locations.length === 0) {
@@ -340,20 +203,20 @@ class LocationEditorController {
 
     // All modifications will already have been saved to the server. Commit the transaction.
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
-    .then((result) => {
-      // Committing will close the transaction. To keep modifying, open a new transaction
-      this.currentTransaction = null
-      this.state.recreateTilesAndCache()
-      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-      this.$timeout()
-    })
-    .catch((err) => {
-      this.currentTransaction = null
-      this.state.recreateTilesAndCache()
-      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-      this.$timeout()
-      console.error(err)
-    })
+      .then((result) => {
+        // Committing will close the transaction. To keep modifying, open a new transaction
+        this.currentTransaction = null
+        this.state.recreateTilesAndCache()
+        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+        this.$timeout()
+      })
+      .catch((err) => {
+        this.currentTransaction = null
+        this.state.recreateTilesAndCache()
+        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+        this.$timeout()
+        console.error(err)
+      })
   }
 
   discardTransaction() {
@@ -370,16 +233,16 @@ class LocationEditorController {
       if (deleteTransaction) {
         // The user has confirmed that the transaction should be deleted
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
-        .then((result) => {
-          this.currentTransaction = null
-          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-          this.$timeout()
-        })
-        .catch((err) => {
-          this.currentTransaction = null
-          this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-          this.$timeout()
-        })
+          .then((result) => {
+            this.currentTransaction = null
+            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+            this.$timeout()
+          })
+          .catch((err) => {
+            this.currentTransaction = null
+            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+            this.$timeout()
+          })
       }
     })
   }
@@ -405,10 +268,4 @@ class LocationEditorController {
 
 LocationEditorController.$inject = ['$http', '$timeout', 'state', 'tileDataService']
 
-app.component('locationEditor', {
-  templateUrl: '/components/sidebar/view/location-editor-component.html',
-  bindings: {
-    mapGlobalObjectName: '@'
-  },
-  controller: LocationEditorController
-})
+export default LocationEditorController

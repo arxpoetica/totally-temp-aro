@@ -42,7 +42,7 @@ class CoverageBoundaryController {
 
     // Handler for map click
     var self = this
-    this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function(event) {
+    this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function (event) {
       self.handleCoverageTargetUpdated(event.latLng)
     });
   }
@@ -66,27 +66,27 @@ class CoverageBoundaryController {
     this.householdsCovered = null
 
     this.calculateCoverage()
-    .then((result) => {
-      // Draw the polygon onto the screen
-      this.coveragePolygon = new google.maps.Polygon({
-        paths: result.coveragePolygon,
-        strokeColor: '#FF1493',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: '#FF1493',
-        fillOpacity: 0.4,
-        clickable: false
+      .then((result) => {
+        // Draw the polygon onto the screen
+        this.coveragePolygon = new google.maps.Polygon({
+          paths: result.coveragePolygon,
+          strokeColor: '#FF1493',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#FF1493',
+          fillOpacity: 0.4,
+          clickable: false
+        })
+        this.coveragePolygon.setMap(this.mapRef)
+        this.householdsCovered = result.householdsCovered
+        this.controlState = this.controlStates.COMPUTED
+        this.targetMarker.setDraggable(true)   // Allow dragging the marker
+        this.$timeout()
       })
-      this.coveragePolygon.setMap(this.mapRef)
-      this.householdsCovered = result.householdsCovered
-      this.controlState = this.controlStates.COMPUTED
-      this.targetMarker.setDraggable(true)   // Allow dragging the marker
-      this.$timeout()
-    })
-    .catch((err) => {
-      console.error(err)
-      this.targetMarker.setDraggable(true)   // Allow dragging the marker
-    })
+      .catch((err) => {
+        console.error(err)
+        this.targetMarker.setDraggable(true)   // Allow dragging the marker
+      })
 
     this.$timeout()
   }
@@ -147,10 +147,4 @@ class CoverageBoundaryController {
 
 CoverageBoundaryController.$inject = ['$http', '$timeout', 'state', 'configuration']
 
-app.component('coverageBoundary', {
-  templateUrl: '/components/sidebar/view/coverage-boundary-component.html',
-  bindings: {
-    mapGlobalObjectName: '@'
-  },
-  controller: CoverageBoundaryController
-})
+export default CoverageBoundaryController
