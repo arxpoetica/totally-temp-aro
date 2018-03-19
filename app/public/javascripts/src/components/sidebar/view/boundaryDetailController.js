@@ -1,7 +1,3 @@
-// export default function bar() {
-//   return "hello webpack"
-// }
-
 class BoundaryDetailController {
 
   constructor($http, state) {
@@ -29,4 +25,4 @@ class BoundaryDetailController {
 
 BoundaryDetailController.$inject = ['$http', 'state']
 
-export { BoundaryDetailController }  
+export default BoundaryDetailController
