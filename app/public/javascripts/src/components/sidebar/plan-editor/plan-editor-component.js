@@ -22,20 +22,26 @@ class EditableMapObject {
     //   onChangeProperty,
     //   onMouseDown
     // }
-    this.feature = feature
     this.eventHandlers = eventHandlers
+    this.setFeature(feature)
+
+    // Raise the onCreate event
+    this.eventHandlers.onCreate && this.eventHandlers.onCreate(this)
+  }
+
+  setFeature(feature) {
+    this.feature = feature
     this.createMapObjects(map)
   }
 
   createMapObjects(map) {
     this.mapObjects = {}
-    this.feature.geometries.forEach((geometry) => this.createMapObject(map, geometry))
-
-    // Raise the onCreate event
-    this.eventHandlers.onCreate && this.eventHandlers.oncreate(this)
+    Object.keys(this.feature.geometries).forEach((geometryKey) => {
+      this.createMapObject(map, geometryKey, this.feature.geometries[geometryKey])
+    })
   }
 
-  createMapObject(map, geometry) {
+  createMapObject(map, geometryKey, geometry) {
 
     // Create the map object
     var mapObject = null
@@ -50,6 +56,21 @@ class EditableMapObject {
         })
       break;
 
+      case 'polygon':
+        mapObject = new google.maps.Polygon({
+          paths: geometry.polygonPath,
+          strokeColor: '#FF1493',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#FF1493',
+          fillOpacity: 0.4,
+          clickable: false,
+          draggable: geometry.draggable
+        })
+        mapObject.setMap(map)
+
+      break;
+
       default:
         throw `createMapObject() does not support geometries with type ${this.feature.geometry.type}`
     }
@@ -59,19 +80,16 @@ class EditableMapObject {
     mapObject.addListener('dragend', (event) => this.eventHandlers.onEndEditing && this.eventHandlers.onEndEditing(event))
     mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(event))
 
-    this.mapObjects[geometry.key] = mapObject
-  }
-
-  setIcon(newIcon) {
-    this.mapObject.setIcon(newIcon)
+    this.mapObjects[geometryKey] = mapObject
   }
 }
 
 class PlanEditorController {
   
-  constructor(state, $http) {
+  constructor(state, $http, configuration) {
     this.state = state
     this.$http = $http
+    this.configuration = configuration
     this.editorModes = Object.freeze({
       ADD: 'ADD',
       DELETE: 'DELETE',
@@ -79,6 +97,7 @@ class PlanEditorController {
       EDIT_BOUNDARY: 'EDIT_BOUNDARY'
     })
     this.selectedEditorMode = this.editorModes.ADD
+    this.coverageRadius = 10000 // Feet!
     this.uuidStore = []
     this.getUUIDsFromServer()
   }
@@ -119,32 +138,58 @@ class PlanEditorController {
   handleMapClick(event) {
     if (this.selectedEditorMode === this.editorModes.ADD) {
       // We are in "Add entity" mode
-      var feature = {
+      var CENTER_KEY = 'point'
+      var equipmentFeature = {
         objectId: this.getUUID(),
-        geometries: [{
-          key: 'coordinate',
-          type: 'point',
-          coordinates: event.latLng,
-          draggable: true,
-          icon: '/images/map_icons/aro/coverage_target.png'
-        }],
+        geometries: {
+          CENTER_POINT: {
+            type: 'point',
+            coordinates: event.latLng,
+            draggable: true,
+            icon: '/images/map_icons/aro/coverage_target.png'
+          }
+        }
       }
       var handlers = {
         onCreate: (editableMapObject) => {
+          var position = editableMapObject.mapObjects.CENTER_POINT.position
           // Get the POST body for optimization based on the current application state
           var optimizationBody = this.state.getOptimizationBody()
           // Replace analysis_type and add a point and radius
           optimizationBody.analysis_type = 'COVERAGE'
           optimizationBody.point = {
             type: 'Point',
-            coordinates: [this.targetMarker.position.lng(), this.targetMarker.position.lat()]
+            coordinates: [position.lng(), position.lat()]
           }
           // Always send radius in meters to the back end
           optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
-          
+
+          this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
+          .then((result) => {
+            // Format the result so we can use it to create a polygon
+            var polygonPath = []
+            result.data.polygon.coordinates[0].forEach((polygonVertex) => {
+              polygonPath.push({
+                lat: polygonVertex[1],
+                lng: polygonVertex[0]
+              })
+            })
+            var feature = editableMapObject.feature
+            feature.geometries.COVERAGE_BOUNDARY = {
+              type: 'polygon',
+              polygonPath: polygonPath,
+              draggable: false
+            }
+            editableMapObject.setFeature(feature)
+            // return Promise.resolve({
+            //   householdsCovered: result.data.coverageInfo.length,
+            //   coveragePolygon: polygonPath
+            // })
+          })
+          .catch((err) => console.error(err))
         }
       }
-      var mapObject = new EditableMapObject(this.mapRef, feature, handlers)
+      var mapObject = new EditableMapObject(this.mapRef, equipmentFeature, handlers)
     }
   }
 
@@ -161,7 +206,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['state', '$http']
+PlanEditorController.$inject = ['state', '$http', 'configuration']
 
 app.component('planEditor', {
   templateUrl: '/components/sidebar/plan-editor/plan-editor-component.html',
