@@ -50,12 +50,11 @@ class TransactionStore {
     //     "number_of_households": "100"
     //   }
     // }
+    this.createdMarkers = {}
     this.objectIdToFeatures = {}
     features.forEach((feature) => {
       this.objectIdToFeatures[feature.objectId] = feature
     })
-
-    this.createdMarkers = {}
   }
 
   getFeaturesCount() {
@@ -81,7 +80,7 @@ class CommandAddLocation {
     // Create a new google maps marker
     var newLocationMarker = new google.maps.Marker({
       position: params.locationLatLng,
-      icon: '/images/map_icons/aro/households_default.png',
+      icon: '/images/map_icons/aro/households_modified.png',
       draggable: true,
       map: params.map,
       objectId: featureObj.objectId
@@ -211,6 +210,12 @@ class LocationEditorController {
     })
     .then((result) => {
       this.store.setFeatures(result.data)
+      // We have set features in the store. Re-create editable map markers for all the features.
+      Object.keys(this.store.objectIdToFeatures).forEach((key) => {
+        var feature = this.store.objectIdToFeatures[key]
+        this.createEditableMarker(new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
+                                  feature.objectId)
+      })
     })
     .catch((err) => {
       console.error(err)
@@ -232,7 +237,7 @@ class LocationEditorController {
     var objectId = event.locations[0].object_id
 
     if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE) {
-      this.createEditableMarker(event.latLng, objectId, 2)
+      this.createEditableMarker(event.latLng, objectId)
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
       var params = {
@@ -248,12 +253,11 @@ class LocationEditorController {
     this.state.requestMapLayerRefresh.next({})
   }
 
-  createEditableMarker(coordinateLatLng, objectId, objectRevision) {
+  createEditableMarker(coordinateLatLng, objectId) {
     // Create a new marker for the location, only if we are in the right selection mode
     var command = new CommandAddLocation()
     var params = {
       objectId: objectId,
-      objectRevision: objectRevision,
       locationLatLng: coordinateLatLng,
       numLocations: this.addLocationData.numLocations,
       map: this.mapRef,
@@ -291,7 +295,7 @@ class LocationEditorController {
 
   selectMarker(marker) {
     if (this.selectedLocation) {
-      this.selectedLocation.setIcon('/images/map_icons/aro/households_default.png')
+      this.selectedLocation.setIcon('/images/map_icons/aro/households_modified.png')
     }
     this.selectedLocation = marker
     this.selectedLocation.setIcon('/images/map_icons/aro/households_selected.png')
