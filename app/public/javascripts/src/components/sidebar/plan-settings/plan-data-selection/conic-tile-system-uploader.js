@@ -85,8 +85,8 @@ class ConicTileSystemUploaderController {
 
 ConicTileSystemUploaderController.$inject = ['$element', '$http']
 
-app.component('conicTileSystemUploader', {
-  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader-component.html',
+let conicTileSystemUploader = {
+  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader.html',
   bindings: {
     projectId: '<',
     userId: '<',
@@ -94,4 +94,6 @@ app.component('conicTileSystemUploader', {
     onDestroyControl: '&'
   },
   controller: ConicTileSystemUploaderController
-})
+}
+
+export default conicTileSystemUploader

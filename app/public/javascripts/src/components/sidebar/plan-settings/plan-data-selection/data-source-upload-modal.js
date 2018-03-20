@@ -192,8 +192,10 @@ class DataSourceUploadController {
 
 DataSourceUploadController.$inject = ['$http', 'state']
 
-app.component('globalDataSourceUploadModal', {
-  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal-component.html',
+let globalDataSourceUploadModal = {
+  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal.html',
   bindings: {},
   controller: DataSourceUploadController
-})
+}
+
+export default globalDataSourceUploadModal

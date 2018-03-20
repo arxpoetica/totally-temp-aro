@@ -116,8 +116,8 @@ class DataSelectionController {
 DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state']
 
 // Component did not work when it was called 'dataSelection'
-app.component('planDataSelection', {
-  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/plan-data-selection-component.html',
+let planDataSelection = {
+  templateUrl: '/components/sidebar/plan-settings/plan-data-selection/plan-data-selection.html',
   bindings: {
     projectId: '<',
     userId: '<',
@@ -125,4 +125,6 @@ app.component('planDataSelection', {
     allDataItems: '='
   },
   controller: DataSelectionController
-})
+}
+
+export default planDataSelection
