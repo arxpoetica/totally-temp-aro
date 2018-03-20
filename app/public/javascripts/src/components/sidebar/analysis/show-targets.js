@@ -15,7 +15,7 @@ class ShowTargetsController {
 
 ShowTargetsController.$inject = ['state']
 
-app.component('showTargets', {
+let showTargets = {
   template: `
     <style scoped>
       #show-targets{
@@ -49,4 +49,6 @@ app.component('showTargets', {
     zoomTarget: '&'
   },
   controller: ShowTargetsController
-});
+}
+
+export default showTargets

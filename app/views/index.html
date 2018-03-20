@@ -150,6 +150,7 @@
         zoom: 12,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         panControl: false,
+        mapTypeControl: true,
         mapTypeControlOptions: {
           position: google.maps.ControlPosition.BOTTOM_RIGHT
         },
@@ -157,8 +158,10 @@
           style: google.maps.ZoomControlStyle.SMALL,
           position: google.maps.ControlPosition.RIGHT_BOTTOM
         },
+        streetViewControl: true,
         streetViewControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_BOTTOM
+          position: google.maps.ControlPosition.RIGHT_BOTTOM,
+          enableCloseButton: true
         },
         styles: styles,
       });
@@ -214,17 +217,17 @@
   <script src="javascripts/lib/components/common/aro-object-editor-component.js"></script>
   <script src="javascripts/lib/components/common/aro-panel-component.js"></script>
 
-  <script src="javascripts/lib/components/sidebar/optimize-button-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/display-mode-buttons-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/analysis-mode-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/show-targets-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/analysis-expert-mode-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-modal-component.js"></script>
+  <!-- <script src="javascripts/lib/components/sidebar/optimize-button-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/display-mode-buttons-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/analysis/analysis-mode-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/analysis/show-targets-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/analysis/analysis-expert-mode-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-modal-component.js"></script>
   <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-content-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-output-component.js"></script>  
+  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-content-component.js"></script> -->
+  <!-- <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-component.js"></script>
+  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-output-component.js"></script>   -->
   <script src="javascripts/lib/components/sidebar/debug/aro-debug-component.js"></script>
   <script src="javascripts/lib/components/sidebar/debug/view-settings-component.js"></script>
   <script src="javascripts/lib/components/sidebar/plan-settings/plan-settings-component.js"></script>
@@ -240,7 +243,7 @@
   <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.js"></script>
   <script src="javascripts/lib/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration-component.js"></script>
   <script src="javascripts/lib/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/view/view-mode-component.js"></script>  
+  <!-- <script src="javascripts/lib/components/sidebar/view/view-mode-component.js"></script>   -->
   <!-- <script src="javascripts/lib/components/sidebar/view/location-detail-component.js"></script> -->
   <!-- <script src="javascripts/lib/components/sidebar/view/boundary-detail-component.js"></script> -->
   <!-- <script src="javascripts/lib/components/sidebar/view/equipment-detail-component.js"></script>   -->

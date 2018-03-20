@@ -41,8 +41,10 @@ class NetworkAnalysisOutputController {
 
 NetworkAnalysisOutputController.$inject = ['$element', '$timeout', 'state']
 
-app.component('networkAnalysisOutput', {
-  templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis-output-component.html',
+let networkAnalysisOutput = {
+  templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis-output.html',
   bindings: {},
   controller: NetworkAnalysisOutputController
-})    
+}
+
+export default networkAnalysisOutput

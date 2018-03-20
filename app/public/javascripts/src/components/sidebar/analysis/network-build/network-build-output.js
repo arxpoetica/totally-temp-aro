@@ -37,8 +37,10 @@ class NetworkBuildOutputController {
 
 NetworkBuildOutputController.$inject = ['$http','state','map_tools']
 
-app.component('networkBuildOutput', {
-  templateUrl: '/components/sidebar/analysis/network-build/network-build-output-component.html',
+let networkBuildOutput = {
+  templateUrl: '/components/sidebar/analysis/network-build/network-build-output.html',
   bindings: {},
   controller: NetworkBuildOutputController
-})    
+}
+
+export default networkBuildOutput

@@ -7,7 +7,7 @@ class ViewModeController {
 
 ViewModeController.$inject = ['state']
 
-app.component('viewMode', {
+let viewMode = {
   template: `
   <style>
     .plan-settings-container {
@@ -67,4 +67,6 @@ app.component('viewMode', {
   </div>
   `,
   controller: ViewModeController
-})
+}
+
+export default viewMode

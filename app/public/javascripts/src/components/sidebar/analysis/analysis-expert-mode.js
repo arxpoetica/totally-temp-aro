@@ -13,7 +13,7 @@ class AnalysisExpertModeController {
   
   AnalysisExpertModeController.$inject = ['state']
   
-  app.component('analysisExpertMode', {
+  let analysisExpertMode = {
     template: `
       <div class="row" style="height:100%">
         <div class="col-md-12" style="height:80%">
@@ -27,4 +27,6 @@ class AnalysisExpertModeController {
       </div>
       `,
     controller: AnalysisExpertModeController
-  });
+  }
+
+export default analysisExpertMode 

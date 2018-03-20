@@ -51,12 +51,14 @@ class NetworkBuildController {
 
 NetworkBuildController.$inject = ['$http', 'state', 'optimization']
 
-app.component('networkBuild', {
-  templateUrl: '/components/sidebar/analysis/network-build/network-build-component.html',
+let networkBuild = {
+  templateUrl: '/components/sidebar/analysis/network-build/network-build.html',
   bindings: {
     removeTarget: '&', 
     zoomTarget: '&',
     removeServiceArea: '&'
   },
   controller: NetworkBuildController
-})
+}
+
+export default networkBuild

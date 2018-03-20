@@ -17,9 +17,10 @@ class DisplayModeButtonsController {
 
 DisplayModeButtonsController.$inject = ['state']
 
-app.component('displayModeButtons', {
-  templateUrl: '/components/sidebar/display-mode-buttons-component.html',
+let displayModeButtons = {
+  templateUrl: '/components/sidebar/display-mode-buttons.html',
   bindings: {},
   controller: DisplayModeButtonsController
-})
+}
 
+export default displayModeButtons

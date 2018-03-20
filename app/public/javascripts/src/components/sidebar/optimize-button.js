@@ -24,8 +24,10 @@ class OptimizeButtonController {
 
 OptimizeButtonController.$inject = ['state']
 
-app.component('optimizeButton', {
-  templateUrl: '/components/sidebar/optimize-button-component.html',
+let optimizeButton = {
+  templateUrl: '/components/sidebar/optimize-button.html',
   bindings: {},
   controller: OptimizeButtonController
-})
+}
+
+export default optimizeButton

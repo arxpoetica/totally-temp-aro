@@ -246,7 +246,7 @@ class NetworkAnalysisOutputContentController {
 
 NetworkAnalysisOutputContentController.$inject = ['$http', '$filter', '$element', 'state']
 
-app.component('networkAnalysisOutputContent', {
+let networkAnalysisOutputContent = {
   template: `
     <div>
       <select class="form-control" style="width: 120px; float: right"
@@ -260,5 +260,6 @@ app.component('networkAnalysisOutputContent', {
     </div>
   `,
   controller: NetworkAnalysisOutputContentController
-})
+}
 
+export default networkAnalysisOutputContent

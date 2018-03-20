@@ -12,7 +12,7 @@ class NetworkAnalysisModalController {
 
 NetworkAnalysisModalController.$inject = ['state']
 
-app.component('networkAnalysisModal', {
+let networkAnalysisModal = {
   template: `
     <modal visible="$ctrl.state.showNetworkAnalysisOutput" backdrop="static" on-hide="$ctrl.onHideModal()" >
       <modal-header title="Network Analysis"></modal-header>
@@ -25,4 +25,6 @@ app.component('networkAnalysisModal', {
       `,
   bindings: {},
   controller: NetworkAnalysisModalController
-})
+}
+
+export default networkAnalysisModal

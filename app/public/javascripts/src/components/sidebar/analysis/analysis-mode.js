@@ -51,9 +51,11 @@ class AnalysisModeController {
 
 AnalysisModeController.$inject = ['$scope','$rootScope','$http','state','optimization']
 
-app.component('analysisMode', {
-  templateUrl: '/components/sidebar/analysis/analysis-mode-component.html',
+let analysisMode = {
+  templateUrl: '/components/sidebar/analysis/analysis-mode.html',
   bindings: {},
   controller: AnalysisModeController
-})
+}
+
+export default analysisMode
 

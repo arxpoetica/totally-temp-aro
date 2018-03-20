@@ -50,12 +50,14 @@ class NetworkAnalysisController {
 
 NetworkAnalysisController.$inject = ['$http', 'state', 'optimization']
 
-app.component('networkAnalysis', {
-  templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis-component.html',
+let networkAnalysis = {
+  templateUrl: '/components/sidebar/analysis/network-analysis/network-analysis.html',
   bindings: {
     removeTarget: '&', 
     zoomTarget: '&',
     removeServiceArea: '&'
   },
   controller: NetworkAnalysisController
-})    
+}
+
+export default networkAnalysis
