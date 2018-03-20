@@ -1,6 +1,6 @@
-import boundaryDetail from './sidebar/view/boundary-detail';
-import equipmentDetail from './sidebar/view/equipment-detail';
-import locationDetail from './sidebar/view/location-detail';
+import boundaryDetail from './sidebar/view/boundary-detail'
+import equipmentDetail from './sidebar/view/equipment-detail'
+import locationDetail from './sidebar/view/location-detail'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
@@ -22,25 +22,25 @@ import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
 
-app.component('boundaryDetail',boundaryDetail)
-   .component('equipmentDetail',equipmentDetail)
-   .component('locationDetail',locationDetail)
-   .component('roadSegmentDetail',roadSegmentDetail)
-   .component('coverageBoundary',coverageBoundary)
-   .component('locationEditor',locationEditor)
-   .component('viewMode',viewMode)
-   .component('displayModeButtons',displayModeButtons)
-   .component('optimizeButton',optimizeButton)
-   .component('analysisExpertMode',analysisExpertMode)
-   .component('analysisMode',analysisMode)
-   .component('showTargets',showTargets)
-   .component('networkAnalysis',networkAnalysis)
-   .component('networkAnalysisOutput',networkAnalysisOutput)
-   .component('networkAnalysisOutputContent',networkAnalysisOutputContent)
-   .component('networkBuild',networkBuild)
-   .component('networkBuildOutput',networkBuildOutput)
-   .component('aroDebug',aroDebug)
-   .component('viewSettings',viewSettings)
-   .component('conicTileSystemUploader',conicTileSystemUploader)
-   .component('globalDataSourceUploadModal',globalDataSourceUploadModal)
-   .component('planDataSelection',planDataSelection)
+app.component('boundaryDetail', boundaryDetail)
+   .component('equipmentDetail', equipmentDetail)
+   .component('locationDetail', locationDetail)
+   .component('roadSegmentDetail', roadSegmentDetail)
+   .component('coverageBoundary', coverageBoundary)
+   .component('locationEditor', locationEditor)
+   .component('viewMode', viewMode)
+   .component('displayModeButtons', displayModeButtons)
+   .component('optimizeButton', optimizeButton)
+   .component('analysisExpertMode', analysisExpertMode)
+   .component('analysisMode', analysisMode)
+   .component('showTargets', showTargets)
+   .component('networkAnalysis', networkAnalysis)
+   .component('networkAnalysisOutput', networkAnalysisOutput)
+   .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
+   .component('networkBuild', networkBuild)
+   .component('networkBuildOutput', networkBuildOutput)
+   .component('aroDebug', aroDebug)
+   .component('viewSettings', viewSettings)
+   .component('conicTileSystemUploader', conicTileSystemUploader)
+   .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
+   .component('planDataSelection', planDataSelection)
