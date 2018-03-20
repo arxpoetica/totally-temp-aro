@@ -95,9 +95,10 @@ class EditableMapObject {
 
 class PlanEditorController {
   
-  constructor(state, $http, configuration) {
+  constructor(state, $http, $timeout, configuration) {
     this.state = state
     this.$http = $http
+    this.$timeout = $timeout
     this.configuration = configuration
     this.editorModes = Object.freeze({
       ADD: 'ADD',
@@ -110,6 +111,73 @@ class PlanEditorController {
     this.createdEditableObjects = []
     this.uuidStore = []
     this.getUUIDsFromServer()
+
+    this.currentTransaction = null
+    this.$http.get(`/service/plan-transaction?user_id=${this.state.getUserId()}`)
+      .then((result) => {
+        if (result.data.length > 0) {
+          // At least one transaction exists. Return it
+          return Promise.resolve({
+            data: result.data[0]
+          })
+        } else {
+          // Create a new transaction and return it.
+          return this.$http.post(`/service/plan-transactions`, { userId: this.state.getUserId(), planId: this.state.plan.getValue().id })
+        }
+      })
+      .then((result) => {
+        this.currentTransaction = result.data
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
+  }
+
+  exitPlanEditMode() {
+    this.currentTransaction = null
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
+    this.$timeout()
+  }
+
+  commitTransaction() {
+    if (!this.currentTransaction) {
+      console.error('No current transaction. We should never be in this state. Aborting commit...')
+    }
+
+    this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}`)
+      .then((result) => {
+        // Committing will close the transaction. To keep modifying, open a new transaction
+        this.exitPlanEditMode()
+      })
+      .catch((err) => {
+        console.error(err)
+        this.exitPlanEditMode()
+      })
+  }
+
+  discardTransaction() {
+    swal({
+      title: 'Discard transaction?',
+      text: `Are you sure you want to discard transaction with ID ${this.currentTransaction.id}`,
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, discard',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (deleteTransaction) => {
+      if (deleteTransaction) {
+        // The user has confirmed that the transaction should be deleted
+        this.$http.delete(`/service/plan-transactions/transaction/${this.currentTransaction.id}`)
+        .then((result) => {
+          this.exitPlanEditMode()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.exitPlanEditMode()
+        })
+      }
+    })
   }
 
   // Get a list of UUIDs from the server
@@ -237,7 +305,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['state', '$http', 'configuration']
+PlanEditorController.$inject = ['state', '$http', '$timeout', 'configuration']
 
 app.component('planEditor', {
   templateUrl: '/components/sidebar/plan-editor/plan-editor-component.html',

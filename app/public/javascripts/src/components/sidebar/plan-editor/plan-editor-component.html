@@ -12,31 +12,40 @@
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="'EDIT_PLAN'">
     <accordion-panel-title title="'Edit Plan'" panel-id="'EDIT_PLAN'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'EDIT_PLAN'" style="padding: 10px">
-      <div class="btn-group">
-        <button ng-class="{ 'btn': true,
-                            'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.ADD,
-                            'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.ADD }"
-                ng-click="$ctrl.setEditorMode($ctrl.editorModes.ADD)">
-          <i class="fa fa-plus"></i> Add
-        </button>
-        <button ng-class="{ 'btn': true,
-                            'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.DELETE,
-                            'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.DELETE }"
-                            ng-click="$ctrl.setEditorMode($ctrl.editorModes.DELETE)">
-          <i class="fa fa-trash"></i> Delete
-        </button>
-        <button ng-class="{ 'btn': true,
-                            'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.MOVE,
-                            'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.MOVE }"
-                            ng-click="$ctrl.setEditorMode($ctrl.editorModes.MOVE)">
-          <i class="fa fa-arrows"></i> Move
-        </button>
-        <button ng-class="{ 'btn': true,
-                            'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.EDIT_BOUNDARY,
-                            'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.EDIT_BOUNDARY }"
-                            ng-click="$ctrl.setEditorMode($ctrl.editorModes.EDIT_BOUNDARY)">
-          <i class="fa fa-edit"></i> Edit boundary
-        </button>
+      <div class="text-center">
+        <div class="btn-group ">
+          <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+          <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Discard</button>
+        </div>
+      </div>
+      <br>
+      <div class="text-center">
+        <div class="btn-group">
+          <button ng-class="{ 'btn': true,
+                              'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.ADD,
+                              'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.ADD }"
+                  ng-click="$ctrl.setEditorMode($ctrl.editorModes.ADD)">
+            <i class="fa fa-plus"></i> Add
+          </button>
+          <button ng-class="{ 'btn': true,
+                              'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.DELETE,
+                              'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.DELETE }"
+                              ng-click="$ctrl.setEditorMode($ctrl.editorModes.DELETE)">
+            <i class="fa fa-trash"></i> Delete
+          </button>
+          <button ng-class="{ 'btn': true,
+                              'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.MOVE,
+                              'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.MOVE }"
+                              ng-click="$ctrl.setEditorMode($ctrl.editorModes.MOVE)">
+            <i class="fa fa-arrows"></i> Move
+          </button>
+          <button ng-class="{ 'btn': true,
+                              'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.EDIT_BOUNDARY,
+                              'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.EDIT_BOUNDARY }"
+                              ng-click="$ctrl.setEditorMode($ctrl.editorModes.EDIT_BOUNDARY)">
+            <i class="fa fa-edit"></i> Edit boundary
+          </button>
+        </div>
       </div>
     </accordion-panel-contents>
   </accordion>
