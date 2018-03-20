@@ -78,6 +78,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',
+    EQUIPMENT_INFO: 'EQUIPMENT_INFO',
+    BOUNDARIES_INFO: 'BOUNDARIES_INFO',
     ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
     COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
     EDIT_LOCATIONS: 'EDIT_LOCATIONS'
@@ -1175,6 +1177,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       },
     }
   }
+
+  service.censusBlockSelectedEvent = new Rx.BehaviorSubject({})
+  $rootScope.$on('map_layer_census_block_click',(e,cbdata) => {
+    service.censusBlockSelectedEvent.next(cbdata)
+    $timeout()
+  })
 
   return service
 }])

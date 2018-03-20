@@ -10,6 +10,13 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get('/census_blocks/:id/details', (request, response, next) => {
+    var id = request.params.id
+    models.CensusBlock.getCensusBlockDetails(id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   api.get('/census_blocks/:statefp/:countyfp', middleware.viewport, (request, response, next) => {
     var statefp = request.params.statefp
     var countyfp = request.params.countyfp

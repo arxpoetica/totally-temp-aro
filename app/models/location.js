@@ -206,7 +206,7 @@ module.exports = class Location {
 
   // Get summary information for a given location
   static showInformation (plan_id, location_id) {
-    var info
+    var info,locationInfo,locationSources
     return Promise.resolve()
       .then(() => {
         var sql = `
@@ -249,11 +249,13 @@ module.exports = class Location {
             union
 
             select
-              location_id, 0, 0, 0, households.number_of_households, 0, 0
+              location_id, 0, 0, 0, sum(households.number_of_households), 0, 0
             from
               aro.households
             where
               households.location_id=$1
+            group by
+              location_id  
 
             UNION ALL
 
@@ -372,7 +374,7 @@ module.exports = class Location {
       })
       .then(() => {
         var sql = `
-          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,
+          SELECT address,zipcode,city, ST_AsGeojson(geog)::json AS geog,cb.tabblock_id, cb.name,
             (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
               FROM (
                 SELECT geom
@@ -381,11 +383,48 @@ module.exports = class Location {
                 LIMIT 10
               ) as ef_closest_fibers
             ) AS distance_to_client_fiber
-          FROM locations WHERE id=$1
+          FROM locations 
+          JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
+          WHERE locations.id=$1
         `
         return database.findOne(sql, [location_id])
       })
-      .then((location) => Object.assign(info, location))
+      .then((_location) => {
+        locationInfo = _location
+        locationSources = {} 
+        var hhSources = `
+          SELECT array_agg(source_id) as source_ids FROM households
+          WHERE location_id=$1
+        `
+        var hhSourceIds = database.findOne(hhSources, [location_id])
+          .then((values) => {
+            locationSources.hhSourceIds = values
+          })
+
+        var bizSources = `
+          SELECT array_agg(source_id) as source_ids FROM businesses
+          WHERE location_id=$1
+        `
+        var bizSourceIds = database.findOne(bizSources, [location_id])
+          .then((values) => {
+            locationSources.bizSourceIds = values
+          })
+
+        var towerSources = `
+          SELECT array_agg(source_id) as source_ids FROM towers
+          WHERE location_id=$1
+        `
+        var towerSourceIds = database.findOne(towerSources, [location_id])
+          .then((values) => {
+            locationSources.towerSourceIds = values
+          })
+
+        return Promise.all([hhSourceIds, bizSourceIds, towerSourceIds])
+      })
+      .then(() => {
+        locationInfo.locSourceIds = locationSources
+        return Object.assign(info, locationInfo)
+      })
   }
 
   static createLocation (values) {

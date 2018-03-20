@@ -28,6 +28,17 @@ app.component('viewMode', {
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
         <location-detail></location-detail>
       </accordion-panel-contents>
+
+      <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO">
+        <equipment-detail></equipment-detail>
+      </accordion-panel-contents>
+
+      <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO">
+        <boundary-detail></boundary-detail>
+      </accordion-panel-contents>
+
       <accordion-panel-title title="'Road Segment Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO">
         <road-segment-detail></road-segment-detail>
