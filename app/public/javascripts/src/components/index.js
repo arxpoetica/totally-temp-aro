@@ -31,6 +31,20 @@ import planResourceSelection from './sidebar/plan-settings/plan-resource-selecti
 import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pricebook-editor'
 import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
 import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
+import boundaries from './views/boundaries'
+import mapSplit from './map/map-split'
+import mapSelector from './map/map-selector'
+import toolBar from './header/tool-bar'
+import reportModal from './header/report-modal'
+import networkPlanModal from './header/network-plan-modal'
+import networkPlanManage from './header/network-plan-manage'
+import networkPlan from './header/network-plan'
+import userAccountSettings from './global-settings/user-account-settings'
+import manageUsers from './global-settings/manage-users'
+import globalSettings from './global-settings/global-settings'
+import aroPanel from './common/aro-panel'
+import aroMultiSelect from './common/aro-multiselect'
+import aroObjectEditor from './common/aro-object-editor'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -64,3 +78,17 @@ app.component('boundaryDetail', boundaryDetail)
    .component('pricebookEditor', pricebookEditor)
    .component('resourceManager', resourceManager)
    .component('roicEditor', roicEditor)
+   .component('boundaries', boundaries)
+   .component('mapSplit', mapSplit)
+   .component('mapSelector', mapSelector)
+   .component('toolBar', toolBar)
+   .component('reportModal', reportModal)
+   .component('networkPlanModal', networkPlanModal)
+   .component('networkPlanManage', networkPlanManage)
+   .component('networkPlan', networkPlan)
+   .component('userAccountSettings', userAccountSettings)
+   .component('manageUsers', manageUsers)
+   .component('globalSettings', globalSettings)
+   .component('aroPanel', aroPanel)
+   .component('aroMultiSelect', aroMultiSelect)
+   .component('aroObjectEditor', aroObjectEditor)

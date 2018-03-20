@@ -19,7 +19,7 @@ class NetworkPlanModalController {
 
 NetworkPlanModalController.$inject = ['state']
 
-app.component('networkPlanModal', {
+let networkPlanModal = {
   template: `
   <modal visible="$ctrl.state.networkPlanModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
     <modal-header title="Network Plan"></modal-header>
@@ -33,4 +33,6 @@ app.component('networkPlanModal', {
   `,
   bindings: {},
   controller: NetworkPlanModalController
-})
+}
+
+export default networkPlanModal

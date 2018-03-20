@@ -55,7 +55,7 @@ class AroMultiSelectController {
 
 AroMultiSelectController.$inject = ['$element']
 
-app.component('aroMultiSelect', {
+let aroMultiSelect = {
   template: `
     <select multiple="multiple"
             ng-model="$ctrl.model"
@@ -70,4 +70,6 @@ app.component('aroMultiSelect', {
     selectionChanged: '&'   // [Optional] Called when the selected items change
   },
   controller: AroMultiSelectController
-})
+}
+
+export default aroMultiSelect

@@ -325,11 +325,12 @@ class ToolBarController {
 
 ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools', '$window']
 
-app.component('toolBar', {
-  templateUrl: '/components/header/tool-bar-component.html',
+let toolBar = {
+  templateUrl: '/components/header/tool-bar.html',
   bindings: {
     mapGlobalObjectName: '@'
   },
   controller: ToolBarController
-})
+}
 
+export default toolBar

@@ -19,7 +19,7 @@ class AroPanelController {
 
 AroPanelController.$inject = ['state','$timeout']
 
-app.component('aroPanel', {
+let aroPanel = {
   template: `
   <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="$ctrl.showPanel">
     <div class="panel-heading">
@@ -28,5 +28,6 @@ app.component('aroPanel', {
   </div>
   `,
   controller: AroPanelController
-})
+}
 
+export default aroPanel

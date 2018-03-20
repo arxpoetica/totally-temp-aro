@@ -37,7 +37,7 @@ class GlobalSettingsController {
 
 GlobalSettingsController.$inject = ['state','globalSettingsService']
 
-app.component('globalSettings', {
+let globalSettings = {
   template: `
   <style scoped>
   #global-settings {
@@ -103,5 +103,6 @@ app.component('globalSettings', {
   `,
   bindings: {},
   controller: GlobalSettingsController
-})
+}
 
+export default globalSettings

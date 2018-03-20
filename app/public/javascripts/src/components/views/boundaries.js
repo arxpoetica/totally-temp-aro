@@ -249,8 +249,10 @@ class BoundariesController {
 
 BoundariesController.$inject = ['$rootScope','state','map_tools','MapLayer','map_layers','regions']
 
-app.component('boundaries', {
-  templateUrl: '/components/views/boundaries-component.html',
+let boundaries = {
+  templateUrl: '/components/views/boundaries.html',
   bindings: {},
   controller: BoundariesController
-})    
+}
+
+export default boundaries

@@ -11,8 +11,10 @@ class NetworkPlanController {
 
 NetworkPlanController.inject = ['$timeout', 'state']
 
-app.component('networkPlan', {
-  templateUrl: '/components/header/network-plan-component.html',
+let networkPlan = {
+  templateUrl: '/components/header/network-plan.html',
   bindings: {},
   controller: NetworkPlanController
-})
+}
+
+export default networkPlan

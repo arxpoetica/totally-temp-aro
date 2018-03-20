@@ -244,7 +244,9 @@ class NetworkPlanModalController {
 
 NetworkPlanModalController.$inject = ['$http', '$q', 'state', 'tracker']
 
-app.component('networkPlanManage', {
-  templateUrl: '/components/header/network-plan-manage-component.html',
+let networkPlanManage = {
+  templateUrl: '/components/header/network-plan-manage.html',
   controller: NetworkPlanModalController
-})
+}
+
+export default networkPlanManage

@@ -8,8 +8,9 @@ class UserAccountSettingsController {
 
 UserAccountSettingsController.$inject = ['$http', 'globalSettingsService']
 
-app.component('userAccountSettings', {
-  templateUrl: '/components/global-settings/user-account-settings-component.html',
+let userAccountSettings = {
+  templateUrl: '/components/global-settings/user-account-settings.html',
   controller: UserAccountSettingsController
-})
+}
 
+export default userAccountSettings

@@ -104,11 +104,12 @@ class ManageUsersController {
 
 ManageUsersController.$inject = ['$http', 'state', 'globalSettingsService']
 
-app.component('manageUsers', {
-  templateUrl: '/components/global-settings/manage-users-component.html',
+let manageUsers = {
+  templateUrl: '/components/global-settings/manage-users.html',
   bindings: {
     managerView: '='
   },
   controller: ManageUsersController
-})
+}
 
+export default manageUsers

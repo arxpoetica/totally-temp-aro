@@ -29,11 +29,13 @@ class AroObjectEditorController {
 
 // AroObjectEditorController.$inject = []
 
-app.component('aroObjectEditor', {
-  templateUrl: '/components/common/aro-object-editor-component.html',
+let aroObjectEditor = {
+  templateUrl: '/components/common/aro-object-editor.html',
   bindings: {
     objectToEdit: '=',      // Two Way binding, we will directly edit object values for now!
     indentationLevel: '<'
   },
   controller: AroObjectEditorController
-})
+}
+
+export default aroObjectEditor

@@ -121,11 +121,12 @@ class MapSelectorController {
 
 MapSelectorController.$inject = ['$document', '$http', 'state']
 
-app.component('mapSelector', {
+let mapSelector = {
   template: '', // No markup for this component. It interacts with the map directly.
   bindings: {
     mapGlobalObjectName: '@'
   },
   controller: MapSelectorController
-})
+}
 
+export default mapSelector

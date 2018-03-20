@@ -132,7 +132,7 @@ class ReportModalController {
 
 ReportModalController.$inject = ['$http', 'state']
 
-app.component('reportModal', {
+let reportModal = {
   template: `
   <modal visible="$ctrl.state.reportModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
     <modal-header title="Reports"></modal-header>
@@ -168,4 +168,6 @@ app.component('reportModal', {
   `,
   bindings: {},
   controller: ReportModalController
-})
+}
+
+export default reportModal

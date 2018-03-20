@@ -57,7 +57,7 @@ class MapSplitController {
 
 MapSplitController.$inject = ['$document', '$timeout', '$scope', 'state']
 
-app.component('mapSplit', {
+let mapSplit = {
   // NOTE: Cannot use a templateUrl for this component, as there is code in index.html that depends upon the "map-canvas"
   // element being present on document.ready(). With a templateUrl, the element is not present on document.ready() and
   // the map is never initialized.
@@ -187,5 +187,6 @@ app.component('mapSplit', {
   `,
   bindings: { },
   controller: MapSplitController
-})
+}
 
+export default mapSplit
