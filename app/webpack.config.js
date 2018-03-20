@@ -1,5 +1,6 @@
 var path = require('path');
 var glob = require('glob');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
   entry: './public/javascripts/src/components/index.js',  
@@ -19,5 +20,11 @@ module.exports = {
         }
       }
     ]
-  }
+  },
+  devtool: 'source-map',
+  plugins: [
+    new UglifyJsPlugin({
+      sourceMap: true
+    })
+  ]
 };

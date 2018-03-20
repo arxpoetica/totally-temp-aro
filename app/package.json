@@ -16,7 +16,7 @@
     "watch-client": "./node_modules/babel-cli/bin/babel.js public/javascripts/src public/javascripts/src/components -d public/javascripts/lib --watch --copy-files --source-maps",
     "watch-server": "./node_modules/.bin/nodemon --inspect ./app.js",
     "webpack-deploy": "webpack",
-    "webpack-dev": "webpack -d --watch",
+    "webpack-dev": "webpack --watch",
     "dev": "./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-dev\"",
     "lint": "standard"
   },
@@ -101,6 +101,7 @@
     "phantomjs": "^1.9.17",
     "protractor": "^2.1.0",
     "standard": "^6.0.7",
+    "uglifyjs-webpack-plugin": "^1.2.4",
     "wdio-dot-reporter": "0.0.8",
     "wdio-firefox-profile-service": "0.0.2",
     "wdio-jasmine-framework": "^0.3.0",
