@@ -58,7 +58,7 @@
                 </tr>
                 <tr>
                   <th colspan="3"><%- config.currency_symbol %> / Premises Passed</th>
-                  <td colspan="2" class="text-right">{{metadata.demandSummary.networkDemands[0].locationDemand.totalRevenue / 1000 | currency:"<%- config.currency_symbol %>":0}}</td>
+                  <td colspan="2" class="text-right"> {{metadata.priceModel.totalCost / plannedNetworkDemand.locationDemand.rawCoverage | currency:"<%- config.currency_symbol %>":0}}</td>
                 </tr>
                 <tr ng-repeat="networkStatistic in metadata.networkStatistics" 
                   ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
