@@ -107,6 +107,7 @@ class PlanEditorController {
     })
     this.selectedEditorMode = this.editorModes.ADD
     this.coverageRadius = 10000 // Feet!
+    this.createdEditableObjects = []
     this.uuidStore = []
     this.getUUIDsFromServer()
   }
@@ -194,7 +195,10 @@ class PlanEditorController {
         }
       }
       var handlers = {
-        onCreate: (editableMapObject) => this.calculateCoverage(editableMapObject),
+        onCreate: (editableMapObject) => {
+          this.createdEditableObjects.push(editableMapObject)
+          this.calculateCoverage(editableMapObject)
+        },
         onMouseDown: (editableMapObject, geometry, event) => {
           if (this.selectedEditorMode === this.editorModes.DELETE) {
             // Remove all geometries from map
@@ -220,6 +224,15 @@ class PlanEditorController {
 
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
+
+    // Remove created objects from map
+    this.createdEditableObjects.forEach((editableObject) => {
+      Object.keys(editableObject.mapGeometries).forEach((geometryKey) => {
+        var mapObject = editableObject.mapGeometries[geometryKey]
+        mapObject.setMap(null)
+      })
+    })
+    this.createdEditableObjects = []
 
   }
 }
