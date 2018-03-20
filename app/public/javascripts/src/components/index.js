@@ -16,7 +16,8 @@ import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-a
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
 import networkBuild from './sidebar/analysis/network-build/network-build'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
-
+import aroDebug from './sidebar/debug/aro-debug'
+import viewSettings from './sidebar/debug/view-settings'
 
 app.component('boundaryDetail',boundaryDetail)
    .component('equipmentDetail',equipmentDetail)
@@ -35,3 +36,5 @@ app.component('boundaryDetail',boundaryDetail)
    .component('networkAnalysisOutputContent',networkAnalysisOutputContent)
    .component('networkBuild',networkBuild)
    .component('networkBuildOutput',networkBuildOutput)
+   .component('aroDebug',aroDebug)
+   .component('viewSettings',viewSettings)

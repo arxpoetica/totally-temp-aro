@@ -25,8 +25,10 @@ class ViewSettingsController {
 
 ViewSettingsController.$inject = ['state', '$rootScope']
 
-app.component('viewSettings', {
-  templateUrl: '/components/sidebar/debug/view-settings-component.html',
+let viewSettings = {
+  templateUrl: '/components/sidebar/debug/view-settings.html',
   bindings: {},
   controller: ViewSettingsController
-})
+}
+
+export default viewSettings

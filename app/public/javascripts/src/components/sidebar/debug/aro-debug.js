@@ -40,8 +40,10 @@ class AroDebugController {
 
 AroDebugController.$inject = ['state', '$http', '$timeout']
 
-app.component('aroDebug', {
-  templateUrl: '/components/sidebar/debug/aro-debug-component.html',
+let aroDebug = {
+  templateUrl: '/components/sidebar/debug/aro-debug.html',
   bindings: {},
   controller: AroDebugController
-})
+}
+
+export default aroDebug
