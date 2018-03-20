@@ -140,8 +140,8 @@ class PriceBookEditorController {
 
 PriceBookEditorController.$inject = ['$http', '$timeout']
 
-app.component('pricebookEditor', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor-component.html',
+let pricebookEditor = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor.html',
   bindings: {
     priceBookId: '<',
     listMode: '<',
@@ -149,4 +149,6 @@ app.component('pricebookEditor', {
     priceBookNameChanged: '&'
   },
   controller: PriceBookEditorController
-})
+}
+
+export default pricebookEditor

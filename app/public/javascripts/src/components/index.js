@@ -21,6 +21,16 @@ import viewSettings from './sidebar/debug/view-settings'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
+import planNetworkConfiguration from './sidebar/plan-settings/plan-network-configuration/plan-network-configuration'
+import planProjectConfiguration from './sidebar/plan-settings/plan-project-configuration/plan-project-configuration'
+import planSettings from './sidebar/plan-settings/plan-settings'
+import arpuEditor from './sidebar/plan-settings/plan-resource-selection/arpu-editor'
+import impedanceEditor from './sidebar/plan-settings/plan-resource-selection/impedance-editor'
+import planResourceEditorModal from './sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal'
+import planResourceSelection from './sidebar/plan-settings/plan-resource-selection/plan-resource-selection'
+import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pricebook-editor'
+import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
+import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -44,3 +54,13 @@ app.component('boundaryDetail', boundaryDetail)
    .component('conicTileSystemUploader', conicTileSystemUploader)
    .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
    .component('planDataSelection', planDataSelection)
+   .component('planNetworkConfiguration', planNetworkConfiguration)
+   .component('planProjectConfiguration', planProjectConfiguration)
+   .component('planSettings', planSettings)
+   .component('arpuEditor', arpuEditor)
+   .component('impedanceEditor', impedanceEditor)
+   .component('planResourceEditorModal', planResourceEditorModal)
+   .component('planResourceSelection', planResourceSelection)
+   .component('pricebookEditor', pricebookEditor)
+   .component('resourceManager', resourceManager)
+   .component('roicEditor', roicEditor)

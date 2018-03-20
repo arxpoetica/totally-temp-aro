@@ -35,12 +35,14 @@ class PlanNetworkConfigurationController {
 
 PlanNetworkConfigurationController.$inject = ['$http', 'state']
 
-app.component('planNetworkConfiguration', {
-  templateUrl: '/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration-component.html',
+let planNetworkConfiguration = {
+  templateUrl: '/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration.html',
   bindings: {
     projectId: '<',
     userId: '<',
     planId: '<'
   },
   controller: PlanNetworkConfigurationController
-})
+}
+
+export default planNetworkConfiguration

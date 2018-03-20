@@ -10,7 +10,9 @@ class PlanSettingsController {
 
 PlanSettingsController.$inject = ['state', '$timeout']
 
-app.component('planSettings', {
-  templateUrl: '/components/sidebar/plan-settings/plan-settings-component.html',
+let planSettings = {
+  templateUrl: '/components/sidebar/plan-settings/plan-settings.html',
   controller: PlanSettingsController
-})
+}
+
+export default planSettings

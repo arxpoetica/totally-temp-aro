@@ -72,12 +72,14 @@ class PlanProjectConfigurationController {
 
 PlanProjectConfigurationController.$inject = ['$http', 'state']
 
-app.component('planProjectConfiguration', {
-  templateUrl: '/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration-component.html',
+let planProjectConfiguration = {
+  templateUrl: '/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration.html',
   bindings: {
     projectId: '<',
     userId: '<',
     planId: '<'
   },
   controller: PlanProjectConfigurationController
-})
+}
+
+export default planProjectConfiguration

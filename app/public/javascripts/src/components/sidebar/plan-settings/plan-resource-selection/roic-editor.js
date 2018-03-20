@@ -36,8 +36,8 @@ class RoicEditorController {
 
 RoicEditorController.$inject = ['$http']
 
-app.component('roicEditor', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/roic-editor-component.html',
+let roicEditor = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/roic-editor.html',
   bindings: {
     roicManagerId: '<',
     listMode: '<',
@@ -46,4 +46,6 @@ app.component('roicEditor', {
     roicManagerNameChanged: '&'
   },
   controller: RoicEditorController
-})
+}
+
+export default roicEditor

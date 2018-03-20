@@ -38,12 +38,14 @@ class ResourceSelectionController {
 ResourceSelectionController.$inject = ['$http', '$timeout', 'state']
 
 // Component did not work when it was called 'dataSelection'
-app.component('planResourceSelection', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection-component.html',
+let planResourceSelection = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection.html',
   bindings: {
     projectId: '<',
     userId: '<',
     planId: '<'
   },
   controller: ResourceSelectionController
-})
+}
+
+export default planResourceSelection

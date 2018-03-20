@@ -224,8 +224,8 @@ class ResourceManagerController {
 
 ResourceManagerController.$inject = ['$http', '$document']
 
-app.component('resourceManager', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.html',
+let resourceManager = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager.html',
   bindings: {
     resourceItems: '<',
     selectedResourceKey: '<',
@@ -237,4 +237,6 @@ app.component('resourceManager', {
     setCurrentSelectedResourceKey: '&'
   },
   controller: ResourceManagerController
-})
+}
+
+export default resourceManager

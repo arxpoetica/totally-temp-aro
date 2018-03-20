@@ -36,8 +36,8 @@ class ImpedanceEditorController {
 
 ImpedanceEditorController.$inject = ['$http']
 
-app.component('impedanceEditor', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/impedance-editor-component.html',
+let impedanceEditor = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/impedance-editor.html',
   bindings: {
     impedanceManagerId: '<',
     listMode: '<',
@@ -46,4 +46,6 @@ app.component('impedanceEditor', {
     impedanceManagerNameChanged: '&'
   },
   controller: ImpedanceEditorController
-})
+}
+
+export default impedanceEditor

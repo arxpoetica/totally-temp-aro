@@ -40,10 +40,12 @@ class PlanResourceEditorController {
 
 PlanResourceEditorController.$inject = ['state']
 
-app.component('planResourceEditorModal', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal-component.html',
+let planResourceEditorModal = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal.html',
   bindings: {
     selectedResourceKey: '<'
   },
   controller: PlanResourceEditorController
-})
+}
+
+export default planResourceEditorModal

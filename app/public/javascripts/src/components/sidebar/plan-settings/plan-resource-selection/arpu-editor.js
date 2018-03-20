@@ -64,8 +64,8 @@ class ArpuEditorController {
 
 ArpuEditorController.$inject = ['$http']
 
-app.component('arpuEditor', {
-  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/arpu-editor-component.html',
+let arpuEditor = {
+  templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/arpu-editor.html',
   bindings: {
     arpuManagerId: '<',
     listMode: '<',
@@ -74,4 +74,6 @@ app.component('arpuEditor', {
     arpuManagerNameChanged: '&'
   },
   controller: ArpuEditorController
-})
+}
+
+export default arpuEditor
