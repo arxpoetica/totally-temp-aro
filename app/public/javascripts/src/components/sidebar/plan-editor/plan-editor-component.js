@@ -266,17 +266,47 @@ class PlanEditorController {
         onCreate: (editableMapObject) => {
           this.createdEditableObjects.push(editableMapObject)
           this.calculateCoverage(editableMapObject)
+          // Format the object and send it over to aro-service
+          var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
+          var serviceFeature = {
+            objectId: editableMapObject.feature.objectId,
+            geometry: {
+              type: 'Point',
+              coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+            }
+          }
+          this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
         },
         onMouseDown: (editableMapObject, geometry, event) => {
           if (this.selectedEditorMode === this.editorModes.DELETE) {
             // Remove all geometries from map
             editableMapObject.setFeature(null)
+            // Format the object and send it over to aro-service
+            var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
+            var serviceFeature = {
+              objectId: editableMapObject.feature.objectId,
+              geometry: {
+                type: 'Point',
+                coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+              }
+            }
+            this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
           }
         },
         onDragEnd: (editableMapObject, geometry, event) => {
           // Update the coordinates in the feature
           editableMapObject.feature.geometries.CENTER_POINT.coordinates = event.latLng
           this.calculateCoverage(editableMapObject)
+          // Format the object and send it over to aro-service
+          var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
+          var serviceFeature = {
+            objectId: editableMapObject.feature.objectId,
+            geometry: {
+              type: 'Point',
+              coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+            }
+          }
+          this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
         }
       }
       var mapObject = new EditableMapObject(this.mapRef, equipmentFeature, handlers)
