@@ -150,6 +150,7 @@
         zoom: 12,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         panControl: false,
+        mapTypeControl: true,
         mapTypeControlOptions: {
           position: google.maps.ControlPosition.BOTTOM_RIGHT
         },
@@ -157,8 +158,10 @@
           style: google.maps.ZoomControlStyle.SMALL,
           position: google.maps.ControlPosition.RIGHT_BOTTOM
         },
+        streetViewControl: true,
         streetViewControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_BOTTOM
+          position: google.maps.ControlPosition.RIGHT_BOTTOM,
+          enableCloseButton: true
         },
         styles: styles,
       });
@@ -201,66 +204,7 @@
   <script src="javascripts/vendors/split.min.js"></script>
   
   <!-- Components -->
-  <script src="javascripts/lib/components/views/boundaries-component.js"></script>
-
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
-  <script src="javascripts/lib/components/tiles/tile-component.js"></script>
-
-  <script src="javascripts/lib/components/accordion/accordion-component.js"></script>
-  <script src="javascripts/lib/components/accordion/accordion-panel-title-component.js"></script>
-  <script src="javascripts/lib/components/accordion/accordion-panel-contents-component.js"></script>
-
-  <script src="javascripts/lib/components/common/aro-multiselect-component.js"></script>
-  <script src="javascripts/lib/components/common/aro-object-editor-component.js"></script>
-  <script src="javascripts/lib/components/common/aro-panel-component.js"></script>
-
-  <script src="javascripts/lib/components/sidebar/optimize-button-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/display-mode-buttons-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/analysis-mode-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/show-targets-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/analysis-expert-mode-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-modal-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-analysis/network-analysis-output-content-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/analysis/network-build/network-build-output-component.js"></script>  
-  <script src="javascripts/lib/components/sidebar/debug/aro-debug-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/debug/view-settings-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-settings-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-data-selection/plan-data-selection-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal-component.js"></script> 
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader-component.js"></script> 
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/pricebook-editor-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/roic-editor-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/arpu-editor-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/impedance-editor-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-resource-selection/resource-manager-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/view/view-mode-component.js"></script>  
-  <script src="javascripts/lib/components/sidebar/view/location-detail-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/view/boundary-detail-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/view/equipment-detail-component.js"></script>  
-  <script src="javascripts/lib/components/sidebar/view/road-segment-detail-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/view/location-editor-component.js"></script>
-  <script src="javascripts/lib/components/sidebar/view/coverage-boundary-component.js"></script>
-
-  <script src="javascripts/lib/components/global-settings/global-settings-component.js"></script>
-  <script src="javascripts/lib/components/global-settings/user-account-settings-component.js"></script>
-  <script src="javascripts/lib/components/global-settings/manage-users-component.js"></script>
-  <script src="javascripts/lib/components/global-settings/user-settings.js"></script>  
-
-  <script src="javascripts/lib/components/header/tool-bar-component.js"></script>
-  <script src="javascripts/lib/components/header/network-plan-component.js"></script>
-  <script src="javascripts/lib/components/header/network-plan-manage-component.js"></script>
-  <script src="javascripts/lib/components/header/report-modal-component.js"></script>
-  <script src="javascripts/lib/components/header/network-plan-modal-component.js"></script>
-
-  <script src="javascripts/lib/components/map/map-split-component.js"></script>
-  <script src="javascripts/lib/components/map/map-selector-component.js"></script>
   
   <script src="javascripts/lib/controllers/body_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
@@ -305,6 +249,10 @@
   <script src="javascripts/lib/directives/dialogs.js"></script>
   <script src="javascripts/lib/directives/modal.js"></script>
   <script src="javascripts/lib/factories/fiberGraph.js"></script>
+
+  <!-- models -->
+  <script src="javascripts/bundle.js"></script>
+  
   <script>app.run(function($rootScope,loader){$rootScope.appTitle = "<%= config.ui.title %>"})</script>
   <script>
     $(function () {
