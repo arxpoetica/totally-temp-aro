@@ -443,6 +443,59 @@ class MapTileRenderer {
       ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
     }
     ctx.stroke()
+    this.drawSegmentDirection(shape, ctx, ctx.strokeStyle)
+  }
+
+  // Draws an arrow showing the direction of a polyline
+  drawSegmentDirection(shape, ctx, strokeStyle) {
+    if (shape.length <= 1) {
+      return // Nothing to do
+    }
+
+    // Find the length of the polyline
+    var polylineLength = 0.0
+    var segmentLengths = []
+    for (var iCoord = 0; iCoord < shape.length - 1; ++iCoord) {
+      var deltaX = shape[iCoord + 1].x - shape[iCoord].x
+      var deltaY = shape[iCoord + 1].y - shape[iCoord].y
+      var segmentLength = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
+      segmentLengths.push(segmentLength)
+      polylineLength += segmentLength
+    }
+
+    // Now travel along the polyline and find the point that is in the middle
+    var xCenter = NaN, yCenter = NaN
+    var currentSegment = 0
+    var remainingDistance = polylineLength / 2
+    while (remainingDistance > 0 && currentSegment < segmentLengths.length) {
+      if (segmentLengths[currentSegment] < remainingDistance) {
+        remainingDistance -= segmentLengths[currentSegment]
+        ++currentSegment
+        continue
+      }
+      // The center point lies on this segment
+      var fraction = remainingDistance / segmentLengths[currentSegment]
+      var deltaX = shape[currentSegment + 1].x - shape[currentSegment].x
+      var deltaY = shape[currentSegment + 1].y - shape[currentSegment].y
+      xCenter = this.drawMargins + shape[currentSegment].x + fraction * deltaX
+      yCenter = this.drawMargins + shape[currentSegment].y + fraction * deltaY
+      ++currentSegment
+      break
+    }
+
+    ctx.strokeStyle = strokeStyle
+    ctx.beginPath()
+    var radius = 3
+    ctx.ellipse(xCenter, yCenter, 3, 3, 0, 0, Math.PI * 2.0)
+    ctx.stroke()
+
+
+    // If we have more than one segment, choose the one that is in the center. ie. for 3 segments, choose the 2nd one.
+
+
+    // All measurements are in pixels
+    var arrowLength = 5, arrowWidth = 5
+    
   }
 
   // Renders a polygon feature onto the canvas
