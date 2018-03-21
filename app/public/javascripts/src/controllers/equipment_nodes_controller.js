@@ -77,7 +77,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               lineWidth: 2,
               fillStyle: networkEquipment.drawingOptions.fillStyle,
               opacity: 0.5,
-              selectable: true
+              selectable: true,
+              showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
             }
             createdMapLayerKeys.add(networkEquipment.key)
           } else if (networkEquipment.key == 'planned_existing_fiber' && networkEquipment.checked

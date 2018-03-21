@@ -443,7 +443,11 @@ class MapTileRenderer {
       ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
     }
     ctx.stroke()
-    this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
+
+    // Draw the polyline direction if the map options specify it
+    if (mapLayer.showPolylineDirection) {
+      this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
+    }
   }
 
   // Draws an arrow showing the direction of a polyline
