@@ -22,9 +22,9 @@ class AccordionPanelContentsController {
   }
 }
 
-AccordionPanelContentsController.inject = ['$element']
+AccordionPanelContentsController.$inject = ['$element']
 
-app.component('accordionPanelContents', {
+let accordionPanelContents = {
   template: `
     <style scoped>
       .accordion-common {
@@ -56,4 +56,6 @@ app.component('accordionPanelContents', {
     panelId: '<'
   },
   controller: AccordionPanelContentsController
-})
+}
+
+export default accordionPanelContents

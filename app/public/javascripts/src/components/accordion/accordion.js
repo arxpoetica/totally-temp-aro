@@ -45,7 +45,7 @@ class AccordionController {
   }
 }
 
-app.component('accordion', {
+let accordion = {
   template: `
     <style scoped>
       .accordion-container {
@@ -68,4 +68,6 @@ app.component('accordion', {
     toggleExpandedPanel: '=' // [Optional] When we wants to toggle the panel programatically.
   },
   controller: AccordionController
-})
+}
+
+export default accordion

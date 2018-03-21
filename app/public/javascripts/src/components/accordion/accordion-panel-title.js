@@ -11,9 +11,9 @@ class AccordionPanelTitleController {
   }
 }
 
-AccordionPanelTitleController.inject = ['$element']
+AccordionPanelTitleController.$inject = ['$element']
 
-app.component('accordionPanelTitle', {
+let accordionPanelTitle = {
   template: `
     <style scoped>
       .accordion-title, .accordion-title:focus, .accordion-title:hover {
@@ -39,4 +39,6 @@ app.component('accordionPanelTitle', {
     panelId: '<'
   },
   controller: AccordionPanelTitleController
-})
+}
+
+export default accordionPanelTitle

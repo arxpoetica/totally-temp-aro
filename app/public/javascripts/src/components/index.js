@@ -45,6 +45,10 @@ import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import aroObjectEditor from './common/aro-object-editor'
+import accordion from './accordion/accordion'
+import accordionPanelContents from './accordion/accordion-panel-contents'
+import accordionPanelTitle from './accordion/accordion-panel-title'
+import tile from './tiles/tile'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -92,3 +96,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroPanel', aroPanel)
    .component('aroMultiSelect', aroMultiSelect)
    .component('aroObjectEditor', aroObjectEditor)
+   .component('accordion', accordion)
+   .component('accordionPanelContents', accordionPanelContents)
+   .component('accordionPanelTitle', accordionPanelTitle)
+   .component('tile', tile)

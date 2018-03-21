@@ -9,7 +9,7 @@ class NetworkPlanController {
 
 }
 
-NetworkPlanController.inject = ['$timeout', 'state']
+NetworkPlanController.$inject = ['$timeout', 'state']
 
 let networkPlan = {
   templateUrl: '/components/header/network-plan.html',

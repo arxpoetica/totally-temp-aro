@@ -1166,11 +1166,12 @@ class TileComponentController {
 
 TileComponentController.$inject = ['$document', 'state', 'tileDataService']
 
-app.component('tile', {
+let tile = {
   template: '',
   bindings: {
     mapGlobalObjectName: '@'
   },
   controller: TileComponentController
-})
+}
 
+export default tile
