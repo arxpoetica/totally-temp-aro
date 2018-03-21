@@ -92,16 +92,14 @@ class LocationEditorController {
       return  // Only supporting editing of a single location
     }
 
-    // Note that UUID and object revision should come from aro-service.
-    // Use UUID for featureId. If not found, use location_id
-    var featureId = event.locations[0].object_id || event.locations[0].location_id
+    var objectId = event.locations[0].object_id
 
     if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.MOVE) {
-      this.createEditableMarker(event.latLng, featureId, 2)
+      this.createEditableMarker(event.latLng, objectId)
     } else if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.DELETE) {
       var command = new CommandDeleteLocation()
       var params = {
-        uuid: featureId,
+        objectId: objectId,
         $http: this.$http,
         transactionId: this.currentTransaction.id
       }
@@ -109,16 +107,15 @@ class LocationEditorController {
     }
 
     // Stop rendering this location in the tile
-    this.tileDataService.addFeatureToExclude(featureId)
+    this.tileDataService.addFeatureToExclude(objectId)
     this.state.requestMapLayerRefresh.next({})
   }
 
-  createEditableMarker(coordinateLatLng, uuid, objectRevision) {
+  createEditableMarker(coordinateLatLng, objectId) {
     // Create a new marker for the location, only if we are in the right selection mode
     var command = new CommandAddLocation()
     var params = {
-      uuid: uuid,
-      objectRevision: objectRevision,
+      objectId: objectId,
       locationLatLng: coordinateLatLng,
       numLocations: this.addLocationData.numLocations,
       map: this.mapRef,
@@ -141,7 +138,7 @@ class LocationEditorController {
         // We are in delete mode.
         var command = new CommandDeleteLocation()
         var params = {
-          uuid: newLocationMarker.uuid,
+          objectId: newLocationMarker.objectId,
           $http: this.$http,
           transactionId: this.currentTransaction.id
         }
@@ -156,11 +153,11 @@ class LocationEditorController {
 
   selectMarker(marker) {
     if (this.selectedLocation) {
-      this.selectedLocation.setIcon('/images/map_icons/aro/households_default.png')
+      this.selectedLocation.setIcon('/images/map_icons/aro/households_modified.png')
     }
     this.selectedLocation = marker
     this.selectedLocation.setIcon('/images/map_icons/aro/households_selected.png')
-    var featureObj = this.store.uuidToFeatures[marker.uuid]
+    var featureObj = this.store.objectIdToFeatures[marker.objectId]
     this.addLocationData.numLocations = featureObj.numLocations
     this.$timeout()
   }
@@ -247,13 +244,18 @@ class LocationEditorController {
     })
   }
 
-  $onDestroy() {
+  destroyAllCreatedMarkers() {
     // Remove all markers that we have created
     Object.keys(this.store.createdMarkers).forEach((key) => {
       var marker = this.store.createdMarkers[key]
       marker.setMap(null)
     })
-    this.store.createdMarkers = null
+    this.store.createdMarkers = {}
+  }
+
+  $onDestroy() {
+
+    this.destroyAllCreatedMarkers()
 
     // Reset selection mode to single select mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.MOVE

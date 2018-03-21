@@ -8,7 +8,8 @@ class GlobalSettingsController {
     this.views = Object.freeze({
       Global_Settings: 0,
       My_Account: 1,
-      Manage_Users: 2
+      Manage_Users: 2,
+      User_Settings: 3
     })
     this.currentView = this.views.Global_Settings
   }
@@ -31,6 +32,10 @@ class GlobalSettingsController {
 
   toggleManageUsersMode() {
     this.currentView = this.views.Manage_Users
+  }
+
+  toggleUserSettings() {
+    this.currentView = this.views.User_Settings
   }
 
 }
@@ -68,6 +73,12 @@ let globalSettings = {
               <i class="fa fa-2x fa-users"></i>
               <br>Manage Users
           </button>
+
+          <button class="btn settings-btn"
+            ng-click="$ctrl.toggleUserSettings()">
+              <i class="fa fa-2x fa-cogs"></i>
+              <br>User Settings
+          </button>
         </div>
 
         <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.My_Account"></user-account-settings>
@@ -75,12 +86,18 @@ let globalSettings = {
         <manage-users ng-if="$ctrl.currentView === $ctrl.views.Manage_Users"
           manager-view="$ctrl.globalSettingsService.currentManageUserView"></manage-users>  
 
+        <user-settings ng-show="$ctrl.currentView === $ctrl.views.User_Settings"></user-settings>  
+
       </modal-body>
 
       <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">
         <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
       </modal-footer>
       <modal-footer ng-if="$ctrl.currentView === $ctrl.views.My_Account">
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.User_Settings">
         <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>

@@ -10,16 +10,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.vztfttp = true
   $scope.planState = state;
 
-  $scope.existingFiberLayer = {
-    name: 'Existing Fiber',
-    iconUrl: '/images/map_icons/aro/fiber_backhaul.png',
-    visible: false
-  }
-
-  $scope.toggleExistingFiberLayer = () => {
-    updateMapLayers()
-  }
-
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
@@ -67,7 +57,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
         // Loop through all the layers in this category
         category.layers.forEach((networkEquipment) => {
-          if (networkEquipment.checked) {
+          if (networkEquipment.checked && networkEquipment.key != 'planned_existing_fiber') {
             var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
             if (networkEquipment.equipmentType === 'point') {
               var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
@@ -87,29 +77,29 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               lineWidth: 2,
               fillStyle: networkEquipment.drawingOptions.fillStyle,
               opacity: 0.5,
-              selectable: true
+              selectable: true,
+              showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
             }
             createdMapLayerKeys.add(networkEquipment.key)
+          } else if (networkEquipment.key == 'planned_existing_fiber' && networkEquipment.checked
+          && state.dataItems.fiber){
+            var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
+            var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
+            var tileUrl = networkEquipment.tileUrl.replace('{lineTransform}', lineTransform)
+            state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
+              var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
+              tileUrl = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
+              oldMapLayers[mapLayerKey] = {
+                dataUrls: [tileUrl],
+                iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
+                renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+                strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
+                lineWidth: 2
+              }
+              createdMapLayerKeys.add(mapLayerKey)
+            })
           }
         })
-      })
-    }
-
-    var layer = $scope.existingFiberLayer
-    // Create layers for existing fiber (the ones that are selected for display)
-    if (layer.visible && state.dataItems.fiber) {
-      var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
-      var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
-      state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
-        var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
-        oldMapLayers[mapLayerKey] = {
-          dataUrls: [`/tile/v1/fiber/existing/tiles/${selectedLibraryItem.identifier}/${lineTransform}/`],
-          iconUrl: layer.iconUrl, // Hack because we need some icon
-          renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-          strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
-          lineWidth: 2
-        }
-        createdMapLayerKeys.add(mapLayerKey)
       })
     }
 
