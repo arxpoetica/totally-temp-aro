@@ -44,7 +44,8 @@ app.component('equipmentDetail', {
   <div class="equipment-detail" ng-if="$ctrl.selectedEquipmentInfo !== null">
     <div>id: {{$ctrl.selectedEquipmentInfo.id}}</div>
     <div>Type: {{$ctrl.selectedEquipmentInfo.description}}</div>
-    <div>location: {{$ctrl.selectedEquipmentInfo.geog.coordinates}}</div>
+    <div>Latitude: {{$ctrl.selectedEquipmentInfo.geog.coordinates[1]}}</div>
+    <div>Longitude: {{$ctrl.selectedEquipmentInfo.geog.coordinates[0]}}</div>
   </div>
   `,
   bindings: {},

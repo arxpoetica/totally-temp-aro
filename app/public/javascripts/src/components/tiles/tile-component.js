@@ -964,7 +964,7 @@ class TileComponentController {
 
             //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
             state.mapFeaturesSelectedEvent.next({
-              locations: selectedLocations,
+              locations: selectedLocationsIds,
               serviceAreas: selectedServiceAreaIds,
               roadSegments: selectedRoadSegments
             })
