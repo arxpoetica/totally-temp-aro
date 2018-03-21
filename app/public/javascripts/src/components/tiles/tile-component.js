@@ -443,11 +443,11 @@ class MapTileRenderer {
       ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
     }
     ctx.stroke()
-    this.drawSegmentDirection(shape, ctx, ctx.strokeStyle)
+    this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
   }
 
   // Draws an arrow showing the direction of a polyline
-  drawSegmentDirection(shape, ctx, strokeStyle) {
+  drawPolylineDirection(shape, ctx, strokeStyle) {
     if (shape.length <= 1) {
       return // Nothing to do
     }
@@ -456,16 +456,22 @@ class MapTileRenderer {
     var polylineLength = 0.0
     var segmentLengths = []
     for (var iCoord = 0; iCoord < shape.length - 1; ++iCoord) {
-      var deltaX = shape[iCoord + 1].x - shape[iCoord].x
-      var deltaY = shape[iCoord + 1].y - shape[iCoord].y
-      var segmentLength = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
+      const deltaX = shape[iCoord + 1].x - shape[iCoord].x
+      const deltaY = shape[iCoord + 1].y - shape[iCoord].y
+      const segmentLength = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
       segmentLengths.push(segmentLength)
       polylineLength += segmentLength
     }
 
+    const arrowLength = 5, arrowWidth = 5
+    if (polylineLength < arrowLength * 2.0) {
+      // Polyline is too small at this zoom level. Do not draw an arrow
+      return
+    }
+
     // Now travel along the polyline and find the point that is in the middle
     var xCenter = NaN, yCenter = NaN
-    var currentSegment = 0
+    var currentSegment = 0, centerSegment = -1
     var remainingDistance = polylineLength / 2
     while (remainingDistance > 0 && currentSegment < segmentLengths.length) {
       if (segmentLengths[currentSegment] < remainingDistance) {
@@ -474,28 +480,47 @@ class MapTileRenderer {
         continue
       }
       // The center point lies on this segment
-      var fraction = remainingDistance / segmentLengths[currentSegment]
-      var deltaX = shape[currentSegment + 1].x - shape[currentSegment].x
-      var deltaY = shape[currentSegment + 1].y - shape[currentSegment].y
+      const fraction = remainingDistance / segmentLengths[currentSegment]
+      const deltaX = shape[currentSegment + 1].x - shape[currentSegment].x
+      const deltaY = shape[currentSegment + 1].y - shape[currentSegment].y
       xCenter = this.drawMargins + shape[currentSegment].x + fraction * deltaX
       yCenter = this.drawMargins + shape[currentSegment].y + fraction * deltaY
+      centerSegment = currentSegment
       ++currentSegment
       break
     }
 
+    // Get the unit direction for the segment on which the center point lies
+    const unitDirection = {
+      x: (shape[centerSegment + 1].x - shape[centerSegment].x) / segmentLengths[centerSegment],
+      y: (shape[centerSegment + 1].y - shape[centerSegment].y) / segmentLengths[centerSegment]
+    }
+    // Get the direction perpendicular to this unit direction
+    const unitPerpendicularDirection = {
+      x: -unitDirection.y,
+      y: unitDirection.x
+    }
+
     ctx.strokeStyle = strokeStyle
     ctx.beginPath()
-    var radius = 3
-    ctx.ellipse(xCenter, yCenter, 3, 3, 0, 0, Math.PI * 2.0)
+    // Define the 3 points for the arrow. One at the tip, the other two at the bottom
+    const pt1 = {
+      x: xCenter + (unitDirection.x * arrowLength / 2),
+      y: yCenter + (unitDirection.y * arrowLength / 2)
+    }
+    const pt2 = {
+      x: xCenter - (unitDirection.x * arrowLength / 2) + (unitPerpendicularDirection.x * arrowWidth / 2),
+      y: yCenter - (unitDirection.y * arrowLength / 2) + (unitPerpendicularDirection.y * arrowWidth / 2)
+    }
+    const pt3 = {
+      x: xCenter - (unitDirection.x * arrowLength / 2) - (unitPerpendicularDirection.x * arrowWidth / 2),
+      y: yCenter - (unitDirection.y * arrowLength / 2) - (unitPerpendicularDirection.y * arrowWidth / 2)
+    }
+    ctx.moveTo(pt1.x, pt1.y)
+    ctx.lineTo(pt2.x, pt2.y)
+    ctx.lineTo(pt3.x, pt3.y)
+    ctx.lineTo(pt1.x, pt1.y)
     ctx.stroke()
-
-
-    // If we have more than one segment, choose the one that is in the center. ie. for 3 segments, choose the 2nd one.
-
-
-    // All measurements are in pixels
-    var arrowLength = 5, arrowWidth = 5
-    
   }
 
   // Renders a polygon feature onto the canvas
