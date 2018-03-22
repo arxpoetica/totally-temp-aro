@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: ARO Stack - QA Environment
+Description: ARO Stack - APP - QA Environment
 
 Parameters:
   VpcId:
@@ -50,7 +50,7 @@ Parameters:
     Default: "arn:aws:acm:us-east-1:976168524097:certificate/b7189445-e5c4-4d94-b875-376b39d063e1"
   ConfigRepoBranch:
     Type: String
-    Default: "master"
+    Default: "v1.3"
   AroClient:
     Type: String
     Default: "aro"
@@ -63,6 +63,18 @@ Parameters:
     Type: String
     AllowedValues: ["yes", "no"]
     Default: "no"
+  EcrUriRoot:
+    Type: String
+    Default: "976168524097.dkr.ecr.us-east-1.amazonaws.com"
+  AroAppImageName:
+    Type: String
+    Default: "aro/aro-app"
+  AroEtlImageName:
+    Type: String
+    Default: "aro/aro-etl"
+  AroNginxImageName:
+    Type: String
+    Default: "aro/aro-app-nginx"
 
 Mappings:
   DNSZoneMap:
@@ -334,6 +346,42 @@ Resources:
         } ]
       }
 
+  StackEcrAccessPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Roles:
+        - !Ref StackRole
+      PolicyName: !Sub "S-ARO-APP-${EnvSlug}-ECR-ACCESS-POLICY" 
+      PolicyDocument: {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Stmt1484162767000",
+            "Effect": "Allow",
+            "Action": [
+              "ecr:GetAuthorizationToken"
+            ],
+            "Resource": [
+              "*"
+            ]
+          },
+          {
+            "Sid": "Stmt1484162767001",
+            "Effect": "Allow",
+             "Action": [
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage",
+              "ecr:BatchCheckLayerAvailability"
+            ],
+            "Resource": [
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroAppImageName}",
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroEtlImageName}",
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroNginxImageName}"              
+            ]
+          }
+        ]
+      }
+
   StackInstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
@@ -344,7 +392,7 @@ Resources:
   OpsWorksStack:
     Type: "AWS::OpsWorks::Stack"
     Properties:
-      Name: !Sub "S-ARO-QA-${EnvSlug}"
+      Name: !Sub "S-ARO-APP-QA-${EnvSlug}"
       VpcId: !Ref VpcId
       DefaultSubnetId: !GetAtt SharedNetworkInfo.AppSubnetB
       DefaultOs: "Ubuntu 14.04 LTS"
@@ -363,7 +411,7 @@ Resources:
       CustomCookbooksSource:
         Type: "git"
         Url: "git@octocat.altvil.com:AIT/aro-opsworks"
-        Revision: "master"
+        Revision: !Ref ConfigRepoBranch
         SshKey: !Ref GithubSshKey
       UseOpsworksSecurityGroups: false
 
@@ -382,10 +430,10 @@ Resources:
       InstallUpdatesOnBoot: true
       CustomRecipes:
         Setup:
+          - "aro_ops_app::install"
           - "aro_ops::cwlogs"
-          - "aro_ops::install"
         Deploy:
-          - "aro_ops::compose"
+          - "aro_ops_app::compose"
       VolumeConfigurations:
         - MountPoint: "/var/lib/docker"
           Size: "40"
