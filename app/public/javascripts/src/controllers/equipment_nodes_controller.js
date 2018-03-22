@@ -57,7 +57,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
         // Loop through all the layers in this category
         category.layers.forEach((networkEquipment) => {
-          if (networkEquipment.checked && networkEquipment.key != 'planned_existing_fiber') {
+          if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') < 0) {
             var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
             if (networkEquipment.equipmentType === 'point') {
               var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
@@ -81,8 +81,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
             }
             createdMapLayerKeys.add(networkEquipment.key)
-          } else if (networkEquipment.key == 'planned_existing_fiber' && networkEquipment.checked
-          && state.dataItems.fiber){
+          } else if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') >= 0
+                     && state.dataItems.fiber){
             var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
             var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
             var tileUrl = networkEquipment.tileUrl.replace('{lineTransform}', lineTransform)
@@ -93,8 +93,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 dataUrls: [tileUrl],
                 iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
                 renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-                strokeStyle: state.existingFiberOptions.drawingOptions.strokeStyle,
-                lineWidth: 2
+                strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+                lineWidth: 2,
+                fillStyle: networkEquipment.drawingOptions.fillStyle,
+                showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
               }
               createdMapLayerKeys.add(mapLayerKey)
             })
