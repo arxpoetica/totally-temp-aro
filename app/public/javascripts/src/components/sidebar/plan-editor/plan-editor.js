@@ -337,10 +337,12 @@ class PlanEditorController {
 
 PlanEditorController.$inject = ['state', '$http', '$timeout', 'configuration']
 
-app.component('planEditor', {
+let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor-component.html',
   bindings: {
     mapGlobalObjectName: '@'
   },
   controller: PlanEditorController
-})
+}
+
+export default planEditor
