@@ -258,7 +258,7 @@ class PlanEditorController {
             type: 'point',
             coordinates: event.latLng,
             draggable: true,
-            icon: '/images/map_icons/aro/coverage_target.png'
+            icon: '/images/map_icons/aro/plan_equipment.png'
           }
         }
       }
