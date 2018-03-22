@@ -1,0 +1,264 @@
+<style scoped>
+
+  .tool-bar {
+    z-index: 3;
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: #1f7de6;
+    color: #eee;
+  }
+
+  .tool-bar .ng-hide-remove {
+    animation: fadeInDown 300ms;
+  }
+
+  .tool-bar .ng-hide-add {
+    animation: fadeOutUp 300ms;
+  }
+  .tool-bar .separator {
+    border-left: #eee 1px dotted;
+  }
+  .tool-bar .btn {
+    flex: 0 0 30px;
+    background-color: #1f7de6;
+    border: none;
+    border-radius: 0px;
+    color: #eee;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 36px;
+  }
+  .tool-bar .btn:hover {
+    background-color: #eee;
+    color: #1f7de6;
+  }
+  .tool-bar .btn-selected {
+    background-color: #eee;
+    color: #1f7de6;
+  }
+  .view-dropdown {
+    min-width: 170px
+  }
+  .dropdown-divider {
+    height: 1px;
+    margin: .5rem 0;
+    overflow: hidden;
+    background-color: #eceeef;
+  }
+  
+  /* http://jsfiddle.net/JnrvG/1/ */
+  .myDropdown1 input[type="range"]{
+    -webkit-appearance: none;
+    -moz-apperance: none;
+    border-radius: 6px;
+    height: 6px;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        right top,
+        color-stop(0.15, #1f7de6),
+        color-stop(0.15, #C5C5C5)
+    );
+    margin: 10px 0px;
+  }
+  .myDropdown1 input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    background-color: #E9E9E9;
+    border: 1px solid #CECECE;
+    height: 15px;
+    width: 10px;
+  }
+
+</style>
+
+<style scoped>
+  #global-search-toolbutton .select2-container {
+    border-radius: 0px;
+  }
+  #global-search-toolbutton .select2-choice {
+    padding-left: 0px;
+    color: white;
+    border-radius: 0px;
+  }
+  #global-search-toolbutton .select2-chosen {
+    background-color: #1f7de6;
+    padding-left: 10px;
+    margin-right: 0px;
+    color: #eee;
+  }
+  #global-search-toolbutton .select2-arrow {
+    display: none;  /* Hiding the arrow completely for now */
+  }
+  #global-search-toolbutton .select2-input {
+    background-color: #1f7de6;
+  }
+  .select2-search {
+    padding: 0px;
+    background-color: #1f7de6;
+  }
+  .select2-results {
+    background-color: #1f7de6;
+    color: #eee;
+    margin: 0px;
+  }
+  .select2-results .select2-highlighted {
+    background-color: white;
+    color: #1f7de6;
+  }
+</style>
+
+<div class="tool-bar" ng-style="{ margin: $ctrl.marginPixels + 'px' }">
+
+  <img src="images/logos/aro/logo_navbar.png" class="no-collapse" style="align-self: center; padding-left: 10px; padding-right: 10px">
+
+  <div ng-controller="global-search-controller" class="no-collapse" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
+    <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
+  </div>
+
+  <div class="fa fa-search no-collapse" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
+
+  <div class="separator" class="no-collapse"></div>
+
+  <button class="btn"
+          ng-click="$ctrl.openGlobalSettings()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Global Settings...">
+    <i class="fa fa-th"></i>
+  </button>
+
+  <div class="separator"></div>
+
+  <button class="btn"
+          ng-click="$ctrl.createEphemeralPlan()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Create a new plan">
+    <i class="fa fa-file"></i>
+  </button>
+
+  <button class="btn"
+          ng-click="$ctrl.savePlanAs()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Save plan as...">
+    <i class="fa fa-floppy-o"></i>
+  </button>
+
+  <button class="btn"
+          ng-click="$ctrl.showPlanModal()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Open an existing plan...">
+    <i class="fa fa-folder-open"></i>
+  </button>
+
+  <div class="separator"></div>
+
+  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.measuringStickEnabled }"
+          ng-click="$ctrl.toggleMeasuringStick()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Ruler">
+    <i class="fa fa-arrows-h"></i>
+  </button>
+
+  <div class="myDropdown1">
+    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Show view settings...">
+      <i class="fa fa-eye"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right view-dropdown">
+      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.heatMapOption" ng-change="$ctrl.toggleHeatMapOptions()" name="ctype-name"
+        style="margin-left: 2px;">
+      <font color="#1f7de6">Location Heatmap On</font>
+      <div class="dropdown-divider" ng-if="$ctrl.heatMapOption"></div>
+      <font color="#1f7de6" ng-if="$ctrl.heatMapOption">Heatmap Intensity</font>
+      <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
+        style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">  
+    </div>
+  </div>
+
+  <div ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW" class="separator"></div>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select individual locations">
+    <i class="fa fa-mouse-pointer"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                   || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select multiple locations">
+    <i class="fa fa-bookmark-o fa-rotate-180"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.MOVE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.MOVE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Move locations">
+    <i class="fa fa-arrows"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.CREATE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.CREATE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Add locations">
+    <i class="fa fa-plus"></i>
+  </button>
+
+  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.DELETE }"
+          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.DELETE)"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Delete locations">
+    <i class="fa fa-trash"></i>
+  </button>
+
+  <div class="separator"></div>
+
+  <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
+          ng-class="{ 'btn': true,
+                      'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
+                                      && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
+                    }"
+          ng-click="$ctrl.openCoverageBoundaryPanel()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Calculate coverage boundary">
+    <i class="fa fa-crosshairs fa-rotate-180"></i>
+  </button>
+
+  <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <i class="fa fa-angle-double-down"></i>
+    </button>
+    <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc -->
+    <ul class="dropdown-menu tool-bar-dropdown" aria-labelledby="dropdownMenu1" style="padding: 0px; min-width: 0px;">
+    </ul>
+  </div>
+
+</div>

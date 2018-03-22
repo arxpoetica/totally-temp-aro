@@ -22,35 +22,6 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
   })
 
-  // The state.locations object will be updated after the configuration is loaded
-  $scope.planState = state;
-
-  $scope.derivedConstructionSites = []
-  state.constructionSites.subscribe((newValue) => {
-    $scope.derivedConstructionSites = newValue
-  })
-
-  $scope.new_location_data = null
-
-  $scope.changeLocationsLayer = (majorCategory) => {
-    tracker.track('Locations / ' + $scope.overlay)
-
-    // Select the business, household, celltower categories to show
-    var businessCategories = []
-    var householdCategories = []
-    var showTowers = false
-    $scope.planState.locationTypes.forEach((locationType) => {
-      if ((locationType.type === 'business') && locationType.checked) {
-        businessCategories.push(locationType.key)
-      } else if ((locationType.type === 'household') && locationType.checked) {
-        householdCategories.push('small')
-        householdCategories.push('medium')
-      } else if ((locationType.type === 'celltower') && locationType.checked) {
-        showTowers = true
-      }
-    })
-  }
-
   $scope.roadLayer = {
     short_name: 'RS',
     name: 'Road Segments',
