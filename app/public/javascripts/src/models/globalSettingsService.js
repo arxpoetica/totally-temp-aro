@@ -76,5 +76,9 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
 
   }
 
+  globalSettings.saveLocation = () => {
+    $http.put(`/user/default_location/${globalSettings.user.default_location}`)
+  }
+
   return globalSettings
 }])

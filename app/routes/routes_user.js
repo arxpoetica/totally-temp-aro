@@ -9,4 +9,12 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  api.put('/user/default_location/:location', (request, response, next) => {
+    var default_location = request.params.location
+    var user_id = request.user.id
+    models.User.setDefaultLocation(default_location,user_id)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

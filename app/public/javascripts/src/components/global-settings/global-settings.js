@@ -98,7 +98,7 @@ let globalSettings = {
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>
       <modal-footer ng-if="$ctrl.currentView === $ctrl.views.User_Settings">
-        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.saveLocation()">Update settings</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>
       <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Manage_Users && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users">
