@@ -21,6 +21,9 @@ class MapSplitController {
             if (map) {
               google.maps.event.trigger(map, "resize")
             }
+            if (map.getStreetView().getVisible()) {
+              google.maps.event.trigger(panorama, 'resize')
+            }
             // After dragging, if the size is non-zero, it means we have expanded the sidebar
             if (this.splitterObj.getSizes()[1] > 0) {
               this.isCollapsed = false
@@ -50,6 +53,9 @@ class MapSplitController {
     if (map) {
       // Call the resize a litle bit after animations finish, so that the right width is loaded
       this.$timeout(() => google.maps.event.trigger(map, "resize"), this.transitionTimeMsec + 50)
+    }
+    if (map.getStreetView().getVisible()) {
+      this.$timeout(() => google.maps.event.trigger(panorama, 'resize'), this.transitionTimeMsec + 50)
     }
     this.state.splitterObj.next(this.splitterObj)    
   }

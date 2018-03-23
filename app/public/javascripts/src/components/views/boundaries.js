@@ -69,17 +69,17 @@ class BoundariesController {
         reset_style_on_click: true,
         style_options: {
           normal: {
-            fillColor: 'blue',
+            fillColor: 'transparent',
             strokeColor: 'blue',
             strokeWeight: 2
           },
           highlight: {
-            fillColor: 'blue',
+            fillColor: 'transparent',
             strokeColor: 'blue',
             strokeWeight: 4
           },
           selected: {
-            fillColor: 'blue',
+            fillColor: 'transparent',
             strokeColor: 'blue',
             strokeWeight: 4
           }

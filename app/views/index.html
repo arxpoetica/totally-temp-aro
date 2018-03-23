@@ -136,6 +136,7 @@
       $qProvider.errorOnUnhandledRejections(false);
     }]);
     var map;
+    var panorama;
 
     function initialize() {
 
@@ -177,6 +178,24 @@
           });
         }
       }
+
+      var thePanorama = map.getStreetView();
+      // change view
+      google.maps.event.addListener(thePanorama, 'visible_changed', function () {
+        // Display your street view visible UI
+        if (thePanorama.getVisible()) {
+
+          panorama = new google.maps.StreetViewPanorama(
+            document.getElementById('map-canvas'), {
+              addressControlOptions: {
+                position: google.maps.ControlPosition.BOTTOM_CENTER, // <- change position
+              },
+              enableCloseButton: true
+            });
+          // rewrite default options  
+          map.setStreetView(panorama);
+        }
+      });
     }
 
     var user_id = <%= user.id %>;
