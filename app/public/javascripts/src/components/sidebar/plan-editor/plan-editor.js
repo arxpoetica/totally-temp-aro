@@ -57,7 +57,7 @@ class EditableMapObject {
     switch(geometry.type) {
       case 'point':
         mapObject = new google.maps.Marker({
-          position: geometry.coordinates,
+          position: new google.maps.LatLng(geometry.coordinates[1], geometry.coordinates[0]),
           icon: geometry.icon,
           draggable: geometry.draggable,
           map: map,
@@ -146,6 +146,23 @@ class PlanEditorController {
       })
       .then((result) => {
         this.currentTransaction = result.data
+        this.createMapObjectsForCurrentTransaction()
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
+  }
+
+  // Creates map objects for the current transaction
+  createMapObjectsForCurrentTransaction() {
+    // First remove any existing map objects
+    this.removeCreatedMapObjects()
+
+    // Get a list of objects for the current transaction
+    this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+      .then((result) => {
+        result.data.forEach((equipmentFeature) => {
+          this.createMapObject(null, equipmentFeature)
+        })
         this.$timeout()
       })
       .catch((err) => console.error(err))
@@ -228,7 +245,7 @@ class PlanEditorController {
     this.mapRef = window[this.mapGlobalObjectName]
     var self = this
     this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function(event) {
-      self.handleMapClick(event)
+      self.createMapObject(event)
     })
   }
 
@@ -280,21 +297,22 @@ class PlanEditorController {
     this.$timeout()
   }
 
-  handleMapClick(event) {
+  createMapObject(event, feature) {
     if (this.selectedEditorMode === this.editorModes.ADD) {
       // We are in "Add entity" mode
       var CENTER_KEY = 'point'
+      // We may have a feature sent in. If it is, use the properties of that feature
       var equipmentFeature = {
-        objectId: this.getUUID(),
+        objectId: (feature && feature.objectId) || this.getUUID(),
         geometries: {
           CENTER_POINT: {
             type: 'point',
-            coordinates: event.latLng,
+            coordinates: (feature && feature.geometry.coordinates) || [event.latLng.lng(), event.latLng.lat()],
             draggable: true,
             icon: '/images/map_icons/aro/plan_equipment.png'
           }
         },
-        attributes: new EquipmentProperties()
+        attributes: (feature && feature.attributes) || new EquipmentProperties()
       }
       var handlers = {
         onCreate: (editableMapObject) => {
@@ -302,12 +320,11 @@ class PlanEditorController {
           this.calculateCoverage(editableMapObject)
           this.selectMapObject(editableMapObject)
           // Format the object and send it over to aro-service
-          var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
           var serviceFeature = {
             objectId: editableMapObject.feature.objectId,
             geometry: {
               type: 'Point',
-              coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+              coordinates: editableMapObject.feature.geometries.CENTER_POINT.coordinates
             },
             attributes: {
               siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
@@ -366,11 +383,7 @@ class PlanEditorController {
     this.selectedEditorMode = newMode
   }
 
-  $onDestroy() {
-
-    // Remove listener
-    google.maps.event.removeListener(this.clickListener)
-
+  removeCreatedMapObjects() {
     // Remove created objects from map
     this.createdEditableObjects.forEach((editableObject) => {
       Object.keys(editableObject.mapGeometries).forEach((geometryKey) => {
@@ -379,7 +392,12 @@ class PlanEditorController {
       })
     })
     this.createdEditableObjects = []
+  }
 
+  $onDestroy() {
+    // Remove listener
+    google.maps.event.removeListener(this.clickListener)
+    this.removeCreatedMapObjects()
   }
 }
 
