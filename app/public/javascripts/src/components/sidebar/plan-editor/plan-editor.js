@@ -107,6 +107,7 @@ class PlanEditorController {
       EDIT_BOUNDARY: 'EDIT_BOUNDARY'
     })
     this.selectedEditorMode = this.editorModes.ADD
+    this.initializeEquipmentProperties()
     this.coverageRadius = 10000 // Feet!
     this.createdEditableObjects = []
     this.uuidStore = []
@@ -130,6 +131,23 @@ class PlanEditorController {
         this.$timeout()
       })
       .catch((err) => console.error(err))
+  }
+
+  initializeEquipmentProperties() {
+    this.siteIdentifier = ''
+    this.siteName = ''
+    this.siteTypes = ['Remote Terminal']
+    this.selectedSiteType = this.siteTypes[0]
+    this.deploymentDate = '03/18'
+    this.equipments = [
+      'Generic ADSL2+ DSLAM',
+      'Generic ADSL2+ P DSLAM',
+      'Generic ADSL-B DSLAM',
+      'Generic ADSL DSLAM',
+      'Generic VDSL-B DSLAM',
+      'Generic VDSL DSLAM'
+    ]
+    this.selectedEquipment = this.equipments[0]
   }
 
   exitPlanEditMode() {
@@ -338,7 +356,7 @@ class PlanEditorController {
 PlanEditorController.$inject = ['state', '$http', '$timeout', 'configuration']
 
 let planEditor = {
-  templateUrl: '/components/sidebar/plan-editor/plan-editor-component.html',
+  templateUrl: '/components/sidebar/plan-editor/plan-editor.html',
   bindings: {
     mapGlobalObjectName: '@'
   },
