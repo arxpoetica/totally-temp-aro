@@ -358,15 +358,14 @@ class PlanEditorController {
         },
         onDragEnd: (editableMapObject, geometry, event) => {
           // Update the coordinates in the feature
-          editableMapObject.feature.geometries.CENTER_POINT.coordinates = event.latLng
+          editableMapObject.feature.geometries.CENTER_POINT.coordinates = [event.latLng.lng(), event.latLng.lat()]
           this.calculateCoverage(editableMapObject)
           // Format the object and send it over to aro-service
-          var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
           var serviceFeature = {
             objectId: editableMapObject.feature.objectId,
             geometry: {
               type: 'Point',
-              coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+              coordinates: editableMapObject.feature.geometries.CENTER_POINT.coordinates
             },
             attributes: {
               siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
