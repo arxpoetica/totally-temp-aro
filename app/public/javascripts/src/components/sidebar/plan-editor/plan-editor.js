@@ -93,6 +93,25 @@ class EditableMapObject {
   }
 }
 
+class EquipmentProperties {
+  constructor() {
+    this.siteIdentifier = ''
+    this.siteName = ''
+    this.siteTypes = ['Remote Terminal']
+    this.selectedSiteType = this.siteTypes[0]
+    this.deploymentDate = '03/18'
+    this.equipmentTypes = [
+      'Generic ADSL2+ DSLAM',
+      'Generic ADSL2+ P DSLAM',
+      'Generic ADSL-B DSLAM',
+      'Generic ADSL DSLAM',
+      'Generic VDSL-B DSLAM',
+      'Generic VDSL DSLAM'
+    ]
+    this.selectedEquipmentType = this.equipmentTypes[0]
+  }
+}
+
 class PlanEditorController {
   
   constructor(state, $http, $timeout, configuration) {
@@ -107,7 +126,6 @@ class PlanEditorController {
       EDIT_BOUNDARY: 'EDIT_BOUNDARY'
     })
     this.selectedEditorMode = this.editorModes.ADD
-    this.initializeEquipmentProperties()
     this.coverageRadius = 10000 // Feet!
     this.createdEditableObjects = []
     this.uuidStore = []
@@ -131,23 +149,6 @@ class PlanEditorController {
         this.$timeout()
       })
       .catch((err) => console.error(err))
-  }
-
-  initializeEquipmentProperties() {
-    this.siteIdentifier = ''
-    this.siteName = ''
-    this.siteTypes = ['Remote Terminal']
-    this.selectedSiteType = this.siteTypes[0]
-    this.deploymentDate = '03/18'
-    this.equipments = [
-      'Generic ADSL2+ DSLAM',
-      'Generic ADSL2+ P DSLAM',
-      'Generic ADSL-B DSLAM',
-      'Generic ADSL DSLAM',
-      'Generic VDSL-B DSLAM',
-      'Generic VDSL DSLAM'
-    ]
-    this.selectedEquipment = this.equipments[0]
   }
 
   exitPlanEditMode() {
@@ -260,9 +261,23 @@ class PlanEditorController {
         polygonPath: polygonPath,
         draggable: false
       }
+      feature.geometries.CENTER_POINT.icon = (editableMapObject === this.selectedMapObject) 
+                                              ? '/images/map_icons/aro/plan_equipment_selected.png'
+                                              : '/images/map_icons/aro/plan_equipment.png'
       editableMapObject.setFeature(feature)
     })
     .catch((err) => console.error(err))
+  }
+
+  selectMapObject(newObjectToSelect) {
+    if (this.selectedMapObject) {
+      this.selectedMapObject.mapGeometries.CENTER_POINT.setIcon('/images/map_icons/aro/plan_equipment.png')
+    }
+    this.selectedMapObject = newObjectToSelect
+    if (this.selectedMapObject) {
+      this.selectedMapObject.mapGeometries.CENTER_POINT.setIcon('/images/map_icons/aro/plan_equipment_selected.png')
+    }
+    this.$timeout()
   }
 
   handleMapClick(event) {
@@ -278,12 +293,14 @@ class PlanEditorController {
             draggable: true,
             icon: '/images/map_icons/aro/plan_equipment.png'
           }
-        }
+        },
+        properties: new EquipmentProperties()
       }
       var handlers = {
         onCreate: (editableMapObject) => {
           this.createdEditableObjects.push(editableMapObject)
           this.calculateCoverage(editableMapObject)
+          this.selectMapObject(editableMapObject)
           // Format the object and send it over to aro-service
           var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
           var serviceFeature = {
@@ -297,8 +314,6 @@ class PlanEditorController {
         },
         onMouseDown: (editableMapObject, geometry, event) => {
           if (this.selectedEditorMode === this.editorModes.DELETE) {
-            // Remove all geometries from map
-            editableMapObject.setFeature(null)
             // Format the object and send it over to aro-service
             var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
             var serviceFeature = {
@@ -309,6 +324,11 @@ class PlanEditorController {
               }
             }
             this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
+            // Remove all geometries from map
+            editableMapObject.setFeature(null)
+            this.selectMapObject(null)
+          } else {
+            this.selectMapObject(editableMapObject)
           }
         },
         onDragEnd: (editableMapObject, geometry, event) => {
