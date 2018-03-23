@@ -60,31 +60,31 @@
           <tbody>
             <tr>
               <td>Site Identifier</td>
-              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.properties.siteIdentifier"></td>
+              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteIdentifier"></td>
             </tr>
             <tr>
               <td>Site Name</td>
-              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.properties.siteName"></td>
+              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteName"></td>
             </tr>
             <tr>
               <td>Site Type</td>
               <td>
                   <select class="form-control"
-                          ng-model="$ctrl.selectedMapObject.feature.properties.selectedSiteType"
-                          ng-options="item as item for item in $ctrl.selectedMapObject.feature.properties.siteTypes">
+                          ng-model="$ctrl.selectedMapObject.feature.attributes.selectedSiteType"
+                          ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.siteTypes">
                   </select>
               </td>
             </tr>
             <tr>
               <td>Deployment Date</td>
-              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.properties.deploymentDate"></td>
+              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.deploymentDate"></td>
             </tr>
             <tr>
               <td>Equipment</td>
               <td>
                 <select class="form-control"
-                        ng-model="$ctrl.selectedMapObject.feature.properties.selectedEquipmentType"
-                        ng-options="item as item for item in $ctrl.selectedMapObject.feature.properties.equipmentTypes">
+                        ng-model="$ctrl.selectedMapObject.feature.attributes.selectedEquipmentType"
+                        ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.equipmentTypes">
                 </select>
               </td>
             </tr>

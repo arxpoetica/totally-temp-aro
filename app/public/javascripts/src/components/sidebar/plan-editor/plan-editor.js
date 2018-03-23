@@ -294,7 +294,7 @@ class PlanEditorController {
             icon: '/images/map_icons/aro/plan_equipment.png'
           }
         },
-        properties: new EquipmentProperties()
+        attributes: new EquipmentProperties()
       }
       var handlers = {
         onCreate: (editableMapObject) => {
@@ -308,6 +308,13 @@ class PlanEditorController {
             geometry: {
               type: 'Point',
               coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+            },
+            attributes: {
+              siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
+              siteName: editableMapObject.feature.attributes.siteName,
+              selectedSiteType: editableMapObject.feature.attributes.selectedSiteType,
+              deploymentDate: editableMapObject.feature.attributes.deploymentDate,
+              selectedEquipmentType: editableMapObject.feature.attributes.selectedEquipmentType
             }
           }
           this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
@@ -317,11 +324,7 @@ class PlanEditorController {
             // Format the object and send it over to aro-service
             var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
             var serviceFeature = {
-              objectId: editableMapObject.feature.objectId,
-              geometry: {
-                type: 'Point',
-                coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
-              }
+              objectId: editableMapObject.feature.objectId
             }
             this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
             // Remove all geometries from map
@@ -342,6 +345,13 @@ class PlanEditorController {
             geometry: {
               type: 'Point',
               coordinates: [coords.lng(), coords.lat()] // Note - longitude, then latitude
+            },
+            attributes: {
+              siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
+              siteName: editableMapObject.feature.attributes.siteName,
+              selectedSiteType: editableMapObject.feature.attributes.selectedSiteType,
+              deploymentDate: editableMapObject.feature.attributes.deploymentDate,
+              selectedEquipmentType: editableMapObject.feature.attributes.selectedEquipmentType
             }
           }
           this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
