@@ -160,7 +160,12 @@ class PlanEditorController {
     // Get a list of objects for the current transaction
     this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       .then((result) => {
+        // Feature attributes are currently stored only as key-value pairs in service. Use defaults
+        // for the array elements
+        var defaultAttributes = new EquipmentProperties()
         result.data.forEach((equipmentFeature) => {
+          equipmentFeature.attributes.siteTypes = defaultAttributes.siteTypes
+          equipmentFeature.attributes.equipmentTypes = defaultAttributes.equipmentTypes
           this.createMapObject(null, equipmentFeature)
         })
         this.$timeout()
