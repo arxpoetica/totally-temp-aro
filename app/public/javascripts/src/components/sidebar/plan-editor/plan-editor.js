@@ -360,26 +360,40 @@ class PlanEditorController {
           // Update the coordinates in the feature
           editableMapObject.feature.geometries.CENTER_POINT.coordinates = [event.latLng.lng(), event.latLng.lat()]
           this.calculateCoverage(editableMapObject)
-          // Format the object and send it over to aro-service
-          var serviceFeature = {
-            objectId: editableMapObject.feature.objectId,
-            geometry: {
-              type: 'Point',
-              coordinates: editableMapObject.feature.geometries.CENTER_POINT.coordinates
-            },
-            attributes: {
-              siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
-              siteName: editableMapObject.feature.attributes.siteName,
-              selectedSiteType: editableMapObject.feature.attributes.selectedSiteType,
-              deploymentDate: editableMapObject.feature.attributes.deploymentDate,
-              selectedEquipmentType: editableMapObject.feature.attributes.selectedEquipmentType
-            }
-          }
-          this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
+          this.saveFeatureAttributes(editableMapObject.feature)
         }
       }
       var mapObject = new EditableMapObject(this.mapRef, equipmentFeature, handlers)
     }
+  }
+
+  // Saves the attributes of the given feature into aro-service
+  saveFeatureAttributes(feature) {
+
+    if (!this.currentTransaction) {
+      console.error('saveFeatureAttributes() - No current transaction. This should never happen.')
+      return
+    } else if (!feature) {
+      console.error('saveFeatureAttributes() - No feature provided.')
+      return
+    }
+
+    // Format the object and send it over to aro-service
+    var serviceFeature = {
+      objectId: feature.objectId,
+      geometry: {
+        type: 'Point',
+        coordinates: feature.geometries.CENTER_POINT.coordinates
+      },
+      attributes: {
+        siteIdentifier: feature.attributes.siteIdentifier,
+        siteName: feature.attributes.siteName,
+        selectedSiteType: feature.attributes.selectedSiteType,
+        deploymentDate: feature.attributes.deploymentDate,
+        selectedEquipmentType: feature.attributes.selectedEquipmentType
+      }
+    }
+    this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
   }
 
   // Sets the editor mode, and subscribes/unsubscribes from map events

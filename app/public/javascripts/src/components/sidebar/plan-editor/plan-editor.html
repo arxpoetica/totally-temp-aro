@@ -44,52 +44,57 @@
                                 ng-click="$ctrl.setEditorMode($ctrl.editorModes.MOVE)">
               <i class="fa fa-arrows"></i> Move
             </button>
-            <button ng-class="{ 'btn': true,
+            <!-- Commenting out edit boundary button until it is supported -->
+            <!-- <button ng-class="{ 'btn': true,
                                 'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.EDIT_BOUNDARY,
                                 'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.EDIT_BOUNDARY }"
                                 ng-click="$ctrl.setEditorMode($ctrl.editorModes.EDIT_BOUNDARY)">
               <i class="fa fa-edit"></i> Edit boundary
-            </button>
+            </button> -->
           </div>
         </div>
         <br>
 
-        <table id="tblEquipmentProperties"
-               class="table table-condensed table-striped"
-               ng-if="$ctrl.selectedMapObject">
-          <tbody>
-            <tr>
-              <td>Site Identifier</td>
-              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteIdentifier"></td>
-            </tr>
-            <tr>
-              <td>Site Name</td>
-              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteName"></td>
-            </tr>
-            <tr>
-              <td>Site Type</td>
-              <td>
+        <div ng-if="$ctrl.selectedMapObject">
+          <table id="tblEquipmentProperties"
+                 class="table table-condensed table-striped">
+            <tbody>
+              <tr>
+                <td>Site Identifier</td>
+                <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteIdentifier"></td>
+              </tr>
+              <tr>
+                <td>Site Name</td>
+                <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteName"></td>
+              </tr>
+              <tr>
+                <td>Site Type</td>
+                <td>
+                    <select class="form-control"
+                            ng-model="$ctrl.selectedMapObject.feature.attributes.selectedSiteType"
+                            ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.siteTypes">
+                    </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Deployment Date</td>
+                <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.deploymentDate"></td>
+              </tr>
+              <tr>
+                <td>Equipment</td>
+                <td>
                   <select class="form-control"
-                          ng-model="$ctrl.selectedMapObject.feature.attributes.selectedSiteType"
-                          ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.siteTypes">
+                          ng-model="$ctrl.selectedMapObject.feature.attributes.selectedEquipmentType"
+                          ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.equipmentTypes">
                   </select>
-              </td>
-            </tr>
-            <tr>
-              <td>Deployment Date</td>
-              <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.deploymentDate"></td>
-            </tr>
-            <tr>
-              <td>Equipment</td>
-              <td>
-                <select class="form-control"
-                        ng-model="$ctrl.selectedMapObject.feature.attributes.selectedEquipmentType"
-                        ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.equipmentTypes">
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary btn-sm pull-right" ng-click="$ctrl.saveFeatureAttributes($ctrl.selectedMapObject.feature)">
+            <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
+          </button>
+        </div>
       </div>
     </accordion-panel-contents>
   </accordion>
