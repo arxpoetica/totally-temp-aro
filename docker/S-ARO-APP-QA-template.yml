@@ -1,0 +1,456 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: ARO Stack - APP - QA Environment
+
+Parameters:
+  VpcId:
+    Type: "AWS::EC2::VPC::Id"
+    Default: "vpc-79412d1c"
+  DBName:
+    Type: String
+    Default: "aro"
+  DBUsername:
+    Type: String
+    Default: "aro"
+  DBPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    Default: "joeMILLER83"
+  ClientSlug:
+    Type: String
+    Default: "dev"
+  LambdaFunctionName:
+    Type: String
+    Default: "LookupStackOutputs"
+  SharedStackName:
+    Type: String
+    Default: "S-ARO-SHARED-01"
+  PrimaryAvailabilityZone:
+    Type: "AWS::EC2::AvailabilityZone::Name"
+    Default: "us-east-1b"
+  EnvSlug: 
+    Type: String
+    Default: "DEV"
+  ProjectTag:
+    Type: String
+    Default: "AIT:ARO"
+  DBInstanceType:
+    Type: String
+    Default: "db.m4.xlarge"
+  DBVolumeSize:
+    Type: String
+    Default: "50"
+  SshKeyName:
+    Type: "AWS::EC2::KeyPair::KeyName"
+    Default: "aro-qa-2016"
+  SslCertificateArn:
+    Type: String
+    Default: "arn:aws:acm:us-east-1:976168524097:certificate/b7189445-e5c4-4d94-b875-376b39d063e1"
+  ConfigRepoBranch:
+    Type: String
+    Default: "v1.3"
+  AroClient:
+    Type: String
+    Default: "aro"
+  GoogleMapsApiKey:
+    Type: String
+    Default: ""
+  GithubSshKey:
+    Type: String
+  RdsFlag:
+    Type: String
+    AllowedValues: ["yes", "no"]
+    Default: "no"
+  EcrUriRoot:
+    Type: String
+    Default: "976168524097.dkr.ecr.us-east-1.amazonaws.com"
+  AroAppImageName:
+    Type: String
+    Default: "aro/aro-app"
+  AroEtlImageName:
+    Type: String
+    Default: "aro/aro-etl"
+  AroNginxImageName:
+    Type: String
+    Default: "aro/aro-app-nginx"
+
+Mappings:
+  DNSZoneMap:
+    Staging:
+      Name: staging.app.altvil.com
+      Private: ZJT9CNWJO53SL
+      Public: Z2F2HKV7MN76BU
+    QA:
+      Name: qa.app.altvil.com
+      Private: Z1F0V5J9HHL1VE
+      Public: ZS4N6JJG3UN3R
+    Production:
+      Name: app.altvil.com
+      Private: Z15UG0P7J1ZPRI
+      Public: Z176YKVMMSEP8V
+    VpnConnected:
+      Name: cloud.altvil.com
+      Private: Z253PXZ4U8TQCU
+      Public: ZQ2MYMRZNH65F
+  EnvironmentMap:
+    Staging:
+      GatewayId: igw-6b98240e
+      VpcId: vpc-79412d1c
+      VpnGateway: ''
+    Production:
+      GatewayId: igw-0a72c26f
+      VpcId: vpc-62c4a407
+      VpnGateway: ''
+    VpnConnected:
+      GatewayId: igw-aa9088c8
+      VpcId: vpc-f3a14f96
+      VpnGateway: vgw-0dfa1b64
+
+Conditions:
+  RdsEnabled: !Equals [ !Ref RdsFlag, "yes"]
+
+
+Resources:
+
+  SharedNetworkInfo:
+    Type: "Custom::NetworkInfo"
+    Properties:
+      ServiceToken: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaFunctionName}"
+      StackName: !Ref SharedStackName
+
+  AppSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: !Sub "S-ARO-QA-${EnvSlug}-APP-SERVERS"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "tcp"
+          FromPort: "22"
+          ToPort: "22"
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-QA-${EnvSlug}-APP"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  AppSecurityGroupSelfIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: AppSecurityGroup
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: "-1"
+      FromPort: "-1"
+      ToPort: "-1"
+      SourceSecurityGroupId: !Ref AppSecurityGroup
+
+  AppSecurityGroupElbIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: AppSecurityGroup
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: "80"
+      ToPort: "80"
+      SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  AppSecurityGroupElbRedirectIngress:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    DependsOn: AppSecurityGroup
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: "tcp"
+      FromPort: "8081"
+      ToPort: "8081"
+      SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  PublicElbDnsRecordSet:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !FindInMap [ DNSZoneMap, QA, Public ]
+      Name: !Sub "${ClientSlug}.aro.qa.app.altvil.com"
+      Type: "CNAME"
+      TTL: "300"
+      ResourceRecords: 
+        - !GetAtt LoadBalancer.DNSName
+
+  LoadBalancerSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: !Sub "S-ARO-QA-${EnvSlug}-ELB"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "tcp"
+          FromPort: "443"
+          ToPort: "443"
+        - CidrIp: "0.0.0.0/0"
+          IpProtocol: "tcp"
+          FromPort: "80"
+          ToPort: "80"
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-QA-${EnvSlug}-ELB-SG"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  LoadBalancer:
+    Type: "AWS::ElasticLoadBalancing::LoadBalancer"
+    Properties:
+      SecurityGroups: 
+        - !Ref LoadBalancerSecurityGroup
+      Subnets:
+        - !GetAtt SharedNetworkInfo.AppSubnetB
+        - !GetAtt SharedNetworkInfo.AppSubnetC
+        - !GetAtt SharedNetworkInfo.AppSubnetD
+        - !GetAtt SharedNetworkInfo.AppSubnetE
+      Listeners:
+        - LoadBalancerPort: '443'
+          Protocol: "HTTPS"
+          InstancePort: '80' 
+          InstanceProtocol: "HTTP"
+          SSLCertificateId: !Ref SslCertificateArn
+        - LoadBalancerPort: '80'
+          Protocol: 'HTTP'
+          InstancePort: '8081'
+          InstanceProtocol: 'HTTP'
+      HealthCheck:
+        Target: "HTTP:80/login"
+        HealthyThreshold: "3"
+        UnhealthyThreshold: "5"
+        Interval: "30"
+        Timeout: "5"
+      ConnectionSettings:
+        IdleTimeout: 3600
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-QA-${EnvSlug}-ELB"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  DbVpcSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Condition: RdsEnabled
+    Properties:
+      GroupDescription: !Sub "S-ARO-QA-${EnvSlug}-DB"
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref AppSecurityGroup
+          IpProtocol: "tcp"
+          FromPort: "5432"
+          ToPort: "5432"
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-QA-${EnvSlug}-DB-SG"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    Condition: RdsEnabled
+    Properties:
+      DBName: !Ref DBName
+      AllocatedStorage: !Ref DBVolumeSize
+      DBInstanceClass: !Ref DBInstanceType
+      DBInstanceIdentifier: !Sub "S-ARO-QA-${EnvSlug}-DB"
+      Engine: "postgres"
+      MultiAZ: "false"
+      AvailabilityZone: !Ref PrimaryAvailabilityZone
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      DBSubnetGroupName: !GetAtt SharedNetworkInfo.DBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DbVpcSecurityGroup
+      BackupRetentionPeriod: "7"
+      StorageType: "gp2"
+      Tags:
+        - Key: Name
+          Value: !Sub "S-ARO-QA-${EnvSlug}-DB"
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  DBExternalDnsRecordSet:
+    Type: "AWS::Route53::RecordSet"
+    Condition: RdsEnabled
+    Properties:
+      HostedZoneId: !FindInMap [ DNSZoneMap, QA, Public ]
+      Name: !Sub "db.${ClientSlug}.aro.qa.app.altvil.com"
+      Type: "CNAME"
+      TTL: "300"
+      ResourceRecords:
+        - !GetAtt DB.Endpoint.Address
+
+  DBInternalDnsRecordSet:
+    Type: "AWS::Route53::RecordSet"
+    Condition: RdsEnabled
+    Properties:
+      HostedZoneId: !FindInMap [ DNSZoneMap, QA, Private ]
+      Name: !Sub "db.${ClientSlug}.aro.qa.app.altvil.com"
+      Type: "CNAME"
+      TTL: "300"
+      ResourceRecords:
+        - !GetAtt DB.Endpoint.Address
+
+  StackRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: {
+        "Version" : "2012-10-17",
+        "Statement" : [ { 
+            "Effect" : "Allow",
+            "Principal" : {
+              "Service" : [ "ec2.amazonaws.com" ]
+            },
+            "Action" : [ "sts:AssumeRole" ]
+        } ]
+      }
+      Path: "/"
+
+  StackCloudWatchLogsPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Roles:
+        - !Ref StackRole
+      PolicyName: !Sub "S-ARO-QA-${EnvSlug}-CWLOGS-POLICY"
+      PolicyDocument: {
+        "Version": "2012-10-17",
+        "Statement": [ {
+          "Effect": "Allow",
+          "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:DescribeLogStreams"
+          ],
+          "Resource": [ "arn:aws:logs:*:*:*" ]
+        } ]
+      }
+
+  StackSendEmailPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Roles:
+        - !Ref StackRole
+      PolicyName: !Sub "S-ARO-QA-${EnvSlug}-SEND-EMAIL-POLICY" 
+      PolicyDocument: {
+        "Version": "2012-10-17",
+        "Statement": [ {
+          "Effect": "Allow",
+          "Action": [
+            "ses:SendEmail",
+            "ses:SendRawEmail"
+          ],
+          "Resource": [ "*" ]
+        } ]
+      }
+
+  StackEcrAccessPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Roles:
+        - !Ref StackRole
+      PolicyName: !Sub "S-ARO-APP-${EnvSlug}-ECR-ACCESS-POLICY" 
+      PolicyDocument: {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Stmt1484162767000",
+            "Effect": "Allow",
+            "Action": [
+              "ecr:GetAuthorizationToken"
+            ],
+            "Resource": [
+              "*"
+            ]
+          },
+          {
+            "Sid": "Stmt1484162767001",
+            "Effect": "Allow",
+             "Action": [
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage",
+              "ecr:BatchCheckLayerAvailability"
+            ],
+            "Resource": [
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroAppImageName}",
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroEtlImageName}",
+              !Sub "arn:aws:ecr:us-east-1:976168524097:repository/${AroNginxImageName}"              
+            ]
+          }
+        ]
+      }
+
+  StackInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles: 
+        - !Ref StackRole
+
+  OpsWorksStack:
+    Type: "AWS::OpsWorks::Stack"
+    Properties:
+      Name: !Sub "S-ARO-APP-QA-${EnvSlug}"
+      VpcId: !Ref VpcId
+      DefaultSubnetId: !GetAtt SharedNetworkInfo.AppSubnetB
+      DefaultOs: "Ubuntu 14.04 LTS"
+      DefaultRootDeviceType: "ebs"
+      ServiceRoleArn: "arn:aws:iam::976168524097:role/aws-opsworks-service-role"
+      DefaultInstanceProfileArn: !GetAtt StackInstanceProfile.Arn
+      DefaultSshKeyName: !Ref SshKeyName
+      HostnameTheme: "Baked_Goods"
+      ConfigurationManager:
+        Name: "Chef"
+        Version: "11.10"
+      ChefConfiguration:
+        BerkshelfVersion: "3.2.0"
+        ManageBerkshelf: true
+      UseCustomCookbooks: true
+      CustomCookbooksSource:
+        Type: "git"
+        Url: "git@octocat.altvil.com:AIT/aro-opsworks"
+        Revision: !Ref ConfigRepoBranch
+        SshKey: !Ref GithubSshKey
+      UseOpsworksSecurityGroups: false
+
+  DockerComposeAppLayer:
+    Type: "AWS::OpsWorks::Layer"
+    Properties:
+      StackId: !Ref OpsWorksStack
+      Name: "Docker-Compose App Layer"
+      Shortname: "app"
+      Type: "custom"
+      EnableAutoHealing: true
+      AutoAssignElasticIps: false
+      AutoAssignPublicIps: true
+      CustomSecurityGroupIds: 
+        - !Ref AppSecurityGroup
+      InstallUpdatesOnBoot: true
+      CustomRecipes:
+        Setup:
+          - "aro_ops_app::install"
+          - "aro_ops::cwlogs"
+        Deploy:
+          - "aro_ops_app::compose"
+      VolumeConfigurations:
+        - MountPoint: "/var/lib/docker"
+          Size: "40"
+          VolumeType: "gp2"
+          NumberOfDisks: 1
+
+  LoadBalancerLink:
+    Type: "AWS::OpsWorks::ElasticLoadBalancerAttachment"
+    Properties:
+      ElasticLoadBalancerName: !Ref LoadBalancer
+      LayerId: !Ref DockerComposeAppLayer
+
+Outputs:
+  Stack:
+    Value: !Ref OpsWorksStack
+  Layer:
+    Value: !Ref DockerComposeAppLayer
+  RDSInstance:
+    Condition: RdsEnabled
+    Value: !Ref DB

@@ -47,7 +47,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
   },10);
 
   function searchAddress () {
-    $http.get("/search/addresses", { params: { text: config.ui.defaultSearch } }).then(function (results) {
+    $http.get("/search/addresses", { params: { text: globalUser.default_location ? globalUser.default_location : config.ui.defaultSearch } }).then(function (results) {
 
       var location = results.data[0];
 

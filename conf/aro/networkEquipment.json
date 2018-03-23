@@ -116,7 +116,7 @@
         },
 	      "planned_copper": {
           "label": "Copper Cable",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/FEEDER/{lineTransform}/",
+          "tileUrl": "/tile/v1/copper/existing/tiles/{libraryId}/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/copper.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
@@ -126,7 +126,7 @@
         },
 	      "planned_copper_direction": {
           "label": "Copper Cable Direction",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/FEEDER/{lineTransform}/",
+          "tileUrl": "/tile/v1/copper/existing/tiles/{libraryId}/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/copper.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
