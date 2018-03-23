@@ -352,6 +352,8 @@ class PlanEditorController {
             // Remove all geometries from map
             editableMapObject.setFeature(null)
             this.selectMapObject(null)
+          } else if (this.selectedEditorMode === this.editorModes.EDIT_BOUNDARY) {
+            editableMapObject.mapGeometries.COVERAGE_BOUNDARY.setEditable(true)
           } else {
             this.selectMapObject(editableMapObject)
           }
@@ -399,6 +401,9 @@ class PlanEditorController {
   // Sets the editor mode, and subscribes/unsubscribes from map events
   setEditorMode(newMode) {
     this.selectedEditorMode = newMode
+    if (newMode != this.editorModes.EDIT_BOUNDARY && this.selectedMapObject) {
+      this.selectedMapObject.mapGeometries.COVERAGE_BOUNDARY.setEditable(false)
+    }
   }
 
   removeCreatedMapObjects() {
