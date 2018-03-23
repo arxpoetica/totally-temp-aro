@@ -1,0 +1,101 @@
+<style>
+  .edit-plan-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  #tblEquipmentProperties td {
+    line-height: 33px;  /* To vertically align text */
+  }
+</style>
+
+<div class="edit-plan-container">
+  <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="'EDIT_PLAN'">
+    <accordion-panel-title title="'Edit Plan'" panel-id="'EDIT_PLAN'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'EDIT_PLAN'">
+      <div style="margin: 10px">
+        <div class="text-center">
+          <div class="btn-group ">
+            <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+            <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Discard</button>
+          </div>
+        </div>
+        <br>
+
+        <div class="text-center">
+          <div class="btn-group">
+            <button ng-class="{ 'btn': true,
+                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.ADD,
+                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.ADD }"
+                    ng-click="$ctrl.setEditorMode($ctrl.editorModes.ADD)">
+              <i class="fa fa-plus"></i> Add
+            </button>
+            <button ng-class="{ 'btn': true,
+                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.DELETE,
+                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.DELETE }"
+                                ng-click="$ctrl.setEditorMode($ctrl.editorModes.DELETE)">
+              <i class="fa fa-trash"></i> Delete
+            </button>
+            <button ng-class="{ 'btn': true,
+                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.MOVE,
+                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.MOVE }"
+                                ng-click="$ctrl.setEditorMode($ctrl.editorModes.MOVE)">
+              <i class="fa fa-arrows"></i> Move
+            </button>
+            <!-- Commenting out edit boundary button until it is supported -->
+            <button ng-class="{ 'btn': true,
+                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.EDIT_BOUNDARY,
+                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.EDIT_BOUNDARY }"
+                                ng-click="$ctrl.setEditorMode($ctrl.editorModes.EDIT_BOUNDARY)">
+              <i class="fa fa-edit"></i> Edit boundary
+            </button>
+          </div>
+        </div>
+        <br>
+
+        <div ng-if="$ctrl.selectedMapObject">
+          <table id="tblEquipmentProperties"
+                 class="table table-condensed table-striped">
+            <tbody>
+              <tr>
+                <td>Site Identifier</td>
+                <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteIdentifier"></td>
+              </tr>
+              <tr>
+                <td>Site Name</td>
+                <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.siteName"></td>
+              </tr>
+              <tr>
+                <td>Site Type</td>
+                <td>
+                    <select class="form-control"
+                            ng-model="$ctrl.selectedMapObject.feature.attributes.selectedSiteType"
+                            ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.siteTypes">
+                    </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Deployment Date</td>
+                <td><input class="form-control" ng-model="$ctrl.selectedMapObject.feature.attributes.deploymentDate"></td>
+              </tr>
+              <tr>
+                <td>Equipment</td>
+                <td>
+                  <select class="form-control"
+                          ng-model="$ctrl.selectedMapObject.feature.attributes.selectedEquipmentType"
+                          ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.equipmentTypes">
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary btn-sm pull-right" ng-click="$ctrl.saveFeatureAttributes($ctrl.selectedMapObject.feature)">
+            <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
+          </button>
+        </div>
+      </div>
+    </accordion-panel-contents>
+  </accordion>
+</div>

@@ -228,10 +228,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // The display modes for the application
   service.displayModes = Object.freeze({
-    VIEW: 0,
-    ANALYSIS: 1,
-    PLAN_SETTINGS: 2,
-    DEBUG: 3
+    VIEW: 'VIEW',
+    ANALYSIS: 'ANALYSIS',
+    EDIT_PLAN: 'EDIT_PLAN',
+    PLAN_SETTINGS: 'PLAN_SETTINGS',
+    DEBUG: 'DEBUG'
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
   service.targetSelectionModes = Object.freeze({
