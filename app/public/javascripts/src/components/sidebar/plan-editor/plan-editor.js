@@ -346,11 +346,7 @@ class PlanEditorController {
         onMouseDown: (editableMapObject, geometry, event) => {
           if (this.selectedEditorMode === this.editorModes.DELETE) {
             // Format the object and send it over to aro-service
-            var coords = editableMapObject.feature.geometries.CENTER_POINT.coordinates
-            var serviceFeature = {
-              objectId: editableMapObject.feature.objectId
-            }
-            this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
+            this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${editableMapObject.feature.objectId}`)
             // Remove all geometries from map
             editableMapObject.setFeature(null)
             this.selectMapObject(null)
