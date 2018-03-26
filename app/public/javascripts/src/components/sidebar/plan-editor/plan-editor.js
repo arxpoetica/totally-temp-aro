@@ -175,6 +175,7 @@ class PlanEditorController {
 
   exitPlanEditMode() {
     this.currentTransaction = null
+    this.state.recreateTilesAndCache()
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
