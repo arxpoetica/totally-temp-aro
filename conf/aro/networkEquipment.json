@@ -13,6 +13,16 @@
             "strokeStyle": "#0000ff"
           }
         },
+        "planned_remote_terminal": {
+          "label": "Remote Terminal",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/dslam/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/aro/remote_terminal.png",
+          "aggregateZoomThreshold": "7",
+          "equipmentType": "point",
+          "drawingOptions": {
+            "strokeStyle": "#0000ff"
+          }
+        },
         "planned_fdh": {
           "label": "FDH",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_hub/point/{pointTransform}/entity/",

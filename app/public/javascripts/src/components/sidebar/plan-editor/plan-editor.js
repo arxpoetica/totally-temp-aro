@@ -175,6 +175,7 @@ class PlanEditorController {
 
   exitPlanEditMode() {
     this.currentTransaction = null
+    this.state.recreateTilesAndCache()
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
@@ -331,6 +332,7 @@ class PlanEditorController {
               type: 'Point',
               coordinates: editableMapObject.feature.geometries.CENTER_POINT.coordinates
             },
+            categoryType: 'dslam',
             attributes: {
               siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
               siteName: editableMapObject.feature.attributes.siteName,
@@ -387,6 +389,7 @@ class PlanEditorController {
         type: 'Point',
         coordinates: feature.geometries.CENTER_POINT.coordinates
       },
+      categoryType: 'dslam',
       attributes: {
         siteIdentifier: feature.attributes.siteIdentifier,
         siteName: feature.attributes.siteName,
