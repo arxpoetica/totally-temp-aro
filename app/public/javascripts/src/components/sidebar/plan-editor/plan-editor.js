@@ -331,6 +331,7 @@ class PlanEditorController {
               type: 'Point',
               coordinates: editableMapObject.feature.geometries.CENTER_POINT.coordinates
             },
+            categoryType: 'dslam',
             attributes: {
               siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
               siteName: editableMapObject.feature.attributes.siteName,
@@ -387,6 +388,7 @@ class PlanEditorController {
         type: 'Point',
         coordinates: feature.geometries.CENTER_POINT.coordinates
       },
+      categoryType: 'dslam',
       attributes: {
         siteIdentifier: feature.attributes.siteIdentifier,
         siteName: feature.attributes.siteName,
