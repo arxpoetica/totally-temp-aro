@@ -199,6 +199,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
+  service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.selectionTypeChanged = new Rx.BehaviorSubject()

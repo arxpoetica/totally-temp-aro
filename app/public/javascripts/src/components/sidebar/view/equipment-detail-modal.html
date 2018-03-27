@@ -1,0 +1,162 @@
+<modal id="selected_equipment_modal" visible="$ctrl.showDetailModal" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
+    <modal-header title={{$ctrl.equipment.id}}>
+      <div class="selected-locations-header">
+          <!-- The map that is shown in the header -->
+          <img ng-attr-src="{{$ctrl.map_url}}">
+          <!-- A div that is overlaid on the map image to make it appear darker -->
+          <div class="selected-locations-map-overlay">
+              <div class="selected-location-address">
+                {{$ctrl.equipment.id + "@" + $ctrl.equipment.description}}
+              </div>
+          </div>    
+      </div>
+    </modal-header>
+
+    <modal-body style="overflow: auto;">
+      <div style="width: 100%; text-align: center">
+        <ul class="nav nav-pills" style="display: inline-block;" role="tablist">
+          <li role="presentation" class="active">
+            <a href="#selected_equipment_general" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">General</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_equipment_coverage" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Coverage</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_equipment_detail" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Equipment</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_equipment_congestion" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Congestion</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_equipment_fiber" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Fiber</a>
+          </li>
+          <li role="presentation">
+            <a href="#selected_equipment_other" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Other</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="selected_equipment_general">
+          <table class="table table-condensed table-striped">
+            <tbody>
+              <tr>
+                <th>Site CLLI</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Site Type</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Site Deployment</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Is Physically Linked</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Technologies</th>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="selected_equipment_coverage">
+          Inside Coverage
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="selected_equipment_detail">
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th class="selected-modal-table-header">Deployment Date</th>
+                <th class="selected-modal-table-header">Equipment CLLI</th>
+                <th class="selected-modal-table-header">Equipment</th>
+                <th class="selected-modal-table-header">Technology</th>
+                <th class="selected-modal-table-header">Deployment Cost</th>
+                <th class="selected-modal-table-header">Quantity</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="selected_equipment_congestion">
+          <table class="table table-condensed table-striped">
+            <thead>
+              <tr>
+                <th class="selected-modal-table-header">Equipment CLLI</th>
+                <th class="selected-modal-table-header">Path Band</th>
+                <th class="selected-modal-table-header">Uplink Speed</th>
+                <th class="selected-modal-table-header">Topology</th>
+                <th class="selected-modal-table-header">Path Hops</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="selected_equipment_fiber">
+          <table class="table table-condensed table-striped">
+            <tbody>
+              <tr>
+                <th>Fiber Fed Site</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Nearest Fiber Route</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Distance to Fiber</th>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="selected_equipment_other">
+          <table class="table table-condensed table-striped">
+            <tbody>
+              <tr>
+                <th>Site Name</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>CAF Phase</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>DPI Environment</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>HSI Office Code</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>T1</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Address</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Notes</th>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </modal-body>
+
+    <modal-footer>
+      <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
+    </modal-footer>
+
+  </modal>
