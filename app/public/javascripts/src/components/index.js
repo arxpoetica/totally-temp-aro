@@ -5,6 +5,7 @@ import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
+import equipmentDetailModal from './sidebar/view/equipment-detail-modal'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
@@ -59,6 +60,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('coverageBoundary', coverageBoundary)
    .component('locationEditor', locationEditor)
    .component('viewMode', viewMode)
+   .component('equipmentDetailModal', equipmentDetailModal)
    .component('displayModeButtons', displayModeButtons)
    .component('optimizeButton', optimizeButton)
    .component('analysisExpertMode', analysisExpertMode)

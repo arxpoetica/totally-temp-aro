@@ -27,6 +27,12 @@ class EquipmentDetailController {
       return response.data
     })
   }
+
+  showDetailEquipmentInfo() {
+    this.selectedEquipmentInfo.id = +this.selectedEquipmentInfo.id   
+    this.state.showDetailedEquipmentInfo.next(this.selectedEquipmentInfo)
+  }
+
 }
 
 EquipmentDetailController.$inject = ['$http', '$timeout', 'state']

@@ -13,7 +13,11 @@ let equipmentDetail = {
   <div class="equipment-detail" ng-if="$ctrl.selectedEquipmentInfo !== null">
     <div>id: {{$ctrl.selectedEquipmentInfo.id}}</div>
     <div>Type: {{$ctrl.selectedEquipmentInfo.description}}</div>
-    <div>location: {{$ctrl.selectedEquipmentInfo.geog.coordinates}}</div>
+    <div>Latitude: {{$ctrl.selectedEquipmentInfo.geog.coordinates[1] | number:5}}</div>
+    <div>Longitude: {{$ctrl.selectedEquipmentInfo.geog.coordinates[0] | number:5}}</div>
+    <div>
+      <button class="btn btn-primary" ng-click="$ctrl.showDetailEquipmentInfo()">More Information</button>
+    </div>
   </div>
   `,
   bindings: {},
