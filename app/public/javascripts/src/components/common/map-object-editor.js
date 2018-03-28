@@ -9,9 +9,6 @@ class MapObjectEditorController {
     this.selectedMapObject = null
     this.uuidStore = []
     this.getUUIDsFromServer()
-    this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.subscribe((event) => {
-      this.handleMapEntitySelected(event)
-    })
   }
 
   // Get a list of UUIDs from the server
@@ -39,9 +36,14 @@ class MapObjectEditorController {
       console.error('ERROR: Map Object Editor component initialized, but a map object is not available at this time.')
       return
     }
-
     this.mapRef = window[this.mapGlobalObjectName]
-    var self = this
+
+    // Use the cross hair cursor while this control is initialized
+    this.mapRef.setOptions({ draggableCursor: 'crosshair' })
+
+    this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.subscribe((event) => {
+      this.handleMapEntitySelected(event)
+    })
 
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
@@ -62,7 +64,10 @@ class MapObjectEditorController {
     const mapObject = new google.maps.Marker({
       objectId: objectId, // Not used by Google Maps
       position: latLng,
-      icon: this.objectIconUrl,
+      icon: {
+        url: this.objectIconUrl,
+        anchor: new google.maps.Point(120, 120)
+      },
       draggable: true,
       map: this.mapRef
     })
@@ -87,6 +92,9 @@ class MapObjectEditorController {
   }
 
   handleMapEntitySelected(event) {
+    if (!event || !event.latLng) {
+      return
+    }
     if (!event.locations || event.locations.length === 0) {
       // The map was clicked on, but there was no location under the cursor. Create a new one.
       this.createMapObject(this.getUUID(), event.latLng)
@@ -132,12 +140,17 @@ class MapObjectEditorController {
   }
 
   $onDestroy() {
+
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
     this.removeCreatedMapObjects()
+
     //unsubscribe map click observer
     this.mapFeaturesSelectedEventObserver.unsubscribe();
-}
+
+    // Go back to the default map cursor
+    this.mapRef.setOptions({ draggableCursor: null })
+  }
 
 }
 
