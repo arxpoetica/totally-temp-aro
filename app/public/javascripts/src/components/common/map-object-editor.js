@@ -1,12 +1,17 @@
 class MapObjectEditorController {
 
-  constructor($http) {
+  constructor($http, state, tileDataService) {
     this.$http = $http
+    this.state = state
+    this.tileDataService = tileDataService
     this.mapRef = null
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.uuidStore = []
     this.getUUIDsFromServer()
+    this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.subscribe((event) => {
+      this.handleMapEntitySelected(event)
+    })
   }
 
   // Get a list of UUIDs from the server
@@ -37,21 +42,18 @@ class MapObjectEditorController {
 
     this.mapRef = window[this.mapGlobalObjectName]
     var self = this
-    this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function(event) {
-      self.createMapObject(event)
-    })
 
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteSelectedObject: this.deleteSelectedObject.bind(this)})
   }
 
-  createMapObject(event) {
+  createMapObject(objectId, latLng) {
 
     // Create a map object
     const mapObject = new google.maps.Marker({
-      objectId: this.getUUID(), // Not used by Google Maps
-      position: event.latLng,
+      objectId: objectId, // Not used by Google Maps
+      position: latLng,
       icon: this.objectIconUrl,
       draggable: true,
       map: this.mapRef
@@ -74,6 +76,21 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       }
     })
+  }
+
+  handleMapEntitySelected(event) {
+    if (!event.locations || event.locations.length === 0) {
+      // The map was clicked on, but there was no location under the cursor. Create a new one.
+      this.createMapObject(this.getUUID(), event.latLng)
+    } else {
+      // The map was clicked on, and there was a location under the cursor
+      const objectId = event.locations[0].object_id
+      this.createMapObject(objectId, event.latLng)
+
+      // Stop rendering this location in the tile
+      this.tileDataService.addFeatureToExclude(objectId)
+      this.state.requestMapLayerRefresh.next({})
+    }
   }
 
   selectMapObject(mapObject) {
@@ -110,11 +127,13 @@ class MapObjectEditorController {
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
     this.removeCreatedMapObjects()
-  }
+    //unsubscribe map click observer
+    this.mapFeaturesSelectedEventObserver.unsubscribe();
+}
 
 }
 
-MapObjectEditorController.$inject = ['$http']
+MapObjectEditorController.$inject = ['$http', 'state', 'tileDataService']
 
 let mapObjectEditor = {
   template: '',
