@@ -46,6 +46,14 @@ class MapObjectEditorController {
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteSelectedObject: this.deleteSelectedObject.bind(this)})
+    this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
+  }
+
+  createMapObjects(features) {
+    // "features" is an array that comes directly from aro-service. Create map objects for these features
+    features.forEach((feature) => {
+      this.createMapObject(feature.objectId, new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]))
+    })
   }
 
   createMapObject(objectId, latLng) {
@@ -147,7 +155,8 @@ let mapObjectEditor = {
     onSelectObject: '&',
     onModifyObject: '&',
     onDeleteObject: '&',
-    registerObjectDeleteCallback: '&' // To be called to register a callback, which will delete the selected object
+    registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
+    registerCreateMapObjectsCallback: '&'  // To be called to register a callback, which will create map objects for existing objectIds
   },
   controller: MapObjectEditorController
 }

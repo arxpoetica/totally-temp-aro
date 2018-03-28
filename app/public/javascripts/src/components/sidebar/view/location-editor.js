@@ -23,6 +23,10 @@ class LocationEditorController {
     this.requestSelectedObjectDelete = objectDeleteCallback
   }
 
+  registerCreateMapObjectsCallback(createMapObjects) {
+    this.createMapObjects = createMapObjects
+  }
+
   $onInit() {
 
     // See if we have an existing transaction for the currently selected location library
@@ -49,6 +53,10 @@ class LocationEditorController {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
+        // Important: Create the map objects first. The events raised by the map object editor will
+        // populate the objectIdToMapObject object when the map objects are created
+        this.createMapObjects && this.createMapObjects(result.data)
+        // We now have objectIdToMapObject populated.
         result.data.forEach((feature) => {
           var locationProperties = new LocationProperties()
           locationProperties.numberOfLocations = feature.attributes.number_of_households
@@ -130,7 +138,7 @@ class LocationEditorController {
     if (this.selectedMapObject) {
       var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
       var locationObject = this.formatLocationForService(selectedMapObject.objectId)
-      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+      this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
         .then((result) => {
           this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
           this.$timeout()
