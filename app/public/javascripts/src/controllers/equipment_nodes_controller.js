@@ -80,6 +80,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               selectable: true,
               showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
             }
+
             createdMapLayerKeys.add(networkEquipment.key)
           } else if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') >= 0
                      && state.dataItems.fiber){
@@ -96,10 +97,38 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 strokeStyle: networkEquipment.drawingOptions.strokeStyle,
                 lineWidth: 2,
                 fillStyle: networkEquipment.drawingOptions.fillStyle,
-                showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
+                showPolylineDirection: networkEquipment.key == "planned_copper" && state.showDirectedCable ? true : false //Showing Direction for copper cable
               }
               createdMapLayerKeys.add(mapLayerKey)
             })
+          } else if (state.showSiteBoundary) {
+            // for now displaying 5G coverage until site boundary api is ready
+            if(networkEquipment.key == "planned_5g_coverage") {
+              var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
+              if (networkEquipment.equipmentType === 'point') {
+                var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+                tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
+              } else if (networkEquipment.equipmentType === 'line') {
+                var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+                tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+              } else if (networkEquipment.equipmentType === 'polygon') {
+                var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+                tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+              }
+              oldMapLayers[networkEquipment.key] = {
+                dataUrls: [tileUrl],
+                iconUrl: networkEquipment.iconUrl,
+                renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+                strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+                lineWidth: 2,
+                fillStyle: networkEquipment.drawingOptions.fillStyle,
+                opacity: 0.5,
+                selectable: true,
+                showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
+              }
+  
+              createdMapLayerKeys.add(networkEquipment.key)
+            }
           }
         })
       })
@@ -126,6 +155,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
     .subscribe((newValue) => updateMapLayers())
+
+  // Update map layers when the dataItems property of state changes
+  state.viewSettingsChanged
+  .subscribe(() => updateMapLayers())
 
   const ROUTE_LAYER_NAME = 'Route'
   function configureServiceLayer (layer) {

@@ -14,6 +14,11 @@ class ToolBarController {
     this.heatMapOption = true
     this.measuringStickEnabled = false
 
+    this.boundaryType = [
+      { id: 'CAF2', label: 'CAF2' }
+    ]
+    this.selectedBoundaryType = this.boundaryType[0]
+
     this.min = 0
     // Map tile settings used for debugging
     this.state.mapTileOptions
@@ -320,6 +325,16 @@ class ToolBarController {
     this.state.activeViewModePanel = this.state.viewModePanels.COVERAGE_BOUNDARY
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW) // Panel is visible only in VIEW mode
     this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.COVERAGE_BOUNDARY
+  }
+
+  toggleSiteBoundary() {
+    //if(this.state.showSiteBoundary && this.selectedBoundaryType) {
+      this.state.viewSettingsChanged.next()
+    //} 
+  }
+
+  showCableDirection() {
+    this.state.viewSettingsChanged.next()
   }
 }
 

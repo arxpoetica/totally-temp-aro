@@ -202,6 +202,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
+  service.viewSettingsChanged = new Rx.BehaviorSubject()
   service.selectionTypeChanged = new Rx.BehaviorSubject()
   service.measuredDistance = new Rx.BehaviorSubject()
   service.showPlanResourceEditorModal = false
@@ -1184,6 +1185,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.censusBlockSelectedEvent.next(cbdata)
     $timeout()
   })
+
+  service.showDirectedCable = false
+  service.showSiteBoundary = false
 
   return service
 }])
