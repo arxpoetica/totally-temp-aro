@@ -6,7 +6,7 @@
         "planned_central_office": {
           "label": "Central Office",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/central_office/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/central_office.png",
+          "iconUrl": "/images/map_icons/frontier/central_office.png",
           "aggregateZoomThreshold": "7",
           "equipmentType": "point",
           "drawingOptions": {
@@ -26,7 +26,7 @@
         "planned_fdh": {
           "label": "FDH",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_hub/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/fiber_distribution_hub.png",
+          "iconUrl": "/images/map_icons/frontier/fiber_distribution_hub.png",
           "aggregateZoomThreshold": "12",
           "equipmentType": "point",
           "drawingOptions": {
@@ -36,37 +36,37 @@
         "planned_fdt": {
           "label": "FDT",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_terminal/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/fiber_distribution_terminal.png",
+          "iconUrl": "/images/map_icons/frontier/fiber_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           }
         },
-        "planned_bulk_distribution_terminal": {
-          "label": "Bulk Distribution Terminal",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distribution_terminal/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
-          "aggregateZoomThreshold": "14",
-          "equipmentType": "point",
-          "drawingOptions": {
-            "strokeStyle": "#0000ff"
-          }
-        },
-        "planned_splice_point": {
+	"planned_splice_point": {
           "label": "Splice point",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/splice_point/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/splice_point.png",
+          "iconUrl": "/images/map_icons/frontier/splice_point.png",
           "aggregateZoomThreshold": "14",
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           }
         },
+        "planned_5g_site": {
+          "label": "Fixed Wireless Site",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/frontier/composite/all_cell_5g.png",
+          "aggregateZoomThreshold": "14",
+          "equipmentType": "point",
+          "drawingOptions": {
+            "strokeStyle": "#0000ff"
+          }
+        },        
         "planned_5g_coverage": {
           "label": "5G Coverage",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
-          "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
+          "iconUrl": "/images/map_icons/frontier/service_layer_cran.png",
           "aggregateZoomThreshold": "13",
           "equipmentType": "polygon",
           "drawingOptions": {
@@ -74,10 +74,10 @@
             "fillStyle": "#a0ffa0"
           }
         },
-        "planned_5g_site": {
-          "label": "5G Site",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
+        "planned_bulk_distribution_terminal": {
+          "label": "Bulk Distribution Terminal",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distribution_terminal/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/frontier/bulk_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
           "equipmentType": "point",
           "drawingOptions": {
@@ -87,7 +87,7 @@
         "planned_feeder_fiber": {
           "label": "Feeder Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/FEEDER/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/fiber_feeder.png",
+          "iconUrl": "/images/map_icons/frontier/fiber_feeder.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
@@ -97,7 +97,7 @@
         "planned_distribution_fiber": {
           "label": "Distribution Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/DISTRIBUTION/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/fiber_distribution.png",
+          "iconUrl": "/images/map_icons/frontier/fiber_distribution.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
@@ -107,27 +107,27 @@
         "planned_backhaul_fiber": {
           "label": "Backhaul Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/BACKBONE/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
+          "iconUrl": "/images/map_icons/frontier/fiber_backhaul.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#000000"
           }
         },
-	      "planned_existing_fiber": {
+	"planned_existing_fiber": {
           "label": "Existing Fiber",
           "tileUrl": "/tile/v1/fiber/existing/tiles/{libraryId}/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
+          "iconUrl": "/images/map_icons/frontier/fiber_backhaul.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#000000"
           }
         },
-	      "planned_copper": {
+	"planned_copper": {
           "label": "Copper Cable",
           "tileUrl": "/tile/v1/copper/existing/tiles/{libraryId}/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/copper.png",
+          "iconUrl": "/images/map_icons/frontier/copper.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
