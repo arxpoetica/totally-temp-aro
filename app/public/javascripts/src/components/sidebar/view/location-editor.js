@@ -13,6 +13,7 @@ class LocationEditorController {
     this.state = state
     this.selectedMapObject = null
     this.objectIdToProperties = {}
+    this.objectIdToMapObject = {}
     this.currentTransaction = null
   }
 
@@ -41,6 +42,7 @@ class LocationEditorController {
       .then((result) => {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
+        this.objectIdToMapObject = {}
         result.data.forEach((feature) => {
           var locationProperties = new LocationProperties()
           locationProperties.numberOfLocations = feature.attributes.number_of_households
@@ -105,14 +107,39 @@ class LocationEditorController {
     })
   }
 
+  // Formats a location (based on the objectId) so that it can be sent in calls to aro-service
+  formatLocationForService(objectId) {
+    var mapObject = this.objectIdToMapObject[objectId]
+    var objectProperties = this.objectIdToProperties[objectId]
+    var featureObj = {
+      objectId: objectId,
+      geometry: {
+        type: 'Point',
+        coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
+      },
+      attributes: {
+        number_of_households: objectProperties.numberOfLocations
+      }
+    }
+    return featureObj
+  }
+
   handleObjectCreated(mapObject) {
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties()
+    this.objectIdToMapObject[mapObject.objectId] = mapObject
+    var locationObject = this.formatLocationForService(mapObject.objectId)
+    this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }
 
   handleSelectedObjectChanged(mapObject) {
     this.selectedMapObject = mapObject
     this.$timeout()
+  }
+
+  handleObjectModified(mapObject) {
+    var locationObject = this.formatLocationForService(mapObject.objectId)
+    this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
   }
 }
 
