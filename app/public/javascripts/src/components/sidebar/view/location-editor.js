@@ -3,6 +3,7 @@ class LocationProperties {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
     this.numberOfLocations = 1
+    this.isDirty = false
   }
 }
 
@@ -116,6 +117,28 @@ class LocationEditorController {
     })
   }
 
+  // Marks the properties of the selected location as dirty (changed).
+  markSelectedLocationPropertiesDirty() {
+    if (this.selectedMapObject) {
+      var objectProperties = this.objectIdToProperties[this.selectedMapObject.objectId]
+      objectProperties.isDirty = true
+    }
+  }
+
+  // Saves the properties of the selected location to aro-service
+  saveSelectedLocationAndProperties() {
+    if (this.selectedMapObject) {
+      var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
+      var locationObject = this.formatLocationForService(selectedMapObject.objectId)
+      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+        .then((result) => {
+          this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
+          this.$timeout()
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+
   // Formats a location (based on the objectId) so that it can be sent in calls to aro-service
   formatLocationForService(objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
@@ -149,7 +172,12 @@ class LocationEditorController {
   handleObjectModified(mapObject) {
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
-  }
+      .then((result) => {
+        this.objectIdToProperties[mapObject.objectId].isDirty = false
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
+}
 
   deleteSelectedObject() {
     // First delete the object in aro-service, then ask the map to remove it (which in turn may change this.selectedMapObject).
