@@ -1,9 +1,12 @@
 class MapObjectEditorController {
 
-  constructor() {
+  constructor($http) {
+    this.$http = $http
     this.mapRef = null
     this.createdMapObjects = {}
     this.selectedMapObject = null
+    this.uuidStore = []
+    this.getUUIDsFromServer()
   }
 
   // Get a list of UUIDs from the server
@@ -47,27 +50,26 @@ class MapObjectEditorController {
     const mapObject = new google.maps.Marker({
       objectId: this.getUUID(), // Not used by Google Maps
       position: event.latLng,
-      icon: this.objectSelectedIconUrl,
+      icon: this.objectIconUrl,
       draggable: true,
       map: this.mapRef
     })
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.selectedMapObject = mapObject
-
-    this.onCreateObject && this.onCreateObject(mapObject)
-    this.onSelectObject && this.onSelectObject(mapObject)
+    this.onCreateObject && this.onCreateObject({mapObject})
+    this.selectMapObject(mapObject)
 
     // Set up listeners on the map object
-    mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject(mapObject))
+    mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
     mapObject.addListener('click', (event) => {
       if (this.deleteMode) {
         // Delete this map object
         mapObject.setMap(null)
         delete this.createdMapObjects[mapObject.objectId]
-        this.onDeleteObject && this.onDeleteObject(mapObject)
+        this.selectMapObject(null)
+        this.onDeleteObject && this.onDeleteObject({mapObject})
       } else {
         // Select this map object
-        this.onSelectObject && this.onSelectObject(mapObject)
+        this.selectMapObject(mapObject)
       }
     })
   }
@@ -77,7 +79,12 @@ class MapObjectEditorController {
       // Reset the icon of the currently selected map object
       this.selectedMapObject.setIcon(this.objectIconUrl)
     }
-    this.selectedMapObject.setIcon(this.objectSelectedIconUrl)
+    this.selectedMapObject = mapObject
+    if (this.selectedMapObject) {
+      // Selected map object can be null if nothing is selected (e.g. when the user deletes a map object)
+      this.selectedMapObject.setIcon(this.objectSelectedIconUrl)
+      this.onSelectObject && this.onSelectObject({mapObject})
+    }
   }
 
   removeCreatedMapObjects() {
@@ -95,6 +102,8 @@ class MapObjectEditorController {
   }
 
 }
+
+MapObjectEditorController.$inject = ['$http']
 
 let mapObjectEditor = {
   template: '',
