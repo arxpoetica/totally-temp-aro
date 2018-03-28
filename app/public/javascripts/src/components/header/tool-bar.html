@@ -225,39 +225,6 @@
     <i class="fa fa-bookmark-o fa-rotate-180"></i>
   </button>
 
-  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
-                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.MOVE }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.MOVE)"
-          data-toggle="tooltip"
-          data-placement="bottom"
-          title="Move locations">
-    <i class="fa fa-arrows"></i>
-  </button>
-
-  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
-                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.CREATE }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.CREATE)"
-          data-toggle="tooltip"
-          data-placement="bottom"
-          title="Add locations">
-    <i class="fa fa-plus"></i>
-  </button>
-
-  <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
-                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                   && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_LOCATIONS"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.DELETE }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.DELETE)"
-          data-toggle="tooltip"
-          data-placement="bottom"
-          title="Delete locations">
-    <i class="fa fa-trash"></i>
-  </button>
-
   <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"

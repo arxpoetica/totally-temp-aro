@@ -1,0 +1,76 @@
+<style>
+  .view-mode-container {
+    position: relative; /* This will require the parent to have position: relative or absolute */
+    height: 100%;
+    padding: 0px 10px 10px 10px;
+  }
+  #tblLocationProperties td {
+    line-height: 33px;  /* To vertically align text */
+  }
+</style>
+<div class="view-mode-container">
+
+  <!-- Add a component to handle map editing -->
+  <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+                     object-icon-url="/images/map_icons/aro/households_modified.png"
+                     object-selected-icon-url="/images/map_icons/aro/households_selected.png"
+                     on-create-object="$ctrl.handleObjectCreated(mapObject)"
+                     on-modify-object="$ctrl.handleObjectModified(mapObject)"
+                     on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+                     register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteSelectedObject)"
+                     register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)">
+  </map-object-editor>
+
+  <!-- BEGIN section transaction details -->
+  <div ng-if="$ctrl.currentTransaction">
+    <div class="row">
+      <div class="col-md-12" style="padding-bottom: 15px">
+        Library <span class="label label-default">{{$ctrl.currentTransaction.libraryName}}</span>
+        <div class="pull-right">transaction ID <span class="label label-default">{{$ctrl.currentTransaction.id}}</span></div>
+      </div>
+    </div>
+    <div class="text-center">
+      <div class="btn-group ">
+        <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+        <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Discard</button>
+      </div>
+    </div>
+    <br>
+    <div ng-if="$ctrl.selectedMapObject">
+      <table id="tblLocationProperties" class="table table-condensed table-striped" style="margin-bottom: 10px">
+        <tr>
+          <td>Location type:</td>
+          <td>
+            <select class="form-control"
+                    ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
+                    ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Number of locations:</td>
+          <td>
+            <input class="form-control"
+                  ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
+          </td>
+        </tr>
+      </table>
+      <button ng-class="{ 'btn btn-block': true,
+                          'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                          'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+              ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+              ng-click="$ctrl.saveSelectedLocationAndProperties()">
+        <i class="fa fa-save"></i>&nbsp;&nbsp;Save properties
+      </button>
+      <!-- Show a delete button if a map object is selected -->
+      <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
+        <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
+      </button>
+    </div>
+    <br>
+    Number of changes in transaction: {{$ctrl.getFeaturesCount()}}
+  </div>
+  <!-- END section transaction details -->
+</div>
