@@ -15,6 +15,11 @@ class LocationEditorController {
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.currentTransaction = null
+    this.requestSelectedObjectDelete = null // A function into the child map object editor, requesting the specified map object to be deleted
+  }
+
+  registerObjectDeleteCallback(objectDeleteCallback) {
+    this.requestSelectedObjectDelete = objectDeleteCallback
   }
 
   $onInit() {
@@ -54,6 +59,10 @@ class LocationEditorController {
         this.isInErrorState = true
         this.$timeout()
       })
+  }
+
+  getFeaturesCount() {
+    return Object.keys(this.objectIdToProperties).length
   }
 
   commitTransaction() {
@@ -140,6 +149,12 @@ class LocationEditorController {
   handleObjectModified(mapObject) {
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+  }
+
+  deleteSelectedObject() {
+    // First delete the object in aro-service, then ask the map to remove it (which in turn may change this.selectedMapObject).
+    this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${this.selectedMapObject.objectId}`)
+    this.requestSelectedObjectDelete && this.requestSelectedObjectDelete()
   }
 }
 

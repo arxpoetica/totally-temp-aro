@@ -16,7 +16,8 @@
                      object-selected-icon-url="/images/map_icons/aro/households_selected.png"
                      on-create-object="$ctrl.handleObjectCreated(mapObject)"
                      on-modify-object="$ctrl.handleObjectModified(mapObject)"
-                     on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)">
+                     on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+                     register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteSelectedObject)">
   </map-object-editor>
 
   <!-- BEGIN section transaction details -->
@@ -51,11 +52,12 @@
         </td>
       </tr>
     </table>
+    <!-- Show a delete button if a map object is selected -->
+    <button class="btn btn-block btn-danger" ng-if="$ctrl.selectedMapObject" ng-click="$ctrl.deleteSelectedObject()">
+      <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
+    </button>
     <br>
-    Number of changes in transaction: {{$ctrl.store.getFeaturesCount()}}
+    Number of changes in transaction: {{$ctrl.getFeaturesCount()}}
   </div>
   <!-- END section transaction details -->
-
-  <!-- Show a delete button if a map object is selected -->
-  <button class="btn btn-block btn-danger" ng-if="$ctrl.selectedMapObject">Delete location</button>
 </div>

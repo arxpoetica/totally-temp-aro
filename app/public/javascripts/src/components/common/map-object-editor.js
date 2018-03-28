@@ -42,6 +42,8 @@ class MapObjectEditorController {
     })
 
     this.onInit && this.onInit()
+    // We register a callback so that the parent object can request a map object to be deleted
+    this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteSelectedObject: this.deleteSelectedObject.bind(this)})
   }
 
   createMapObject(event) {
@@ -83,8 +85,8 @@ class MapObjectEditorController {
     if (this.selectedMapObject) {
       // Selected map object can be null if nothing is selected (e.g. when the user deletes a map object)
       this.selectedMapObject.setIcon(this.objectSelectedIconUrl)
-      this.onSelectObject && this.onSelectObject({mapObject})
     }
+    this.onSelectObject && this.onSelectObject({mapObject})
   }
 
   removeCreatedMapObjects() {
@@ -93,6 +95,15 @@ class MapObjectEditorController {
       this.createdMapObjects[objectId].setMap(null)
     })
     this.createdMapObjects = {}
+  }
+
+  deleteSelectedObject() {
+    if (this.selectedMapObject) {
+      var mapObjectToDelete = this.selectedMapObject
+      this.selectMapObject(null)
+      mapObjectToDelete.setMap(null)
+      delete this.createdMapObjects[mapObjectToDelete.objectId]
+    }
   }
 
   $onDestroy() {
@@ -116,7 +127,8 @@ let mapObjectEditor = {
     onCreateObject: '&',
     onSelectObject: '&',
     onModifyObject: '&',
-    onDeleteObject: '&'
+    onDeleteObject: '&',
+    registerObjectDeleteCallback: '&' // To be called to register a callback, which will delete the selected object
   },
   controller: MapObjectEditorController
 }
