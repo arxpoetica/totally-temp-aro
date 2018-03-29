@@ -4,13 +4,16 @@ class EditableMapObject {
     // Object description
     // feature = {
     //   objectId: 'xyz',  // Globally unique object ID
-    //   geometries: [{
-    //     key: 'asdf', // Sub-key for the geometry. Has to be unique within this object
-    //     type: 'point',
+    //   geometry: {
+    //     type: 'Point',
     //     coordinates: google.maps.LatLng() // Basically whatever we can pass to maps creation
     //     draggable: true, //or false
     //     icon: 'icon'  // For point geometries
-    //   } ..... ],
+    //   },
+    //   mapOptions: {
+    //     draggable: true, // or false
+    //     icon: 'icon' // For point geometries
+    //  }
     // }
 
     // Event handlers - optional, specify only the ones you want to subscribe to
@@ -23,60 +26,57 @@ class EditableMapObject {
     //   onMouseDown
     // }
     this.eventHandlers = eventHandlers
-    this.setFeature(feature)
+    this.setFeature(map, feature)
 
     // Raise the onCreate event
     this.eventHandlers.onCreate && this.eventHandlers.onCreate(this)
   }
 
-  setFeature(feature) {
+  setFeature(map, feature) {
     // Clear any previously created geometries
-    if (this.mapGeometries) {
-      Object.keys(this.mapGeometries).forEach((geometryKey) => {
-        this.mapGeometries[geometryKey].setMap(null)
-      })
+    if (this.mapGeomety) {
+      this.mapGeometry.setMap(null)
     }
-    this.mapGeometries = {}
+    this.mapGeometry = {}
     this.feature = feature
     if (feature) {
-      this.createMapGeometries(map)
+      this.createMapGeometry(map)
     }
   }
 
-  createMapGeometries(map) {
-    this.mapGeometries = {}
-    Object.keys(this.feature.geometries).forEach((geometryKey) => {
-      this.createMapObject(map, geometryKey, this.feature.geometries[geometryKey])
-    })
-  }
-
-  createMapObject(map, geometryKey, geometry) {
+  createMapGeometry(map) {
 
     // Create the map object
-    var mapObject = null
-    switch(geometry.type) {
-      case 'point':
-        mapObject = new google.maps.Marker({
-          position: new google.maps.LatLng(geometry.coordinates[1], geometry.coordinates[0]),
-          icon: geometry.icon,
-          draggable: geometry.draggable,
+    switch(this.feature.geometry.type) {
+      case 'Point':
+        this.mapGeometry = new google.maps.Marker({
+          position: new google.maps.LatLng(this.feature.geometry.coordinates[1], this.feature.geometry.coordinates[0]),
+          icon: this.feature.mapOptions.icon,
+          draggable: this.feature.mapOptions.draggable,
           map: map,
           editableMapObject: this
         })
       break;
 
-      case 'polygon':
-        mapObject = new google.maps.Polygon({
-          paths: geometry.polygonPath,
+      case 'Polygon':
+        var polygonPath = []
+        this.feature.geometry.coordinates[0].forEach((polygonVertex) => {
+          polygonPath.push({
+            lat: polygonVertex[1],
+            lng: polygonVertex[0]
+          })
+        })
+        this.mapGeometry = new google.maps.Polygon({
+          paths: polygonPath,
           strokeColor: '#FF1493',
           strokeOpacity: 0.8,
           strokeWeight: 2,
           fillColor: '#FF1493',
           fillOpacity: 0.4,
           clickable: true,
-          draggable: geometry.draggable
+          draggable: this.feature.mapOptions.draggable
         })
-        mapObject.setMap(map)
+        this.mapGeometry.setMap(map)
 
       break;
 
@@ -85,11 +85,9 @@ class EditableMapObject {
     }
     
     // Subscribe to map object events
-    mapObject.addListener('dragstart', (event) => this.eventHandlers.onDragStart && this.eventHandlers.onDragStart(this, mapObject, event))
-    mapObject.addListener('dragend', (event) => this.eventHandlers.onDragEnd && this.eventHandlers.onDragEnd(this, mapObject, event))
-    mapObject.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(this, mapObject, event))
-
-    this.mapGeometries[geometryKey] = mapObject
+    this.mapGeometry.addListener('dragstart', (event) => this.eventHandlers.onDragStart && this.eventHandlers.onDragStart(this, this.mapGeometry, event))
+    this.mapGeometry.addListener('dragend', (event) => this.eventHandlers.onDragEnd && this.eventHandlers.onDragEnd(this, this.mapGeometry, event))
+    this.mapGeometry.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(this, this.mapGeometry, event))
   }
 }
 
@@ -256,14 +254,13 @@ class PlanEditorController {
   }
 
   calculateCoverage(editableMapObject) {
-    var position = editableMapObject.mapGeometries.CENTER_POINT.position
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'COVERAGE'
     optimizationBody.point = {
       type: 'Point',
-      coordinates: [position.lng(), position.lat()]
+      coordinates: editableMapObject.feature.geometry.coordinates
     }
     // Always send radius in meters to the back end
     optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
@@ -278,21 +275,19 @@ class PlanEditorController {
           lng: polygonVertex[0]
         })
       })
-      var feature = editableMapObject.feature
-      feature.geometries.COVERAGE_BOUNDARY = {
-        type: 'polygon',
-        polygonPath: polygonPath,
-        draggable: false
+      var boundaryFeature = {
+        objectId: this.getUUID(),
+        geometry: result.data.polygon,
+        mapOptions: {
+          draggable: false
+        }
       }
-      feature.geometries.CENTER_POINT.icon = (editableMapObject === this.selectedMapObject) 
-                                              ? '/images/map_icons/aro/plan_equipment_selected.png'
-                                              : '/images/map_icons/aro/plan_equipment.png'
-      editableMapObject.setFeature(feature)
+      var mapObject = new EditableMapObject(this.mapRef, boundaryFeature, {})
 
       // Save the boundary to aro-service
       var serviceFeature = {
-        objectId: this.getUUID(),
-        geometry: result.data.polygon,
+        objectId: boundaryFeature.objectId,
+        geometry: boundaryFeature.geometry,
         attributes: {
           network_node_object_id: editableMapObject.feature.objectId
         }
@@ -304,11 +299,11 @@ class PlanEditorController {
 
   selectMapObject(newObjectToSelect) {
     if (this.selectedMapObject) {
-      this.selectedMapObject.mapGeometries.CENTER_POINT.setIcon('/images/map_icons/aro/plan_equipment.png')
+      this.selectedMapObject.mapGeometry.setIcon('/images/map_icons/aro/plan_equipment.png')
     }
     this.selectedMapObject = newObjectToSelect
     if (this.selectedMapObject) {
-      this.selectedMapObject.mapGeometries.CENTER_POINT.setIcon('/images/map_icons/aro/plan_equipment_selected.png')
+      this.selectedMapObject.mapGeometry.setIcon('/images/map_icons/aro/plan_equipment_selected.png')
     }
     this.$timeout()
   }
@@ -316,19 +311,27 @@ class PlanEditorController {
   createMapObject(event, feature, calculateCoverage) {
     if (this.selectedEditorMode === this.editorModes.ADD) {
       // We are in "Add entity" mode
-      var CENTER_KEY = 'point'
       // We may have a feature sent in. If it is, use the properties of that feature
-      var equipmentFeature = {
-        objectId: (feature && feature.objectId) || this.getUUID(),
-        geometries: {
-          CENTER_POINT: {
-            type: 'point',
-            coordinates: (feature && feature.geometry.coordinates) || [event.latLng.lng(), event.latLng.lat()],
+      var equipmentFeature = null
+      if (feature) {
+        equipmentFeature = feature
+        equipmentFeature.mapOptions = {
+          draggable: true,
+          icon: '/images/map_icons/aro/plan_equipment.png'
+        }
+      } else {
+        equipmentFeature = {
+          objectId: this.getUUID(),
+          geometry: {
+              type: 'Point',
+              coordinates: [event.latLng.lng(), event.latLng.lat()]
+          },
+          mapOptions: {
             draggable: true,
             icon: '/images/map_icons/aro/plan_equipment.png'
-          }
-        },
-        attributes: (feature && feature.attributes) || new EquipmentProperties()
+          },
+          attributes: new EquipmentProperties()
+        }
       }
       var handlers = {
         onCreate: (editableMapObject) => {
@@ -340,10 +343,7 @@ class PlanEditorController {
           // Format the object and send it over to aro-service
           var serviceFeature = {
             objectId: editableMapObject.feature.objectId,
-            geometry: {
-              type: 'Point',
-              coordinates: editableMapObject.feature.geometries.CENTER_POINT.coordinates
-            },
+            geometry: editableMapObject.feature.geometry,
             categoryType: 'dslam',
             attributes: {
               siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
@@ -363,6 +363,7 @@ class PlanEditorController {
             editableMapObject.setFeature(null)
             this.selectMapObject(null)
           } else if (this.selectedEditorMode === this.editorModes.EDIT_BOUNDARY) {
+            throw 'editable boundaryNot supported'
             editableMapObject.mapGeometries.COVERAGE_BOUNDARY.setEditable(true)
           } else {
             this.selectMapObject(editableMapObject)
@@ -370,7 +371,7 @@ class PlanEditorController {
         },
         onDragEnd: (editableMapObject, geometry, event) => {
           // Update the coordinates in the feature
-          editableMapObject.feature.geometries.CENTER_POINT.coordinates = [event.latLng.lng(), event.latLng.lat()]
+          editableMapObject.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
           this.calculateCoverage(editableMapObject)
           this.saveFeatureAttributes(editableMapObject.feature)
         }
@@ -393,10 +394,7 @@ class PlanEditorController {
     // Format the object and send it over to aro-service
     var serviceFeature = {
       objectId: feature.objectId,
-      geometry: {
-        type: 'Point',
-        coordinates: feature.geometries.CENTER_POINT.coordinates
-      },
+      geometry: feature.geometry,
       categoryType: 'dslam',
       attributes: {
         siteIdentifier: feature.attributes.siteIdentifier,
@@ -413,17 +411,14 @@ class PlanEditorController {
   setEditorMode(newMode) {
     this.selectedEditorMode = newMode
     if (newMode != this.editorModes.EDIT_BOUNDARY && this.selectedMapObject) {
-      this.selectedMapObject.mapGeometries.COVERAGE_BOUNDARY.setEditable(false)
+      this.selectedMapObject.mapObject.setEditable(false)
     }
   }
 
   removeCreatedMapObjects() {
     // Remove created objects from map
     this.createdEditableObjects.forEach((editableObject) => {
-      Object.keys(editableObject.mapGeometries).forEach((geometryKey) => {
-        var mapObject = editableObject.mapGeometries[geometryKey]
-        mapObject.setMap(null)
-      })
+      editableObject.setMap(null)
     })
     this.createdEditableObjects = []
   }
