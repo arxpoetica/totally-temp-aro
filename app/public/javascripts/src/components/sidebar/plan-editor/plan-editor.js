@@ -283,6 +283,7 @@ class PlanEditorController {
       })
       var boundaryFeature = {
         objectId: this.getUUID(),
+        associatedNetworkNodeId: editableMapObject.feature.objectId,
         geometry: result.data.polygon,
         mapOptions: {
           draggable: false
@@ -424,6 +425,20 @@ class PlanEditorController {
         onDragEnd: (editableMapObject, geometry, event) => {
           // Update the coordinates in the feature
           editableMapObject.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
+          // Remove the boundary geometry associated with this map object (if any)
+          const nodeObjectId = editableMapObject.feature.objectId
+          var indexToDelete = -1
+          this.createdEditableObjects.forEach((mapObj, index) => {
+            if (mapObj.feature.associatedNetworkNodeId === nodeObjectId) {
+              // Remove this boundary
+              mapObj.mapGeometry.setMap(null)
+              indexToDelete = index
+            }
+          })
+          if (indexToDelete >= 0) {
+            var deletedObject = this.createdEditableObjects.splice(indexToDelete, 1)[0]
+            this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${deletedObject.feature.objectId}`)
+          }
           this.calculateCoverage(editableMapObject)
           this.saveFeatureAttributes(editableMapObject.feature)
         }
