@@ -129,6 +129,12 @@ class PlanEditorController {
     this.uuidStore = []
     this.getUUIDsFromServer()
 
+    this.CAF_BOUNDARY_ID = null
+    this.$http.get('/service/boundary_type')
+    .then((result) => {
+      this.CAF_BOUNDARY_ID = result.data.filter((item) => item.description === 'CAF2')[0].id
+    })
+
     this.currentTransaction = null
     this.$http.get(`/service/plan-transaction?user_id=${this.state.getUserId()}`)
       .then((result) => {
@@ -336,6 +342,7 @@ class PlanEditorController {
       geometry: editableMapObject.feature.geometry,
       attributes: {
         network_node_type: 'dslam',
+        boundary_type_id: this.CAF_BOUNDARY_ID, // Assume that we have it at this point
         network_node_object_id: editableMapObject.feature.objectId
       }
     }
