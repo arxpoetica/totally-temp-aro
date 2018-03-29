@@ -5,6 +5,7 @@
       "layers": {
         "planned_central_office": {
           "label": "Central Office",
+	  "networkNodeType": "central_office",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/central_office/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/central_office.png",
           "aggregateZoomThreshold": "7",
@@ -15,6 +16,7 @@
         },
         "planned_remote_terminal": {
           "label": "Remote Terminal",
+	  "networkNodeType": "dslam",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/dslam/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/aro/remote_terminal.png",
           "aggregateZoomThreshold": "7",
@@ -25,6 +27,7 @@
         },
         "planned_fdh": {
           "label": "FDH",
+	  "networkNodeType": "fiber_distribution_hub",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_hub/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/fiber_distribution_hub.png",
           "aggregateZoomThreshold": "12",
@@ -35,6 +38,7 @@
         },
         "planned_fdt": {
           "label": "FDT",
+	  "networkNodeType": "fiber_distribution_terminal",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_terminal/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/fiber_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
@@ -45,6 +49,7 @@
         },
 	"planned_splice_point": {
           "label": "Splice point",
+	  "networkNodeType": "splice_point",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/splice_point/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/splice_point.png",
           "aggregateZoomThreshold": "14",
@@ -65,6 +70,7 @@
         },        
         "planned_5g_coverage": {
           "label": "5G Coverage",
+	  "networkNodeType": "cell_5g",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
           "iconUrl": "/images/map_icons/frontier/service_layer_cran.png",
           "aggregateZoomThreshold": "13",
@@ -76,6 +82,7 @@
         },
         "planned_bulk_distribution_terminal": {
           "label": "Bulk Distribution Terminal",
+	  "networkNodeType": "bulk_distribution_terminal",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distribution_terminal/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/bulk_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
@@ -132,6 +139,17 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#b87333"
+          }
+        },
+        "planned_site_boundaries": {
+          "label": "Site Boundaries",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment_boundary/tiles/{boundaryTypeId}/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
+          "aggregateZoomThreshold": "7",
+          "equipmentType": "point",
+          "drawingOptions": {
+            "strokeStyle": "#00a000",
+            "fillStyle": "#a0ffa0"
           }
         }
       }

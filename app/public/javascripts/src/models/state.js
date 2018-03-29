@@ -950,12 +950,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.networkNodeTypesEntity = {}
+  service.networkNodeTypes = {}
   //Load NetworkNodeTypesEntity
   service.loadNetworkNodeTypesEntity = () => {
     return new Promise((resolve, reject) => {
       $http.get('/service/odata/NetworkNodeTypesEntity')
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
+            service.networkNodeTypes = response.data
             response.data.forEach((entityType) => {
               service.networkNodeTypesEntity[entityType.name] = entityType.description
             })
@@ -1185,6 +1187,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.showDirectedCable = false
   service.showSiteBoundary = false
+  service.boundaryTypes = []
+  service.selectedBoundaryType = {}
+
+  var loadBoundaryLayers = function () {
+    return $http.get(`/service/boundary_type`)
+    .then((result) => {
+      service.boundaryTypes = result.data
+      service.selectedBoundaryType = result.data[0]
+    })  
+  }
+
+  loadBoundaryLayers()
 
   return service
 }])
