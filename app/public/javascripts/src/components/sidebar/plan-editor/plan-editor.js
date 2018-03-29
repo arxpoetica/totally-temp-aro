@@ -290,9 +290,9 @@ class PlanEditorController {
       }
       var polygonEventHandlers = []
       var handlers = {
-        onCreate: (editableMapObject, geometry, event) => {
-          this.createdEditableObjects.push(editableMapObject)
-          this.saveBoundaryToService(editableMapObject)
+        onCreate: (boundaryMapObject, geometry, event) => {
+          this.createdEditableObjects.push(boundaryMapObject)
+          this.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
         },
         onMouseDown: (editableMapObject, geometry, event) => {
           // Make the geometry editable
@@ -306,20 +306,20 @@ class PlanEditorController {
       boundaryMapObject.mapGeometry.getPaths().forEach(function(path, index){
         google.maps.event.addListener(path, 'insert_at', function(){
           self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-          self.saveBoundaryToService(boundaryMapObject)
+          self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
         });
         google.maps.event.addListener(path, 'remove_at', function(){
           self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-          self.saveBoundaryToService(boundaryMapObject)
+          self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
         });
         google.maps.event.addListener(path, 'set_at', function(){
           self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-          self.saveBoundaryToService(boundaryMapObject)
+          self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
         });
       });
       google.maps.event.addListener(boundaryMapObject.mapGeometry, 'dragend', function(){
         self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-        self.saveBoundaryToService(boundaryMapObject)
+        self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
       });
     })
     .catch((err) => console.error(err))
@@ -335,7 +335,7 @@ class PlanEditorController {
     editableMapObject.mapGeometry.coordinates = allPaths
   }
 
-  saveBoundaryToService(editableMapObject) {
+  saveBoundaryToService(editableMapObject, networkEquipmentObjectId) {
     // Save the boundary to aro-service
     var serviceFeature = {
       objectId: editableMapObject.feature.objectId,
@@ -343,7 +343,7 @@ class PlanEditorController {
       attributes: {
         network_node_type: 'dslam',
         boundary_type_id: this.CAF_BOUNDARY_ID, // Assume that we have it at this point
-        network_node_object_id: editableMapObject.feature.objectId
+        network_node_object_id: networkEquipmentObjectId
       }
     }
     this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
