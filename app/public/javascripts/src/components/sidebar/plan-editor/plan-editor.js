@@ -285,6 +285,7 @@ class PlanEditorController {
       var polygonEventHandlers = []
       var handlers = {
         onCreate: (editableMapObject, geometry, event) => {
+          this.createdEditableObjects.push(editableMapObject)
           this.saveBoundaryToService(editableMapObject)
         },
         onMouseDown: (editableMapObject, geometry, event) => {
@@ -461,7 +462,7 @@ class PlanEditorController {
   removeCreatedMapObjects() {
     // Remove created objects from map
     this.createdEditableObjects.forEach((editableObject) => {
-      editableObject.setMap(null)
+      editableObject.mapGeometry.setMap(null)
     })
     this.createdEditableObjects = []
   }
