@@ -117,7 +117,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               var pointTransform = getPointTransformForLayer(+planned_site_boundaries.aggregateZoomThreshold)
               
               planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{rootPlanId}', planId)
-              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{boundaryTypeId}', boundaryType.id)
+              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{boundaryTypeId}', state.selectedBoundaryType.id)
               planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{pointTransform}', pointTransform)
 
               oldMapLayers["planned_site_boundaries_"+networkEquipment.networkNodeType] = {

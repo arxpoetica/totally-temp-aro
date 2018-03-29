@@ -1187,6 +1187,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.showDirectedCable = false
   service.showSiteBoundary = false
+  service.boundaryTypes = []
+  service.selectedBoundaryType = {}
+
+  var loadBoundaryLayers = function () {
+    return $http.get(`/service/boundary_type`)
+    .then((result) => {
+      service.boundaryTypes = result.data
+      service.selectedBoundaryType = result.data[0]
+    })  
+  }
+
+  loadBoundaryLayers()
 
   return service
 }])
