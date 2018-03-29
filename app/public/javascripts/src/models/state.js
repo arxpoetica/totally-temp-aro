@@ -950,12 +950,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.networkNodeTypesEntity = {}
+  service.networkNodeTypes = {}
   //Load NetworkNodeTypesEntity
   service.loadNetworkNodeTypesEntity = () => {
     return new Promise((resolve, reject) => {
       $http.get('/service/odata/NetworkNodeTypesEntity')
         .then((response) => {
           if (response.status >= 200 && response.status <= 299) {
+            service.networkNodeTypes = response.data
             response.data.forEach((entityType) => {
               service.networkNodeTypesEntity[entityType.name] = entityType.description
             })

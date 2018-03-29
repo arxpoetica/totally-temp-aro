@@ -6,7 +6,7 @@
       <div ng-repeat="networkEquipment in planState.networkEquipments">
         <table class="table table-condensed">
           <tbody>
-            <tr ng-repeat="equipmentLayer in networkEquipment.layers">
+            <tr ng-repeat="equipmentLayer in networkEquipment.layers" ng-if="equipmentLayer.label!='Site Boundaries'">
               <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
               <td><input type="checkbox" class="checkboxfill"
                 ng-checked="equipmentLayer.checked" 

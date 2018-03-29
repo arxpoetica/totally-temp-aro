@@ -52,6 +52,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var planId = state.plan && state.plan.getValue() && state.plan.getValue().id
     if (planId) {
 
+      var networkLayers = _.find(state.networkEquipments,(category) => category.key == "planned" ).layers
+      var site_boundaries = _.find(networkLayers,(layer) => layer.label == "Site Boundaries")
+      
       // Loop through all network equipment categories (e.g. "Existing Equipment")
       state.networkEquipments.forEach((category) => {
 
@@ -101,36 +104,38 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               }
               createdMapLayerKeys.add(mapLayerKey)
             })
-          } else if (state.showSiteBoundary) {
-            // for now displaying 5G coverage until site boundary api is ready
-            if(networkEquipment.key == "planned_5g_coverage") {
-              var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
-              if (networkEquipment.equipmentType === 'point') {
-                var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-                tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
-              } else if (networkEquipment.equipmentType === 'line') {
-                var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-                tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
-              } else if (networkEquipment.equipmentType === 'polygon') {
-                var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-                tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
-              }
-              oldMapLayers[networkEquipment.key] = {
-                dataUrls: [tileUrl],
-                iconUrl: networkEquipment.iconUrl,
-                renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-                strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-                lineWidth: 2,
-                fillStyle: networkEquipment.drawingOptions.fillStyle,
-                opacity: 0.5,
-                selectable: true,
-                showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
-              }
-  
-              createdMapLayerKeys.add(networkEquipment.key)
-            }
           }
         })
+        if (state.showSiteBoundary) {
+          category.layers.forEach((networkEquipment) => {
+            if(networkEquipment.checked && networkEquipment.networkNodeType) {
+              var planned_site_boundaries = angular.copy(site_boundaries)
+              var boundaryType = _.find(state.networkNodeTypes,(node) => {
+                if(node.name == networkEquipment.networkNodeType)
+                  return node
+              })
+              var pointTransform = getPointTransformForLayer(+planned_site_boundaries.aggregateZoomThreshold)
+              
+              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{rootPlanId}', planId)
+              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{boundaryTypeId}', boundaryType.id)
+              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{pointTransform}', pointTransform)
+
+              oldMapLayers["planned_site_boundaries_"+networkEquipment.networkNodeType] = {
+                dataUrls: [planned_site_boundaries.tileUrl],
+                iconUrl: planned_site_boundaries.iconUrl,
+                renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+                strokeStyle: planned_site_boundaries.drawingOptions.strokeStyle,
+                lineWidth: 2,
+                fillStyle: planned_site_boundaries.drawingOptions.fillStyle,
+                opacity: 0.5,
+                selectable: true,
+                showPolylineDirection: planned_site_boundaries.drawingOptions.showPolylineDirection
+              }
+
+              createdMapLayerKeys.add("planned_site_boundaries_"+networkEquipment.networkNodeType)
+            }
+          })
+        }  
       })
     }
 
