@@ -166,7 +166,7 @@ class PlanEditorController {
         result.data.forEach((equipmentFeature) => {
           equipmentFeature.attributes.siteTypes = defaultAttributes.siteTypes
           equipmentFeature.attributes.equipmentTypes = defaultAttributes.equipmentTypes
-          this.createMapObject(null, equipmentFeature)
+          this.createMapObject(null, equipmentFeature, false)
         })
         this.$timeout()
       })
@@ -251,7 +251,7 @@ class PlanEditorController {
     this.mapRef = window[this.mapGlobalObjectName]
     var self = this
     this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function(event) {
-      self.createMapObject(event)
+      self.createMapObject(event, null, true)
     })
   }
 
@@ -288,6 +288,16 @@ class PlanEditorController {
                                               ? '/images/map_icons/aro/plan_equipment_selected.png'
                                               : '/images/map_icons/aro/plan_equipment.png'
       editableMapObject.setFeature(feature)
+
+      // Save the boundary to aro-service
+      var serviceFeature = {
+        objectId: this.getUUID(),
+        geometry: result.data.polygon,
+        attributes: {
+          network_node_object_id: editableMapObject.feature.objectId
+        }
+      }
+      this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
     })
     .catch((err) => console.error(err))
   }
@@ -303,7 +313,7 @@ class PlanEditorController {
     this.$timeout()
   }
 
-  createMapObject(event, feature) {
+  createMapObject(event, feature, calculateCoverage) {
     if (this.selectedEditorMode === this.editorModes.ADD) {
       // We are in "Add entity" mode
       var CENTER_KEY = 'point'
@@ -323,7 +333,9 @@ class PlanEditorController {
       var handlers = {
         onCreate: (editableMapObject) => {
           this.createdEditableObjects.push(editableMapObject)
-          this.calculateCoverage(editableMapObject)
+          if (calculateCoverage) {
+            this.calculateCoverage(editableMapObject)
+          }
           this.selectMapObject(editableMapObject)
           // Format the object and send it over to aro-service
           var serviceFeature = {
