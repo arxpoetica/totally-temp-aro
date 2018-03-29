@@ -335,6 +335,7 @@ class PlanEditorController {
       objectId: editableMapObject.feature.objectId,
       geometry: editableMapObject.feature.geometry,
       attributes: {
+        network_node_type: 'dslam',
         network_node_object_id: editableMapObject.feature.objectId
       }
     }
