@@ -417,7 +417,6 @@ class PlanEditorController {
             this.selectMapObject(null)
           } else if (this.selectedEditorMode === this.editorModes.EDIT_BOUNDARY) {
             throw 'editable boundaryNot supported'
-            editableMapObject.mapGeometries.COVERAGE_BOUNDARY.setEditable(true)
           } else {
             this.selectMapObject(editableMapObject)
           }
@@ -477,8 +476,13 @@ class PlanEditorController {
   // Sets the editor mode, and subscribes/unsubscribes from map events
   setEditorMode(newMode) {
     this.selectedEditorMode = newMode
-    if (newMode != this.editorModes.EDIT_BOUNDARY && this.selectedMapObject && this.selectedMapObject.mapGeometry.type === 'Polygon') {
-      this.selectedMapObject.mapGeometry.setEditable(false)
+    if (newMode != this.editorModes.EDIT_BOUNDARY) {
+      // Loop through all created objects and just set the editable flag to false
+      this.createdEditableObjects.forEach((editableObject) => {
+        if (editableObject.feature.geometry.type === 'Polygon') {
+          editableObject.mapGeometry.setEditable(false)
+        }
+      })
     }
   }
 
