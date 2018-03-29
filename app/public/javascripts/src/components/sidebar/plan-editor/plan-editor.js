@@ -282,19 +282,62 @@ class PlanEditorController {
           draggable: false
         }
       }
-      var mapObject = new EditableMapObject(this.mapRef, boundaryFeature, {})
-
-      // Save the boundary to aro-service
-      var serviceFeature = {
-        objectId: boundaryFeature.objectId,
-        geometry: boundaryFeature.geometry,
-        attributes: {
-          network_node_object_id: editableMapObject.feature.objectId
+      var polygonEventHandlers = []
+      var handlers = {
+        onCreate: (editableMapObject, geometry, event) => {
+          this.saveBoundaryToService(editableMapObject)
+        },
+        onMouseDown: (editableMapObject, geometry, event) => {
+          // Make the geometry editable
+          if (this.selectedEditorMode === this.editorModes.EDIT_BOUNDARY) {
+            geometry.setEditable(true)
+          }
         }
       }
-      this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
+      var boundaryMapObject = new EditableMapObject(this.mapRef, boundaryFeature, handlers)
+      var self = this
+      boundaryMapObject.mapGeometry.getPaths().forEach(function(path, index){
+        google.maps.event.addListener(path, 'insert_at', function(){
+          self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
+          self.saveBoundaryToService(boundaryMapObject)
+        });
+        google.maps.event.addListener(path, 'remove_at', function(){
+          self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
+          self.saveBoundaryToService(boundaryMapObject)
+        });
+        google.maps.event.addListener(path, 'set_at', function(){
+          self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
+          self.saveBoundaryToService(boundaryMapObject)
+        });
+      });
+      google.maps.event.addListener(boundaryMapObject.mapGeometry, 'dragend', function(){
+        self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
+        self.saveBoundaryToService(boundaryMapObject)
+      });
     })
     .catch((err) => console.error(err))
+  }
+
+  updatePolygonInFeature(polygon, editableMapObject) {
+    var allPaths = []
+    polygon.getPaths().forEach((path) => {
+      var pathPoints = []
+      path.forEach((latLng) => pathPoints.push(latLng.lng(), latLng.lat()))
+      allPaths.push(pathPoints)
+    })
+    editableMapObject.mapGeometry.coordinates = allPaths
+  }
+
+  saveBoundaryToService(editableMapObject) {
+    // Save the boundary to aro-service
+    var serviceFeature = {
+      objectId: editableMapObject.feature.objectId,
+      geometry: editableMapObject.feature.geometry,
+      attributes: {
+        network_node_object_id: editableMapObject.feature.objectId
+      }
+    }
+    this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
   }
 
   selectMapObject(newObjectToSelect) {
@@ -410,8 +453,8 @@ class PlanEditorController {
   // Sets the editor mode, and subscribes/unsubscribes from map events
   setEditorMode(newMode) {
     this.selectedEditorMode = newMode
-    if (newMode != this.editorModes.EDIT_BOUNDARY && this.selectedMapObject) {
-      this.selectedMapObject.mapObject.setEditable(false)
+    if (newMode != this.editorModes.EDIT_BOUNDARY && this.selectedMapObject && this.selectedMapObject.mapGeometry.type === 'Polygon') {
+      this.selectedMapObject.mapGeometry.setEditable(false)
     }
   }
 
