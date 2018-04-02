@@ -1,6 +1,6 @@
 /* global app $ map */
 // Search Controller
-app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', ($scope, $rootScope, $http, map_tools, $timeout) => {
+app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', 'state', ($scope, $rootScope, $http, map_tools, $timeout, state) => {
   var ids = 0
   var search = $('#global-search-toolbutton .select2')
   search.select2({
@@ -33,21 +33,33 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
       cache: true
     }
   }).on('change', (e) => {
+	console.log('CHANGED')
     var selected = e.added
     if (selected) {
       var centroid = selected.centroid.coordinates
       map.setCenter({ lat: centroid[1], lng: centroid[0] })
     }
   })
-
+  
+  // --- here or
+  console.log(state)
+  state.plan.subscribe((newPlan) => {
+	if (newPlan && !newPlan.ephemeral){
+	  searchAddress(newPlan.areaName)
+    }
+  })
+  
+  
+  
   //set the default search to the location in config
   $timeout(function () {
     $scope.searchRetry = 0
     searchAddress()
   },10);
 
-  function searchAddress () {
-    $http.get("/search/addresses", { params: { text: globalUser.default_location ? globalUser.default_location : config.ui.defaultSearch } }).then(function (results) {
+  function searchAddress (searchText) {
+	if ('undefined' == typeof searchText) searchText = globalUser.default_location ? globalUser.default_location : config.ui.defaultSearch
+	$http.get("/search/addresses", { params: { text: searchText } }).then(function (results) {
 
       var location = results.data[0];
 
@@ -62,11 +74,10 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
         search.select2("val", loc, true)
       } else if ($scope.searchRetry < 5) {
         $scope.searchRetry++
-        searchAddress()
+        searchAddress(searchText)
       }
 
     });
   }
-
-
+  
 }]);

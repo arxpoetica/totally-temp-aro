@@ -127,3 +127,5 @@ aro-service/
 bootstrap/etl.log
 
 docker/docker-compose.yml
+/node_modules/
+/.gitignore

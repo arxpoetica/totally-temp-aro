@@ -59,6 +59,7 @@ class ToolBarController {
       e.stopPropagation();
       e.preventDefault();
     })
+    
   }
 
   $onInit() {
