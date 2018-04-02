@@ -24,8 +24,8 @@ class ViewModeRoadSegmentController {
       }
   
       if(roadSegments.size == 1) {
-        roadSegmentsInfo.gid = roadSegments[0].gid
-        roadSegmentsInfo.edge_length = roadSegments[0].edge_length.toFixed(2)
+        roadSegmentsInfo.gid =  [...roadSegments][0].gid
+        roadSegmentsInfo.edge_length =  [...roadSegments][0].edge_length.toFixed(2)
       } else {
         roadSegmentsInfo.totalLength = [...roadSegments].reduce((total, item) => { return total + item.edge_length }, 0).toFixed(2)
         roadSegmentsInfo.count = roadSegments.length
