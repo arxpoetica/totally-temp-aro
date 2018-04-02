@@ -41,8 +41,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
     }
   })
   
-  // --- here or
-  console.log(state)
+  
   state.plan.subscribe((newPlan) => {
 	if (newPlan && !newPlan.ephemeral){
 	  searchAddress(newPlan.areaName)
