@@ -1090,7 +1090,7 @@ class TileComponentController {
           .then((results) => {
             var hitFeatures = []
             var serviceAreaFeatures = []
-            var roadSegments = this.state.selectedRoadSegments.getValue()
+            var roadSegments = new Set()
             var equipmentFeatures = []
 
             var canSelectLoc  = false

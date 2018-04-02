@@ -12,7 +12,8 @@
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
+          },
+	  "isequipment": true
         },
         "planned_remote_terminal": {
           "label": "Remote Terminal",
@@ -23,7 +24,8 @@
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
+          },
+	  "isequipment": true
         },
         "planned_fdh": {
           "label": "FDH",
@@ -34,7 +36,8 @@
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
+          },
+	  "isequipment": true
         },
         "planned_fdt": {
           "label": "FDT",
@@ -45,7 +48,19 @@
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
+          },
+	  "isequipment": true
+        },
+        "planned_5g_site": {
+          "label": "Fixed Wireless Site",
+          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
+          "iconUrl": "/images/map_icons/frontier/composite/all_cell_5g.png",
+          "aggregateZoomThreshold": "14",
+          "equipmentType": "point",
+          "drawingOptions": {
+            "strokeStyle": "#0000ff"
+          },
+	  "isequipment": true
         },
 	"planned_splice_point": {
           "label": "Splice point",
@@ -56,18 +71,9 @@
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
-        },
-        "planned_5g_site": {
-          "label": "Fixed Wireless Site",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
-          "iconUrl": "/images/map_icons/frontier/composite/all_cell_5g.png",
-          "aggregateZoomThreshold": "14",
-          "equipmentType": "point",
-          "drawingOptions": {
-            "strokeStyle": "#0000ff"
-          }
-        },        
+          },
+	  "isequipment": true
+        },  
         "planned_5g_coverage": {
           "label": "5G Coverage",
 	  "networkNodeType": "cell_5g",
@@ -78,7 +84,8 @@
           "drawingOptions": {
             "strokeStyle": "#00a000",
             "fillStyle": "#a0ffa0"
-          }
+          },
+	  "isequipment": true
         },
         "planned_bulk_distribution_terminal": {
           "label": "Bulk Distribution Terminal",
@@ -89,7 +96,8 @@
           "equipmentType": "point",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
+          },
+	  "isequipment": true
         },
         "planned_feeder_fiber": {
           "label": "Feeder Fiber",
@@ -99,7 +107,8 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#0000ff"
-          }
+          },
+	  "isequipment": false
         },
         "planned_distribution_fiber": {
           "label": "Distribution Fiber",
@@ -109,7 +118,8 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#ff0000"
-          }
+          },
+	  "isequipment": false
         },
         "planned_backhaul_fiber": {
           "label": "Backhaul Fiber",
@@ -119,7 +129,8 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#000000"
-          }
+          },
+	  "isequipment": false
         },
 	"planned_existing_fiber": {
           "label": "Existing Fiber",
@@ -129,7 +140,8 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#000000"
-          }
+          },
+	  "isequipment": false
         },
 	"planned_copper": {
           "label": "Copper Cable",
@@ -139,7 +151,8 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#b87333"
-          }
+          },
+	  "isequipment": false
         },
         "planned_site_boundaries": {
           "label": "Site Boundaries",
