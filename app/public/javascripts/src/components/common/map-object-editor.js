@@ -60,6 +60,16 @@ class MapObjectEditorController {
       documentBody.appendChild(this.contextMenuElement)
     }, 0)
 
+    // Add a click handler on the entire document so that we can hide the context menu if the user clicks outside the menu.
+    this.$document.on('click', () => {
+      this.contextMenuCss.display = 'none'
+      this.$timeout()
+    })
+    this.mapRightClickListener = this.mapRef.addListener('rightclick', () => {
+      this.contextMenuCss.display = 'none'
+      this.$timeout()
+    })
+
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
 
@@ -125,6 +135,10 @@ class MapObjectEditorController {
     if (!event || !event.latLng) {
       return
     }
+    if (this.contextMenuCss.display === 'block') {
+      // This means that the context menu is being displayed. Do not create an object.
+      return
+    }
     if (!event.locations || event.locations.length === 0) {
       // The map was clicked on, but there was no location under the cursor. Create a new one.
       this.createMapObject(this.getUUID(), event.latLng)
@@ -166,6 +180,7 @@ class MapObjectEditorController {
       this.selectMapObject(null)
       mapObjectToDelete.setMap(null)
       delete this.createdMapObjects[mapObjectToDelete.objectId]
+      this.onDeleteObject && this.onDeleteObject({mapObjectToDelete})
     }
     this.contextMenuCss.display = 'none'  // Hide the context menu
   }
@@ -186,6 +201,12 @@ class MapObjectEditorController {
       var documentBody = this.$document.find('body')[0]
       documentBody.removeChild(this.contextMenuElement)
     }, 0)
+
+    // Remove the click handler we had added on the document.
+    this.$document.off('click')
+    if (this.mapRightClickListener) {
+      this.mapRightClickListener.remove()
+    }
   }
 }
 
