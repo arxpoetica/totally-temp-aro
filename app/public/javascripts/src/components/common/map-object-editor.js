@@ -208,6 +208,14 @@ class MapObjectEditorController {
     if (this.mapRightClickListener) {
       this.mapRightClickListener.remove()
     }
+    // Since we hijacked the $document.on('click'), the bootstrap dropdowns won't work unless you re-enable them.
+    // Try-catch in case we don't have jQuery or bootstrap
+    try {
+      $('.dropdown-toggle').dropdown();
+    } catch (err) {
+      console.error('Unable to re-enable bootstrap dropdown')
+      console.error(err)
+    }
   }
 }
 
