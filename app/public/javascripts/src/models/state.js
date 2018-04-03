@@ -82,7 +82,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     BOUNDARIES_INFO: 'BOUNDARIES_INFO',
     ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
     COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
-    EDIT_LOCATIONS: 'EDIT_LOCATIONS'
+    EDIT_LOCATIONS: 'EDIT_LOCATIONS',
+    PLAN_INFO: 'PLAN_INFO'
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
 
