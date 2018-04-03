@@ -1,14 +1,26 @@
 <div id="equipment_nodes_controller">
 
   <!-- New implementation of network equipments -->
+  <% if(config.ARO_CLIENT === 'frontier') { %>
   <div class="row">
     <div class="col-md-12">
       <div ng-repeat="networkEquipment in planState.networkEquipments">
         <table class="table table-condensed">
           <tbody>
-            <tr ng-repeat="equipmentLayer in networkEquipment.layers" ng-if="equipmentLayer.label!='Site Boundaries'">
+            <strong>Equipment</strong>
+            <tr ng-repeat="equipmentLayer in networkEquipment.layers" 
+              ng-if="equipmentLayer.isequipment && equipmentLayer.label!='Site Boundaries'">
               <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
               <td><input type="checkbox" class="checkboxfill"
+                ng-checked="equipmentLayer.checked" 
+                ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
+              </td>
+            </tr>
+            <tr><td colspan="2"><strong>Cable Plant</strong></td></tr>
+            <tr ng-repeat="equipmentLayer in networkEquipment.layers" 
+              ng-if="!equipmentLayer.isequipment && equipmentLayer.label!='Site Boundaries'">
+              <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
+              <td><input type="checkbox" class="checkboxfill" 
                 ng-checked="equipmentLayer.checked" 
                 ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
               </td>
@@ -18,6 +30,25 @@
       </div>
     </div>
   </div>
+  <% } else {%>
+    <div class="row">
+      <div class="col-md-12">
+        <div ng-repeat="networkEquipment in planState.networkEquipments">
+          <table class="table table-condensed">
+            <tbody>
+              <tr ng-repeat="equipmentLayer in networkEquipment.layers" ng-if="equipmentLayer.label!='Site Boundaries'">
+                <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
+                <td><input type="checkbox" class="checkboxfill"
+                  ng-checked="equipmentLayer.checked" 
+                  ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% } %>
 
   <% if (env_is_test) { %>
     <a href="javascript:void(0)" ng-click="equipment_layers.network_nodes.select_random_features()" ng-attr-data-loaded="{{equipment_layers.network_nodes.data_loaded}}">.</a>

@@ -1,44 +1,33 @@
-<div>
-  <form>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search for Plan Names" ng-model="$ctrl.search_text"
-            ng-model-options="{ debounce: 500 }" ng-change="$ctrl.loadPlans()">
-          <span class="input-group-addon">
-        <span class="glyphicon glyphicon-search"></span>
-          </span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="input-group">
-          <span class="input-group-addon">{{ config.currency_symbol }}</span>
-          <input type="text" class="form-control" placeholder="Minimum cost" ng-model="$ctrl.minimumCost" ng-change="$ctrl.loadPlans()">
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="input-group">
-          <span class="input-group-addon">{{ config.currency_symbol }}</span>
-          <input type="text" class="form-control" placeholder="Maximum cost" ng-model="$ctrl.maximumCost" ng-change="$ctrl.loadPlans()">
-        </div>
-      </div>
-    </div>
+<style scoped>
+  .plan-info-container {
+    position: relative;
+    height: 99%;
+    margin-top: 1%;
+  }
+</style>    
+<div class="plan-info-container">
+  <div class="input-group">
+    <input type="text" class="form-control" placeholder="Search for Plan Names" 
+      ng-model="$ctrl.search_text" ng-model-options="{ debounce: 500 }"
+      ng-change="$ctrl.loadPlans()">
+    <span class="input-group-addon">
+      <span class="glyphicon glyphicon-search"></span>
+    </span>
+  </div>
 
-    <div ng-if="user.rol == admin" class="row">
-      <div class="col-md-12">
-        <div class="checkbox">
-          <input type="checkbox" style="left: 10px; margin-top: 1px;" class="checkboxfill" ng-model="allPlans" name="ctype-name" ng-change="$scope.loadPlans()">
-          <span style="padding-left: 13px">Show plans of all users</span>
-        </div>
-        <hr>
-  </form>
+  <div style="margin-top:2px">
+    <input type="checkbox"
+      class="checkboxfill"
+      name="ctype-name" disabled> Limit to plans in current map view
+  </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
     No plans found
   </p>
+
   <div ng-show="$ctrl.plans.length > 0">
-    <div class="table-responsive">
-      <table id="tblSelectPlans" class="table table-striped">
+    <!-- <div class="table-responsive"> -->
+      <table id="tblSelectPlans" class="table table-condensed table-striped">
         <thead>
           <tr>
             <th>
@@ -46,79 +35,39 @@
               <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'asc')">↓</a>
               <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'desc')">↑</a>
             </th>
-            <th>Status</th>
             <th>Actions</th>
-            <!-- <th>
-              Created at
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('created_at', false)">↓</a>
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('created_at', true)">↑</a>
-            </th> -->
-            <th>
-              Updated at
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('updated_at', false)">↓</a>
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('updated_at', true)">↑</a>
-            </th>
             <th>Created By</th>
-            <!-- <th class="text-right">
-              Total Cost
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('total_cost', false)">↓</a>
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('total_cost', true)">↑</a>
-            </th> -->
-            <!-- <th>Optimization Type</th> -->
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
             <td><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></td>
             <td>
-              <div ng-if="plan.progress">
-                <div style="float:left; width:200px">
-                  <div class="progress" style="margin:0">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar" style="width: {{ plan.progress * 100 }}%">{{ plan.progressString }}</div>
-                  </div>
-                </div>
-              </div>
-              <div ng-if="!plan.progress && plan.ranOptimization">
-                <div style="float:left; width:200px">
-                  <div class="progress" style="margin:0">
-                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: 100%">Complete</div>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td>
               <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
               <a ng-if="!plan.progress" class="btn btn-sm btn-primary"><span class="fa fa-folder"></span></a>
-              <!--Commenting out "plan sharing" for now. Until we get ACL sorted out in aro-service-->
-              <!--<a ng-if="!plan.progress" class="btn btn-sm btn-primary" ng-click="showSharePlan(plan)"><span class="glyphicon glyphicon-share"></span></a>-->
               <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
             </td>
-            <!-- <td>{{plan.created_at | date:'shortDate'}}</td> -->
-            <td>{{plan.updated_at | date:'shortDate'}}</td>
             <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
-            <!-- <td class="text-right">{{plan.total_cost | currency:"
-              <%- config.currency_symbol %>"}}</td>
-            <td></td> -->
           </tr>
         </tbody>
       </table>
-    </div>
+    <!-- </div> -->
     <nav class="text-center" style="max-height: 35px">
       <ul class="pagination" style="margin: 0px">
         <li ng-class="{ disabled: $ctrl.currentPage === 1 }">
           <a href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
+            <span aria-hidden="true">&laquo;</span>
+          </a>
         </li>
         <li ng-repeat="page in $ctrl.pages" ng-class="{ active: page === $ctrl.currentPage }">
           <a href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
         </li>
         <li ng-class="{ disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
           <a href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
+            <span aria-hidden="true">&raquo;</span>
+          </a>
         </li>
       </ul>
     </nav>
   </div>
-  </div>
+</div>
