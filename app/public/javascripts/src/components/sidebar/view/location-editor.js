@@ -187,9 +187,12 @@ class LocationEditorController {
       .catch((err) => console.error(err))
 }
 
+  handleObjectDeleted(mapObject) {
+    this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
+  }
+
   deleteSelectedObject() {
-    // First delete the object in aro-service, then ask the map to remove it (which in turn may change this.selectedMapObject).
-    this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${this.selectedMapObject.objectId}`)
+    // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
     this.requestSelectedObjectDelete && this.requestSelectedObjectDelete()
   }
 }
