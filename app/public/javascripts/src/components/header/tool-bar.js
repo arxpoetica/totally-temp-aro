@@ -14,11 +14,6 @@ class ToolBarController {
     this.heatMapOption = true
     this.measuringStickEnabled = false
 
-    this.boundaryType = [
-      { id: 'CAF2', label: 'CAF2' }
-    ]
-    this.selectedBoundaryType = this.boundaryType[0]
-
     this.min = 0
     // Map tile settings used for debugging
     this.state.mapTileOptions
@@ -42,7 +37,7 @@ class ToolBarController {
       else if(i < 2000000) incrementby = 250000
       else incrementby=500000
     }
-
+    this.rangeValues.reverse()
     this.max = this.rangeValues.length - 1
     this.sliderValue = this.rangeValues.indexOf(this.mapTileOptions.heatMap.worldMaxValue)
 
@@ -75,7 +70,7 @@ class ToolBarController {
   }
 
   showPlanModal() {
-    this.state.networkPlanModal.next(true)
+    this.state.activeViewModePanel = this.state.viewModePanels.PLAN_INFO
   }
 
   createEphemeralPlan() {
