@@ -180,7 +180,7 @@ class MapObjectEditorController {
       this.selectMapObject(null)
       mapObjectToDelete.setMap(null)
       delete this.createdMapObjects[mapObjectToDelete.objectId]
-      this.onDeleteObject && this.onDeleteObject({mapObjectToDelete})
+      this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
     }
     this.contextMenuCss.display = 'none'  // Hide the context menu
   }
