@@ -68,7 +68,8 @@ class MapTileRenderer {
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
-    var layersChanged = false
+    console.log('set order')
+	var layersChanged = false
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
       if (!mapLayers[oldMapLayerKey]) {
         // Old map layer key does not exist in new map layers, so layers have changed
@@ -176,12 +177,14 @@ class MapTileRenderer {
 
   // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
-
-    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+	var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
+	console.log(this.mapLayers)
     Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
+      //console.log('layer: '+mapLayerKey)
+      //console.log(mapLayer)
       var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,

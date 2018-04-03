@@ -33,7 +33,6 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
       cache: true
     }
   }).on('change', (e) => {
-	console.log('CHANGED')
     var selected = e.added
     if (selected) {
       var centroid = selected.centroid.coordinates
