@@ -134,7 +134,9 @@ class MapObjectEditorController {
     if (!event || !event.latLng) {
       return
     }
-    if (this.contextMenuCss.display === 'block') {
+    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+    const isDropdownHidden = dropdownMenu.is(':hidden')
+    if (!isDropdownHidden) {
       // This means that the context menu is being displayed. Do not create an object.
       return
     }
