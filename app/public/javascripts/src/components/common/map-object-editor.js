@@ -1,7 +1,10 @@
 class MapObjectEditorController {
 
-  constructor($http, state, tileDataService) {
+  constructor($http, $element, $document, $timeout, state, tileDataService) {
     this.$http = $http
+    this.$element = $element
+    this.$document = $document
+    this.$timeout = $timeout
     this.state = state
     this.tileDataService = tileDataService
     this.mapRef = null
@@ -9,6 +12,15 @@ class MapObjectEditorController {
     this.selectedMapObject = null
     this.uuidStore = []
     this.getUUIDsFromServer()
+    // Save the context menu element so that we can remove it when the component is destroyed
+    this.contextMenuElement = null
+    this.contextMenuCss = {
+      display: 'none',
+      position: 'absolute',
+      visible: true,
+      top: '100px',
+      left: '100px'
+    }
   }
 
   // Get a list of UUIDs from the server
@@ -37,6 +49,16 @@ class MapObjectEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
+
+    // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
+    // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
+    // changes while the component is initializing, and we get a AngularJS error.
+    this.$timeout(() => {
+      this.contextMenuElement = this.$element.find(`.dropdown-menu`)[0]
+      this.$element[0].removeChild(this.contextMenuElement)
+      var documentBody = this.$document.find('body')[0]
+      documentBody.appendChild(this.contextMenuElement)
+    }, 0)
 
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
@@ -89,6 +111,14 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       }
     })
+    mapObject.addListener('rightclick', (event) => {
+      // Display the context menu and select the clicked marker
+      this.contextMenuCss.display = 'block'
+      this.contextMenuCss.left = `${event.pixel.x}px`
+      this.contextMenuCss.top = `${event.pixel.y}px`
+      this.selectMapObject(mapObject)
+      this.$timeout()
+    })
   }
 
   handleMapEntitySelected(event) {
@@ -137,10 +167,10 @@ class MapObjectEditorController {
       mapObjectToDelete.setMap(null)
       delete this.createdMapObjects[mapObjectToDelete.objectId]
     }
+    this.contextMenuCss.display = 'none'  // Hide the context menu
   }
 
   $onDestroy() {
-
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
     this.removeCreatedMapObjects()
@@ -150,14 +180,19 @@ class MapObjectEditorController {
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
-  }
 
+    // Remove the context menu from the document body
+    this.$timeout(() => {
+      var documentBody = this.$document.find('body')[0]
+      documentBody.removeChild(this.contextMenuElement)
+    }, 0)
+  }
 }
 
-MapObjectEditorController.$inject = ['$http', 'state', 'tileDataService']
+MapObjectEditorController.$inject = ['$http', '$element', '$document', '$timeout', 'state', 'tileDataService']
 
 let mapObjectEditor = {
-  template: '',
+  templateUrl: '/components/common/map-object-editor.html',
   bindings: {
     mapGlobalObjectName: '@',
     objectIconUrl: '@',
