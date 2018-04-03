@@ -73,7 +73,8 @@ class MapObjectEditorController {
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
 
-    this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.subscribe((event) => {
+    // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
+    this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       this.handleMapEntitySelected(event)
     })
 
