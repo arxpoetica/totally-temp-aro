@@ -15,7 +15,7 @@ class MapObjectEditorController {
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
     this.contextMenuCss = {
-      display: 'none',
+      display: 'block',
       position: 'absolute',
       visible: true,
       top: '100px',
@@ -54,21 +54,11 @@ class MapObjectEditorController {
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
     this.$timeout(() => {
-      this.contextMenuElement = this.$element.find(`.dropdown-menu`)[0]
+      this.contextMenuElement = this.$element.find('.map-object-editor-context-menu-container')[0]
       this.$element[0].removeChild(this.contextMenuElement)
       var documentBody = this.$document.find('body')[0]
       documentBody.appendChild(this.contextMenuElement)
     }, 0)
-
-    // Add a click handler on the entire document so that we can hide the context menu if the user clicks outside the menu.
-    this.$document.on('click', () => {
-      this.contextMenuCss.display = 'none'
-      this.$timeout()
-    })
-    this.mapRightClickListener = this.mapRef.addListener('rightclick', () => {
-      this.contextMenuCss.display = 'none'
-      this.$timeout()
-    })
 
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
@@ -127,6 +117,14 @@ class MapObjectEditorController {
       this.contextMenuCss.display = 'block'
       this.contextMenuCss.left = `${event.pixel.x}px`
       this.contextMenuCss.top = `${event.pixel.y}px`
+
+      // Show the dropdown menu
+      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+      const isDropdownHidden = dropdownMenu.is(':hidden')
+      if (isDropdownHidden) {
+        var toggleButton = this.$document.find('.map-object-editor-context-menu')
+        toggleButton.dropdown('toggle')
+      }
       this.selectMapObject(mapObject)
       this.$timeout()
     })
@@ -202,20 +200,6 @@ class MapObjectEditorController {
       var documentBody = this.$document.find('body')[0]
       documentBody.removeChild(this.contextMenuElement)
     }, 0)
-
-    // Remove the click handler we had added on the document.
-    this.$document.off('click')
-    if (this.mapRightClickListener) {
-      this.mapRightClickListener.remove()
-    }
-    // Since we hijacked the $document.on('click'), the bootstrap dropdowns won't work unless you re-enable them.
-    // Try-catch in case we don't have jQuery or bootstrap
-    try {
-      $('.dropdown-toggle').dropdown();
-    } catch (err) {
-      console.error('Unable to re-enable bootstrap dropdown')
-      console.error(err)
-    }
   }
 }
 
