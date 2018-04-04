@@ -4,6 +4,18 @@
     height: 99%;
     margin-top: 1%;
   }
+  .tags {
+   margin-bottom: 5px;
+  } 
+  .tags .tag {
+    display: inline-block;
+    margin: 1px;
+    font-size: 12px;
+  }
+  .tag .close {
+    font-size: 14px;
+    margin-left: 5px;
+  }
 </style>    
 <div class="plan-info-container">
   <div class="input-group">
@@ -13,6 +25,16 @@
     <span class="input-group-addon">
       <span class="glyphicon glyphicon-search"></span>
     </span>
+  </div>
+  <div style="margin:2px">
+    <aro-multi-select 
+      model="$ctrl.selectedTags" 
+      all-items="$ctrl.allTags" 
+      current-selected-items="$ctrl.selectedTags"
+      selection-changed="$ctrl.onTagSelectionChanged()"
+      enable-search = "true"
+      placeholder="Filter by tags">
+    </aro-multi-select>
   </div>
 
   <div style="margin-top:2px">
@@ -36,6 +58,7 @@
               <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'desc')">↑</a>
             </th>
             <th>Actions</th>
+            <th>Tags</th>
             <th>Created By</th>
           </tr>
         </thead>
@@ -46,6 +69,18 @@
               <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
               <a ng-if="!plan.progress" class="btn btn-sm btn-primary"><span class="fa fa-folder"></span></a>
               <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
+            </td>
+            <td>
+              <div class="tags">
+                <div ng-repeat="tag in $ctrl.plantags track by $index" class="tag label label-success">{{tag.name}} 
+                  <a class="close" href ng-click="$ctrl.removetag(tag)">×</a>
+                </div>
+              </div>
+              <!-- <div class="tags">
+                <div ng-repeat="(id,tag) in $ctrl.tags track by $index" class="tag label label-success">{{tag}}
+                  <a class="close" href ng-click="$ctrl.removeTag(id)">×</a>
+                </div>
+              </div> -->
             </td>
             <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
           </tr>

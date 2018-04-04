@@ -81,7 +81,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               fillStyle: networkEquipment.drawingOptions.fillStyle,
               opacity: 0.5,
               selectable: true,
-              showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
+              showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
             }
 
             createdMapLayerKeys.add(networkEquipment.key)
@@ -100,7 +100,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 strokeStyle: networkEquipment.drawingOptions.strokeStyle,
                 lineWidth: 2,
                 fillStyle: networkEquipment.drawingOptions.fillStyle,
-                showPolylineDirection: networkEquipment.key == "planned_copper" && state.showDirectedCable ? true : false //Showing Direction for copper cable
+                showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
               }
               createdMapLayerKeys.add(mapLayerKey)
             })

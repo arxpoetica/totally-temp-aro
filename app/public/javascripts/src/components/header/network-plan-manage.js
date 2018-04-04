@@ -30,6 +30,26 @@ class NetworkPlanModalController {
       params: {}
     }
 
+    this.tags=['test','test1']
+    this.plantags = [
+      {id:1,name:'test'},
+      {id:2,name:'test1'}
+    ]
+
+    this.selectedTags = []
+    this.allTags = [
+      {id:1,name:'test'},
+      {id:2,name:'test1'},
+      {id:3,name:'test3'},
+      {id:4,name:'test4'}
+    ]
+  }
+
+  onTagSelectionChanged() {
+    console.log(this.selectedTags)
+  }
+  removeTag(removetag) {
+    console.log(removetag)
   }
 
   $onInit() {
