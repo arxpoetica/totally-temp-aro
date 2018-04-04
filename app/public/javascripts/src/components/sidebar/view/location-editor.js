@@ -27,8 +27,17 @@ class LocationEditorController {
     this.createMapObjects = createMapObjects
   }
 
-  $onInit() {
+  registerRemoveMapObjectsCallback(removeMapObjects) {
+    this.removeMapObjects = removeMapObjects
+  }
 
+  $onInit() {
+    this.resumeOrCreateTransaction()
+  }
+
+  resumeOrCreateTransaction() {
+    this.removeMapObjects && this.removeMapObjects()
+    this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction?user_id=${this.state.getUserId()}`)
@@ -82,11 +91,9 @@ class LocationEditorController {
     // All modifications will already have been saved to the server. Commit the transaction.
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
       .then((result) => {
-        // Committing will close the transaction. To keep modifying, open a new transaction
-        this.currentTransaction = null
+        // Transaction has been committed, start a new one
         this.state.recreateTilesAndCache()
-        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-        this.$timeout()
+        return this.resumeOrCreateTransaction()
       })
       .catch((err) => {
         this.currentTransaction = null
@@ -112,14 +119,15 @@ class LocationEditorController {
         // The user has confirmed that the transaction should be deleted
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
-            this.currentTransaction = null
-            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-            this.$timeout()
+            // Transaction has been discarded, start a new one
+            this.state.recreateTilesAndCache()
+            return this.resumeOrCreateTransaction()
           })
           .catch((err) => {
             this.currentTransaction = null
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
             this.$timeout()
+            console.error(err)
           })
       }
     })
@@ -185,7 +193,7 @@ class LocationEditorController {
         this.$timeout()
       })
       .catch((err) => console.error(err))
-}
+  }
 
   handleObjectDeleted(mapObject) {
     this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
