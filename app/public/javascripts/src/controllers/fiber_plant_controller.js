@@ -69,6 +69,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           strokeStyle: cbStrokeStyle,
           fillStyle: cbFillStyle,
+          zIndex: 1041, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
           opacity: 0.6
         }
 
@@ -107,6 +108,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           strokeStyle: '#000000',
           fillStyle: '#000000',
+          zIndex: 1042, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
           lineWidth: fiberLineWidth
         }
         createdMapLayerKeys.add(mapLayerKey)
@@ -118,6 +120,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
             strokeStyle: selectedCompetitor.strokeStyle,
             fillStyle: selectedCompetitor.fillStyle,
+            zIndex: 1043, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
             lineWidth: fiberLineWidth
           }
           createdMapLayerKeys.add(mapLayerKey)
@@ -133,6 +136,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           dataUrls: [`/tile/v1/fiber/competitive/all/tiles/buffer/${polyTransform}/`],
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           strokeStyle: '#000000',
+          zIndex: 1044, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
           fillStyle: '#000000'
         }
         createdMapLayerKeys.add(mapLayerKey)
@@ -144,6 +148,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
             iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
             strokeStyle: selectedCompetitor.strokeStyle,
             fillStyle: selectedCompetitor.fillStyle,
+            zIndex: 1045, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
             opacity: 0.4
           }
           createdMapLayerKeys.add(mapLayerKey)

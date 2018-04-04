@@ -76,8 +76,8 @@ class MapTileRenderer {
 	    
 	  if ( !aObj.hasOwnProperty(orderPram) || isNaN(aObj[orderPram]) ){ aObj[orderPram] = defaultVal }
 	  if ( !bObj.hasOwnProperty(orderPram) || isNaN(bObj[orderPram]) ){ bObj[orderPram] = defaultVal }
-	    
-      return aObj.zValue - bObj.zValue;
+	  
+      return aObj[orderPram] - bObj[orderPram];
     });
     
     return orderedArr;
@@ -109,9 +109,10 @@ class MapTileRenderer {
     if (layersChanged) {
       this.tileDataService.markHtmlCacheDirty()
       // --- REORDER BY Z-INDEX HERE ---
-      this.mapLayersByZ = Object.keys(mapLayers)
+      //this.mapLayersByZ = Object.keys(mapLayers)
       // once zIndex is implimented uncomment below and delete above
-      //this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
+      this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
+      console.log(this.mapLayersByZ)
     }
     
     this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)
