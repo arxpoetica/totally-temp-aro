@@ -98,7 +98,8 @@
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
-            "strokeStyle": "#0000ff"
+            "strokeStyle": "#0000ff",
+	    "showPolylineDirection": true
           }
         },
         "planned_distribution_fiber": {
@@ -108,7 +109,8 @@
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
-            "strokeStyle": "#ff0000"
+            "strokeStyle": "#ff0000",
+	    "showPolylineDirection": true
           }
         },
         "planned_backhaul_fiber": {
@@ -118,7 +120,8 @@
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
-            "strokeStyle": "#000000"
+            "strokeStyle": "#000000",
+	    "showPolylineDirection": true
           }
         },
 	      "planned_existing_fiber": {
@@ -128,7 +131,8 @@
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
-            "strokeStyle": "#000000"
+            "strokeStyle": "#000000",
+	    "showPolylineDirection": true
           }
         },
 	      "planned_copper": {
@@ -138,7 +142,8 @@
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
-            "strokeStyle": "#b87333"
+            "strokeStyle": "#b87333",
+	    "showPolylineDirection": true
           }
         },
         "planned_site_boundaries": {
