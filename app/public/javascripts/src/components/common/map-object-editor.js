@@ -72,6 +72,7 @@ class MapObjectEditorController {
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteSelectedObject: this.deleteSelectedObject.bind(this)})
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
+    this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
   }
 
   createMapObjects(features) {
@@ -169,6 +170,7 @@ class MapObjectEditorController {
 
   removeCreatedMapObjects() {
     // Remove created objects from map
+    this.selectMapObject(null)
     Object.keys(this.createdMapObjects).forEach((objectId) => {
       this.createdMapObjects[objectId].setMap(null)
     })
@@ -220,7 +222,8 @@ let mapObjectEditor = {
     onModifyObject: '&',
     onDeleteObject: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
-    registerCreateMapObjectsCallback: '&'  // To be called to register a callback, which will create map objects for existing objectIds
+    registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds
+    registerRemoveMapObjectsCallback: '&'   // To be called to register a callback, which will remove all created map objects
   },
   controller: MapObjectEditorController
 }
