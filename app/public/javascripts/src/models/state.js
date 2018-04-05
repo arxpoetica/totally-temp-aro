@@ -195,6 +195,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
+  service.planInputsModal =  new Rx.BehaviorSubject(false)
   service.reportModal =  new Rx.BehaviorSubject(false)
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })

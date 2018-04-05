@@ -82,33 +82,7 @@ class ToolBarController {
   }
 
   savePlanAs() {
-    var swalOptions = {
-      title: 'Plan name required',
-      text: 'Enter a name for saving the plan',
-      type: 'input',
-      showCancelButton: true,
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Create Plan'
-    }
-
-    var currentPlan = this.state.plan.getValue()
-    if (currentPlan.ephemeral) {
-      // This is an ephemeral plan
-      swal(swalOptions,
-      (planName) => {
-        if (planName) {
-          this.state.makeCurrentPlanNonEphemeral(planName)
-        }
-      })
-    } else {
-      // Copy the plan
-      swal(swalOptions,
-      (planName) => {
-        if (planName) {
-          this.state.copyCurrentPlanTo(planName)
-        }
-      })
-    }
+    this.state.planInputsModal.next(true)
   }
 
   toggleMeasuringStick() {

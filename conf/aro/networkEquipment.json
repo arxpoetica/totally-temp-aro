@@ -91,8 +91,63 @@
             "strokeStyle": "#0000ff"
           }
         },
-        "planned_feeder_fiber": {
+	"existing_feeder_fiber": {
           "label": "Feeder Fiber",
+          "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/FEEDER/{lineTransform}/",
+          "iconUrl": "/images/map_icons/aro/fiber_feeder.png",
+          "aggregateZoomThreshold": "10",
+          "equipmentType": "line",
+          "drawingOptions": {
+            "strokeStyle": "#0000ff",
+	    "showPolylineDirection": true
+          }
+        },
+	"existing_distribution_fiber": {
+          "label": "Distribution Fiber",
+          "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/DISTRIBUTION/{lineTransform}/",
+          "iconUrl": "/images/map_icons/aro/fiber_distribution.png",
+          "aggregateZoomThreshold": "10",
+          "equipmentType": "line",
+          "drawingOptions": {
+            "strokeStyle": "#ff0000",
+	    "showPolylineDirection": true
+          }
+        },
+	"existing_iof_fiber": {
+          "label": "IOF Fiber",
+          "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/IOF/{lineTransform}/",
+          "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
+          "aggregateZoomThreshold": "10",
+          "equipmentType": "line",
+          "drawingOptions": {
+            "strokeStyle": "#000000",
+	    "showPolylineDirection": true
+          }
+        },
+	"existing_unknown_fiber": {
+          "label": "Unknown Fiber",
+          "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/UNKNOWN/{lineTransform}/",
+          "iconUrl": "/images/map_icons/aro/fiber_unknown.png",
+          "aggregateZoomThreshold": "10",
+          "equipmentType": "line",
+          "drawingOptions": {
+            "strokeStyle": "#808080",
+	    "showPolylineDirection": true
+          }
+        },
+	"existing_copper": {
+          "label": "Copper Cable",
+          "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/COPPER/{lineTransform}/",
+          "iconUrl": "/images/map_icons/aro/copper.png",
+          "aggregateZoomThreshold": "10",
+          "equipmentType": "line",
+          "drawingOptions": {
+            "strokeStyle": "#b87333",
+	    "showPolylineDirection": true
+          }
+        },
+        "planned_feeder_fiber": {
+          "label": "Planned Feeder Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/FEEDER/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/fiber_feeder.png",
           "aggregateZoomThreshold": "10",
@@ -103,46 +158,13 @@
           }
         },
         "planned_distribution_fiber": {
-          "label": "Distribution Fiber",
+          "label": "Planned Distribution Fiber",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/DISTRIBUTION/{lineTransform}/",
           "iconUrl": "/images/map_icons/aro/fiber_distribution.png",
           "aggregateZoomThreshold": "10",
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#ff0000",
-	    "showPolylineDirection": true
-          }
-        },
-        "planned_backhaul_fiber": {
-          "label": "Backhaul Fiber",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/BACKBONE/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
-          "aggregateZoomThreshold": "10",
-          "equipmentType": "line",
-          "drawingOptions": {
-            "strokeStyle": "#000000",
-	    "showPolylineDirection": true
-          }
-        },
-	      "planned_existing_fiber": {
-          "label": "Existing Fiber",
-          "tileUrl": "/tile/v1/fiber/existing/tiles/{libraryId}/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
-          "aggregateZoomThreshold": "10",
-          "equipmentType": "line",
-          "drawingOptions": {
-            "strokeStyle": "#000000",
-	    "showPolylineDirection": true
-          }
-        },
-	      "planned_copper": {
-          "label": "Copper Cable",
-          "tileUrl": "/tile/v1/copper/existing/tiles/{libraryId}/{lineTransform}/",
-          "iconUrl": "/images/map_icons/aro/copper.png",
-          "aggregateZoomThreshold": "10",
-          "equipmentType": "line",
-          "drawingOptions": {
-            "strokeStyle": "#b87333",
 	    "showPolylineDirection": true
           }
         },
