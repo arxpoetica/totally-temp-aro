@@ -19,7 +19,10 @@ class AroMultiSelectController {
             this.selectionChanged()
           }
         },
-        maxHeight: this.maxHeight ? this.maxHeight : 200
+        maxHeight: this.maxHeight ? this.maxHeight : 200,
+        includeSelectAllOption: this.enableSearch ? true : false,
+        enableFiltering: this.enableSearch ? true : false,
+        nonSelectedText: this.placeholder ? this.placeholder : 'None Selected'
       }), 0);
   }
 
@@ -67,7 +70,9 @@ let aroMultiSelect = {
     allItems: '<',          // All the items to show.
     currentSelectedItems: '<', // currently Selected Items
     maxHeightInPixels: '<', // [Optional] The maximum height of the component in pixels
-    selectionChanged: '&'   // [Optional] Called when the selected items change
+    selectionChanged: '&',   // [Optional] Called when the selected items change
+    enableSearch: '@',
+    placeholder: '@'  // [optional] placeholder to show
   },
   controller: AroMultiSelectController
 }

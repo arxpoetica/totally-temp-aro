@@ -5,7 +5,8 @@ class EquipmentDetailController {
     this.state = state
     this.selectedEquipmentInfo = null
 
-    state.mapFeaturesSelectedEvent.subscribe((options) => {
+    // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
+    state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       var equipmentId = null
       if (options.equipmentFeatures && options.equipmentFeatures.length > 0 && options.equipmentFeatures[0].id) {
         state.activeViewModePanel = state.viewModePanels.EQUIPMENT_INFO
