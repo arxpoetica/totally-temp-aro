@@ -96,7 +96,7 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
             strokeStyle: layer.style_options.highlight.strokeColor
           },
           fillStyle: "transparent",
-          zIndex: 1051, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+          zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
           opacity: 0.7
         }
         createdRoadMapLayerKeys.add(mapLayerKey)
@@ -117,7 +117,7 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
             strokeStyle: layer.style_options.highlight.strokeColor
           },
           fillStyle: "transparent",
-          zIndex: 1052, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+          zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
           opacity: 0.7
         }
         createdRoadMapLayerKeys.add(mapLayerKey)

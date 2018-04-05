@@ -81,7 +81,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               fillStyle: networkEquipment.drawingOptions.fillStyle,
               opacity: 0.5,
               selectable: true,
-              zIndex: 1031, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+              zIndex: 5500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
               showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection
             }
 
@@ -100,7 +100,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
                 strokeStyle: networkEquipment.drawingOptions.strokeStyle,
                 lineWidth: 2,
-                zIndex: 1032, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                zIndex: 5500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 fillStyle: networkEquipment.drawingOptions.fillStyle,
                 showPolylineDirection: networkEquipment.key == "planned_copper" && state.showDirectedCable ? true : false //Showing Direction for copper cable
               }
@@ -131,7 +131,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 fillStyle: planned_site_boundaries.drawingOptions.fillStyle,
                 opacity: 0.5,
                 selectable: true,
-                zIndex: 1033, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                zIndex: 5500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 showPolylineDirection: planned_site_boundaries.drawingOptions.showPolylineDirection
               }
 

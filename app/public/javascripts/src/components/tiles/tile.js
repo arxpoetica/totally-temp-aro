@@ -86,9 +86,9 @@ class MapTileRenderer {
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
-    console.log('set order - old, new:')
-    console.log(this.mapLayers)
-	console.log(mapLayers)
+    //console.log('set order - old, new:')
+    //console.log(this.mapLayers)
+	//console.log(mapLayers)
     var layersChanged = false
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
       if (!mapLayers[oldMapLayerKey]) {
@@ -108,11 +108,9 @@ class MapTileRenderer {
     
     if (layersChanged) {
       this.tileDataService.markHtmlCacheDirty()
-      // --- REORDER BY Z-INDEX HERE ---
-      //this.mapLayersByZ = Object.keys(mapLayers)
-      // once zIndex is implimented uncomment below and delete above
+      // order by zIndex for drawing in proper stacking order 
       this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
-      console.log(this.mapLayersByZ)
+      //console.log(this.mapLayersByZ)
     }
     
     this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)

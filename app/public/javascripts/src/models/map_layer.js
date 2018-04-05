@@ -77,7 +77,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
       this.isBoundaryLayer = options.isBoundaryLayer || false
       this.scaleIcon = options.scaleIcon || false
       this.onDataLoaded = options.onDataLoaded || false
-
+      
       this.setDeclarativeStyle(options.declarativeStyles)
 
       var data_layer = this.data_layer

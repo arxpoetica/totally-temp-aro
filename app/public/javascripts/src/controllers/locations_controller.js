@@ -64,7 +64,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                 dataUrls: [url],
                 iconUrl: `${baseUrl}${locationType.iconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
-                zIndex: 1061, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                zIndex: 7500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 selectable: true
               }
               createdMapLayerKeys.add(mapLayerKey)
@@ -91,7 +91,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         dataUrls: mergedLayerUrls,
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
-        zIndex: 1062, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+        zIndex: 7500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
         aggregateMode: 'FLATTEN'
       }
       createdMapLayerKeys.add(mapLayerKey)

@@ -75,7 +75,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             lineWidth: 4,
             fillStyle: "transparent",
             opacity: 0.7,
-            zIndex: 1021, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+            zIndex: 3001, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
             highlightStyle: {
               strokeStyle: '#000000',
               fillStyle: 'green',
@@ -97,7 +97,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
             lineWidth: 4,
             fillStyle: "transparent",
             opacity: 0.7,
-            zIndex: 1022, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+            zIndex: 3001, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
             highlightStyle: {
               strokeStyle: '#000000',
               fillStyle: 'green',
@@ -145,7 +145,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       minZoom: 9,
       hoverField: 'name',
       visibilityThreshold : 1,
-      zIndex: 1023, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
       isBoundaryLayer : true
     })
   }
@@ -183,7 +182,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       minZoom: 14,
       hoverField: 'name',
       visibilityThreshold : 1,
-      zIndex: 1024, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
       isBoundaryLayer : true
     })
 
@@ -244,7 +242,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       reload: 'always',
       threshold: 0,
       visibilityThreshold : 1,
-      zIndex: 1025, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
       isBoundaryLayer : true
     })
     state.boundaries.areaLayers.push(layer)
@@ -267,7 +264,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       type: serviceLayer.name,
       api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
       layerId: serviceLayer.id,
-      zIndex: 1026, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
       aggregateZoomThreshold: 10
     }
   
