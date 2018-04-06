@@ -475,7 +475,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
     service.locationTypes.next(locationTypes)
     service.constructionSites.next(angular.copy(locationTypes))
-
+    
     // Network equipment layer
     service.networkEquipments = []
     service.existingFiberOptions = {}
@@ -501,7 +501,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         })
       }
     }
-
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 

@@ -43,8 +43,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
         // Loop through the location types
         state.locationTypes.getValue().forEach((locationType) => {
-
-          if (locationType.checked 
+        	  if (locationType.checked 
             //Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
             && map && map.getZoom() >= 10) {
             $scope.disablelocations = false
@@ -64,6 +63,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                 dataUrls: [url],
                 iconUrl: `${baseUrl}${locationType.iconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
+                zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 selectable: true
               }
               createdMapLayerKeys.add(mapLayerKey)
@@ -90,6 +90,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         dataUrls: mergedLayerUrls,
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
+        zIndex: 7500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
         aggregateMode: 'FLATTEN'
       }
       createdMapLayerKeys.add(mapLayerKey)

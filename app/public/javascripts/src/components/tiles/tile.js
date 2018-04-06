@@ -13,6 +13,7 @@ class MapTileRenderer {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
+    this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations
     this.selectedServiceAreas = selectedServiceAreas
@@ -64,10 +65,30 @@ class MapTileRenderer {
     this.analysisSelectionMode = analysisSelectionMode
     this.tileDataService.markHtmlCacheDirty()
   }
-
+  
+  // ToDo: move this to a place of utility functions
+  // utility function NOTE: will apply default val to source object items
+  getOrderedKeys(obj, orderPram, defaultVal){
+    let orderedArr = Object.keys(obj)
+    orderedArr.sort(function (a, b) {
+	  let aObj = obj[a]
+	  let bObj = obj[b]
+	    
+	  if ( !aObj.hasOwnProperty(orderPram) || isNaN(aObj[orderPram]) ){ aObj[orderPram] = defaultVal }
+	  if ( !bObj.hasOwnProperty(orderPram) || isNaN(bObj[orderPram]) ){ bObj[orderPram] = defaultVal }
+	  
+      return aObj[orderPram] - bObj[orderPram];
+    });
+    
+    return orderedArr;
+  }
+  
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
+    //console.log('set order - old, new:')
+    //console.log(this.mapLayers)
+	//console.log(mapLayers)
     var layersChanged = false
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
       if (!mapLayers[oldMapLayerKey]) {
@@ -84,11 +105,16 @@ class MapTileRenderer {
         layersChanged = true
       }
     })
-
+    
     if (layersChanged) {
       this.tileDataService.markHtmlCacheDirty()
+      // order by zIndex for drawing in proper stacking order 
+      this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
+      //console.log(this.mapLayersByZ)
     }
-    this.mapLayers = mapLayers  // Set the object in any case
+    
+    this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)
+    
   }
 
   // Gets the tile id for given zoom and coords. Useful for setting div ids and cache keys
@@ -176,12 +202,15 @@ class MapTileRenderer {
 
   // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
-
-    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+	var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
-    Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
+	//console.log(this.mapLayers)
+    //Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
+    	this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
+      //console.log('layer: '+mapLayerKey)
+      //console.log(mapLayer)
       var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,
