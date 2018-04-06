@@ -360,10 +360,13 @@ class PlanEditorController {
     var allPaths = []
     polygon.getPaths().forEach((path) => {
       var pathPoints = []
-      path.forEach((latLng) => pathPoints.push(latLng.lng(), latLng.lat()))
+      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
       allPaths.push(pathPoints)
     })
-    editableMapObject.mapGeometry.coordinates = allPaths
+    editableMapObject.feature.geometry = {
+      type: 'Polygon',
+      coordinates: allPaths
+    }
   }
 
   saveBoundaryToService(editableMapObject, networkEquipmentObjectId) {
