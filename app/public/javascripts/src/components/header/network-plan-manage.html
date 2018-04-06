@@ -20,21 +20,10 @@
 <div class="plan-info-container">
   <div class="input-group">
     <input type="text" class="form-control" placeholder="Search for Plan Names" 
-      ng-model="$ctrl.search_text" ng-model-options="{ debounce: 500 }"
-      ng-change="$ctrl.loadPlans()">
-    <span class="input-group-addon">
+      ng-model="$ctrl.search_text" ng-model-options="{ debounce: 1000 }">
+    <span class="input-group-addon" ng-click="$ctrl.loadPlans()" style="cursor:pointer">
       <span class="glyphicon glyphicon-search"></span>
     </span>
-  </div>
-  <div style="margin:2px">
-    <aro-multi-select 
-      model="$ctrl.selectedTags" 
-      all-items="$ctrl.allTags" 
-      current-selected-items="$ctrl.selectedTags"
-      selection-changed="$ctrl.onTagSelectionChanged()"
-      enable-search = "true"
-      placeholder="Filter by tags">
-    </aro-multi-select>
   </div>
 
   <div style="margin-top:2px">
@@ -54,8 +43,8 @@
           <tr>
             <th>
               Name
-              <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'asc')">↓</a>
-              <a href="javascript:void(0)" ng-click="$ctrl.loadSortBy('name', 'desc')">↑</a>
+              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('name', true)">↓</a>
+              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('name', false)">↑</a>
             </th>
             <th>Actions</th>
             <th>Tags</th>
@@ -72,8 +61,8 @@
             </td>
             <td>
               <div class="tags">
-                <div ng-repeat="tag in $ctrl.plantags track by $index" class="tag label label-success">{{tag.name}} 
-                  <a class="close" href ng-click="$ctrl.removetag(tag)">×</a>
+                <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by $index" class="tag label label-success">{{tag.name}} 
+                  <a class="close" href ng-click="$ctrl.updateTag(plan,tag)">×</a>
                 </div>
               </div>
               <!-- <div class="tags">

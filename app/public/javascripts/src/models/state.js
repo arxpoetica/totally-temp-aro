@@ -846,6 +846,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     newPlan.ephemeral = false
     newPlan.latitude = service.defaultPlanCoordinates.latitude
     newPlan.longitude = service.defaultPlanCoordinates.longitude
+    newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
@@ -1201,6 +1202,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   loadBoundaryLayers()
+
+  service.listOfTags = []
+  service.currentPlanTags = []
+  service.loadListOfPlanTags = () => {
+    return $http.get(`/service/tag-mapping/tags`)
+    .then((result) => {
+      service.listOfTags = result.data
+    }) 
+  }
+
+  service.loadListOfPlanTags()
 
   return service
 }])

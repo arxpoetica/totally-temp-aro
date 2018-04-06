@@ -3,13 +3,6 @@ class PlanInputsModalController {
     this.state    = state
     this.$element = $element
     this.planName = null
-    this.selectedTags = []
-    this.allTags = [
-      {id:1,name:'test'},
-      {id:2,name:'test1'},
-      {id:3,name:'test3'},
-      {id:4,name:'test4'}
-    ]
   }
 
   close() {
@@ -41,7 +34,7 @@ class PlanInputsModalController {
 
   resetPlanInputs() {
     this.planName = null
-    this.selectedTags = []
+    this.state.currentPlanTags = []
     this.close()
   }
 
@@ -60,9 +53,9 @@ let planInputsModal = {
       <modal-body>
         <input class="form-control" style="margin-bottom:5px" type="text" ng-model="$ctrl.planName" placeholder="Plan Name">
         <aro-multi-select 
-          model="$ctrl.selectedTags" 
-          all-items="$ctrl.allTags" 
-          current-selected-items="$ctrl.selectedTags"
+          model="$ctrl.state.currentPlanTags" 
+          all-items="$ctrl.state.listOfTags" 
+          current-selected-items="$ctrl.state.currentPlanTags"
           selection-changed="$ctrl.onTagSelectionChanged()"
           enable-search = "true"
           placeholder="add tags">
