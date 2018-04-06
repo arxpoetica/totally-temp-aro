@@ -537,6 +537,7 @@ class PlanEditorController {
   $onDestroy() {
     //unsubscribe map click observer
     this.mapFeaturesSelectedEventObserver.unsubscribe();
+    this.removeCreatedMapObjects()
   }
 }
 
