@@ -24,41 +24,11 @@
         </div>
         <br>
 
-        <div class="text-center">
-          <div class="btn-group">
-            <button ng-class="{ 'btn': true,
-                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.ADD,
-                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.ADD }"
-                    ng-click="$ctrl.setEditorMode($ctrl.editorModes.ADD)">
-              <i class="fa fa-plus"></i> Add
-            </button>
-            <button ng-class="{ 'btn': true,
-                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.DELETE,
-                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.DELETE }"
-                                ng-click="$ctrl.setEditorMode($ctrl.editorModes.DELETE)">
-              <i class="fa fa-trash"></i> Delete
-            </button>
-            <button ng-class="{ 'btn': true,
-                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.MOVE,
-                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.MOVE }"
-                                ng-click="$ctrl.setEditorMode($ctrl.editorModes.MOVE)">
-              <i class="fa fa-arrows"></i> Move
-            </button>
-            <!-- Commenting out edit boundary button until it is supported -->
-            <button ng-class="{ 'btn': true,
-                                'btn-default': $ctrl.selectedEditorMode !== $ctrl.editorModes.EDIT_BOUNDARY,
-                                'btn-primary': $ctrl.selectedEditorMode === $ctrl.editorModes.EDIT_BOUNDARY }"
-                                ng-click="$ctrl.setEditorMode($ctrl.editorModes.EDIT_BOUNDARY)">
-              <i class="fa fa-edit"></i> Edit boundary
-            </button>
-          </div>
-        </div>
-        <br>
-
         <select class="form-control"
                 ng-model="$ctrl.selectedBoundaryType"
                 ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
         </select>
+        <br>
 
         <div ng-if="$ctrl.selectedMapObject">
           <table id="tblEquipmentProperties"
@@ -116,6 +86,9 @@
                   ng-disabled="!$ctrl.selectedMapObject.feature.attributes.isDirty"
                   ng-click="$ctrl.saveFeatureAttributes($ctrl.selectedMapObject.feature)">
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
+          </button>
+          <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
+            <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
           </button>
         </div>
       </div>
