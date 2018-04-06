@@ -72,57 +72,57 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     
     if(layer.visible && selectedEdgeLibraries) {
       selectedEdgeLibraries.forEach((selectedEdgeLibrary) => {
-      // Location type is visible
-      var mapZoom = map.getZoom()
-      var pointTransform = (mapZoom > layer.aggregateZoomThreshold) ? 'select' : 'smooth_relative'
-      var mapLayerKey = `${pointTransform}_${layer.type}_${selectedEdgeLibrary.identifier}`
+        // Location type is visible
+        var mapZoom = map.getZoom()
+        var pointTransform = (mapZoom > layer.aggregateZoomThreshold) ? 'select' : 'smooth_relative'
+        var mapLayerKey = `${pointTransform}_${layer.type}_${selectedEdgeLibrary.identifier}`
 
-      var url = layer.api_endpoint.replace('${lineTransform}', pointTransform)
-      url = url.replace('${libraryId}', selectedEdgeLibrary.identifier)
+        var url = layer.api_endpoint.replace('${lineTransform}', pointTransform)
+        url = url.replace('${libraryId}', selectedEdgeLibrary.identifier)
 
-      if (pointTransform === 'smooth_relative') {
-        // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-        mergedLayerUrls.push(url)
-      } else {
-        // We want to create an individual layer
-        oldRoadMapLayers[mapLayerKey] = {
-          dataUrls: [url],
-          renderMode: 'PRIMITIVE_FEATURES',
-          selectable: true,
-          strokeStyle: layer.style_options.normal.strokeColor,
-          lineWidth: layer.style_options.normal.strokeWeight,
-          highlightStyle: {
-            lineWidth: layer.style_options.highlight.strokeWeight,
-            strokeStyle: layer.style_options.highlight.strokeColor
-          },
-          fillStyle: "transparent",
-          zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-          opacity: 0.7
+        if (pointTransform === 'smooth_relative') {
+          // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+          mergedLayerUrls.push(url)
+        } else {
+          // We want to create an individual layer
+          oldRoadMapLayers[mapLayerKey] = {
+            dataUrls: [url],
+            renderMode: 'PRIMITIVE_FEATURES',
+            selectable: true,
+            strokeStyle: layer.style_options.normal.strokeColor,
+            lineWidth: layer.style_options.normal.strokeWeight,
+            highlightStyle: {
+              lineWidth: layer.style_options.highlight.strokeWeight,
+              strokeStyle: layer.style_options.highlight.strokeColor
+            },
+            fillStyle: "transparent",
+            zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+            opacity: 0.7
+          }
+          createdRoadMapLayerKeys.add(mapLayerKey)
         }
-        createdRoadMapLayerKeys.add(mapLayerKey)
-      }
 
-      if (mergedLayerUrls.length > 0) {
-        // We have some business layers that need to be merged into one
-        // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
-        oldRoadMapLayers[mapLayerKey] = {
-          dataUrls: mergedLayerUrls,
-          renderMode: 'HEATMAP',
-          selectable: true,
-          aggregateMode: 'FLATTEN',
-          strokeStyle: layer.style_options.normal.strokeColor,
-          lineWidth: layer.style_options.normal.strokeWeight,
-          highlightStyle: {
-            lineWidth: layer.style_options.highlight.strokeWeight,
-            strokeStyle: layer.style_options.highlight.strokeColor
-          },
-          fillStyle: "transparent",
-          zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-          opacity: 0.7
+        if (mergedLayerUrls.length > 0) {
+          // We have some business layers that need to be merged into one
+          // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
+          oldRoadMapLayers[mapLayerKey] = {
+            dataUrls: mergedLayerUrls,
+            renderMode: 'HEATMAP',
+            selectable: true,
+            aggregateMode: 'FLATTEN',
+            strokeStyle: layer.style_options.normal.strokeColor,
+            lineWidth: layer.style_options.normal.strokeWeight,
+            highlightStyle: {
+              lineWidth: layer.style_options.highlight.strokeWeight,
+              strokeStyle: layer.style_options.highlight.strokeColor
+            },
+            fillStyle: "transparent",
+            zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+            opacity: 0.7
+          }
+          createdRoadMapLayerKeys.add(mapLayerKey)
         }
-        createdRoadMapLayerKeys.add(mapLayerKey)
-      }
-    })
+      })
     }
 
     // "oldMapLayers" now contains the new layers. Set it in the state

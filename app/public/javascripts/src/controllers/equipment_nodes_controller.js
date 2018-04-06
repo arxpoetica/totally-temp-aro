@@ -72,6 +72,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
               tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
             }
+            
             oldMapLayers[networkEquipment.key] = {
               dataUrls: [tileUrl],
               iconUrl: networkEquipment.iconUrl,
@@ -81,7 +82,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               fillStyle: networkEquipment.drawingOptions.fillStyle,
               opacity: 0.5,
               selectable: true,
-              zIndex: 5500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+              zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
               showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
             }
 
@@ -94,13 +95,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
             state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
               tileUrl = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
+              
               oldMapLayers[networkEquipment.key] = {
                 dataUrls: [tileUrl],
                 iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
                 renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
                 strokeStyle: networkEquipment.drawingOptions.strokeStyle,
                 lineWidth: 2,
-                zIndex: 5500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 fillStyle: networkEquipment.drawingOptions.fillStyle,
                 showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
               }
@@ -121,7 +123,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
               planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{rootPlanId}', planId)
               planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{boundaryTypeId}', state.selectedBoundaryType.id)
               planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{pointTransform}', pointTransform)
-
+              
               oldMapLayers["planned_site_boundaries_"+networkEquipment.networkNodeType] = {
                 dataUrls: [planned_site_boundaries.tileUrl],
                 iconUrl: planned_site_boundaries.iconUrl,
@@ -131,7 +133,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 fillStyle: planned_site_boundaries.drawingOptions.fillStyle,
                 opacity: 0.5,
                 selectable: true,
-                zIndex: 5500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                zIndex: planned_site_boundaries.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 showPolylineDirection: planned_site_boundaries.drawingOptions.showPolylineDirection
               }
 
