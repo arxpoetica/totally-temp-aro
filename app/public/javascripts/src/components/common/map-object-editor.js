@@ -114,10 +114,12 @@ class MapObjectEditorController {
       }
     })
     mapObject.addListener('rightclick', (event) => {
+      console.log('---- Debugging for context menu -----')
+      console.log(event)
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.pixel.x}px`
-      this.contextMenuCss.top = `${event.pixel.y}px`
+      this.contextMenuCss.left = `${event.va.clientX}px`
+      this.contextMenuCss.top = `${event.va.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')

@@ -94,7 +94,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
             state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
               var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
               tileUrl = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
-              oldMapLayers[mapLayerKey] = {
+              oldMapLayers[networkEquipment.key] = {
                 dataUrls: [tileUrl],
                 iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
                 renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
@@ -104,7 +104,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 fillStyle: networkEquipment.drawingOptions.fillStyle,
                 showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
               }
-              createdMapLayerKeys.add(mapLayerKey)
+              createdMapLayerKeys.add(networkEquipment.key)
             })
           }
         })

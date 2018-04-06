@@ -195,6 +195,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
+  service.planInputsModal =  new Rx.BehaviorSubject(false)
   service.reportModal =  new Rx.BehaviorSubject(false)
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
@@ -617,16 +618,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         
         var newDataItems = {}
         dataTypeEntityResult.forEach((dataTypeEntity) => {
-          newDataItems[dataTypeEntity.name] = {
-            id: dataTypeEntity.id,
-            description: dataTypeEntity.description,
-            minValue: dataTypeEntity.minValue,
-            maxValue: dataTypeEntity.maxValue,
-            uploadSupported: dataTypeEntity.uploadSupported,
-            isMinValueSelectionValid: true,
-            isMaxValueSelectionValid: true,
-            selectedLibraryItems: [],
-            allLibraryItems: []
+          if (dataTypeEntity.maxValue > 0) {
+            newDataItems[dataTypeEntity.name] = {
+              id: dataTypeEntity.id,
+              description: dataTypeEntity.description,
+              minValue: dataTypeEntity.minValue,
+              maxValue: dataTypeEntity.maxValue,
+              uploadSupported: dataTypeEntity.uploadSupported,
+              isMinValueSelectionValid: true,
+              isMaxValueSelectionValid: true,
+              selectedLibraryItems: [],
+              allLibraryItems: []
+            }
           }
         })
 
@@ -844,6 +847,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     newPlan.ephemeral = false
     newPlan.latitude = service.defaultPlanCoordinates.latitude
     newPlan.longitude = service.defaultPlanCoordinates.longitude
+    newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
@@ -1199,6 +1203,21 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   loadBoundaryLayers()
+
+  service.listOfTags = []
+  service.currentPlanTags = []
+  service.loadListOfPlanTags = () => {
+    return $http.get(`/service/tag-mapping/tags`)
+    .then((result) => {
+      service.listOfTags = result.data
+    }) 
+  }
+
+  service.loadListOfPlanTags()
+
+  service.getTagColour = (tag) => {
+    return hsvToRgb(tag.colourHue,1,1)
+  } 
 
   return service
 }])

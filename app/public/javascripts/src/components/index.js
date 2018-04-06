@@ -39,6 +39,7 @@ import mapSelector from './map/map-selector'
 import toolBar from './header/tool-bar'
 import reportModal from './header/report-modal'
 import networkPlanModal from './header/network-plan-modal'
+import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import userAccountSettings from './global-settings/user-account-settings'
@@ -53,6 +54,7 @@ import accordionPanelContents from './accordion/accordion-panel-contents'
 import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 import userSettings from './global-settings/user-settings'
+import tagManager from './global-settings/tag-manager'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -94,6 +96,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('toolBar', toolBar)
    .component('reportModal', reportModal)
    .component('networkPlanModal', networkPlanModal)
+   .component('planInputsModal', planInputsModal)   
    .component('networkPlanManage', networkPlanManage)
    .component('networkPlan', networkPlan)
    .component('userAccountSettings', userAccountSettings)
@@ -108,3 +111,4 @@ app.component('boundaryDetail', boundaryDetail)
    .component('accordionPanelTitle', accordionPanelTitle)
    .component('tile', tile)
    .component('userSettings', userSettings)
+   .component('tagManager', tagManager)
