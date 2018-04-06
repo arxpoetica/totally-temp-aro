@@ -39,6 +39,7 @@ import mapSelector from './map/map-selector'
 import toolBar from './header/tool-bar'
 import reportModal from './header/report-modal'
 import networkPlanModal from './header/network-plan-modal'
+import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import userAccountSettings from './global-settings/user-account-settings'
@@ -94,6 +95,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('toolBar', toolBar)
    .component('reportModal', reportModal)
    .component('networkPlanModal', networkPlanModal)
+   .component('planInputsModal', planInputsModal)   
    .component('networkPlanManage', networkPlanManage)
    .component('networkPlan', networkPlan)
    .component('userAccountSettings', userAccountSettings)
