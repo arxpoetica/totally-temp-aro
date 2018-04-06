@@ -256,7 +256,6 @@ class PlanEditorController {
     if (!event || !event.latLng) {
       return
     }
-    console.log(event)
     if (!event.equipmentFeatures || event.equipmentFeatures.length === 0) {
       // The map was clicked on, but there was no location under the cursor. Create a new one.
       this.createMapObject(event, null, true)
@@ -361,10 +360,13 @@ class PlanEditorController {
     var allPaths = []
     polygon.getPaths().forEach((path) => {
       var pathPoints = []
-      path.forEach((latLng) => pathPoints.push(latLng.lng(), latLng.lat()))
+      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
       allPaths.push(pathPoints)
     })
-    editableMapObject.mapGeometry.coordinates = allPaths
+    editableMapObject.feature.geometry = {
+      type: 'Polygon',
+      coordinates: allPaths
+    }
   }
 
   saveBoundaryToService(editableMapObject, networkEquipmentObjectId) {
@@ -536,8 +538,8 @@ class PlanEditorController {
   }
 
   $onDestroy() {
-    // Remove listener
-    google.maps.event.removeListener(this.clickListener)
+    //unsubscribe map click observer
+    this.mapFeaturesSelectedEventObserver.unsubscribe();
     this.removeCreatedMapObjects()
   }
 }
