@@ -107,6 +107,7 @@ class EquipmentProperties {
       'Generic VDSL DSLAM'
     ]
     this.selectedEquipmentType = this.equipmentTypes[0]
+    this.isDirty = false
   }
 }
 
@@ -443,6 +444,10 @@ class PlanEditorController {
     }
   }
 
+  onFeatureAttributeChanged(feature) {
+    feature.attributes.isDirty = true
+  }
+
   // Saves the attributes of the given feature into aro-service
   saveFeatureAttributes(feature) {
 
@@ -468,6 +473,8 @@ class PlanEditorController {
       }
     }
     this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
+      .then(() => feature.attributes.isDirty = false)
+      .catch((err) => console.error(err))
   }
 
   // Sets the editor mode, and subscribes/unsubscribes from map events
