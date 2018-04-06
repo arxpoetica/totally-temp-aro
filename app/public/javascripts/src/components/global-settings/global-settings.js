@@ -9,7 +9,8 @@ class GlobalSettingsController {
       Global_Settings: 0,
       My_Account: 1,
       Manage_Users: 2,
-      User_Settings: 3
+      User_Settings: 3,
+      Tag_Manager: 4
     })
     this.currentView = this.views.Global_Settings
   }
@@ -79,6 +80,13 @@ let globalSettings = {
               <i class="fa fa-2x fa-cogs"></i>
               <br>User Settings
           </button>
+
+          <button class="btn settings-btn"
+            ng-if="$ctrl.currentUser.rol === 'admin'"
+            ng-click="$ctrl.currentView = $ctrl.views.Tag_Manager">
+              <i class="fa fa-2x fa-tags"></i>
+              <br>Tag Manager
+          </button>
         </div>
 
         <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.My_Account"></user-account-settings>
@@ -88,6 +96,7 @@ let globalSettings = {
 
         <user-settings ng-show="$ctrl.currentView === $ctrl.views.User_Settings"></user-settings>  
 
+        <tag-manager ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager"><tag-manager>
       </modal-body>
 
       <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">
@@ -115,7 +124,10 @@ let globalSettings = {
         <button type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.register_user()">Register user</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
       </modal-footer>
-
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager">
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
+      </modal-footer>
     </modal>
   `,
   bindings: {},

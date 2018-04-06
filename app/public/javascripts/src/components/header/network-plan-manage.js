@@ -19,37 +19,30 @@ class NetworkPlanModalController {
 
     this.interval  = null
     this.search
-    this.search_text
+    this.search_text = ""
 
     this.sortField
     this.descending
 
     this.planOptions = {
-      url: '/service/v1/plan-summary',
+      //url: '/service/v1/plan-summary',
+      url: '/service/v1/plan',
       method: 'GET',
       params: {}
     }
-
-    this.tags=['test','test1']
-    this.plantags = [
-      {id:1,name:'test'},
-      {id:2,name:'test1'}
-    ]
-
-    this.selectedTags = []
-    this.allTags = [
-      {id:1,name:'test'},
-      {id:2,name:'test1'},
-      {id:3,name:'test3'},
-      {id:4,name:'test4'}
-    ]
   }
 
   onTagSelectionChanged() {
     console.log(this.selectedTags)
   }
-  removeTag(removetag) {
-    console.log(removetag)
+  updateTag(plan,removetag) {
+    var updatePlan = plan
+    updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removetag.id)
+    
+    this.$http.put(`/service/v1/plan?user_id=${this.user_id}`,updatePlan)
+    .then((response) => {
+      this.loadPlans()
+    })
   }
 
   $onInit() {
@@ -125,19 +118,23 @@ class NetworkPlanModalController {
 
     var load = (callback) => {
 
+      // this.planOptions.params.user_id = this.user_id
+
+      // if(!this.planOptions.params.$orderby)
+      //   this.planOptions.params.$orderby = "name"
+
+      // this.planOptions.params.$filter = "ephemeral ne true"
+      // if (this.search_text) {
+      //   if (this.planOptions.params.$filter) {
+      //     this.planOptions.params.$filter += ' and substringof(name, \'' + this.search_text + '\')'
+      //   } else {
+      //     this.planOptions.params.$filter = 'substringof(name, \'' + this.search_text + '\')'
+      //   }
+      // }
+
       this.planOptions.params.user_id = this.user_id
-
-      if(!this.planOptions.params.$orderby)
-        this.planOptions.params.$orderby = "name"
-
-      this.planOptions.params.$filter = "ephemeral ne true"
-      if (this.search_text) {
-        if (this.planOptions.params.$filter) {
-          this.planOptions.params.$filter += ' and substringof(name, \'' + this.search_text + '\')'
-        } else {
-          this.planOptions.params.$filter = 'substringof(name, \'' + this.search_text + '\')'
-        }
-      }
+      this.planOptions.params.search = this.search_text
+      this.planOptions.params.project_id = this.projectId
 
       this.$http(this.planOptions)
         .then((response) => {
@@ -155,8 +152,8 @@ class NetworkPlanModalController {
                 plan.optimizationState = info.optimizationState
               }
             })
-            this.allPlans = response.data
-            this.plans = response.data.slice(0, this.maxResults);
+            this.allPlans = _.sortBy(response.data, 'name');
+            this.plans = this.allPlans.slice(0, this.maxResults);
             // this.pages = response.data.pages
             this.pages = [];
             var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
@@ -258,6 +255,10 @@ class NetworkPlanModalController {
       return loc;
 
     });
+  }
+
+  getTagCategories(currentPlanTags) {
+    return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
 
 }

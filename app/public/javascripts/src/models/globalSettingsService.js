@@ -9,6 +9,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   globalSettings.old_password = ''
   globalSettings.password = ''
   globalSettings.password_confirm = ''
+  globalSettings.newTag = {}
 
   globalSettings.ManageUserViews = Object.freeze({
     Users: 0,
@@ -78,6 +79,13 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
 
   globalSettings.saveLocation = () => {
     $http.put(`/user/default_location/${globalSettings.user.default_location}`)
+  }
+
+  globalSettings.createTag = () => {
+    $http.post(`/service/tag-mapping/tags?name=${globalSettings.newTag.name}&description=${globalSettings.newTag.description}&colourHue=${globalSettings.newTag.hueColor}`)
+    .then((response) => {
+      state.loadListOfPlanTags()
+    })
   }
 
   return globalSettings
