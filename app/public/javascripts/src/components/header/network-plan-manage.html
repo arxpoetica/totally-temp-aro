@@ -61,7 +61,8 @@
             </td>
             <td>
               <div class="tags">
-                <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by $index" class="tag label label-success">{{tag.name}} 
+                <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by $index" 
+                  class="tag label" ng-style="{'color': $ctrl.state.getTagColour(tag)}">{{tag.name}} 
                   <a class="close" href ng-click="$ctrl.updateTag(plan,tag)">×</a>
                 </div>
               </div>
