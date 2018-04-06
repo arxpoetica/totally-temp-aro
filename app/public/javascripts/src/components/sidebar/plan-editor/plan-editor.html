@@ -55,6 +55,11 @@
         </div>
         <br>
 
+        <select class="form-control"
+                ng-model="$ctrl.selectedBoundaryType"
+                ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
+        </select>
+
         <div ng-if="$ctrl.selectedMapObject">
           <table id="tblEquipmentProperties"
                  class="table table-condensed table-striped">
