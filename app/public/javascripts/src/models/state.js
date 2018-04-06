@@ -619,16 +619,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         
         var newDataItems = {}
         dataTypeEntityResult.forEach((dataTypeEntity) => {
-          newDataItems[dataTypeEntity.name] = {
-            id: dataTypeEntity.id,
-            description: dataTypeEntity.description,
-            minValue: dataTypeEntity.minValue,
-            maxValue: dataTypeEntity.maxValue,
-            uploadSupported: dataTypeEntity.uploadSupported,
-            isMinValueSelectionValid: true,
-            isMaxValueSelectionValid: true,
-            selectedLibraryItems: [],
-            allLibraryItems: []
+          if (dataTypeEntity.maxValue > 0) {
+            newDataItems[dataTypeEntity.name] = {
+              id: dataTypeEntity.id,
+              description: dataTypeEntity.description,
+              minValue: dataTypeEntity.minValue,
+              maxValue: dataTypeEntity.maxValue,
+              uploadSupported: dataTypeEntity.uploadSupported,
+              isMinValueSelectionValid: true,
+              isMaxValueSelectionValid: true,
+              selectedLibraryItems: [],
+              allLibraryItems: []
+            }
           }
         })
 
