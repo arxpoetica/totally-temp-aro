@@ -73,19 +73,6 @@
             "strokeStyle": "#0000ff"
           },
 	  "isequipment": true
-        },  
-        "planned_5g_coverage": {
-          "label": "5G Coverage",
-	  "networkNodeType": "cell_5g",
-          "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
-          "iconUrl": "/images/map_icons/frontier/service_layer_cran.png",
-          "aggregateZoomThreshold": "13",
-          "equipmentType": "polygon",
-          "drawingOptions": {
-            "strokeStyle": "#00a000",
-            "fillStyle": "#a0ffa0"
-          },
-	  "isequipment": true
         },
         "planned_bulk_distribution_terminal": {
           "label": "Bulk Distribution Terminal",

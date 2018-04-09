@@ -4,6 +4,20 @@
     height: 99%;
     margin-top: 1%;
   }
+  .plan-info {
+    display: flex;
+    flex-direction: row;
+  }
+  .plan-info button {
+    margin-left: 1px;
+    margin-right: 1px;
+    flex: 1
+  }
+  .indent-1 {
+    padding-left: 15px !important;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
   .tags {
    margin-bottom: 5px;
   } 
@@ -12,12 +26,33 @@
     margin: 1px;
     font-size: 12px;
   }
+  .pointer {
+    cursor: pointer;
+  }
   .tag .close {
     font-size: 14px;
     margin-left: 5px;
   }
+  .btn-default {
+    border-color:white;
+  }
 </style>    
 <div class="plan-info-container">
+
+  <div class="plan-info">
+    <button ng-class="{ 'btn': true, 'btn-primary': $ctrl.currentView == $ctrl.views.Plan_Info }"
+      ng-click="$ctrl.currentView = $ctrl.views.Plan_Info">Plan Info</button>
+    <button ng-class="{ 'btn': true, 'btn-primary': $ctrl.currentView == $ctrl.views.Search_plans }" 
+      ng-click="$ctrl.currentView = $ctrl.views.Search_plans">Search Plans</button>
+    <button ng-class="{ 'btn': true, 'btn-primary': $ctrl.currentView == $ctrl.views.Recent_plans }"
+      ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">Recent Plans</button>
+  </div>  
+
+  <div class="indent-1">
+    <input type="checkbox" class="checkboxfill" 
+      name="ctype-name" disabled> Refresh Plans on map move
+  </div>
+
   <div class="input-group">
     <input type="text" class="form-control" placeholder="Search for Plan Names" 
       ng-model="$ctrl.search_text" ng-model-options="{ debounce: 1000 }">
@@ -26,10 +61,11 @@
     </span>
   </div>
 
-  <div style="margin-top:2px">
-    <input type="checkbox"
-      class="checkboxfill"
-      name="ctype-name" disabled> Limit to plans in current map view
+  <div class="indent-1 plan-info">
+    <span style="align-self:center">Filter by:</span> 
+    <button class = "btn btn-sm btn-default">Tag</button>
+    <button class = "btn btn-sm btn-default">Owner</button>
+    <button class = "btn btn-sm btn-default">Location</button>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
@@ -37,46 +73,28 @@
   </p>
 
   <div ng-show="$ctrl.plans.length > 0">
-    <!-- <div class="table-responsive"> -->
-      <table id="tblSelectPlans" class="table table-condensed table-striped">
-        <thead>
-          <tr>
-            <th>
-              Name
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('name', true)">↓</a>
-              <a href="javascript:void(0)" ng-click="$ctrl.sortBy('name', false)">↑</a>
-            </th>
-            <th>Actions</th>
-            <th>Tags</th>
-            <th>Created By</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
-            <td><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></td>
-            <td>
-              <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
-              <a ng-if="!plan.progress" class="btn btn-sm btn-primary"><span class="fa fa-folder"></span></a>
-              <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
-            </td>
-            <td>
-              <div class="tags">
-                <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by $index" 
-                  class="tag label" ng-style="{'color': $ctrl.state.getTagColour(tag)}">{{tag.name}} 
-                  <a class="close" href ng-click="$ctrl.updateTag(plan,tag)">×</a>
-                </div>
-              </div>
-              <!-- <div class="tags">
-                <div ng-repeat="(id,tag) in $ctrl.tags track by $index" class="tag label label-success">{{tag}}
-                  <a class="close" href ng-click="$ctrl.removeTag(id)">×</a>
-                </div>
-              </div> -->
-            </td>
-            <td>{{plan.owner_first_name}} {{plan.owner_last_name}}</td>
-          </tr>
-        </tbody>
-      </table>
-    <!-- </div> -->
+    <table id="tblSelectPlans" class="table table-condensed table-striped">
+      <tbody>
+        <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
+          <td>
+            <b><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></b>
+            <div><i>{{$ctrl.user.first_name}} {{$ctrl.user.last_name}}</i></div>
+            <div class="tags">
+              <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by $index" 
+                class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
+              <span class="label"> {{tag.name}} 
+                <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,tag)"></i>
+              </span>
+            </div>
+          </td>
+          <td>
+            <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
+            <!-- <a ng-if="!plan.progress" class="btn btn-sm btn-primary"><span class="fa fa-folder"></span></a> -->
+            <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <nav class="text-center" style="max-height: 35px">
       <ul class="pagination" style="margin: 0px">
         <li ng-class="{ disabled: $ctrl.currentPage === 1 }">
