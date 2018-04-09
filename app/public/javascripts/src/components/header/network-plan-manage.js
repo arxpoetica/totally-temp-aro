@@ -24,6 +24,14 @@ class NetworkPlanModalController {
     this.sortField
     this.descending
 
+    this.views = Object.freeze({
+      Plan_Info: 0,
+      Search_plans: 1,
+      Recent_plans: 2
+    })
+
+    this.currentView = this.views.Plan_Info
+
     this.planOptions = {
       //url: '/service/v1/plan-summary',
       url: '/service/v1/plan',
