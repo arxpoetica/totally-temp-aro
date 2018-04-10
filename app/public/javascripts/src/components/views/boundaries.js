@@ -57,7 +57,7 @@ class BoundariesController {
     }
     map_layers.addFeatureLayer(countySubdivisionsLayer);
 
-
+    /*
     if (config.ui.map_tools.boundaries.view.indexOf('census_blocks') >= 0) {
       censusBlocksLayer = new MapLayer({
         type: 'census_blocks',
@@ -95,7 +95,8 @@ class BoundariesController {
 
       map_layers.addFeatureLayer(censusBlocksLayer);
     }
-
+	*/
+    
     globalAnalysisLayers.forEach((analysisLayer) => {
       var color = analysisLayersColors.shift() || 'black'
       var layer = new MapLayer({
@@ -128,7 +129,13 @@ class BoundariesController {
       countySubdivisionsLayer,
       censusBlocksLayer
     ].filter((layer) => layer))
-
+    
+    console.log('globalAnalysisLayers')
+    console.log(globalAnalysisLayers)
+    
+    console.log('globalServiceLayers')
+    console.log(globalServiceLayers)
+    
     globalServiceLayers.forEach((serviceLayer) => {
       if (!serviceLayer.show_in_boundaries) return
       var wirecenter_layer = {
@@ -141,15 +148,38 @@ class BoundariesController {
     
       this.state.boundaries.tileLayers.push(wirecenter_layer)
     })
+    
+    
+    
+    
+    
+    
+    
+    
+    this.state.boundaries.tileLayers.push({
+    	  name: 'Census Blocks',
+      type: 'census_blocks',
+      api_endpoint: "/tile/v1/census_block/tiles/${tilePointTransform}/",
+      //layerId: serviceLayer.id,
+      aggregateZoomThreshold: 10
+    	  
+    })
+    
+    console.log('this.state.boundaries')
+    console.log(this.state.boundaries)
   }
-
+  
+  // for MapLayer objects 
   toggleVisibility(layer) {
+	console.log("toggle")
+	console.log(layer)
     layer.visible = layer.visible_check;
 
     layer.configureVisibility()
     this.regions.setSearchOption(layer.type, layer.visible)
   }
-
+  
+  // for layers drawn on vector tiles
   tilesToggleVisibility(layer) {
     layer.visible = layer.visible_check;
     this.updateMapLayers()
@@ -178,7 +208,7 @@ class BoundariesController {
       selectedServiceAreaLibraries.forEach((selectedServiceAreaLibrary) => {
         
         this.state.boundaries.tileLayers.forEach((layer) => {
-
+          console.log(layer)
           if (layer.visible) {
             var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
