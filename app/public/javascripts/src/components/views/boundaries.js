@@ -186,7 +186,61 @@ class BoundariesController {
   }
 
   updateMapLayers() {
-
+	// ToDo: this function could stand to be cleaned up
+	
+	// ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  
+	var layerSettings = {}
+	layerSettings['wirecenter'] = {
+	  dataUrls: [],
+	  renderMode: 'PRIMITIVE_FEATURES',
+	  selectable: true,
+	  strokeStyle: '#00ff00',
+	  lineWidth: 4,
+	  fillStyle: "transparent",
+	  opacity: 0.7,
+	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+	  highlightStyle: {
+	    strokeStyle: '#000000',
+	    fillStyle: 'green',
+	    opacity: 0.3
+	  }
+	}
+	
+	layerSettings['census_blocks'] = {
+	  dataUrls: [],
+	  renderMode: 'PRIMITIVE_FEATURES',
+	  selectable: true,
+	  strokeStyle: 'blue',
+	  lineWidth: 2,
+	  fillStyle: "transparent",
+	  opacity: 0.7,
+	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+	  highlightStyle: {
+	    strokeStyle: '#000000',
+	    fillStyle: 'green',
+	    opacity: 0.3
+	  }
+	}
+	
+	layerSettings['aggregated_wirecenters'] = {
+	  dataUrls: [],
+	  renderMode: 'PRIMITIVE_FEATURES',
+	  selectable: true,
+	  aggregateMode: 'FLATTEN',
+	  strokeStyle: '#00ff00',
+	  lineWidth: 4,
+	  fillStyle: "transparent",
+	  opacity: 0.7,
+	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+	  highlightStyle: {
+	    strokeStyle: '#000000',
+	    fillStyle: 'green',
+	    opacity: 0.3
+	  }
+	}
+	
+	layerSettings['default'] = layerSettings['wirecenter']
+	  
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 
@@ -220,7 +274,8 @@ class BoundariesController {
               mergedLayerUrls.push(url)
             } else {
               // We want to create an individual layer
-              oldMapLayers[mapLayerKey] = {
+              /*
+            	  oldMapLayers[mapLayerKey] = {
                 dataUrls: [url],
                 renderMode: 'PRIMITIVE_FEATURES',
                 selectable: true,
@@ -235,6 +290,13 @@ class BoundariesController {
                   opacity: 0.3
                 }
               }
+              */
+            	  
+            	  var settingsKey = layer.type
+            	  if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
+            	  oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
+            	  oldMapLayers[mapLayerKey].dataUrls = [url]
+            	  
               this.createdMapLayerKeys.add(mapLayerKey)
             }
           }
@@ -246,7 +308,8 @@ class BoundariesController {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
       var mapLayerKey = 'aggregated_wirecenters'
-      oldMapLayers[mapLayerKey] = {
+      /*
+    	  oldMapLayers[mapLayerKey] = {
         dataUrls: mergedLayerUrls,
         renderMode: 'PRIMITIVE_FEATURES',
         selectable: true,
@@ -262,10 +325,19 @@ class BoundariesController {
           opacity: 0.3
         }
       }
+      */
+    	  
+    	  var settingsKey = mapLayerKey
+    	  if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
+    	  
+    	  oldMapLayers[mapLayerKey] = angular.copy(layerSettings[mapLayerKey])
+    	  oldMapLayers[mapLayerKey].dataUrls = mergedLayerUrls
       this.createdMapLayerKeys.add(mapLayerKey)
     }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
+    console.log('oldMapLayers')
+    console.log(oldMapLayers)
     this.state.mapLayers.next(oldMapLayers)
   }
 
