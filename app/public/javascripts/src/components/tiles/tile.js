@@ -817,7 +817,9 @@ class MapTileRenderer {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
-      var selectFeature = false
+      //console.log('test feature')
+      //console.log(feature)
+    	  var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
       var geometry = feature.loadGeometry()
@@ -840,7 +842,8 @@ class MapTileRenderer {
       }
 
       //Load the selected service area 
-      if(feature.properties.code) {
+      //if(feature.properties.code) { // HACK by Corr, change this back
+    	  if(feature.properties.id) {
         feature.loadGeometry().forEach(function (areaGeom) {
           var areaPolyCoordinates = []
 
@@ -1047,7 +1050,7 @@ class TileComponentController {
             })
           }
         }
-        Promise.all(pointInPolyPromises)
+        Promise.all(pointInPolyPromises) // ToDo: is this repeat code from $document.ready ?
           .then((results) => {
             var selectedLocations = new Set()
             var selectedServiceAreas = new Set()
@@ -1113,7 +1116,7 @@ class TileComponentController {
 
         var hitPromises = []
         this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
+        	  hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
         })
         Promise.all(hitPromises)
           .then((results) => {
@@ -1121,7 +1124,8 @@ class TileComponentController {
             var serviceAreaFeatures = []
             var roadSegments = new Set()
             var equipmentFeatures = []
-
+            var censusFeatures = []
+            
             var canSelectLoc  = false
             var canSelectSA   = false
             
@@ -1135,6 +1139,9 @@ class TileComponentController {
             }
 
             results[0].forEach((result) => {
+            	  console.log('result')
+        	      console.log(result)
+            	  // ToDo: need a better way to differentiate feature types. An explicit way, also we can then generalize these feature arrays
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)
@@ -1142,6 +1149,8 @@ class TileComponentController {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
               } else if (result.gid) {
                 roadSegments.add(result)
+              } else if (result.id && result.hasOwnProperty('tags')) {
+            	    censusFeatures.push(result)
               } else if (result.id) {
                 equipmentFeatures = equipmentFeatures.concat(result)
               }
@@ -1157,7 +1166,8 @@ class TileComponentController {
               locations: hitFeatures,
               serviceAreas: serviceAreaFeatures,
               roadSegments: roadSegments,
-              equipmentFeatures: equipmentFeatures
+              equipmentFeatures: equipmentFeatures, 
+              censusFeatures: censusFeatures
             })
           })
       })

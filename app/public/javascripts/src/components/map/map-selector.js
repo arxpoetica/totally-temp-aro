@@ -15,6 +15,12 @@ class MapSelectorController {
 
     // Handle selection events from state
     state.mapFeaturesSelectedEvent.subscribe((event) => {
+    	  //console.log(event)
+    	  // ToDo: Corr isn't sure if this is where this should go
+    	  //if (event.hasOwnProperty('censusFeatures') && event.censusFeatures.length > 0){
+      //  $rootScope.$broadcast('map_layer_census_block_click', event.censusFeatures[0])
+    	  //}
+    	  
       var plan = state.plan.getValue()
       
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0) {

@@ -130,11 +130,6 @@ class BoundariesController {
       censusBlocksLayer
     ].filter((layer) => layer))
     
-    console.log('globalAnalysisLayers')
-    console.log(globalAnalysisLayers)
-    
-    console.log('globalServiceLayers')
-    console.log(globalServiceLayers)
     
     globalServiceLayers.forEach((serviceLayer) => {
       if (!serviceLayer.show_in_boundaries) return
@@ -150,12 +145,6 @@ class BoundariesController {
     })
     
     
-    
-    
-    
-    
-    
-    
     this.state.boundaries.tileLayers.push({
     	  name: 'Census Blocks',
       type: 'census_blocks',
@@ -165,8 +154,6 @@ class BoundariesController {
     	  
     })
     
-    console.log('this.state.boundaries')
-    console.log(this.state.boundaries)
   }
   
   // for MapLayer objects 
@@ -217,7 +204,7 @@ class BoundariesController {
 	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
 	  highlightStyle: {
 	    strokeStyle: '#000000',
-	    fillStyle: 'green',
+	    fillStyle: 'blue',
 	    opacity: 0.3
 	  }
 	}
@@ -262,7 +249,6 @@ class BoundariesController {
       selectedServiceAreaLibraries.forEach((selectedServiceAreaLibrary) => {
         
         this.state.boundaries.tileLayers.forEach((layer) => {
-          console.log(layer)
           if (layer.visible) {
             var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
@@ -330,14 +316,12 @@ class BoundariesController {
     	  var settingsKey = mapLayerKey
     	  if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
     	  
-    	  oldMapLayers[mapLayerKey] = angular.copy(layerSettings[mapLayerKey])
+    	  oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
     	  oldMapLayers[mapLayerKey].dataUrls = mergedLayerUrls
       this.createdMapLayerKeys.add(mapLayerKey)
     }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
-    console.log('oldMapLayers')
-    console.log(oldMapLayers)
     this.state.mapLayers.next(oldMapLayers)
   }
 

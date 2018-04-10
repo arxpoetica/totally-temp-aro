@@ -8,7 +8,15 @@ class BoundaryDetailController {
     state.censusBlockSelectedEvent.subscribe((cbdata) => {
 
       if (_.isEmpty(cbdata)) return
-      this.getCensusBlockInfo(cbdata.getProperty('id'))
+      let cbId 
+      if (cbdata.hasOwnProperty('id')){
+    	    cbId = cbdata.id
+      }else if(cbdata.hasOwnProperty('getProperty')){ // this may not be necessary anymore
+    	    cbId = cbdata.getProperty('id')
+      }else{
+    	    return
+      }
+      this.getCensusBlockInfo(cbId)
         .then((cbInfo) => {
           this.selectedBoundaryInfo = cbInfo
         })
