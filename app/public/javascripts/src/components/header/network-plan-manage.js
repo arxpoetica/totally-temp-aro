@@ -19,7 +19,9 @@ class NetworkPlanModalController {
 
     this.interval  = null
     this.search
-    this.search_text = ""
+    this.search_text = ''
+    this.searchText = []
+    this.searchList = []
 
     this.sortField
     this.descending
@@ -267,6 +269,23 @@ class NetworkPlanModalController {
 
   getTagCategories(currentPlanTags) {
     return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  }
+
+  applyTagSearchFilter(selectedFilters) {
+    _.map(selectedFilters.selectedFilters, (tag) => { 
+      tag.type = 'tag'
+      return tag
+    })       
+    this.searchText = this.searchText.concat(selectedFilters.selectedFilters)
+    this.searchList = this.searchList.concat(selectedFilters.selectedFilters)
+  }
+  applyOwnerSearchFilter(selectedFilters) {
+    _.map(selectedFilters.selectedFilters, (tag) => { 
+      tag.type = 'owner'
+      return tag
+    })       
+    this.searchText = this.searchText.concat(selectedFilters.selectedFilters)
+    this.searchList = this.searchList.concat(selectedFilters.selectedFilters)
   }
 
 }

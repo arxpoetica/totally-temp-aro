@@ -1,0 +1,29 @@
+<style scoped>
+  #dropdownMenu1 {
+    border-color:white;
+  }
+</style>  
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    {{$ctrl.objectName}}
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <ui-select multiple ng-model="$ctrl.selectedItems" 
+      ng-if="$ctrl.searchList.length > 0"
+      theme="bootstrap" close-on-select="true" on-select="onSelectedItemsChanged()" on-remove="onSelectedItemsChanged()">
+      <ui-select-match placeholder="Select {{$ctrl.objectName}}...">
+        <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour($item), 'margin-right':'5px' }"></span>{{$item.name}}
+      </ui-select-match>
+      <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search">
+        <div>
+          <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
+        </div>
+      </ui-select-choices>
+    </ui-select>
+    <div class="text-center" style="margin-top:2px">
+      <button ng-class="{'btn btn-sm': true, 'btn-primary': $ctrl.selectedItems.length > 0 }" 
+        ng-click="$ctrl.applySearch({selectedFilters:$ctrl.selectedItems})"
+        ng-disabled="$ctrl.selectedItems.length < 0">Apply</button>
+    </div>
+  </div>
+</div>
