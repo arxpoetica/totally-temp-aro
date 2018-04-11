@@ -35,6 +35,58 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+
+  // Update map layers for equipment items (these do not have a library id associated with them)
+  var updateMapLayersForEquipment = (planId, networkEquipment, mapLayers, newCreatedMapLayerKeys) => {
+    var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
+    if (networkEquipment.equipmentType === 'point') {
+      var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+      tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
+    } else if (networkEquipment.equipmentType === 'polygon') {
+      var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+      tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+    }
+
+    mapLayers[networkEquipment.key] = {
+      dataUrls: [tileUrl],
+      iconUrl: networkEquipment.iconUrl,
+      renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+      strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+      lineWidth: 2,
+      fillStyle: networkEquipment.drawingOptions.fillStyle,
+      opacity: 0.5,
+      selectable: true,
+      zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
+    }
+
+    newCreatedMapLayerKeys.add(networkEquipment.key)
+  }
+
+  // Update map layers for cable/fiber items (these can have multiple library ids selected for display)
+  var updateMapLayersForCable = (networkEquipment, mapLayers, newCreatedMapLayerKeys) => {
+    var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
+    var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
+    var tileUrl = networkEquipment.tileUrl.replace('{lineTransform}', lineTransform)
+    state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
+      // Careful - mapLayerKey must be unique, or else it will be overwritten
+      var mapLayerKey = `${EXISTING_FIBER_PREFIX}_${networkEquipment.key}_${selectedLibraryItem.identifier}`
+      const tileUrlThisItem = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
+
+      mapLayers[mapLayerKey] = {
+        dataUrls: [tileUrlThisItem],
+        iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
+        renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+        strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+        lineWidth: 2,
+        zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+        fillStyle: networkEquipment.drawingOptions.fillStyle,
+        showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
+      }
+      newCreatedMapLayerKeys.add(mapLayerKey)
+    })
+  }
+
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
@@ -51,7 +103,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     // Only add planned equipment if we have a valid plan selected
     var planId = state.plan && state.plan.getValue() && state.plan.getValue().id
     if (planId) {
-
       var networkLayers = _.find(state.networkEquipments,(category) => category.key == "planned" ).layers
       var site_boundaries = _.find(networkLayers,(layer) => layer.label == "Site Boundaries")
       
@@ -61,53 +112,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // Loop through all the layers in this category
         category.layers.forEach((networkEquipment) => {
           if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') < 0) {
-            var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
-            if (networkEquipment.equipmentType === 'point') {
-              var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-              tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
-            } else if (networkEquipment.equipmentType === 'line') {
-              var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-              tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
-            } else if (networkEquipment.equipmentType === 'polygon') {
-              var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-              tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
-            }
-            
-            oldMapLayers[networkEquipment.key] = {
-              dataUrls: [tileUrl],
-              iconUrl: networkEquipment.iconUrl,
-              renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-              strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-              lineWidth: 2,
-              fillStyle: networkEquipment.drawingOptions.fillStyle,
-              opacity: 0.5,
-              selectable: true,
-              zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-              showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
-            }
-
-            createdMapLayerKeys.add(networkEquipment.key)
+            updateMapLayersForEquipment(planId, networkEquipment, oldMapLayers, createdMapLayerKeys)
           } else if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') >= 0
                      && state.dataItems.fiber){
-            var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
-            var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
-            var tileUrl = networkEquipment.tileUrl.replace('{lineTransform}', lineTransform)
-            state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
-              var mapLayerKey = `${EXISTING_FIBER_PREFIX}_${networkEquipment.key}_${selectedLibraryItem.identifier}`
-              const tileUrlThisItem = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
-              
-              oldMapLayers[mapLayerKey] = {
-                dataUrls: [tileUrlThisItem],
-                iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
-                renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-                strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-                lineWidth: 2,
-                zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                fillStyle: networkEquipment.drawingOptions.fillStyle,
-                showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
-              }
-              createdMapLayerKeys.add(mapLayerKey)
-            })
+            updateMapLayersForCable(networkEquipment, oldMapLayers, createdMapLayerKeys)
           }
         })
         if (state.showSiteBoundary) {
