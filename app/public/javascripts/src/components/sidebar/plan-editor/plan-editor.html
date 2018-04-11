@@ -20,7 +20,7 @@
       <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                         object-icon-url="/images/map_icons/aro/plan_equipment.png"
                         object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
-                        on-create-object="$ctrl.handleObjectCreated(mapObject)"
+                        on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick)"
                         on-modify-object="$ctrl.handleObjectModified(mapObject)"
                         on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                         on-delete-object="$ctrl.handleObjectDeleted(mapObject)"

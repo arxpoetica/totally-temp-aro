@@ -18,17 +18,48 @@ class EquipmentProperties {
   }
 }
 
+class BoundaryAttributes {
+  constructor(networkNodeType, associatedNetworkNodeId, boundaryTypeId) {
+    this.networkNodeType = networkNodeType
+    this.associatedNetworkNodeId = associatedNetworkNodeId
+    this.boundaryTypeId = boundaryTypeId
+  }
+}
+
 class PlanEditorController {
 
-  constructor($timeout, $http, state) {
+  constructor($timeout, $http, state, configuration) {
     this.$timeout = $timeout
     this.$http = $http
     this.state = state
+    this.configuration = configuration
     this.selectedMapObject = null
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.currentTransaction = null
+    this.coverageRadius = 10000 // In user units (e.g. Feet)
     this.requestSelectedObjectDelete = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.uuidStore = []
+    this.getUUIDsFromServer()
+  }
+
+  // Get a list of UUIDs from the server
+  getUUIDsFromServer() {
+    const numUUIDsToFetch = 20
+    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
+    .then((result) => {
+      this.uuidStore = this.uuidStore.concat(result.data)
+    })
+    .catch((err) => console.error(err))
+  }
+
+  // Get a UUID from the store
+  getUUID() {
+    if (this.uuidStore.length < 7) {
+      // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
+      this.getUUIDsFromServer()
+    }
+    return this.uuidStore.pop()
   }
 
   registerObjectDeleteCallback(objectDeleteCallback) {
@@ -98,6 +129,42 @@ class PlanEditorController {
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
+  }
+
+  calculateCoverage(mapObject) {
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = this.state.getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.analysis_type = 'COVERAGE'
+    console.log(mapObject)
+    optimizationBody.point = {
+      type: 'Point',
+      coordinates: [mapObject.position.lng(), mapObject.position.lat()]
+    }
+    // Always send radius in meters to the back end
+    optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
+
+    var equipmentObjectId = mapObject.objectId
+    this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
+      .then((result) => {
+        console.log(result);
+        // Construct a feature that we will pass to the map object editor, which will create the map object
+        var feature = {
+          objectId: this.getUUID(),
+          geometry: {
+            type: 'Polygon',
+            coordinates: result.data.polygon.coordinates
+          },
+          attributes: {
+            network_node_type: 'dslam',
+            boundary_type_id: this.selectedBoundaryType.id,
+            network_node_object_id: equipmentObjectId // This is the Network Equipment that this boundary is associated with
+          }
+        }
+        console.log(feature)
+        this.createMapObjects && this.createMapObjects([feature])
+      })
+      .catch((err) => console.error(err))
   }
 
   commitTransaction() {
@@ -186,11 +253,16 @@ class PlanEditorController {
     }
   }
 
-  handleObjectCreated(mapObject) {
+  handleObjectCreated(mapObject, usingMapClick) {
     this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties()
     this.objectIdToMapObject[mapObject.objectId] = mapObject
-    var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-    this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+    console.log(mapObject)
+    if (usingMapClick && mapObject.icon && mapObject.position) {
+      // This is a equipment marker and not a boundary. We should have a better way of detecting this
+        var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+        this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+        this.calculateCoverage(mapObject)
+    }
     this.$timeout()
   }
 
@@ -652,7 +724,7 @@ class PlanEditorController {
 //   }
 // }
 
-PlanEditorController.$inject = ['$timeout', '$http', 'state']
+PlanEditorController.$inject = ['$timeout', '$http', 'state', 'configuration']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',

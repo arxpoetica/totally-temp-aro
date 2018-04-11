@@ -78,59 +78,98 @@ class MapObjectEditorController {
   createMapObjects(features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
     features.forEach((feature) => {
-      this.createMapObject(feature.objectId, new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]))
+      this.createMapObject(feature, false)  // Feature is not created usin a map click
     })
   }
 
-  createMapObject(objectId, latLng) {
-
-    // Create a map object
-    const mapObject = new google.maps.Marker({
-      objectId: objectId, // Not used by Google Maps
-      position: latLng,
+  createPointMapObject(feature) {
+    // Create a "point" map object - a marker
+    return new google.maps.Marker({
+      objectId: feature.objectId, // Not used by Google Maps
+      position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
       icon: {
-        url: this.objectIconUrl,
-        anchor: new google.maps.Point(120, 120)
+        url: this.objectIconUrl
       },
       draggable: true,
       map: this.mapRef
     })
-    this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject})
-    this.selectMapObject(mapObject)
+  }
 
-    // Set up listeners on the map object
-    mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
-    mapObject.addListener('click', (event) => {
-      if (this.deleteMode) {
-        // Delete this map object
-        mapObject.setMap(null)
-        delete this.createdMapObjects[mapObject.objectId]
-        this.selectMapObject(null)
-        this.onDeleteObject && this.onDeleteObject({mapObject})
-      } else {
+  createPolygonMapObject(feature) {
+    // Create a "polygon" map object
+    var polygonPath = []
+    feature.geometry.coordinates[0].forEach((polygonVertex) => {
+      polygonPath.push({
+        lat: polygonVertex[1],  // Note array index
+        lng: polygonVertex[0]   // Note array index
+      })
+    })
+
+    return new google.maps.Polygon({
+      objectId: feature.objectId, // Not used by Google Maps
+      paths: polygonPath,
+      strokeColor: '#FF1493',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF1493',
+      fillOpacity: 0.4,
+      clickable: true,
+      draggable: false,
+      map: this.mapRef
+    })
+  }
+
+  createMapObject(feature, usingMapClick) {
+
+    var mapObject = null
+    if (feature.geometry.type === 'Point') {
+      mapObject = this.createPointMapObject(feature)
+      // Set up listeners on the map object
+      mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
+      mapObject.addListener('click', (event) => {
         // Select this map object
         this.selectMapObject(mapObject)
-      }
-    })
-    mapObject.addListener('rightclick', (event) => {
-      console.log('---- Debugging for context menu -----')
-      console.log(event)
-      // Display the context menu and select the clicked marker
-      this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.va.clientX}px`
-      this.contextMenuCss.top = `${event.va.clientY}px`
+      })
+      mapObject.addListener('rightclick', (event) => {
+        // Display the context menu and select the clicked marker
+        this.contextMenuCss.display = 'block'
+        this.contextMenuCss.left = `${event.va.clientX}px`
+        this.contextMenuCss.top = `${event.va.clientY}px`
 
-      // Show the dropdown menu
-      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-      const isDropdownHidden = dropdownMenu.is(':hidden')
-      if (isDropdownHidden) {
-        var toggleButton = this.$document.find('.map-object-editor-context-menu')
-        toggleButton.dropdown('toggle')
-      }
-      this.selectMapObject(mapObject)
-      this.$timeout()
-    })
+        // Show the dropdown menu
+        var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+        const isDropdownHidden = dropdownMenu.is(':hidden')
+        if (isDropdownHidden) {
+          var toggleButton = this.$document.find('.map-object-editor-context-menu')
+          toggleButton.dropdown('toggle')
+        }
+        this.selectMapObject(mapObject)
+        this.$timeout()
+      })
+    } else if (feature.geometry.type === 'Polygon') {
+      mapObject = this.createPolygonMapObject(feature)
+      // Set up listeners on the map object
+      mapObject.getPaths().forEach(function(path, index){
+        google.maps.event.addListener(path, 'insert_at', function(){
+          this.onModifyObject && this.onModifyObject({mapObject})
+        });
+        google.maps.event.addListener(path, 'remove_at', function(){
+          this.onModifyObject && this.onModifyObject({mapObject})
+        });
+        google.maps.event.addListener(path, 'set_at', function(){
+          this.onModifyObject && this.onModifyObject({mapObject})
+        });
+      });
+      google.maps.event.addListener(mapObject, 'dragend', function(){
+        this.onModifyObject && this.onModifyObject({mapObject})
+      });
+    } else {
+      throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
+    }
+
+    this.createdMapObjects[mapObject.objectId] = mapObject
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick})
+    this.selectMapObject(mapObject)
   }
 
   handleMapEntitySelected(event) {
@@ -143,13 +182,20 @@ class MapObjectEditorController {
       // This means that the context menu is being displayed. Do not create an object.
       return
     }
+    var feature = {
+      geometry: {
+        type: 'Point',
+        coordinates: [event.latLng.lng(), event.latLng.lat()]
+      }
+    }
     if (!event.locations || event.locations.length === 0) {
       // The map was clicked on, but there was no location under the cursor. Create a new one.
-      this.createMapObject(this.getUUID(), event.latLng)
+      feature.objectId = this.getUUID()
+      this.createMapObject(feature, true)
     } else {
       // The map was clicked on, and there was a location under the cursor
-      const objectId = event.locations[0].object_id
-      this.createMapObject(objectId, event.latLng)
+      feature.objectId = event.locations[0].object_id
+      this.createMapObject(feature, true)
 
       // Stop rendering this location in the tile
       this.tileDataService.addFeatureToExclude(objectId)
@@ -158,6 +204,10 @@ class MapObjectEditorController {
   }
 
   selectMapObject(mapObject) {
+    if (!mapObject.icon) {
+      // This is a polygon. Don't select
+      return
+    }
     if (this.selectedMapObject) {
       // Reset the icon of the currently selected map object
       this.selectedMapObject.setIcon(this.objectIconUrl)
