@@ -43,17 +43,11 @@ make load_schema
 make reset_stage_reference
 make stage_reference
 
-make reset_international_stage_reference
-make stage_international_reference
-
 make reset_view
 make load_view
 
 make reset_public
 make load_public
-
-make reset_international_public
-make load_international_public
 
 make refresh_materialized_view
 
