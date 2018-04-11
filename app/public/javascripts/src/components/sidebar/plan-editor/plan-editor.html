@@ -24,7 +24,7 @@
                         on-modify-object="$ctrl.handleObjectModified(mapObject)"
                         on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                         on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
-                        register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteSelectedObject)"
+                        register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                         register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
       </map-object-editor>

@@ -16,11 +16,11 @@ class LocationEditorController {
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.currentTransaction = null
-    this.requestSelectedObjectDelete = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
   }
 
-  registerObjectDeleteCallback(objectDeleteCallback) {
-    this.requestSelectedObjectDelete = objectDeleteCallback
+  registerObjectDeleteCallback(deleteObjectWithIdCallback) {
+    this.deleteObjectWithId = deleteObjectWithIdCallback
   }
 
   registerCreateMapObjectsCallback(createMapObjects) {
@@ -201,7 +201,9 @@ class LocationEditorController {
 
   deleteSelectedObject() {
     // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
-    this.requestSelectedObjectDelete && this.requestSelectedObjectDelete()
+    if (this.selectedMapObject) {
+      this.deleteObjectWithId && this.deleteObjectWithId(this.selectedMapObject.objectId)
+    }
   }
 }
 

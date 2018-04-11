@@ -37,9 +37,10 @@ class PlanEditorController {
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
+    this.equipmentIdToBoundaryId = {}
     this.currentTransaction = null
     this.coverageRadius = 10000 // In user units (e.g. Feet)
-    this.requestSelectedObjectDelete = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.uuidStore = []
     this.getUUIDsFromServer()
   }
@@ -63,8 +64,8 @@ class PlanEditorController {
     return this.uuidStore.pop()
   }
 
-  registerObjectDeleteCallback(objectDeleteCallback) {
-    this.requestSelectedObjectDelete = objectDeleteCallback
+  registerObjectDeleteCallback(deleteObjectWithIdCallback) {
+    this.deleteObjectWithId = deleteObjectWithIdCallback
   }
 
   registerCreateMapObjectsCallback(createMapObjects) {
@@ -106,6 +107,8 @@ class PlanEditorController {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
+        this.equipmentIdToBoundaryId = {}
+        this.boundaryIdToEquipmentId = {}
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(result.data)
@@ -142,7 +145,6 @@ class PlanEditorController {
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
     optimizationBody.analysis_type = 'COVERAGE'
-    console.log(mapObject)
     optimizationBody.point = {
       type: 'Point',
       coordinates: [mapObject.position.lng(), mapObject.position.lat()]
@@ -153,7 +155,6 @@ class PlanEditorController {
     var equipmentObjectId = mapObject.objectId
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
-        console.log(result);
         // Construct a feature that we will pass to the map object editor, which will create the map object
         var feature = {
           objectId: this.getUUID(),
@@ -168,7 +169,7 @@ class PlanEditorController {
           }
         }
         this.boundaryIdToEquipmentId[feature.objectId] = equipmentObjectId
-        console.log(feature)
+        this.equipmentIdToBoundaryId[equipmentObjectId] = feature.objectId
         this.createMapObjects && this.createMapObjects([feature])
       })
       .catch((err) => console.error(err))
@@ -289,13 +290,12 @@ class PlanEditorController {
   handleObjectCreated(mapObject, usingMapClick) {
     this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties()
     this.objectIdToMapObject[mapObject.objectId] = mapObject
-    console.log(mapObject)
     if (usingMapClick && mapObject.icon && mapObject.position) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
       this.calculateCoverage(mapObject)
-    } else if (usingMapClick) {
+    } else if (!mapObject.icon && !mapObject.position) {
       // This is a boundary marker. This will be created without map clicks. Save it.
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
@@ -319,6 +319,14 @@ class PlanEditorController {
           this.$timeout()
         })
         .catch((err) => console.error(err))
+      // Delete the associated boundary
+      const boundaryObjectId = this.equipmentIdToBoundaryId[this.selectedMapObject.objectId]
+      if (boundaryObjectId) {
+        delete this.equipmentIdToBoundaryId[this.selectedMapObject.objectId]
+        delete this.boundaryIdToEquipmentId[boundaryObjectId]
+        this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+      }
+      this.calculateCoverage(mapObject)
     } else {
       // This is a boundary feature
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
@@ -338,442 +346,22 @@ class PlanEditorController {
 
   deleteSelectedObject() {
     // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
-    this.requestSelectedObjectDelete && this.requestSelectedObjectDelete()
+    if (this.selectedMapObject) {
+      var mapObjectToDelete = this.selectedMapObject  // this.selectedMapObject may change while deleting stuff below
+      // If this is an equipment, delete its associated boundary (if any)
+      if (mapObjectToDelete.icon && mapObjectToDelete.position) {
+        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObjectToDelete.objectId]
+        if (boundaryObjectId) {
+          delete this.equipmentIdToBoundaryId[mapObjectToDelete.objectId]
+          delete this.boundaryIdToEquipmentId[boundaryObjectId]
+          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+        }
+      }
+      // Delete the selected map object
+      this.deleteObjectWithId && this.deleteObjectWithId(mapObjectToDelete.objectId)
+    }
   }
 }
-
-// class PlanEditorController {
-  
-//   constructor(state, $http, $timeout, tileDataService, configuration) {
-//     this.state = state
-//     this.$http = $http
-//     this.$timeout = $timeout
-//     this.tileDataService = tileDataService
-//     this.configuration = configuration
-//     this.coverageRadius = 10000 // Feet!
-//     this.createdEditableObjects = []
-//     this.uuidStore = []
-//     this.getUUIDsFromServer()
-
-//     this.currentTransaction = null
-//     this.$http.get(`/service/plan-transaction?user_id=${this.state.getUserId()}`)
-//       .then((result) => {
-//         if (result.data.length > 0) {
-//           // At least one transaction exists. Return it
-//           return Promise.resolve({
-//             data: result.data[0]
-//           })
-//         } else {
-//           // Create a new transaction and return it.
-//           return this.$http.post(`/service/plan-transactions`, { userId: this.state.getUserId(), planId: this.state.plan.getValue().id })
-//         }
-//       })
-//       .then((result) => {
-//         this.currentTransaction = result.data
-//         this.createMapObj ectsForCurrentTransaction()
-//         this.$timeout()
-//       })
-//       .catch((err) => console.error(err))
-//   }
-
-//   // Creates map objects for the current transaction
-//   createMapObjectsForCurrentTransaction() {
-//     // First remove any existing map objects
-//     this.removeCreatedMapObjects()
-
-//     // Get a list of objects for the current transaction
-//     this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
-//       .then((result) => {
-//         // Feature attributes are currently stored only as key-value pairs in service. Use defaults
-//         // for the array elements
-//         var defaultAttributes = new EquipmentProperties()
-//         result.data.forEach((equipmentFeature) => {
-//           equipmentFeature.attributes.siteTypes = defaultAttributes.siteTypes
-//           equipmentFeature.attributes.equipmentTypes = defaultAttributes.equipmentTypes
-//           this.createMapObject(null, equipmentFeature, false)
-//         })
-//         this.$timeout()
-//       })
-//       .catch((err) => console.error(err))
-//   }
-
-//   exitPlanEditMode() {
-//     this.currentTransaction = null
-//     this.state.recreateTilesAndCache()
-//     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
-//     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
-//     this.$timeout()
-//   }
-
-//   commitTransaction() {
-//     if (!this.currentTransaction) {
-//       console.error('No current transaction. We should never be in this state. Aborting commit...')
-//     }
-
-//     this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}`)
-//       .then((result) => {
-//         // Committing will close the transaction. To keep modifying, open a new transaction
-//         this.exitPlanEditMode()
-//       })
-//       .catch((err) => {
-//         console.error(err)
-//         this.exitPlanEditMode()
-//       })
-//   }
-
-//   discardTransaction() {
-//     swal({
-//       title: 'Discard transaction?',
-//       text: `Are you sure you want to discard transaction with ID ${this.currentTransaction.id}`,
-//       type: 'warning',
-//       confirmButtonColor: '#DD6B55',
-//       confirmButtonText: 'Yes, discard',
-//       cancelButtonText: 'No',
-//       showCancelButton: true,
-//       closeOnConfirm: true
-//     }, (deleteTransaction) => {
-//       if (deleteTransaction) {
-//         // The user has confir`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/med that the transaction should be deleted
-//         this.$http.delete(`/service/plan-transactions/transaction/${this.currentTransaction.id}`)
-//         .then((result) => {
-//           this.exitPlanEditMode()
-//         })
-//         .catch((err) => {
-//           console.error(err)
-//           this.exitPlanEditMode()
-//         })
-//       }
-//     })
-//   }
-
-//   // Get a list of UUIDs from the server
-//   getUUIDsFromServer() {
-//     const numUUIDsToFetch = 20
-//     this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
-//     .then((result) => {
-//       this.uuidStore = this.uuidStore.concat(result.data)
-//     })
-//     .catch((err) => console.error(err))
-//   }
-
-//   // Get a UUID from the store
-//   getUUID() {
-//     if (this.uuidStore.length < 7) {
-//       // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
-//       this.getUUIDsFromServer()
-//     }
-//     return this.uuidStore.pop()
-//   }
-
-//   $onInit() {
-//     // We should have a map variable at this point
-//     if (!window[this.mapGlobalObjectName]) {
-//       console.error('ERROR: Location Editor component initialized, but a map object is not available at this time.')
-//       return
-//     }
-
-//     this.mapRef = window[this.mapGlobalObjectName]
-//     var self = this
-//     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
-//     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-//       this.handleMapEntitySelected(event)
-//     })
-
-//     // Select the first boundary in the list
-//     this.selectedBoundaryType = this.state.boundaryTypes[0]
-//   }
-
-//   handleMapEntitySelected(event) {
-//     if (!event || !event.latLng) {
-//       return
-//     }
-//     if (!event.equipmentFeatures || event.equipmentFeatures.length === 0) {
-//       // The map was clicked on, but there was no location under the cursor. Create a new one.
-//       this.createMapObject(event, null, true)
-//     } else {
-//       // The map was clicked on, and there was a location under the cursor
-//       var feature = {
-//         objectId: event.equipmentFeatures[0].object_id,
-//         geometry: {
-//           type: 'Point',
-//           coordinates: [event.latLng.lng(), event.latLng.lat()]
-//         },
-//         mapOptions: {
-//           draggable: true,
-//           icon: '/images/map_icons/aro/plan_equipment.png'
-//         },
-//         attributes: new EquipmentProperties()
-//       }
-//       this.createMapObject(event, feature, false)
-
-//       // Stop rendering this location in the tile
-//       this.tileDataService.addFeatureToExclude(feature.objectId)
-//       this.state.requestMapLayerRefresh.next({})
-//     }
-//   }
-
-//   calculateCoverage(editableMapObject) {
-//     // Get the POST body for optimization based on the current application state
-//     var optimizationBody = this.state.getOptimizationBody()
-//     // Replace analysis_type and add a point and radius
-//     optimizationBody.analysis_type = 'COVERAGE'
-//     optimizationBody.point = {
-//       type: 'Point',
-//       coordinates: editableMapObject.feature.geometry.coordinates
-//     }
-//     // Always send radius in meters to the back end
-//     optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
-
-//     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
-//     .then((result) => {
-//       // Format the result so we can use it to create a polygon
-//       var polygonPath = []
-//       result.data.polygon.coordinates[0].forEach((polygonVertex) => {
-//         polygonPath.push({
-//           lat: polygonVertex[1],
-//           lng: polygonVertex[0]
-//         })
-//       })
-//       var boundaryFeature = {
-//         objectId: this.getUUID(),
-//         associatedNetworkNodeId: editableMapObject.feature.objectId,
-//         geometry: result.data.polygon,
-//         mapOptions: {
-//           draggable: false
-//         }
-//       }
-//       var polygonEventHandlers = []
-//       var handlers = {
-//         onCreate: (boundaryMapObject, geometry, event) => {
-//           this.createdEditableObjects.push(boundaryMapObject)
-//           this.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
-//         },
-//         onMouseDown: (editableMapObject, geometry, event) => {
-//           if (geometry.getEditable()) {
-//             // Geometry is already editable. Nothing to do.
-//             return
-//           }
-//           // Remove the editable flag on all created object's geometries
-//           this.createdEditableObjects.forEach((createdEditableObject) => {
-//             if (createdEditableObject.mapGeometry && createdEditableObject.feature.geometry.type === 'Polygon') {
-//               createdEditableObject.mapGeometry.setEditable(false)
-//             }
-//           })
-//           // Make the geometry editable
-//           geometry.setEditable(true)
-//         }
-//       }
-//       var boundaryMapObject = new EditableMapObject(this.mapRef, boundaryFeature, handlers)
-//       var self = this
-//       boundaryMapObject.mapGeometry.getPaths().forEach(function(path, index){
-//         google.maps.event.addListener(path, 'insert_at', function(){
-//           self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-//           self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
-//         });
-//         google.maps.event.addListener(path, 'remove_at', function(){
-//           self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-//           self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
-//         });
-//         google.maps.event.addListener(path, 'set_at', function(){
-//           self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-//           self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
-//         });
-//       });
-//       google.maps.event.addListener(boundaryMapObject.mapGeometry, 'dragend', function(){
-//         self.updatePolygonInFeature(boundaryMapObject.mapGeometry, boundaryMapObject)
-//         self.saveBoundaryToService(boundaryMapObject, editableMapObject.feature.objectId)
-//       });
-//     })
-//     .catch((err) => console.error(err))
-//   }
-
-//   updatePolygonInFeature(polygon, editableMapObject) {
-//     var allPaths = []
-//     polygon.getPaths().forEach((path) => {
-//       var pathPoints = []
-//       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-//       allPaths.push(pathPoints)
-//     })
-//     editableMapObject.feature.geometry = {
-//       type: 'Polygon',
-//       coordinates: allPaths
-//     }
-//   }
-
-//   saveBoundaryToService(editableMapObject, networkEquipmentObjectId) {
-//     // Save the boundary to aro-service
-//     var serviceFeature = {
-//       objectId: editableMapObject.feature.objectId,
-//       geometry: editableMapObject.feature.geometry,
-//       attributes: {
-//         network_node_type: 'dslam',
-//         boundary_type_id: this.selectedBoundaryType.id,
-//         network_node_object_id: networkEquipmentObjectId
-//       }
-//     }
-//     this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
-//   }
-
-//   selectMapObject(newObjectToSelect) {
-//     if (this.selectedMapObject) {
-//       this.selectedMapObject.mapGeometry.setIcon('/images/map_icons/aro/plan_equipment.png')
-//     }
-//     this.selectedMapObject = newObjectToSelect
-//     if (this.selectedMapObject) {
-//       this.selectedMapObject.mapGeometry.setIcon('/images/map_icons/aro/plan_equipment_selected.png')
-//     }
-//     this.$timeout()
-//   }
-
-//   createMapObject(event, feature, calculateCoverage) {
-//     // We are in "Add entity" mode
-//     // We may have a feature sent in. If it is, use the properties of that feature
-//     var equipmentFeature = null
-//     if (feature) {
-//       equipmentFeature = feature
-//       equipmentFeature.mapOptions = {
-//         draggable: true,
-//         icon: '/images/map_icons/aro/plan_equipment.png'
-//       }
-//     } else {
-//       equipmentFeature = {
-//         objectId: this.getUUID(),
-//         geometry: {
-//             type: 'Point',
-//             coordinates: [event.latLng.lng(), event.latLng.lat()]
-//         },
-//         mapOptions: {
-//           draggable: true,
-//           icon: '/images/map_icons/aro/plan_equipment.png'
-//         },
-//         attributes: new EquipmentProperties()
-//       }
-//     }
-//     var handlers = {
-//       onCreate: (editableMapObject) => {
-//         this.createdEditableObjects.push(editableMapObject)
-//         if (calculateCoverage) {
-//           this.calculateCoverage(editableMapObject)
-//         }
-//         this.selectMapObject(editableMapObject)
-//         // Format the object and send it over to aro-service
-//         var serviceFeature = {
-//           objectId: editableMapObject.feature.objectId,
-//           geometry: editableMapObject.feature.geometry,
-//           categoryType: 'dslam',
-//           attributes: {
-//             siteIdentifier: editableMapObject.feature.attributes.siteIdentifier,
-//             siteName: editableMapObject.feature.attributes.siteName,
-//             selectedSiteType: editableMapObject.feature.attributes.selectedSiteType,
-//             deploymentDate: editableMapObject.feature.attributes.deploymentDate,
-//             selectedEquipmentType: editableMapObject.feature.attributes.selectedEquipmentType
-//           }
-//         }
-//         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
-//       },
-//       onMouseDown: (editableMapObject, geometry, event) => {
-//         this.selectMapObject(editableMapObject)
-//       },
-//       onDragEnd: (editableMapObject, geometry, event) => {
-//         // Update the coordinates in the feature
-//         editableMapObject.feature.geometry.coordinates = [event.latLng.lng(), event.latLng.lat()]
-//         // Remove the boundary geometry associated with this map object (if any)
-//         const nodeObjectId = editableMapObject.feature.objectId
-//         var indexToDelete = -1
-//         this.createdEditableObjects.forEach((mapObj, index) => {
-//           if (mapObj.feature.associatedNetworkNodeId === nodeObjectId) {
-//             // Remove this boundary
-//             mapObj.mapGeometry.setMap(null)
-//             indexToDelete = index
-//           }
-//         })
-//         if (indexToDelete >= 0) {
-//           var deletedObject = this.createdEditableObjects.splice(indexToDelete, 1)[0]
-//           this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${deletedObject.feature.objectId}`)
-//         }
-//         this.calculateCoverage(editableMapObject)
-//         this.saveFeatureAttributes(editableMapObject.feature)
-//       }
-//     }
-//     var mapObject = new EditableMapObject(this.mapRef, equipmentFeature, handlers)
-//   }
-
-//   deleteSelectedObject() {
-//     if (!this.selectedMapObject) {
-//       console.error('No object selected on map. deleteSelectedObject() should never have been called!')
-//       return
-//     }
-//     // Format the object and send it over to aro-service
-//     this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${this.selectedMapObject.feature.objectId}`)
-//     // Remove all geometries from map
-//     var mapObjectToDelete = this.selectedMapObject
-//     // Remove the boundary geometry associated with this map object (if any)
-//     const nodeObjectId = mapObjectToDelete.feature.objectId
-//     var indexToDelete = -1
-//     this.createdEditableObjects.forEach((mapObj, index) => {
-//       if (mapObj.feature && mapObj.feature.associatedNetworkNodeId === nodeObjectId) {
-//         // Remove this boundary
-//         mapObj.mapGeometry.setMap(null)
-//         indexToDelete = index
-//       }
-//     })
-//     if (indexToDelete >= 0) {
-//       var deletedObject = this.createdEditableObjects.splice(indexToDelete, 1)[0]
-//       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${deletedObject.feature.objectId}`)
-//     }
-//     // Delete the equipment
-//     this.selectMapObject(null)
-//     mapObjectToDelete.mapGeometry.setMap(null)
-//     mapObjectToDelete.setFeature(null)
-//   }
-
-//   onFeatureAttributeChanged(feature) {
-//     feature.attributes.isDirty = true
-//   }
-
-//   // Saves the attributes of the given feature into aro-service
-//   saveFeatureAttributes(feature) {
-
-//     if (!this.currentTransaction) {
-//       console.error('saveFeatureAttributes() - No current transaction. This should never happen.')
-//       return
-//     } else if (!feature) {
-//       console.error('saveFeatureAttributes() - No feature provided.')
-//       return
-//     }
-
-//     // Format the object and send it over to aro-service
-//     var serviceFeature = {
-//       objectId: feature.objectId,
-//       geometry: feature.geometry,
-//       categoryType: 'dslam',
-//       attributes: {
-//         siteIdentifier: feature.attributes.siteIdentifier,
-//         siteName: feature.attributes.siteName,
-//         selectedSiteType: feature.attributes.selectedSiteType,
-//         deploymentDate: feature.attributes.deploymentDate,
-//         selectedEquipmentType: feature.attributes.selectedEquipmentType
-//       }
-//     }
-//     this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, serviceFeature)
-//       .then(() => feature.attributes.isDirty = false)
-//       .catch((err) => console.error(err))
-//   }
-
-//   removeCreatedMapObjects() {
-//     // Remove created objects from map
-//     this.createdEditableObjects.forEach((editableObject) => {
-//       editableObject.mapGeometry.setMap(null)
-//     })
-//     this.createdEditableObjects = []
-//   }
-
-//   $onDestroy() {
-//     //unsubscribe map click observer
-//     this.mapFeaturesSelectedEventObserver.unsubscribe();
-//     this.removeCreatedMapObjects()
-//   }
-// }
 
 PlanEditorController.$inject = ['$timeout', '$http', 'state', 'configuration']
 
@@ -784,99 +372,5 @@ let planEditor = {
   },
   controller: PlanEditorController
 }
-
-// class EditableMapObject {
-
-//   constructor(map, feature, eventHandlers) {
-//     // Object description
-//     // feature = {
-//     //   objectId: 'xyz',  // Globally unique object ID
-//     //   geometry: {
-//     //     type: 'Point',
-//     //     coordinates: google.maps.LatLng() // Basically whatever we can pass to maps creation
-//     //     draggable: true, //or false
-//     //     icon: 'icon'  // For point geometries
-//     //   },
-//     //   mapOptions: {
-//     //     draggable: true, // or false
-//     //     icon: 'icon' // For point geometries
-//     //  }
-//     // }
-
-//     // Event handlers - optional, specify only the ones you want to subscribe to
-//     // eventHandlers = {
-//     //   onCreate,
-//     //   onDragStart,
-//     //   onDragEnd,
-//     //   onChangeGeometry,
-//     //   onChangeProperty,
-//     //   onMouseDown
-//     // }
-//     this.eventHandlers = eventHandlers
-//     this.setFeature(map, feature)
-
-//     // Raise the onCreate event
-//     this.eventHandlers.onCreate && this.eventHandlers.onCreate(this)
-//   }
-
-//   setFeature(map, feature) {
-//     // Clear any previously created geometries
-//     if (this.mapGeomety) {
-//       this.mapGeometry.setMap(null)
-//     }
-//     this.mapGeometry = {}
-//     this.feature = feature
-//     if (feature) {
-//       this.createMapGeometry(map)
-//     }
-//   }
-
-//   createMapGeometry(map) {
-
-//     // Create the map object
-//     switch(this.feature.geometry.type) {
-//       case 'Point':
-//         this.mapGeometry = new google.maps.Marker({
-//           position: new google.maps.LatLng(this.feature.geometry.coordinates[1], this.feature.geometry.coordinates[0]),
-//           icon: this.feature.mapOptions.icon,
-//           draggable: this.feature.mapOptions.draggable,
-//           map: map,
-//           editableMapObject: this
-//         })
-//       break;
-
-//       case 'Polygon':
-//         var polygonPath = []
-//         this.feature.geometry.coordinates[0].forEach((polygonVertex) => {
-//           polygonPath.push({
-//             lat: polygonVertex[1],
-//             lng: polygonVertex[0]
-//           })
-//         })
-//         this.mapGeometry = new google.maps.Polygon({
-//           paths: polygonPath,
-//           strokeColor: '#FF1493',
-//           strokeOpacity: 0.8,
-//           strokeWeight: 2,
-//           fillColor: '#FF1493',
-//           fillOpacity: 0.4,
-//           clickable: true,
-//           draggable: this.feature.mapOptions.draggable
-//         })
-//         this.mapGeometry.setMap(map)
-
-//       break;
-
-//       default:
-//         throw `createMapObject() does not support geometries with type ${this.feature.geometry.type}`
-//     }
-    
-//     // Subscribe to map object events
-//     this.mapGeometry.addListener('dragstart', (event) => this.eventHandlers.onDragStart && this.eventHandlers.onDragStart(this, this.mapGeometry, event))
-//     this.mapGeometry.addListener('dragend', (event) => this.eventHandlers.onDragEnd && this.eventHandlers.onDragEnd(this, this.mapGeometry, event))
-//     this.mapGeometry.addListener('mousedown', (event) => this.eventHandlers.onMouseDown && this.eventHandlers.onMouseDown(this, this.mapGeometry, event))
-//   }
-// }
-
 
 export default planEditor

@@ -70,7 +70,7 @@ class MapObjectEditorController {
 
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
-    this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteSelectedObject: this.deleteSelectedObject.bind(this)})
+    this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
   }
@@ -193,17 +193,24 @@ class MapObjectEditorController {
         coordinates: [event.latLng.lng(), event.latLng.lat()]
       }
     }
-    if (!event.locations || event.locations.length === 0) {
-      // The map was clicked on, but there was no location under the cursor. Create a new one.
-      feature.objectId = this.getUUID()
-      this.createMapObject(feature, true)
-    } else {
+    var isExistingObject = false
+    if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
-      this.createMapObject(feature, true)
-
-      // Stop rendering this location in the tile
-      this.tileDataService.addFeatureToExclude(objectId)
+      isExistingObject = true
+    } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
+      // The map was clicked on, and there was a location under the cursor
+      feature.objectId = event.equipmentFeatures[0].object_id
+      isExistingObject = true
+    } else {
+      // The map was clicked on, but there was no location under the cursor. Create a new one.
+      feature.objectId = this.getUUID()
+      isExistingObject = false
+    }
+    this.createMapObject(feature, true)
+    if (isExistingObject) {
+      // We have clicked on an existing object. Stop rendering this object in the tile,
+      this.tileDataService.addFeatureToExclude(feature.objectId)
       this.state.requestMapLayerRefresh.next({})
     }
   }
@@ -234,14 +241,12 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
   }
 
-  deleteSelectedObject() {
-    if (this.selectedMapObject) {
-      var mapObjectToDelete = this.selectedMapObject
-      this.selectMapObject(null)
-      mapObjectToDelete.setMap(null)
-      delete this.createdMapObjects[mapObjectToDelete.objectId]
-      this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
-    }
+  deleteObjectWithId(objectId) {
+    this.selectMapObject(null)
+    var mapObjectToDelete = this.createdMapObjects[objectId]
+    mapObjectToDelete.setMap(null)
+    delete this.createdMapObjects[objectId]
+    this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
     this.contextMenuCss.display = 'none'  // Hide the context menu
   }
 
