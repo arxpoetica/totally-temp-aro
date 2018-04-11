@@ -2,6 +2,12 @@
   #dropdownMenu1 {
     border-color:white;
   }
+  .ui-select-choices-style {
+    width: auto!important;
+    max-height: 100px!important;
+    position: relative;
+    margin-bottom: 2px;
+  }
 </style>  
 <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -14,7 +20,7 @@
       <ui-select-match placeholder="Select {{$ctrl.objectName}}...">
         <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour($item), 'margin-right':'5px' }"></span>{{$item.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search">
+      <ui-select-choices class="ui-select-choices-style" repeat="item in $ctrl.searchList | filter: $select.search">
         <div>
           <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
         </div>

@@ -116,6 +116,7 @@ class NetworkPlanModalController {
   }
 
   loadPlans(page, callback) {
+    this.constructSearch()
     clearInterval(this.interval)
     this.currentPage = page || 1
     this.maxResults = 10
@@ -286,6 +287,23 @@ class NetworkPlanModalController {
     })       
     this.searchText = this.searchText.concat(selectedFilters.selectedFilters)
     this.searchList = this.searchList.concat(selectedFilters.selectedFilters)
+  }
+
+  constructSearch() {
+
+    this.search_text = ''
+
+    var selectedFilterPlans = _.filter(this.searchText,(plan) => {
+      if(_.isString(plan)) return plan
+    })
+
+    var selectedFilters = _.map(this.searchText,(tag) => {
+      if(!_.isString(tag)) { 
+        return tag.type +":"+ tag.name 
+      }
+    })
+    if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
+    this.search_text = selectedFilters.join(" ")
   }
 
 }

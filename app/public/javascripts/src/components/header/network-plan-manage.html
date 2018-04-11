@@ -69,14 +69,17 @@
 
   <div class="input-group">
     <div class="form-group has-feedback has-clear">
-      <ui-select tagging tagging-label="false" multiple ng-model="$ctrl.searchText"
+      <ui-select tagging tagging-label="false" tagging-tokens="SPACE|,|/" multiple ng-model="$ctrl.searchText"
         theme="bootstrap" close-on-select="true" on-select="onSelectedItemsChanged()" on-remove="onSelectedItemsChanged()">
         <ui-select-match placeholder="Search for Plan Names">
-          <span class="tag">
+          <span class="tag" ng-if=$item.type>
             {{$item.type}}:<span class="label" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name}}</span>
           </span>
+          <span class="tag" ng-if=!$item.type>
+            {{$item}}
+          </span>
         </ui-select-match>
-        <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search">
+        <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
             <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
           </div>
