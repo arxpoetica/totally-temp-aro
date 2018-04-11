@@ -93,11 +93,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
             var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
             var tileUrl = networkEquipment.tileUrl.replace('{lineTransform}', lineTransform)
             state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
-              var mapLayerKey = `${EXISTING_FIBER_PREFIX}${selectedLibraryItem.identifier}`
-              tileUrl = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
+              var mapLayerKey = `${EXISTING_FIBER_PREFIX}_${networkEquipment.key}_${selectedLibraryItem.identifier}`
+              const tileUrlThisItem = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
               
-              oldMapLayers[networkEquipment.key] = {
-                dataUrls: [tileUrl],
+              oldMapLayers[mapLayerKey] = {
+                dataUrls: [tileUrlThisItem],
                 iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
                 renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
                 strokeStyle: networkEquipment.drawingOptions.strokeStyle,
@@ -106,7 +106,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                 fillStyle: networkEquipment.drawingOptions.fillStyle,
                 showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
               }
-              createdMapLayerKeys.add(networkEquipment.key)
+              createdMapLayerKeys.add(mapLayerKey)
             })
           }
         })
