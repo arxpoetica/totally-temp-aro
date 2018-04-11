@@ -220,7 +220,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
   service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-
+  
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
@@ -450,7 +450,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return Promise.resolve()
     }
   }
-
+  
+  
+  service.selectedCensusBlockId = new Rx.BehaviorSubject()
+  service.reloadSelectedCensusBlockId = (censusBlock) => {
+    service.selectedCensusBlockId.next(censusBlock)
+    service.requestMapLayerRefresh.next({})
+  }
+  
+  
   service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedRoadSegments = (road) => {
     service.selectedRoadSegments.next(road)
@@ -1182,12 +1190,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       },
     }
   }
-
-  service.censusBlockSelectedEvent = new Rx.BehaviorSubject({})
-  $rootScope.$on('map_layer_census_block_click',(e,cbdata) => {
-    service.censusBlockSelectedEvent.next(cbdata)
-    $timeout()
-  })
 
   service.showDirectedCable = false
   service.showSiteBoundary = false
