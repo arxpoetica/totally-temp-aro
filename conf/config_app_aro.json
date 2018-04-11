@@ -10,6 +10,7 @@
   "spend_by_city": false,
   "currency_symbol": "$",
   "from_email_address": "aro-demo@app.altvil.com",
+  "saturation_value_color" : [0.5,0.5],
   "length": {
 		"length_units": "miles",
 		"length_units_to_meters": "1609.34",
