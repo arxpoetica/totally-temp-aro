@@ -15,6 +15,20 @@
   <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="'EDIT_PLAN'">
     <accordion-panel-title title="'Edit Plan'" panel-id="'EDIT_PLAN'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'EDIT_PLAN'">
+
+      <!-- Add a component to handle map editing -->
+      <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+                        object-icon-url="/images/map_icons/aro/plan_equipment.png"
+                        object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
+                        on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick)"
+                        on-modify-object="$ctrl.handleObjectModified(mapObject)"
+                        on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+                        on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
+                        register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
+                        register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
+                        register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
+      </map-object-editor>
+
       <div style="margin: 10px">
         <div class="text-center">
           <div class="btn-group ">
@@ -38,25 +52,25 @@
                 <td>Site Identifier</td>
                 <td>
                   <input class="form-control"
-                         ng-model="$ctrl.selectedMapObject.feature.attributes.siteIdentifier"
-                         ng-change="$ctrl.onFeatureAttributeChanged($ctrl.selectedMapObject.feature)">
+                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteIdentifier"
+                         ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                 </td>
               </tr>
               <tr>
                 <td>Site Name</td>
                 <td>
                   <input class="form-control"
-                         ng-model="$ctrl.selectedMapObject.feature.attributes.siteName"
-                         ng-change="$ctrl.onFeatureAttributeChanged($ctrl.selectedMapObject.feature)">
+                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteName"
+                         ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                 </td>
               </tr>
               <tr>
                 <td>Site Type</td>
                 <td>
                     <select class="form-control"
-                            ng-model="$ctrl.selectedMapObject.feature.attributes.selectedSiteType"
-                            ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.siteTypes"
-                            ng-change="$ctrl.onFeatureAttributeChanged($ctrl.selectedMapObject.feature)">
+                            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteType"
+                            ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteTypes"
+                            ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                     </select>
                 </td>
               </tr>
@@ -64,27 +78,27 @@
                 <td>Deployment Date</td>
                 <td>
                   <input class="form-control"
-                         ng-model="$ctrl.selectedMapObject.feature.attributes.deploymentDate"
-                         ng-change="$ctrl.onFeatureAttributeChanged($ctrl.selectedMapObject.feature)">
+                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].deploymentDate"
+                         ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                 </td>
               </tr>
               <tr>
                 <td>Equipment</td>
                 <td>
                   <select class="form-control"
-                          ng-model="$ctrl.selectedMapObject.feature.attributes.selectedEquipmentType"
-                          ng-options="item as item for item in $ctrl.selectedMapObject.feature.attributes.equipmentTypes"
-                          ng-change="$ctrl.onFeatureAttributeChanged($ctrl.selectedMapObject.feature)">
+                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedEquipmentType"
+                          ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].equipmentTypes"
+                          ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                   </select>
                 </td>
               </tr>
             </tbody>
           </table>
           <button ng-class="{ 'btn btn-sm pull-right': true,
-                              'btn-default': !$ctrl.selectedMapObject.feature.attributes.isDirty,
-                              'btn-primary': $ctrl.selectedMapObject.feature.attributes.isDirty }"
-                  ng-disabled="!$ctrl.selectedMapObject.feature.attributes.isDirty"
-                  ng-click="$ctrl.saveFeatureAttributes($ctrl.selectedMapObject.feature)">
+                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+                  ng-click="$ctrl.saveSelectedEquipmentProperties()">
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
           </button>
           <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
