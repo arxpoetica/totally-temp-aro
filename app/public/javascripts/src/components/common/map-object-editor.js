@@ -149,19 +149,24 @@ class MapObjectEditorController {
     } else if (feature.geometry.type === 'Polygon') {
       mapObject = this.createPolygonMapObject(feature)
       // Set up listeners on the map object
+      mapObject.addListener('click', (event) => {
+        var isEditable = mapObject.getEditable()
+        mapObject.setEditable(!isEditable)
+      })
+      var self = this
       mapObject.getPaths().forEach(function(path, index){
         google.maps.event.addListener(path, 'insert_at', function(){
-          this.onModifyObject && this.onModifyObject({mapObject})
+          self.onModifyObject && self.onModifyObject({mapObject})
         });
         google.maps.event.addListener(path, 'remove_at', function(){
-          this.onModifyObject && this.onModifyObject({mapObject})
+          self.onModifyObject && self.onModifyObject({mapObject})
         });
         google.maps.event.addListener(path, 'set_at', function(){
-          this.onModifyObject && this.onModifyObject({mapObject})
+          self.onModifyObject && self.onModifyObject({mapObject})
         });
       });
       google.maps.event.addListener(mapObject, 'dragend', function(){
-        this.onModifyObject && this.onModifyObject({mapObject})
+        self.onModifyObject && self.onModifyObject({mapObject})
       });
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
@@ -204,7 +209,7 @@ class MapObjectEditorController {
   }
 
   selectMapObject(mapObject) {
-    if (!mapObject.icon) {
+    if (mapObject && !mapObject.icon) {
       // This is a polygon. Don't select
       return
     }
