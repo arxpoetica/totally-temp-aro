@@ -450,7 +450,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return Promise.resolve()
     }
   }
-
+  
+  
+  service.selectedCensusBlockId = new Rx.BehaviorSubject()
+  service.reloadSelectedCensusBlockId = (censusBlock) => {
+    service.selectedCensusBlockId.next(censusBlock)
+    service.requestMapLayerRefresh.next({})
+  }
+  
+  
   service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedRoadSegments = (road) => {
     service.selectedRoadSegments.next(road)

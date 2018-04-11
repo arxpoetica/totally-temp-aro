@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -20,7 +20,7 @@ class MapTileRenderer {
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
-    this.selectedCensusBlocks = new Set()
+    this.selectedCensusBlockId = selectedCensusBlockId
     this.displayModes = displayModes
     this.renderBatches = []
     this.isRendering = false
@@ -30,7 +30,9 @@ class MapTileRenderer {
     // be such that the largest rendered feature (or heatmap) does not get clipped.
     this.drawMargins = 10
   }
-
+  
+  // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
+  
   // Sets the global tile options
   setMapTileOptions(mapTileOptions) {
     this.mapTileOptions = mapTileOptions
@@ -45,10 +47,16 @@ class MapTileRenderer {
 
   // Sets the selected service area ids
   setselectedServiceAreas(selectedServiceAreas) {
-    this.selectedServiceAreas = selectedServiceAreas
+	this.selectedServiceAreas = selectedServiceAreas
     this.tileDataService.markHtmlCacheDirty()
   }
-
+  
+  //Sets the selected Census Block ids
+  setSelectedCensusBlockId(selectedCensusBlockId) {
+    this.selectedCensusBlockId = selectedCensusBlockId
+    this.tileDataService.markHtmlCacheDirty()
+  }
+  
   // Sets the selected Road Segment ids
   setSelectedRoadSegment(selectedRoadSegment) {
     this.selectedRoadSegment = selectedRoadSegment
@@ -379,63 +387,61 @@ class MapTileRenderer {
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
       geometry.forEach((shape) => {
         // Shape is an array of coordinates
-        switch(shape.length) {
-          case 1:
-            // This is a point
-            var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
-            var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
+        if (1 == shape.length) {
+	      // This is a point
+	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
+	      var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
+	
+	      //Draw the location icons with its original color
+	      ctx.globalCompositeOperation = 'source-over'
+	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
+	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
+	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
+	          //show selected location icon at analysis mode -> selection type is locations    
+	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
+	          // Draw selected icon
+	          ctx.drawImage(selectedLocationImage[0], x, y)
+	        } else {
+	          ctx.drawImage(entityImage, x, y)
+	        }
+	      } else {
+	        // Display heatmap
+	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+	        if (aggregationProperty) {
+	          var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
+	          heatMapData.push([x, y, adjustedWeight])
+	        }
+	      }  
+        }else{
+          // Check if this is a closed polygon
+          var firstPoint = shape[0]
+          var lastPoint = shape[shape.length - 1]
+          var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
 
-            //Draw the location icons with its original color
-            ctx.globalCompositeOperation = 'source-over'
-            if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
-              // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
-              if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
-                //show selected location icon at analysis mode -> selection type is locations    
-                  && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
-                // Draw selected icon
-                ctx.drawImage(selectedLocationImage[0], x, y)
-              } else {
-                ctx.drawImage(entityImage, x, y)
+          if (isClosedPolygon) {
+            // First draw a filled polygon with the fill color
+            this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
+            ctx.globalAlpha = 1.0
+          } else {
+            // This is not a closed polygon. Render lines only
+            ctx.globalAlpha = 1.0
+            if (this.selectedRoadSegment.size > 0 && 
+              [...this.selectedRoadSegment].filter(function (road) {
+                 return road.gid === feature.properties.gid
+              }).length > 0) {
+              //Highlight the selected Selected RoadSegments
+              var drawingStyles = {
+                lineWidth: mapLayer.highlightStyle.lineWidth,
+                strokeStyle: mapLayer.highlightStyle.strokeStyle
               }
+              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false)
             } else {
-              // Display heatmap
-              var aggregationProperty = feature.properties.entity_count || feature.properties.weight
-              if (aggregationProperty) {
-                var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
-                heatMapData.push([x, y, adjustedWeight])
-              }
+              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, false)
             }
-            break;
-
-          default:
-            // Check if this is a closed polygon
-            var firstPoint = shape[0]
-            var lastPoint = shape[shape.length - 1]
-            var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
-
-            if (isClosedPolygon) {
-              // First draw a filled polygon with the fill color
-              this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
-              ctx.globalAlpha = 1.0
-            } else {
-              // This is not a closed polygon. Render lines only
-              ctx.globalAlpha = 1.0
-              if (this.selectedRoadSegment.size > 0 && 
-                [...this.selectedRoadSegment].filter(function (road) {
-                   return road.gid === feature.properties.gid
-                }).length > 0) {
-                //Highlight the selected Selected RoadSegments
-                var drawingStyles = {
-                  lineWidth: mapLayer.highlightStyle.lineWidth,
-                  strokeStyle: mapLayer.highlightStyle.strokeStyle
-                }
-                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false)
-              } else {
-                this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, false)
-              }
-            }
-            break;
+          }
+            
         }
+        
       })
     }
   }
@@ -559,16 +565,25 @@ class MapTileRenderer {
 
   // Renders a polygon feature onto the canvas
   renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer) {
-
+    
     // Get the drawing styles for rendering the polygon
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
-
-    //Highlight the selected SA
-    if(  this.selectedCensusBlocks.has(feature.properties.id)
-         || (this.selectedServiceAreas.has(feature.properties.id)
-             && this.selectedDisplayMode == this.displayModes.ANALYSIS 
-             && this.analysisSelectionMode == "SELECTED_AREAS") 
-      ){
+    
+    // ToDo: should this go into getDrawingStylesForPolygon?
+    // ToDo: use an object merge of mapLayer.highlightStyle instead having to know which attributes are implemented
+    // ToDo: need to ensure feature type 
+    //    a non-selected service area could have the same id as the selected census block
+    if (this.selectedCensusBlockId == feature.properties.id){
+    	  // Hilight selected census block
+    	  //drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      //drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
+      //drawingStyles.opacity = mapLayer.highlightStyle.opacity
+    	  drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
+    	  //ctx.globalCompositeOperation = 'multiply'
+    }else if(  this.selectedServiceAreas.has(feature.properties.id)
+         && this.selectedDisplayMode == this.displayModes.ANALYSIS 
+         && this.analysisSelectionMode == "SELECTED_AREAS") {
+    	  //Highlight the selected SA
     	  //highlight if analysis mode -> selection type is service areas 
     	  drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
@@ -913,104 +928,102 @@ class TileComponentController {
       .subscribe((pairs) => this.handleMapEvents(pairs[0], pairs[1], null))
 
     // Subscribe to changes in the plan (for setting center and zoom)
-    state.plan
-      .subscribe((plan) => {
-        // Set default coordinates in case we dont have a valid plan
-        var coordinates = state.defaultPlanCoordinates
-        if (plan) {
-          coordinates = {
-            zoom: plan.zoomIndex,
-            latitude: plan.latitude,
-            longitude: plan.longitude
-          }
+    state.plan.subscribe((plan) => {
+      // Set default coordinates in case we dont have a valid plan
+      var coordinates = state.defaultPlanCoordinates
+      if (plan) {
+        coordinates = {
+          zoom: plan.zoomIndex,
+          latitude: plan.latitude,
+          longitude: plan.longitude
         }
+      }
 
-        if (plan) {
-          this.areControlsEnabled = (plan.planState === 'START_STATE') || (plan.planState === 'INITIALIZED')
-        }
-      })
+      if (plan) {
+        this.areControlsEnabled = (plan.planState === 'START_STATE') || (plan.planState === 'INITIALIZED')
+      }
+    })
 
     // Subscribe to changes in the map tile options
-    state.mapTileOptions
-      .subscribe((mapTileOptions) => {
-        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
-        }
-      })
+    state.mapTileOptions.subscribe((mapTileOptions) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setMapTileOptions(mapTileOptions)
+      }
+    })
 
     // Redraw map tiles when requestd
-    state.requestMapLayerRefresh
-      .subscribe((newValue) => {
-        this.tileDataService.markHtmlCacheDirty()
-        this.refreshMapTiles()
-      })
-
+    state.requestMapLayerRefresh.subscribe((newValue) => {
+      this.tileDataService.markHtmlCacheDirty()
+      this.refreshMapTiles()
+    })
+    
+    // ToDo: It would seem the repeat code below could be generalized 
+    
     // If selected location ids change, set that in the tile data service
-    state.selectedLocations
-      .subscribe((selectedLocations) => {
-        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedLocations(selectedLocations)
-        }
-      })
+    state.selectedLocations.subscribe((selectedLocations) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedLocations(selectedLocations)
+      }
+    })
 
     // If selected service_area ids change, set that in the tile data service
-    state.selectedServiceAreas
-    .subscribe((selectedServiceAreas) => {
+    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
       }
     })
-
+    
+    // If selected census block ids change, set that in the tile data road
+    state.selectedCensusBlockId.subscribe((selectedCensusBlockId) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedCensusBlockId(selectedCensusBlockId)
+      }
+    })
+    
     // If selected road_segment ids change, set that in the tile data road
-    state.selectedRoadSegments
-    .subscribe((selectedRoadSegment) => {
+    state.selectedRoadSegments.subscribe((selectedRoadSegment) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedRoadSegment(selectedRoadSegment)
       }
     })
 
     // If Display Mode change, set that in the tile data
-    state.selectedDisplayMode
-      .subscribe((selectedDisplayMode) => {
-        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
-        }
-      })
+    state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
+      }
+    })
 
     // If analysis selection Type change, set that in the tile data
-    state.selectionTypeChanged
-      .subscribe((analysisSelectionMode) => {
-        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-          this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(analysisSelectionMode)
-        }
-      })
+    state.selectionTypeChanged.subscribe((analysisSelectionMode) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(analysisSelectionMode)
+      }
+    })
 
     // Set the map zoom level
-    state.requestSetMapZoom
-      .subscribe((zoom) => {
-        if (this.mapRef) {
-          this.mapRef.setZoom(zoom)
-        }
-      })
+    state.requestSetMapZoom.subscribe((zoom) => {
+      if (this.mapRef) {
+        this.mapRef.setZoom(zoom)
+      }
+    })
 
     // To change the center of the map to given LatLng 
-    state.requestSetMapCenter
-      .subscribe((mapCenter) => {
-        if (this.mapRef) {
-          this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
-        }
-      })
+    state.requestSetMapCenter.subscribe((mapCenter) => {
+      if (this.mapRef) {
+        this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
+      }
+    })
     
     // Force a re-creation of all map tiles
-    state.requestRecreateTiles
-      .subscribe((newValue) => {
-        if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-          // First clear our HTML cache. Tiles where the rendering is in progress will keep rendering to the old tiles.
-          tileDataService.deleteHtmlCache()
-          // Then re-set the overlayMapTypes, this will call getTile() on all visible tiles
-          this.mapRef.overlayMapTypes.setAt(this.OVERLAY_MAP_INDEX, this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX))
-        }
-      })
+    state.requestRecreateTiles.subscribe((newValue) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        // First clear our HTML cache. Tiles where the rendering is in progress will keep rendering to the old tiles.
+        tileDataService.deleteHtmlCache()
+        // Then re-set the overlayMapTypes, this will call getTile() on all visible tiles
+        this.mapRef.overlayMapTypes.setAt(this.OVERLAY_MAP_INDEX, this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX))
+      }
+    })
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
@@ -1097,6 +1110,7 @@ class TileComponentController {
                                                            this.state.mapTileOptions.getValue(),
                                                            this.state.selectedLocations.getValue(),
                                                            this.state.selectedServiceAreas.getValue(),
+                                                           this.state.selectedCensusBlockId.getValue(),
                                                            this.state.selectedRoadSegments.getValue(),
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
@@ -1120,7 +1134,6 @@ class TileComponentController {
 
         var hitPromises = []
         this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        	  console.log(mapOverlay)
         	  hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
         })
         Promise.all(hitPromises)
@@ -1144,8 +1157,8 @@ class TileComponentController {
             }
 
             results[0].forEach((result) => {
-            	  console.log('result')
-        	      console.log(result)
+            	  //console.log('result')
+        	      //console.log(result)
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
@@ -1156,6 +1169,8 @@ class TileComponentController {
                 roadSegments.add(result)
               } else if (result.id && result.hasOwnProperty('tags')) {
             	    censusFeatures.push(result)
+            	    //console.log(this)
+            	    //this.selectedCensusBlockId = result.id
               } else if (result.id) {
                 equipmentFeatures = equipmentFeatures.concat(result)
               }

@@ -203,9 +203,7 @@ class BoundariesController {
 	  opacity: 0.7,
 	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
 	  highlightStyle: {
-	    strokeStyle: '#000000',
-	    fillStyle: 'blue',
-	    opacity: 0.3
+	    lineWidth: 8
 	  }
 	}
 	

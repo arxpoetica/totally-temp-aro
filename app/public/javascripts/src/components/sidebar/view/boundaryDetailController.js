@@ -11,11 +11,10 @@ class BoundaryDetailController {
     		  || !event.censusFeatures[0].hasOwnProperty('id') ) return
     	  
     	  let censusBlockId = event.censusFeatures[0].id
-      
-      this.getCensusBlockInfo(censusBlockId)
-        .then((cbInfo) => {
-          this.selectedBoundaryInfo = cbInfo
-        })
+      this.state.reloadSelectedCensusBlockId(censusBlockId)
+      this.getCensusBlockInfo(censusBlockId).then((cbInfo) => {
+        this.selectedBoundaryInfo = cbInfo
+      })
     })
   }
 
