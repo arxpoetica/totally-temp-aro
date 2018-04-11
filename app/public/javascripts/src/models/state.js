@@ -221,16 +221,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
   service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
   
-  service.mapFeaturesSelectedEvent.subscribe((event) => {
-    console.log(event)
-    // ToDo: Corr isn't sure if this is where this should go
-    if (event.hasOwnProperty('censusFeatures') && event.censusFeatures.length > 0){
-      //$rootScope.$broadcast('map_layer_census_block_click', event.censusFeatures[0])
-      service.censusBlockSelectedEvent.next(event.censusFeatures[0])
-      //$timeout()
-    }
-  })
-  
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
@@ -1192,14 +1182,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       },
     }
   }
-  
-  service.censusBlockSelectedEvent = new Rx.BehaviorSubject({})
-  
-  // ToDo: Corr doesn't think this is necessary anymore but isn't sure. Parag?
-  $rootScope.$on('map_layer_census_block_click',(e,cbdata) => {
-    service.censusBlockSelectedEvent.next(cbdata)
-    $timeout()
-  })
 
   service.showDirectedCable = false
   service.showSiteBoundary = false

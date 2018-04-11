@@ -15,11 +15,12 @@ class MapTileRenderer {
     this.mapLayers = mapLayers
     this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
-    this.selectedLocations = selectedLocations
-    this.selectedServiceAreas = selectedServiceAreas
+    this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
+    this.selectedServiceAreas = selectedServiceAreas 
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
+    this.selectedCensusBlocks = new Set()
     this.displayModes = displayModes
     this.renderBatches = []
     this.isRendering = false
@@ -563,10 +564,13 @@ class MapTileRenderer {
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
 
     //Highlight the selected SA
-    if(this.selectedServiceAreas.has(feature.properties.id)
-      //highlight if analysis mode -> selection type is service areas 
-      && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_AREAS") {
-      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+    if(  this.selectedCensusBlocks.has(feature.properties.id)
+         || (this.selectedServiceAreas.has(feature.properties.id)
+             && this.selectedDisplayMode == this.displayModes.ANALYSIS 
+             && this.analysisSelectionMode == "SELECTED_AREAS") 
+      ){
+    	  //highlight if analysis mode -> selection type is service areas 
+    	  drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       ctx.globalCompositeOperation = 'multiply'
@@ -819,7 +823,7 @@ class MapTileRenderer {
     var shouldFeatureBeSelected = (feature, icon) => {
       //console.log('test feature')
       //console.log(feature)
-    	  var selectFeature = false
+      var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
       var geometry = feature.loadGeometry()
@@ -842,7 +846,7 @@ class MapTileRenderer {
       }
 
       //Load the selected service area 
-      //if(feature.properties.code) { // HACK by Corr, change this back
+      //if(feature.properties.code) { // ToDo: use featureType when implimented 
     	  if(feature.properties.id) {
         feature.loadGeometry().forEach(function (areaGeom) {
           var areaPolyCoordinates = []
@@ -1050,7 +1054,7 @@ class TileComponentController {
             })
           }
         }
-        Promise.all(pointInPolyPromises) // ToDo: is this repeat code from $document.ready ?
+        Promise.all(pointInPolyPromises) 
           .then((results) => {
             var selectedLocations = new Set()
             var selectedServiceAreas = new Set()
@@ -1116,6 +1120,7 @@ class TileComponentController {
 
         var hitPromises = []
         this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+        	  console.log(mapOverlay)
         	  hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
         })
         Promise.all(hitPromises)
@@ -1141,7 +1146,7 @@ class TileComponentController {
             results[0].forEach((result) => {
             	  console.log('result')
         	      console.log(result)
-            	  // ToDo: need a better way to differentiate feature types. An explicit way, also we can then generalize these feature arrays
+            	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)

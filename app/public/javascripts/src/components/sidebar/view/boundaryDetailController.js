@@ -5,18 +5,14 @@ class BoundaryDetailController {
     this.state = state
     this.selectedBoundaryInfo = null
 
-    state.censusBlockSelectedEvent.subscribe((cbdata) => {
-
-      if (_.isEmpty(cbdata)) return
-      let cbId 
-      if (cbdata.hasOwnProperty('id')){
-    	    cbId = cbdata.id
-      }else if(cbdata.hasOwnProperty('getProperty')){ // this may not be necessary anymore
-    	    cbId = cbdata.getProperty('id')
-      }else{
-    	    return
-      }
-      this.getCensusBlockInfo(cbId)
+    state.mapFeaturesSelectedEvent.subscribe((event) => {
+      if ( !event.hasOwnProperty('censusFeatures') 
+    		  || event.censusFeatures.length <= 0 
+    		  || !event.censusFeatures[0].hasOwnProperty('id') ) return
+    	  
+    	  let censusBlockId = event.censusFeatures[0].id
+      
+      this.getCensusBlockInfo(censusBlockId)
         .then((cbInfo) => {
           this.selectedBoundaryInfo = cbInfo
         })
