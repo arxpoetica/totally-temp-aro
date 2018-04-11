@@ -273,20 +273,24 @@ class NetworkPlanModalController {
   }
 
   applyTagSearchFilter(selectedFilters) {
-    _.map(selectedFilters.selectedFilters, (tag) => { 
+    var filters = _.map(selectedFilters.selectedFilters, (tag) => { 
       tag.type = 'tag'
       return tag
-    })       
-    this.searchText = this.searchText.concat(selectedFilters.selectedFilters)
-    this.searchList = this.searchList.concat(selectedFilters.selectedFilters)
+    }) 
+    this.applySearch(filters)
   }
   applyOwnerSearchFilter(selectedFilters) {
-    _.map(selectedFilters.selectedFilters, (tag) => { 
+    var filters = _.map(selectedFilters.selectedFilters, (tag) => { 
       tag.type = 'owner'
       return tag
-    })       
-    this.searchText = this.searchText.concat(selectedFilters.selectedFilters)
-    this.searchList = this.searchList.concat(selectedFilters.selectedFilters)
+    })
+    this.applySearch(filters)
+  }
+
+  applySearch(filters) {
+    this.searchText = _.uniq(this.searchText.concat(filters))
+    this.searchList = _.uniq(this.searchList.concat(filters))
+    this.loadPlans()
   }
 
   constructSearch() {
