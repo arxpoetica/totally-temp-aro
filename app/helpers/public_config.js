@@ -5,6 +5,7 @@ var public_config = _.pick(config,
   'route_planning',
   'ui',
   'currency_symbol',
+  'hsv_defaults',
   'client_carrier_name',
   'length',
   'displayable_client_carrier_name')

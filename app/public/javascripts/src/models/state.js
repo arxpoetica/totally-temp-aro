@@ -1216,7 +1216,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.loadListOfPlanTags()
 
   service.getTagColour = (tag) => {
-    return hsvToRgb(tag.colourHue,1,1)
+    return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
   } 
 
   return service
