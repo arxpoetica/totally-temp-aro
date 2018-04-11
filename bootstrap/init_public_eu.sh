@@ -26,7 +26,7 @@ exec 3>&1 1>>${ETL_LOG_FILE} 2> >(tee /dev/fd/3)  # I think it works, though psq
 source ${DIR}/../db/lib/lookup_codes.sh
 
 if [ -z "$STATE_CODES" ]; then
-  export STATE_CODES='ak,al,ar,az,ca,co,ct,de,dc,fl,ga,hi,ia,id,il,in,ks,ky,la,ma,md,me,mi,mn,mo,ms,mt,nc,nd,ne,nh,nj,nm,nv,ny,oh,ok,or,pa,ri,sc,sd,tn,tx,ut,va,vt,wa,wi,wv,wy'
+  export STATE_CODES='ir,de,uk,cz,hu,po,sv'
 fi
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) # gets directory the script is running from
@@ -37,17 +37,18 @@ cd $DIR/../db
 
 make reset_schema
 psql -c "CREATE EXTENSION IF NOT EXISTS hstore;" # this is also a hack. for some reason resetting the schema drops this extension.
+psql -c "CREATE EXTENSION IF NOT EXISTS unaccent;" # this is also a hack. for some reason resetting the schema drops this extension.
 psql -c "CREATE EXTENSION IF NOT EXISTS "\"uuid-ossp\"";" # this is also a hack. for some reason resetting the schema drops this extension.
 make load_schema
 
-make reset_stage_reference
-make stage_reference
+make reset_eu_stage_public
+make load_eu_stage_public
 
 make reset_view
 make load_view
 
-make reset_public
-make load_public
+make reset_eu_public
+make load_eu_public
 
 make refresh_materialized_view
 
