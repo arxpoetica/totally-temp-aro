@@ -19,7 +19,9 @@ class NetworkPlanModalController {
 
     this.interval  = null
     this.search
-    this.search_text = ""
+    this.search_text = ''
+    this.searchText = []
+    this.searchList = []
 
     this.sortField
     this.descending
@@ -114,6 +116,7 @@ class NetworkPlanModalController {
   }
 
   loadPlans(page, callback) {
+    this.constructSearch()
     clearInterval(this.interval)
     this.currentPage = page || 1
     this.maxResults = 10
@@ -267,6 +270,44 @@ class NetworkPlanModalController {
 
   getTagCategories(currentPlanTags) {
     return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  }
+
+  applyTagSearchFilter(selectedFilters) {
+    var filters = _.map(selectedFilters.selectedFilters, (tag) => { 
+      tag.type = 'tag'
+      return tag
+    }) 
+    this.applySearch(filters)
+  }
+  applyOwnerSearchFilter(selectedFilters) {
+    var filters = _.map(selectedFilters.selectedFilters, (tag) => { 
+      tag.type = 'owner'
+      return tag
+    })
+    this.applySearch(filters)
+  }
+
+  applySearch(filters) {
+    this.searchText = _.uniq(this.searchText.concat(filters))
+    this.searchList = _.uniq(this.searchList.concat(filters))
+    this.loadPlans()
+  }
+
+  constructSearch() {
+
+    this.search_text = ''
+
+    var selectedFilterPlans = _.filter(this.searchText,(plan) => {
+      if(_.isString(plan)) return plan
+    })
+
+    var selectedFilters = _.map(this.searchText,(tag) => {
+      if(!_.isString(tag)) { 
+        return tag.type +":"+ tag.name 
+      }
+    })
+    if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
+    this.search_text = selectedFilters.join(" ")
   }
 
 }

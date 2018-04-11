@@ -33,8 +33,10 @@
     font-size: 14px;
     margin-left: 5px;
   }
-  .btn-default {
-    border-color:white;
+  .form-control-clear {
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer;
   }
 </style>    
 <div class="plan-info-container">
@@ -53,19 +55,53 @@
       name="ctype-name" disabled> Refresh Plans on map move
   </div>
 
+  <!-- <div class="input-group">
+    <div class="form-group has-feedback has-clear">
+      <input type="text" class="form-control" placeholder="Search for Plan Names"
+        ng-model="$ctrl.search_text" ng-model-options="{ debounce: 1000 }">
+      <span class="form-control-clear glyphicon glyphicon-remove form-control-feedback"
+        ng-click="$ctrl.search_text = ''"></span>
+    </div>
+    <span class="input-group-addon" ng-click="$ctrl.loadPlans()" style="cursor:pointer">
+      <span class="glyphicon glyphicon-search"></span>
+    </span>
+  </div> -->
+
   <div class="input-group">
-    <input type="text" class="form-control" placeholder="Search for Plan Names" 
-      ng-model="$ctrl.search_text" ng-model-options="{ debounce: 1000 }">
+    <div class="form-group has-feedback has-clear">
+      <ui-select tagging tagging-label="false" tagging-tokens="SPACE|,|/" multiple ng-model="$ctrl.searchText"
+        theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
+        <ui-select-match placeholder="Search for Plan Names">
+          <span class="tag" ng-if=$item.type>
+            {{$item.type}}:<span class="label" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name}}</span>
+          </span>
+          <span class="tag" ng-if=!$item.type>
+            {{$item}}
+          </span>
+        </ui-select-match>
+        <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
+          <div>
+            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
+          </div>
+        </ui-select-choices>
+      </ui-select>
+    </div>
     <span class="input-group-addon" ng-click="$ctrl.loadPlans()" style="cursor:pointer">
       <span class="glyphicon glyphicon-search"></span>
     </span>
   </div>
 
   <div class="indent-1 plan-info">
-    <span style="align-self:center">Filter by:</span> 
-    <button class = "btn btn-sm btn-default">Tag</button>
-    <button class = "btn btn-sm btn-default">Owner</button>
-    <button class = "btn btn-sm btn-default">Location</button>
+    <span style="align-self:center">Filter by:</span>
+    <search-plan-filter 
+      object-name="Tag"
+      search-list="$ctrl.state.listOfTags"
+      apply-search="$ctrl.applyTagSearchFilter({selectedFilters:selectedFilters})">
+    </search-plan-filter>
+    <search-plan-filter object-name="Owner"
+    search-list="$ctrl.state.listOfTags"
+    apply-search="$ctrl.applyOwnerSearchFilter({selectedFilters:selectedFilters})"></search-plan-filter>
+    <search-plan-filter object-name="Location"></search-plan-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
