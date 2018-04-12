@@ -1,0 +1,46 @@
+<style scoped>
+.plan-details-container {
+  position: relative;
+  height: 99%;
+  margin-top: 1%;
+}
+.plan-actions {
+  display: flex;
+  flex-direction: row;
+}
+.plan-actions button {
+  margin-left: 1px;
+  margin-right: 1px;
+  flex: 1
+}
+.info {
+  width: -webkit-fill-available;
+  margin: 2px;
+}
+</style>
+<div class="plan-details-container">
+
+  <div class="plan-actions">
+    <button class="btn btn-primary" ng-if="!$ctrl.isEditMode" ng-click="$ctrl.editCurrentPlan()">Edit Plan Details</button>
+    <button class="btn btn-primary" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatedtoPlan()">Lock Changes</button>
+    <button class="btn btn-danger" ng-click="$ctrl.deleteCurrentPlan()">Delete Plan</button>
+  </div>
+
+  <div class="container info">
+    <div class="row">
+      <div class="col-sm-6">Plan Name</div>
+      <div class="col-sm-6">{{$ctrl.currentPlanInfo.name}}</div>
+    </div> 
+    
+    <div class="row">
+      <div class="col-sm-6">Owner</div>
+      <div class="col-sm-6">{{$ctrl.currentUser.first_name}} {{$ctrl.currentUser.last_name}}</div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">Tags</div>
+      <div class="col-sm-6">{{$ctrl.currentUser.name}}</div>
+    </div>
+  </div> 
+
+</div>  
