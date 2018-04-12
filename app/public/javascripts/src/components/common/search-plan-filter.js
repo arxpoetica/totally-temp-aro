@@ -6,6 +6,15 @@ class SearchPlanFilterController {
       this.$timeout = $timeout
       this.state = state
       this.selectedItems = []
+
+      var filterDropdown = this.$element.find('.filter-dropdown')
+
+      filterDropdown.on('click', (event) => {
+        const isDropdownHidden = filterDropdown.is(':hidden')
+        if(!isDropdownHidden && event.target.id !== 'apply-filter') {
+          event.stopPropagation()
+        }
+      })
     }
   }
   

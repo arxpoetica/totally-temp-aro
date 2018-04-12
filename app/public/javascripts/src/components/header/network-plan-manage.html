@@ -38,6 +38,10 @@
     pointer-events: auto;
     cursor: pointer;
   }
+  #ui-select-search {
+    width: auto!important;
+    max-height: 150px!important;
+  }
 </style>    
 <div class="plan-info-container">
 
@@ -50,6 +54,11 @@
       ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">Recent Plans</button>
   </div>  
 
+  <plan-info ng-show="$ctrl.currentView == $ctrl.views.Plan_Info"
+    current-user="$ctrl.user"></plan-info>
+  <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
+
+  <div ng-if="$ctrl.currentView == $ctrl.views.Search_plans">
   <div class="indent-1">
     <input type="checkbox" class="checkboxfill" 
       name="ctype-name" disabled> Refresh Plans on map move
@@ -79,7 +88,7 @@
             {{$item}}
           </span>
         </ui-select-match>
-        <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
+        <ui-select-choices class="ui-select-search" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
             <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
           </div>
@@ -148,5 +157,6 @@
         </li>
       </ul>
     </nav>
+  </div>
   </div>
 </div>
