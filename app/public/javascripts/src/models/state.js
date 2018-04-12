@@ -230,6 +230,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     areaLayers: []
   }
   
+  // doesn't change so only needs to be loaded once 
+  //    if that changes use a Rx.BehaviorSubject instead 
   service.censusCategories = {}
   
   // The display modes for the application
@@ -1196,7 +1198,20 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showSiteBoundary = false
   service.boundaryTypes = []
   service.selectedBoundaryType = {}
-
+  
+  var loadCensusCatData = function () {
+    return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
+    .then((result) => {
+      console.log(result)
+      service.censusCategories = {}
+      result.data.forEach( (cat) => {
+        service.censusCategories[ cat.id+'' ] = cat
+      })
+      console.log(service.censusCategories)
+    })  
+  }
+  loadCensusCatData()
+  
   var loadBoundaryLayers = function () {
     return $http.get(`/service/boundary_type`)
     .then((result) => {

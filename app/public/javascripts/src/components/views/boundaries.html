@@ -16,6 +16,13 @@
             <label>
               <!-- Service Areas -->
               {{layer.name}}
+              
+              <div ng-if="'Census Blocks' == layer.name">
+                <div ng-repeat="cat in $ctrl.state.censusCategories">
+                  {{cat.description}}
+                </div>
+              </div>
+              
             </label>
           </div>
         </div>

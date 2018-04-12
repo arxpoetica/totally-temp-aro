@@ -71,15 +71,11 @@ app.service('tileDataService', ['$http', ($http) => {
             var layer = mapboxVectorTile.layers[layerKey]
             var features = []
             for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-            	  //console.log( layer.feature(iFeature) )
             	  let feature = layer.feature(iFeature)
             	  //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
             	  if ('v1.tiles.census_block.select' == layerKey){
-            		  //console.log(layer.feature(iFeature).)
-            		  //layer.feature(iFeature) = formatCensusBlockData( layer.feature(iFeature) )
             		  formatCensusBlockData( feature )
             	  }
-            	  
               features.push(feature)
             }
             layerToFeatures[layerKey] = features
@@ -99,12 +95,15 @@ app.service('tileDataService', ['$http', ($http) => {
   }
   
   var formatCensusBlockData = function(cBlock){
-    cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side 
-    	let kvPairs = cBlock.properties.tags.split(';')
+	let sepA = ';'
+	let sepB = ':'
+    cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
+    	let kvPairs = cBlock.properties.tags.split( sepA )
     	cBlock.properties.tags = {}
     	kvPairs.forEach((pair) => {
-    	  let kv = pair.split(':')
-    	  if ("" != kv[0]) cBlock.properties.tags[ kv[0]+"" ] = kv[1]
+    	  let kv = pair.split( sepB )
+    	  // incase there are extra ':'s in the value we join all but the first together 
+    	  if ("" != kv[0]) cBlock.properties.tags[ kv[0]+"" ] = kv.slice(1).join( sepB )
     	}) 
     //console.log(cBlock.properties.tags)
     //return cBlock 
