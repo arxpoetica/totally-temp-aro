@@ -573,11 +573,12 @@ class MapTileRenderer {
     // ToDo: use an object merge of mapLayer.highlightStyle instead having to know which attributes are implemented
     // ToDo: need to ensure feature type 
     //    a non-selected service area could have the same id as the selected census block
-    if (this.selectedCensusBlockId == feature.properties.id){
+    if (this.selectedCensusBlockId == feature.properties.id && feature.properties.hasOwnProperty('tags') ){
     	  // Hilight selected census block
     	  //drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       //drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       //drawingStyles.opacity = mapLayer.highlightStyle.opacity
+    	  console.log(feature)
     	  drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     	  //ctx.globalCompositeOperation = 'multiply'
     }else if(  this.selectedServiceAreas.has(feature.properties.id)

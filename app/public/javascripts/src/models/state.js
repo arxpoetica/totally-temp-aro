@@ -229,7 +229,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     tileLayers: [],
     areaLayers: []
   }
-
+  
+  service.censusCategories = {}
+  
   // The display modes for the application
   service.displayModes = Object.freeze({
     VIEW: 'VIEW',
@@ -522,8 +524,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.networkAnalysisType = service.networkAnalysisTypes[0]
 
     //Upload Data Sources
-    service.uploadDataSources = [
-    ]
+    service.uploadDataSources = []
     service.uploadDataSource
     service.dataItems = {}
 
