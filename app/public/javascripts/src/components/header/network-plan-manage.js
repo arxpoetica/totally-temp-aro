@@ -273,17 +273,25 @@ class NetworkPlanModalController {
   }
 
   applyTagSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters.selectedFilters, (tag) => { 
+    var filters = _.map(selectedFilters, (tag) => { 
       tag.type = 'tag'
       return tag
     }) 
     this.applySearch(filters)
   }
   applyOwnerSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters.selectedFilters, (tag) => { 
+    var filters = _.map(selectedFilters, (tag) => { 
       tag.type = 'owner'
       return tag
     })
+    this.applySearch(filters)
+  }
+
+  applySaSearchFilter(selectedFilters) {
+    var filters = _.map(selectedFilters, (tag) => { 
+      tag.type = 'svc'
+      return tag
+    }) 
     this.applySearch(filters)
   }
 
@@ -301,7 +309,7 @@ class NetworkPlanModalController {
       if(_.isString(plan)) return plan
     })
 
-    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type +":"+ tag.name)
+    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat(tag.name ? tag.name : tag.code))
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
     this.search_text = selectedFilters.join(" ")
   }

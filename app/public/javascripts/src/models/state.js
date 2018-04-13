@@ -867,7 +867,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     newPlan.ephemeral = false
     newPlan.latitude = service.defaultPlanCoordinates.latitude
     newPlan.longitude = service.defaultPlanCoordinates.longitude
-    newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
+    newPlan.tagMapping = {
+      global:[],
+      linkTags:{
+        geographyTag: "service_area",
+        serviceAreaIds: []
+      }
+    }
+    newPlan.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
+    newPlan.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
+    //newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
@@ -1238,18 +1247,28 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.listOfTags = []
   service.currentPlanTags = []
-  service.loadListOfPlanTags = () => {
-    return $http.get(`/service/tag-mapping/tags`)
-    .then((result) => {
-      service.listOfTags = result.data
-    }) 
+  service.listOfServiceAreaTags = []
+  service.currentPlanServiceAreaTags = []
+  service.loadListOfPlanTags = () => {    
+    var promises = [
+      $http.get(`/service/tag-mapping/tags`),
+      $http.get(`/service/odata/servicearea?$select=id,code&$filter=layer/id eq 1&$orderby=id&$top=10&$skip=10`)
+    ]
+
+    return Promise.all(promises)
+      .then((results) => {
+        service.listOfTags = results[0].data
+        //concatinating harcoded SA tag values
+        //service.listOfServiceAreaTags = _.uniq(service.listOfServiceAreaTags.concat(results[1].data))
+        service.listOfServiceAreaTags = results[1].data
+      }) 
   }
 
   service.loadListOfPlanTags()
 
   service.getTagColour = (tag) => {
     return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
-  } 
+  }
 
   return service
 }])
