@@ -1,0 +1,942 @@
+[
+  {
+    "id": 3769,
+    "code": "ADMSWIXA"
+  },
+  {
+    "id": 3778,
+    "code": "ALBYWIXA"
+  },
+  {
+    "id": 3781,
+    "code": "ALCTWIXA"
+  },
+  {
+    "id": 3787,
+    "code": "ALMDWIXA"
+  },
+  {
+    "id": 3796,
+    "code": "ALNTWIXA"
+  },
+  {
+    "id": 3802,
+    "code": "AMHRWIXA"
+  },
+  {
+    "id": 3823,
+    "code": "APPLWI01"
+  },
+  {
+    "id": 3832,
+    "code": "BRKSWIXA"
+  },
+  {
+    "id": 3838,
+    "code": "BOAZWIXA"
+  },
+  {
+    "id": 3841,
+    "code": "ARENWIXA"
+  },
+  {
+    "id": 3844,
+    "code": "BARBWI01"
+  },
+  {
+    "id": 3850,
+    "code": "BRGVWIXA"
+  },
+  {
+    "id": 3853,
+    "code": "AVOCWIXA"
+  },
+  {
+    "id": 3874,
+    "code": "BLCYWIXA"
+  },
+  {
+    "id": 3883,
+    "code": "BLERWIXA"
+  },
+  {
+    "id": 3892,
+    "code": "BLLNWIXA"
+  },
+  {
+    "id": 3895,
+    "code": "BLRVWIXA"
+  },
+  {
+    "id": 3898,
+    "code": "BLVLWIXA"
+  },
+  {
+    "id": 3904,
+    "code": "BNGRWIXA"
+  },
+  {
+    "id": 3913,
+    "code": "BLMTWIXA"
+  },
+  {
+    "id": 3928,
+    "code": "BNVLWIXA"
+  },
+  {
+    "id": 3937,
+    "code": "BRFLWIXA"
+  },
+  {
+    "id": 3940,
+    "code": "BRKLWIXB"
+  },
+  {
+    "id": 3943,
+    "code": "VNDNWI11"
+  },
+  {
+    "id": 3949,
+    "code": "BRLNWI01"
+  },
+  {
+    "id": 3952,
+    "code": "BRNDWIXB"
+  },
+  {
+    "id": 3958,
+    "code": "BOSCWIXA"
+  },
+  {
+    "id": 3976,
+    "code": "ELKHWIXC"
+  },
+  {
+    "id": 4009,
+    "code": "BVDMWI01"
+  },
+  {
+    "id": 4042,
+    "code": "CITNWIXA"
+  },
+  {
+    "id": 4057,
+    "code": "CLEVWIXA"
+  },
+  {
+    "id": 4060,
+    "code": "CLNSWIXA"
+  },
+  {
+    "id": 4063,
+    "code": "CMBAWIXA"
+  },
+  {
+    "id": 4078,
+    "code": "CLMBWI11"
+  },
+  {
+    "id": 4087,
+    "code": "CLYMWIXA"
+  },
+  {
+    "id": 4093,
+    "code": "CMBRWIXA"
+  },
+  {
+    "id": 4096,
+    "code": "CMPTWIXA"
+  },
+  {
+    "id": 4105,
+    "code": "COVYWIXA"
+  },
+  {
+    "id": 4108,
+    "code": "COLMWIXA"
+  },
+  {
+    "id": 4111,
+    "code": "CPDGWIXA"
+  },
+  {
+    "id": 4114,
+    "code": "COBBWIXA"
+  },
+  {
+    "id": 4135,
+    "code": "CRPLWIXA"
+  },
+  {
+    "id": 4138,
+    "code": "CSTNWIXA"
+  },
+  {
+    "id": 4144,
+    "code": "CZNVWIXA"
+  },
+  {
+    "id": 4150,
+    "code": "CSCDWIXA"
+  },
+  {
+    "id": 4153,
+    "code": "CTGVWIXA"
+  },
+  {
+    "id": 4156,
+    "code": "CTRCWIXA"
+  },
+  {
+    "id": 4162,
+    "code": "DGVLWIXA"
+  },
+  {
+    "id": 4174,
+    "code": "DLFDWIXA"
+  },
+  {
+    "id": 4177,
+    "code": "DFRSWIXA"
+  },
+  {
+    "id": 4192,
+    "code": "DSMNWIXA"
+  },
+  {
+    "id": 4195,
+    "code": "DRTNWIXA"
+  },
+  {
+    "id": 4198,
+    "code": "DRFDWIXA"
+  },
+  {
+    "id": 4201,
+    "code": "DNMKWIXA"
+  },
+  {
+    "id": 4210,
+    "code": "EDENWIXC"
+  },
+  {
+    "id": 4216,
+    "code": "EAGLWIXA"
+  },
+  {
+    "id": 4219,
+    "code": "ELLKWIXA"
+  },
+  {
+    "id": 4228,
+    "code": "EGTNWIXA"
+  },
+  {
+    "id": 4243,
+    "code": "ELRYWIXA"
+  },
+  {
+    "id": 4258,
+    "code": "EVVLWI11"
+  },
+  {
+    "id": 4264,
+    "code": "ETRYWIXA"
+  },
+  {
+    "id": 4267,
+    "code": "ENDVWIXA"
+  },
+  {
+    "id": 4276,
+    "code": "FNMRWIXA"
+  },
+  {
+    "id": 4288,
+    "code": "FLRVWIXA"
+  },
+  {
+    "id": 4294,
+    "code": "FDULWI01"
+  },
+  {
+    "id": 4306,
+    "code": "FRMTWIXA"
+  },
+  {
+    "id": 4312,
+    "code": "FXLKWIXA"
+  },
+  {
+    "id": 4315,
+    "code": "FTATWI11"
+  },
+  {
+    "id": 4330,
+    "code": "GENSWIXA"
+  },
+  {
+    "id": 4336,
+    "code": "GNBSWIXA"
+  },
+  {
+    "id": 4366,
+    "code": "GNVLWI12"
+  },
+  {
+    "id": 4378,
+    "code": "GNLKWI11"
+  },
+  {
+    "id": 4381,
+    "code": "GYMLWIXA"
+  },
+  {
+    "id": 4390,
+    "code": "HGLDWIXA"
+  },
+  {
+    "id": 4393,
+    "code": "KGTNWIXA"
+  },
+  {
+    "id": 4408,
+    "code": "HBTSWI11"
+  },
+  {
+    "id": 4414,
+    "code": "HLBOWIXA"
+  },
+  {
+    "id": 4417,
+    "code": "HLBRWIXA"
+  },
+  {
+    "id": 4429,
+    "code": "HNCCWIXA"
+  },
+  {
+    "id": 4432,
+    "code": "HODLWIXA"
+  },
+  {
+    "id": 4441,
+    "code": "HSFDWIXA"
+  },
+  {
+    "id": 4447,
+    "code": "HRCNWI11"
+  },
+  {
+    "id": 4450,
+    "code": "HOVLWI12"
+  },
+  {
+    "id": 4453,
+    "code": "KENDWIXA"
+  },
+  {
+    "id": 4456,
+    "code": "HRFRWI11"
+  },
+  {
+    "id": 4462,
+    "code": "HRLDWI11"
+  },
+  {
+    "id": 4465,
+    "code": "HXTNWIXA"
+  },
+  {
+    "id": 4477,
+    "code": "MRMCWIXA"
+  },
+  {
+    "id": 4480,
+    "code": "HWGVWIXA"
+  },
+  {
+    "id": 4495,
+    "code": "PCKTWIXB"
+  },
+  {
+    "id": 4498,
+    "code": "JFSNWI11"
+  },
+  {
+    "id": 4504,
+    "code": "ITHCWIXA"
+  },
+  {
+    "id": 4507,
+    "code": "JCSNWI11"
+  },
+  {
+    "id": 4510,
+    "code": "KAUKWI11"
+  },
+  {
+    "id": 4516,
+    "code": "KIELWIXA"
+  },
+  {
+    "id": 4519,
+    "code": "JUNEWI11"
+  },
+  {
+    "id": 4525,
+    "code": "JNVLWI01"
+  },
+  {
+    "id": 4534,
+    "code": "JHCKWIXA"
+  },
+  {
+    "id": 4540,
+    "code": "JHBGWIXA"
+  },
+  {
+    "id": 4543,
+    "code": "LBNNWIXA"
+  },
+  {
+    "id": 4552,
+    "code": "LAVAWIXA"
+  },
+  {
+    "id": 4555,
+    "code": "KWSKWIXA"
+  },
+  {
+    "id": 4561,
+    "code": "LCHTWI11"
+  },
+  {
+    "id": 4570,
+    "code": "LGVLWIXA"
+  },
+  {
+    "id": 4591,
+    "code": "LKMLWIXA"
+  },
+  {
+    "id": 4594,
+    "code": "LMRGWIXA"
+  },
+  {
+    "id": 4600,
+    "code": "LRSNWIXA"
+  },
+  {
+    "id": 4606,
+    "code": "LODIWIXA"
+  },
+  {
+    "id": 4615,
+    "code": "LOMRWIXA"
+  },
+  {
+    "id": 4618,
+    "code": "LNRKWIXB"
+  },
+  {
+    "id": 4621,
+    "code": "LNCSWIXA"
+  },
+  {
+    "id": 4636,
+    "code": "MAZOWI11"
+  },
+  {
+    "id": 4642,
+    "code": "NEKSWIXA"
+  },
+  {
+    "id": 4645,
+    "code": "LYSTWIXA"
+  },
+  {
+    "id": 4648,
+    "code": "MDSNWI11"
+  },
+  {
+    "id": 4654,
+    "code": "MDSNWI12"
+  },
+  {
+    "id": 4657,
+    "code": "MDSNWI14"
+  },
+  {
+    "id": 4660,
+    "code": "MDSNWI13"
+  },
+  {
+    "id": 4663,
+    "code": "MDSNWI16"
+  },
+  {
+    "id": 4666,
+    "code": "MCFAWIXA"
+  },
+  {
+    "id": 4675,
+    "code": "MDTNWIXA"
+  },
+  {
+    "id": 4678,
+    "code": "NTBGWIXA"
+  },
+  {
+    "id": 4681,
+    "code": "MDTNWIXB"
+  },
+  {
+    "id": 4687,
+    "code": "PCKWWIXA"
+  },
+  {
+    "id": 4696,
+    "code": "NRWLWIXA"
+  },
+  {
+    "id": 4726,
+    "code": "MNPTWIXA"
+  },
+  {
+    "id": 4747,
+    "code": "MLTNWIXA"
+  },
+  {
+    "id": 4756,
+    "code": "MNCTWIXA"
+  },
+  {
+    "id": 4768,
+    "code": "MSHCWIXA"
+  },
+  {
+    "id": 4771,
+    "code": "NSHKWIXA"
+  },
+  {
+    "id": 4774,
+    "code": "MLRSWIXA"
+  },
+  {
+    "id": 4777,
+    "code": "MPTNWIXA"
+  },
+  {
+    "id": 4792,
+    "code": "MNDRWIXA"
+  },
+  {
+    "id": 4798,
+    "code": "MNTWWI01"
+  },
+  {
+    "id": 4804,
+    "code": "MNTIWIXA"
+  },
+  {
+    "id": 4819,
+    "code": "MRLNWIXA"
+  },
+  {
+    "id": 4822,
+    "code": "MRKSWIXA"
+  },
+  {
+    "id": 4828,
+    "code": "MRSHWIXA"
+  },
+  {
+    "id": 4831,
+    "code": "MTCLWIXA"
+  },
+  {
+    "id": 4840,
+    "code": "MTFTWIXA"
+  },
+  {
+    "id": 4843,
+    "code": "MSCDWIXA"
+  },
+  {
+    "id": 4852,
+    "code": "MSTNWIXA"
+  },
+  {
+    "id": 4855,
+    "code": "MTVRWIXA"
+  },
+  {
+    "id": 4858,
+    "code": "MTHPWIXA"
+  },
+  {
+    "id": 4861,
+    "code": "MTLLWIXA"
+  },
+  {
+    "id": 4864,
+    "code": "MYVLWI11"
+  },
+  {
+    "id": 4867,
+    "code": "MTZNWIXA"
+  },
+  {
+    "id": 4873,
+    "code": "MTHBWIXA"
+  },
+  {
+    "id": 4876,
+    "code": "NENHWI11"
+  },
+  {
+    "id": 4879,
+    "code": "STBRWIXA"
+  },
+  {
+    "id": 4894,
+    "code": "NWGLWIXA"
+  },
+  {
+    "id": 4900,
+    "code": "NESHWIXA"
+  },
+  {
+    "id": 4903,
+    "code": "NPRRWIXA"
+  },
+  {
+    "id": 4906,
+    "code": "NCDHWIXA"
+  },
+  {
+    "id": 4909,
+    "code": "NFDMWI11"
+  },
+  {
+    "id": 4912,
+    "code": "OMROWI11"
+  },
+  {
+    "id": 4924,
+    "code": "NWHLWIXA"
+  },
+  {
+    "id": 4927,
+    "code": "NWLNWI11"
+  },
+  {
+    "id": 4942,
+    "code": "NWTNWIXA"
+  },
+  {
+    "id": 4951,
+    "code": "OCNMWI11"
+  },
+  {
+    "id": 4963,
+    "code": "ORGNWIXA"
+  },
+  {
+    "id": 4966,
+    "code": "ONTRWIXA"
+  },
+  {
+    "id": 4975,
+    "code": "OKFDWIXA"
+  },
+  {
+    "id": 4984,
+    "code": "OSHKWI01"
+  },
+  {
+    "id": 4987,
+    "code": "PDVLWIXA"
+  },
+  {
+    "id": 4993,
+    "code": "OXFRWIXA"
+  },
+  {
+    "id": 5002,
+    "code": "PLFDWIXA"
+  },
+  {
+    "id": 5017,
+    "code": "PLANWIXA"
+  },
+  {
+    "id": 5023,
+    "code": "PLMOWIXA"
+  },
+  {
+    "id": 5029,
+    "code": "PLMYWIXA"
+  },
+  {
+    "id": 5041,
+    "code": "PTEDWIXA"
+  },
+  {
+    "id": 5056,
+    "code": "PRTGWIXA"
+  },
+  {
+    "id": 5065,
+    "code": "PRTNWI11"
+  },
+  {
+    "id": 5083,
+    "code": "PYNTWIXA"
+  },
+  {
+    "id": 5086,
+    "code": "PTSVWIXA"
+  },
+  {
+    "id": 5089,
+    "code": "PYSPWIXA"
+  },
+  {
+    "id": 5098,
+    "code": "PTVLWIXA"
+  },
+  {
+    "id": 5104,
+    "code": "RCCTWIXA"
+  },
+  {
+    "id": 5107,
+    "code": "RIO WIXA"
+  },
+  {
+    "id": 5113,
+    "code": "RIPNWIXA"
+  },
+  {
+    "id": 5116,
+    "code": "RDBGWIXA"
+  },
+  {
+    "id": 5122,
+    "code": "RDFDWIXA"
+  },
+  {
+    "id": 5125,
+    "code": "RDVLWIXA"
+  },
+  {
+    "id": 5131,
+    "code": "RCMDWI11"
+  },
+  {
+    "id": 5137,
+    "code": "RDWYWIXA"
+  },
+  {
+    "id": 5143,
+    "code": "RDGRWI11"
+  },
+  {
+    "id": 5149,
+    "code": "RNLKWIXA"
+  },
+  {
+    "id": 5155,
+    "code": "WSBYWIXA"
+  },
+  {
+    "id": 5158,
+    "code": "RNDHWIXB"
+  },
+  {
+    "id": 5167,
+    "code": "RODLWIXA"
+  },
+  {
+    "id": 5173,
+    "code": "SABNWIXA"
+  },
+  {
+    "id": 5185,
+    "code": "RSVLWIXA"
+  },
+  {
+    "id": 5200,
+    "code": "SGTNWI11"
+  },
+  {
+    "id": 5203,
+    "code": "SLNGWIXA"
+  },
+  {
+    "id": 5212,
+    "code": "SHWDWIXA"
+  },
+  {
+    "id": 5218,
+    "code": "SLGVWIXA"
+  },
+  {
+    "id": 5230,
+    "code": "SKCYWIXA"
+  },
+  {
+    "id": 5257,
+    "code": "SLLVWIXA"
+  },
+  {
+    "id": 5266,
+    "code": "STCDWIXA"
+  },
+  {
+    "id": 5275,
+    "code": "SNPRWIXA"
+  },
+  {
+    "id": 5290,
+    "code": "SPGRWIXA"
+  },
+  {
+    "id": 5296,
+    "code": "STBNWIXA"
+  },
+  {
+    "id": 5317,
+    "code": "SPRTWIXA"
+  },
+  {
+    "id": 5323,
+    "code": "STNZWIXA"
+  },
+  {
+    "id": 5350,
+    "code": "STPTWI01"
+  },
+  {
+    "id": 5365,
+    "code": "THRSWIXA"
+  },
+  {
+    "id": 5374,
+    "code": "TOMAWIXA"
+  },
+  {
+    "id": 5380,
+    "code": "TSMLWIXA"
+  },
+  {
+    "id": 5389,
+    "code": "WAPNWI11"
+  },
+  {
+    "id": 5395,
+    "code": "VRNAWIXA"
+  },
+  {
+    "id": 5398,
+    "code": "VIRQWIXA"
+  },
+  {
+    "id": 5410,
+    "code": "VLDRWIXA"
+  },
+  {
+    "id": 5419,
+    "code": "WBKAWIXA"
+  },
+  {
+    "id": 5422,
+    "code": "WBNDWI01"
+  },
+  {
+    "id": 5431,
+    "code": "WHLWWIXA"
+  },
+  {
+    "id": 5443,
+    "code": "WDMNWIXA"
+  },
+  {
+    "id": 5452,
+    "code": "WAUNWIXA"
+  },
+  {
+    "id": 5455,
+    "code": "WHWRWI11"
+  },
+  {
+    "id": 5461,
+    "code": "WIDLWIXA"
+  },
+  {
+    "id": 5464,
+    "code": "WLDRWIXA"
+  },
+  {
+    "id": 5467,
+    "code": "WNCNWI11"
+  },
+  {
+    "id": 5479,
+    "code": "WPCAWI11"
+  },
+  {
+    "id": 5485,
+    "code": "WNWCWIXA"
+  },
+  {
+    "id": 5488,
+    "code": "WLTOWIXA"
+  },
+  {
+    "id": 5494,
+    "code": "WTTWWI01"
+  },
+  {
+    "id": 5506,
+    "code": "WTWNWIXA"
+  },
+  {
+    "id": 5509,
+    "code": "WRTWWI11"
+  },
+  {
+    "id": 5515,
+    "code": "WTMAWIXA"
+  },
+  {
+    "id": 5518,
+    "code": "WRNSWIXA"
+  },
+  {
+    "id": 5521,
+    "code": "WRPDWIXA"
+  },
+  {
+    "id": 5524,
+    "code": "WTRLWIXA"
+  },
+  {
+    "id": 5527,
+    "code": "WRPDWIXB"
+  },
+  {
+    "id": 5530,
+    "code": "WSFDWIXA"
+  },
+  {
+    "id": 5533,
+    "code": "WYSDWIXA"
+  },
+  {
+    "id": 5536,
+    "code": "WYWGWIXA"
+  }
+ ]

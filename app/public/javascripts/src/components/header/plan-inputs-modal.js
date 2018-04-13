@@ -48,17 +48,32 @@ PlanInputsModalController.$inject = ['state','$element']
 
 let planInputsModal = {
   template: `
+  <style scoped>
+  .with-margin {
+    margin-bottom: 5px;
+  }
+  </style>
   <modal id="plan_inputs_modal" visible="$ctrl.state.planInputsModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
     <modal-header title="Plan Inputs"></modal-header>
       <modal-body>
-        <input class="form-control" style="margin-bottom:5px" type="text" ng-model="$ctrl.planName" placeholder="Plan Name">
-        <aro-multi-select 
+        <input class="form-control with-margin" type="text" ng-model="$ctrl.planName" placeholder="Plan Name">
+        <div class="with-margin">  
+        <aro-multi-select
           model="$ctrl.state.currentPlanTags" 
           all-items="$ctrl.state.listOfTags" 
           current-selected-items="$ctrl.state.currentPlanTags"
           selection-changed="$ctrl.onTagSelectionChanged()"
           enable-search = "true"
           placeholder="add tags">
+        </aro-multi-select>
+        </div>
+        <aro-multi-select
+          model="$ctrl.state.currentPlanServiceAreaTags" 
+          all-items="$ctrl.state.listOfServiceAreaTags" 
+          current-selected-items="$ctrl.state.currentPlanServiceAreaTags"
+          selection-changed="$ctrl.onTagSelectionChanged()"
+          enable-search = "true"
+          placeholder="add service area tags">
         </aro-multi-select>
       </modal-body>
     <modal-footer>
