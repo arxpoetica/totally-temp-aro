@@ -69,20 +69,19 @@
           <button class="btn btn-default draggable-item-button">
             <i class="fa fa-2x fa-copyright"></i>
           </button>
-          <hr class="plan-editor-hr">
         </div>
-        <br>
 
         <!-- We need an object to be selected in order to show its details -->
-        <div ng-if="$ctrl.selectedMapObject">
+        <div ng-if="$ctrl.selectedMapObject" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
-          <div style="padding-bottom: 10px; font-weight: 700;">
-              <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="padding-right: 10px">
-              {{$ctrl.getSelectedNetworkConfig().label}}
+          <div class="sidebar-table-header">
+              <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
+              <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
           </div>
           <!-- A table containing the editable properties of the selected object -->
           <table id="tblEquipmentProperties"
-                 class="table table-condensed table-striped">
+                 class="table table-condensed table-striped sidebar-table"
+                 style="margin-bottom: 10px">
             <tbody>
               <tr>
                 <td>Site Identifier</td>
@@ -116,7 +115,8 @@
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-                  ng-click="$ctrl.saveSelectedEquipmentProperties()">
+                  ng-click="$ctrl.saveSelectedEquipmentProperties()"
+                  style="margin-bottom: 10px">
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
           </button>
           <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">

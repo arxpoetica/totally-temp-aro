@@ -1189,3 +1189,15 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   background-size: 8px 8px;
   background-position: 4px 4px;
 }
+
+.sidebar-table-header {
+  padding: 10px;
+  font-weight: 700;
+  background-color: #eee;
+  border: solid 1px #ccc;
+  border-bottom: none;
+}
+
+.sidebar-table {
+  border: solid 1px #ccc;
+}
