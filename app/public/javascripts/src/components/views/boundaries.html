@@ -22,6 +22,7 @@
 			            ng-model="$ctrl.selectedCensusCat"
 			            ng-options="item as item.description for item in $ctrl.censusCategories"
 			            ng-change="$ctrl.onSelectCensusCat()">
+			            <option value="">None</option>
 			          </select>
                 
                 <div ng-if="$ctrl.selectedCensusCat" ng-repeat="tag in $ctrl.selectedCensusCat.tags">

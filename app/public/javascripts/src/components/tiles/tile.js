@@ -1203,7 +1203,8 @@ class TileComponentController {
               } else if (result.gid) {
                 roadSegments.add(result)
               } else if ( result.hasOwnProperty('layerType') 
-                          && 'census_block' == result.layerType){
+                          && 'census_block' == result.layerType
+                          && state.selectedDisplayMode.getValue() === state.displayModes.VIEW){
             	    censusFeatures.push(result)
               } else if (result.id) {
                 equipmentFeatures = equipmentFeatures.concat(result)
