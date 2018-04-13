@@ -1,30 +1,5 @@
-class EquipmentProperties {
-  constructor(siteIdentifier, siteName, selectedSiteType, deploymentDate, selectedEquipmentType) {
-    this.siteIdentifier = siteIdentifier || ''
-    this.siteName = siteName || ''
-    this.siteTypes = ['Remote Terminal']
-    this.selectedSiteType = selectedSiteType || this.siteTypes[0]
-    this.deploymentDate = deploymentDate || '04/18'
-    this.equipmentTypes = [
-      'Generic ADSL2+ DSLAM',
-      'Generic ADSL2+ P DSLAM',
-      'Generic ADSL-B DSLAM',
-      'Generic ADSL DSLAM',
-      'Generic VDSL-B DSLAM',
-      'Generic VDSL DSLAM'
-    ]
-    this.selectedEquipmentType = selectedEquipmentType || this.equipmentTypes[0]
-    this.isDirty = false
-  }
-}
-
-class BoundaryAttributes {
-  constructor(networkNodeType, associatedNetworkNodeId, boundaryTypeId) {
-    this.networkNodeType = networkNodeType
-    this.associatedNetworkNodeId = associatedNetworkNodeId
-    this.boundaryTypeId = boundaryTypeId
-  }
-}
+import EquipmentProperties from './equipment-properties'
+import BoundaryAttributes from './boundary-attributes'
 
 class PlanEditorController {
 
@@ -38,11 +13,27 @@ class PlanEditorController {
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
     this.equipmentIdToBoundaryId = {}
+    this.showDragHelpText = true
     this.currentTransaction = null
+    this.lastSelectedEquipmentType = 'Generic ADSL'
     this.coverageRadius = 10000 // In user units (e.g. Feet)
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.uuidStore = []
     this.getUUIDsFromServer()
+    // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
+    this.allEditableNetworkNodeTypes = [
+      'central_office',
+      'dslam',
+      'fiber_distribution_hub',
+      'fiber_distribution_terminal',
+      'cell_5g',
+      'splice_point',
+      'bulk_distribution_terminal'
+    ]
+    // Create a list of enabled network node types that we WILL allow the user to drag onto the map
+    this.enabledNetworkNodeTypes = [
+      'dslam'
+    ]
   }
 
   // Get a list of UUIDs from the server
@@ -79,8 +70,8 @@ class PlanEditorController {
   $onInit() {
     // Select the first boundary in the list
     this.selectedBoundaryType = this.state.boundaryTypes[0]
-
     this.resumeOrCreateTransaction()
+    this.$timeout(() => this.showDragHelpText = false, 6000)  // Hide help text after a while
   }
 
   resumeOrCreateTransaction() {
@@ -115,8 +106,8 @@ class PlanEditorController {
         // We now have objectIdToMapObject populated.
         result.data.forEach((feature) => {
           const attributes = feature.attributes
-          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, attributes.selectedSiteType,
-                                                     attributes.deploymentDate, attributes.selectedEquipmentType)
+          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
+                                                     'planned_remote_terminal', attributes.selectedEquipmentType)
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
@@ -124,6 +115,13 @@ class PlanEditorController {
       .then((result) => {
         // We have a list of equipment boundaries. Populate them in the map object
         this.createMapObjects && this.createMapObjects(result.data)
+        // Save the equipment and boundary ID associations
+        result.data.forEach((boundaryFeature) => {
+          var equipmentId = boundaryFeature.attributes.network_node_object_id
+          var boundaryId = boundaryFeature.objectId
+          this.equipmentIdToBoundaryId[equipmentId] = boundaryId
+          this.boundaryIdToEquipmentId[boundaryId] = equipmentId
+        })
       })
       .catch((err) => console.error(err))
   }
@@ -221,6 +219,7 @@ class PlanEditorController {
     if (this.selectedMapObject) {
       var objectProperties = this.objectIdToProperties[this.selectedMapObject.objectId]
       objectProperties.isDirty = true
+      this.lastSelectedEquipmentType = objectProperties.selectedEquipmentType || this.lastSelectedEquipmentType
     }
   }
 
@@ -239,8 +238,6 @@ class PlanEditorController {
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
-        selectedSiteType: objectProperties.selectedSiteType,
-        deploymentDate: objectProperties.deploymentDate,
         selectedEquipmentType: objectProperties.selectedEquipmentType
       }
     }
@@ -287,8 +284,15 @@ class PlanEditorController {
     }
   }
 
+  // Returns the configuration of the currently selected network type
+  getSelectedNetworkConfig() {
+    var layers = this.configuration.networkEquipment.equipmentList.planned.layers
+    var networkNodeType = this.objectIdToProperties[this.selectedMapObject.objectId].siteNetworkNodeType
+    return layers[networkNodeType]
+  }
+
   handleObjectCreated(mapObject, usingMapClick) {
-    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties()
+    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'planned_remote_terminal', this.lastSelectedEquipmentType)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && mapObject.icon && mapObject.position) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -320,9 +324,9 @@ class PlanEditorController {
         })
         .catch((err) => console.error(err))
       // Delete the associated boundary
-      const boundaryObjectId = this.equipmentIdToBoundaryId[this.selectedMapObject.objectId]
+      const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
       if (boundaryObjectId) {
-        delete this.equipmentIdToBoundaryId[this.selectedMapObject.objectId]
+        delete this.equipmentIdToBoundaryId[mapObject.objectId]
         delete this.boundaryIdToEquipmentId[boundaryObjectId]
         this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
       }
@@ -339,6 +343,16 @@ class PlanEditorController {
     if (mapObject.icon && mapObject.position) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+      // If this is an equipment, delete its associated boundary (if any)
+      if (mapObject.icon && mapObject.position) {
+        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
+        if (boundaryObjectId) {
+          delete this.equipmentIdToBoundaryId[mapObject.objectId]
+          delete this.boundaryIdToEquipmentId[boundaryObjectId]
+          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+          // No need to delete from the server, we will get another delete event for the boundary.
+        }
+      }
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
     }
@@ -347,18 +361,8 @@ class PlanEditorController {
   deleteSelectedObject() {
     // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
     if (this.selectedMapObject) {
-      var mapObjectToDelete = this.selectedMapObject  // this.selectedMapObject may change while deleting stuff below
-      // If this is an equipment, delete its associated boundary (if any)
-      if (mapObjectToDelete.icon && mapObjectToDelete.position) {
-        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObjectToDelete.objectId]
-        if (boundaryObjectId) {
-          delete this.equipmentIdToBoundaryId[mapObjectToDelete.objectId]
-          delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-        }
-      }
       // Delete the selected map object
-      this.deleteObjectWithId && this.deleteObjectWithId(mapObjectToDelete.objectId)
+      this.deleteObjectWithId && this.deleteObjectWithId(this.selectedMapObject.objectId)
     }
   }
 }

@@ -62,7 +62,7 @@ let aroMultiSelect = {
   template: `
     <select multiple="multiple"
             ng-model="$ctrl.model"
-            ng-options="item.name for item in $ctrl.allItems">
+            ng-options="item.name || item.code for item in $ctrl.allItems">
     </select>
   `,
   bindings: {

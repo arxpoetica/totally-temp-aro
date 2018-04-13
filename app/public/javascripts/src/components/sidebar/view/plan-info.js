@@ -23,7 +23,8 @@ PlanInfoController.$inject = ['state']
 let planInfo = {
   templateUrl: '/components/sidebar/view/plan-info.html',
   bindings: {
-    currentUser: '<'
+    currentUser: '<',
+    getTagDetails: '&'
   },
   controller: PlanInfoController
 }

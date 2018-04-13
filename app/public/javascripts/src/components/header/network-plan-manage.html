@@ -55,7 +55,8 @@
   </div>  
 
   <plan-info ng-show="$ctrl.currentView == $ctrl.views.Plan_Info"
-    current-user="$ctrl.user"></plan-info>
+    current-user="$ctrl.user"
+    get-tag-details="$ctrl.getTagCategories(tagObject)"></plan-info>
   <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
 
   <div ng-if="$ctrl.currentView == $ctrl.views.Search_plans">
@@ -82,7 +83,7 @@
         theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
-            {{$item.type}}:<span class="label" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name}}</span>
+            {{$item.type}}:<span class="label" style = "background-color:#1f7de6" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name || $item.code}}</span>
           </span>
           <span class="tag" ng-if=!$item.type>
             {{$item}}
@@ -90,7 +91,7 @@
         </ui-select-match>
         <ui-select-choices class="ui-select-search" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
-            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
+            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code}}
           </div>
         </ui-select-choices>
       </ui-select>
@@ -105,12 +106,15 @@
     <search-plan-filter 
       object-name="Tag"
       search-list="$ctrl.state.listOfTags"
-      apply-search="$ctrl.applyTagSearchFilter({selectedFilters:selectedFilters})">
+      apply-search="$ctrl.applyTagSearchFilter(selectedFilters)">
     </search-plan-filter>
-    <search-plan-filter object-name="Owner"
+    <!-- <search-plan-filter object-name="Owner"
     search-list="$ctrl.state.listOfTags"
-    apply-search="$ctrl.applyOwnerSearchFilter({selectedFilters:selectedFilters})"></search-plan-filter>
-    <search-plan-filter object-name="Location"></search-plan-filter>
+    apply-search="$ctrl.applyOwnerSearchFilter({selectedFilters:selectedFilters})"></search-plan-filter> -->
+    <search-plan-filter 
+      object-name="Service Area"
+      search-list="$ctrl.state.listOfServiceAreaTags"
+      apply-search="$ctrl.applySaSearchFilter(selectedFilters)"></search-plan-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">

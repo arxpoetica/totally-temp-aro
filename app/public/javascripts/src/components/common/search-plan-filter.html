@@ -18,11 +18,11 @@
       ng-if="$ctrl.searchList.length > 0"
       theme="bootstrap" close-on-select="false" on-select="onSelectedItemsChanged()" on-remove="onSelectedItemsChanged()">
       <ui-select-match placeholder="Select {{$ctrl.objectName}}...">
-        <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour($item), 'margin-right':'5px' }"></span>{{$item.name}}
+        <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour($item), 'margin-right':'5px' }"></span>{{$item.name || $item.code}}
       </ui-select-match>
       <ui-select-choices class="ui-select-choices-style" repeat="item in $ctrl.searchList | filter: $select.search">
         <div>
-          <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name}}
+          <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code}}
         </div>
       </ui-select-choices>
     </ui-select>
