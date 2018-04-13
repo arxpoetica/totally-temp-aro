@@ -154,16 +154,22 @@ class BoundariesController {
     	  
     })
     
+    this.selectedCensusCat
+    
+  }
+  
+  
+  onSelectCensusCat(){
+    //this.selectedCensusCat = censusCat
+    this.state.reloadSelectedCensusCategoryId(this.selectedCensusCat.id)
+    console.log(this.selectedCensusCat)
   }
   
   // for MapLayer objects 
   toggleVisibility(layer) {
-	console.log("toggle")
-	console.log(layer)
-    layer.visible = layer.visible_check;
-
-    layer.configureVisibility()
-    this.regions.setSearchOption(layer.type, layer.visible)
+	 layer.visible = layer.visible_check;
+   layer.configureVisibility()
+   this.regions.setSearchOption(layer.type, layer.visible)
   }
   
   // for layers drawn on vector tiles
@@ -171,61 +177,62 @@ class BoundariesController {
     layer.visible = layer.visible_check;
     this.updateMapLayers()
   }
-
+  
+  
   updateMapLayers() {
-	// ToDo: this function could stand to be cleaned up
-	
-	// ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  
-	var layerSettings = {}
-	layerSettings['wirecenter'] = {
-	  dataUrls: [],
-	  renderMode: 'PRIMITIVE_FEATURES',
-	  selectable: true,
-	  strokeStyle: '#00ff00',
-	  lineWidth: 4,
-	  fillStyle: "transparent",
-	  opacity: 0.7,
-	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
-	  highlightStyle: {
-	    strokeStyle: '#000000',
-	    fillStyle: 'green',
-	    opacity: 0.3
-	  }
-	}
-	
-	layerSettings['census_blocks'] = {
-	  dataUrls: [],
-	  renderMode: 'PRIMITIVE_FEATURES',
-	  selectable: true,
-	  strokeStyle: 'blue',
-	  lineWidth: 2,
-	  fillStyle: "transparent",
-	  opacity: 0.7,
-	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
-	  highlightStyle: {
-	    lineWidth: 8
-	  }
-	}
-	
-	layerSettings['aggregated_wirecenters'] = {
-	  dataUrls: [],
-	  renderMode: 'PRIMITIVE_FEATURES',
-	  selectable: true,
-	  aggregateMode: 'FLATTEN',
-	  strokeStyle: '#00ff00',
-	  lineWidth: 4,
-	  fillStyle: "transparent",
-	  opacity: 0.7,
-	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
-	  highlightStyle: {
-	    strokeStyle: '#000000',
-	    fillStyle: 'green',
-	    opacity: 0.3
-	  }
-	}
-	
-	layerSettings['default'] = layerSettings['wirecenter']
-	  
+    	// ToDo: this function could stand to be cleaned up
+    	
+    	// ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  
+    	var layerSettings = {}
+    	layerSettings['wirecenter'] = {
+    	  dataUrls: [],
+    	  renderMode: 'PRIMITIVE_FEATURES',
+    	  selectable: true,
+    	  strokeStyle: '#00ff00',
+    	  lineWidth: 4,
+    	  fillStyle: "transparent",
+    	  opacity: 0.7,
+    	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+    	  highlightStyle: {
+    	    strokeStyle: '#000000',
+    	    fillStyle: 'green',
+    	    opacity: 0.3
+    	  }
+    	}
+    	
+    	layerSettings['census_blocks'] = {
+    	  dataUrls: [],
+    	  renderMode: 'PRIMITIVE_FEATURES',
+    	  selectable: true,
+    	  strokeStyle: 'blue',
+    	  lineWidth: 2,
+    	  fillStyle: "transparent",
+    	  opacity: 0.7,
+    	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+    	  highlightStyle: {
+    	    lineWidth: 8
+    	  }
+    	}
+    	
+    	layerSettings['aggregated_wirecenters'] = {
+    	  dataUrls: [],
+    	  renderMode: 'PRIMITIVE_FEATURES',
+    	  selectable: true,
+    	  aggregateMode: 'FLATTEN',
+    	  strokeStyle: '#00ff00',
+    	  lineWidth: 4,
+    	  fillStyle: "transparent",
+    	  opacity: 0.7,
+    	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+    	  highlightStyle: {
+    	    strokeStyle: '#000000',
+    	    fillStyle: 'green',
+    	    opacity: 0.3
+    	  }
+    	}
+    	
+    	layerSettings['default'] = layerSettings['wirecenter']
+    	  
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 

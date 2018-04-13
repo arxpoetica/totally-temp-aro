@@ -303,6 +303,16 @@ footer nav {
   margin-right: 5px;
 }
 
+.outlineLegendIcon{
+	display: inline-block;
+	width: 1.0em;
+	height: 1.0em;
+	border-style: solid;
+	border-width: 2px;
+	border-color: #888888;
+	background-color: #88888833;
+}
+
 .spinner {
   margin: 10px auto;
   width: 50px;

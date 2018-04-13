@@ -234,6 +234,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   //    if that changes use a Rx.BehaviorSubject instead 
   service.censusCategories = {}
   
+  service.selectedCensusCategoryId = new Rx.BehaviorSubject()
+  service.reloadSelectedCensusCategoryId = (catId) => {
+    service.selectedCensusBlockId.next(catId)
+    service.requestMapLayerRefresh.next({})
+    console.log(catId)
+  }
+  
   // The display modes for the application
   service.displayModes = Object.freeze({
     VIEW: 'VIEW',
@@ -1205,6 +1212,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       console.log(result)
       service.censusCategories = {}
       result.data.forEach( (cat) => {
+        cat.tags.forEach( (tag) => {
+          tag.colourHash = service.getTagColour(tag)
+        })
         service.censusCategories[ cat.id+'' ] = cat
       })
       console.log(service.censusCategories)
