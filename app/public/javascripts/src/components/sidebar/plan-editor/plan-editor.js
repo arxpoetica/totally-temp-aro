@@ -68,7 +68,6 @@ class PlanEditorController {
   $onInit() {
     // Select the first boundary in the list
     this.selectedBoundaryType = this.state.boundaryTypes[0]
-
     this.resumeOrCreateTransaction()
   }
 
@@ -104,8 +103,8 @@ class PlanEditorController {
         // We now have objectIdToMapObject populated.
         result.data.forEach((feature) => {
           const attributes = feature.attributes
-          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, attributes.selectedSiteType,
-                                                     attributes.deploymentDate, attributes.selectedEquipmentType)
+          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
+                                                     'planned_remote_terminal', attributes.selectedEquipmentType)
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
@@ -228,8 +227,6 @@ class PlanEditorController {
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
-        selectedSiteType: objectProperties.selectedSiteType,
-        deploymentDate: objectProperties.deploymentDate,
         selectedEquipmentType: objectProperties.selectedEquipmentType
       }
     }
@@ -276,8 +273,15 @@ class PlanEditorController {
     }
   }
 
+  // Returns the configuration of the currently selected network type
+  getSelectedNetworkConfig() {
+    var layers = this.configuration.networkEquipment.equipmentList.planned.layers
+    var networkNodeType = this.objectIdToProperties[this.selectedMapObject.objectId].siteNetworkNodeType
+    return layers[networkNodeType]
+  }
+
   handleObjectCreated(mapObject, usingMapClick) {
-    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties()
+    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'planned_remote_terminal')
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && mapObject.icon && mapObject.position) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this

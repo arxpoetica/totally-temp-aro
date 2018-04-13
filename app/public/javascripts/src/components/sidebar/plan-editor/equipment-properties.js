@@ -1,11 +1,10 @@
 class EquipmentProperties {
-  constructor(siteIdentifier, siteName, selectedSiteType, deploymentDate, selectedEquipmentType) {
+  constructor(siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType) {
     this.siteIdentifier = siteIdentifier || ''
     this.siteName = siteName || ''
-    this.siteTypes = ['Remote Terminal']
-    this.selectedSiteType = selectedSiteType || this.siteTypes[0]
-    this.deploymentDate = deploymentDate || '04/18'
+    this.siteNetworkNodeType = siteNetworkNodeType
     this.equipmentTypes = [
+      'Generic ADSL',
       'Generic ADSL2+ DSLAM',
       'Generic ADSL2+ P DSLAM',
       'Generic ADSL-B DSLAM',
