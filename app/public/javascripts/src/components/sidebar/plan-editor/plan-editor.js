@@ -114,6 +114,13 @@ class PlanEditorController {
       .then((result) => {
         // We have a list of equipment boundaries. Populate them in the map object
         this.createMapObjects && this.createMapObjects(result.data)
+        // Save the equipment and boundary ID associations
+        result.data.forEach((boundaryFeature) => {
+          var equipmentId = boundaryFeature.attributes.network_node_object_id
+          var boundaryId = boundaryFeature.objectId
+          this.equipmentIdToBoundaryId[equipmentId] = boundaryId
+          this.boundaryIdToEquipmentId[boundaryId] = equipmentId
+        })
       })
       .catch((err) => console.error(err))
   }
