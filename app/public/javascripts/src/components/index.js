@@ -21,6 +21,7 @@ import networkBuild from './sidebar/analysis/network-build/network-build'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
 import viewSettings from './sidebar/debug/view-settings'
+import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
@@ -82,6 +83,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroDebug', aroDebug)
    .component('viewSettings', viewSettings)
    .component('planEditor', planEditor)
+   .component('draggableButton', draggableButton)
    .component('conicTileSystemUploader', conicTileSystemUploader)
    .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
    .component('planDataSelection', planDataSelection)

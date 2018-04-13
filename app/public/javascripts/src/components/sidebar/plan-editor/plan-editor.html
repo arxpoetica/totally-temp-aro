@@ -9,6 +9,19 @@
   #tblEquipmentProperties td {
     line-height: 33px;  /* To vertically align text */
   }
+  .drag-help-text.ng-hide-add {
+    animation: fadeOutUp 300ms;
+  }
+  .drag-help-text.ng-hide-remove {
+    animation: fadeInDown 300ms;
+  }
+  .draggable-item-button {
+    border: none;
+  }
+  .plan-editor-hr {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 </style>
 
 <div class="edit-plan-container">
@@ -18,18 +31,22 @@
 
       <!-- Add a component to handle map editing -->
       <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
-                        object-icon-url="/images/map_icons/aro/plan_equipment.png"
-                        object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
-                        on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick)"
-                        on-modify-object="$ctrl.handleObjectModified(mapObject)"
-                        on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
-                        on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
-                        register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
-                        register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
-                        register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
+                         map-container-id="map-canvas-container"
+                         object-icon-url="/images/map_icons/aro/plan_equipment.png"
+                         object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
+                         create-object-on-click="false"
+                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick)"
+                         on-modify-object="$ctrl.handleObjectModified(mapObject)"
+                         on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+                         on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
+                         register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
+                         register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
+                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
       </map-object-editor>
 
       <div style="margin: 10px">
+
+        <!-- Buttons to commit or discard a transaction -->
         <div class="text-center">
           <div class="btn-group ">
             <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
@@ -38,15 +55,41 @@
         </div>
         <br>
 
-        <select class="form-control"
-                ng-model="$ctrl.selectedBoundaryType"
-                ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
-        </select>
-        <br>
+        <!-- Section that allows the user to drag and drop equipment and boundaries onto the map -->
+        <div style="width: 100%">
+          <div ng-show="$ctrl.showDragHelpText" class="drag-help-text">
+            <p class="text-center">Click and drag equipment/boundary onto the map</p>
+            <hr class="plan-editor-hr">
+          </div>
+          <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
+          <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipmentList.planned.layers"
+                            ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
+                            icon="{{equipment.iconUrl}}",
+                            is-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0"
+                            entity-type="networkEquipment"
+                            entity-details="{{equipment.networkNodeType}}">
+          </draggable-button>
+          <hr class="plan-editor-hr">
+          <!-- Boundary buttons -->
+          <button class="btn btn-default draggable-item-button">
+            <i class="fa fa-2x fa-registered"></i>
+          </button>
+          <button class="btn btn-default draggable-item-button">
+            <i class="fa fa-2x fa-copyright"></i>
+          </button>
+        </div>
 
-        <div ng-if="$ctrl.selectedMapObject">
+        <!-- We need an object to be selected in order to show its details -->
+        <div ng-if="$ctrl.selectedMapObject" style="margin-top: 10px">
+          <!-- Section header showing the type of the selected object -->
+          <div class="sidebar-table-header">
+              <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
+              <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
+          </div>
+          <!-- A table containing the editable properties of the selected object -->
           <table id="tblEquipmentProperties"
-                 class="table table-condensed table-striped">
+                 class="table table-condensed table-striped sidebar-table"
+                 style="margin-bottom: 10px">
             <tbody>
               <tr>
                 <td>Site Identifier</td>
@@ -61,24 +104,6 @@
                 <td>
                   <input class="form-control"
                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteName"
-                         ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-                </td>
-              </tr>
-              <tr>
-                <td>Site Type</td>
-                <td>
-                    <select class="form-control"
-                            ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteType"
-                            ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteTypes"
-                            ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-                    </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Deployment Date</td>
-                <td>
-                  <input class="form-control"
-                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].deploymentDate"
                          ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                 </td>
               </tr>
@@ -98,12 +123,19 @@
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-                  ng-click="$ctrl.saveSelectedEquipmentProperties()">
+                  ng-click="$ctrl.saveSelectedEquipmentProperties()"
+                  style="margin-bottom: 10px">
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
           </button>
           <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
-            <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
+            <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected equipment
           </button>
+          <br>
+          <br>
+          <select class="form-control"
+                  ng-model="$ctrl.selectedBoundaryType"
+                  ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
+          </select>
         </div>
       </div>
     </accordion-panel-contents>
