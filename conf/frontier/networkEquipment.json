@@ -5,7 +5,7 @@
       "layers": {
         "planned_central_office": {
           "label": "Central Office",
-	  "networkNodeType": "central_office",
+          "networkNodeType": "central_office",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/central_office/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/central_office.png",
           "aggregateZoomThreshold": "7",
@@ -13,11 +13,11 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
         "planned_remote_terminal": {
           "label": "Remote Terminal",
-	  "networkNodeType": "dslam",
+          "networkNodeType": "dslam",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/dslam/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/aro/remote_terminal.png",
           "aggregateZoomThreshold": "7",
@@ -25,11 +25,11 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
         "planned_fdh": {
           "label": "FDH",
-	  "networkNodeType": "fiber_distribution_hub",
+          "networkNodeType": "fiber_distribution_hub",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_hub/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/fiber_distribution_hub.png",
           "aggregateZoomThreshold": "12",
@@ -37,11 +37,11 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
         "planned_fdt": {
           "label": "FDT",
-	  "networkNodeType": "fiber_distribution_terminal",
+          "networkNodeType": "fiber_distribution_terminal",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/fiber_distribution_terminal/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/fiber_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
@@ -49,10 +49,11 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
         "planned_5g_site": {
           "label": "Fixed Wireless Site",
+          "networkNodeType": "cell_5g",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/composite/all_cell_5g.png",
           "aggregateZoomThreshold": "14",
@@ -60,11 +61,11 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
-	"planned_splice_point": {
+        "planned_splice_point": {
           "label": "Splice point",
-	  "networkNodeType": "splice_point",
+          "networkNodeType": "splice_point",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/splice_point/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/splice_point.png",
           "aggregateZoomThreshold": "14",
@@ -72,11 +73,11 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
         "planned_bulk_distribution_terminal": {
           "label": "Bulk Distribution Terminal",
-	  "networkNodeType": "bulk_distribution_terminal",
+          "networkNodeType": "bulk_distribution_terminal",
           "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/bulk_distribution_terminal/point/{pointTransform}/entity/",
           "iconUrl": "/images/map_icons/frontier/bulk_distribution_terminal.png",
           "aggregateZoomThreshold": "14",
@@ -84,9 +85,9 @@
           "drawingOptions": {
             "strokeStyle": "#0000ff"
           },
-	  "isequipment": true
+          "isequipment": true
         },
-	"existing_distribution_fiber": {
+        "existing_distribution_fiber": {
           "label": "Distribution Fiber",
           "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/DISTRIBUTION/{lineTransform}/",
           "iconUrl": "/images/map_icons/frontier/fiber_distribution.png",
@@ -94,11 +95,11 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#0000ff",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
-	"existing_feeder_fiber": {
+        "existing_feeder_fiber": {
           "label": "Feeder Fiber",
           "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/FEEDER/{lineTransform}/",
           "iconUrl": "/images/map_icons/frontier/fiber_feeder.png",
@@ -106,11 +107,11 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#ff0000",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
-	"existing_iof_fiber": {
+        "existing_iof_fiber": {
           "label": "IOF Fiber",
           "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/IOF/{lineTransform}/",
           "iconUrl": "/images/map_icons/frontier/fiber_backhaul.png",
@@ -118,11 +119,11 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#000000",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
-	"existing_unknown_fiber": {
+        "existing_unknown_fiber": {
           "label": "Unknown Fiber",
           "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/UNKNOWN/{lineTransform}/",
           "iconUrl": "/images/map_icons/frontier/fiber_unknown.png",
@@ -130,11 +131,11 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#808080",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
-	"existing_copper": {
+        "existing_copper": {
           "label": "Copper Cable",
           "tileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/COPPER/{lineTransform}/",
           "iconUrl": "/images/map_icons/frontier/copper.png",
@@ -142,9 +143,9 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#b87333",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
         "planned_distribution_fiber": {
           "label": "Planned Distribution Fiber",
@@ -154,9 +155,9 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#0000ff",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
         "planned_feeder_fiber": {
           "label": "Planned Feeder Fiber",
@@ -166,9 +167,9 @@
           "equipmentType": "line",
           "drawingOptions": {
             "strokeStyle": "#ff0000",
-	    "showPolylineDirection": true
+            "showPolylineDirection": true
           },
-	  "isequipment": false
+          "isequipment": false
         },
         "planned_site_boundaries": {
           "label": "Site Boundaries",
@@ -184,7 +185,7 @@
       }
     }
   },
-  "existingFiberOptions" : {
+  "existingFiberOptions": {
     "aggregateZoomThreshold": "10",
     "drawingOptions": {
       "strokeStyle": "#000000"

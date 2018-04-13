@@ -21,6 +21,36 @@ class MapObjectEditorController {
       top: '100px',
       left: '100px'
     }
+
+    var mapCanvas = $document.find('#map-canvas-container')[0]
+    mapCanvas.ondragover = () => false;
+    mapCanvas.ondrop = (event) => {
+      console.log(event);
+      // Convert pixels to latlng
+      var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
+      console.log(dropLatLng)
+      var feature = {
+        objectId: this.getUUID(),
+        geometry: {
+          type: 'Point',
+          coordinates: [dropLatLng.lng(), dropLatLng.lat()]
+        }
+      }
+      this.createMapObject(feature, true)
+      event.preventDefault();
+    };
+  }
+
+  // Convert from pixel coordinates to latlngs. https://stackoverflow.com/a/30541162
+  pixelToLatlng(xcoor, ycoor) {
+    var ne = this.mapRef.getBounds().getNorthEast();
+    var sw = this.mapRef.getBounds().getSouthWest();
+    var projection = this.mapRef.getProjection();
+    var topRight = projection.fromLatLngToPoint(ne);
+    var bottomLeft = projection.fromLatLngToPoint(sw);
+    var scale = 1 << this.mapRef.getZoom();
+    var newLatlng = projection.fromPointToLatLng(new google.maps.Point(xcoor / scale + bottomLeft.x, ycoor / scale + topRight.y));
+    return newLatlng;
   }
 
   // Get a list of UUIDs from the server
