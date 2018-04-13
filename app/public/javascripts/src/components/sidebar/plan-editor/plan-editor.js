@@ -324,9 +324,9 @@ class PlanEditorController {
         })
         .catch((err) => console.error(err))
       // Delete the associated boundary
-      const boundaryObjectId = this.equipmentIdToBoundaryId[this.selectedMapObject.objectId]
+      const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
       if (boundaryObjectId) {
-        delete this.equipmentIdToBoundaryId[this.selectedMapObject.objectId]
+        delete this.equipmentIdToBoundaryId[mapObject.objectId]
         delete this.boundaryIdToEquipmentId[boundaryObjectId]
         this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
       }
