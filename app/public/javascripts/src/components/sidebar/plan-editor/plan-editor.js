@@ -13,6 +13,7 @@ class PlanEditorController {
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
     this.equipmentIdToBoundaryId = {}
+    this.showDragHelpText = true
     this.currentTransaction = null
     this.coverageRadius = 10000 // In user units (e.g. Feet)
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
@@ -69,6 +70,7 @@ class PlanEditorController {
     // Select the first boundary in the list
     this.selectedBoundaryType = this.state.boundaryTypes[0]
     this.resumeOrCreateTransaction()
+    this.$timeout(() => this.showDragHelpText = false, 3000)  // Hide help text after a while
   }
 
   resumeOrCreateTransaction() {
