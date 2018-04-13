@@ -43,6 +43,20 @@ class PlanEditorController {
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.uuidStore = []
     this.getUUIDsFromServer()
+    // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
+    this.allEditableNetworkNodeTypes = [
+      'central_office',
+      'dslam',
+      'fiber_distribution_hub',
+      'fiber_distribution_terminal',
+      'cell_5g',
+      'splice_point',
+      'bulk_distribution_terminal'
+    ]
+    // Create a list of enabled network node types that we WILL allow the user to drag onto the map
+    this.enabledNetworkNodeTypes = [
+      'dslam'
+    ]
   }
 
   // Get a list of UUIDs from the server

@@ -9,6 +9,13 @@
   #tblEquipmentProperties td {
     line-height: 33px;  /* To vertically align text */
   }
+  .draggable-item-button {
+    border: none;
+  }
+  .plan-editor-hr {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 </style>
 
 <div class="edit-plan-container">
@@ -30,6 +37,8 @@
       </map-object-editor>
 
       <div style="margin: 10px">
+
+        <!-- Buttons to commit or discard a transaction -->
         <div class="text-center">
           <div class="btn-group ">
             <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
@@ -38,6 +47,29 @@
         </div>
         <br>
 
+        <!-- Section that allows the user to drag and drop equipment and boundaries onto the map -->
+        <div style="width: 100%">
+          <p class="text-center">Click and drag equipment/boundary onto the map</p>
+          <hr class="plan-editor-hr">
+          <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
+          <button class="btn btn-default draggable-item-button"
+                  ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipmentList.planned.layers"
+                  ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
+                  ng-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0">
+            <img ng-src="{{equipment.iconUrl}}">
+          </button>
+          <hr class="plan-editor-hr">
+          <!-- Boundary buttons -->
+          <button class="btn btn-default draggable-item-button">
+            <i class="fa fa-2x fa-registered"></i>
+          </button>
+          <button class="btn btn-default draggable-item-button">
+            <i class="fa fa-2x fa-copyright"></i>
+          </button>
+          <hr class="plan-editor-hr">
+        </div>
+
+        <br>
         <select class="form-control"
                 ng-model="$ctrl.selectedBoundaryType"
                 ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
