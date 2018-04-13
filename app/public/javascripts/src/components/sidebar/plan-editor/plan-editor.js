@@ -15,6 +15,7 @@ class PlanEditorController {
     this.equipmentIdToBoundaryId = {}
     this.showDragHelpText = true
     this.currentTransaction = null
+    this.lastSelectedEquipmentType = 'Generic ADSL'
     this.coverageRadius = 10000 // In user units (e.g. Feet)
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.uuidStore = []
@@ -218,6 +219,7 @@ class PlanEditorController {
     if (this.selectedMapObject) {
       var objectProperties = this.objectIdToProperties[this.selectedMapObject.objectId]
       objectProperties.isDirty = true
+      this.lastSelectedEquipmentType = objectProperties.selectedEquipmentType || this.lastSelectedEquipmentType
     }
   }
 
@@ -290,7 +292,7 @@ class PlanEditorController {
   }
 
   handleObjectCreated(mapObject, usingMapClick) {
-    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'planned_remote_terminal')
+    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'planned_remote_terminal', this.lastSelectedEquipmentType)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && mapObject.icon && mapObject.position) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
