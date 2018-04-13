@@ -10,8 +10,12 @@ class DraggableButtonController {
     var buttonElement = this.$element.find('button')[0]
     // Set custom dragging data when this button is dragged
     buttonElement.ondragstart = (dragEvent) => {
+      if (this.isDisabled) {
+        return false
+      }
       dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_KEY, this.entityType)
       dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY, this.entityDetails)
+      return true
     }
   }
 
