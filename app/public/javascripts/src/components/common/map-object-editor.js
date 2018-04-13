@@ -9,6 +9,7 @@ class MapObjectEditorController {
     this.state = state
     this.tileDataService = tileDataService
     this.mapRef = null
+    this.createObjectOnClick = true
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.uuidStore = []
@@ -239,6 +240,9 @@ class MapObjectEditorController {
       isExistingObject = true
     } else {
       // The map was clicked on, but there was no location under the cursor. Create a new one.
+      if (!this.createObjectOnClick) {
+        return    // We do not want to create the map object on click
+      }
       feature.objectId = this.getUUID()
       isExistingObject = false
     }
@@ -319,6 +323,7 @@ let mapObjectEditor = {
     objectIconUrl: '@',
     objectSelectedIconUrl: '@',
     deleteMode: '<',
+    createObjectOnClick: '<',
     onInit: '&',
     onCreateObject: '&',
     onSelectObject: '&',
