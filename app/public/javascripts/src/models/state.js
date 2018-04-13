@@ -229,7 +229,20 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     tileLayers: [],
     areaLayers: []
   }
-
+  
+  
+  service.censusCategories = new Rx.BehaviorSubject()
+  service.reloadCensusCategories = (censusCategories) => {
+    service.censusCategories.next(censusCategories)
+    service.requestMapLayerRefresh.next({})
+  }
+  
+  service.selectedCensusCategoryId = new Rx.BehaviorSubject()
+  service.reloadSelectedCensusCategoryId = (catId) => {
+    service.selectedCensusCategoryId.next(catId)
+    service.requestMapLayerRefresh.next({})
+  }
+  
   // The display modes for the application
   service.displayModes = Object.freeze({
     VIEW: 'VIEW',
@@ -522,8 +535,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.networkAnalysisType = service.networkAnalysisTypes[0]
 
     //Upload Data Sources
-    service.uploadDataSources = [
-    ]
+    service.uploadDataSources = []
     service.uploadDataSource
     service.dataItems = {}
 
@@ -1195,7 +1207,25 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.showSiteBoundary = false
   service.boundaryTypes = []
   service.selectedBoundaryType = {}
-
+  
+  var loadCensusCatData = function () {
+    return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
+    .then((result) => {
+      let censusCats = {}
+      result.data.forEach( (cat) => {
+        let tagsById = {}
+        cat.tags.forEach( (tag) => {
+          tag.colourHash = service.getTagColour(tag)
+          tagsById[ tag.id+'' ] = tag
+        })
+        cat.tags = tagsById
+        censusCats[ cat.id+'' ] = cat
+      })
+      service.reloadCensusCategories(censusCats)
+    })  
+  }
+  loadCensusCatData()
+  
   var loadBoundaryLayers = function () {
     return $http.get(`/service/boundary_type`)
     .then((result) => {

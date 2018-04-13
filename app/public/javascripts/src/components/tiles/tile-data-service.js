@@ -36,6 +36,7 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
+	//console.log(mapLayer) 
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
       // We have one or multiple URLs where data is coming from, and we want a simple union of the results
       return tileDataService.getTileDataFlatten(mapLayer, zoom, tileX, tileY)
@@ -66,10 +67,16 @@ app.service('tileDataService', ['$http', ($http) => {
           // Save the features in a per-layer object
           var layerToFeatures = {}
           Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+        	    //console.log(layerKey)
             var layer = mapboxVectorTile.layers[layerKey]
             var features = []
             for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-              features.push(layer.feature(iFeature))
+            	  let feature = layer.feature(iFeature)
+            	  //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+            	  if ('v1.tiles.census_block.select' == layerKey){
+            		  formatCensusBlockData( feature )
+            	  }
+              features.push(feature)
             }
             layerToFeatures[layerKey] = features
           })
@@ -86,7 +93,22 @@ app.service('tileDataService', ['$http', ($http) => {
     }
     return tileDataService.tileDataCache[tileCacheKey]
   }
-
+  
+  var formatCensusBlockData = function(cBlock){
+	let sepA = ';'
+	let sepB = ':'
+    cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
+    	let kvPairs = cBlock.properties.tags.split( sepA )
+    	cBlock.properties.tags = {}
+    	kvPairs.forEach((pair) => {
+    	  let kv = pair.split( sepB )
+    	  // incase there are extra ':'s in the value we join all but the first together 
+    	  if ("" != kv[0]) cBlock.properties.tags[ kv[0]+"" ] = kv.slice(1).join( sepB )
+    	}) 
+    //console.log(cBlock.properties.tags)
+    //return cBlock 
+  }
+  
   // Flattens all URLs and returns tile data that is a simple union of all features
   tileDataService.getTileDataFlatten = (mapLayer, zoom, tileX, tileY) => {
     // We have multiple URLs where data is coming from, and we want a simple union of the results

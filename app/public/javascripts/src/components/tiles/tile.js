@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -21,6 +21,9 @@ class MapTileRenderer {
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
     this.selectedCensusBlockId = selectedCensusBlockId
+    this.censusCategories = censusCategories
+    this.selectedCensusCategoryId = selectedCensusCategoryId
+    
     this.displayModes = displayModes
     this.renderBatches = []
     this.isRendering = false
@@ -54,6 +57,16 @@ class MapTileRenderer {
   //Sets the selected Census Block ids
   setSelectedCensusBlockId(selectedCensusBlockId) {
     this.selectedCensusBlockId = selectedCensusBlockId
+    this.tileDataService.markHtmlCacheDirty()
+  }
+  
+  setSelectedCensusCategoryId(selectedCensusCategoryId) {
+    this.selectedCensusCategoryId = selectedCensusCategoryId
+    this.tileDataService.markHtmlCacheDirty()
+  }
+  
+  setCensusCategories(censusCategories) {
+    this.censusCategories = censusCategories
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -95,9 +108,6 @@ class MapTileRenderer {
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
-    //console.log('set order - old, new:')
-    //console.log(this.mapLayers)
-	//console.log(mapLayers)
     var layersChanged = false
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
       if (!mapLayers[oldMapLayerKey]) {
@@ -119,7 +129,6 @@ class MapTileRenderer {
       this.tileDataService.markHtmlCacheDirty()
       // order by zIndex for drawing in proper stacking order 
       this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
-      //console.log(this.mapLayersByZ)
     }
     
     this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)
@@ -213,13 +222,9 @@ class MapTileRenderer {
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
 	var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
-	//console.log(this.mapLayers)
-    //Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
     	this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
-      //console.log('layer: '+mapLayerKey)
-      //console.log(mapLayer)
       var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,
@@ -573,13 +578,26 @@ class MapTileRenderer {
     // ToDo: use an object merge of mapLayer.highlightStyle instead having to know which attributes are implemented
     // ToDo: need to ensure feature type 
     //    a non-selected service area could have the same id as the selected census block
-    if (this.selectedCensusBlockId == feature.properties.id){
-    	  // Hilight selected census block
-    	  //drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
-      //drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
-      //drawingStyles.opacity = mapLayer.highlightStyle.opacity
-    	  drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
-    	  //ctx.globalCompositeOperation = 'multiply'
+    if ( feature.properties.hasOwnProperty('layerType') 
+         && 'census_block' == feature.properties.layerType){
+      if (this.selectedCensusBlockId == feature.properties.id){
+        // Hilight selected census block
+        drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
+        ctx.lineCap = 'round';
+      }
+      
+    	  // check for census filters
+      if ( 'undefined' != typeof this.selectedCensusCategoryId
+           && feature.properties.tags.hasOwnProperty(this.selectedCensusCategoryId)){
+        let tagId = feature.properties.tags[this.selectedCensusCategoryId]
+        
+        if (this.censusCategories[this.selectedCensusCategoryId].tags.hasOwnProperty(tagId)){
+          let color = this.censusCategories[this.selectedCensusCategoryId].tags[tagId].colourHash
+          drawingStyles.strokeStyle = color
+          drawingStyles.fillStyle = color
+        }
+      }
+      
     }else if(  this.selectedServiceAreas.has(feature.properties.id)
          && this.selectedDisplayMode == this.displayModes.ANALYSIS 
          && this.analysisSelectionMode == "SELECTED_AREAS") {
@@ -836,8 +854,6 @@ class MapTileRenderer {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
-      //console.log('test feature')
-      //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
@@ -980,6 +996,25 @@ class TileComponentController {
       }
     })
     
+    // If selected census category ids change, set that in the tile data road
+    state.selectedCensusCategoryId.subscribe((selectedCensusCategoryId) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedCensusCategoryId(selectedCensusCategoryId)
+      }
+    })
+    
+    
+    
+    // If selected census category map changes or gets loaded, set that in the tile data road
+    state.censusCategories.subscribe((censusCategories) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setCensusCategories(censusCategories)
+      }
+    })
+    
+    
+    
+    
     // If selected road_segment ids change, set that in the tile data road
     state.selectedRoadSegments.subscribe((selectedRoadSegment) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -1111,6 +1146,8 @@ class TileComponentController {
                                                            this.state.selectedLocations.getValue(),
                                                            this.state.selectedServiceAreas.getValue(),
                                                            this.state.selectedCensusBlockId.getValue(),
+                                                           this.state.censusCategories.getValue(),
+                                                           this.state.selectedCensusCategoryId.getValue(),
                                                            this.state.selectedRoadSegments.getValue(),
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
@@ -1157,8 +1194,6 @@ class TileComponentController {
             }
 
             results[0].forEach((result) => {
-            	  //console.log('result')
-        	      //console.log(result)
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
@@ -1167,10 +1202,9 @@ class TileComponentController {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
               } else if (result.gid) {
                 roadSegments.add(result)
-              } else if (result.id && result.hasOwnProperty('tags')) {
+              } else if ( result.hasOwnProperty('layerType') 
+                          && 'census_block' == result.layerType){
             	    censusFeatures.push(result)
-            	    //console.log(this)
-            	    //this.selectedCensusBlockId = result.id
               } else if (result.id) {
                 equipmentFeatures = equipmentFeatures.concat(result)
               }

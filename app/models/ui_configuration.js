@@ -18,7 +18,8 @@ module.exports = class UIConfiguration {
     
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded. Load it from disk now.
-      var clientConfigFile = '../../conf/' + process.env.ARO_CLIENT + '/' + configSet + '.json'
+      // Do the config merege here
+    	  var clientConfigFile = '../../conf/' + process.env.ARO_CLIENT + '/' + configSet + '.json'
       this.configurations[configSet] = require(clientConfigFile)
     }
 
