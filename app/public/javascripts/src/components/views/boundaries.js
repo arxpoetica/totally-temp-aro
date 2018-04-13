@@ -165,9 +165,7 @@ class BoundariesController {
   
   
   onSelectCensusCat(){
-    //this.selectedCensusCat = censusCat
     this.state.reloadSelectedCensusCategoryId(this.selectedCensusCat.id)
-    //console.log(this.selectedCensusCat)
   }
   
   // for MapLayer objects 
@@ -197,7 +195,7 @@ class BoundariesController {
     	  lineWidth: 4,
     	  fillStyle: "transparent",
     	  opacity: 0.7,
-    	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+    	  zIndex: 3510, // ToDo: MOVE THIS TO A SETTINGS FILE!
     	  highlightStyle: {
     	    strokeStyle: '#000000',
     	    fillStyle: 'green',
@@ -213,7 +211,7 @@ class BoundariesController {
     	  lineWidth: 1,
     	  fillStyle: "transparent",
     	  opacity: 0.7,
-    	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
+    	  zIndex: 3520, // ToDo: MOVE THIS TO A SETTINGS FILE!
     	  highlightStyle: {
     	    lineWidth: 8
     	  }

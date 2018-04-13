@@ -17,8 +17,8 @@
               <!-- Service Areas -->
               {{layer.name}}
               
-              <div ng-if="'census_blocks' == layer.type && layer.visible_check">
-                <select class="form-control"
+              <div ng-if="'census_blocks' == layer.type && layer.visible_check" style="padding-left: 0.5em;">
+                <select class="form-control" style="margin-bottom: 0.5em;"
 			            ng-model="$ctrl.selectedCensusCat"
 			            ng-options="item as item.description for item in $ctrl.censusCategories"
 			            ng-change="$ctrl.onSelectCensusCat()">

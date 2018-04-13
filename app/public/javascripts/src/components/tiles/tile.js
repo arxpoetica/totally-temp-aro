@@ -108,9 +108,6 @@ class MapTileRenderer {
   // Sets the map layers for this renderer
   setMapLayers(mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
-    //console.log('set order - old, new:')
-    //console.log(this.mapLayers)
-	//console.log(mapLayers)
     var layersChanged = false
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
       if (!mapLayers[oldMapLayerKey]) {
@@ -132,7 +129,6 @@ class MapTileRenderer {
       this.tileDataService.markHtmlCacheDirty()
       // order by zIndex for drawing in proper stacking order 
       this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
-      //console.log(this.mapLayersByZ)
     }
     
     this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)
@@ -226,13 +222,9 @@ class MapTileRenderer {
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
 	var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
-	//console.log(this.mapLayers)
-    //Object.keys(this.mapLayers).forEach((mapLayerKey, index) => {
     	this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
-      //console.log('layer: '+mapLayerKey)
-      //console.log(mapLayer)
       var numNeighbors = (useNeighbouringTileData && mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,
@@ -590,12 +582,8 @@ class MapTileRenderer {
          && 'census_block' == feature.properties.layerType){
       if (this.selectedCensusBlockId == feature.properties.id){
         // Hilight selected census block
-        //drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
-        //drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
-        //drawingStyles.opacity = mapLayer.highlightStyle.opacity
-        console.log(feature)
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
-        //ctx.globalCompositeOperation = 'multiply'
+        ctx.lineCap = 'round';
       }
       
     	  // check for census filters
@@ -866,8 +854,6 @@ class MapTileRenderer {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
-      //console.log('test feature')
-      //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
@@ -1208,8 +1194,6 @@ class TileComponentController {
             }
 
             results[0].forEach((result) => {
-            	  //console.log('result')
-        	      //console.log(result)
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {

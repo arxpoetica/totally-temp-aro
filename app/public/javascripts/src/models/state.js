@@ -1211,7 +1211,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   var loadCensusCatData = function () {
     return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
     .then((result) => {
-      console.log(result)
       let censusCats = {}
       result.data.forEach( (cat) => {
         let tagsById = {}
@@ -1222,7 +1221,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         cat.tags = tagsById
         censusCats[ cat.id+'' ] = cat
       })
-      console.log(censusCats)
       service.reloadCensusCategories(censusCats)
     })  
   }
