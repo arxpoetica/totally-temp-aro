@@ -1,5 +1,3 @@
-import saTags from './servicetags_temp.json'
-
 class PlanInputsModalController {
   constructor(state,$element) {
     this.state    = state
@@ -42,8 +40,6 @@ class PlanInputsModalController {
 
   $onInit() {
     this.$element.find('#plan_inputs_modal > .modal-dialog').css("width","300")
-    //Getting hardcoded SA tag values
-    this.state.listOfServiceAreaTags = saTags
   }
 
 }

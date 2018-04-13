@@ -1259,8 +1259,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       .then((results) => {
         service.listOfTags = results[0].data
         //concatinating harcoded SA tag values
-        //service.listOfServiceAreaTags = _.uniq(service.listOfServiceAreaTags.concat(results[1].data))
-        service.listOfServiceAreaTags = results[1].data
+        service.listOfServiceAreaTags = results[1].data.concat(configuration.servicetagsTemp)
       }) 
   }
 
