@@ -70,7 +70,7 @@ class PlanEditorController {
     // Select the first boundary in the list
     this.selectedBoundaryType = this.state.boundaryTypes[0]
     this.resumeOrCreateTransaction()
-    this.$timeout(() => this.showDragHelpText = false, 3000)  // Hide help text after a while
+    this.$timeout(() => this.showDragHelpText = false, 6000)  // Hide help text after a while
   }
 
   resumeOrCreateTransaction() {
@@ -341,6 +341,16 @@ class PlanEditorController {
     if (mapObject.icon && mapObject.position) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+      // If this is an equipment, delete its associated boundary (if any)
+      if (mapObject.icon && mapObject.position) {
+        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
+        if (boundaryObjectId) {
+          delete this.equipmentIdToBoundaryId[mapObject.objectId]
+          delete this.boundaryIdToEquipmentId[boundaryObjectId]
+          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+          // No need to delete from the server, we will get another delete event for the boundary.
+        }
+      }
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
     }
@@ -349,18 +359,8 @@ class PlanEditorController {
   deleteSelectedObject() {
     // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
     if (this.selectedMapObject) {
-      var mapObjectToDelete = this.selectedMapObject  // this.selectedMapObject may change while deleting stuff below
-      // If this is an equipment, delete its associated boundary (if any)
-      if (mapObjectToDelete.icon && mapObjectToDelete.position) {
-        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObjectToDelete.objectId]
-        if (boundaryObjectId) {
-          delete this.equipmentIdToBoundaryId[mapObjectToDelete.objectId]
-          delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-        }
-      }
       // Delete the selected map object
-      this.deleteObjectWithId && this.deleteObjectWithId(mapObjectToDelete.objectId)
+      this.deleteObjectWithId && this.deleteObjectWithId(this.selectedMapObject.objectId)
     }
   }
 }

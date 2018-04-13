@@ -280,6 +280,12 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
   }
 
+  deleteSelectedObject() {
+    if (this.selectedMapObject) {
+      this.deleteObjectWithId(this.selectedMapObject.objectId)
+    }
+  }
+
   deleteObjectWithId(objectId) {
     if (this.selectedMapObject && (this.selectedMapObject.objectId === objectId)) {
       // Deselect the currently selected object, as it is about to be deleted.
