@@ -28,6 +28,11 @@ class BoundariesController {
     // Update map layers when the display mode button changes
     this.state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
     
+    this.censusCategories = this.state.censusCategories.getValue()
+    this.state.censusCategories.subscribe((newValue) => {
+      this.censusCategories = newValue
+    })
+    
     if (config.ui.map_tools.boundaries.view.indexOf('county_subdivisions') >= 0) {
       countySubdivisionsLayer = new MapLayer({
         short_name: 'CS',
@@ -162,7 +167,7 @@ class BoundariesController {
   onSelectCensusCat(){
     //this.selectedCensusCat = censusCat
     this.state.reloadSelectedCensusCategoryId(this.selectedCensusCat.id)
-    console.log(this.selectedCensusCat)
+    //console.log(this.selectedCensusCat)
   }
   
   // for MapLayer objects 
@@ -204,8 +209,8 @@ class BoundariesController {
     	  dataUrls: [],
     	  renderMode: 'PRIMITIVE_FEATURES',
     	  selectable: true,
-    	  strokeStyle: 'blue',
-    	  lineWidth: 2,
+    	  strokeStyle: '#333333',
+    	  lineWidth: 1,
     	  fillStyle: "transparent",
     	  opacity: 0.7,
     	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!

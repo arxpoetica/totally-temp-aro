@@ -20,7 +20,7 @@
               <div ng-if="'census_blocks' == layer.type && layer.visible_check">
                 <select class="form-control"
 			            ng-model="$ctrl.selectedCensusCat"
-			            ng-options="item as item.description for item in $ctrl.state.censusCategories"
+			            ng-options="item as item.description for item in $ctrl.censusCategories"
 			            ng-change="$ctrl.onSelectCensusCat()">
 			          </select>
                 

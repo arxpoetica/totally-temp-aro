@@ -230,15 +230,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     areaLayers: []
   }
   
-  // doesn't change so only needs to be loaded once 
-  //    if that changes use a Rx.BehaviorSubject instead 
-  service.censusCategories = {}
+  
+  service.censusCategories = new Rx.BehaviorSubject()
+  service.reloadCensusCategories = (censusCategories) => {
+    service.censusCategories.next(censusCategories)
+    service.requestMapLayerRefresh.next({})
+  }
   
   service.selectedCensusCategoryId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusCategoryId = (catId) => {
-    service.selectedCensusBlockId.next(catId)
+    service.selectedCensusCategoryId.next(catId)
     service.requestMapLayerRefresh.next({})
-    console.log(catId)
   }
   
   // The display modes for the application
@@ -1210,14 +1212,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
     .then((result) => {
       console.log(result)
-      service.censusCategories = {}
+      let censusCats = {}
       result.data.forEach( (cat) => {
+        let tagsById = {}
         cat.tags.forEach( (tag) => {
           tag.colourHash = service.getTagColour(tag)
+          tagsById[ tag.id+'' ] = tag
         })
-        service.censusCategories[ cat.id+'' ] = cat
+        cat.tags = tagsById
+        censusCats[ cat.id+'' ] = cat
       })
-      console.log(service.censusCategories)
+      console.log(censusCats)
+      service.reloadCensusCategories(censusCats)
     })  
   }
   loadCensusCatData()
