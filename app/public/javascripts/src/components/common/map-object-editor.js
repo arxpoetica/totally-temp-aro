@@ -1,3 +1,4 @@
+import Constants from './constants'
 class MapObjectEditorController {
 
   constructor($http, $element, $document, $timeout, state, tileDataService) {
@@ -21,36 +22,6 @@ class MapObjectEditorController {
       top: '100px',
       left: '100px'
     }
-
-    var mapCanvas = $document.find('#map-canvas-container')[0]
-    mapCanvas.ondragover = () => false;
-    mapCanvas.ondrop = (event) => {
-      console.log(event);
-      // Convert pixels to latlng
-      var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
-      console.log(dropLatLng)
-      var feature = {
-        objectId: this.getUUID(),
-        geometry: {
-          type: 'Point',
-          coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-        }
-      }
-      this.createMapObject(feature, true)
-      event.preventDefault();
-    };
-  }
-
-  // Convert from pixel coordinates to latlngs. https://stackoverflow.com/a/30541162
-  pixelToLatlng(xcoor, ycoor) {
-    var ne = this.mapRef.getBounds().getNorthEast();
-    var sw = this.mapRef.getBounds().getSouthWest();
-    var projection = this.mapRef.getProjection();
-    var topRight = projection.fromLatLngToPoint(ne);
-    var bottomLeft = projection.fromLatLngToPoint(sw);
-    var scale = 1 << this.mapRef.getZoom();
-    var newLatlng = projection.fromPointToLatLng(new google.maps.Point(xcoor / scale + bottomLeft.x, ycoor / scale + topRight.y));
-    return newLatlng;
   }
 
   // Get a list of UUIDs from the server
@@ -98,11 +69,45 @@ class MapObjectEditorController {
       this.handleMapEntitySelected(event)
     })
 
+    // Add handlers for drag-and-drop creation of elements
+    var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
+    // On drag over, only allow dropping if the object being dragged is a networkEquipment
+    mapCanvas.ondragover = (event) => {
+      // Note that we do not have access the the event.dataTransfer data, only the types. This is by design.
+      var hasEntityType = (event.dataTransfer.types.indexOf(Constants.DRAG_DROP_ENTITY_KEY) >= 0)
+      return !hasEntityType;  // false == allow dropping
+    }
+    mapCanvas.ondrop = (event) => {
+      // Convert pixels to latlng
+      var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
+      var feature = {
+        objectId: this.getUUID(),
+        geometry: {
+          type: 'Point',
+          coordinates: [dropLatLng.lng(), dropLatLng.lat()]
+        }
+      }
+      this.createMapObject(feature, true)
+      event.preventDefault();
+    };
+
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
+  }
+
+  // Convert from pixel coordinates to latlngs. https://stackoverflow.com/a/30541162
+  pixelToLatlng(xcoor, ycoor) {
+    var ne = this.mapRef.getBounds().getNorthEast();
+    var sw = this.mapRef.getBounds().getSouthWest();
+    var projection = this.mapRef.getProjection();
+    var topRight = projection.fromLatLngToPoint(ne);
+    var bottomLeft = projection.fromLatLngToPoint(sw);
+    var scale = 1 << this.mapRef.getZoom();
+    var newLatlng = projection.fromPointToLatLng(new google.maps.Point(xcoor / scale + bottomLeft.x, ycoor / scale + topRight.y));
+    return newLatlng;
   }
 
   createMapObjects(features) {
@@ -296,6 +301,11 @@ class MapObjectEditorController {
       var documentBody = this.$document.find('body')[0]
       documentBody.removeChild(this.contextMenuElement)
     }, 0)
+
+    // Remove any dragging DOM event listeners
+    var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
+    mapCanvas.ondragover = null
+    mapCanvas.ondrop = null
   }
 }
 
@@ -305,6 +315,7 @@ let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
   bindings: {
     mapGlobalObjectName: '@',
+    mapContainerId: '@',  // The HTML element that contains the map
     objectIconUrl: '@',
     objectSelectedIconUrl: '@',
     deleteMode: '<',

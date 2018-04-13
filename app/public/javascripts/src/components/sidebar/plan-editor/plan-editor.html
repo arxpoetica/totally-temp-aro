@@ -25,15 +25,16 @@
 
       <!-- Add a component to handle map editing -->
       <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
-                        object-icon-url="/images/map_icons/aro/plan_equipment.png"
-                        object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
-                        on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick)"
-                        on-modify-object="$ctrl.handleObjectModified(mapObject)"
-                        on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
-                        on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
-                        register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
-                        register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
-                        register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
+                         map-container-id="map-canvas-container"
+                         object-icon-url="/images/map_icons/aro/plan_equipment.png"
+                         object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
+                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick)"
+                         on-modify-object="$ctrl.handleObjectModified(mapObject)"
+                         on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+                         on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
+                         register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
+                         register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
+                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
       </map-object-editor>
 
       <div style="margin: 10px">
@@ -52,12 +53,13 @@
           <p class="text-center">Click and drag equipment/boundary onto the map</p>
           <hr class="plan-editor-hr">
           <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
-          <button class="btn btn-default draggable-item-button"
-                  ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipmentList.planned.layers"
-                  ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
-                  ng-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0">
-            <img ng-src="{{equipment.iconUrl}}">
-          </button>
+          <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipmentList.planned.layers"
+                            ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
+                            icon="{{equipment.iconUrl}}",
+                            is-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0"
+                            entity-type="networkEquipment"
+                            entity-details="{{equipment.networkNodeType}}">
+          </draggable-button>
           <hr class="plan-editor-hr">
           <!-- Boundary buttons -->
           <button class="btn btn-default draggable-item-button">
