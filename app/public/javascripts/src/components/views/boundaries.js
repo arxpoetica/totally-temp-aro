@@ -138,6 +138,7 @@ class BoundariesController {
     
     globalServiceLayers.forEach((serviceLayer) => {
       if (!serviceLayer.show_in_boundaries) return
+      if ("Wirecenter" == serviceLayer.description) serviceLayer.description = "Service Areas" // ToDo: This is a hack, find where description is set
       var wirecenter_layer = {
         name: serviceLayer.description,
         type: serviceLayer.name,
@@ -165,7 +166,9 @@ class BoundariesController {
   
   
   onSelectCensusCat(){
-    this.state.reloadSelectedCensusCategoryId(this.selectedCensusCat.id)
+    let id = null
+    if (null != this.selectedCensusCat) id = this.selectedCensusCat.id
+    this.state.reloadSelectedCensusCategoryId(id)
   }
   
   // for MapLayer objects 
@@ -222,15 +225,16 @@ class BoundariesController {
     	  renderMode: 'PRIMITIVE_FEATURES',
     	  selectable: true,
     	  aggregateMode: 'FLATTEN',
-    	  strokeStyle: '#00ff00',
-    	  lineWidth: 4,
+    	  strokeStyle: '#333333',
+    	  lineWidth: 1,
     	  fillStyle: "transparent",
     	  opacity: 0.7,
     	  zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
     	  highlightStyle: {
     	    strokeStyle: '#000000',
     	    fillStyle: 'green',
-    	    opacity: 0.3
+    	    opacity: 0.3, 
+    	    lineWidth: 8
     	  }
     	}
     	
