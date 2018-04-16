@@ -1,0 +1,9 @@
+{
+  "b":"mask b",
+  "c":"mask c (not in base)", 
+  "arr":["arrays", "are", "overwritten"], 
+  "obj":{
+    "child_b":"mask child b", 
+    "child_c":"mask child c (not in base)"  
+  }
+}
