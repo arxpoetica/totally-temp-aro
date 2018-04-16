@@ -18,11 +18,50 @@ module.exports = class UIConfiguration {
     
     if (!this.configurations[configSet]) {
       // This configuration set has not been loaded. Load it from disk now.
-      // Do the config merege here
-    	  var clientConfigFile = '../../conf/' + process.env.ARO_CLIENT + '/' + configSet + '.json'
-      this.configurations[configSet] = require(clientConfigFile)
+      
+      // merge base config with client config 
+      var baseConfigPath = '/srv/www/aro/conf/base/' + configSet + '.json'
+      var clientConfigPath = '/srv/www/aro/conf/' + process.env.ARO_CLIENT + '/' + configSet + '.json'
+      
+      var baseConfigFile = null
+      var clientConfigFile = null
+      var outputConfigFile = null
+      
+      if (fs.existsSync(baseConfigPath)){
+        baseConfigFile = JSON.parse( fs.readFileSync(baseConfigPath) )
+      }
+      
+      if (fs.existsSync(clientConfigPath)){
+        clientConfigFile = JSON.parse( fs.readFileSync(clientConfigPath) )
+      }
+      
+      if (null != baseConfigFile && null == clientConfigFile){
+        outputConfigFile = baseConfigFile
+      }else if(null == baseConfigFile && null != clientConfigFile){
+        outputConfigFile = clientConfigFile
+      }else if(null != baseConfigFile && null != clientConfigFile){
+        UIConfiguration.basicDeepObjMerge(baseConfigFile, clientConfigFile)
+        outputConfigFile = baseConfigFile
+      }
+      
+      this.configurations[configSet] = outputConfigFile
     }
 
     return this.configurations[configSet]
   }
+  
+  
+  static basicDeepObjMerge(baseObj, maskObj){
+    // will merge maskObj on to baseObj, in place
+    for (var key in maskObj){
+      if (maskObj.hasOwnProperty(key)){
+        if ('object' == typeof maskObj[key] && 'object' == typeof baseObj[key]){
+          UIConfiguration.basicDeepObjMerge(baseObj[key], maskObj[key])
+        }else{
+          baseObj[key] = maskObj[key]
+        }
+      } 
+    }     
+  }
+  
 }

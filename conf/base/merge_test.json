@@ -1,0 +1,9 @@
+{
+  "a":"base a (not in mask)",
+  "b":"base b",
+  "arr":["base", "array"], 
+  "obj":{
+    "child_a":"base child a (not in mask)",
+    "child_b":"base child b" 
+  }
+}
