@@ -10,7 +10,8 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       'locationCategories',
       'networkEquipment',
       'units',
-      'servicetagsTemp'
+      'servicetagsTemp',
+      'aroClient'
     ]
     configurationTypes.forEach((configurationType) => {
       configurationPromises.push(

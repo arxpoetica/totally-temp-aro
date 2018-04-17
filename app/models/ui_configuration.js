@@ -17,7 +17,11 @@ module.exports = class UIConfiguration {
   getConfigurationSet (configSet) {
     
     if (!this.configurations[configSet]) {
-      // This configuration set has not been loaded. Load it from disk now.
+        if(configSet === 'aroClient')
+            this.configurations['aroClient'] = process.env.ARO_CLIENT || ''
+            return this.configurations['aroClient']
+
+        // This configuration set has not been loaded. Load it from disk now.
       
       // merge base config with client config 
       var baseConfigPath = '/srv/www/aro/conf/base/' + configSet + '.json'
@@ -43,7 +47,7 @@ module.exports = class UIConfiguration {
         UIConfiguration.basicDeepObjMerge(baseConfigFile, clientConfigFile)
         outputConfigFile = baseConfigFile
       }
-      
+
       this.configurations[configSet] = outputConfigFile
     }
 
