@@ -23,28 +23,17 @@ module.exports = class UIConfiguration {
       var baseConfigPath = '/srv/www/aro/conf/base/' + configSet + '.json'
       var clientConfigPath = '/srv/www/aro/conf/' + process.env.ARO_CLIENT + '/' + configSet + '.json'
       
-      var baseConfigFile = null
-      var clientConfigFile = null
-      var outputConfigFile = null
+      var baseConfig = fs.existsSync(baseConfigPath) ? JSON.parse( fs.readFileSync(baseConfigPath) ) : null // easier than testing for {}
+      var clientConfig = fs.existsSync(clientConfigPath) ? JSON.parse( fs.readFileSync(clientConfigPath) ) : {}
       
-      if (fs.existsSync(baseConfigPath)){
-        baseConfigFile = JSON.parse( fs.readFileSync(baseConfigPath) )
+      if (null == baseConfig){
+        // if we're just going to copy everything, no need to do it one at a time
+        baseConfig = clientConfig 
+      }else{
+        UIConfiguration.basicDeepObjMerge(baseConfig, clientConfig)
       }
       
-      if (fs.existsSync(clientConfigPath)){
-        clientConfigFile = JSON.parse( fs.readFileSync(clientConfigPath) )
-      }
-      
-      if (null != baseConfigFile && null == clientConfigFile){
-        outputConfigFile = baseConfigFile
-      }else if(null == baseConfigFile && null != clientConfigFile){
-        outputConfigFile = clientConfigFile
-      }else if(null != baseConfigFile && null != clientConfigFile){
-        UIConfiguration.basicDeepObjMerge(baseConfigFile, clientConfigFile)
-        outputConfigFile = baseConfigFile
-      }
-      
-      this.configurations[configSet] = outputConfigFile
+      this.configurations[configSet] = baseConfig
     }
 
     return this.configurations[configSet]
