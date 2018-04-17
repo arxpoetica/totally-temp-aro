@@ -1,78 +1,20 @@
 {
 	"mapIconFolder": "/images/map_icons/aro/",
-	"business": {
-		"user_upload": {
-			"active": true,
-			"label": "User Uploaded Customers"
-		},
-		"segments": {
-			"small": {
-				"show": true,
-				"label": "Small Businesses"
-			},
-			"medium": {
-				"show": true,
-				"label": "Medium Businesses"
-			},
-			"large": {
-				"show": true,
-				"label": "Large Businesses"
-			}
-		}
-	},
-	"household": {
-		"show": true,
-		"label": "Residential"
-	},
-	"celltower": {
-		"show": true,
-		"label": "Cell Sites"
-	},
 	"v2": {
 		"small_businesses": {
-			"show": true,
-			"label": "Small Businesses",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
-			"zIndex": 7560, 
-			"plannerKey": "small"
+			"iconUrl": "/images/map_icons/aro/businesses_small_default.png"
 		},
 		"medium_businesses": {
-			"show": true,
-			"label": "Medium Businesses",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/medium/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
-			"zIndex": 7570, 
-			"plannerKey": "medium"
+			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png"
 		},
 		"large_businesses": {
-			"show": true,
-			"label": "Large Businesses",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/large/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/businesses_large_default.png",
-			"zIndex": 7580, 
-			"plannerKey": "large"
+			"iconUrl": "/images/map_icons/aro/businesses_large_default.png"
 		},
 		"household": {
-			"show": true,
-			"label": "Residential",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/household/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/households_default.png",
-			"zIndex": 7500, 
-			"plannerKey": "household"
+			"iconUrl": "/images/map_icons/aro/households_default.png"
 		},
 		"celltower": {
-			"show": true,
-			"label": "Cell Sites",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/tower.png",
-			"zIndex": 7590, 
-			"plannerKey": "celltower"
+			"iconUrl": "/images/map_icons/aro/tower.png"
 		}
 	},
 	"env_is_test": false
