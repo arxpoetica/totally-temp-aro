@@ -1249,21 +1249,33 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.currentPlanTags = []
   service.listOfServiceAreaTags = []
   service.currentPlanServiceAreaTags = []
-  service.loadListOfPlanTags = () => {    
+  service.loadListOfPlanTags = () => {
     var promises = [
       $http.get(`/service/tag-mapping/tags`),
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=layer/id eq 1&$orderby=id&$top=10&$skip=10`)
+      //$http.get(`/service/odata/servicearea?$select=id,code&$filter=layer/id eq 1&$orderby=id&$top=10&$skip=10`)
     ]
 
     return Promise.all(promises)
       .then((results) => {
         service.listOfTags = results[0].data
         //concatinating harcoded SA tag values
-        service.listOfServiceAreaTags = results[1].data.concat(configuration.servicetagsTemp)
+        //service.listOfServiceAreaTags = results[1].data.concat(configuration.servicetagsTemp)
+        //service.listOfServiceAreaTags = results[1].data
       }) 
   }
 
   service.loadListOfPlanTags()
+
+  service.loadListOfSAPlanTags = (filterObj) => {
+    var filter = "layer/id eq 1"
+    filter = filterObj ? filter.concat(` and substringof(code,'${filterObj}')`) : filter
+    $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10`)
+    .then((results) => {
+      service.listOfServiceAreaTags = results.data
+    })  
+  }
+
+  service.loadListOfSAPlanTags()
 
   service.getTagColour = (tag) => {
     return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)

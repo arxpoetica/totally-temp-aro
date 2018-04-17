@@ -54,9 +54,13 @@
       ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">Recent Plans</button>
   </div>  
 
-  <plan-info ng-show="$ctrl.currentView == $ctrl.views.Plan_Info"
+  <plan-info ng-if="$ctrl.currentView == $ctrl.views.Plan_Info"
     current-user="$ctrl.user"
-    get-tag-details="$ctrl.getTagCategories(tagObject)"></plan-info>
+    get-tag-details="$ctrl.getTagCategories(tagObject)"
+    get-sa-tag-details="$ctrl.getSATagCategories(tagObject)"
+    update-tag="$ctrl.updateTag(plan,removeTag)"
+    delete-plan="$ctrl.deletePlan(plan)"
+    load-plans="$ctrl.loadPlans()"></plan-info>
   <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
 
   <div ng-if="$ctrl.currentView == $ctrl.views.Search_plans">
@@ -83,7 +87,9 @@
         theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
-            {{$item.type}}:<span class="label" style = "background-color:#1f7de6" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name || $item.code}}</span>
+            {{$item.type}}:
+            <span class="label" ng-if="$item.type!='svc'" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name || $item.code}}</span>
+            <span class="label satags satag" ng-if="$item.type=='svc'">{{$item.code}}</span>
           </span>
           <span class="tag" ng-if=!$item.type>
             {{$item}}
@@ -114,7 +120,8 @@
     <search-plan-filter 
       object-name="Service Area"
       search-list="$ctrl.state.listOfServiceAreaTags"
-      apply-search="$ctrl.applySaSearchFilter(selectedFilters)"></search-plan-filter>
+      apply-search="$ctrl.applySaSearchFilter(selectedFilters)"
+      refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></search-plan-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
@@ -132,7 +139,14 @@
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by $index" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
               <span class="label"> {{tag.name}} 
-                <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,tag)"></i>
+                <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
+              </span>
+            </div>
+            <div class="tags">
+              <div ng-repeat="tag in $ctrl.getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds) track by $index" 
+                class="tag label satags">
+              <span class="label satag"> {{tag.code}} 
+                <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
               </span>
             </div>
           </td>

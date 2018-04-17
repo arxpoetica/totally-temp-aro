@@ -45,11 +45,15 @@ class NetworkPlanModalController {
   onTagSelectionChanged() {
     console.log(this.selectedTags)
   }
-  updateTag(plan,removetag) {
+  updateTag(plan,removeTag) {
     var updatePlan = plan
-    updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removetag.id)
+    if(removeTag.type == 'svc') {
+      updatePlan.tagMapping.linkTags.serviceAreaIds = _.without(updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.tag.id)
+    } else {
+      updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
+    }
     
-    this.$http.put(`/service/v1/plan?user_id=${this.user_id}`,updatePlan)
+    return this.$http.put(`/service/v1/plan?user_id=${this.user_id}`,updatePlan)
     .then((response) => {
       this.loadPlans()
     })
@@ -202,6 +206,10 @@ class NetworkPlanModalController {
     }, () => {
       this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.user_id}`).then((response) => {
         this.loadPlans()
+        this.state.getOrCreateEphemeralPlan()
+        .then((ephemeralPlan) => {
+          this.state.setPlan(ephemeralPlan)
+        })
       })
     })
   }
@@ -272,6 +280,10 @@ class NetworkPlanModalController {
     return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
 
+  getSATagCategories(currentPlanTags) {
+    return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  }
+
   applyTagSearchFilter(selectedFilters) {
     var filters = _.map(selectedFilters, (tag) => { 
       tag.type = 'tag'
@@ -313,7 +325,6 @@ class NetworkPlanModalController {
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
     this.search_text = selectedFilters.join(" ")
   }
-
 }
 
 NetworkPlanModalController.$inject = ['$http', '$q', 'state', 'tracker']

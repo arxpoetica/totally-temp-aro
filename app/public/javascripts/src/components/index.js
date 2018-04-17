@@ -8,6 +8,7 @@ import viewMode from './sidebar/view/view-mode'
 import equipmentDetailModal from './sidebar/view/equipment-detail-modal'
 import planInfo from './sidebar/view/plan-info'
 import planInfoRecent from './sidebar/view/plan-info-recent'
+import editPlanTag from './sidebar/view/edit-plan-tag'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
@@ -70,6 +71,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetailModal', equipmentDetailModal)
    .component('planInfo', planInfo)
    .component('planInfoRecent', planInfoRecent)
+   .component('editPlanTag', editPlanTag)
    .component('displayModeButtons', displayModeButtons)
    .component('optimizeButton', optimizeButton)
    .component('analysisExpertMode', analysisExpertMode)
