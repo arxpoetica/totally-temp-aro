@@ -132,5 +132,14 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     tools.available_tools.splice(tools.available_tools.indexOf(tool), 1)
   }
 
+  $rootScope.$on("configuration_loaded", ()=> {
+    if(configuration.aroClient === 'aro_sales') {
+        var tool = tools.available_tools.find(function (item) {
+            return item.id === tools.TOOL_IDS.CONSTRUCTION_SITES;
+        });
+        tools.available_tools.splice(tools.available_tools.indexOf(tool), 1);
+    }
+  });
+
   return tools
 }])
