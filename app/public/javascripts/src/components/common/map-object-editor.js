@@ -323,7 +323,11 @@ class MapObjectEditorController {
       feature.objectId = event.equipmentFeatures[0].object_id
       isExistingObject = true
     } else {
-      // The map was clicked on, but there was no location under the cursor. Create a new one.
+      // The map was clicked on, but there was no location under the cursor.
+      // If there is a selected polygon, set it to non-editable
+      if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)) {
+        this.selectedMapObject.setEditable(false)
+      }
       if (!this.createObjectOnClick) {
         return    // We do not want to create the map object on click
       }
@@ -349,6 +353,7 @@ class MapObjectEditorController {
         this.selectedMapObject.setIcon(this.objectIconUrl)
       } else {
         this.selectedMapObject.setOptions(this.polygonOptions)
+        this.selectedMapObject.setEditable(false)
       }
     }
 
