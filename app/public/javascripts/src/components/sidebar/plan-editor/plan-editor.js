@@ -1,5 +1,5 @@
 import EquipmentProperties from './equipment-properties'
-import BoundaryAttributes from './boundary-attributes'
+import BoundaryProperties from './boundary-properties'
 
 class PlanEditorController {
 
@@ -16,7 +16,6 @@ class PlanEditorController {
     this.showDragHelpText = true
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
-    this.coverageRadius = 10000 // In user units (e.g. Feet)
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.uuidStore = []
     this.getUUIDsFromServer()
@@ -69,7 +68,6 @@ class PlanEditorController {
 
   $onInit() {
     // Select the first boundary in the list
-    this.selectedBoundaryType = this.state.boundaryTypes[0]
     this.resumeOrCreateTransaction()
     this.$timeout(() => this.showDragHelpText = false, 6000)  // Hide help text after a while
   }
@@ -115,6 +113,13 @@ class PlanEditorController {
       .then((result) => {
         // We have a list of equipment boundaries. Populate them in the map object
         this.createMapObjects && this.createMapObjects(result.data)
+        // Save the properties for the boundary
+        result.data.forEach((feature) => {
+          const attributes = feature.attributes
+          const properties = new BoundaryProperties(attributes.boundary_type_id, attributes.selected_site_move_update,
+                                                    attributes.selected_site_boundary_generation, attributes.distance)
+          this.objectIdToProperties[feature.objectId] = properties
+        })
         // Save the equipment and boundary ID associations
         result.data.forEach((boundaryFeature) => {
           var equipmentId = boundaryFeature.attributes.network_node_object_id
@@ -164,12 +169,13 @@ class PlanEditorController {
       coordinates: [mapObject.position.lng(), mapObject.position.lat()]
     }
     // Always send radius in meters to the back end
-    optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
+    optimizationBody.radius = 10000 * this.configuration.units.length_units_to_meters
 
     var equipmentObjectId = mapObject.objectId
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
         // Construct a feature that we will pass to the map object editor, which will create the map object
+        var boundaryProperties = new BoundaryProperties(this.state.boundaryTypes[0].id, 'Auto-redraw', 'Road Distance', optimizationBody.radius)
         var feature = {
           objectId: this.getUUID(),
           geometry: {
@@ -178,10 +184,14 @@ class PlanEditorController {
           },
           attributes: {
             network_node_type: 'dslam',
-            boundary_type_id: this.selectedBoundaryType.id,
+            boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
+            selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
+            selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
+            distance: boundaryProperties.distance,
             network_node_object_id: equipmentObjectId // This is the Network Equipment that this boundary is associated with
           }
         }
+        this.objectIdToProperties[feature.objectId] = boundaryProperties
         this.boundaryIdToEquipmentId[feature.objectId] = equipmentObjectId
         this.equipmentIdToBoundaryId[equipmentObjectId] = feature.objectId
         this.createMapObjects && this.createMapObjects([feature])
@@ -271,6 +281,7 @@ class PlanEditorController {
       allPaths.push(pathPoints)
     })
 
+    const boundaryProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
       geometry: {
@@ -279,7 +290,9 @@ class PlanEditorController {
       },
       attributes: {
         network_node_type: 'dslam',
-        boundary_type_id: this.selectedBoundaryType.id,
+        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
+        selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
+        selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId]
       }
     }
@@ -307,14 +320,18 @@ class PlanEditorController {
     return layers[networkNodeType]
   }
 
+  isMarker(mapObject) {
+    return mapObject && mapObject.icon
+  }
+
   handleObjectCreated(mapObject, usingMapClick) {
-    this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'planned_remote_terminal', this.lastSelectedEquipmentType)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
-    if (usingMapClick && mapObject.icon && mapObject.position) {
+    if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
+      this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'planned_remote_terminal', this.lastSelectedEquipmentType)
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-    } else if (!mapObject.icon && !mapObject.position) {
+    } else if (!this.isMarker(mapObject)) {
       // This is a boundary marker. This will be created without map clicks. Save it.
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
@@ -329,7 +346,7 @@ class PlanEditorController {
   }
 
   handleObjectModified(mapObject) {
-    if (mapObject.icon && mapObject.position) {
+    if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
@@ -355,18 +372,16 @@ class PlanEditorController {
   }
 
   handleObjectDeleted(mapObject) {
-    if (mapObject.icon && mapObject.position) {
+    if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
       // If this is an equipment, delete its associated boundary (if any)
-      if (mapObject.icon && mapObject.position) {
-        const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
-        if (boundaryObjectId) {
-          delete this.equipmentIdToBoundaryId[mapObject.objectId]
-          delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-          // No need to delete from the server, we will get another delete event for the boundary.
-        }
+      const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
+      if (boundaryObjectId) {
+        delete this.equipmentIdToBoundaryId[mapObject.objectId]
+        delete this.boundaryIdToEquipmentId[boundaryObjectId]
+        this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+        // No need to delete from the server, we will get another delete event for the boundary.
       }
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)

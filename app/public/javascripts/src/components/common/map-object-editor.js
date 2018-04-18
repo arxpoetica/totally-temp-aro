@@ -260,8 +260,8 @@ class MapObjectEditorController {
       mapObject = this.createPolygonMapObject(feature)
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
-        var isEditable = mapObject.getEditable()
-        mapObject.setEditable(!isEditable)
+        // Select this map object
+        this.selectMapObject(mapObject)
       })
       var self = this
       mapObject.getPaths().forEach(function(path, index){
@@ -333,19 +333,24 @@ class MapObjectEditorController {
   }
 
   selectMapObject(mapObject) {
-    if (!this.isMarker(mapObject)) {
-      // This is not a marker. Don't select
-      return
-    }
+    // First de-select the currently selected map object (if any)
     if (this.selectedMapObject) {
-      // Reset the icon of the currently selected map object
-      this.selectedMapObject.setIcon(this.objectIconUrl)
+      if (this.isMarker(this.selectedMapObject)) {
+        this.selectedMapObject.setIcon(this.objectIconUrl)
+      } else {
+        this.selectedMapObject.setEditable(false)
+      }
+    }
+
+    // Then select the map object
+    if (mapObject) {  // Can be null if we are de-selecting everything
+      if (this.isMarker(mapObject)) {
+        mapObject.setIcon(this.objectSelectedIconUrl)
+      } else {
+        mapObject.setEditable(true)
+      }
     }
     this.selectedMapObject = mapObject
-    if (this.selectedMapObject) {
-      // Selected map object can be null if nothing is selected (e.g. when the user deletes a map object)
-      this.selectedMapObject.setIcon(this.objectSelectedIconUrl)
-    }
     this.onSelectObject && this.onSelectObject({mapObject})
   }
 

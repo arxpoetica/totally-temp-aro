@@ -75,18 +75,14 @@
           <draggable-button icon="/images/map_icons/aro/remote_terminal.png"
                             is-disabled="false"
                             is-boundary="true">
-            <i class="fa fa-2x fa-registered"></i>
           </draggable-button>
-          <!-- <button class="btn btn-default draggable-item-button">
-            <i class="fa fa-2x fa-registered"></i>
-          </button> -->
           <button class="btn btn-default draggable-item-button">
             <i class="fa fa-2x fa-copyright"></i>
           </button>
         </div>
 
-        <!-- We need an object to be selected in order to show its details -->
-        <div ng-if="$ctrl.selectedMapObject" style="margin-top: 10px">
+        <!-- Section to show properties when the selected map object is an equipment node -->
+        <div ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
@@ -131,7 +127,7 @@
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
                   ng-click="$ctrl.saveSelectedEquipmentProperties()"
                   style="margin-bottom: 10px">
-            <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment attributes
+            <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
           </button>
           <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
             <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected equipment
@@ -142,6 +138,68 @@
                   ng-model="$ctrl.selectedBoundaryType"
                   ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
           </select>
+        </div>
+
+        <!-- Section to show properties when the selected map object is an equipment boundary -->
+        <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+          <!-- Section header showing the type of the selected object -->
+          <div class="sidebar-table-header">
+              <img src="/images/map_icons/aro/remote_terminal.png" style="vertical-align:middle; padding-right: 10px">
+              <span>Remote Terminal boundary</span>
+          </div>
+          <!-- A table containing the editable properties of the selected object -->
+          <table id="tblBoundaryProperties"
+                 class="table table-condensed table-striped sidebar-table"
+                 style="margin-bottom: 10px">
+            <tbody>
+              <tr>
+                <td>Site boundary type</td>
+                <td>
+                  <select class="form-control"
+                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryTypeId"
+                          ng-options="item.id as item.description for item in $ctrl.state.boundaryTypes">
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Site move update</td>
+                <td>
+                  <select class="form-control"
+                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteMoveUpdate"
+                          ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteMoveUpdates">
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Site boundary generation</td>
+                <td>
+                  <select class="form-control"
+                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryGeneration"
+                          ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteBoundaryGenerations">
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Distance (feet)</td>
+                <td>
+                  <input class="form-control"
+                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].distance">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button ng-class="{ 'btn btn-sm pull-right': true,
+                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
+                  style="margin-bottom: 10px">
+            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
+          </button>
+          <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
+            <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected equipment
+          </button>
+          <br>
         </div>
       </div>
     </accordion-panel-contents>
