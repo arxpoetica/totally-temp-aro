@@ -15,6 +15,9 @@ class DraggableButtonController {
       }
       dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_KEY, this.entityType)
       dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY, this.entityDetails)
+      if (this.isBoundary) {
+        dragEvent.dataTransfer.setData(Constants.DRAG_IS_BOUNDARY, 'true')
+      }
       return true
     }
   }
@@ -39,7 +42,8 @@ let draggableButton = {
     icon: '@',
     isDisabled: '<',
     entityType: '@',
-    entityDetails: '@'
+    entityDetails: '@',
+    isBoundary: '@'
   },
   controller: DraggableButtonController
 }

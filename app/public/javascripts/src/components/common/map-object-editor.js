@@ -1,9 +1,10 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $document, $timeout, state, tileDataService) {
+  constructor($http, $element, $compile, $document, $timeout, state, tileDataService) {
     this.$http = $http
     this.$element = $element
+    this.$compile = $compile
     this.$document = $document
     this.$timeout = $timeout
     this.state = state
@@ -43,6 +44,9 @@ class MapObjectEditorController {
     }
     return this.uuidStore.pop()
   }
+  dropTargetClicked(text) {
+    console.log('Drop target was clicked - ' + text);
+  }
 
   $onInit() {
     // We should have a map variable at this point
@@ -60,6 +64,11 @@ class MapObjectEditorController {
       this.$element[0].removeChild(this.contextMenuElement)
       var documentBody = this.$document.find('body')[0]
       documentBody.appendChild(this.contextMenuElement)
+
+      this.dropTargetElement = this.$element.find('.map-object-drop-targets-container')[0]
+      this.$element[0].removeChild(this.dropTargetElement)
+      var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
+      mapCanvas.appendChild(this.dropTargetElement)
     }, 0)
 
     // Use the cross hair cursor while this control is initialized
@@ -72,13 +81,22 @@ class MapObjectEditorController {
 
     // Add handlers for drag-and-drop creation of elements
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
+    this.objectIdToDropCSS = {}
+    // console.log(this.$compile('<div style="position:absolute; top: 100px; left: 100px; width: 100px; height: 100px; background-color: red;'))
+    // mapCanvas.appendChild(this.$compile('<div style="position:absolute; top: 100px; left: 100px; width: 100px; height: 100px; background-color: red;'))
     // On drag over, only allow dropping if the object being dragged is a networkEquipment
     mapCanvas.ondragover = (event) => {
       // Note that we do not have access the the event.dataTransfer data, only the types. This is by design.
       var hasEntityType = (event.dataTransfer.types.indexOf(Constants.DRAG_DROP_ENTITY_KEY) >= 0)
-      return !hasEntityType;  // false == allow dropping
+      var hasBoundaryType = (event.dataTransfer.types.indexOf(Constants.DRAG_IS_BOUNDARY) >= 0)
+      return !(hasEntityType || hasBoundaryType);  // false == allow dropping
     }
     mapCanvas.ondrop = (event) => {
+      var hasBoundaryType = (event.dataTransfer.types.indexOf(Constants.DRAG_IS_BOUNDARY) >= 0)
+      if (hasBoundaryType) {
+        // This will be handled by our custom drop targets. Do not use the map canvas' ondrop to handle it.
+        return
+      }      
       // Convert pixels to latlng
       var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
       var feature = {
@@ -99,6 +117,12 @@ class MapObjectEditorController {
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
   }
 
+  handleOnDropped(eventArgs) {
+    console.log('------------_ Handled drop event')
+    console.log(eventArgs)
+    this.onObjectDroppedOnMarker && this.onObjectDroppedOnMarker(eventArgs)
+  }
+
   // Convert from pixel coordinates to latlngs. https://stackoverflow.com/a/30541162
   pixelToLatlng(xcoor, ycoor) {
     var ne = this.mapRef.getBounds().getNorthEast();
@@ -109,6 +133,47 @@ class MapObjectEditorController {
     var scale = 1 << this.mapRef.getZoom();
     var newLatlng = projection.fromPointToLatLng(new google.maps.Point(xcoor / scale + bottomLeft.x, ycoor / scale + topRight.y));
     return newLatlng;
+  }
+
+  // Convert from latlng to pixel coordinates. https://stackoverflow.com/a/2692617
+  latLngToPixel(latLng) {
+    var scale = Math.pow(2, this.mapRef.getZoom())
+    var nw = new google.maps.LatLng(
+      this.mapRef.getBounds().getNorthEast().lat(),
+      this.mapRef.getBounds().getSouthWest().lng()
+    )
+    var worldCoordinateNW = this.mapRef.getProjection().fromLatLngToPoint(nw)
+    var worldCoordinate = this.mapRef.getProjection().fromLatLngToPoint(latLng)
+    return {
+      x: Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
+      y: Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
+    }
+  }
+
+  // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
+  getDropTargetCSSForMapObject(mapObject) {
+    if (!this.isMarker(mapObject)) {
+      return null
+    }
+    var dropTargetCSS = this.objectIdToDropCSS[mapObject.objectId]
+    if (dropTargetCSS) {
+      return dropTargetCSS
+    }
+    const radius = 50;  // Pixels
+    var pixelCoords = this.latLngToPixel(mapObject.getPosition())
+    dropTargetCSS = {
+      position: 'absolute',
+      left: `${pixelCoords.x - radius}px`,
+      top: `${pixelCoords.y - radius}px`,
+      border: 'solid 3px black',
+      'border-style': 'dashed',
+      'border-radius': `${radius}px`,
+      width: `${radius * 2}px`,
+      height: `${radius * 2}px`,
+      'background-color': 'rgba(255, 255, 255, 0.5'
+    }
+    this.objectIdToDropCSS[mapObject.objectId] = dropTargetCSS
+    return dropTargetCSS;
   }
 
   createMapObjects(features) {
@@ -254,9 +319,13 @@ class MapObjectEditorController {
     }
   }
 
+  isMarker(mapObject) {
+    return mapObject && mapObject.icon
+  }
+
   selectMapObject(mapObject) {
-    if (mapObject && !mapObject.icon) {
-      // This is a polygon. Don't select
+    if (!this.isMarker(mapObject)) {
+      // This is not a marker. Don't select
       return
     }
     if (this.selectedMapObject) {
@@ -313,6 +382,7 @@ class MapObjectEditorController {
     this.$timeout(() => {
       var documentBody = this.$document.find('body')[0]
       documentBody.removeChild(this.contextMenuElement)
+      documentBody.removeChild(this.dropTargetElement)
     }, 0)
 
     // Remove any dragging DOM event listeners
@@ -322,7 +392,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$document', '$timeout', 'state', 'tileDataService']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
@@ -338,6 +408,7 @@ let mapObjectEditor = {
     onSelectObject: '&',
     onModifyObject: '&',
     onDeleteObject: '&',
+    onObjectDroppedOnMarker: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&'   // To be called to register a callback, which will remove all created map objects

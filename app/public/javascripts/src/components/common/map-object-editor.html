@@ -10,6 +10,9 @@
   .map-object-editor-context-menu-dropdown {
     line-height: 30px; /* Any property will do */
   }
+  .map-object-drop-targets-container {
+    line-height: 30px; /* Any property will do */
+  }
 </style>
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
   <div class="dropdown">
@@ -23,4 +26,18 @@
       <li><a href="#" ng-click="$ctrl.deleteSelectedObject()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</a></li>
     </ul>
   </div>
+</div>
+<div class="map-object-drop-targets-container" style="position: absolute; left: 0px; top: 0px; bottom: 0px; right: 0px;">
+  <!-- <div ng-repeat="(key, mapObject) in $ctrl.createdMapObjects"
+       ng-click="$ctrl.dropTargetClicked(dropTarget)"
+       ng-if="$ctrl.getDropTargetCSSForMapObject(mapObject)"
+       ng-style="$ctrl.getDropTargetCSSForMapObject(mapObject)">
+    {{dropTarget}}
+  </div> -->
+  <drop-target ng-repeat="(key, mapObject) in $ctrl.createdMapObjects"
+               ng-if="$ctrl.getDropTargetCSSForMapObject(mapObject)"
+               ng-style="$ctrl.getDropTargetCSSForMapObject(mapObject)"
+               target-object-id="mapObject.objectId"
+               on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">
+  </drop-target>
 </div>
