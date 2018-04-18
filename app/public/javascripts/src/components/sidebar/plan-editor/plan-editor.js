@@ -111,8 +111,6 @@ class PlanEditorController {
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       })
       .then((result) => {
-        // We have a list of equipment boundaries. Populate them in the map object
-        this.createMapObjects && this.createMapObjects(result.data)
         // Save the properties for the boundary
         result.data.forEach((feature) => {
           const attributes = feature.attributes
@@ -120,6 +118,8 @@ class PlanEditorController {
                                                     attributes.selected_site_boundary_generation, attributes.distance)
           this.objectIdToProperties[feature.objectId] = properties
         })
+        // We have a list of equipment boundaries. Populate them in the map object
+        this.createMapObjects && this.createMapObjects(result.data)
         // Save the equipment and boundary ID associations
         result.data.forEach((boundaryFeature) => {
           var equipmentId = boundaryFeature.attributes.network_node_object_id
