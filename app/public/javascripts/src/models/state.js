@@ -1251,21 +1251,60 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.currentPlanTags = []
   service.listOfServiceAreaTags = []
   service.currentPlanServiceAreaTags = []
-  service.loadListOfPlanTags = () => {    
+  service.loadListOfPlanTags = () => {
     var promises = [
-      $http.get(`/service/tag-mapping/tags`),
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=layer/id eq 1&$orderby=id&$top=10&$skip=10`)
+      $http.get(`/service/tag-mapping/tags`)
     ]
 
     return Promise.all(promises)
       .then((results) => {
         service.listOfTags = results[0].data
-        //concatinating harcoded SA tag values
-        service.listOfServiceAreaTags = results[1].data.concat(configuration.servicetagsTemp)
       }) 
   }
 
   service.loadListOfPlanTags()
+
+  service.loadListOfSAPlanTags = (filterObj) => {
+    var filter = "layer/id eq 1"
+    filter = filterObj ? filter.concat(` and substringof(code,'${filterObj}')`) : filter
+    if(filterObj || service.listOfServiceAreaTags.length == 0) {
+      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10`)
+      .then((results) => {
+        service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
+      })  
+    }  
+  }
+
+  service.removeDuplicates = (myArr,prop) => {
+    return myArr.filter((obj, pos, arr) => {
+      return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos;
+    });
+  }
+  //service.loadListOfSAPlanTags()
+
+  service.loadAllAssociatedSaPlanTags = (plans) => {
+    let promises = new Set()
+    var tempList = []
+
+    plans.forEach((plan) => {
+      plan.tagMapping.linkTags.serviceAreaIds.forEach((tag) => {
+        var filter = "layer/id eq 1"
+        filter = filter.concat(` and id eq ${tag}`)
+        service.listOfServiceAreaTags
+        if (!service.listOfServiceAreaTags.find(function (obj) { return obj.id === tag })){
+          promises.add($http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}`))
+        }  
+      })
+    })  
+
+    Promise.all([...promises])
+    .then((results) => {
+      results.forEach((result) => {
+        tempList = tempList.concat(result.data)
+      }) 
+      service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList),'id')
+    })  
+  }
 
   service.getTagColour = (tag) => {
     return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
