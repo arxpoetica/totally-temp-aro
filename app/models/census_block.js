@@ -83,7 +83,7 @@ module.exports = class CensusBlock {
 
   static getCensusBlockDetails (id) {
     var sql = `
-      SELECT gid as id, name, tabblock_id, aland, awater, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
+      SELECT gid as id, name, tabblock_id, aland, awater, area_meters, ST_AsGeoJSON(ST_Centroid(geom))::json AS centroid
       FROM aro.census_blocks
       WHERE
       gid=$1
