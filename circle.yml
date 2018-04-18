@@ -8,15 +8,13 @@ machine:
   services:
     - docker
   environment:
-    IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
+    IMAGE_NAME: aro/aro-app
     IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
     LATEST_TAG: ${IMAGE_NAME}:latest
+    ECR_IMAGE_PATH: 976168524097.dkr.ecr.us-east-1.amazonaws.com
+    ECR_IMAGE_TAG: ${ECR_IMAGE_PATH}/${IMAGE_TAG}
+    ECR_LATEST_TAG: ${ECR_IMAGE_PATH}/${LATEST_TAG}
 
-    #CONTAINER VERSIONS AND DEPLOYMENT SETTINGS
-    # ARO_NGINX_IMAGE_VERSION: "8"
-    # ARO_ETL_IMAGE_VERSION: "44"
-    # ARO_DATA_IMAGE_VERSION: "3"
-    # ARO_SERVICE_IMAGE_VERSION: "3"
     ARO_CLIENT: aro
   node:
     version: 6.1.0
@@ -36,6 +34,7 @@ dependencies:
     # by caching the image in a tarball
     - if [[ -e ~/docker-image/image.tar ]]; then docker load --input ~/docker-image/image.tar; fi
     - eval $(aws ecr get-login --region us-east-1)
+    - echo $DOCKERHUB_PASS | docker login --username $DOCKERHUB_USER --password-stdin
     - docker/build.sh
     - docker build -t ${IMAGE_TAG} ./target
     - docker tag ${IMAGE_TAG} ${LATEST_TAG}
@@ -57,26 +56,19 @@ deployment:
     commands:
       - docker push ${IMAGE_TAG}
       - docker push ${LATEST_TAG}
+      - docker push ${ECR_IMAGE_TAG}
+      - docker push ${ECR_LATEST_TAG}
       - python docker/publish_version.py ait-master app $CIRCLE_BUILD_NUM
       - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
       - chmod 400 opsworks_ssh_key
       - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
-      # - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa:
-      #     environment:
-      #       VZ_QA_MASTER: true
-      #       ARO_PRIVATE_DATA_IMAGE_NAME: aro-data-vz
-      #       ARO_PRIVATE_DATA_IMAGE_VERSION: "9"
-      #       ARO_CLIENT: verizon
-      #       ARO_DB_HOST: db.vz-master.aro.qa.app.altvil.com
       - rm -f opsworks_ssh_key
-  qa-projectui:
-    branch: [aro_project_UI]
+  dockerhub:
+    branch: [dockerhub]
     owner: AIT
     commands:
       - docker push ${IMAGE_TAG}
       - docker push ${LATEST_TAG}
-      - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
-      - chmod 400 opsworks_ssh_key
-      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
-      - rm -f opsworks_ssh_key
+      - docker push ${ECR_IMAGE_TAG}
+      - docker push ${ECR_LATEST_TAG}
   
