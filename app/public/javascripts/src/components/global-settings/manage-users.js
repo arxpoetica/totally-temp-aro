@@ -14,6 +14,10 @@ class ManageUsersController {
       {
         name: 'Biz-dev',
         rol: 'biz-dev'
+      },
+      {
+        name: 'Sales',
+        rol: 'sales'
       }
     ]
   }

@@ -1,5 +1,5 @@
 /* global app config $ */
-app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
+app.service('map_tools', ['$rootScope', 'tracker', 'state', ($rootScope, tracker, state) => {
   var tools = {}
   var visible = []
   var collapsed = {}
@@ -132,12 +132,13 @@ app.service('map_tools', ['$rootScope', 'tracker', ($rootScope, tracker) => {
     tools.available_tools.splice(tools.available_tools.indexOf(tool), 1)
   }
 
-  $rootScope.$on("configuration_loaded", ()=> {
-    if(configuration.aroClient === 'aro_sales') {
-        var tool = tools.available_tools.find(function (item) {
-            return item.id === tools.TOOL_IDS.CONSTRUCTION_SITES;
-        });
-        tools.available_tools.splice(tools.available_tools.indexOf(tool), 1);
+  $rootScope.$on("configuration_loaded", function () {
+    var user = state.getUser()
+    if (user.rol === 'sales') {
+      var tool = tools.available_tools.find(function (item) {
+        return item.id === tools.TOOL_IDS.CONSTRUCTION_SITES;
+      });
+      tools.available_tools.splice(tools.available_tools.indexOf(tool), 1);
     }
   });
 

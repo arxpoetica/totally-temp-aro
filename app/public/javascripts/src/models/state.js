@@ -601,6 +601,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return globalUser.id // Ugh. Depending on global variable "globalUser"
   }
 
+  service.getUser = () => {
+    return globalUser
+  }
+
   service.getProjectId = () => {
     return globalUser.projectId // Ugh. Depending on global variable "globalUser"
   }

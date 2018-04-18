@@ -14,6 +14,7 @@ class ToolBarController {
     this.showDropDown = false
     this.heatMapOption = true
     this.measuringStickEnabled = false
+    this.currentUser = state.getUser()
 
     this.min = 0
     // Map tile settings used for debugging
