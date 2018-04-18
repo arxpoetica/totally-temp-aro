@@ -2,8 +2,9 @@ import Constants from '../../common/constants'
 
 class DraggableButtonController {
 
-  constructor($element) {
+  constructor($element, state) {
     this.$element = $element
+    this.state = state
   }
 
   $onInit() {
@@ -20,6 +21,10 @@ class DraggableButtonController {
       }
       return true
     }
+    // Fire an event on dragend
+    buttonElement.ondragend = (dragEvent) => {
+      this.state.dragEndEvent.next(dragEvent)
+    }
   }
 
   $onDestroy() {
@@ -29,7 +34,7 @@ class DraggableButtonController {
   }
 }
 
-DraggableButtonController.$inject = ['$element']
+DraggableButtonController.$inject = ['$element', 'state']
   
 let draggableButton = {
   template: `

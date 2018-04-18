@@ -97,8 +97,6 @@ class MapObjectEditorController {
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     this.objectIdToDropCSS = {}
     this.isHavingBoundaryDraggedOver = false
-    // console.log(this.$compile('<div style="position:absolute; top: 100px; left: 100px; width: 100px; height: 100px; background-color: red;'))
-    // mapCanvas.appendChild(this.$compile('<div style="position:absolute; top: 100px; left: 100px; width: 100px; height: 100px; background-color: red;'))
     // On drag over, only allow dropping if the object being dragged is a networkEquipment
     mapCanvas.ondragover = (event) => {
       // Note that we do not have access the the event.dataTransfer data, only the types. This is by design.
@@ -108,10 +106,10 @@ class MapObjectEditorController {
       this.$timeout()
       return !(hasEntityType || hasBoundaryType);  // false == allow dropping
     }
-    mapCanvas.ondragleave = (event) => {
+    this.dragEndEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
       this.isHavingBoundaryDraggedOver = false
       this.$timeout()
-    }
+    })
     mapCanvas.ondrop = (event) => {
       this.isHavingBoundaryDraggedOver = false
       this.$timeout()
@@ -411,6 +409,7 @@ class MapObjectEditorController {
 
     //unsubscribe map click observer
     this.mapFeaturesSelectedEventObserver.unsubscribe();
+    this.dragEndEventObserver.unsubscribe();
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
@@ -427,7 +426,6 @@ class MapObjectEditorController {
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
     mapCanvas.ondrop = null
-    mapCanvas.ondragleave = null
   }
 }
 
