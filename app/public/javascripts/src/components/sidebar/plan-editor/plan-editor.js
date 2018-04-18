@@ -16,6 +16,7 @@ class PlanEditorController {
     this.showDragHelpText = true
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
+    this.lastUsedBoundaryDistance = 10000
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.uuidStore = []
     this.getUUIDsFromServer()
@@ -114,8 +115,9 @@ class PlanEditorController {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
           const attributes = feature.attributes
+          const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
-                                                    attributes.selected_site_boundary_generation, attributes.distance)
+                                                    attributes.selected_site_boundary_generation, distance)
           this.objectIdToProperties[feature.objectId] = properties
         })
         // Save the equipment and boundary ID associations
@@ -169,13 +171,14 @@ class PlanEditorController {
       coordinates: [mapObject.position.lng(), mapObject.position.lat()]
     }
     // Always send radius in meters to the back end
-    optimizationBody.radius = 10000 * this.configuration.units.length_units_to_meters
+    optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
 
     var equipmentObjectId = mapObject.objectId
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
         // Construct a feature that we will pass to the map object editor, which will create the map object
-        var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', optimizationBody.radius)
+        var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
+                                                        Math.round(optimizationBody.radius * this.configuration.units.meters_to_length_units))
         var feature = {
           objectId: this.getUUID(),
           geometry: {
@@ -187,7 +190,7 @@ class PlanEditorController {
             boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-            distance: boundaryProperties.distance,
+            distance: optimizationBody.radius,        // Save this in meters only
             network_node_object_id: equipmentObjectId // This is the Network Equipment that this boundary is associated with
           }
         }
@@ -197,6 +200,10 @@ class PlanEditorController {
         this.createMapObjects && this.createMapObjects([feature])
       })
       .catch((err) => console.error(err))
+  }
+
+  updateLastUsedBoundaryDistance(lastUsedBoundaryDistance) {
+    this.lastUsedBoundaryDistance = lastUsedBoundaryDistance
   }
 
   commitTransaction() {
@@ -293,7 +300,7 @@ class PlanEditorController {
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-        distance: boundaryProperties.distance,
+        distance: boundaryProperties.distance * this.configuration.units.length_units_to_meters,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId]
       }
     }
