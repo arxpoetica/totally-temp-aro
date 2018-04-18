@@ -8,12 +8,12 @@ machine:
   services:
     - docker
   environment:
-    IMAGE_NAME: aro/aro-app
+    IMAGE_NAME: avco/aro-app
     IMAGE_TAG: ${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
     LATEST_TAG: ${IMAGE_NAME}:latest
-    ECR_IMAGE_PATH: 976168524097.dkr.ecr.us-east-1.amazonaws.com
-    ECR_IMAGE_TAG: ${ECR_IMAGE_PATH}/${IMAGE_TAG}
-    ECR_LATEST_TAG: ${ECR_IMAGE_PATH}/${LATEST_TAG}
+    ECR_IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
+    ECR_IMAGE_TAG: ${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
+    ECR_LATEST_TAG: ${ECR_IMAGE_NAME}:latest
 
     ARO_CLIENT: aro
   node:
