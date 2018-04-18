@@ -1201,3 +1201,15 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .sidebar-table {
   border: solid 1px #ccc;
 }
+
+.satags {
+  background-color:white;
+  border-color:#1f7de6;
+  border-style:solid;
+  border-radius:0.50em;
+  border-width:2px;
+}
+.satag {
+  font-size: xx-small;
+  color:#1f7de6;
+}

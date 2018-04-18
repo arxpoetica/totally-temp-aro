@@ -57,8 +57,18 @@ let planInputsModal = {
     <modal-header title="Plan Inputs"></modal-header>
       <modal-body>
         <input class="form-control with-margin" type="text" ng-model="$ctrl.planName" placeholder="Plan Name">
-        <div class="with-margin">  
-        <aro-multi-select
+        <div class="with-margin"> 
+        <edit-plan-tag
+          object-name="Tag"
+          search-list="$ctrl.state.listOfTags"
+          selected-list="$ctrl.state.currentPlanTags"></edit-plan-tag>
+        </div>
+        <edit-plan-tag
+          object-name="Service Area"
+          search-list="$ctrl.state.listOfServiceAreaTags"
+          selected-list="$ctrl.state.currentPlanServiceAreaTags"
+          refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
+        <!--<aro-multi-select
           model="$ctrl.state.currentPlanTags" 
           all-items="$ctrl.state.listOfTags" 
           current-selected-items="$ctrl.state.currentPlanTags"
@@ -74,7 +84,7 @@ let planInputsModal = {
           selection-changed="$ctrl.onTagSelectionChanged()"
           enable-search = "true"
           placeholder="add service area tags">
-        </aro-multi-select>
+        </aro-multi-select>-->
       </modal-body>
     <modal-footer>
       <button class="btn btn-primary pull-left" ng-click="$ctrl.savePlanAs()">Create Plan</button>
