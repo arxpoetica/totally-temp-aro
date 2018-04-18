@@ -249,22 +249,6 @@ class MapObjectEditorController {
         // Select this map object
         this.selectMapObject(mapObject)
       })
-      mapObject.addListener('rightclick', (event) => {
-        // Display the context menu and select the clicked marker
-        this.contextMenuCss.display = 'block'
-        this.contextMenuCss.left = `${event.va.clientX}px`
-        this.contextMenuCss.top = `${event.va.clientY}px`
-
-        // Show the dropdown menu
-        var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-        const isDropdownHidden = dropdownMenu.is(':hidden')
-        if (isDropdownHidden) {
-          var toggleButton = this.$document.find('.map-object-editor-context-menu')
-          toggleButton.dropdown('toggle')
-        }
-        this.selectMapObject(mapObject)
-        this.$timeout()
-      })
     } else if (feature.geometry.type === 'Polygon') {
       mapObject = this.createPolygonMapObject(feature)
       // Set up listeners on the map object
@@ -290,6 +274,23 @@ class MapObjectEditorController {
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
+
+    mapObject.addListener('rightclick', (event) => {
+      // Display the context menu and select the clicked marker
+      this.contextMenuCss.display = 'block'
+      this.contextMenuCss.left = `${event.va.clientX}px`
+      this.contextMenuCss.top = `${event.va.clientY}px`
+
+      // Show the dropdown menu
+      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+      const isDropdownHidden = dropdownMenu.is(':hidden')
+      if (isDropdownHidden) {
+        var toggleButton = this.$document.find('.map-object-editor-context-menu')
+        toggleButton.dropdown('toggle')
+      }
+      this.selectMapObject(mapObject)
+      this.$timeout()
+    })
 
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick})
@@ -347,7 +348,6 @@ class MapObjectEditorController {
       if (this.isMarker(this.selectedMapObject)) {
         this.selectedMapObject.setIcon(this.objectIconUrl)
       } else {
-        this.selectedMapObject.setEditable(false)
         this.selectedMapObject.setOptions(this.polygonOptions)
       }
     }
@@ -357,12 +357,19 @@ class MapObjectEditorController {
       if (this.isMarker(mapObject)) {
         mapObject.setIcon(this.objectSelectedIconUrl)
       } else {
-        mapObject.setEditable(true)
         mapObject.setOptions(this.selectedPolygonOptions)
       }
     }
     this.selectedMapObject = mapObject
     this.onSelectObject && this.onSelectObject({mapObject})
+  }
+
+  toggleEditSelectedPolygon() {
+    if (!this.selectedMapObject || this.isMarker(this.selectedMapObject)) {
+      return
+    }
+    var isEditable = this.selectedMapObject.getEditable();
+    this.selectedMapObject.setEditable(!isEditable);
   }
 
   removeCreatedMapObjects() {

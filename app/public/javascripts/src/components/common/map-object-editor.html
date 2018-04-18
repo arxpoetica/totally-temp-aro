@@ -23,7 +23,17 @@
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
+      <!-- Menu item to delete object -->
       <li><a href="#" ng-click="$ctrl.deleteSelectedObject()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</a></li>
+      <!-- Menu item to start/stop editing polygon objects -->
+      <li ng-if="!$ctrl.isMarker($ctrl.selectedMapObject)">
+        <a href="#" ng-click="$ctrl.toggleEditSelectedPolygon()">
+          <!-- If the selected polygon is editable, display "Stop Editing" -->
+          <i ng-if="$ctrl.selectedMapObject.getEditable()" class="fa fa-stop"></i>
+          <i ng-if="!$ctrl.selectedMapObject.getEditable()" class="fa fa-pencil"></i>
+          &nbsp;&nbsp;{{$ctrl.selectedMapObject.getEditable() ? 'Stop Editing' : 'Edit boundary'}}
+        </a>
+      </li>
     </ul>
   </div>
 </div>
