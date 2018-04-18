@@ -75,14 +75,27 @@
           </draggable-button>
           <hr class="plan-editor-hr">
           <!-- Boundary buttons -->
-          <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
-                            is-disabled="false"
-                            is-boundary="true">
-          </draggable-button>
-          <draggable-button icon="/images/map_icons/aro/boundary_copper.png"
-                            is-disabled="true"
-                            is-boundary="true">
-          </draggable-button>
+          <div style="display: flex; flex-direction: row; width: 100%">
+            <div style="flex: 0 0 auto">
+              <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
+                                is-disabled="false"
+                                is-boundary="true">
+              </draggable-button>
+            </div>
+            <div style="flex: 0 0 auto">
+              <draggable-button icon="/images/map_icons/aro/boundary_copper.png"
+                                is-disabled="true"
+                                is-boundary="true">
+              </draggable-button>
+            </div>
+            <div style="flex: 0 0 auto; line-height: 45px; padding-left: 5px; padding-right: 5px;">
+              Distance ({{$ctrl.configuration.units.length_medium_units}})
+            </div>
+            <div style="flex: 1 1 auto; margin-top: 5px; padding-left: 5px; padding-right: 5px;">
+              <input class="form-control"
+                      ng-model="$ctrl.lastUsedBoundaryDistance">
+            </div>
+          </div>
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment node -->
@@ -178,14 +191,6 @@
                           ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteBoundaryGenerations"
                           ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
                   </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Distance ({{$ctrl.configuration.units.length_medium_units}})</td>
-                <td>
-                  <input class="form-control"
-                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].distance"
-                         ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.updateLastUsedBoundaryDistance($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].distance)">
                 </td>
               </tr>
             </tbody>

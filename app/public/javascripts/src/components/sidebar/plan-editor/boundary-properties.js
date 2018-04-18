@@ -10,7 +10,6 @@ class BoundaryProperties {
       'Road Distance'
     ]
     this.selectedSiteBoundaryGeneration = selectedSiteBoundaryGeneration
-    this.distance = distance
     this.isDirty = false
   }
 }

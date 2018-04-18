@@ -190,7 +190,6 @@ class PlanEditorController {
             boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-            distance: optimizationBody.radius,        // Save this in meters only
             network_node_object_id: equipmentObjectId // This is the Network Equipment that this boundary is associated with
           }
         }
@@ -200,10 +199,6 @@ class PlanEditorController {
         this.createMapObjects && this.createMapObjects([feature])
       })
       .catch((err) => console.error(err))
-  }
-
-  updateLastUsedBoundaryDistance(lastUsedBoundaryDistance) {
-    this.lastUsedBoundaryDistance = lastUsedBoundaryDistance
   }
 
   commitTransaction() {
@@ -308,7 +303,6 @@ class PlanEditorController {
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-        distance: boundaryProperties.distance * this.configuration.units.length_units_to_meters,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId]
       }
     }
