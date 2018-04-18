@@ -24,6 +24,20 @@ class MapObjectEditorController {
       top: '100px',
       left: '100px'
     }
+    this.polygonOptions = {
+      strokeColor: '#FF1493',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF1493',
+      fillOpacity: 0.4,
+    }
+    this.selectedPolygonOptions = {
+      strokeColor: '#000000',
+      strokeOpacity: 0.8,
+      strokeWeight: 3,
+      fillColor: '#FF1493',
+      fillOpacity: 0.4,
+    }
   }
 
   // Get a list of UUIDs from the server
@@ -127,8 +141,6 @@ class MapObjectEditorController {
   }
 
   handleOnDropped(eventArgs) {
-    console.log('------------_ Handled drop event')
-    console.log(eventArgs)
     this.onObjectDroppedOnMarker && this.onObjectDroppedOnMarker(eventArgs)
   }
 
@@ -215,18 +227,15 @@ class MapObjectEditorController {
       })
     })
 
-    return new google.maps.Polygon({
+    var polygon = new google.maps.Polygon({
       objectId: feature.objectId, // Not used by Google Maps
       paths: polygonPath,
-      strokeColor: '#FF1493',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4,
       clickable: true,
       draggable: false,
       map: this.mapRef
     })
+    polygon.setOptions(this.polygonOptions)
+    return polygon
   }
 
   createMapObject(feature, usingMapClick) {
@@ -339,6 +348,7 @@ class MapObjectEditorController {
         this.selectedMapObject.setIcon(this.objectIconUrl)
       } else {
         this.selectedMapObject.setEditable(false)
+        this.selectedMapObject.setOptions(this.polygonOptions)
       }
     }
 
@@ -348,6 +358,7 @@ class MapObjectEditorController {
         mapObject.setIcon(this.objectSelectedIconUrl)
       } else {
         mapObject.setEditable(true)
+        mapObject.setOptions(this.selectedPolygonOptions)
       }
     }
     this.selectedMapObject = mapObject
