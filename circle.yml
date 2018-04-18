@@ -32,13 +32,15 @@ dependencies:
     - docker info
     # these load/save commands work around inability to cache copy-on-write layers properly
     # by caching the image in a tarball
-    - if [[ -e ~/docker-image/image.tar ]]; then docker load --input ~/docker-image/image.tar; fi
+    # - if [[ -e ~/docker-image/image.tar ]]; then docker load --input ~/docker-image/image.tar; fi
     - eval $(aws ecr get-login --region us-east-1)
     - docker login --username $DOCKERHUB_USER --password $DOCKERHUB_PASS --email completely@outdated.com
     - docker/build.sh
     - docker build -t ${IMAGE_TAG} ./target
     - docker tag ${IMAGE_TAG} ${LATEST_TAG}
-    - mkdir -p ~/docker-image; docker save ${IMAGE_TAG} > ~/docker-image/image.tar
+    - docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
+    - docker tag ${IMAGE_TAG} ${ECR_LATEST_TAG}
+    # - mkdir -p ~/docker-image; docker save ${IMAGE_TAG} > ~/docker-image/image.tar
 
 database:
   override:
