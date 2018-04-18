@@ -106,6 +106,10 @@ class MapObjectEditorController {
       this.$timeout()
       return !(hasEntityType || hasBoundaryType);  // false == allow dropping
     }
+    this.dragStartEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
+      this.objectIdToDropCSS = {} // So that we will regenerate the CSS in case the map has zoomed/panned
+      this.$timeout()
+    })
     this.dragEndEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
       this.isHavingBoundaryDraggedOver = false
       this.$timeout()
@@ -174,6 +178,7 @@ class MapObjectEditorController {
     if (!this.isMarker(mapObject)) {
       return null
     }
+    // Without the 'this.objectIdToDropCSS' cache we get into an infinite digest cycle
     var dropTargetCSS = this.objectIdToDropCSS[mapObject.objectId]
     if (dropTargetCSS) {
       return dropTargetCSS
@@ -410,6 +415,7 @@ class MapObjectEditorController {
     //unsubscribe map click observer
     this.mapFeaturesSelectedEventObserver.unsubscribe();
     this.dragEndEventObserver.unsubscribe();
+    this.dragStartEventObserver.unsubscribe();
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })

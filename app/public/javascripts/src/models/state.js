@@ -207,6 +207,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.viewSettingsChanged = new Rx.BehaviorSubject()
   service.selectionTypeChanged = new Rx.BehaviorSubject()
   service.measuredDistance = new Rx.BehaviorSubject()
+  service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
