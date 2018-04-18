@@ -114,7 +114,7 @@ class PlanEditorController {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
           const attributes = feature.attributes
-          const properties = new BoundaryProperties(attributes.boundary_type_id, attributes.selected_site_move_update,
+          const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
                                                     attributes.selected_site_boundary_generation, attributes.distance)
           this.objectIdToProperties[feature.objectId] = properties
         })
@@ -175,7 +175,7 @@ class PlanEditorController {
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
         // Construct a feature that we will pass to the map object editor, which will create the map object
-        var boundaryProperties = new BoundaryProperties(this.state.boundaryTypes[0].id, 'Auto-redraw', 'Road Distance', optimizationBody.radius)
+        var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', optimizationBody.radius)
         var feature = {
           objectId: this.getUUID(),
           geometry: {
@@ -293,6 +293,7 @@ class PlanEditorController {
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
+        distance: boundaryProperties.distance,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId]
       }
     }
