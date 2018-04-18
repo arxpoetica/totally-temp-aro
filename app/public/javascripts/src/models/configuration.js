@@ -9,8 +9,7 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     var configurationTypes = [
       'locationCategories',
       'networkEquipment',
-      'units',
-      'servicetagsTemp'
+      'units'
     ]
     configurationTypes.forEach((configurationType) => {
       configurationPromises.push(

@@ -1251,16 +1251,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.currentPlanServiceAreaTags = []
   service.loadListOfPlanTags = () => {
     var promises = [
-      $http.get(`/service/tag-mapping/tags`),
-      //$http.get(`/service/odata/servicearea?$select=id,code&$filter=layer/id eq 1&$orderby=id&$top=10&$skip=10`)
+      $http.get(`/service/tag-mapping/tags`)
     ]
 
     return Promise.all(promises)
       .then((results) => {
         service.listOfTags = results[0].data
-        //concatinating harcoded SA tag values
-        //service.listOfServiceAreaTags = results[1].data.concat(configuration.servicetagsTemp)
-        //service.listOfServiceAreaTags = results[1].data
       }) 
   }
 
