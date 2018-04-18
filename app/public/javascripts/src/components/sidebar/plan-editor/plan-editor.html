@@ -9,6 +9,9 @@
   #tblEquipmentProperties td {
     line-height: 33px;  /* To vertically align text */
   }
+  #tblBoundaryProperties td {
+    line-height: 33px;  /* To vertically align text */
+  }
   .drag-help-text.ng-hide-add {
     animation: fadeOutUp 300ms;
   }
@@ -72,13 +75,14 @@
           </draggable-button>
           <hr class="plan-editor-hr">
           <!-- Boundary buttons -->
-          <draggable-button icon="/images/map_icons/aro/remote_terminal.png"
+          <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
                             is-disabled="false"
                             is-boundary="true">
           </draggable-button>
-          <button class="btn btn-default draggable-item-button">
-            <i class="fa fa-2x fa-copyright"></i>
-          </button>
+          <draggable-button icon="/images/map_icons/aro/boundary_copper.png"
+                            is-disabled="true"
+                            is-boundary="true">
+          </draggable-button>
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment node -->
@@ -132,19 +136,13 @@
           <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
             <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected equipment
           </button>
-          <br>
-          <br>
-          <select class="form-control"
-                  ng-model="$ctrl.selectedBoundaryType"
-                  ng-options="item as item.description for item in $ctrl.state.boundaryTypes">
-          </select>
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment boundary -->
         <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
-              <img src="/images/map_icons/aro/remote_terminal.png" style="vertical-align:middle; padding-right: 10px">
+              <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
               <span>Remote Terminal boundary</span>
           </div>
           <!-- A table containing the editable properties of the selected object -->
