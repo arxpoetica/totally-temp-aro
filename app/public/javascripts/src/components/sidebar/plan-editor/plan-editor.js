@@ -256,6 +256,14 @@ class PlanEditorController {
     }
   }
 
+  // Marks the properties of the selected equipment boundary as dirty (changed).
+  markSelectedBoundaryPropertiesDirty() {
+    if (this.selectedMapObject) {
+      var objectProperties = this.objectIdToProperties[this.selectedMapObject.objectId]
+      objectProperties.isDirty = true
+    }
+  }
+
   // Formats the equipment specified by the objectId so that it can be sent to aro-service for saving
   formatEquipmentForService(objectId) {
     // Format the object and send it over to aro-service
@@ -309,10 +317,24 @@ class PlanEditorController {
 
   // Saves the properties of the selected location to aro-service
   saveSelectedEquipmentProperties() {
-    if (this.selectedMapObject) {
+    if (this.selectedMapObject && this.isMarker(this.selectedMapObject)) {
       var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
       var equipmentObjectForService = this.formatEquipmentForService(selectedMapObject.objectId)
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
+        .then((result) => {
+          this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
+          this.$timeout()
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+
+  // Saves the properties of the selected boundary to aro-service
+  saveSelectedBoundaryProperties() {
+    if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)) {
+      var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
+      var boundaryObjectForService = this.formatBoundaryForService(selectedMapObject.objectId)
+      this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, boundaryObjectForService)
         .then((result) => {
           this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
           this.$timeout()
