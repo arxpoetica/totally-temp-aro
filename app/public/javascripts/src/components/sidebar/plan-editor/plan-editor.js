@@ -118,8 +118,6 @@ class PlanEditorController {
                                                     attributes.selected_site_boundary_generation, attributes.distance)
           this.objectIdToProperties[feature.objectId] = properties
         })
-        // We have a list of equipment boundaries. Populate them in the map object
-        this.createMapObjects && this.createMapObjects(result.data)
         // Save the equipment and boundary ID associations
         result.data.forEach((boundaryFeature) => {
           var equipmentId = boundaryFeature.attributes.network_node_object_id
@@ -127,6 +125,8 @@ class PlanEditorController {
           this.equipmentIdToBoundaryId[equipmentId] = boundaryId
           this.boundaryIdToEquipmentId[boundaryId] = equipmentId
         })
+        // We have a list of equipment boundaries. Populate them in the map object
+        this.createMapObjects && this.createMapObjects(result.data)
       })
       .catch((err) => console.error(err))
   }
@@ -356,16 +356,23 @@ class PlanEditorController {
           this.$timeout()
         })
         .catch((err) => console.error(err))
-      // Delete the associated boundary
+      // Get the associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
       if (boundaryObjectId) {
-        delete this.equipmentIdToBoundaryId[mapObject.objectId]
-        delete this.boundaryIdToEquipmentId[boundaryObjectId]
-        this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+        // We have a boundary object. Delete it and recalculate coverage only if the boundary properties say to do so.
+        const boundaryProperties = this.objectIdToProperties[boundaryObjectId]
+        if (boundaryProperties.selectedSiteMoveUpdate === 'Auto-redraw') {
+          delete this.equipmentIdToBoundaryId[mapObject.objectId]
+          delete this.boundaryIdToEquipmentId[boundaryObjectId]
+          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+          this.calculateCoverage(mapObject)
+        }
       }
-      this.calculateCoverage(mapObject)
     } else {
-      // This is a boundary feature
+      // This is a boundary feature. If it is modified, change the update style to 'Don't update'
+      const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
+      boundaryProperties.selectedSiteMoveUpdate = 'Don\'t update'
+      this.$timeout()
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
