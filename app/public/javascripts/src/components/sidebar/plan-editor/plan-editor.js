@@ -418,14 +418,6 @@ class PlanEditorController {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
     }
   }
-
-  deleteSelectedObject() {
-    // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
-    if (this.selectedMapObject) {
-      // Delete the selected map object
-      this.deleteObjectWithId && this.deleteObjectWithId(this.selectedMapObject.objectId)
-    }
-  }
 }
 
 PlanEditorController.$inject = ['$timeout', '$http', 'state', 'configuration']
