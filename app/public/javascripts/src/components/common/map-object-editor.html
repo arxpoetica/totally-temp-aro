@@ -35,7 +35,7 @@
     {{dropTarget}}
   </div> -->
   <drop-target ng-repeat="(key, mapObject) in $ctrl.createdMapObjects"
-               ng-if="$ctrl.getDropTargetCSSForMapObject(mapObject)"
+               ng-if="$ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForMapObject(mapObject)"
                ng-style="$ctrl.getDropTargetCSSForMapObject(mapObject)"
                target-object-id="mapObject.objectId"
                on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">

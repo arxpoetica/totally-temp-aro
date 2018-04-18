@@ -139,12 +139,17 @@ class PlanEditorController {
   }
 
   handleObjectDroppedOnMarker(eventArgs) {
-    console.log('-----------__ In plan editor')
-    console.log(eventArgs)
     var equipmentMapObject = this.objectIdToMapObject[eventArgs.targetObjectId]
     if (!equipmentMapObject) {
       console.error(`And object was dropped on marker with id ${eventArgs.targetObjectId}, but this id does not exist in this.objectIdToMapObject`)
       return
+    }
+    // Delete the associated boundary if it exists
+    const boundaryObjectId = this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
+    if (boundaryObjectId) {
+      delete this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
+      delete this.boundaryIdToEquipmentId[boundaryObjectId]
+      this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
     }
     this.calculateCoverage(equipmentMapObject)
   }
@@ -309,7 +314,6 @@ class PlanEditorController {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-      // this.calculateCoverage(mapObject)
     } else if (!mapObject.icon && !mapObject.position) {
       // This is a boundary marker. This will be created without map clicks. Save it.
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)

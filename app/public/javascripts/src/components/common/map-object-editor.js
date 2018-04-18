@@ -82,6 +82,7 @@ class MapObjectEditorController {
     // Add handlers for drag-and-drop creation of elements
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     this.objectIdToDropCSS = {}
+    this.isHavingBoundaryDraggedOver = false
     // console.log(this.$compile('<div style="position:absolute; top: 100px; left: 100px; width: 100px; height: 100px; background-color: red;'))
     // mapCanvas.appendChild(this.$compile('<div style="position:absolute; top: 100px; left: 100px; width: 100px; height: 100px; background-color: red;'))
     // On drag over, only allow dropping if the object being dragged is a networkEquipment
@@ -89,9 +90,17 @@ class MapObjectEditorController {
       // Note that we do not have access the the event.dataTransfer data, only the types. This is by design.
       var hasEntityType = (event.dataTransfer.types.indexOf(Constants.DRAG_DROP_ENTITY_KEY) >= 0)
       var hasBoundaryType = (event.dataTransfer.types.indexOf(Constants.DRAG_IS_BOUNDARY) >= 0)
+      this.isHavingBoundaryDraggedOver = hasBoundaryType
+      this.$timeout()
       return !(hasEntityType || hasBoundaryType);  // false == allow dropping
     }
+    mapCanvas.ondragleave = (event) => {
+      this.isHavingBoundaryDraggedOver = false
+      this.$timeout()
+    }
     mapCanvas.ondrop = (event) => {
+      this.isHavingBoundaryDraggedOver = false
+      this.$timeout()
       var hasBoundaryType = (event.dataTransfer.types.indexOf(Constants.DRAG_IS_BOUNDARY) >= 0)
       if (hasBoundaryType) {
         // This will be handled by our custom drop targets. Do not use the map canvas' ondrop to handle it.
@@ -389,6 +398,7 @@ class MapObjectEditorController {
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
     mapCanvas.ondrop = null
+    mapCanvas.ondragleave = null
   }
 }
 
