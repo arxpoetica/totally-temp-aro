@@ -34,7 +34,7 @@ dependencies:
     # by caching the image in a tarball
     - if [[ -e ~/docker-image/image.tar ]]; then docker load --input ~/docker-image/image.tar; fi
     - eval $(aws ecr get-login --region us-east-1)
-    - echo $DOCKERHUB_PASS | docker login --username $DOCKERHUB_USER --password-stdin
+    - docker login --username $DOCKERHUB_USER --password $DOCKERHUB_PASS --email completely@outdated.com
     - docker/build.sh
     - docker build -t ${IMAGE_TAG} ./target
     - docker tag ${IMAGE_TAG} ${LATEST_TAG}
