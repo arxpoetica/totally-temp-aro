@@ -2,20 +2,29 @@ import Constants from '../../common/constants'
 
 class DraggableButtonController {
 
-  constructor($element) {
+  constructor($element, state) {
     this.$element = $element
+    this.state = state
   }
 
   $onInit() {
     var buttonElement = this.$element.find('button')[0]
     // Set custom dragging data when this button is dragged
     buttonElement.ondragstart = (dragEvent) => {
+      this.state.dragStartEvent.next(dragEvent)
       if (this.isDisabled) {
         return false
       }
       dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_KEY, this.entityType)
       dragEvent.dataTransfer.setData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY, this.entityDetails)
+      if (this.isBoundary) {
+        dragEvent.dataTransfer.setData(Constants.DRAG_IS_BOUNDARY, 'true')
+      }
       return true
+    }
+    // Fire an event on dragend
+    buttonElement.ondragend = (dragEvent) => {
+      this.state.dragEndEvent.next(dragEvent)
     }
   }
 
@@ -26,7 +35,7 @@ class DraggableButtonController {
   }
 }
 
-DraggableButtonController.$inject = ['$element']
+DraggableButtonController.$inject = ['$element', 'state']
   
 let draggableButton = {
   template: `
@@ -39,7 +48,8 @@ let draggableButton = {
     icon: '@',
     isDisabled: '<',
     entityType: '@',
-    entityDetails: '@'
+    entityDetails: '@',
+    isBoundary: '@'
   },
   controller: DraggableButtonController
 }
