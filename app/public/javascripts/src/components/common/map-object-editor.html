@@ -10,6 +10,9 @@
   .map-object-editor-context-menu-dropdown {
     line-height: 30px; /* Any property will do */
   }
+  .map-object-drop-targets-container {
+    line-height: 30px; /* Any property will do */
+  }
 </style>
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
   <div class="dropdown">
@@ -20,7 +23,28 @@
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
+      <!-- Menu item to delete object -->
       <li><a href="#" ng-click="$ctrl.deleteSelectedObject()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</a></li>
+      <!-- Menu item to start/stop editing polygon objects -->
+      <li ng-if="!$ctrl.isMarker($ctrl.selectedMapObject)">
+        <a href="#" ng-click="$ctrl.toggleEditSelectedPolygon()">
+          <!-- If the selected polygon is editable, display "Stop Editing" -->
+          <i ng-if="$ctrl.selectedMapObject.getEditable()" class="fa fa-stop"></i>
+          <i ng-if="!$ctrl.selectedMapObject.getEditable()" class="fa fa-pencil"></i>
+          &nbsp;&nbsp;{{$ctrl.selectedMapObject.getEditable() ? 'Stop Editing' : 'Edit boundary'}}
+        </a>
+      </li>
     </ul>
   </div>
+</div>
+<!-- A div containing the drop targets, used when dropping boundaries onto equipments. Do NOT set
+     the width or height of the DIV, otherwise it will eat up all mouse events. Even setting pointer-events:none
+     does not help, because then the drop event on the drop targets does not work either -->
+<div class="map-object-drop-targets-container" style="position: absolute; left: 0px; top: 0px;">
+  <drop-target ng-repeat="(key, mapObject) in $ctrl.createdMapObjects"
+               ng-if="$ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForMapObject(mapObject)"
+               ng-style="$ctrl.getDropTargetCSSForMapObject(mapObject)"
+               target-object-id="mapObject.objectId"
+               on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">
+  </drop-target>
 </div>

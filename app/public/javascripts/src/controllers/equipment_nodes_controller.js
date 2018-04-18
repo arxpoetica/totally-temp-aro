@@ -42,6 +42,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     if (networkEquipment.equipmentType === 'point') {
       var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
+    } else if (networkEquipment.equipmentType === 'line') {
+      var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+      tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
     } else if (networkEquipment.equipmentType === 'polygon') {
       var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)

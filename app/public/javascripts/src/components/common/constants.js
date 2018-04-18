@@ -4,7 +4,8 @@ var Constants = Object.freeze({
 
   // Drag-and-drop editing on map
   DRAG_DROP_ENTITY_KEY: 'entity_type',
-  DRAG_DROP_ENTITY_DETAILS_KEY: 'entity_details'
+  DRAG_DROP_ENTITY_DETAILS_KEY: 'entity_details',
+  DRAG_IS_BOUNDARY: 'dragged_object_is_a_boundary'
 })
 
 export default Constants
