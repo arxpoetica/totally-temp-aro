@@ -2,8 +2,6 @@ class DropTargetController {
   
   constructor($element) {
     $element[0].ondrop = (event) => {
-      console.log('DROPPED')
-      console.log(event)
       event.preventDefault();
       this.onDropped && this.onDropped({
         dropEvent: event,

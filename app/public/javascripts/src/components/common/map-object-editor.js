@@ -419,7 +419,8 @@ class MapObjectEditorController {
     this.$timeout(() => {
       var documentBody = this.$document.find('body')[0]
       documentBody.removeChild(this.contextMenuElement)
-      documentBody.removeChild(this.dropTargetElement)
+      var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
+      mapCanvas.removeChild(this.dropTargetElement)
     }, 0)
 
     // Remove any dragging DOM event listeners
