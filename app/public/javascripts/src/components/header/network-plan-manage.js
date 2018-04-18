@@ -168,6 +168,7 @@ class NetworkPlanModalController {
               }
             })
             this.allPlans = _.sortBy(response.data, 'name');
+            this.state.loadAllAssociatedSaPlanTags(this.allPlans)
             this.plans = this.allPlans.slice(0, this.maxResults);
             // this.pages = response.data.pages
             this.pages = [];
