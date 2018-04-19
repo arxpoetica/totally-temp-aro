@@ -71,6 +71,7 @@
     "passport-stub": "^1.0.1",
     "pbf": "^3.0.5",
     "pg": "^4.5.5",
+    "pg-hstore": "^2.3.2",
     "pify": "^2.3.0",
     "point-in-polygon": "^1.0.1",
     "pync": "^1.0.0",

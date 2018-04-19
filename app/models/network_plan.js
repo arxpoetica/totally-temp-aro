@@ -394,7 +394,7 @@ module.exports = class NetworkPlan {
           WHERE plan.plan_type='R'
         `
         var params = [config.client_carrier_name]
-        var allPlans = user && user.rol === 'admin' && options.allPlans
+        var allPlans = user && (user.rol === 'admin' || user.rol === 'sales') && options.allPlans
         if (user && !allPlans) {
           params.push(user.id)
           sql += ` AND plan.id IN (SELECT plan_id FROM auth.permissions WHERE user_id=$${params.length})`
