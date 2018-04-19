@@ -1,0 +1,160 @@
+<div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
+    <img width="100%" ng-attr-src="{{$ctrl.map_url}}">
+    <br>
+    <style scoped>
+        .view-mode-container {
+            position: relative; /* This will require the parent to have position: relative or absolute */
+            height: 100%;
+        }
+        .view-mode-container > div {
+            margin-top: 2px;
+        }
+        #subject:first-word {
+            font-weight: bold;
+        }
+        #show-source{
+            overflow: auto;
+            max-height: 80px;
+            padding-left: 30px !important;
+        }
+        #seperator {
+            border-top: 1px solid #8c8b8b;
+        }
+        .loc_attributes_container h5{
+            font-weight: bold;
+        }
+    </style>
+
+    <table id="tblLocationInfo" class="table table-condensed table-striped">
+        <tbody>
+        <tr>
+            <td>Address</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.address}}
+            </td>
+        </tr>
+        <tr>
+            <td>Latitude</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.geog.coordinates[1]}}
+            </td>
+        </tr>
+        <tr>
+            <td>Longitude</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.geog.coordinates[0]}}
+            </td>
+        </tr>
+        <tr>
+            <td>Census Block</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.tabblock_id}}
+            </td>
+        </tr>
+        <tr>
+            <td>Census Block</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.tabblock_id}}
+            </td>
+        </tr>
+        <tr>
+           <td>
+               Additional Attributes
+           </td>
+
+            <td>
+                <div class="loc_attributes_container" ng-if="$ctrl.showAttributes">
+                    <table id="tblNetworkBuild" class="table table-condensed table-striped">
+                        <tbody>
+                        <tr ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes">
+                            <td>{{k + ':'}}</td>
+                            <td>{{v}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td>HouseHolds</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.number_of_households}}
+            </td>
+        </tr>
+
+        <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.source_ids && $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.source_ids.length > 0">
+            <td></td>
+            <td>
+           <span>
+                <div id="show-source">
+                  <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
+                    <li class="item"
+                        ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.source_ids track by $index">
+                      {{ target }}
+                    </li>
+                  </ul>
+                </div>
+             </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Businesses</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.number_of_businesses}}
+            </td>
+        </tr>
+
+        <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids && $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids.length > 0">
+            <td>{{$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids.length}}</td>
+            <td>
+                <div id="show-source" >
+                    <ul  style="list-style-type:none; padding:0; margin-bottom: 0px;">
+                        <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids track by $index">
+                            {{ target }}
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Towers</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.number_of_towers}}
+            </td>
+        </tr>
+        <tr  ng-if="$ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.source_ids && $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.source_ids.length > 0" style="list-style-type:none; padding:0; margin-bottom: 0px;">
+            <td></td>
+            <td>
+                <div id="show-source">
+                    <ul>
+                        <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.source_ids track by $index">
+                            {{ target }}
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Distance From Existing Network:</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.number_of_towers}}
+            </td>
+        </tr>
+
+        <tr>
+            <td>Distance From Planned Network:</td>
+            <td>
+                {{$ctrl.selectedLocationInfo.distance_to_client_fiber | number: 0}}m
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
+    </div>
+</div>
