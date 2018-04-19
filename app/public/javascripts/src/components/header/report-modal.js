@@ -110,7 +110,7 @@ class ReportModalController {
           url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${this.plan.id}.csv`
         }
       ])
-      if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin') {
+      if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin'|| globalUser.rol === 'sales' ) {
         analysis = analysis.concat([
           {
             name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Output`,

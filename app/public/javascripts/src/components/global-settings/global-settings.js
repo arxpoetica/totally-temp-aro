@@ -69,7 +69,7 @@ let globalSettings = {
           </button>
 
           <button class="btn settings-btn"
-            ng-if="$ctrl.currentUser.rol === 'admin'"
+            ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'"
             ng-click="$ctrl.toggleManageUsersMode()">
               <i class="fa fa-2x fa-users"></i>
               <br>Manage Users
@@ -82,7 +82,7 @@ let globalSettings = {
           </button>
 
           <button class="btn settings-btn"
-            ng-if="$ctrl.currentUser.rol === 'admin'"
+            ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'"
             ng-click="$ctrl.currentView = $ctrl.views.Tag_Manager">
               <i class="fa fa-2x fa-tags"></i>
               <br>Tag Manager

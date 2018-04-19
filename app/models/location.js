@@ -8,6 +8,7 @@ var database = helpers.database
 var config = helpers.config
 var models = require('../models')
 var fs = require('fs')
+var hstore = require('pg-hstore')()
 
 module.exports = class Location {
 
@@ -393,8 +394,8 @@ module.exports = class Location {
         locationInfo = _location
         locationSources = {} 
         var hhSources = `
-          SELECT array_agg(source_id) as source_ids FROM households
-          WHERE location_id=$1
+            SELECT array_agg(source_id) as source_ids FROM households
+            WHERE location_id=$1
         `
         var hhSourceIds = database.findOne(hhSources, [location_id])
           .then((values) => {
@@ -402,7 +403,7 @@ module.exports = class Location {
           })
 
         var bizSources = `
-          SELECT array_agg(source_id) as source_ids FROM businesses
+          SELECT array_remove(array_agg(source_id), null) as source_ids FROM businesses
           WHERE location_id=$1
         `
         var bizSourceIds = database.findOne(bizSources, [location_id])
@@ -420,6 +421,24 @@ module.exports = class Location {
           })
 
         return Promise.all([hhSourceIds, bizSourceIds, towerSourceIds])
+      })
+      .then(()=> {
+
+        var attributeQuery = `
+          SELECT attributes FROM businesses
+          WHERE location_id=$1
+        `
+
+        return database.findOne(attributeQuery, [location_id])
+          .then((values) => {
+            locationInfo.attributes = {}
+            if(values.attributes) {
+              hstore.parse(values.attributes, function (result) {
+                locationInfo.attributes = result
+              })
+            }
+          })
+
       })
       .then(() => {
         locationInfo.locSourceIds = locationSources

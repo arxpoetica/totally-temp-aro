@@ -36,60 +36,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
 
-  // Update map layers for equipment items (these do not have a library id associated with them)
-  var updateMapLayersForEquipment = (planId, networkEquipment, mapLayers, newCreatedMapLayerKeys) => {
-    var tileUrl = networkEquipment.tileUrl.replace('{rootPlanId}', planId)
-    if (networkEquipment.equipmentType === 'point') {
-      var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
-    } else if (networkEquipment.equipmentType === 'line') {
-      var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
-    } else if (networkEquipment.equipmentType === 'polygon') {
-      var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
-    }
-
-    mapLayers[networkEquipment.key] = {
-      dataUrls: [tileUrl],
-      iconUrl: networkEquipment.iconUrl,
-      renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-      strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-      lineWidth: 2,
-      fillStyle: networkEquipment.drawingOptions.fillStyle,
-      opacity: 0.5,
-      selectable: true,
-      zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
-    }
-
-    newCreatedMapLayerKeys.add(networkEquipment.key)
-  }
-
-  // Update map layers for cable/fiber items (these can have multiple library ids selected for display)
-  var updateMapLayersForCable = (networkEquipment, mapLayers, newCreatedMapLayerKeys) => {
-    var EXISTING_FIBER_PREFIX = 'map_layer_existing_'
-    var lineTransform = getLineTransformForLayer(+state.existingFiberOptions.aggregateZoomThreshold)
-    var tileUrl = networkEquipment.tileUrl.replace('{lineTransform}', lineTransform)
-    state.dataItems.fiber.selectedLibraryItems.forEach((selectedLibraryItem) => {
-      // Careful - mapLayerKey must be unique, or else it will be overwritten
-      var mapLayerKey = `${EXISTING_FIBER_PREFIX}_${networkEquipment.key}_${selectedLibraryItem.identifier}`
-      const tileUrlThisItem = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
-
-      mapLayers[mapLayerKey] = {
-        dataUrls: [tileUrlThisItem],
-        iconUrl: networkEquipment.iconUrl, // Hack because we need some icon
-        renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-        strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-        lineWidth: 2,
-        zIndex: networkEquipment.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-        fillStyle: networkEquipment.drawingOptions.fillStyle,
-        showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction for copper cable
-      }
-      newCreatedMapLayerKeys.add(mapLayerKey)
-    })
-  }
-
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
@@ -103,57 +49,74 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     createdMapLayerKeys.clear()
 
-    // Only add planned equipment if we have a valid plan selected
-    var planId = state.plan && state.plan.getValue() && state.plan.getValue().id
-    if (planId) {
-      var networkLayers = _.find(state.networkEquipments,(category) => category.key == "planned" ).layers
-      var site_boundaries = _.find(networkLayers,(layer) => layer.label == "Site Boundaries")
-      
-      // Loop through all network equipment categories (e.g. "Existing Equipment")
-      state.networkEquipments.forEach((category) => {
-
-        // Loop through all the layers in this category
-        category.layers.forEach((networkEquipment) => {
-          if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') < 0) {
-            updateMapLayersForEquipment(planId, networkEquipment, oldMapLayers, createdMapLayerKeys)
-          } else if (networkEquipment.checked && networkEquipment.tileUrl.indexOf('{libraryId}') >= 0
-                     && state.dataItems.fiber){
-            updateMapLayersForCable(networkEquipment, oldMapLayers, createdMapLayerKeys)
-          }
-        })
-        if (state.showSiteBoundary) {
-          category.layers.forEach((networkEquipment) => {
-            if(networkEquipment.checked && networkEquipment.networkNodeType) {
-              var planned_site_boundaries = angular.copy(site_boundaries)
-              var boundaryType = _.find(state.networkNodeTypes,(node) => {
-                if(node.name == networkEquipment.networkNodeType)
-                  return node
-              })
-              var pointTransform = getPointTransformForLayer(+planned_site_boundaries.aggregateZoomThreshold)
-              
-              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{rootPlanId}', planId)
-              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{boundaryTypeId}', state.selectedBoundaryType.id)
-              planned_site_boundaries.tileUrl = planned_site_boundaries.tileUrl.replace('{pointTransform}', pointTransform)
-              
-              oldMapLayers["planned_site_boundaries_"+networkEquipment.networkNodeType] = {
-                dataUrls: [planned_site_boundaries.tileUrl],
-                iconUrl: planned_site_boundaries.iconUrl,
-                renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-                strokeStyle: planned_site_boundaries.drawingOptions.strokeStyle,
-                lineWidth: 2,
-                fillStyle: planned_site_boundaries.drawingOptions.fillStyle,
-                opacity: 0.5,
-                selectable: true,
-                zIndex: planned_site_boundaries.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                showPolylineDirection: planned_site_boundaries.drawingOptions.showPolylineDirection
-              }
-
-              createdMapLayerKeys.add("planned_site_boundaries_"+networkEquipment.networkNodeType)
+    // Loop through all network equipment categories (e.g. "Existing Equipment")
+    state.networkEquipments.forEach((category) => {
+      // Loop through all the layers in this category
+      category.layers.forEach((networkEquipment) => {
+        if (networkEquipment.showExisting) {
+          // We need to show the existing network equipment. Loop through all the selected library ids.
+          state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+            var mapLayerKey = `${networkEquipment.key}_existing_${selectedLibraryItem.identifier}`
+            var tileUrl = networkEquipment.existingTileUrl
+            tileUrl = tileUrl.replace('{libraryId}', selectedLibraryItem.identifier)
+            if (networkEquipment.equipmentType === 'point') {
+              var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
+            } else if (networkEquipment.equipmentType === 'line') {
+              var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+            } else if (networkEquipment.equipmentType === 'polygon') {
+              var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+              tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
             }
+            oldMapLayers[mapLayerKey] = {
+              dataUrls: [tileUrl],
+              iconUrl: networkEquipment.iconUrl,
+              renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+              strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+              lineWidth: 2,
+              fillStyle: networkEquipment.drawingOptions.fillStyle,
+              opacity: 0.5,
+              selectable: true,
+              zIndex: networkEquipment.zIndex,
+              showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
+            }
+            createdMapLayerKeys.add(mapLayerKey)
           })
-        }  
+        }
+
+        var planId = state.plan && state.plan.getValue() && state.plan.getValue().id
+        if (networkEquipment.showPlanned && planId) {
+          // We need to show the planned network equipment for this plan.
+          var mapLayerKey = `${networkEquipment.key}_planned`
+          var tileUrl = networkEquipment.plannedTileUrl
+          tileUrl = tileUrl.replace('{rootPlanId}', planId)
+          if (networkEquipment.equipmentType === 'point') {
+            var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+            tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
+          } else if (networkEquipment.equipmentType === 'line') {
+            var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+            tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+          } else if (networkEquipment.equipmentType === 'polygon') {
+            var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+            tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+          }
+          oldMapLayers[mapLayerKey] = {
+            dataUrls: [tileUrl],
+            iconUrl: networkEquipment.iconUrl,
+            renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
+            strokeStyle: networkEquipment.drawingOptions.strokeStyle,
+            lineWidth: 2,
+            fillStyle: networkEquipment.drawingOptions.fillStyle,
+            opacity: 0.5,
+            selectable: true,
+            zIndex: networkEquipment.zIndex,
+            showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
+          }
+          createdMapLayerKeys.add(mapLayerKey)
+        }
       })
-    }
+    })
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
@@ -163,8 +126,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
-  $scope.changeLayerVisibility = (layerObj, isVisible) => {
-    layerObj.checked = isVisible
+  $scope.changeLayerVisibility = (layerObj, visibilityType, isVisible) => {
+    // "visibilityType" allows us to distinguish between planned and existing layers
+    layerObj[visibilityType] = isVisible
     updateMapLayers()
   }
 

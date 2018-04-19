@@ -213,7 +213,7 @@
     </div>-->
 
     <div>
-    	<% if (user.rol === 'admin') { %>
+    	<% if (user.rol === 'admin' || user.rol === 'sales') { %>
       <p class="pull-left">
         <button class="btn btn-primary" ng-click="runExpertMode()">Expert Mode</button>
       </p>

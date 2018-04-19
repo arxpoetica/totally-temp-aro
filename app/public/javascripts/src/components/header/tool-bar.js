@@ -1,11 +1,12 @@
 class ToolBarController {
 
-  constructor($element, $timeout,$document ,state, map_tools, $window) {
+  constructor($element, $timeout,$document ,state, map_tools, $window, configuration) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
     this.$document = $document
     this.$window = $window
+    this.configuration = configuration
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
     this.numPreviousCollapsedButtons = 0
@@ -13,6 +14,7 @@ class ToolBarController {
     this.showDropDown = false
     this.heatMapOption = true
     this.measuringStickEnabled = false
+    this.currentUser = state.getUser()
 
     this.min = 0
     // Map tile settings used for debugging
@@ -308,7 +310,7 @@ class ToolBarController {
   }
 }
 
-ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools', '$window']
+ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools', '$window', 'configuration']
 
 let toolBar = {
   templateUrl: '/components/header/tool-bar.html',
