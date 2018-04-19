@@ -10,7 +10,6 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       'locationCategories',
       'networkEquipment',
       'units',
-      'servicetagsTemp',
       'aroClient'
     ]
     configurationTypes.forEach((configurationType) => {

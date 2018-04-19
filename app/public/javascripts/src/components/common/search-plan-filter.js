@@ -25,7 +25,8 @@ class SearchPlanFilterController {
     bindings: {
       objectName : '@',
       searchList : '<',
-      applySearch: '&'
+      applySearch: '&',
+      refreshTagList: '&'
     },
     controller: SearchPlanFilterController
   }

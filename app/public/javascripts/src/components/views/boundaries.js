@@ -138,9 +138,8 @@ class BoundariesController {
     
     globalServiceLayers.forEach((serviceLayer) => {
       if (!serviceLayer.show_in_boundaries) return
-      if ("Wirecenter" == serviceLayer.description) serviceLayer.description = "Service Areas" // ToDo: This is a hack, find where description is set
       var wirecenter_layer = {
-        name: serviceLayer.description,
+        name: serviceLayer.description, //serviceLayer.description, // Service Areas 
         type: serviceLayer.name,
         api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
         layerId: serviceLayer.id,

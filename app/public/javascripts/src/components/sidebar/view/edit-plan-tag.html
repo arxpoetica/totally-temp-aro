@@ -1,0 +1,23 @@
+<style scoped>
+.ui-select-choices-tag-style {
+  width: auto!important;
+}
+</style>  
+<div>
+  <ui-select multiple ng-model="$ctrl.selectedList" theme="bootstrap" 
+    close-on-select="false" 
+    on-select="onSelectedItemsChanged()"
+    on-remove="onSelectedItemsChanged()">
+    <ui-select-match placeholder="Select {{$ctrl.objectName}}...">
+      <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour($item), 'margin-right':'5px' }">
+        </span>{{$item.name || $item.code}}
+    </ui-select-match>
+    <ui-select-choices class="ui-select-choices-tag-style" repeat="item in $ctrl.searchList | filter: $select.search" refresh="$ctrl.refreshTagList({searchObj:$select.search})"
+      refresh-delay="100">
+      <div>
+        <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }">
+          </span>{{item.name || item.code}}
+      </div>
+    </ui-select-choices>
+  </ui-select>
+</div>

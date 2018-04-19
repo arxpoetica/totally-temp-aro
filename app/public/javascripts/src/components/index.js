@@ -8,6 +8,7 @@ import viewMode from './sidebar/view/view-mode'
 import equipmentDetailModal from './sidebar/view/equipment-detail-modal'
 import planInfo from './sidebar/view/plan-info'
 import planInfoRecent from './sidebar/view/plan-info-recent'
+import editPlanTag from './sidebar/view/edit-plan-tag'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
@@ -52,6 +53,7 @@ import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import aroObjectEditor from './common/aro-object-editor'
 import mapObjectEditor from './common/map-object-editor'
+import dropTarget from './common/drop-target'
 import searchPlanFilter from './common/search-plan-filter'
 import accordion from './accordion/accordion'
 import accordionPanelContents from './accordion/accordion-panel-contents'
@@ -70,6 +72,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetailModal', equipmentDetailModal)
    .component('planInfo', planInfo)
    .component('planInfoRecent', planInfoRecent)
+   .component('editPlanTag', editPlanTag)
    .component('displayModeButtons', displayModeButtons)
    .component('optimizeButton', optimizeButton)
    .component('analysisExpertMode', analysisExpertMode)
@@ -113,6 +116,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroMultiSelect', aroMultiSelect)
    .component('aroObjectEditor', aroObjectEditor)
    .component('mapObjectEditor', mapObjectEditor)
+   .component('dropTarget', dropTarget)
    .component('searchPlanFilter', searchPlanFilter)
    .component('accordion', accordion)
    .component('accordionPanelContents', accordionPanelContents)
