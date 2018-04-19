@@ -16,7 +16,7 @@ class EquipmentDetailController {
         //this.selectedEquipmentInfo = options.equipmentFeatures[0]
         this.getEquipmentInfo(equipmentId)
           .then((equipmentInfo) => {
-            console.log(equipmentInfo)
+            //console.log(equipmentInfo)
             this.selectedEquipmentInfo = equipmentInfo
           })
       }

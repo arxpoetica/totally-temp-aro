@@ -39,7 +39,7 @@ module.exports = class UIConfiguration {
       var clientConfig = this.loadJSONFile(clientConfigPath, {})
 
       if (null == baseConfig){
-        // if we're just going to copy everything, no need to do it one at a time
+        // if we're just going to copy everything to an empty object, no need to do it one at a time
         baseConfig = clientConfig 
       }else{
         UIConfiguration.basicDeepObjMerge(baseConfig, clientConfig)
