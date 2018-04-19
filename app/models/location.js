@@ -8,6 +8,7 @@ var database = helpers.database
 var config = helpers.config
 var models = require('../models')
 var fs = require('fs')
+var hstore = require('pg-hstore')()
 
 module.exports = class Location {
 
@@ -420,6 +421,24 @@ module.exports = class Location {
           })
 
         return Promise.all([hhSourceIds, bizSourceIds, towerSourceIds])
+      })
+      .then(()=> {
+
+        var attributeQuery = `
+          SELECT attributes FROM businesses
+          WHERE location_id=$1
+        `
+
+        return database.findOne(attributeQuery, [location_id])
+          .then((values) => {
+            locationInfo.attributes = {}
+            if(values.attributes) {
+              hstore.parse(values.attributes, function (result) {
+                locationInfo.attributes = result
+              })
+            }
+          })
+
       })
       .then(() => {
         locationInfo.locSourceIds = locationSources

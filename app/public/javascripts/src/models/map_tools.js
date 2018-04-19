@@ -91,7 +91,8 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', ($rootScope, tracker
   tools.TOOL_IDS = {
     LOCATIONS: 'locations',
     AREA_NETWORK_PLANNING: 'area_network_planning',
-    TARGET_BUILDER: 'target_builder'
+    TARGET_BUILDER: 'target_builder',
+    CONSTRUCTION_SITES: 'construction_sites'
   }
 
   tools.available_tools = [
@@ -108,7 +109,7 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state', ($rootScope, tracker
       icon: 'fa fa-sitemap fa-2x'
     },
     {
-      id: 'construction_sites',
+      id: tools.TOOL_IDS.CONSTRUCTION_SITES,
       name: 'Construction Sites',
       short_name: 'C',
       icon: 'fa fa-wrench fa-2x'

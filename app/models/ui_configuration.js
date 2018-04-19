@@ -30,6 +30,11 @@ module.exports = class UIConfiguration {
   getConfigurationSet (configSet) {
     
     if (!this.configurations[configSet]) {
+      if(configSet === 'aroClient'){
+        this.configurations['aroClient'] = process.env.ARO_CLIENT || ''
+        return this.configurations['aroClient']
+      }
+
       // This configuration set has not been loaded. Load it from disk now.
       // merge base config with client config 
       var baseConfigPath = `../../conf/base/${configSet}.json`

@@ -1213,3 +1213,34 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   font-size: xx-small;
   color:#1f7de6;
 }
+
+.map_tools_container {
+  text-align: center;
+}
+.map_tool_label {
+  color: white;
+  width: 70px;
+  background: #1f7de6;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-radius: 2px;
+  padding-left: 2px;
+  padding-right: 4px;
+  font-size: 12px;
+}
+
+.attribute_table {
+  display: table;
+}
+
+.attribute_row {
+  display: table-row;
+}
+.attribute_cell {
+  display: table-cell;
+  padding: 3px;
+}
+
+.attribute_cell.key {
+  font-weight: bold;
+}

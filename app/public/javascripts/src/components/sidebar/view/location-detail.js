@@ -21,6 +21,9 @@ let locationDetail = {
     #seperator {
       border-top: 1px solid #8c8b8b;
     }
+    .loc_attributes_container h5{
+        font-weight: bold;
+    }
   </style>
   <div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
     <img width="100%" ng-attr-src="{{$ctrl.map_url}}">
@@ -29,6 +32,18 @@ let locationDetail = {
     <div><b>Latitude:</b> {{$ctrl.selectedLocationInfo.geog.coordinates[1]}}</div>
     <div><b>Longitude:</b> {{$ctrl.selectedLocationInfo.geog.coordinates[0]}}</div>
     <div><b>Census Block:</b> {{$ctrl.selectedLocationInfo.tabblock_id}}</div>
+    <div id="seperator"></div>
+    <div class="loc_attributes_container" ng-if="$ctrl.currentUser.rol === 'sales'">
+        <h5>Additional Attributes</h5>
+        <div ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes">
+            <div class="attribute_table">
+                <div class="attribute_row">
+                    <div class="attribute_cell key">{{k + ':'}}</div>
+                    <div class="attribute_cell value">{{v}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div id="seperator"><b>HouseHolds:</b> {{$ctrl.selectedLocationInfo.number_of_households}}</div>
     <span>

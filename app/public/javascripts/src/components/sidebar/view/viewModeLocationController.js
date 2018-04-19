@@ -5,6 +5,7 @@ class ViewModeLocationController {
     this.plan = null
     this.selectedLocationInfo = null
     this.map_url = null
+    this.currentUser = state.getUser()
 
     state.plan
     .subscribe((plan) => {
