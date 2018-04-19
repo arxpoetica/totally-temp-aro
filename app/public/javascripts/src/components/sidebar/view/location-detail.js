@@ -33,7 +33,7 @@ let locationDetail = {
     <div><b>Longitude:</b> {{$ctrl.selectedLocationInfo.geog.coordinates[0]}}</div>
     <div><b>Census Block:</b> {{$ctrl.selectedLocationInfo.tabblock_id}}</div>
     <div id="seperator"></div>
-    <div class="loc_attributes_container" ng-if="$ctrl.currentUser.rol === 'sales'">
+    <div class="loc_attributes_container" ng-if="$ctrl.showAttributes">
         <h5>Additional Attributes</h5>
         <div ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes">
             <div class="attribute_table">

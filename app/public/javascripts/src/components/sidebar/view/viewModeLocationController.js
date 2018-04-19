@@ -21,6 +21,7 @@ class ViewModeLocationController {
         getLocationInfo(this.plan.id,locationId)
         .then((locationInfo) => {
           this.selectedLocationInfo = locationInfo
+          this.showAttributes = this.currentUser.rol === 'sales' && !angular.equals(locationInfo.attributes, {})
           
           var google_maps_key = configuration.google_maps_key
           var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
