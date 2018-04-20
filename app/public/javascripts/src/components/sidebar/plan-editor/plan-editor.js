@@ -106,7 +106,7 @@ class PlanEditorController {
         result.data.forEach((feature) => {
           const attributes = feature.attributes
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
-                                                     'remote_terminal', attributes.selectedEquipmentType)
+                                                     'dslam', attributes.selectedEquipmentType)
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
@@ -352,7 +352,7 @@ class PlanEditorController {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
-      this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'remote_terminal', this.lastSelectedEquipmentType)
+      this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'dslam', this.lastSelectedEquipmentType)
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
     } else if (!this.isMarker(mapObject)) {

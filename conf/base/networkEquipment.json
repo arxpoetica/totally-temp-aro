@@ -196,18 +196,18 @@
         "showPolylineDirection": true
       },
       "isequipment": false
-    },
-    "site_boundaries": {
-      "label": "Site Boundaries",
-      "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment_boundary/tiles/{boundaryTypeId}/point/{pointTransform}/entity/",
-      "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
-      "aggregateZoomThreshold": "7",
-      "equipmentType": "point",
-      "zIndex": 5999, 
-      "drawingOptions": {
-        "strokeStyle": "#00a000",
-        "fillStyle": "#a0ffa0"
-      }
+    }
+  },
+  "siteBoundaries": {
+    "label": "Site Boundaries",
+    "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment_boundary/tiles/{boundaryTypeId}/point/{pointTransform}/entity/",
+    "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
+    "aggregateZoomThreshold": "7",
+    "equipmentType": "point",
+    "zIndex": 5999,
+    "drawingOptions": {
+      "strokeStyle": "#00a000",
+      "fillStyle": "#a0ffa0"
     }
   },
   "tileCacheKeywords": [
