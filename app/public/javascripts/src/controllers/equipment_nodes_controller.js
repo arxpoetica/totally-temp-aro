@@ -61,7 +61,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
       lineWidth: 2,
       fillStyle: networkEquipment.drawingOptions.fillStyle,
-      opacity: 0.5,
+      opacity: networkEquipment.drawingOptions.opacity || 0.5,
       selectable: true,
       zIndex: networkEquipment.zIndex,
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
@@ -79,7 +79,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
           mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
           createdMapLayerKeys.add(mapLayerKey)
-          if (networkEquipment.existingBoundaryTileUrl) {
+          if (networkEquipment.existingBoundaryTileUrl && state.showSiteBoundary) {
             var mapLayerKeyBoundary = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}_boundary`
             mapLayers[mapLayerKeyBoundary] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingBoundaryTileUrl', selectedLibraryItem.identifier, null)
             createdMapLayerKeys.add(mapLayerKeyBoundary)
