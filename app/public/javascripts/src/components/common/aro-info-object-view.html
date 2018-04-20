@@ -64,7 +64,7 @@
       <div class="aro-object-editor-title" ng-click="$ctrl.toggleIsKeyExpanded($index)">
         <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
         <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
-        {{$ctrl.indentationLevel}} {{key}}
+        {{key}}
       </div>
       <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
       <aro-info-object-view class="aro-object-editor-internal" ng-if="$ctrl.indentationLevel <= 200"
@@ -78,7 +78,10 @@
     <div class="aro-object-editor-item" ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" ng-class-odd="'aro-object-editor-odd'" ng-class-even="'aro-object-editor-even'">
       <div style="flex: 1 1 auto;">{{key}}</div>
       <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
+      <!-- 
       <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm" style="flex: 0 0 100px">
+      -->
+      <div ng-if="$ctrl.isEditable(value)" style="flex: 0 0 100px">{{$ctrl.objectToView[key]}}</div>
     </div>
   </div>
 </div>
