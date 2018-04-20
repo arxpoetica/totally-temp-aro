@@ -498,32 +498,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
     service.locationTypes.next(locationTypes)
     service.constructionSites.next(angular.copy(locationTypes))
-    
-    // Network equipment layer
-    service.networkEquipments = []
-    service.existingFiberOptions = {}
-    if (configuration && configuration.networkEquipment) {
-      service.existingFiberOptions = configuration.networkEquipment.existingFiberOptions
-      if (configuration.networkEquipment.equipmentList) {
-        Object.keys(configuration.networkEquipment.equipmentList).forEach((categoryKey) => {
-          // First save the label for the category
-          var category = configuration.networkEquipment.equipmentList[categoryKey]
-          var categoryStateObj = {
-            key: categoryKey,
-            label: category.label,
-            layers: []
-          }
-          // Then save all the network layers in the category
-          Object.keys(category.layers).forEach((layerKey) => {
-            var networkEquipment = category.layers[layerKey]
-            networkEquipment.key = layerKey
-            networkEquipment.checked = false
-            categoryStateObj.layers.push(networkEquipment)
-          })
-          service.networkEquipments.push(categoryStateObj)
-        })
-      }
-    }
+
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 
