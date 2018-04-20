@@ -61,7 +61,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
       lineWidth: 2,
       fillStyle: networkEquipment.drawingOptions.fillStyle,
-      opacity: 0.5,
+      opacity: networkEquipment.drawingOptions.opacity || 0.5,
       selectable: true,
       zIndex: networkEquipment.zIndex,
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
