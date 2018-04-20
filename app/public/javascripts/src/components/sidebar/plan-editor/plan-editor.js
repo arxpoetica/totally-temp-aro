@@ -339,7 +339,7 @@ class PlanEditorController {
 
   // Returns the configuration of the currently selected network type
   getSelectedNetworkConfig() {
-    var layers = this.configuration.networkEquipment.equipmentList.planned.layers
+    var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[this.selectedMapObject.objectId].siteNetworkNodeType
     return layers[networkNodeType]
   }
