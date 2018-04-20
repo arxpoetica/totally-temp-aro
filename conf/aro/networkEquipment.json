@@ -3,7 +3,7 @@
     "central_office": {
       "iconUrl": "/images/map_icons/aro/central_office.png"
     },
-    "remote_terminal": {
+    "dslam": {
       "iconUrl": "/images/map_icons/aro/remote_terminal.png"
     },
     "fdh": {
