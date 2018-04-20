@@ -3,12 +3,7 @@
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'configuration', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state, configuration) => {
   // Controller instance variables
   $scope.map_tools = map_tools
-  $scope.user_id = user_id
-  $scope.ARO_CLIENT = config.ARO_CLIENT
   $scope.configuration = configuration
-
-  $scope.selected_tool = null
-  $scope.vztfttp = true
   $scope.planState = state
   $scope.layerTypeVisibility = {
     existing: false,
@@ -173,109 +168,4 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Update map layers when the dataItems property of state changes
   state.viewSettingsChanged
   .subscribe(() => updateMapLayers())
-
-  const ROUTE_LAYER_NAME = 'Route'
-  function configureServiceLayer (layer) {
-    layer.showFeederFiber = false
-    layer.showDistributionFiber = false
-    layer.showBackhaulFiber = false
-    layer.enabled = true
-
-    // Limit the number of segments we receive from the server. It takes a long time to
-    // display segments, especially when they have different widths and opacity. Also,
-    // each fiber segment takes 70 bytes zipped to transfer from the server.
-    // So 1000 segments = approx 70 kb zipped
-    var maxFiberSegments = 3000
-
-    var routeLayer = new MapLayer({
-      short_name: 'RT',
-      name: ROUTE_LAYER_NAME,
-      type: 'route',
-      style_options: {
-        normal: {
-          strokeColor: 'red'
-        }
-      },
-      highlighteable: true,
-      api_endpoint: `/network/fiber/:plan_id/find/${layer.id}/${maxFiberSegments}`,
-      declarativeStyles: routeStyles(layer),
-      threshold: 0,
-      reload: 'always',
-      onDataLoaded:(data)=>{
-        if(data.api_endpoint == `/network/fiber/:plan_id/find/all/${maxFiberSegments}`){
-          $scope.fiberOverlay = data;
-          //calculate opacity here
-          $scope.calcFiberScale();
-          $scope.calcStrokeOpacity();
-        }
-      }
-    })
-
-    $scope.calcStrokeOpacity = function () {
-      var currOption = state.viewSetting.selectedFiberOption;
-      if (currOption.id === state.viewFiberOptions[0].id) {
-        $scope.fiberOverlay.features.map(function (feature) {
-          feature.setProperty("opacity", 1);
-        })
-      } else {
-        var ll = +currOption.opacity.min;
-        var ul = +currOption.opacity.max;
-        var min = _.min($scope.fiberOverlay.features, (o) => { return o.getProperty("width") }).getProperty("width");
-        var max = _.max($scope.fiberOverlay.features, (o) => { return o.getProperty("width") }).getProperty("width");
-
-        $scope.fiberOverlay.features.map(function (feature) {
-          var math = (ul - ll) * (((feature.getProperty("width") - min) / (max - min))) + ll
-          feature.setProperty("opacity", math);
-        })
-      }
-    }
-
-    $scope.calcFiberScale = function () {
-      // return  // This causes the browser to hang
-        var currOption = state.viewSetting.selectedFiberOption;
-        if (currOption.id === state.viewFiberOptions[0].id) {
-          var featuresBucket = _.groupBy($scope.fiberOverlay.features,function(feature) { return feature.getProperty("fiber_type") } )	
-          var featuresBucketKeys = _.keys(featuresBucket)
-          _.each(featuresBucketKeys, function (key) {
-            if (key == 'distribution') {
-              _.each(featuresBucket[key], function (feature) { feature.setProperty("width", 2) })
-            } else {
-              _.each(featuresBucket[key], function (feature) { feature.setProperty("width", 4) })
-            }
-          })
-        } else {
-          $scope.fiberOverlay.features.map(function (feature) {
-	        var optionValue = feature.f[currOption.field];
-	
-	        var width = 0;
-	        var maxPixelWidth = +currOption.pixelWidth.max
-	        var minPixelWidth = +currOption.pixelWidth.min
-	
-	        var exponent = +currOption.pixelWidth.divisor // 1/3 Currently
-	        var atomicDivisor = +currOption.pixelWidth.atomicDivisor; //50 Currently
-	
-	        switch (currOption.field) {
-	          case "fiber_strands": width = Math.min(Math.pow(optionValue, (exponent)), maxPixelWidth)
-	            break;
-	          case "atomic_units": width = Math.min(Math.pow((optionValue / atomicDivisor + 1), (exponent)), maxPixelWidth)
-	            break;
-	        }
-	
-	        var aw = (width / maxPixelWidth) * (maxPixelWidth - minPixelWidth) + minPixelWidth - 1
-	        feature.setProperty("width", aw);
-          })
-        }
-    }
-
-    layer.routeLayer = routeLayer
-
-    layer.changedFiberVisibility = () => {
-      state.showFeederFiber = layer.showFeederFiber
-      state.showDistributionFiber = layer.showDistributionFiber
-      state.showBackhaulFiber = layer.showBackhaulFiber
-
-      routeLayer.setVisible(layer.enabled && (layer.showFeederFiber || layer.showDistributionFiber || layer.showBackhaulFiber))
-      routeLayer.setDeclarativeStyle(routeStyles(layer))
-    }
-  }
 }])
