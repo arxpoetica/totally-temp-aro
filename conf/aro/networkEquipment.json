@@ -40,9 +40,6 @@
     },
     "copper": {
       "iconUrl": "/images/map_icons/aro/copper.png"
-    },
-    "site_boundaries": {
-      "iconUrl": "/images/map_icons/aro/service_layer_cran.png"
     }
   }
 }

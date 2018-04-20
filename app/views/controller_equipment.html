@@ -1,6 +1,29 @@
+<style scoped>
+  .layer-type-checkboxes {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+</style>
 <div id="equipment_nodes_controller">
 
   <!-- New implementation of network equipments -->
+  <div class="row" style="padding-bottom: 5px;">
+    <div class="col-md-4">
+      <strong style="padding-left: 5px;">Type</strong>
+    </div>
+    <div class="col-md-4">
+      <input type="checkbox" class="checkboxfill layer-type-checkboxes"
+             ng-checked="layerTypeVisibility.existing"
+             ng-click="setLayerTypeVisibility('existing', !layerTypeVisibility.existing)">
+        <span>&nbsp;Existing</span>
+    </div>
+    <div class="col-md-4">
+    <input type="checkbox" class="checkboxfill layer-type-checkboxes"
+           ng-checked="layerTypeVisibility.planned"
+           ng-click="setLayerTypeVisibility('planned', !layerTypeVisibility.planned)">
+      <span>&nbsp;Planned</span>
+    </div>
+  </div>
   <div class="row">
     <div class="col-md-12">
       <table class="table table-condensed">
@@ -9,40 +32,18 @@
           <tr ng-repeat="(layerKey, equipmentLayer) in configuration.networkEquipment.equipments">
             <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
             <td>
-              <div class="btn-group btn-group-xs">
-                <button ng-class="{ 'btn': true,
-                                    'btn-default': !equipmentLayer.showExisting,
-                                    'btn-primary': equipmentLayer.showExisting }",
-                        ng-click="changeLayerVisibility(equipmentLayer, 'showExisting', !equipmentLayer.showExisting)">
-                  Exist
-                </button>
-                <button ng-class="{ 'btn': true,
-                                    'btn-default': !equipmentLayer.showPlanned,
-                                    'btn-primary': equipmentLayer.showPlanned }",
-                        ng-click="changeLayerVisibility(equipmentLayer, 'showPlanned', !equipmentLayer.showPlanned)">
-                  Plan
-                </button>
-              </div>
+              <input type="checkbox" class="checkboxfill"
+                     ng-checked="equipmentLayer.checked"
+                     ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
             </td>
           </tr>
           <tr><td colspan="2"><strong>Cable Plant</strong></td></tr>
           <tr ng-repeat="(layerKey, equipmentLayer) in configuration.networkEquipment.cables">
             <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
             <td>
-              <div class="btn-group btn-group-xs">
-                <button ng-class="{ 'btn': true,
-                                    'btn-default': !equipmentLayer.showExisting,
-                                    'btn-primary': equipmentLayer.showExisting }",
-                        ng-click="changeLayerVisibility(equipmentLayer, 'showExisting', !equipmentLayer.showExisting)">
-                  Exist
-                </button>
-                <button ng-class="{ 'btn': true,
-                                    'btn-default': !equipmentLayer.showPlanned,
-                                    'btn-primary': equipmentLayer.showPlanned }",
-                        ng-click="changeLayerVisibility(equipmentLayer, 'showPlanned', !equipmentLayer.showPlanned)">
-                  Plan
-                </button>
-              </div>
+              <input type="checkbox" class="checkboxfill"
+                     ng-checked="equipmentLayer.checked"
+                     ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
             </td>
           </tr>
         </tbody>

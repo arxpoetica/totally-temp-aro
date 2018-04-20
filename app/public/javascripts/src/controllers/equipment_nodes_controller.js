@@ -9,7 +9,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   $scope.selected_tool = null
   $scope.vztfttp = true
-  $scope.planState = state;
+  $scope.planState = state
+  $scope.layerTypeVisibility = {
+    existing: false,
+    planned: false
+  }
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
@@ -71,7 +75,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     // First loop through all the equipment types (e.g. central_office)
     Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
-      if (networkEquipment.showExisting) {
+      if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
         // We need to show the existing network equipment. Loop through all the selected library ids.
         state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
           var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
@@ -81,7 +85,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
 
       const planId = state.plan && state.plan.getValue() && state.plan.getValue().id
-      if (networkEquipment.showPlanned && planId) {
+      if ($scope.layerTypeVisibility.planned && networkEquipment.checked && planId) {
         // We need to show the planned network equipment for this plan.
         var mapLayerKey = `${categoryItemKey}_planned`
         mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'plannedTileUrl', null, planId)
@@ -145,9 +149,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
-  $scope.changeLayerVisibility = (layerObj, visibilityType, isVisible) => {
+  $scope.changeLayerVisibility = (layerObj, isVisible) => {
     // "visibilityType" allows us to distinguish between planned and existing layers
-    layerObj[visibilityType] = isVisible
+    layerObj.checked = isVisible
+    updateMapLayers()
+  }
+
+  // When the type (existing, planned) changes, update map layers
+  $scope.setLayerTypeVisibility = (type, newValue) => {
+    $scope.layerTypeVisibility[type] = newValue
     updateMapLayers()
   }
 
