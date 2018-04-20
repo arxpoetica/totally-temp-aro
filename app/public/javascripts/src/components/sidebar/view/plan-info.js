@@ -52,18 +52,6 @@ class PlanInfoController {
       })
   }
 
-  delete() {
-    if(!this.currentPlanInfo.ephemeral) {
-      this.deletePlan({plan:this.currentPlanInfo})
-    } else {
-      this.state.createEphemeralPlan()
-      .then((ephemeralPlan) => {
-        this.state.loadPlan(ephemeralPlan.id)
-      })
-    }
-
-  }
-
   $onInit() {
     this.getPlanTagDetails()
   }
