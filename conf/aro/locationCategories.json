@@ -1,21 +1,21 @@
 {
 	"mapIconFolder": "/images/map_icons/aro/",
-	"v2": {
-		"small_businesses": {
+	"v2": [
+		{
 			"iconUrl": "/images/map_icons/aro/businesses_small_default.png"
 		},
-		"medium_businesses": {
+		{
 			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png"
 		},
-		"large_businesses": {
+		{
 			"iconUrl": "/images/map_icons/aro/businesses_large_default.png"
 		},
-		"household": {
+		{
 			"iconUrl": "/images/map_icons/aro/households_default.png"
 		},
-		"celltower": {
+		{
 			"iconUrl": "/images/map_icons/aro/tower.png"
 		}
-	},
+	],
 	"env_is_test": false
 }
