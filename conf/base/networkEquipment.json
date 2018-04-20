@@ -20,6 +20,7 @@
       "networkNodeType": "dslam",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/dslam/point/{pointTransform}/entity/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/dslam/point/{pointTransform}/entity/",
+      "existingBoundaryTileUrl": "/tile/v1/tiles/equipment_boundary/{libraryId}/{boundaryTypeId}/point/{pointTransform}/entity/",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
       "aggregateZoomThreshold": "7",

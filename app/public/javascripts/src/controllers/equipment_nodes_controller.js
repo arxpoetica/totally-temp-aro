@@ -41,6 +41,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     var tileUrl = networkEquipment[tileUrlType]
     tileUrl = tileUrl.replace('{libraryId}', libraryId)
     tileUrl = tileUrl.replace('{rootPlanId}', rootPlanId)
+    tileUrl = tileUrl.replace('{boundaryTypeId}', state.selectedBoundaryType.id)
     if (networkEquipment.equipmentType === 'point') {
       var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
@@ -51,6 +52,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
     }
+    var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
+    tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
     return {
       dataUrls: [tileUrl],
       iconUrl: networkEquipment.iconUrl,
