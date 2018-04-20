@@ -79,6 +79,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
           mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
           createdMapLayerKeys.add(mapLayerKey)
+          if (networkEquipment.existingBoundaryTileUrl) {
+            var mapLayerKeyBoundary = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}_boundary`
+            mapLayers[mapLayerKeyBoundary] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingBoundaryTileUrl', selectedLibraryItem.identifier, null)
+            createdMapLayerKeys.add(mapLayerKeyBoundary)
+          }
         })
       }
 
