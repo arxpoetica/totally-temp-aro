@@ -571,6 +571,7 @@ class MapTileRenderer {
   // Renders a polygon feature onto the canvas
   renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer) {
     
+    ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
     
@@ -583,7 +584,6 @@ class MapTileRenderer {
       if (this.selectedCensusBlockId == feature.properties.id){
         // Hilight selected census block
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
-        ctx.lineCap = 'round';
       }
       
     	  // check for census filters

@@ -33,6 +33,7 @@ class BoundaryDetailController {
       this.state.reloadSelectedCensusBlockId(censusBlockId)
       this.getCensusBlockInfo(censusBlockId).then((cbInfo) => {
         this.selectedBoundaryInfo = cbInfo
+        this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
       })
     })
   }

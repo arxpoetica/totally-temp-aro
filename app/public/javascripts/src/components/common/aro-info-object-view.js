@@ -2,7 +2,9 @@
 // boxes for string, boolean and integer types. Objects can be nested as deep as required (though it
 // will get unweildy to use with too much nesting). Editing of arrays is NOT supported as of now.
 
-class AroObjectEditorController {
+//ToDo: inherit from AroObjectEditorController 
+
+class AroInfoObjectViewController {
   constructor() {
     // Store the "Object.keys()" function so we can use it in the markup
     this.ObjectKeys = Object.keys
@@ -27,15 +29,15 @@ class AroObjectEditorController {
   }
 }
 
-// AroObjectEditorController.$inject = []
+// AroInfoObjectViewController.$inject = []
 
-let aroObjectEditor = {
-  templateUrl: '/components/common/aro-object-editor.html',
+let aroInfoObjectView = {
+  templateUrl: '/components/common/aro-info-object-view.html',
   bindings: {
-    objectToEdit: '=',      // Two Way binding, we will directly edit object values for now!
+    objectToView: '=',      // Two Way binding, we will directly edit object values for now!
     indentationLevel: '<'
   },
-  controller: AroObjectEditorController
+  controller: AroInfoObjectViewController
 }
 
-export default aroObjectEditor
+export default aroInfoObjectView
