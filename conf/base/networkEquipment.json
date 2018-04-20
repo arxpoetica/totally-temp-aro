@@ -27,7 +27,10 @@
       "equipmentType": "point",
       "zIndex": 7580, 
       "drawingOptions": {
-        "strokeStyle": "#0000ff"
+        "strokeStyle": "#0000ff",
+        "lineWidth": 3,
+        "fillStyle": "#0000ff",
+        "opacity": 0.2
       },
       "isequipment": true
     },

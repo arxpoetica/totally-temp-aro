@@ -611,7 +611,6 @@ class MapTileRenderer {
 
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
-    ctx.globalAlpha = 0.2 // Parag - Really quick hack for todays demo!
 
     // Draw a filled polygon with the drawing styles computed for this feature
     var x0 = this.drawMargins + geometryOffset.x + shape[0].x
