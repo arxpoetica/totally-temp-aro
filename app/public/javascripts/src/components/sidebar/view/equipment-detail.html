@@ -2,8 +2,15 @@
     .equipment-detail {
       position: relative; /* This will require the parent to have position: relative or absolute */
     }
+    
     .equipment-detail > div {
       margin-top: 10px;
+    }
+    
+    .equipment-detail-title{
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1em;
     }
   </style>
   <!-- 
@@ -18,5 +25,6 @@
   </div>
   -->
   <div class="equipment-detail">
+    <div class="equipment-detail-title">{{$ctrl.debug_testObj["General"]["Site Type"]}}</div>
     <aro-info-object-view object-to-view="$ctrl.debug_testObj"></aro-info-object-view>
   </div>
