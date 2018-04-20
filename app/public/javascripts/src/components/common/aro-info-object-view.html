@@ -2,7 +2,9 @@
   /* The 'if' above is to keep these from being repeated with EVERY iteration */
   
   .aro-object-editor-internal > .aro-object-editor-level{
+    /*
     margin-top: -6px;
+    */
     border-left: 1px #eeeeee dashed;
   }
   
@@ -27,7 +29,9 @@
     padding-bottom: 8px;
     border-bottom: 2px solid #888888;
     cursor: pointer;
+    /*
     margin-bottom: 6px;
+    */
   }
   .expand-collapse-icon{
     padding-left: 5px;
@@ -51,6 +55,20 @@
   .aro-object-editor-even{
     
   }
+  
+  .aro-info-ov-foldout-label{
+    float: right;
+    font-size: 0.7em;
+    font-weight: normal;
+  }
+  
+  .aro-info-ov-foldout-label-bottom{
+    font-size: 0.7em;
+    cursor: pointer;
+    padding: 6px;
+    text-align: center;
+  }
+  
 </style>
 <!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
 <div class="aro-object-editor-level" ng-style="{ 'padding-left': $ctrl.pixelsPerIndentationLevel + 'px' }">
@@ -60,18 +78,36 @@
 
     <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
          RECURSIVELY show the object editor for the sub-object -->
-    <div class="aro-object-editor-foldout" ng-if="$ctrl.isExpandable(value)" style="width: 100%;">
+    <div class="aro-object-editor-foldout" ng-if="$ctrl.isExpandable(value) && key != 'summery'" style="width: 100%;">
       <div class="aro-object-editor-title" ng-click="$ctrl.toggleIsKeyExpanded($index)">
-        <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
-        <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
+        <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summery')"></i>
+        <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summery')"></i>
         {{key}}
+        <div class="aro-info-ov-foldout-label" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')">summery</div>
+        <div class="aro-info-ov-foldout-label" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')">detail</div>
       </div>
+      
+      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
+      <aro-info-object-view class="aro-object-editor-internal" ng-if="$ctrl.indentationLevel <= 200 && value.hasOwnProperty('summery')"
+                         object-to-view="value.summery"
+                         indentation-level="$ctrl.indentationLevel + 1">
+      </aro-info-object-view>
+      
       <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
       <aro-info-object-view class="aro-object-editor-internal" ng-if="$ctrl.indentationLevel <= 200"
                          object-to-view="value"
                          indentation-level="$ctrl.indentationLevel + 1"
                          ng-style="{ display: $ctrl.isKeyExpanded[$index] ? 'inline' : 'none' }">
       </aro-info-object-view>
+      
+      <div class="aro-info-ov-foldout-label-bottom" 
+                      ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')" 
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ + detail ]
+      </div>
+      <div class="aro-info-ov-foldout-label-bottom" 
+                      ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')" 
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ - summery ]
+      </div>
     </div>
 
     <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
@@ -81,7 +117,7 @@
       <!-- 
       <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm" style="flex: 0 0 100px">
       -->
-      <div ng-if="$ctrl.isEditable(value)" style="flex: 0 0 100px">{{$ctrl.objectToView[key]}}</div>
+      <div ng-if="$ctrl.isEditable(value)" style="flex: 0 0 auto">{{$ctrl.objectToView[key]}}</div>
     </div>
   </div>
 </div>
