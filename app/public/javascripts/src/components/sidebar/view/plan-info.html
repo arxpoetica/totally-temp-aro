@@ -18,12 +18,12 @@
   margin: 2px;
 }
 </style>
-<div class="plan-details-container">
+<div class="plan-details-container" ng-if="!$ctrl.currentPlanInfo.ephemeral">
 
   <div class="plan-actions">
     <button class="btn btn-primary" ng-if="!$ctrl.isEditMode" ng-click="$ctrl.editCurrentPlan()">Edit Plan Details</button>
     <button class="btn btn-primary" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatestoPlan()">Lock Changes</button>
-    <button class="btn btn-danger" ng-click="$ctrl.delete()">Delete Plan</button>
+    <button class="btn btn-danger" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})">Delete Plan</button>
   </div>
 
   <div class="grid container info">

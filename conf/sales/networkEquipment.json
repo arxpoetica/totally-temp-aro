@@ -1,0 +1,50 @@
+{
+  "equipmentList": {
+    "planned": {
+      "layers": {
+        "central_office": {
+          "iconUrl": "/images/map_icons/aro/central_office.png"
+        },
+        "remote_terminal": {
+          "iconUrl": "/images/map_icons/aro/remote_terminal.png"
+        },
+        "fdh": {
+          "iconUrl": "/images/map_icons/aro/fiber_distribution_hub.png"
+        },
+        "fdt": {
+          "iconUrl": "/images/map_icons/aro/fiber_distribution_terminal.png"
+        },
+        "bulk_distribution_terminal": {
+          "iconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png"
+        },
+        "splice_point": {
+          "iconUrl": "/images/map_icons/aro/splice_point.png"
+        },
+        "fiveg_coverage": {
+          "iconUrl": "/images/map_icons/aro/service_layer_cran.png"
+        },
+        "fiveg_site": {
+          "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png"
+        },
+        "feeder_fiber": {
+          "iconUrl": "/images/map_icons/aro/fiber_feeder.png"
+        },
+        "distribution_fiber": {
+          "iconUrl": "/images/map_icons/aro/fiber_distribution.png"
+        },
+        "iof_fiber": {
+          "iconUrl": "/images/map_icons/aro/fiber_backhaul.png"
+        },
+        "unknown_fiber": {
+          "iconUrl": "/images/map_icons/aro/fiber_unknown.png"
+        },
+        "copper": {
+          "iconUrl": "/images/map_icons/aro/copper.png"
+        },
+        "site_boundaries": {
+          "iconUrl": "/images/map_icons/aro/service_layer_cran.png"
+        }
+      }
+    }
+  }
+}

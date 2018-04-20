@@ -1,0 +1,31 @@
+{
+	"mapIconFolder": "/images/map_icons/sales/",
+	"v2": [
+		{
+			"iconUrl": "/images/map_icons/sales/businesses_small_default.png",
+			"label": "Ethernet Lit Buildings",
+			"key": "ethernet_lit_building"
+		},
+		{
+			"iconUrl": "/images/map_icons/sales/businesses_medium_default.png",
+			"label": "Lit Building",
+			"key": "lit_building"
+		},
+		{
+			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
+			"label": "Tier 1",
+			"key": "tier_1"
+		},
+		{
+			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
+			"label": "Tier 2",
+			"key": "tier_2"
+		},
+		{
+			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
+			"label": "Tier 3",
+			"key": "tier_3"
+		}
+	],
+	"env_is_test": false
+}
