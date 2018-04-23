@@ -12,12 +12,6 @@
   #tblBoundaryProperties td {
     line-height: 33px;  /* To vertically align text */
   }
-  .drag-help-text.ng-hide-add {
-    animation: fadeOutUp 300ms;
-  }
-  .drag-help-text.ng-hide-remove {
-    animation: fadeInDown 300ms;
-  }
   .draggable-item-button {
     border: none;
   }
@@ -61,10 +55,8 @@
 
         <!-- Section that allows the user to drag and drop equipment and boundaries onto the map -->
         <div style="width: 100%">
-          <div ng-show="$ctrl.showDragHelpText" class="drag-help-text">
-            <p class="text-center">Click and drag equipment/boundary onto the map</p>
-            <hr class="plan-editor-hr">
-          </div>
+          <p class="text-center">Click and drag equipment/boundary onto the map</p>
+          <hr class="plan-editor-hr">
           <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
           <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipments"
                             ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"

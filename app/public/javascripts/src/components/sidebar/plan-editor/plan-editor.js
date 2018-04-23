@@ -13,7 +13,6 @@ class PlanEditorController {
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
     this.equipmentIdToBoundaryId = {}
-    this.showDragHelpText = true
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
@@ -70,7 +69,6 @@ class PlanEditorController {
   $onInit() {
     // Select the first boundary in the list
     this.resumeOrCreateTransaction()
-    this.$timeout(() => this.showDragHelpText = false, 6000)  // Hide help text after a while
   }
 
   resumeOrCreateTransaction() {
