@@ -34,6 +34,10 @@
           &nbsp;&nbsp;{{$ctrl.selectedMapObject.getEditable() ? 'Stop Editing' : 'Edit boundary'}}
         </a>
       </li>
+      <!-- Menu item to add a boundary to a site -->
+      <li ng-if="$ctrl.isMarker($ctrl.selectedMapObject)">
+        <a href="#" ng-click="$ctrl.startDrawingBoundaryFor($ctrl.selectedMapObject)"><i class="fa fa-plus"></i> Add boundary</a>
+      </li>
     </ul>
   </div>
 </div>
