@@ -78,24 +78,21 @@ class EquipmentDetailController {
     
     this.testCongestion = [
       {
-        "equipmentCLLI": "", 
-        "pathBand": "", 
-        "uplinkSpeed": "", 
-        "topology": "", 
-        "pathHops": 0
+        "equipmentCLLI": "PDVLWIACRL0", 
+        "pathBand": "none", 
+        "uplinkSpeed": "unknown", 
+        "topology": "none", 
+        "pathHops": 2
       }, 
       {
-        "equipmentCLLI": "", 
-        "pathBand": "", 
-        "uplinkSpeed": "", 
-        "topology": "", 
+        "equipmentCLLI": "PDVLWIACH00", 
+        "pathBand": "high", 
+        "uplinkSpeed": "unknown", 
+        "topology": "path", 
         "pathHops": 3
       }, 
       {
-        "equipmentCLLI": "", 
-        "pathBand": "", 
-        "uplinkSpeed": "", 
-        "topology": "", 
+        "equipmentCLLI": "null test", 
         "pathHops": 4
       } 
     ]

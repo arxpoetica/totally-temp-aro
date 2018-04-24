@@ -8,7 +8,7 @@
     <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
          RECURSIVELY show the object editor for the sub-object -->
     <div class="ei-foldout" ng-if="$ctrl.isExpandable(value)" style="width: 100%;">
-      <div class="ei-foldout-header" ng-click="$ctrl.toggleIsKeyExpanded($index)">
+      <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded($index)">
         <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
         <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
         {{key}}

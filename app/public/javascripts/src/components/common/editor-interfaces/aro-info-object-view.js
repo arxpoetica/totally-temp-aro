@@ -39,5 +39,4 @@ let aroInfoObjectView = {
   },
   controller: AroInfoObjectViewController
 }
-
 export default aroInfoObjectView

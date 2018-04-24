@@ -64,6 +64,7 @@ import createUpdateTag from './global-settings/create-update-tag'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
 import aroInfoObjectView from './common/editor-interfaces/aro-info-object-view'
+import editorItnerfaceTable from './common/editor-interfaces/editor-interface-table'
 
 
 app.component('boundaryDetail', boundaryDetail)
@@ -130,4 +131,5 @@ app.component('boundaryDetail', boundaryDetail)
    .component('createUpdateTag', createUpdateTag)
    .component('aroObjectEditor', aroObjectEditor)
    .component('aroInfoObjectView', aroInfoObjectView)
+   .component('editorItnerfaceTable', editorItnerfaceTable)
    
