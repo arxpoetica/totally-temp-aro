@@ -322,7 +322,7 @@ class NetworkPlanModalController {
       if(_.isString(plan)) return plan
     })
 
-    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat(tag.name ? tag.name : tag.code))
+    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name ? tag.name : tag.code).concat("\""))
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
     this.search_text = selectedFilters.join(" ")
   }
