@@ -56,17 +56,23 @@
     
   }
   
-  .aro-info-ov-foldout-label{
-    float: right;
+  .aro-info-ov-foldout-label, .aro-info-ov-foldout-btn{
     font-size: 0.7em;
     font-weight: normal;
+  }
+  
+  .aro-info-ov-foldout-label{
+    float: right;
+  }
+  
+  .aro-info-ov-foldout-btn{
+    float: left;
   }
   
   .aro-info-ov-foldout-label-bottom{
     font-size: 0.7em;
     cursor: pointer;
-    padding: 6px;
-    text-align: center;
+    padding-top: 6px;
   }
   
 </style>
@@ -83,6 +89,9 @@
         <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
         <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
         {{key}}
+        <div class="aro-info-ov-foldout-btn" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">[ + ]</div>
+        <div class="aro-info-ov-foldout-btn" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">[ - ]</div>
+        
         <div class="aro-info-ov-foldout-label" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">summary</div>
         <div class="aro-info-ov-foldout-label" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">detail</div>
       </div>
@@ -102,11 +111,11 @@
       
       <div class="aro-info-ov-foldout-label-bottom" 
                       ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
-                      ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ + detail ]
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)">[ + detail ]
       </div>
       <div class="aro-info-ov-foldout-label-bottom" 
                       ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
-                      ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ - summary ]
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)">[ - summary ]
       </div>
     </div>
 
