@@ -35,7 +35,8 @@
 			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
-			"zIndex": 6560, 
+			"zIndex": 6560,
+			"categoryKey": "business",
 			"plannerKey": "small",
 			"key": "small_businesses"
 		},
@@ -46,6 +47,7 @@
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
 			"zIndex": 6570, 
+			"categoryKey": "business",
 			"plannerKey": "medium",
 			"key": "medium_businesses"
 		},
@@ -56,6 +58,7 @@
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/businesses_large_default.png",
 			"zIndex": 6580, 
+			"categoryKey": "business",
 			"plannerKey": "large",
 			"key": "large_businesses"
 		},
@@ -66,6 +69,7 @@
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/households_default.png",
 			"zIndex": 6500, 
+			"categoryKey": "household",
 			"plannerKey": "household",
 			"key": "household"
 		},
@@ -75,7 +79,8 @@
 			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
 			"aggregateZoomThreshold": "15",
 			"iconUrl": "/images/map_icons/aro/tower.png",
-			"zIndex": 6590, 
+			"zIndex": 6590,
+			"categoryKey": "celltower",
 			"plannerKey": "celltower",
 			"key": "celltower"
 		}
