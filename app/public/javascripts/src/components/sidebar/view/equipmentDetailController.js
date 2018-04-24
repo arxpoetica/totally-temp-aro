@@ -6,7 +6,7 @@ class EquipmentDetailController {
     this.selectedEquipmentInfo = null
     this.debug_testObj = {
       "General": {
-        "summery": {
+        "summary": {
           "Site Name": "Fenske Rd", 
           "Site CLLI": "PCVLWIAC", 
           "Site Type": "Remote Terminal", 
@@ -24,7 +24,7 @@ class EquipmentDetailController {
         "Notes": "Bonded"
       }, 
       "Equipment": {
-        "summery": {
+        "summary": {
           "Equipment Count": "2", 
           "Technology 1": "ADSL (32.416 Mbps max speed)", 
           "Technology 2": "ADSL2+ (32.416 Mbps max speed)", 
@@ -32,7 +32,7 @@ class EquipmentDetailController {
           "Technology 4": "ADSL-B (32.416 Mbps max speed)"
         },
         "Equipment 1": {
-          "summery": {
+          "summary": {
             "Equipment CLLI": "PDVLWIACRL0", 
             "Technology": "", 
             "Deployment Date": "10/2013", 
@@ -49,7 +49,7 @@ class EquipmentDetailController {
           "Congestion": ""
         }, 
         "Equipment 2": {
-          "summery": {
+          "summary": {
             "Equipment CLLI": "PDVLWIACH00", 
             "Technology": "", 
             "Deployment Date": "10/2013", 

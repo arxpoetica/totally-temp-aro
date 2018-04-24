@@ -78,18 +78,18 @@
 
     <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
          RECURSIVELY show the object editor for the sub-object -->
-    <div class="aro-object-editor-foldout" ng-if="$ctrl.isExpandable(value) && key != 'summery'" style="width: 100%;">
+    <div class="aro-object-editor-foldout" ng-if="$ctrl.isExpandable(value) && key != 'summary'" style="width: 100%;">
       <div class="aro-object-editor-title" ng-click="$ctrl.toggleIsKeyExpanded($index)">
-        <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summery')"></i>
-        <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summery')"></i>
+        <i class="fa fa-plus-square-o expand-collapse-icon" ng-if="!$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
+        <i class="fa fa-minus-square-o expand-collapse-icon" ng-if="$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
         {{key}}
-        <div class="aro-info-ov-foldout-label" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')">summery</div>
-        <div class="aro-info-ov-foldout-label" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')">detail</div>
+        <div class="aro-info-ov-foldout-label" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">summary</div>
+        <div class="aro-info-ov-foldout-label" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">detail</div>
       </div>
       
       <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
-      <aro-info-object-view class="aro-object-editor-internal" ng-if="$ctrl.indentationLevel <= 200 && value.hasOwnProperty('summery')"
-                         object-to-view="value.summery"
+      <aro-info-object-view class="aro-object-editor-internal" ng-if="$ctrl.indentationLevel <= 200 && value.hasOwnProperty('summary')"
+                         object-to-view="value.summary"
                          indentation-level="$ctrl.indentationLevel + 1">
       </aro-info-object-view>
       
@@ -101,12 +101,12 @@
       </aro-info-object-view>
       
       <div class="aro-info-ov-foldout-label-bottom" 
-                      ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')" 
+                      ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
                       ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ + detail ]
       </div>
       <div class="aro-info-ov-foldout-label-bottom" 
-                      ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summery')" 
-                      ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ - summery ]
+                      ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)"> [ - summary ]
       </div>
     </div>
 
