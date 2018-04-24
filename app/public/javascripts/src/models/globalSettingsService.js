@@ -100,15 +100,17 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
       state.loadListOfPlanTags()
       globalSettings.getTags()
       globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+      globalSettings.newTag = {}
     })
   }
 
   globalSettings.updateTag = () => {
-    $http.put(`/service/tag-mapping/tags`,globalSettings.updatedTag)
+    $http.put(`/service/tag-mapping/tags`,_.omit(globalSettings.updatedTag,'type'))
     .then((response) => {
       state.loadListOfPlanTags()
       globalSettings.getTags()
       globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+      globalSettings.updatedTag = {}
     })
   }
 
