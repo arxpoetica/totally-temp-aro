@@ -95,35 +95,35 @@
 			"can_view": ["admin"]
 		},
 		"ethernet_lit_building": {
-			"iconUrl": "/images/map_icons/sales/businesses_small_default.png",
+			"iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
 			"label": "Ethernet Lit Buildings",
 			"key": "ethernet_lit_building",
 			"selected": false,
 			"can_view": ["sales"]
 		},
 		"lit_building":{
-			"iconUrl": "/images/map_icons/sales/businesses_medium_default.png",
+			"iconUrl": "/images/map_icons/aro/lit_building.png",
 			"label": "Lit Building",
 			"key": "lit_building",
 			"selected": false,
 			"can_view": ["sales"]
 		},
 		"tier_1":{
-			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
+			"iconUrl": "/images/map_icons/aro/tier_1.png",
 			"label": "Tier 1",
 			"key": "tier_1",
 			"selected": false,
 			"can_view": ["sales"]
 		},
 		"tier_2":{
-			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
+			"iconUrl": "/images/map_icons/aro/tier_2.png",
 			"label": "Tier 2",
 			"key": "tier_2",
 			"selected": false,
 			"can_view": ["sales"]
 		},
 		"tier_3":{
-			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
+			"iconUrl": "/images/map_icons/aro/tier_3.png",
 			"label": "Tier 3",
 			"key": "tier_3",
 			"selected": false,
