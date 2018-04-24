@@ -32,7 +32,7 @@ class AroInfoObjectViewController {
 // AroInfoObjectViewController.$inject = []
 
 let aroInfoObjectView = {
-  templateUrl: '/components/common/aro-info-object-view.html',
+  templateUrl: '/components/common/editor-interfaces/aro-info-object-view.html',
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
     indentationLevel: '<'

@@ -1,0 +1,94 @@
+
+.ei-internal-gen > .ei-gen-level{
+  /*
+  margin-top: -6px;
+  */
+  border-left: 1px #eeeeee dashed;
+}
+
+.ei-gen-level{
+  width: 100%;
+}
+
+.ei-items-contain{
+  width: 100%;
+}
+
+.ei-foldout{
+  border-bottom: 1px solid #888888;
+  margin-bottom: 6px;
+}
+
+.ei-foldout-header{
+  font-weight: bold;
+  width: 100%;
+  padding-left: 5px;
+  padding-top: 26px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #888888;
+  cursor: pointer;
+  /*
+  margin-bottom: 6px;
+  */
+}
+.ei-foldout-icon{
+  padding-left: 5px;
+  padding-right: 10px;
+}
+
+.ei-property-item{
+  display: flex; 
+  align-items: center; 
+  width: 100%; 
+  padding-top: 3px; 
+  padding-bottom: 3px; 
+  border-bottom: 1px solid #888888;
+  margin-top: 1px;
+  margin-bottom: -1px;
+}
+
+.ei-row-odd{
+  background-color: #f9f9f9;
+}
+.ei-row-even{
+  
+}
+
+
+
+
+/* === */
+
+
+ .ei-foldout-state-label, .ei-foldout-btn, .ei-foldout-state-label-bottom{
+   font-size: 0.7em;
+   font-weight: normal;
+ }
+ 
+ .ei-foldout-state-label{
+   float: right;
+ }
+ 
+ .ei-foldout-btn{
+   float: left;
+ }
+ 
+ .ei-foldout-state-label-bottom{
+   cursor: pointer;
+   padding-top: 6px;
+ }
+ 
+ 
+ /* === object editor === */
+ aro-object-editor .ei-internal-gen > .ei-gen-level{
+  margin-top: -6px;
+}
+
+aro-object-editor .ei-foldout-header{
+  margin-bottom: 6px;
+}
+
+
+
+
+ 

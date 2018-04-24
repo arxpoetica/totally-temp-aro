@@ -1,0 +1,55 @@
+
+<!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
+<div class="ei-gen-level" ng-style="{ 'padding-left': $ctrl.pixelsPerIndentationLevel + 'px' }">
+
+  <!-- Loop through all the key-value pairs in the object to be edited -->
+  <div class="ei-items-contain" ng-repeat="(key, value) in $ctrl.objectToView">
+
+    <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
+         RECURSIVELY show the object editor for the sub-object -->
+    <div class="ei-foldout" ng-if="$ctrl.isExpandable(value) && key != 'summary'" style="width: 100%;">
+      <div class="ei-foldout-header" ng-click="$ctrl.toggleIsKeyExpanded($index)">
+        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
+        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
+        {{key}}
+        <div class="ei-foldout-btn" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">[ + ]</div>
+        <div class="ei-foldout-btn" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">[ - ]</div>
+        
+        <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">summary</div>
+        <div class="ei-foldout-state-label" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">detail</div>
+      </div>
+      
+      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
+      <aro-info-object-view class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200 && value.hasOwnProperty('summary')"
+                         object-to-view="value.summary"
+                         indentation-level="$ctrl.indentationLevel + 1">
+      </aro-info-object-view>
+      
+      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
+      <aro-info-object-view class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
+                         object-to-view="value"
+                         indentation-level="$ctrl.indentationLevel + 1"
+                         ng-style="{ display: $ctrl.isKeyExpanded[$index] ? 'inline' : 'none' }">
+      </aro-info-object-view>
+      
+      <div class="ei-foldout-state-label-bottom" 
+                      ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)">[ + detail ]
+      </div>
+      <div class="ei-foldout-state-label-bottom" 
+                      ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
+                      ng-click="$ctrl.toggleIsKeyExpanded($index)">[ - summary ]
+      </div>
+    </div>
+
+    <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
+    <div class="ei-property-item" ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
+      <div style="flex: 1 1 auto;">{{key}}</div>
+      <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
+      <!-- 
+      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm" style="flex: 0 0 100px">
+      -->
+      <div ng-if="$ctrl.isEditable(value)" style="flex: 0 0 auto">{{$ctrl.objectToView[key]}}</div>
+    </div>
+  </div>
+</div>

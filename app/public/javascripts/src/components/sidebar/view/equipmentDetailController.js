@@ -4,6 +4,9 @@ class EquipmentDetailController {
     this.$http = $http
     this.state = state
     this.selectedEquipmentInfo = null
+    
+    this.isEdit = false
+    
     this.debug_testObj = {
       "General": {
         "summary": {
@@ -72,6 +75,64 @@ class EquipmentDetailController {
         } 
       }
     }
+    
+    this.testCongestion = [
+      {
+        "equipmentCLLI": "", 
+        "pathBand": "", 
+        "uplinkSpeed": "", 
+        "topology": "", 
+        "pathHops": 0
+      }, 
+      {
+        "equipmentCLLI": "", 
+        "pathBand": "", 
+        "uplinkSpeed": "", 
+        "topology": "", 
+        "pathHops": 3
+      }, 
+      {
+        "equipmentCLLI": "", 
+        "pathBand": "", 
+        "uplinkSpeed": "", 
+        "topology": "", 
+        "pathHops": 4
+      } 
+    ]
+    
+    this.tableViewStructure = {
+        "editSwitch": "isEdit", 
+        "cols": [
+          {
+            "label": "Equipment CLLI", 
+            "property": "equipmentCLLI", 
+            "editType": "false"
+          }, 
+          {
+            "label": "Path Band", 
+            "property": "pathBand", 
+            "editType": "text"
+          }, 
+          {
+            "label": "Uplink Speed", 
+            "property": "uplinkSpeed", 
+            "editType": "text"
+          }, 
+          {
+            "label": "Topology", 
+            "property": "topology", 
+            "editType": "text"
+          }, 
+          {
+            "label": "Path Hops", 
+            "property": "pathHops", 
+            "editType": "number"
+          }
+        ],
+        "rows": this.testCongestion
+    }
+    
+    
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {

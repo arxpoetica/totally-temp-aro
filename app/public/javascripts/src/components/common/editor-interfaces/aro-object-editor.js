@@ -30,7 +30,7 @@ class AroObjectEditorController {
 // AroObjectEditorController.$inject = []
 
 let aroObjectEditor = {
-  templateUrl: '/components/common/aro-object-editor.html',
+  templateUrl: '/components/common/editor-interfaces/aro-object-editor.html',
   bindings: {
     objectToEdit: '=',      // Two Way binding, we will directly edit object values for now!
     indentationLevel: '<'
