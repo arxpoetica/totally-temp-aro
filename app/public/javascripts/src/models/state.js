@@ -491,7 +491,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var locations = configuration.locationCategories.v2
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        location.key = locationKey
+        location.categoryKey = location.categoryKey
         location.checked = false
         locationTypes.push(location)
       })
@@ -956,7 +956,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.hasLocationType = (locationKey) => {
     var hasLocationType = false
     service.locationTypes.getValue().forEach((locationType) => {
-      if (locationType.checked && locationType.key.indexOf(locationKey) >= 0) {
+      if (locationType.checked && locationType.categoryKey.indexOf(locationKey) >= 0) {
         hasLocationType = true
       }
     })

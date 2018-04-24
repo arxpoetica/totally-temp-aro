@@ -331,6 +331,7 @@ class MapObjectEditorController {
       if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)) {
         this.selectedMapObject.setEditable(false)
       }
+      this.selectMapObject(null)
       if (!this.createObjectOnClick) {
         return    // We do not want to create the map object on click
       }
