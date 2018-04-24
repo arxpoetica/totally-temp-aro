@@ -346,7 +346,7 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
 
-  handleObjectCreated(mapObject, usingMapClick) {
+  handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -354,7 +354,20 @@ class PlanEditorController {
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
     } else if (!this.isMarker(mapObject)) {
-      // This is a boundary marker. This will be created without map clicks. Save it.
+      // If the user has drawn the boundary, we will have an associated object in the "feature" attributes. Save associations.
+      if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
+        // If the associated equipment has a boundary associated with it, first delete *that* boundary
+        var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
+        if (existingBoundaryId) {
+          delete this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
+          delete this.boundaryIdToEquipmentId[existingBoundaryId]
+          this.deleteObjectWithId && this.deleteObjectWithId(existingBoundaryId)
+          existingBoundaryId = null
+        }
+        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 0)
+        this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
+        this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
+      }
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))

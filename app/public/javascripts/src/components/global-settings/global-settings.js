@@ -96,7 +96,8 @@ let globalSettings = {
 
         <user-settings ng-show="$ctrl.currentView === $ctrl.views.User_Settings"></user-settings>  
 
-        <tag-manager ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager"><tag-manager>
+        <tag-manager ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager"
+          manager-view="$ctrl.globalSettingsService.currentTagManagerView"><tag-manager>
       </modal-body>
 
       <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">
@@ -124,9 +125,17 @@ let globalSettings = {
         <button type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.register_user()">Register user</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager">
-        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.Tags">
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.CreateTag">Create Tag</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.UpdateTag">
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.updateTag()">Update Tag</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.Tags">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag">
+        <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.Tags">Back</button>
       </modal-footer>
     </modal>
   `,

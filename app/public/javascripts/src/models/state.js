@@ -487,13 +487,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   var initializeState = function () {
 
     var locationTypes = []
-    if (configuration && configuration.locationCategories && configuration.locationCategories.v2) {
-      var locations = configuration.locationCategories.v2
+    if (configuration && configuration.locationCategories && configuration.locationCategories.categories) {
+      var locations = configuration.locationCategories.categories
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        location.key = locationKey
-        location.checked = false
-        locationTypes.push(location)
+        if(service.getUser() && (location.can_view.indexOf(service.getUser().rol) !== -1)){
+          location.checked = location.selected
+          locationTypes.push(location)
+        }
       })
     }
     service.locationTypes.next(locationTypes)
@@ -513,7 +514,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     //Upload Data Sources
     service.uploadDataSources = []
-    service.uploadDataSource
     service.dataItems = {}
 
   }
@@ -953,14 +953,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
-  service.hasLocationType = (locationKey) => {
-    var hasLocationType = false
-    service.locationTypes.getValue().forEach((locationType) => {
-      if (locationType.checked && locationType.key.indexOf(locationKey) >= 0) {
-        hasLocationType = true
-      }
-    })
-    return hasLocationType
+  service.locationInputSelected = (locationKey) => {
+    return service.locationTypes.getValue().filter((locationType)=> {
+        return locationType.checked && locationType.categoryKey === locationKey
+    }).length > 0
   }
 
   service.networkNodeTypesEntity = {}

@@ -24,6 +24,10 @@ class MapObjectEditorController {
       top: '100px',
       left: '100px'
     }
+    this.drawing = {
+      drawingManager: null,
+      markerIdForBoundary: null   // The objectId of the marker for which we are drawing the boundary
+    }
     this.polygonOptions = {
       strokeColor: '#FF1493',
       strokeOpacity: 0.8,
@@ -296,7 +300,7 @@ class MapObjectEditorController {
     })
 
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick})
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     this.selectMapObject(mapObject)
   }
 
@@ -406,6 +410,55 @@ class MapObjectEditorController {
     delete this.createdMapObjects[objectId]
     this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
     this.contextMenuCss.display = 'none'  // Hide the context menu
+  }
+
+  startDrawingBoundaryFor(mapObject) {
+    if (!this.isMarker(mapObject)) {
+      console.warn('startDrawingBoundarFor() called on a non-marker object.')
+      return
+    }
+
+    if (this.drawing.drawingManager) {
+      // If we already have a drawing manager, discard it.
+      console.warn('We already have a drawing manager active')
+      this.drawing.drawingManager.setMap(null)
+      this.drawing.drawingManager = null
+    }
+    this.drawing.markerIdForBoundary = mapObject.objectId // This is the object ID for which we are drawing the boundary
+    this.drawing.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      polygonOptions:this.selectedPolygonOptions
+    });
+    this.drawing.drawingManager.setMap(this.mapRef);
+    var self = this;
+    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function(event) {
+      // Create a boundary object using the regular object-creation workflow. A little awkward as we are converting
+      // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
+      // We keep it this way because the object creation workflow does other things like set up events, etc.
+      var feature = {
+        objectId: self.getUUID(),
+        geometry: {
+          type: 'Polygon',
+          coordinates: []
+        },
+        attributes: {
+          network_node_object_id: self.drawing.markerIdForBoundary
+        }
+      }
+      event.overlay.getPaths().forEach((path) => {
+        var pathPoints = []
+        path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+        pathPoints.push(pathPoints[0])  // Close the polygon
+        feature.geometry.coordinates.push(pathPoints)
+      })
+      self.createMapObject(feature, true)
+      // Remove the overlay. It will be replaced with the created map object
+      event.overlay.setMap(null)
+      // Kill the drawing manager
+      self.drawing.drawingManager.setMap(null)
+      self.drawing.drawingManager = null
+      self.drawing.markerIdForBoundary = null
+    });
   }
 
   $onDestroy() {

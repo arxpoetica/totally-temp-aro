@@ -62,6 +62,7 @@ import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 import userSettings from './global-settings/user-settings'
 import tagManager from './global-settings/tag-manager'
+import createUpdateTag from './global-settings/create-update-tag'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -126,3 +127,4 @@ app.component('boundaryDetail', boundaryDetail)
    .component('tile', tile)
    .component('userSettings', userSettings)
    .component('tagManager', tagManager)
+   .component('createUpdateTag', createUpdateTag)

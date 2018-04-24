@@ -9,6 +9,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   globalSettings.old_password = ''
   globalSettings.password = ''
   globalSettings.password_confirm = ''
+  globalSettings.updatedTag = {}
   globalSettings.newTag = {}
 
   globalSettings.ManageUserViews = Object.freeze({
@@ -81,10 +82,35 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
     $http.put(`/user/default_location/${globalSettings.user.default_location}`)
   }
 
+  globalSettings.TagManagerViews = Object.freeze({
+    Tags: 0,
+    CreateTag: 1,
+    UpdateTag: 2,
+  })
+
+  globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+
+  globalSettings.getTags = () => {
+    globalSettings.tagsList = state.listOfTags
+  }  
+
   globalSettings.createTag = () => {
-    $http.post(`/service/tag-mapping/tags?name=${globalSettings.newTag.name}&description=${globalSettings.newTag.description}&colourHue=${globalSettings.newTag.hueColor}`)
+    $http.post(`/service/tag-mapping/tags?name=${globalSettings.newTag.name}&description=${globalSettings.newTag.description}&colourHue=${globalSettings.newTag.colourHue}`)
     .then((response) => {
       state.loadListOfPlanTags()
+      globalSettings.getTags()
+      globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+      globalSettings.newTag = {}
+    })
+  }
+
+  globalSettings.updateTag = () => {
+    $http.put(`/service/tag-mapping/tags`,_.omit(globalSettings.updatedTag,'type'))
+    .then((response) => {
+      state.loadListOfPlanTags()
+      globalSettings.getTags()
+      globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+      globalSettings.updatedTag = {}
     })
   }
 

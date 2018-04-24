@@ -1,22 +1,35 @@
-<div>
-  <form class="form-horizontal">
-    <div class="form-group">
-      <label class="col-sm-4 control-label">Name</label>
-      <div class="col-sm-8">
-        <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newTag.name">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="col-sm-4 control-label">Description</label>
-      <div class="col-sm-8">
-        <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newTag.description">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="col-sm-4 control-label">Color Hue</label>
-      <div class="col-sm-8">
-        <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newTag.hueColor">
-      </div>
-    </div>
-  </form>  
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.TagManagerViews.Tags">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>
+          Name
+        </th>
+        <th>
+          Description
+        </th>
+        <th>
+          Color
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="tag in $ctrl.globalSettingsService.tagsList">
+        <td><a href="javascript:void(0)" 
+          ng-click="$ctrl.updateTag(tag)">
+            {{tag.name}}
+          </a>
+        </td>
+        <td>{{tag.description}}</td>
+        <td>{{tag.colourHue}}</td>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.TagManagerViews.UpdateTag">
+  <create-update-tag tag="$ctrl.globalSettingsService.updatedTag"></create-update-tag>
+</div>  
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag">
+  <create-update-tag tag="$ctrl.globalSettingsService.newTag"></create-update-tag>
 </div>
