@@ -20,17 +20,19 @@
       </div>
       
       <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
-      <aro-info-object-view class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200 && value.hasOwnProperty('summary')"
-                         object-to-view="value.summary"
+      <editor-interface-tree class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200 && value.hasOwnProperty('summary')"
+                         object-to-view="value.summary" 
+                         is-edit="$ctrl.isEdit" 
                          indentation-level="$ctrl.indentationLevel + 1">
-      </aro-info-object-view>
+      </editor-interface-tree>
       
       <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
-      <aro-info-object-view class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
-                         object-to-view="value"
+      <editor-interface-tree class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
+                         object-to-view="value" 
+                         is-edit="$ctrl.isEdit" 
                          indentation-level="$ctrl.indentationLevel + 1"
                          ng-style="{ display: $ctrl.isKeyExpanded[$index] ? 'inline' : 'none' }">
-      </aro-info-object-view>
+      </editor-interface-tree>
       
       <div class="ei-foldout-state-label-bottom" 
                       ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')" 
@@ -46,10 +48,10 @@
     <div class="ei-property-item" ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
       <div style="flex: 1 1 auto;">{{key}}</div>
       <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
-      <!-- 
-      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm" style="flex: 0 0 100px">
-      -->
-      <div ng-if="$ctrl.isEditable(value)" style="flex: 0 0 auto">{{$ctrl.objectToView[key]}}</div>
+      <!-- ToDo replace below with editor-interface-table once we figure out the settings issue -->
+      <input ng-if="$ctrl.isEdit && $ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm ei-input-text" style="flex: 0 0 auto">
+      
+      <div ng-if="!$ctrl.isEdit && $ctrl.isEditable(value)" style="flex: 0 0 auto">{{$ctrl.objectToView[key]}}</div>
     </div>
   </div>
 </div>

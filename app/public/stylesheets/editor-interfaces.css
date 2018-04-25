@@ -74,8 +74,8 @@
 
 
 /* === input elements === */
-.ei-input-text, .ei-input-number{
-  
+.ei-input-text, .ei-input-number, .ei-input-select{
+  width: auto;
 }
 
 .ei-input-text{
@@ -87,7 +87,7 @@
 }
 
 .ei-input-select{
-	width: auto;
+	
 }
 
 
@@ -97,8 +97,8 @@
 }
 
 
-/* === object viewer === */
-aro-info-object-view .ei-header{
+/* === tree === */
+editor-interface-tree .ei-header{
   margin-bottom: 0px;
 }
 

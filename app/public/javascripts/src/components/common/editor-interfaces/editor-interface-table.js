@@ -1,6 +1,6 @@
 // === table view === //
 
-class EditorItnerfaceTableController {
+class EditorInterfaceTableController {
   constructor() {
     //
   }
@@ -30,13 +30,13 @@ class EditorItnerfaceTableController {
   
 }
 
-let editorItnerfaceTable = {
+let editorInterfaceTable = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-table.html',
   bindings: {
     struct: '=', 
     isEdit: '<'
   },
-  controller: EditorItnerfaceTableController
+  controller: EditorInterfaceTableController
 }
-export default editorItnerfaceTable
+export default editorInterfaceTable
   

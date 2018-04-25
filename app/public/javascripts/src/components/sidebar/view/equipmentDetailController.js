@@ -7,7 +7,7 @@ class EquipmentDetailController {
     
     this.isEdit = false
     
-    this.debug_testObj = {
+    this.treeData = {
       "General": {
         "summary": {
           "Site Name": "Fenske Rd", 
@@ -75,6 +75,7 @@ class EquipmentDetailController {
         } 
       }
     }
+    this.treeState = angular.copy(this.treeData)
     
     this.rowsData = [
       {
@@ -96,7 +97,6 @@ class EquipmentDetailController {
         "pathHops": 4
       } 
     ]
-    
     this.rowsState = angular.copy(this.rowsData)
     
     this.tableViewStructure = {
@@ -170,7 +170,7 @@ class EquipmentDetailController {
   }
   
   
-  //these perhaps get moved to the UI component 
+  //ToDo: these perhaps get moved to the UI component 
   beginEdit(){
     // set up listeners etc
     this.isEdit = true
@@ -178,6 +178,7 @@ class EquipmentDetailController {
   
   cancelEdit(){
     // return the object to init state
+    angular.copy(this.treeData, this.treeState)
     angular.copy(this.rowsData, this.rowsState)
     this.isEdit = false
   }
@@ -185,9 +186,11 @@ class EquipmentDetailController {
   commitEdit(){
     // set the object to the edited object and tell the DB
     // may need to compare to check for deletes and creates 
+    angular.copy(this.treeState, this.treeData)
     angular.copy(this.rowsState, this.rowsData)
     this.isEdit = false
     console.log('send changed data to DB:')
+    console.log(this.treeData)
     console.log(this.rowsData)
   }
   

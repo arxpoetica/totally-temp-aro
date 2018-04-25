@@ -63,8 +63,9 @@ import tagManager from './global-settings/tag-manager'
 import createUpdateTag from './global-settings/create-update-tag'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
-import aroInfoObjectView from './common/editor-interfaces/aro-info-object-view'
-import editorItnerfaceTable from './common/editor-interfaces/editor-interface-table'
+import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
+import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
+import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
 
 
 app.component('boundaryDetail', boundaryDetail)
@@ -130,6 +131,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('tagManager', tagManager)
    .component('createUpdateTag', createUpdateTag)
    .component('aroObjectEditor', aroObjectEditor)
-   .component('aroInfoObjectView', aroInfoObjectView)
-   .component('editorItnerfaceTable', editorItnerfaceTable)
+   .component('editorInterfaceTree', editorInterfaceTree)
+   .component('editorInterfaceTable', editorInterfaceTable)
+   .component('editorInterfaceValue', editorInterfaceValue)
    

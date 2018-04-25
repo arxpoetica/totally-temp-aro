@@ -14,24 +14,9 @@
 	      
 	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.struct.rows">
 	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.struct.cols">
-	          <div ng-if="$ctrl.isEdit" ng-switch="colValue.editType">
-	            
-	            <input ng-switch-when="text" type="text" ng-model="rowValue[ colValue.property ]" class="form-control input-sm ei-input-text">
-	            <input ng-switch-when="number" type="number" ng-model="rowValue[ colValue.property ]" class="form-control input-sm ei-input-number">
-              
-              <select ng-if="colValue.hasOwnProperty('editorData')" ng-switch-when="select" class="form-control ei-input-select" 
-                  ng-model="rowValue[ colValue.property ]"
-                  ng-options="item for item in colValue.editorData">
-              </select>
-	            
-	            <div ng-switch-default>
-	              {{ rowValue[ colValue.property ] }}
-	            </div>
-	            
-	          </div>
-	          <div ng-if="!$ctrl.isEdit">
-	            {{ rowValue[ colValue.property ] }}
-	          </div>
+	          
+	          <editor-interface-value struct="colValue" model="rowValue[ colValue.property ]" is-edit="$ctrl.isEdit"></editor-interface-value>
+	          
 	        </div>
 	        <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" class="ei-table-cell">
 	          <div ng-click="$ctrl.deleteItem(rowKey)">delete</div>
