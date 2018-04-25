@@ -108,7 +108,8 @@ class EquipmentDetailController {
           {
             "label": "Path Band", 
             "property": "pathBand", 
-            "editType": "text"
+            "editType": "select", 
+            "selectOptions": ['none', 'high', 'option 2']
           }, 
           {
             "label": "Uplink Speed", 
@@ -160,7 +161,25 @@ class EquipmentDetailController {
     this.selectedEquipmentInfo.id = +this.selectedEquipmentInfo.id   
     this.state.showDetailedEquipmentInfo.next(this.selectedEquipmentInfo)
   }
-
+  
+  
+  //these perhaps get moved to the UI component 
+  beginEdit(){
+    // set up listeners etc
+    this.isEdit = true
+  }
+  
+  cancelEdit(){
+    // retrun the object to init state
+    this.isEdit = false
+  }
+  
+  commitEdit(){
+    // set the object to the edited object and tell the DB
+    this.isEdit = false
+    console.log(this.testCongestion)
+  }
+  
 }
 
 EquipmentDetailController.$inject = ['$http', '$timeout', 'state']

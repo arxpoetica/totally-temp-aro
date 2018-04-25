@@ -12,11 +12,12 @@ class EditorItnerfaceTableController {
 }
 
 let editorItnerfaceTable = {
-    templateUrl: '/components/common/editor-interfaces/editor-interface-table.html',
-    bindings: {
-      tableStructure: '=' 
-    },
-    controller: EditorItnerfaceTableController
-  }
-  export default editorItnerfaceTable
+  templateUrl: '/components/common/editor-interfaces/editor-interface-table.html',
+  bindings: {
+    tableStructure: '=', 
+    isEdit: '<'
+  },
+  controller: EditorItnerfaceTableController
+}
+export default editorItnerfaceTable
   

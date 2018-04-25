@@ -73,6 +73,24 @@
 }
 
 
+/* === input elements === */
+.ei-input-text, .ei-input-number{
+  
+}
+
+.ei-input-text{
+	
+}
+
+.ei-input-number{
+	
+}
+
+.ei-input-select{
+	width: auto;
+}
+
+
 /* === object editor === */
  aro-object-editor .ei-internal-gen > .ei-gen-level{
   margin-top: -6px;
@@ -86,6 +104,9 @@ aro-info-object-view .ei-header{
 
 
 /* === table === */
+.ei-table-contain{
+	overflow: scroll;
+}
 
 .ei-table-table{
 	display: table;
