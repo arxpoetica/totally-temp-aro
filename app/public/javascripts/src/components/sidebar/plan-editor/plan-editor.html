@@ -33,6 +33,7 @@
                          object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
                          create-object-on-click="false"
                          allow-boundary-creation="$ctrl.state.showSiteBoundary"
+                         hide-object-ids="$ctrl.objectIdsToHide"
                          on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
@@ -162,7 +163,7 @@
                   <select class="form-control"
                           ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryTypeId"
                           ng-options="item.id as item.description for item in $ctrl.state.boundaryTypes"
-                          ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
+                          ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.handleSiteBoundaryTypeChanged();">
                   </select>
                 </td>
               </tr>
