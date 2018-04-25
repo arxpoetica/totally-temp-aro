@@ -427,6 +427,7 @@ class MapObjectEditorController {
     this.drawing.markerIdForBoundary = mapObject.objectId // This is the object ID for which we are drawing the boundary
     this.drawing.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingControl: false,
       polygonOptions:this.selectedPolygonOptions
     });
     this.drawing.drawingManager.setMap(this.mapRef);
