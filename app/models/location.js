@@ -432,7 +432,7 @@ module.exports = class Location {
         return database.findOne(attributeQuery, [location_id])
           .then((values) => {
             locationInfo.attributes = {}
-            if(values.attributes) {
+            if(values && values.attributes) {
               hstore.parse(values.attributes, function (result) {
                 locationInfo.attributes = result
               })
