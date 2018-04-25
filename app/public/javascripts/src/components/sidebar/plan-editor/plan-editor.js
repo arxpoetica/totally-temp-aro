@@ -17,6 +17,7 @@ class PlanEditorController {
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
     this.uuidStore = []
     this.getUUIDsFromServer()
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
@@ -174,6 +175,11 @@ class PlanEditorController {
     var equipmentObjectId = mapObject.objectId
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
+        // The user may have destroyed the component before we get here. In that case, just return
+        if (this.isComponentDestroyed) {
+          console.warn('Plan editor was closed while a boundary was being calculated')
+          return
+        }
         // Construct a feature that we will pass to the map object editor, which will create the map object
         var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
                                                         Math.round(optimizationBody.radius * this.configuration.units.meters_to_length_units))
@@ -428,6 +434,11 @@ class PlanEditorController {
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
     }
+  }
+
+  $onDestroy() {
+    // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
+    this.isComponentDestroyed = true
   }
 }
 
