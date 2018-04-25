@@ -462,6 +462,22 @@ class MapObjectEditorController {
     });
   }
 
+  $onChanges(changesObj) {
+    if (changesObj && changesObj.hideObjectIds && (this.hideObjectIds) instanceof Set) {
+      // First set all objects as visible
+      Object.keys(this.createdMapObjects).forEach((objectId) => this.createdMapObjects[objectId].setVisible(true))
+      // Then hide the ones that we want
+      Object.keys(this.createdMapObjects).forEach((objectId) => {
+        if (this.hideObjectIds.has(objectId)) {
+          this.createdMapObjects[objectId].setVisible(false)
+          if (this.createdMapObjects[objectId] === this.selectedMapObject) {
+            this.selectMapObject(null)
+          }
+        }
+      })
+    }
+  }
+
   $onDestroy() {
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
@@ -501,6 +517,8 @@ let mapObjectEditor = {
     objectSelectedIconUrl: '@',
     deleteMode: '<',
     createObjectOnClick: '<',
+    allowBoundaryCreation: '<',
+    hideObjectIds: '<',    // A set of IDs that we will suppress visibility for
     onInit: '&',
     onCreateObject: '&',
     onSelectObject: '&',

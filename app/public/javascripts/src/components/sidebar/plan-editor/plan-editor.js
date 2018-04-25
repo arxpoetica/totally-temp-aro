@@ -13,6 +13,7 @@ class PlanEditorController {
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
     this.equipmentIdToBoundaryId = {}
+    this.objectIdsToHide = new Set()
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
@@ -126,6 +127,7 @@ class PlanEditorController {
           this.equipmentIdToBoundaryId[equipmentId] = boundaryId
           this.boundaryIdToEquipmentId[boundaryId] = equipmentId
         })
+        this.updateObjectIdsToHide()
         // We have a list of equipment boundaries. Populate them in the map object
         this.createMapObjects && this.createMapObjects(result.data)
       })
@@ -378,6 +380,7 @@ class PlanEditorController {
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
+    this.updateObjectIdsToHide()
     this.$timeout()
   }
 
@@ -433,6 +436,34 @@ class PlanEditorController {
       }
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
+    }
+  }
+
+  handleSiteBoundaryTypeChanged() {
+    this.saveSelectedBoundaryProperties() // I don't like to do this, but the boundary type affects the visibility of the boundary, so best to save it here.
+    this.updateObjectIdsToHide()
+  }
+
+  updateObjectIdsToHide() {
+    this.objectIdsToHide = new Set()
+    Object.keys(this.objectIdToProperties).forEach((objectId) => {
+      var properties = this.objectIdToProperties[objectId]
+      if ((properties instanceof BoundaryProperties)  // This is a boundary property
+          && (this.state.selectedBoundaryType.id !== properties.selectedSiteBoundaryTypeId  // The selected boundary id does not match this objects boundary id
+              || !this.state.showSiteBoundary)) {     // The checkbox for showing site boundaries is not selected
+        this.objectIdsToHide.add(objectId)
+      }
+    })
+  }
+
+  $doCheck() {
+    // Doing it this way because we don't have a better way to detect when state.selectedBoundaryType has changed
+    if (this.state.selectedBoundaryType.id !== this.cachedSelectedBoundaryTypeId
+        || this.state.showSiteBoundary !== this.cachedShowSiteBoundary) {
+      // Selected boundary type has changed. See if we want to hide any boundary objects
+      this.updateObjectIdsToHide()
+      this.cachedSelectedBoundaryTypeId = this.state.selectedBoundaryType.id
+      this.cachedShowSiteBoundary = this.state.showSiteBoundary
     }
   }
 
