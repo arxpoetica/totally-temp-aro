@@ -25,7 +25,7 @@
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
       "aggregateZoomThreshold": "7",
       "equipmentType": "point",
-      "zIndex": 7580, 
+      "zIndex": 7580,
       "drawingOptions": {
         "strokeStyle": "#0000ff",
         "lineWidth": 3,
@@ -210,10 +210,12 @@
     "equipmentType": "point",
     "zIndex": 5999,
     "drawingOptions": {
-      "strokeStyle": "#00a000",
-      "fillStyle": "#a0ffa0"
+      "strokeStyle": "#0000ff",
+      "lineWidth": 3,
+      "fillStyle": "#0000ff",
+      "opacity": 0.2
     }
-  },
+},
   "tileCacheKeywords": [
     "central_office",
     "fiber_distribution_hub",
