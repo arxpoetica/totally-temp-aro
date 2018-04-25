@@ -14,8 +14,8 @@ class EditorItnerfaceTableController {
     console.log(this.struct)
     let newItem = {}
     
-    // ToDo: should actually make a new instance of a defined class.
-    //  we should pass in a class. That can also cut down on the structure definition 
+    // ToDo: should actually make a new instance of a defined class. 
+    //  we should pass in a class. There may be properties that we don't show bu want to pass. It can also cut down on the structure definition 
     this.struct.cols.forEach(col => {
       newItem[col.property] = col.hasOwnProperty('defaultVal') ? col.defaultVal : null 
     }) 

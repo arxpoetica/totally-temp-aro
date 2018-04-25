@@ -76,7 +76,7 @@ class EquipmentDetailController {
       }
     }
     
-    this.testCongestion = [
+    this.rowsData = [
       {
         "equipmentCLLI": "PDVLWIACRL0", 
         "pathBand": "none", 
@@ -96,6 +96,8 @@ class EquipmentDetailController {
         "pathHops": 4
       } 
     ]
+    
+    this.rowsState = angular.copy(this.rowsData)
     
     this.tableViewStructure = {
         "editSwitch": "isEdit", 
@@ -132,7 +134,7 @@ class EquipmentDetailController {
             "editType": "number"
           }
         ],
-        "rows": this.testCongestion
+        "rows": this.rowsState
     }
     
     
@@ -175,14 +177,18 @@ class EquipmentDetailController {
   }
   
   cancelEdit(){
-    // retrun the object to init state
+    // return the object to init state
+    angular.copy(this.rowsData, this.rowsState)
     this.isEdit = false
   }
   
   commitEdit(){
     // set the object to the edited object and tell the DB
+    // may need to compare to check for deletes and creates 
+    angular.copy(this.rowsState, this.rowsData)
     this.isEdit = false
-    console.log(this.testCongestion)
+    console.log('send changed data to DB:')
+    console.log(this.rowsData)
   }
   
 }
