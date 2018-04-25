@@ -99,17 +99,20 @@ class EquipmentDetailController {
     
     this.tableViewStructure = {
         "editSwitch": "isEdit", 
+        "canAdd": true,  
         "cols": [
           {
             "label": "Equipment CLLI", 
             "property": "equipmentCLLI", 
+            "defaultVal": "default CLLI", 
             "editType": "false"
           }, 
           {
             "label": "Path Band", 
             "property": "pathBand", 
+            "defaultVal": "none", 
             "editType": "select", 
-            "selectOptions": ['none', 'high', 'option 2']
+            "editorData": ['none', 'high', 'option 2']
           }, 
           {
             "label": "Uplink Speed", 
@@ -119,11 +122,13 @@ class EquipmentDetailController {
           {
             "label": "Topology", 
             "property": "topology", 
+            "defaultVal": "", 
             "editType": "text"
           }, 
           {
             "label": "Path Hops", 
             "property": "pathHops", 
+            "defaultVal": 2, 
             "editType": "number"
           }
         ],

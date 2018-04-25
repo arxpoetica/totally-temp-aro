@@ -54,7 +54,7 @@
 }
 
 
-.ei-foldout-state-label, .ei-foldout-btn, .ei-foldout-state-label-bottom{
+.ei-foldout-state-label, .ei-foldout-btn, .ei-foldout-state-label-bottom, .ei-sub-btn{
   font-size: 0.7em;
   font-weight: normal;
 }
