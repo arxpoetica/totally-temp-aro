@@ -501,6 +501,7 @@ let mapObjectEditor = {
     objectSelectedIconUrl: '@',
     deleteMode: '<',
     createObjectOnClick: '<',
+    allowBoundaryCreation: '<',
     onInit: '&',
     onCreateObject: '&',
     onSelectObject: '&',

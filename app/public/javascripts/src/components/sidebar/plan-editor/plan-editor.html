@@ -32,6 +32,7 @@
                          object-icon-url="/images/map_icons/aro/plan_equipment.png"
                          object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
                          create-object-on-click="false"
+                         allow-boundary-creation="$ctrl.state.showSiteBoundary"
                          on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
@@ -67,7 +68,10 @@
           </draggable-button>
           <hr class="plan-editor-hr">
           <!-- Boundary buttons -->
-          <div style="display: flex; flex-direction: row; width: 100%">
+          <div ng-if="!$ctrl.state.showSiteBoundary" class="alert alert-warning">
+            You can add site boundaries only if the "Site Boundaries" option is selected in View Settings
+          </div>
+          <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
                                 is-disabled="false"
