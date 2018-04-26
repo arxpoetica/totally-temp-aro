@@ -229,12 +229,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   var loadAlgorithmParametersFromBody = (state, optimization, postBody) => {
-    // All this "uiSelectedAlgorithm" stuff is because the UI has muliple options that map to (postBody.algorithm === 'IRR')
-    // state.optimizationOptions.uiAlgorithms.forEach((uiAlgorithm) => {
-    //   if (uiAlgorithm.algorithm === postBody.optimization.algorithm) {
-    //     state.optimizationOptions.uiSelectedAlgorithm = uiAlgorithm
-    //   }
-    // })
+
+    if (!postBody.optimization) {
+      console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
+      return
+    }
 
     if (postBody.optimization.algorithm === 'UNCONSTRAINED') {
       state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.UNCONSTRAINED
