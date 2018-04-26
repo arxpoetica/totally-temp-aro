@@ -52,8 +52,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
       tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
     }
-    var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-    tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
     return {
       dataUrls: [tileUrl],
       iconUrl: networkEquipment.iconUrl,
@@ -79,11 +77,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
           mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
           createdMapLayerKeys.add(mapLayerKey)
-          if (networkEquipment.existingBoundaryTileUrl && state.showSiteBoundary) {
-            var mapLayerKeyBoundary = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}_boundary`
-            mapLayers[mapLayerKeyBoundary] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingBoundaryTileUrl', selectedLibraryItem.identifier, null)
-            createdMapLayerKeys.add(mapLayerKeyBoundary)
-          }
         })
       }
 
@@ -117,32 +110,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createdMapLayerKeys.clear()
     createMapLayersForCategory($scope.configuration.networkEquipment.equipments, oldMapLayers, createdMapLayerKeys);
     createMapLayersForCategory($scope.configuration.networkEquipment.cables, oldMapLayers, createdMapLayerKeys);
-
-    // Create layer for site boundaries
-    const planId = state.plan && state.plan.getValue() && state.plan.getValue().id
-    if (state.showSiteBoundary && state.selectedBoundaryType && planId) {
-      const mapLayerKey = `site_boundaries_${state.selectedBoundaryType.id}_${planId}`
-      var boundaryDefinition = $scope.configuration.networkEquipment.siteBoundaries
-      var tileUrl = boundaryDefinition.tileUrl
-      tileUrl = tileUrl.replace('{boundaryTypeId}', state.selectedBoundaryType.id)
-      tileUrl = tileUrl.replace('{rootPlanId}', planId)
-      const polygonTransform = getPolygonTransformForLayer(+boundaryDefinition.aggregateZoomThreshold)
-      // {pointTransform} for polygon??? Thats how it is currently coded in service
-      tileUrl = tileUrl.replace('{pointTransform}', polygonTransform)
-      oldMapLayers[mapLayerKey] = {
-        dataUrls: [tileUrl],
-        iconUrl: boundaryDefinition.iconUrl,
-        renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
-        strokeStyle: boundaryDefinition.drawingOptions.strokeStyle,
-        lineWidth: 2,
-        fillStyle: boundaryDefinition.drawingOptions.fillStyle,
-        opacity: 0.5,
-        selectable: true,
-        zIndex: boundaryDefinition.zIndex,
-        showPolylineDirection: boundaryDefinition.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
-      }
-      createdMapLayerKeys.add(mapLayerKey)
-    }
+    // Hack to check/uncheck site boundaries based on view settings
+    Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
+      $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = state.showSiteBoundary
+    })
+    createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)

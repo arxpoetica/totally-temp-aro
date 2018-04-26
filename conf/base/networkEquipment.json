@@ -20,7 +20,6 @@
       "networkNodeType": "dslam",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/dslam/point/{pointTransform}/entity/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/dslam/point/{pointTransform}/entity/",
-      "existingBoundaryTileUrl": "/tile/v1/tiles/equipment_boundary/{libraryId}/{boundaryTypeId}/point/{pointTransform}/entity/",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
       "aggregateZoomThreshold": "7",
@@ -202,19 +201,23 @@
       "isequipment": false
     }
   },
-  "siteBoundaries": {
-    "label": "Site Boundaries",
-    "tileUrl": "/tile/v1/plan/{rootPlanId}/equipment_boundary/tiles/{boundaryTypeId}/point/{pointTransform}/entity/",
-    "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
-    "aggregateZoomThreshold": "7",
-    "equipmentType": "point",
-    "zIndex": 5999,
-    "drawingOptions": {
-      "strokeStyle": "#0000ff",
-      "lineWidth": 3,
-      "fillStyle": "#0000ff",
-      "opacity": 0.2
-    }
+  "boundaries": {
+    "siteBoundaries": {
+      "label": "Site Boundaries",
+      "existingTileUrl": "/tile/v1/tiles/equipment_boundary/{libraryId}/{boundaryTypeId}/point/{polyTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment_boundary/tiles/{boundaryTypeId}/point/{polyTransform}/entity/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
+      "aggregateZoomThreshold": "7",
+      "equipmentType": "polygon",
+      "zIndex": 5999,
+      "drawingOptions": {
+        "strokeStyle": "#0000ff",
+        "lineWidth": 3,
+        "fillStyle": "#0000ff",
+        "opacity": 0.5
+      }
+  }
 },
   "tileCacheKeywords": [
     "central_office",
