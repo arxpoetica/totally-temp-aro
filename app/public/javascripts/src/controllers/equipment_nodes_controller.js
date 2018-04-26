@@ -120,7 +120,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // Create layer for site boundaries
     const planId = state.plan && state.plan.getValue() && state.plan.getValue().id
-    if (state.showSiteBoundary && state.selectedBoundaryType && planId) {
+    if (state.showSiteBoundary && state.selectedBoundaryType && $scope.layerTypeVisibility.planned && planId) {
       const mapLayerKey = `site_boundaries_${state.selectedBoundaryType.id}_${planId}`
       var boundaryDefinition = $scope.configuration.networkEquipment.siteBoundaries
       var tileUrl = boundaryDefinition.tileUrl
