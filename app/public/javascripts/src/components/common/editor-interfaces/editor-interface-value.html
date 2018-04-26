@@ -1,0 +1,20 @@
+
+<div ng-if="$ctrl.isEdit" ng-switch="$ctrl.struct.editType">
+  
+  <input ng-switch-when="text" type="text" ng-model="$ctrl.model" class="form-control input-sm ei-input-text">
+  <input ng-switch-when="number" type="number" ng-model="$ctrl.model" class="form-control input-sm ei-input-number">
+  
+  <select ng-switch-when="select" class="form-control ei-input-select" 
+      ng-model="$ctrl.model"
+      ng-options="item for item in $ctrl.struct.editorData">
+  </select>
+  
+  <div ng-switch-default>
+    {{ $ctrl.model }}
+  </div>
+  
+</div>
+
+<div ng-if="!$ctrl.isEdit">
+  {{ $ctrl.model }}
+</div>

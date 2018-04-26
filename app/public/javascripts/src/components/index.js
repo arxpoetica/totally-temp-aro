@@ -52,9 +52,7 @@ import manageUsers from './global-settings/manage-users'
 import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
-import aroObjectEditor from './common/aro-object-editor'
 import mapObjectEditor from './common/map-object-editor'
-import aroInfoObjectView from './common/aro-info-object-view'
 import dropTarget from './common/drop-target'
 import searchPlanFilter from './common/search-plan-filter'
 import accordion from './accordion/accordion'
@@ -64,6 +62,12 @@ import tile from './tiles/tile'
 import userSettings from './global-settings/user-settings'
 import tagManager from './global-settings/tag-manager'
 import createUpdateTag from './global-settings/create-update-tag'
+
+import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
+import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
+import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
+import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
+
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -118,9 +122,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('globalSettings', globalSettings)
    .component('aroPanel', aroPanel)
    .component('aroMultiSelect', aroMultiSelect)
-   .component('aroObjectEditor', aroObjectEditor)
    .component('mapObjectEditor', mapObjectEditor)
-   .component('aroInfoObjectView', aroInfoObjectView)
    .component('dropTarget', dropTarget)
    .component('searchPlanFilter', searchPlanFilter)
    .component('accordion', accordion)
@@ -130,3 +132,8 @@ app.component('boundaryDetail', boundaryDetail)
    .component('userSettings', userSettings)
    .component('tagManager', tagManager)
    .component('createUpdateTag', createUpdateTag)
+   .component('aroObjectEditor', aroObjectEditor)
+   .component('editorInterfaceTree', editorInterfaceTree)
+   .component('editorInterfaceTable', editorInterfaceTable)
+   .component('editorInterfaceValue', editorInterfaceValue)
+   

@@ -33,6 +33,7 @@ let accordionPanelContents = {
       .accordion-expanded {
         flex: 1 1 auto;
         transition: flex-grow 100ms, flex-shrink 100ms, visibility 0ms 100ms;
+        overflow-x: hidden;
         overflow-y: auto;
       }
       .accordion-collapsed {

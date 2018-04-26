@@ -1,0 +1,30 @@
+
+<div>
+  <div class="ei-header">A Table Example</div>
+  
+  <div class="ei-table-contain">
+	  <div class="ei-table-table">
+	    <div class="ei-table-body">
+	      <div class="ei-table-header-row">
+	        <div class="ei-table-col-head" ng-repeat="(colKey, colValue) in $ctrl.struct.cols">
+	          {{colValue.label}}
+	        </div>
+	        <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" class="ei-table-col-head"></div>
+	      </div>
+	      
+	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.struct.rows">
+	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.struct.cols">
+	          
+	          <editor-interface-value struct="colValue" model="rowValue[ colValue.property ]" is-edit="$ctrl.isEdit"></editor-interface-value>
+	          
+	        </div>
+	        <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" class="ei-table-cell">
+	          <div ng-click="$ctrl.deleteItem(rowKey)" style="cursor: pointer">[delete]</div>
+	        </div>
+	      </div>
+	      
+	    </div>
+	  </div>
+  </div>
+  <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" ng-click="$ctrl.addItem()" style="cursor: pointer; display: inline-block;">[add item]</div>
+</div>

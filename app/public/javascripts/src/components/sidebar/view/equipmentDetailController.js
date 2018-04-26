@@ -4,13 +4,16 @@ class EquipmentDetailController {
     this.$http = $http
     this.state = state
     this.selectedEquipmentInfo = null
-    this.debug_testObj = {
+    
+    this.isEdit = false
+    
+    this.treeData = {
       "General": {
         "summary": {
           "Site Name": "Fenske Rd", 
           "Site CLLI": "PCVLWIAC", 
           "Site Type": "Remote Terminal", 
-          "Site Deployment Date": "10/2013", 
+          "Site HSI Deployment Date": "10/2013", 
           "Latitude": "43.60396", 
           "Longitude": "-89.23765", 
           "Fiber Availability": "Not Available" 
@@ -35,7 +38,7 @@ class EquipmentDetailController {
           "summary": {
             "Equipment CLLI": "PDVLWIACRL0", 
             "Technology": "", 
-            "Deployment Date": "10/2013", 
+            "HSI Deployment Date": "10/2013", 
           }, 
           "Equipment Type": "SIEMENS MLC24/DLC", 
           "Deployment Cost": "", 
@@ -52,7 +55,7 @@ class EquipmentDetailController {
           "summary": {
             "Equipment CLLI": "PDVLWIACH00", 
             "Technology": "", 
-            "Deployment Date": "10/2013", 
+            "HSI Deployment Date": "10/2013", 
           }, 
           "Equipment Type": "ADTRAN TA 1148A IP/HSI - FIBER", 
           "Deployment Cost": "", 
@@ -72,6 +75,69 @@ class EquipmentDetailController {
         } 
       }
     }
+    this.treeState = angular.copy(this.treeData)
+    
+    this.rowsData = [
+      {
+        "equipmentCLLI": "PDVLWIACRL0", 
+        "pathBand": "none", 
+        "uplinkSpeed": "unknown", 
+        "topology": "none", 
+        "pathHops": 2
+      }, 
+      {
+        "equipmentCLLI": "PDVLWIACH00", 
+        "pathBand": "high", 
+        "uplinkSpeed": "unknown", 
+        "topology": "path", 
+        "pathHops": 3
+      }, 
+      {
+        "equipmentCLLI": "null test", 
+        "pathHops": 4
+      } 
+    ]
+    this.rowsState = angular.copy(this.rowsData)
+    
+    this.tableViewStructure = {
+        "editSwitch": "isEdit", 
+        "canAdd": true,  
+        "cols": [
+          {
+            "label": "Equipment CLLI", 
+            "property": "equipmentCLLI", 
+            "defaultVal": "default CLLI", 
+            "editType": "false"
+          }, 
+          {
+            "label": "Path Band", 
+            "property": "pathBand", 
+            "defaultVal": "none", 
+            "editType": "select", 
+            "editorData": ['none', 'high', 'option 2']
+          }, 
+          {
+            "label": "Uplink Speed", 
+            "property": "uplinkSpeed", 
+            "editType": "text"
+          }, 
+          {
+            "label": "Topology", 
+            "property": "topology", 
+            "defaultVal": "", 
+            "editType": "text"
+          }, 
+          {
+            "label": "Path Hops", 
+            "property": "pathHops", 
+            "defaultVal": 2, 
+            "editType": "number"
+          }
+        ],
+        "rows": this.rowsState
+    }
+    
+    
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
@@ -102,7 +168,32 @@ class EquipmentDetailController {
     this.selectedEquipmentInfo.id = +this.selectedEquipmentInfo.id   
     this.state.showDetailedEquipmentInfo.next(this.selectedEquipmentInfo)
   }
-
+  
+  
+  //ToDo: these perhaps get moved to the UI component 
+  beginEdit(){
+    // set up listeners etc
+    this.isEdit = true
+  }
+  
+  cancelEdit(){
+    // return the object to init state
+    angular.copy(this.treeData, this.treeState)
+    angular.copy(this.rowsData, this.rowsState)
+    this.isEdit = false
+  }
+  
+  commitEdit(){
+    // set the object to the edited object and tell the DB
+    // may need to compare to check for deletes and creates 
+    angular.copy(this.treeState, this.treeData)
+    angular.copy(this.rowsState, this.rowsData)
+    this.isEdit = false
+    console.log('send changed data to DB:')
+    console.log(this.treeData)
+    console.log(this.rowsData)
+  }
+  
 }
 
 EquipmentDetailController.$inject = ['$http', '$timeout', 'state']
