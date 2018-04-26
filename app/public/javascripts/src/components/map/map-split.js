@@ -150,7 +150,8 @@ let mapSplit = {
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
       </div>
-      <map-selector map-global-object-name="map"></map-selector>
+      <map-selector-plan-target map-global-object-name="map" ng-if="$ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT"></map-selector-plan-target>
+      <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_EXPORT"></map-selector-export-locations>
     </div>
 
     <!-- Define the sidebar -->

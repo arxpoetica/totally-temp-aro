@@ -163,6 +163,14 @@
     <i class="fa fa-folder-open"></i>
   </button>
 
+  <button class="btn"
+          ng-click="$ctrl.setSelectionExport()"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Export selected polygon">
+    <i class="fa fa-cube"></i>
+  </button>
+
   <div class="separator"></div>
 
   <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.measuringStickEnabled }"
@@ -209,8 +217,8 @@
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
                    && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.SINGLE)"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE_PLAN_TARGET }"
+          ng-click="$ctrl.setSelectionSingle()"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Select individual locations">
@@ -220,8 +228,8 @@
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
                    && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON }"
-          ng-click="$ctrl.setSelectionMode($ctrl.state.targetSelectionModes.POLYGON)"
+          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_PLAN_TARGET }"
+          ng-click="$ctrl.setSelectionPolygon()"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Select multiple locations">
@@ -231,6 +239,7 @@
   <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
+          ng-if="$ctrl.currentUser.rol != 'sales'"
           ng-class="{ 'btn': true,
                       'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
                                       && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY

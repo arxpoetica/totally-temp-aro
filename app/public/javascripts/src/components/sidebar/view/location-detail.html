@@ -52,12 +52,6 @@
             </td>
         </tr>
         <tr>
-            <td>Census Block</td>
-            <td>
-                {{$ctrl.selectedLocationInfo.tabblock_id}}
-            </td>
-        </tr>
-        <tr>
            <td>
                Additional Attributes
            </td>
@@ -141,14 +135,14 @@
         <tr>
             <td>Distance From Existing Network:</td>
             <td>
-                {{$ctrl.selectedLocationInfo.number_of_towers}}
+                {{$ctrl.selectedLocationInfo.distance_to_client_fiber | number: 0}}m
             </td>
         </tr>
 
         <tr>
             <td>Distance From Planned Network:</td>
             <td>
-                {{$ctrl.selectedLocationInfo.distance_to_client_fiber | number: 0}}m
+                {{$ctrl.selectedLocationInfo.distance_to_planned_network | number: 0}}m
             </td>
         </tr>
         </tbody>

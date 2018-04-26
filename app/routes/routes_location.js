@@ -211,6 +211,15 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.post('/locations/exportRegion', (request, response, next)=> {
+    let locations = request.body.locations
+    models.Location.exportAsCSV(locations).then((locations)=> {
+      response.setHeader('Content-disposition', 'attachment; filename=exported_locations.csv');
+      response.set('Content-Type', 'text/csv');
+      response.status(200).send(locations);
+    })
+  });
+
   function saveMorphology (request, response, next) {
     var name = request.body.name
     var tileSystemId = request.params.id || null

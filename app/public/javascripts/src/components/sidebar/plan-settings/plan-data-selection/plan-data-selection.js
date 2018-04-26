@@ -5,6 +5,8 @@ class DataSelectionController {
     this.$rootScope = $rootScope
     this.state = state
     this.isDirty = false
+    this.currentUser = state.getUser()
+    this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
@@ -77,6 +79,10 @@ class DataSelectionController {
   // Updates the 'valid' flags for all data items
   updateSelectionValidation() {
     Object.keys(this.allDataItems).forEach((dataItemKey) => {
+      if(this.currentUser.rol === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
+        this.allDataItems[dataItemKey].hidden = true
+      }
+
       var dataItem = this.allDataItems[dataItemKey]
       dataItem.isMinValueSelectionValid = dataItem.selectedLibraryItems.length >= dataItem.minValue
       dataItem.isMaxValueSelectionValid = dataItem.selectedLibraryItems.length <= dataItem.maxValue

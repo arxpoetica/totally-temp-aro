@@ -56,7 +56,6 @@ class ToolBarController {
       e.stopPropagation();
       e.preventDefault();
     })
-    
   }
 
   $onInit() {
@@ -65,6 +64,21 @@ class ToolBarController {
 
   openGlobalSettings() {
     this.state.showGlobalSettings.next(true)
+  }
+
+  setSelectionSingle() {
+    this.state.selectedToolBarAction = this.state.toolbarActions.SINGLE_SELECT
+    this.setSelectionMode(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
+  }
+
+  setSelectionPolygon() {
+    this.state.selectedToolBarAction = this.state.toolbarActions.POLYGON_SELECT
+    this.setSelectionMode(this.state.targetSelectionModes.POLYGON_PLAN_TARGET)
+  }
+
+  setSelectionExport(){
+    this.state.selectedToolBarAction = this.state.toolbarActions.POLYGON_EXPORT
+    this.setSelectionMode(this.state.targetSelectionModes.POLYGON_EXPORT_TARGET)
   }
 
   setSelectionMode(selectionMode) {
