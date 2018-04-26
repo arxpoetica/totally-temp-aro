@@ -1,4 +1,44 @@
 
+/* === panel === */
+.ei-panel{
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+
+.ei-panel-header{
+	position: absolute;
+	top: 0px;
+  left: 0px;
+  right: 0px;
+	z-index: 200;
+	padding: 10px 0px 10px 0px;
+	background: #ffffff;
+	border-bottom: 1px solid #888888;
+}
+
+.ei-panel-header-title{
+	font-weight: bold;
+  font-size: 1.3em;
+  display: inline-block;
+  /* ToDo: V center the text for real */
+  margin-top: 6px;
+}
+
+.ei-panel-header-btn{
+	float: right;
+	margin-left: 10px;
+}
+
+.ei-panel-content{
+	max-height: 100%;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	padding-top: 65px;
+}
+
+/* === common === */
+
 .ei-internal-gen > .ei-gen-level{
   /*
   margin-top: -6px;
