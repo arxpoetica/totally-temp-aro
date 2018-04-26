@@ -13,7 +13,7 @@ class EquipmentDetailController {
           "Site Name": "Fenske Rd", 
           "Site CLLI": "PCVLWIAC", 
           "Site Type": "Remote Terminal", 
-          "Site Deployment Date": "10/2013", 
+          "Site HSI Deployment Date": "10/2013", 
           "Latitude": "43.60396", 
           "Longitude": "-89.23765", 
           "Fiber Availability": "Not Available" 
@@ -38,7 +38,7 @@ class EquipmentDetailController {
           "summary": {
             "Equipment CLLI": "PDVLWIACRL0", 
             "Technology": "", 
-            "Deployment Date": "10/2013", 
+            "HSI Deployment Date": "10/2013", 
           }, 
           "Equipment Type": "SIEMENS MLC24/DLC", 
           "Deployment Cost": "", 
@@ -55,7 +55,7 @@ class EquipmentDetailController {
           "summary": {
             "Equipment CLLI": "PDVLWIACH00", 
             "Technology": "", 
-            "Deployment Date": "10/2013", 
+            "HSI Deployment Date": "10/2013", 
           }, 
           "Equipment Type": "ADTRAN TA 1148A IP/HSI - FIBER", 
           "Deployment Cost": "", 
