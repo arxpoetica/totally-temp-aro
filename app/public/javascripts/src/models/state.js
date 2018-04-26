@@ -7,6 +7,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
+  service.MAX_EXPORTABLE_AREA = 1000000
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
@@ -68,6 +69,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   // appReadyPromise will resolve when the map and configuration are loaded
   service.appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
+
+  //toolbar actions
+  service.toolbarActions = Object.freeze({
+    SINGLE_SELECT: 1,
+    POLYGON_SELECT: 2,
+    POLYGON_EXPORT: 3
+  });
+  service.selectedToolBarAction = null
+  service.resetToolBarAction = () => {
+    service.selectedToolBarAction = null
+  }
+
 
   // The selection modes for the application
   service.selectionModes = {
@@ -255,11 +268,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   service.selectedDisplayMode = new Rx.BehaviorSubject(service.displayModes.VIEW)
   service.targetSelectionModes = Object.freeze({
-    SINGLE: 0,
-    POLYGON: 1,
+    SINGLE_PLAN_TARGET: 0,
+    POLYGON_PLAN_TARGET: 1,
+    POLYGON_EXPORT_TARGET: 2,
     COVERAGE_BOUNDARY: 5
   })
-  service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE
+  service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE_PLAN_TARGET
 
   // Competition display
   service.competition = {

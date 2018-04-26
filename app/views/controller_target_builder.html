@@ -86,11 +86,11 @@
   <form id="target-builder-upload">
     <p>
      <button class="btn btn-sm"
-       ng-class="{'btn-primary': selectedTool !== tools.SINGLE, 'btn-selected': selectedTool === tools.SINGLE && !deselectMode, 'btn-danger active': selectedTool === tools.SINGLE && deselectMode}"
-       ng-click="setActiveTool(tools.SINGLE)">Building Select</button>
+       ng-class="{'btn-primary': selectedTool !== tools.SINGLE_PLAN_TARGET, 'btn-selected': selectedTool === tools.SINGLE_PLAN_TARGET && !deselectMode, 'btn-danger active': selectedTool === tools.SINGLE && deselectMode}"
+       ng-click="setActiveTool(tools.SINGLE_PLAN_TARGET)">Building Select</button>
      <button class="btn btn-sm"
-       ng-class="{'btn-primary': selectedTool !== tools.POLYGON, 'btn-selected': selectedTool === tools.POLYGON && !deselectMode, 'btn-danger active': selectedTool === tools.POLYGON && deselectMode}"
-       ng-click="setActiveTool(tools.POLYGON)">Polygon Select</button>
+       ng-class="{'btn-primary': selectedTool !== tools.POLYGON_SINGLE_TARGET, 'btn-selected': selectedTool === tools.POLYGON_SINGLE_TARGET && !deselectMode, 'btn-danger active': selectedTool === tools.POLYGON && deselectMode}"
+       ng-click="setActiveTool(tools.POLYGON_PLAN_TARGET)">Polygon Select</button>
      <span>
        <input type="file" name="csv" id="target-builder-upload-csv" style="width:0.1px; height:0.1px; opacity:0; overflow:hidden; position:absolute; z-index:-1">
        <label for="target-builder-upload-csv" ng-click="setSelectedTool('upload')">

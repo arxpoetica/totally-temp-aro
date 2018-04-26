@@ -39,7 +39,8 @@ import resourceManager from './sidebar/plan-settings/plan-resource-selection/res
 import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
 import boundaries from './views/boundaries'
 import mapSplit from './map/map-split'
-import mapSelector from './map/map-selector'
+import mapSelectorPlanTarget from './map/map-selector-plan-target'
+import mapSelectorExportLocations from './map/map-selector-export-locations'
 import toolBar from './header/tool-bar'
 import reportModal from './header/report-modal'
 import networkPlanModal from './header/network-plan-modal'
@@ -104,7 +105,8 @@ app.component('boundaryDetail', boundaryDetail)
    .component('roicEditor', roicEditor)
    .component('boundaries', boundaries)
    .component('mapSplit', mapSplit)
-   .component('mapSelector', mapSelector)
+   .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
+   .component('mapSelectorExportLocations', mapSelectorExportLocations)
    .component('toolBar', toolBar)
    .component('reportModal', reportModal)
    .component('networkPlanModal', networkPlanModal)

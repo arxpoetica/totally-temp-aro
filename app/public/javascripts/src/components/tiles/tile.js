@@ -1132,8 +1132,14 @@ class TileComponentController {
             state.mapFeaturesSelectedEvent.next({
               locations: selectedLocationsIds,
               serviceAreas: selectedServiceAreaIds,
-              roadSegments: selectedRoadSegments
+              roadSegments: selectedRoadSegments,
+              area: processArea()
             })
+
+
+            function processArea() {
+              return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{ return {lat: a.lat() , lng: a.lng()} })}).getPath())
+            }
           })
       })
 

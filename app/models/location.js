@@ -9,6 +9,7 @@ var config = helpers.config
 var models = require('../models')
 var fs = require('fs')
 var hstore = require('pg-hstore')()
+var stringify = require('csv-stringify')
 
 module.exports = class Location {
 
@@ -832,5 +833,60 @@ module.exports = class Location {
           return Promise.resolve()
         }
       });
+  }
+
+  static exportAsCSV(locations) {
+    if(locations.length === 0)
+        return ""
+
+  return Promise.resolve()
+    .then(()=>{
+      var sql = `
+          WITH locations as (
+          SELECT locations.id,address,zipcode,city, st_x(geog::geometry) as long, st_y(geog::geometry) as lat,cb.tabblock_id, cb.name,
+            (SELECT min(ST_Distance(ef_closest_fibers.geom::geography, locations.geog))
+              FROM (
+                SELECT geom
+                FROM client.existing_fiber
+                ORDER BY existing_fiber.geom <#> locations.geom ASC
+                LIMIT 10
+              ) as ef_closest_fibers
+            ) AS distance_to_client_fiber
+          FROM locations 
+          JOIN aro.census_blocks cb ON ST_Contains(cb.geom,locations.geom)
+          WHERE locations.id in ($1)
+          ),
+          location_info as (
+            SELECT l.*, attributes, 'business' as type from aro.businesses bus join locations l on l.id = bus.location_id
+            UNION ALL
+            SELECT l.*, attributes, 'household' as type from aro.households hh join locations l on l.id = hh.location_id
+            UNION ALL
+            SELECT l.*, attributes, 'tower' as type from aro.towers tow join locations l on l.id = tow.location_id
+          ),
+          aggregates as (
+            SELECT l.* ,
+             (SELECT array_remove(array_agg(source_id), null) as source_ids FROM households WHERE location_id in ($1)) as hhSourceIds,
+             (SELECT array_remove(array_agg(source_id), null) as source_ids FROM businesses WHERE location_id in ($1)) as bizSourceIds,
+             (SELECT array_remove(array_agg(source_id), null) as source_ids FROM towers WHERE location_id in ($1)) as towerSourceIds
+            from location_info l
+          )
+          select * from aggregates
+        `
+      return database.query(sql, [locations])
+    }).then((results)=>{
+        results.map((l)=>{
+          l.households = (l.hhsourceids || []).length
+          delete l.hhsourceids
+          l.businesses = (l.bizsourceids || []).length
+          delete l.bizsourceids
+          l.towers = (l.towersourceids || []).length
+          delete l.towersourceids
+        })
+        return results
+    }).then((results)=>{
+      //send response as csv
+      var json2csv = require("json2csv");
+      return json2csv({data:results });
+    })
   }
 }

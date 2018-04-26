@@ -141,7 +141,7 @@ class CoverageBoundaryController {
     this.mapRef = null
 
     // Target selection mode cannot be COVERAGE_BOUNDARY anymore
-    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE
+    this.state.selectedTargetSelectionMode = this.state.targetSelectionModes.SINGLE_PLAN_TARGET
   }
 }
 

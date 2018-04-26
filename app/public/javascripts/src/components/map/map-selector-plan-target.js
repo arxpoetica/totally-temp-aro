@@ -1,4 +1,4 @@
-class MapSelectorController {
+class MapSelectorPlanTargetController {
   constructor($document, $http, state) {
 
     this.mapRef = null
@@ -14,7 +14,7 @@ class MapSelectorController {
     this.selectionModes = state.selectionModes
 
     // Handle selection events from state
-    state.mapFeaturesSelectedEvent.subscribe((event) => {
+    this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
     	  //console.log(event)
     	  // ToDo: Corr isn't sure if this is where this should go
     	  //if (event.hasOwnProperty('censusFeatures') && event.censusFeatures.length > 0){
@@ -72,24 +72,6 @@ class MapSelectorController {
       if (event.roadSegments && event.roadSegments.size > 0) {
           state.reloadSelectedRoadSegments(event.roadSegments)
       }
-
-    })
-
-    $document.ready(() => {
-      // We should have a map variable at this point
-      this.mapRef = window[this.mapGlobalObjectName]
-
-      // Create a drawing manager that will be used for marking out polygons for selecting entities
-      this.drawingManager = new google.maps.drawing.DrawingManager({
-        drawingMode: null,
-        drawingControl: false
-      })
-      this.drawingManager.addListener('overlaycomplete', (e) => {
-        state.requestPolygonSelect.next({
-          coords: e.overlay.getPath().getArray()
-        })
-        setTimeout(() => e.overlay.setMap(null), 100)
-      })
     })
   }
 
@@ -99,7 +81,7 @@ class MapSelectorController {
     }
 
     if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW)
-        && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON) {
+        && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_PLAN_TARGET) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
@@ -113,6 +95,32 @@ class MapSelectorController {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
+
+    // We should have a map variable at this point
+    this.mapRef = window[this.mapGlobalObjectName]
+
+    // Create a drawing manager that will be used for marking out polygons for selecting entities
+    this.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: null,
+      drawingControl: false
+    })
+    this.drawingManager.addListener('overlaycomplete', (e) => {
+      this.state.requestPolygonSelect.next({
+        coords: e.overlay.getPath().getArray()
+      })
+      setTimeout(() => e.overlay.setMap(null), 100)
+    })
+
+  }
+
+  $onDestroy() {
+    if(this.unsub)
+      this.unsub.unsubscribe()
+
+    if(this.drawingManager) {
+      this.drawingManager.setDrawingMode(null)
+      this.drawingManager.setMap(null)
+    }
   }
 
   $doCheck() {
@@ -125,14 +133,14 @@ class MapSelectorController {
   }
 }
 
-MapSelectorController.$inject = ['$document', '$http', 'state']
+MapSelectorPlanTargetController.$inject = ['$document', '$http', 'state']
 
-let mapSelector = {
+let mapSelectorPlanTarget = {
   template: '', // No markup for this component. It interacts with the map directly.
   bindings: {
     mapGlobalObjectName: '@'
   },
-  controller: MapSelectorController
+  controller: MapSelectorPlanTargetController
 }
 
-export default mapSelector
+export default mapSelectorPlanTarget
