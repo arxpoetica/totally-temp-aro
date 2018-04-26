@@ -27,6 +27,7 @@
   -->
   <div class="ei-panel">
 	  <div class="ei-panel-header">
+	    <img class="ei-panel-header-icon" ng-src="{{$ctrl.headerIcon}}">
 	    <div class="ei-panel-header-title">{{$ctrl.treeData["General"]["summary"]["Site Type"]}}</div>
 	    <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.commitEdit()">Save</button>
 	    <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.cancelEdit()">Cancel</button>

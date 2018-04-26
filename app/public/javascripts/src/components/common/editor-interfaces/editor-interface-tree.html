@@ -1,6 +1,6 @@
 
 <!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
-<div class="ei-gen-level" ng-style="{ 'padding-left': $ctrl.pixelsPerIndentationLevel + 'px' }">
+<div class="ei-gen-level" ng-style="{ 'padding-left': $ctrl.indentationLevel > 0 ? $ctrl.pixelsPerIndentationLevel : 0 + 'px' }">
 
   <!-- Loop through all the key-value pairs in the object to be edited -->
   <div class="ei-items-contain" ng-repeat="(key, value) in $ctrl.objectToView">

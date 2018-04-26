@@ -12,9 +12,9 @@ class ViewModeLocationController {
       this.plan = plan
     })
 
-    state.mapFeaturesSelectedEvent
-    .subscribe((options) => {
+    state.mapFeaturesSelectedEvent.subscribe((options) => {
       var locationId = null
+      // Update state's selected location list 
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
         locationId = options.locations[0].location_id;
 

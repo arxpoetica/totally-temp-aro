@@ -401,12 +401,19 @@ class MapTileRenderer {
 	      ctx.globalCompositeOperation = 'source-over'
 	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
 	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
+	        console.log('wouldbe SELECTED location: ')
+	        //console.log(this.selectedLocations)
+	        console.log(feature)
 	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
 	          //show selected location icon at analysis mode -> selection type is locations    
 	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
 	          // Draw selected icon
+	          console.log('SELECTED location: ')
+	          console.log(selectedLocationImage[0])
 	          ctx.drawImage(selectedLocationImage[0], x, y)
 	        } else {
+	          console.log('location: ')
+	          console.log(entityImage) 
 	          ctx.drawImage(entityImage, x, y)
 	        }
 	      } else {
@@ -1201,6 +1208,7 @@ class TileComponentController {
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
+              console.log(result)
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)

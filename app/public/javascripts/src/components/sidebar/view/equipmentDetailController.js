@@ -6,6 +6,8 @@ class EquipmentDetailController {
     this.selectedEquipmentInfo = null
     
     this.isEdit = false
+    // ToDo: get all this dynamically 
+    this.headerIcon = "/images/map_icons/aro/remote_terminal.png"
     
     this.treeData = {
       "General": {
@@ -100,6 +102,7 @@ class EquipmentDetailController {
     this.rowsState = angular.copy(this.rowsData)
     
     this.tableViewStructure = {
+        "title": "Congestion", 
         "editSwitch": "isEdit", 
         "canAdd": true,  
         "cols": [

@@ -368,6 +368,7 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) {  // Can be null if we are de-selecting everything
       if (this.isMarker(mapObject)) {
+        console.log('item selected')
         mapObject.setIcon(this.objectSelectedIconUrl)
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
