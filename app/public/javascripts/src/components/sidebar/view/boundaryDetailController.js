@@ -36,6 +36,10 @@ class BoundaryDetailController {
         this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
       })
     })
+
+    state.clearViewMode.subscribe((clear) => {
+      if(clear) this.selectedBoundaryInfo = null
+    })
   }
 
   getCensusBlockInfo(cbId) {
