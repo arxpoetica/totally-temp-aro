@@ -40,7 +40,7 @@
 			"plannerKey": "small",
 			"key": "small_businesses",
 			"selected": false,
-			"can_view": ["admin"]
+			"can_view": ["admin","sales"]
 		},
 		"medium_businesses":{
 			"show": true,
@@ -95,41 +95,70 @@
 			"can_view": ["admin"]
 		},
 		"ethernet_lit_building": {
-			"iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
-			"label": "Ethernet Lit Buildings",
-			"key": "ethernet_lit_building",
-			"selected": false,
-			"can_view": ["sales"]
+            "show": true,
+            "label": "Ethernet Lit Buildings",
+            "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/ethernet_lit_buildings/",
+            "aggregateZoomThreshold": "15",
+            "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
+            "zIndex": 6680,
+            "categoryKey": "ethernet_lit_building",
+            "plannerKey": "ethernet_lit_building",
+            "key": "ethernet_lit_building",
+            "selected": false,
+            "can_view": ["sales"]
 		},
 		"lit_building":{
-			"iconUrl": "/images/map_icons/aro/lit_building.png",
-			"label": "Lit Building",
-			"key": "lit_building",
-			"selected": false,
-			"can_view": ["sales"]
-		},
+          "show": true,
+          "label": "Lit Building",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/lit_buildings/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/lit_building.png",
+          "zIndex": 6770,
+          "categoryKey": "lit_building",
+          "plannerKey": "lit_building",
+          "key": "lit_building",
+          "selected": false,
+          "can_view": ["sales"]
+        },
 		"tier_1":{
-			"iconUrl": "/images/map_icons/aro/tier_1.png",
-			"label": "Tier 1",
-			"key": "tier_1",
-			"selected": false,
-			"can_view": ["sales"]
+          "show": true,
+          "label": "Tier 1",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_1/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/tier_1.png",
+          "zIndex": 6860,
+          "categoryKey": "tier_1",
+          "plannerKey": "tier_1",
+          "key": "tier_1",
+          "selected": false,
+          "can_view": ["sales"]
 		},
 		"tier_2":{
-			"iconUrl": "/images/map_icons/aro/tier_2.png",
-			"label": "Tier 2",
-			"key": "tier_2",
-			"selected": false,
-			"can_view": ["sales"]
+          "show": true,
+          "label": "Tier 2",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_2/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/tier_2.png",
+          "zIndex": 6950,
+          "categoryKey": "tier_2",
+          "plannerKey": "tier_2",
+          "key": "tier_2",
+          "selected": false,
+          "can_view": ["sales"]
 		},
 		"tier_3":{
-			"iconUrl": "/images/map_icons/aro/tier_3.png",
-			"label": "Tier 3",
-			"key": "tier_3",
-			"selected": false,
-			"can_view": ["sales"]
+          "show": true,
+          "label": "Tier 3",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_3/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/tier_3.png",
+          "zIndex": 7040,
+          "categoryKey": "tier_3",
+          "plannerKey": "tier_3",
+          "key": "tier_3",
+          "selected": false,
+          "can_view": ["sales"]
 		}
-
 	},
 	"env_is_test": false
 }
