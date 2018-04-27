@@ -13,9 +13,17 @@ class ViewModeLocationController {
     })
 
     state.mapFeaturesSelectedEvent.subscribe((options) => {
+      var locationsList = []
+      if (options.hasOwnProperty('locations')) locationsList = options.locations
+      
       var locationId = null
       // Update state's selected location list 
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
+        var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
+        selectedViewFeaturesByType.locations = locationsList
+        state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+        
+        state.activeViewModePanel = state.viewModePanels.LOCATION_INFO
         locationId = options.locations[0].location_id;
 
         getLocationInfo(this.plan.id,locationId)

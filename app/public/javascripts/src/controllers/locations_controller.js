@@ -62,6 +62,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
               oldMapLayers[mapLayerKey] = {
                 dataUrls: [url],
                 iconUrl: `${baseUrl}${locationType.iconUrl}`,
+                selectedIconUrl: `${baseUrl}${locationType.selectedIconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
                 zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                 selectable: true
@@ -90,7 +91,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         dataUrls: mergedLayerUrls,
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
-        zIndex: 7500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+        zIndex: 6500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
         aggregateMode: 'FLATTEN'
       }
       createdMapLayerKeys.add(mapLayerKey)

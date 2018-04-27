@@ -144,8 +144,16 @@ class EquipmentDetailController {
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
+      var equipmentList = []
+      if (options.hasOwnProperty('equipmentFeatures')) equipmentList = options.equipmentFeatures
+      
       var equipmentId = null
+      
       if (options.equipmentFeatures && options.equipmentFeatures.length > 0 && options.equipmentFeatures[0].id) {
+        var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
+        selectedViewFeaturesByType.equipment = equipmentList
+        state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+        
         state.activeViewModePanel = state.viewModePanels.EQUIPMENT_INFO
         $timeout()
         equipmentId = options.equipmentFeatures[0].id;

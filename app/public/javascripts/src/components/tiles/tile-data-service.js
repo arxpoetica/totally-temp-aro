@@ -113,7 +113,7 @@ app.service('tileDataService', ['$http', ($http) => {
     return new Promise((resolve, reject) => {
       var promises = []
       mapLayer.dataUrls.forEach((tileUrl) => promises.push(getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
-      var hasIcon = mapLayer.iconUrl
+      var hasIcon = mapLayer.hasOwnProperty('iconUrl')
       if (hasIcon) {
         promises.push(new Promise((resolve, reject) => {
           var img = new Image()
@@ -124,10 +124,24 @@ app.service('tileDataService', ['$http', ($http) => {
           }
         }))
       }
+      
+      var hasSelectedIcon = mapLayer.hasOwnProperty('selectedIconUrl')
+      if (hasSelectedIcon) {
+        promises.push(new Promise((resolve, reject) => {
+          var img = new Image()
+          img.src = mapLayer.selectedIconUrl
+          img.onload = () => {
+            // Image has been loaded
+            resolve(img)
+          }
+        }))
+      }
+      
       Promise.all(promises)
         .then((results) => {
           var allFeatures = []
-          var numDataResults = hasIcon ? results.length - 1 : results.length
+          var numDataResults = results.length - (hasIcon + hasSelectedIcon) // booleans are 0 or 1 so True + True = 2
+          
           for (var iResult = 0; iResult < numDataResults; ++iResult) {
             var result = results[iResult]
             var layerToFeatures = result.layerToFeatures
@@ -140,8 +154,12 @@ app.service('tileDataService', ['$http', ($http) => {
               FEATURES_FLATTENED: allFeatures
             }
           }
+          
           if (hasIcon) {
-            tileData.icon = results[results.length - 1]
+            tileData.icon = results[results.length - (hasIcon + hasSelectedIcon)]
+          }
+          if (hasSelectedIcon) {
+            tileData.selectedIcon = results[results.length - 1]
           }
           resolve(tileData)
         })
