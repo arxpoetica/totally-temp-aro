@@ -55,6 +55,9 @@ class ViewModeLocationController {
       state.showDetailedLocationInfo.next(this.selectedLocationInfo)
     }
 
+    state.clearViewMode.subscribe((clear) => {
+      if(clear) this.selectedLocationInfo = null
+    })
   }  
 }
 

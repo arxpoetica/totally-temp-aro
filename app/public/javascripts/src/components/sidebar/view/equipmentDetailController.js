@@ -155,6 +155,10 @@ class EquipmentDetailController {
           })
       }
     })
+
+    state.clearViewMode.subscribe((clear) => {
+      if(clear) this.selectedEquipmentInfo = null
+    })
   }
 
   getEquipmentInfo(equipmentId) {

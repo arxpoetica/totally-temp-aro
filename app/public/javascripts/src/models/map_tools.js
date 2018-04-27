@@ -1,11 +1,23 @@
 /* global app config $ */
-app.service('map_tools', ['$rootScope', 'tracker', 'state', ($rootScope, tracker, state) => {
+app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootScope, tracker, state, $document) => {
   var tools = {}
   var visible = []
   var collapsed = {}
   var disabled = []
 
   var accordion = $('#map-tools-accordion')
+
+  $document.on("keydown",(event) => hideModal(event))
+
+  function hideModal(e) {
+    if (e.keyCode == 27) {
+      var visibleModal = _.filter(tools.available_tools, (tool) => tool.id == visible[0])
+      visibleModal.map(tools.toggle)
+      $rootScope.$broadcast('map_tool_esc_clear_view_mode')
+      if (!$rootScope.$$phase) { $rootScope.$apply() }
+    }
+  }
+
   accordion.on('click', '[data-parent="#map-tools-accordion"]', (e) => {
     e.preventDefault()
   })

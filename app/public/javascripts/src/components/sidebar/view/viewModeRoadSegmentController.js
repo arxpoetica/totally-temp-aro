@@ -16,6 +16,10 @@ class ViewModeRoadSegmentController {
         }
         this.$timeout() // Will safely call $scope.$apply()
       })  
+
+      state.clearViewMode.subscribe((clear) => {
+        if(clear) this.selectedEdgeInfo = null
+      })
     }
   
     generateRoadSegmentsInfo(roadSegments) {
