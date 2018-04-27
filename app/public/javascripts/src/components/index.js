@@ -67,6 +67,7 @@ import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
 import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
 import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
 import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
+import utils from './common/utilities'
 
 
 app.component('boundaryDetail', boundaryDetail)
@@ -136,4 +137,5 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceTree', editorInterfaceTree)
    .component('editorInterfaceTable', editorInterfaceTable)
    .component('editorInterfaceValue', editorInterfaceValue)
+   .service('Utils', utils)
    
