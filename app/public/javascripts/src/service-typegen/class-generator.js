@@ -41,10 +41,14 @@ class ClassGenerator {
 
   // Register all helpers for Handlebars, used to generate the source for a single class
   static registerHandlebarsHelpers(Handlebars) {
-    Handlebars.registerHelper('classNameExtractor', (inputString) => {
-      return inputString ? this.getClassName(inputString) : 'object'
+    Handlebars.registerHelper('classNameExtractor', (obj) => {
+      const classNameKey = obj.hasOwnProperty('id') ? 'id' : '$ref'
+      const className = obj[classNameKey]
+      return className ? this.getClassName(className) : 'object'
     })
     Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
+    // Helper to detect if the object is a map (Java Map, or Javascript POJO)
+    Handlebars.registerHelper('isMapObject', (input) => this.isMapObject(input))
     this.registerImportsHelper(Handlebars)
     this.registerAssignmentHelper(Handlebars)
   }
@@ -52,9 +56,9 @@ class ClassGenerator {
   // Register a Handlebars helper that generates the "this.xyz = new Abc()" statements
   // that are used in the constructor of our class
   static registerAssignmentHelper(Handlebars) {
-    Handlebars.registerHelper('memberDeclaration', (memberName, memberType, objectId) => {
+    Handlebars.registerHelper('memberDeclaration', (memberName, memberObj) => {
       var result = `this.${memberName} = `
-      switch(memberType) {
+      switch(memberObj.type) {
         case 'string':
           result += '\'\''
           break
@@ -63,20 +67,32 @@ class ClassGenerator {
           result += '0.0'
           break
 
+        case 'boolean':
+          result += 'false'
+          break
+
+        case 'any':
+          result += '{}'
+          break
+
         case 'integer':
           result += '0'
           break
         
         case 'object':
-          if (objectId && (typeof objectId === 'string')) {
-            result += `new ${this.getClassName(objectId)}()`
+          const classNameKey = memberObj.hasOwnProperty('id') ? 'id' : '$ref'
+          const className = memberObj[classNameKey]
+          if (className && (typeof className === 'string')) {
+            result += `new ${this.getClassName(className)}()`
+          } else if (this.isMapObject(memberObj)) {
+            result += `{}`  // This is a "map" object or a POJO object
           } else {
             result = `this.${memberName}_error${Math.round(Math.random() * 1000)} = 'This is an error'`
           }
           break
 
         default:
-          // throw `Unsupported member type ${memberType}`
+          // throw `Unsupported member type ${memberObj.id || memberObj['$ref']}`
           break
       }
       return new Handlebars.SafeString(result)
@@ -90,9 +106,13 @@ class ClassGenerator {
       Object.keys(properties).forEach((propertyKey) => {
         const property = properties[propertyKey]
         if (property.type === 'object') {
-          if (property.id) {
-            const className = this.getClassName(property.id)
+          const classNameKey = property.hasOwnProperty('id') ? 'id' : '$ref'
+          const fullClassName = property[classNameKey]
+          if (fullClassName) {
+            const className = this.getClassName(fullClassName)
             importsString += `import ${className} from './${className}'\n`
+          } else if (this.isMapObject(property)) {
+            // Do nothing - A "map" object is "{}"
           } else {
             importsString += `// ERROR: class id not found for ${propertyKey}\n`
           }
@@ -100,6 +120,12 @@ class ClassGenerator {
       })
       return new Handlebars.SafeString(importsString)
     })
+  }
+
+  // Returns true if this is a map (e.g. HashMap, POJO) object
+  static isMapObject(obj) {
+    console.log(obj)
+    return (obj.type === 'object') && obj.hasOwnProperty('additionalProperties')
   }
 
   // Returns the class name (e.g. Geometry) from a fully-qualified name (e.g. com.altvil:Geometry)

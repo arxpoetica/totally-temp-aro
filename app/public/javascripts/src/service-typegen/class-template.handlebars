@@ -9,27 +9,29 @@
 {{importDependentClasses properties}}
 
 {{!-- The class definition for the current class --}}
-class {{classNameExtractor id}} {
+class {{classNameExtractor this}} {
 
   {{!-- Define a constructor that will create default values for all the member variables --}}
   // Constructor
   constructor() {
     {{#each properties}}
-    {{memberDeclaration @key this.type this.id}}  {{!-- Example output: "this.name = ''" --}}
+    {{memberDeclaration @key this}}  {{!-- Example output: "this.name = ''" --}}
     {{/each}}
   }
 
   {{!-- A static function that will take a POJO object and return an object with the current classes type --}}
-  // Returns a {{classNameExtractor id}} object from it's JSON representation
+  // Returns a {{classNameExtractor this}} object from it's JSON representation
   static fromJSONObject(jsonObject) {
-    var newObj = new {{classNameExtractor id}}()
+    var newObj = new {{classNameExtractor this}}()
 
     // Set all the properties of newObj from the POJO. For object types, create a new object with data from the POJO.
     {{#each properties}}
     {{#if (isNotObject this.type)}}
     newObj.{{@key}} = jsonObject[{{@key}}]
+    {{else if (isMapObject this)}}
+    newObj.{{@key}} = jsonObject[{{@key}}]
     {{else}}
-    newObj.{{@key}} = {{classNameExtractor this.id}}.fromJSON(jsonObject[{{@key}}])
+    newObj.{{@key}} = {{classNameExtractor this}}.fromJSON(jsonObject[{{@key}}])
     {{/if}}
     {{/each}}
 
@@ -37,4 +39,4 @@ class {{classNameExtractor id}} {
   }
 }
 
-export default {{classNameExtractor id}}
+export default {{classNameExtractor this}}
