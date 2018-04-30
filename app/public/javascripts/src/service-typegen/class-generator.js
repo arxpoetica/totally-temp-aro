@@ -32,7 +32,7 @@ class ClassGenerator {
       .then(() => {
         fs.mkdirSync(path.join(__dirname, './dist'))
         Object.keys(typeToSourceCode).forEach((typeKey) => {
-          const className = typeKey.substr(typeKey.lastIndexOf(':') + 1)
+          const className = this.getClassName(typeKey)
           const fileName = path.join(__dirname, `./dist/${className}.js`)
           fs.writeFileSync(fileName, typeToSourceCode[typeKey])
         })
@@ -42,7 +42,7 @@ class ClassGenerator {
   // Register all helpers for Handlebars, used to generate the source for a single class
   static registerHandlebarsHelpers(Handlebars) {
     Handlebars.registerHelper('classNameExtractor', (inputString) => {
-      return inputString ? inputString.substr(inputString.lastIndexOf(':') + 1) : 'object'
+      return inputString ? this.getClassName(inputString) : 'object'
     })
     Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
     this.registerImportsHelper(Handlebars)
@@ -69,7 +69,7 @@ class ClassGenerator {
         
         case 'object':
           if (objectId && (typeof objectId === 'string')) {
-            result += `new ${objectId.substr(objectId.lastIndexOf(':') + 1)}()`
+            result += `new ${this.getClassName(objectId)}()`
           } else {
             result = `this.${memberName}_error${Math.round(Math.random() * 1000)} = 'This is an error'`
           }
@@ -91,7 +91,7 @@ class ClassGenerator {
         const property = properties[propertyKey]
         if (property.type === 'object') {
           if (property.id) {
-            const className = property.id.substr(property.id.lastIndexOf(':') + 1)
+            const className = this.getClassName(property.id)
             importsString += `import ${className} from './${className}'\n`
           } else {
             importsString += `// ERROR: class id not found for ${propertyKey}\n`
@@ -102,9 +102,10 @@ class ClassGenerator {
     })
   }
 
-  static getClassName(classDef) {
-    if (classDef.id) {
-      return classDef.id.substr(classDef.id.lastIndexOf(':') + 1)
+  // Returns the class name (e.g. Geometry) from a fully-qualified name (e.g. com.altvil:Geometry)
+  static getClassName(className) {
+    if (className) {
+      return className.substr(className.lastIndexOf(':') + 1)
     } else {
       return null
     }
