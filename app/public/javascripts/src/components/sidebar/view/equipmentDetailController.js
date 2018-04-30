@@ -150,8 +150,19 @@ class EquipmentDetailController {
       var equipmentId = null
       
       if (options.equipmentFeatures && options.equipmentFeatures.length > 0 && options.equipmentFeatures[0].id) {
+        
         var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
-        selectedViewFeaturesByType.equipment = equipmentList
+        selectedViewFeaturesByType.equipment = {}
+        equipmentList.forEach((feature) => {
+          var id = null
+          if ( feature.hasOwnProperty('id') ){
+            id = feature.id
+          }else if ( feature.hasOwnProperty('location_id') ){
+            id = feature.location_id
+          }
+          
+          if (null != id) selectedViewFeaturesByType.equipment[ id ] = feature
+        })
         state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
         
         state.activeViewModePanel = state.viewModePanels.EQUIPMENT_INFO

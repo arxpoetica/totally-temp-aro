@@ -23,7 +23,7 @@ class MapTileRenderer {
     this.selectedCensusBlockId = selectedCensusBlockId
     this.censusCategories = censusCategories
     this.selectedCensusCategoryId = selectedCensusCategoryId
-    this.selectedViewFeaturesById = selectedViewFeaturesByType
+    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     
     this.displayModes = displayModes
     this.renderBatches = []
@@ -77,32 +77,11 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
   
-  setSelectedViewFeaturesById(selectedViewFeaturesByType) {
-    var selectedViewFeaturesById = {}
-    for (var type in selectedViewFeaturesByType) {
-      // check if the property/key is defined in the object itself, not in parent
-      if (selectedViewFeaturesByType.hasOwnProperty(type)) {           
-          var typeList = selectedViewFeaturesByType[type]
-          typeList.forEach((feature) => {
-            // ToDo: I'm not sure if location_id and object_id are mutually unique  <----------------- fix this ---<<<
-            //console.log(feature)
-            var id = null
-            if ( feature.hasOwnProperty('object_id') ){
-              id = feature.object_id
-            }else if ( feature.hasOwnProperty('location_id') ){
-              id = feature.location_id
-            }else if ( feature.hasOwnProperty('id') ){
-              id = feature.id
-            }
-            
-            if (null != id) selectedViewFeaturesById[ id ] = feature
-          }) 
-      }
-    } 
-    this.selectedViewFeaturesById = selectedViewFeaturesById
+  setSelectedViewFeaturesByType(selectedViewFeaturesByType) {
+    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.tileDataService.markHtmlCacheDirty()
   }
-
+  
   // Sets the selected display mode
   setselectedDisplayMode(selectedDisplayMode) {
     this.selectedDisplayMode = selectedDisplayMode
@@ -411,20 +390,23 @@ class MapTileRenderer {
       var feature = features[iFeature]
       if (feature.properties) {
         // Try object_id first, else try location_id
-        var featureId = feature.properties.object_id || feature.properties.location_id  // <------------------- fix this ---<<<
+        var featureId = feature.properties.object_id || feature.properties.location_id  
         if (this.tileDataService.featuresToExclude.has(featureId)) {
           // This feature is to be excluded. Do not render it.
           continue
         }
       }
       
-      var selectedListId = null                       // <----------------------------------------------- fix this ---<<<
-      if ( feature.properties.hasOwnProperty('object_id') ){
-        selectedListId = feature.properties.object_id
-      }else if ( feature.properties.hasOwnProperty('location_id') ){
-        selectedListId = feature.properties.location_id
-      }else if ( feature.properties.hasOwnProperty('id') ){
-        selectedListId = feature.properties.id
+      var selectedListType = null 
+      var selectedListId = null 
+      if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
+        var fullDataType = feature.properties._data_type + '.'
+        selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
+        if ( feature.properties.hasOwnProperty('id') ){
+          selectedListId = feature.properties.id
+        }else if ( feature.properties.hasOwnProperty('location_id') ){
+          selectedListId = feature.properties.location_id
+        }
       }
       
       var geometry = feature.loadGeometry()
@@ -437,7 +419,7 @@ class MapTileRenderer {
   	      // This is a point
   	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
   	      var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-          
+          //console.log(feature)
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
@@ -449,8 +431,11 @@ class MapTileRenderer {
   	          ctx.drawImage(selectedLocationImage[0], x, y)
   	        }else if(this.selectedDisplayMode == this.displayModes.VIEW 
   	                 && null != selectedListId 
-  	                 && this.selectedViewFeaturesById.hasOwnProperty(selectedListId) ){
-  	          ctx.drawImage(entitySelectedImage, x, y)
+  	                 && null != selectedListType
+  	                 && this.selectedViewFeaturesByType.hasOwnProperty(selectedListType) 
+  	                 && this.selectedViewFeaturesByType[selectedListType].hasOwnProperty(selectedListId) 
+  	                ){
+  	          ctx.drawImage(entitySelectedImage, x, y) //<--------------------------------------------------- highlight here ---<<<
   	        } else {
   	          ctx.drawImage(entityImage, x, y)
   	        }
@@ -1057,7 +1042,7 @@ class TileComponentController {
     
     state.selectedViewFeaturesByType.subscribe((selectedViewFeaturesByType) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedViewFeaturesById(selectedViewFeaturesByType)
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedViewFeaturesByType(selectedViewFeaturesByType)
       }
     })
     
@@ -1249,7 +1234,7 @@ class TileComponentController {
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-              console.log(result)
+              //console.log(result)
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)
@@ -1271,7 +1256,8 @@ class TileComponentController {
             }
             
             //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            state.mapFeaturesSelectedEvent.next({
+            // ToDo: now that we have types these categories should to be dynamic
+            state.mapFeaturesSelectedEvent.next({ 
               latLng: event.latLng,
               locations: hitFeatures,
               serviceAreas: serviceAreaFeatures,

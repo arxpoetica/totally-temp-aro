@@ -20,7 +20,17 @@ class ViewModeLocationController {
       // Update state's selected location list 
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
         var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
-        selectedViewFeaturesByType.locations = locationsList
+        selectedViewFeaturesByType.location = {}
+        locationsList.forEach((feature) => {
+          var id = null
+          if ( feature.hasOwnProperty('id') ){
+            id = feature.id
+          }else if ( feature.hasOwnProperty('location_id') ){
+            id = feature.location_id
+          }
+          
+          if (null != id) selectedViewFeaturesByType.location[ id ] = feature
+        })
         state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
         
         state.activeViewModePanel = state.viewModePanels.LOCATION_INFO
