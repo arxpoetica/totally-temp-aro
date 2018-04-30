@@ -78,6 +78,7 @@
     "pync": "^1.0.0",
     "q": "^1.4.1",
     "request": "^2.75.0",
+    "rimraf": "^2.6.2",
     "rxjs": "^5.4.1",
     "stream-transform": "^0.1.1",
     "supertest": "^1.1.0",

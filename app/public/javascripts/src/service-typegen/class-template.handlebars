@@ -9,8 +9,16 @@ class {{classNameExtractor id}} {
   }
 
   // Returns a {{classNameExtractor id}} object from it's JSON representation
-  static fromJSON() {
-
+  static fromJSONObject(jsonObject) {
+    var newObj = new {{classNameExtractor id}}()
+    {{#each properties}}
+    {{#if (isNotObject this.type)}}
+    newObj.{{@key}} = jsonObject[{{@key}}]
+    {{else}}
+    newObj.{{@key}} = {{classNameExtractor this.id}}.fromJSON(jsonObject[{{@key}}])
+    {{/if}}
+    {{/each}}
+    return newObj
   }
 }
 

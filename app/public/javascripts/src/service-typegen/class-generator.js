@@ -1,4 +1,6 @@
 var fs = require('fs')
+var path = require('path')
+var rimraf = require('rimraf')
 var Handlebars = require('handlebars')
 
 class ClassGenerator {
@@ -10,7 +12,9 @@ class ClassGenerator {
     var classDefinition = require('./src/equipment-feature.json')
     
     var templateSource = fs.readFileSync('./class-template.handlebars').toString()
-    Handlebars.registerHelper('classNameExtractor', (inputString) => inputString.substr(inputString.lastIndexOf(':') + 1))
+    Handlebars.registerHelper('classNameExtractor', (inputString) => {
+      return inputString ? inputString.substr(inputString.lastIndexOf(':') + 1) : 'object'
+    })
     Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
     Handlebars.registerHelper('memberDeclaration', (memberName, memberType, objectId) => {
       var result = `this.${memberName} = `
@@ -36,7 +40,7 @@ class ClassGenerator {
           break
 
         default:
-          throw `Unsupported member type ${memberType}`
+          // throw `Unsupported member type ${memberType}`
           break
       }
       return new Handlebars.SafeString(result)
@@ -58,9 +62,30 @@ class ClassGenerator {
       return new Handlebars.SafeString(importsString)
     })
 
-    var classTemplate = Handlebars.compile(templateSource)
-    const result = classTemplate(classDefinition)
-    console.log(result)
+    // Hold a list of class names to compiled strings
+    var typeToSourceCode = {}
+    var handlebarsCompiler = Handlebars.compile(templateSource)
+    // const result = handlebarsCompiler(classDefinition)
+    // console.log(result)
+    this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode)
+
+    // Dump to console
+    Object.keys(typeToSourceCode).forEach((typeKey) => {
+      console.log('-----------------------------------------------------------------------')
+      console.log(typeToSourceCode[typeKey])
+    })
+
+    // Save to distribution folder
+    this.deleteDistributionFolder()
+      .then(() => {
+        fs.mkdirSync(path.join(__dirname, './dist'))
+        Object.keys(typeToSourceCode).forEach((typeKey) => {
+          const className = typeKey.substr(typeKey.lastIndexOf(':') + 1)
+          const fileName = path.join(__dirname, `./dist/${className}.js`)
+          fs.writeFileSync(fileName, typeToSourceCode[typeKey])
+        })
+      })
+    
   }
 
   getClassName(classDef) {
@@ -71,6 +96,24 @@ class ClassGenerator {
     }
   }
 
+  buildTypeSourceCode(classDefinition, handlebarsCompiler, classToSourceCode) {
+    if (classDefinition.type === 'object' && classDefinition.id && !classToSourceCode.hasOwnProperty(classDefinition.id)) {
+      // Build the source for this class
+      classToSourceCode[classDefinition.id] = handlebarsCompiler(classDefinition)
+    }
+    if (classDefinition.properties) {
+      Object.keys(classDefinition.properties).forEach((propertyKey) => {
+        const property = classDefinition.properties[propertyKey]
+        this.buildTypeSourceCode(property, handlebarsCompiler, classToSourceCode)
+      })
+    }
+  }
+
+  deleteDistributionFolder() {
+    return new Promise((resolve, reject) => {
+      rimraf('./dist', () => resolve())
+    })
+  }
 }
 
 (new ClassGenerator()).generateClass()
