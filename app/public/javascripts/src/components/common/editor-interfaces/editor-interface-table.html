@@ -19,12 +19,15 @@
 	          
 	        </div>
 	        <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" class="ei-table-cell">
-	          <div ng-click="$ctrl.deleteItem(rowKey)" style="cursor: pointer">[delete]</div>
+	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)">delete</button>
 	        </div>
 	      </div>
 	      
 	    </div>
 	  </div>
   </div>
-  <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" ng-click="$ctrl.addItem()" style="cursor: pointer; display: inline-block;">[add item]</div>
+  <button class="btn btn-primary btn-sm" 
+          ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" 
+          ng-click="$ctrl.addItem()"
+          style="display: inline-block;">add item</button>
 </div>

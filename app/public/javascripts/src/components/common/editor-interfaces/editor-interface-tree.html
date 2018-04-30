@@ -9,12 +9,13 @@
          RECURSIVELY show the object editor for the sub-object -->
     <div class="ei-foldout" ng-if="$ctrl.isExpandable(value) && key != 'summary'" style="width: 100%;">
       <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded($index)">
-        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
-        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[$index] && !value.hasOwnProperty('summary')"></i>
+        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
+        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
         {{key}}
+        <!-- 
         <div class="ei-foldout-btn" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">[ + ]</div>
         <div class="ei-foldout-btn" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">[ - ]</div>
-        
+        -->
         <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">summary</div>
         <div class="ei-foldout-state-label" ng-if="$ctrl.isKeyExpanded[$index] && value.hasOwnProperty('summary')">detail</div>
       </div>
@@ -49,7 +50,7 @@
       <div style="flex: 1 1 50%;"><div>{{key}}</div></div>
       <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
       <!-- ToDo replace below with editor-interface-table once we figure out the settings issue -->
-      <input ng-if="$ctrl.isEdit && $ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm ei-input-text" style="flex: 0 0 auto">
+      <input ng-if="$ctrl.isEdit && $ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToView[key]" class="form-control input-sm ei-input-text" style="flex: 0 0 50%">
       
       <div ng-if="!$ctrl.isEdit && $ctrl.isEditable(value)" style="flex: 0 0 50%"><div>{{$ctrl.objectToView[key]}}</div></div>
     </div>
