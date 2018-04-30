@@ -884,9 +884,43 @@ module.exports = class Location {
         })
         return results
     }).then((results)=>{
+
+      //Flatten HSTORE
+      //Create a list of unique columns for all locations
+
+      let columns = new Set()
+      let newResults = []
+
+      results.forEach((l) => {
+        if (l.attributes) {
+          hstore.parse(l.attributes, function (result) {
+            l = Object.assign(l, result)
+            delete l.attributes
+
+            for(let key in l) {
+              if (l.hasOwnProperty(key)) {
+                columns.add(key)
+              }
+            }
+          })
+        }
+        newResults.push(l)
+      })
+
+      //check each row for missing columns and add if missing and set to null
+      newResults.map((l)=>{
+        columns.forEach(function(val ,val2 ,set){
+          if (!(val in l))  {
+            l[val] = null
+          }
+        })
+      })
+      return newResults
+    })
+    .then((results)=>{
       //send response as csv
       var json2csv = require("json2csv");
-      return json2csv({data:results });
+      return json2csv({data:results});
     })
   }
 }
