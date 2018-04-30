@@ -1,0 +1,17 @@
+{{importDependentClasses properties}}
+class {{classNameExtractor id}} {
+
+  // Constructor
+  constructor() {
+    {{#each properties}}
+    {{memberDeclaration @key this.type this.id}}
+    {{/each}}
+  }
+
+  // Returns a {{classNameExtractor id}} object from it's JSON representation
+  static fromJSON() {
+
+  }
+}
+
+export default {{classNameExtractor id}}

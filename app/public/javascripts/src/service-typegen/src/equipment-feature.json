@@ -1,0 +1,366 @@
+{
+  "type" : "object",
+  "id" : "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentFeature",
+  "properties" : {
+    "dataType" : {
+      "type" : "string"
+    },
+    "categoryType" : {
+      "type" : "string"
+    },
+    "objectId" : {
+      "type" : "string"
+    },
+    "geometry" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:com:vividsolutions:jts:geom:Geometry",
+      "properties" : {
+        "envelope" : {
+          "type" : "object",
+          "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Geometry"
+        },
+        "factory" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:com:vividsolutions:jts:geom:GeometryFactory",
+          "properties" : {
+            "precisionModel" : {
+              "type" : "object",
+              "id" : "urn:jsonschema:com:vividsolutions:jts:geom:PrecisionModel",
+              "properties" : {
+                "scale" : {
+                  "type" : "number"
+                },
+                "type" : {
+                  "type" : "any"
+                },
+                "floating" : {
+                  "type" : "boolean"
+                },
+                "maximumSignificantDigits" : {
+                  "type" : "integer"
+                },
+                "offsetX" : {
+                  "type" : "number"
+                },
+                "offsetY" : {
+                  "type" : "number"
+                }
+              }
+            },
+            "coordinateSequenceFactory" : {
+              "type" : "any"
+            },
+            "srid" : {
+              "type" : "integer"
+            }
+          }
+        },
+        "userData" : {
+          "type" : "any"
+        },
+        "length" : {
+          "type" : "number"
+        },
+        "empty" : {
+          "type" : "boolean"
+        },
+        "boundary" : {
+          "type" : "object",
+          "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Geometry"
+        },
+        "srid" : {
+          "type" : "integer"
+        },
+        "numGeometries" : {
+          "type" : "integer"
+        },
+        "precisionModel" : {
+          "type" : "object",
+          "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:PrecisionModel"
+        },
+        "coordinate" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:com:vividsolutions:jts:geom:Coordinate",
+          "properties" : {
+            "x" : {
+              "type" : "number"
+            },
+            "y" : {
+              "type" : "number"
+            },
+            "z" : {
+              "type" : "number"
+            }
+          }
+        },
+        "coordinates" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Coordinate"
+          }
+        },
+        "geometryType" : {
+          "type" : "string"
+        },
+        "numPoints" : {
+          "type" : "integer"
+        },
+        "simple" : {
+          "type" : "boolean"
+        },
+        "envelopeInternal" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:com:vividsolutions:jts:geom:Envelope",
+          "properties" : {
+            "null" : {
+              "type" : "boolean"
+            },
+            "width" : {
+              "type" : "number"
+            },
+            "height" : {
+              "type" : "number"
+            },
+            "minX" : {
+              "type" : "number"
+            },
+            "maxX" : {
+              "type" : "number"
+            },
+            "minY" : {
+              "type" : "number"
+            },
+            "maxY" : {
+              "type" : "number"
+            },
+            "area" : {
+              "type" : "number"
+            }
+          }
+        },
+        "rectangle" : {
+          "type" : "boolean"
+        },
+        "area" : {
+          "type" : "number"
+        },
+        "centroid" : {
+          "type" : "object",
+          "id" : "urn:jsonschema:com:vividsolutions:jts:geom:Point",
+          "properties" : {
+            "envelope" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Geometry"
+            },
+            "factory" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:GeometryFactory"
+            },
+            "userData" : {
+              "type" : "any"
+            },
+            "coordinates" : {
+              "type" : "array",
+              "items" : {
+                "type" : "object",
+                "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Coordinate"
+              }
+            },
+            "empty" : {
+              "type" : "boolean"
+            },
+            "coordinateSequence" : {
+              "type" : "object",
+              "id" : "urn:jsonschema:com:vividsolutions:jts:geom:CoordinateSequence",
+              "properties" : {
+                "dimension" : {
+                  "type" : "integer"
+                }
+              }
+            },
+            "x" : {
+              "type" : "number"
+            },
+            "y" : {
+              "type" : "number"
+            },
+            "boundary" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Geometry"
+            },
+            "coordinate" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Coordinate"
+            },
+            "geometryType" : {
+              "type" : "string"
+            },
+            "numPoints" : {
+              "type" : "integer"
+            },
+            "simple" : {
+              "type" : "boolean"
+            },
+            "dimension" : {
+              "type" : "integer"
+            },
+            "boundaryDimension" : {
+              "type" : "integer"
+            },
+            "length" : {
+              "type" : "number"
+            },
+            "srid" : {
+              "type" : "integer"
+            },
+            "numGeometries" : {
+              "type" : "integer"
+            },
+            "precisionModel" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:PrecisionModel"
+            },
+            "envelopeInternal" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Envelope"
+            },
+            "rectangle" : {
+              "type" : "boolean"
+            },
+            "area" : {
+              "type" : "number"
+            },
+            "centroid" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Point"
+            },
+            "interiorPoint" : {
+              "type" : "object",
+              "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Point"
+            },
+            "valid" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        "interiorPoint" : {
+          "type" : "object",
+          "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Point"
+        },
+        "dimension" : {
+          "type" : "integer"
+        },
+        "boundaryDimension" : {
+          "type" : "integer"
+        },
+        "valid" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "attributes" : {
+      "type" : "object",
+      "additionalProperties" : {
+        "type" : "string"
+      }
+    },
+    "networkNodeType" : {
+      "type" : "string",
+      "enum" : [ "undefined", "central_office", "splice_point", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "bulk_distribution_consumer", "cell_5g", "junction_splitter", "dslam" ]
+    },
+    "networkNodeEquipment" : {
+      "type" : "object",
+      "id" : "urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment",
+      "properties" : {
+        "existingEquipment" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "id" : "urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
+            "properties" : {
+              "assignedEquipment" : {
+                "type" : "object",
+                "id" : "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+                "properties" : {
+                  "equipmentItemId" : {
+                    "type" : "integer"
+                  },
+                  "quantity" : {
+                    "type" : "number"
+                  },
+                  "constructionCost" : {
+                    "type" : "number"
+                  },
+                  "installCost" : {
+                    "type" : "number"
+                  },
+                  "rank" : {
+                    "type" : "integer"
+                  },
+                  "equipmentName" : {
+                    "type" : "string"
+                  },
+                  "serialNumber" : {
+                    "type" : "string"
+                  },
+                  "modelNumber" : {
+                    "type" : "string"
+                  },
+                  "manufacturer" : {
+                    "type" : "string"
+                  },
+                  "extendedAttributes" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "string"
+                    }
+                  },
+                  "subComponents" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "object",
+                      "$ref" : "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+                    }
+                  },
+                  "oneTimeCost" : {
+                    "type" : "boolean"
+                  }
+                }
+              },
+              "marketableEquipments" : {
+                "type" : "array",
+                "items" : {
+                  "type" : "object",
+                  "id" : "urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment",
+                  "properties" : {
+                    "equipmentId" : {
+                      "type" : "integer"
+                    },
+                    "daysFrom" : {
+                      "type" : "integer"
+                    },
+                    "daysTo" : {
+                      "type" : "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "plannedEquipment" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "$ref" : "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+          }
+        }
+      }
+    },
+    "boundary" : {
+      "type" : "object",
+      "$ref" : "urn:jsonschema:com:vividsolutions:jts:geom:Geometry"
+    }
+  }
+}
