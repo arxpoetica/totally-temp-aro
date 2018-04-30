@@ -1304,5 +1304,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
   }
 
+  service.clearViewMode = new Rx.BehaviorSubject(false)
+  $rootScope.$on('map_tool_esc_clear_view_mode', () => {
+    service.clearViewMode.next(true)
+  })
+
   return service
 }])

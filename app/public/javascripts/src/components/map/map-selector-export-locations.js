@@ -1,5 +1,5 @@
 class MapSelectorExportLocationsController {
-  constructor($document, $http, state) {
+  constructor($document, $http, state, Utils) {
 
     this.mapRef = null
     this.drawingManager = null
@@ -40,7 +40,8 @@ class MapSelectorExportLocationsController {
             type: 'error'
           })
         }
-        downloadCSV(r.data)
+
+        Utils.downloadCSV(r.data, "exported_locations.csv")
       })
     })
 
@@ -104,18 +105,7 @@ class MapSelectorExportLocationsController {
   }
 }
 
-
-function downloadCSV(data) {
-  var csvContent = "data:text/csv;charset=utf-8," + data.toString();
-  var a = document.createElement('a');
-  a.href = csvContent
-  a.setAttribute('download', "exported_locations.csv");
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-MapSelectorExportLocationsController.$inject = ['$document', '$http', 'state']
+MapSelectorExportLocationsController.$inject = ['$document', '$http', 'state', 'Utils']
 
 let mapSelectorExportLocation = {
   template: '', // No markup for this component. It interacts with the map directly.

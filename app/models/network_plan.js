@@ -939,6 +939,17 @@ module.exports = class NetworkPlan {
       : Promise.resolve(null)
     return Promise.all([wirecenters, addresses])
       .then((results) => {
+        var latlngSearch = text && text.split(',')
+        var searchText
+        if (this.inrange(-90,latlngSearch[0],90) && this.inrange(-180,latlngSearch[1],180)) {
+          searchText = {
+            name: text,
+            centroid: {
+              type: 'Point',
+              coordinates: [+latlngSearch[1], +latlngSearch[0]]
+            }
+          }
+        }
         var wirecenters = results[0]
         if (!results[1]) return wirecenters
         var addresses = results[1][1].results.map((item) => {
@@ -956,12 +967,20 @@ module.exports = class NetworkPlan {
             ]}
           }
         })
-        return addresses.concat(wirecenters)
+        return searchText ? addresses.concat(wirecenters).concat(searchText) : addresses.concat(wirecenters)
       })
   }
 
   static _callService (req) {
     return models.AROService.request(req)
+  }
+
+  static inrange(min,number,max){
+    if ( !isNaN(number) && (number >= min) && (number <= max) ){
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 
