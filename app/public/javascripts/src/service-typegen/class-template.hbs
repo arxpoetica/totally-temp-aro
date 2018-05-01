@@ -39,11 +39,17 @@ class {{classNameExtractor this.classDef}} {
     return newObj
   }
 
+  static buildDisplayProperties() {
+    this.displayProperties = {{{toJSON display}}}
+  }
+
   {{!-- A static function that will return details on how to display properties of this class --}}
   // Return details on how to display properties of this class
-  static getDisplayProperties() {
-    const displayProperties = {{{toJSON display}}}
-    return displayProperties
+  getDisplayProperties() {
+    if (!{{classNameExtractor this.classDef}}.displayProperties) {
+      {{classNameExtractor this.classDef}}.buildDisplayProperties()
+    }
+    return {{classNameExtractor this.classDef}}.displayProperties
   }
 }
 
