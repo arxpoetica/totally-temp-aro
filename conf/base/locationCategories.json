@@ -40,7 +40,7 @@
 			"plannerKey": "small",
 			"key": "small_businesses",
 			"selected": false,
-			"can_view": ["admin","sales"]
+			"can_view": ["admin"]
 		},
 		"medium_businesses":{
 			"show": true,
