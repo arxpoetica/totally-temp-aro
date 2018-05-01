@@ -7,6 +7,7 @@
 
 {{!-- Import dependent classes that are required by the current class --}}
 {{importDependentClasses classDef.properties}}
+import AroFeatureFactory from './AroFeatureFactory'
 
 {{!-- The class definition for the current class --}}
 class {{classNameExtractor this.classDef}} {
@@ -45,5 +46,7 @@ class {{classNameExtractor this.classDef}} {
     return displayProperties
   }
 }
+
+AroFeatureFactory.registerAroFeature('{{classUrnExtractor this.classDef}}', {{classNameExtractor this.classDef}})
 
 export default {{classNameExtractor this.classDef}}

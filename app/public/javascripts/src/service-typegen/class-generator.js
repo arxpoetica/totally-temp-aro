@@ -40,6 +40,13 @@ class ClassGenerator {
           const fileName = path.join(__dirname, `./dist/${className}.js`)
           fs.writeFileSync(fileName, typeToSourceCode[typeKey])
         })
+
+        // Build the AroFeatureFactory
+        var templateFactory = Handlebars.compile(fs.readFileSync('./aro-feature-factory.hbs').toString())
+        var dataTypeToUrnList = require('./src/dataTypeToUrn.json')
+        const fileName = path.join(__dirname, `./dist/AroFeatureFactory.js`)
+        console.log(templateFactory(dataTypeToUrnList))
+        fs.writeFileSync(fileName, templateFactory(dataTypeToUrnList))
       })
   }
 
@@ -49,6 +56,11 @@ class ClassGenerator {
       const classNameKey = obj.hasOwnProperty('id') ? 'id' : '$ref'
       const className = obj[classNameKey]
       return className ? this.getClassName(className) : 'object'
+    })
+    Handlebars.registerHelper('classUrnExtractor', (obj) => {
+      const classNameKey = obj.hasOwnProperty('id') ? 'id' : '$ref'
+      const classUrn = obj[classNameKey]
+      return classUrn ? classUrn : 'object'
     })
     Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
     Handlebars.registerHelper('toJSON', (input) => JSON.stringify(input, null, 2))
