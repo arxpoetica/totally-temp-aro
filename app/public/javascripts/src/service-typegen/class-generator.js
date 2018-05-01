@@ -18,8 +18,12 @@ class ClassGenerator {
     var templateSource = fs.readFileSync('./class-template.handlebars').toString()
     var typeToSourceCode = {}
     var handlebarsCompiler = Handlebars.compile(templateSource)
+    // Create a map of type URN to its display properties
+    var classMetas = require('./src/typesmeta.json')
+    var typeToDisplayProperties = {}
+    classMetas.forEach((classMeta) => typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties)
     var classDefinitions = require('./src/types.json')
-    classDefinitions.forEach((classDefinition) => this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode))
+    classDefinitions.forEach((classDefinition) => this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties))
 
     // // Dump to console
     // Object.keys(typeToSourceCode).forEach((typeKey) => {
@@ -47,6 +51,7 @@ class ClassGenerator {
       return className ? this.getClassName(className) : 'object'
     })
     Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
+    Handlebars.registerHelper('toJSON', (input) => JSON.stringify(input, null, 2))
     // Helper to detect if the object is a map (Java Map, or Javascript POJO)
     Handlebars.registerHelper('isMapObject', (input) => this.isMapObject(input))
     this.registerImportsHelper(Handlebars)
@@ -143,23 +148,29 @@ class ClassGenerator {
     }
   }
 
-  static buildTypeSourceCode(classDefinition, handlebarsCompiler, classToSourceCode) {
+  static buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties) {
     // Only generate source code if we haven't generated it before.
-    if (classDefinition.type === 'object' && classDefinition.id && !classToSourceCode.hasOwnProperty(classDefinition.id)) {
+    if (classDefinition.type === 'object' && classDefinition.id && !typeToSourceCode.hasOwnProperty(classDefinition.id)) {
       // Build the source for this class
-      classToSourceCode[classDefinition.id] = handlebarsCompiler(classDefinition)
+      typeToSourceCode[classDefinition.id] = handlebarsCompiler({
+        classDef: classDefinition,
+        display: typeToDisplayProperties[classDefinition.id]
+      })
       if (classDefinition.properties) {
         Object.keys(classDefinition.properties).forEach((propertyKey) => {
           const property = classDefinition.properties[propertyKey]
-          this.buildTypeSourceCode(property, handlebarsCompiler, classToSourceCode)
+          this.buildTypeSourceCode(property, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties)
         })
       }
-    } else if (classDefinition.type === 'array' && classDefinition.items.hasOwnProperty('id') && !classToSourceCode.hasOwnProperty(classDefinition.items.id)) {
-      classToSourceCode[classDefinition.items.id] = handlebarsCompiler(classDefinition.items)
+    } else if (classDefinition.type === 'array' && classDefinition.items.hasOwnProperty('id') && !typeToSourceCode.hasOwnProperty(classDefinition.items.id)) {
+      typeToSourceCode[classDefinition.items.id] = handlebarsCompiler({
+        classDef: classDefinition.items,
+        display: typeToDisplayProperties[classDefinition.id]
+      })
       if (classDefinition.items.properties) {
         Object.keys(classDefinition.items.properties).forEach((propertyKey) => {
           const property = classDefinition.items.properties[propertyKey]
-          this.buildTypeSourceCode(property, handlebarsCompiler, classToSourceCode)
+          this.buildTypeSourceCode(property, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties)
         })
       }
     }
