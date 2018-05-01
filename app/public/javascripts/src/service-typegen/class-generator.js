@@ -15,7 +15,7 @@ class ClassGenerator {
     this.registerHandlebarsHelpers(Handlebars)
 
     // Hold a list of class names to compiled strings
-    var templateSource = fs.readFileSync('./class-template.handlebars').toString()
+    var templateSource = fs.readFileSync('./class-template.hbs').toString()
     var typeToSourceCode = {}
     var handlebarsCompiler = Handlebars.compile(templateSource)
     // Create a map of type URN to its display properties
