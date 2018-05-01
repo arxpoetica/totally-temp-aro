@@ -165,7 +165,7 @@ class ClassGenerator {
     } else if (classDefinition.type === 'array' && classDefinition.items.hasOwnProperty('id') && !typeToSourceCode.hasOwnProperty(classDefinition.items.id)) {
       typeToSourceCode[classDefinition.items.id] = handlebarsCompiler({
         classDef: classDefinition.items,
-        display: typeToDisplayProperties[classDefinition.id]
+        display: typeToDisplayProperties[classDefinition.items.id]
       })
       if (classDefinition.items.properties) {
         Object.keys(classDefinition.items.properties).forEach((propertyKey) => {
