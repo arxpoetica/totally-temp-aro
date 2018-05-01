@@ -1,6 +1,6 @@
 class ViewModeLocationController {
 
-  constructor($http,state,configuration) {
+  constructor($http, $timeout, state, configuration) {
     this.state = state
     this.plan = null
     this.selectedLocationInfo = null
@@ -19,6 +19,7 @@ class ViewModeLocationController {
       var locationId = null
       // Update state's selected location list 
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
+        
         var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
         selectedViewFeaturesByType.location = {}
         locationsList.forEach((feature) => {
@@ -34,6 +35,7 @@ class ViewModeLocationController {
         state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
         
         state.activeViewModePanel = state.viewModePanels.LOCATION_INFO
+        //$timeout()
         locationId = options.locations[0].location_id;
 
         getLocationInfo(this.plan.id,locationId)
@@ -79,6 +81,6 @@ class ViewModeLocationController {
   }  
 }
 
-ViewModeLocationController.$inject = ['$http','state','configuration']
+ViewModeLocationController.$inject = ['$http','$timeout','state','configuration']
 
 export default ViewModeLocationController

@@ -419,7 +419,7 @@ class MapTileRenderer {
   	      // This is a point
   	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
   	      var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-          //console.log(feature)
+          
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
@@ -435,7 +435,21 @@ class MapTileRenderer {
   	                 && this.selectedViewFeaturesByType.hasOwnProperty(selectedListType) 
   	                 && this.selectedViewFeaturesByType[selectedListType].hasOwnProperty(selectedListId) 
   	                ){
+  	          
+  	          ctx.fillStyle='#e8ffe8'
+  	          ctx.strokeStyle = '#008000'
+  	          ctx.lineWidth = 2
+  	          //ctx.fillRect(x,y,entitySelectedImage.width,entitySelectedImage.height)
+  	          ctx.beginPath();
+  	          var halfWidth = 0.5*entitySelectedImage.width
+  	          ctx.arc(x+halfWidth, y+(0.5*entitySelectedImage.height), halfWidth+4, 0, 2 * Math.PI);
+  	          ctx.fill();
+  	          ctx.stroke();
+  	          
   	          ctx.drawImage(entitySelectedImage, x, y) //<--------------------------------------------------- highlight here ---<<<
+  	          //ctx.globalCompositeOperation='difference'
+  	          
+  	          //ctx.globalCompositeOperation='source-over'
   	        } else {
   	          ctx.drawImage(entityImage, x, y)
   	        }
