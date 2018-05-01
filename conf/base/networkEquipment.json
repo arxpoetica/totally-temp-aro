@@ -13,7 +13,8 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin", "sales"]
     },
     "dslam": {
       "label": "Remote Terminal",
@@ -31,7 +32,8 @@
         "fillStyle": "#0000ff",
         "opacity": 0.2
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin", "sales"]
     },
     "fdh": {
       "label": "FDH",
@@ -46,7 +48,8 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin", "sales"]
     },
     "fdt": {
       "label": "FDT",
@@ -61,7 +64,8 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin", "sales"]
     },
     "bulk_distribution_terminal": {
       "label": "Bulk Distribution Terminal",
@@ -76,7 +80,8 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin"]
     },
     "splice_point": {
       "label": "Splice point",
@@ -91,7 +96,8 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin", "sales"]
     },
     "fiveg_coverage": {
       "label": "5G Coverage",
@@ -106,7 +112,8 @@
         "strokeStyle": "#00a000",
         "fillStyle": "#a0ffa0"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin"]
     },
     "fiveg_site": {
       "label": "5G Site",
@@ -121,7 +128,8 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true
+      "isequipment": true,
+      "can_view": ["admin", "sales"]
     }
   },
   "cables": {
@@ -138,7 +146,8 @@
         "strokeStyle": "#0000ff",
         "showPolylineDirection": true
       },
-      "isequipment": false
+      "isequipment": false,
+      "can_view": ["admin", "sales"]
     },
     "distribution_fiber": {
       "label": "Distribution Fiber",
@@ -153,7 +162,8 @@
         "strokeStyle": "#ff0000",
         "showPolylineDirection": true
       },
-      "isequipment": false
+      "isequipment": false,
+      "can_view": ["admin", "sales"]
     },
     "iof_fiber": {
       "label": "IOF Fiber",
@@ -168,7 +178,8 @@
         "strokeStyle": "#000000",
         "showPolylineDirection": true
       },
-      "isequipment": false
+      "isequipment": false,
+      "can_view": ["admin", "sales"]
     },
     "unknown_fiber": {
       "label": "Unknown Fiber",
@@ -183,7 +194,8 @@
         "strokeStyle": "#808080",
         "showPolylineDirection": true
       },
-      "isequipment": false
+      "isequipment": false,
+      "can_view": ["admin", "sales"]
     },
     "copper": {
       "label": "Copper Cable",
@@ -198,7 +210,8 @@
         "strokeStyle": "#b87333",
         "showPolylineDirection": true
       },
-      "isequipment": false
+      "isequipment": false,
+      "can_view": ["admin", "sales"]
     }
   },
   "boundaries": {

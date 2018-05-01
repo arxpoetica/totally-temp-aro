@@ -29,7 +29,7 @@
       <table class="table table-condensed">
         <tbody>
           <tr><td colspan="2"><strong>Equipment</strong></td></tr>
-          <tr ng-repeat="(layerKey, equipmentLayer) in configuration.networkEquipment.equipments">
+          <tr ng-repeat="(layerKey, equipmentLayer) in configuration.networkEquipment.equipments" ng-if="equipmentLayer.can_view.indexOf(currentUser.rol) != -1">
             <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
             <td>
               <input type="checkbox" class="checkboxfill"
