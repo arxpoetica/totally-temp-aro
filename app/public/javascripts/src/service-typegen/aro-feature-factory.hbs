@@ -7,18 +7,20 @@
 
 {{!-- Define the factory class--}}
 class AroFeatureFactory {
-  static dataTypeToUrn = {
-    {{#each this}}
-    {{#if @last}}
-    '{{this.dataType}}': '{{this.schemaReference}}' {{!-- No comma on the last element --}}
-    {{else}}
-    '{{this.dataType}}': '{{this.schemaReference}}',
-    {{/if}}
-    {{/each}}
-  }
-  static urnToClass = {}
 
+  static initializeDataTypeToUrn() {
+    this.dataTypeToUrn = {
+      {{#each this}}
+      {{#if @last}}
+      '{{this.dataType}}': '{{this.schemaReference}}' {{!-- No comma on the last element --}}
+      {{else}}
+      '{{this.dataType}}': '{{this.schemaReference}}',
+      {{/if}}
+      {{/each}}
+    }
+  }
   static registerAroFeature(urn, classPrototype) {
+    this.urnToClass = this.urnToClass || {}
     this.urnToClass[urn] = classPrototype
   }
 
@@ -26,6 +28,9 @@ class AroFeatureFactory {
     if (!jsonObject.dataType) {
       console.error('Must have a dataType to create an object using AroFeatureFactory')
       return null
+    }
+    if (!this.dataTypeToUrn) {
+      this.initializeDataTypeToUrn()
     }
     const urn = this.dataTypeToUrn[jsonObject.dataType]
     if (!urn) {

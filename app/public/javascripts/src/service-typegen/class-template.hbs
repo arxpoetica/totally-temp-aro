@@ -28,9 +28,9 @@ class {{classNameExtractor this.classDef}} {
     // Set all the properties of newObj from the POJO. For object types, create a new object with data from the POJO.
     {{#each classDef.properties}}
     {{#if (isNotObject this.classDef.type)}}
-    newObj.{{@key}} = jsonObject[{{@key}}]
+    newObj.{{@key}} = jsonObject['{{@key}}']
     {{else if (isMapObject this.classDef)}}
-    newObj.{{@key}} = jsonObject[{{@key}}]
+    newObj.{{@key}} = jsonObject['{{@key}}']
     {{else}}
     newObj.{{@key}} = {{classNameExtractor this.classDef}}.fromJSON(jsonObject[{{@key}}])
     {{/if}}
