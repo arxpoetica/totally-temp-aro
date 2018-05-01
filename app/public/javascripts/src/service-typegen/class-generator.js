@@ -18,8 +18,8 @@ class ClassGenerator {
     var templateSource = fs.readFileSync('./class-template.handlebars').toString()
     var typeToSourceCode = {}
     var handlebarsCompiler = Handlebars.compile(templateSource)
-    var classDefinition = require('./src/equipment-feature.json')
-    this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode)
+    var classDefinitions = require('./src/types.json')
+    classDefinitions.forEach((classDefinition) => this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode))
 
     // Dump to console
     Object.keys(typeToSourceCode).forEach((typeKey) => {
