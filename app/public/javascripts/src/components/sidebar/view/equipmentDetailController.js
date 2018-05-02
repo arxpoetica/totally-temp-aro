@@ -4,6 +4,7 @@ class EquipmentDetailController {
     this.$http = $http
     this.state = state
     this.selectedEquipmentInfo = null
+    this.selectedEquipment = null
     
     this.isEdit = false
     
@@ -196,6 +197,10 @@ class EquipmentDetailController {
     console.log('send changed data to DB:')
     console.log(this.treeData)
     console.log(this.rowsData)
+  }
+
+  viewSelectedEquipment(selectedEquipment) {
+    console.log(selectedEquipment)
   }
   
 }
