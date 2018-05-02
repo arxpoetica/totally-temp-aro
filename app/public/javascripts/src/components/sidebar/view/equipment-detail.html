@@ -25,6 +25,15 @@
     </div>
   </div>
   -->
+  <div class="mb-5 mt-2">
+    <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
+      object-name="Equipment"
+      search-list="$ctrl.state.listOfServiceAreaTags"
+      selected="$ctrl.selectedEquipment"
+      refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"
+      on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj)">
+    </aro-search>
+  </div>
   <div class="ei-panel">
 	  <div class="ei-panel-header">
 	    <div class="ei-panel-header-title">{{$ctrl.treeData["General"]["summary"]["Site Type"]}}</div>

@@ -1304,5 +1304,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.clearViewMode.next(true)
   })
 
+  service.entityTypeList = {
+    censusBlock: []
+  }
+  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
+    var filter = ''
+    filter = filterObj ? `substringof(${searchColumn},${filterObj})` : filter
+    $http.get(`/service/odata/${entityType}?$select=${select}&$filter=${filter}&$orderby=id&$top=10`)
+    .then((results) => {
+      service.entityTypeList.censusBlock = results.data
+    })
+  }
+
   return service
 }])
