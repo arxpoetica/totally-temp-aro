@@ -22,14 +22,12 @@ class ClassGenerator {
     var classMetas = require('./typesmeta.json')
     var typeToDisplayProperties = {}
     classMetas.forEach((classMeta) => typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties)
-    var classDefinitions = require('./types.json')
-    classDefinitions.forEach((classDefinition) => this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties))
+    var typeDefinitions = require('./types.json')
+    typeDefinitions.forEach((typeDefinition) => this.buildTypeSourceCode(typeDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties))
 
-    // // Dump to console
-    // Object.keys(typeToSourceCode).forEach((typeKey) => {
-    //   console.log('-----------------------------------------------------------------------')
-    //   console.log(typeToSourceCode[typeKey])
-    // })
+    var referencedTypes = new Set()
+    typeDefinitions.forEach((typeDefinition) => this.getAllTypes(typeDefinition, referencedTypes))
+    console.log(referencedTypes)
 
     // Save to distribution folder
     this.deleteDistributionFolder()
@@ -50,18 +48,17 @@ class ClassGenerator {
       })
   }
 
+  // Gets the URN (if available) of a type
+  static getUrnForType(typeDefinition) {
+    const typeUrnKey = typeDefinition.hasOwnProperty('id') ? 'id' : '$ref'
+    return typeDefinition[typeUrnKey] // CAN RETURN NULL for types like 'string', 'number', etc.
+  }
+
   // Register all helpers for Handlebars, used to generate the source for a single class
   static registerHandlebarsHelpers(Handlebars) {
-    Handlebars.registerHelper('classNameExtractor', (obj) => {
-      const classNameKey = obj.hasOwnProperty('id') ? 'id' : '$ref'
-      const className = obj[classNameKey]
-      return className ? this.getClassName(className) : 'object'
-    })
-    Handlebars.registerHelper('classUrnExtractor', (obj) => {
-      const classNameKey = obj.hasOwnProperty('id') ? 'id' : '$ref'
-      const classUrn = obj[classNameKey]
-      return classUrn ? classUrn : 'object'
-    })
+      // If we don't have a URN return 'object'
+    Handlebars.registerHelper('classNameExtractor', (obj) => this.getClassName(this.getUrnForType(obj)) || 'object')
+    Handlebars.registerHelper('classUrnExtractor', (obj) => this.getUrnForType(obj) || 'object')
     Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
     Handlebars.registerHelper('toJSON', (input) => JSON.stringify(input, null, 2))
     // Helper to detect if the object is a map (Java Map, or Javascript POJO)
@@ -101,10 +98,9 @@ class ClassGenerator {
           break
         
         case 'object':
-          const classNameKey = memberObj.hasOwnProperty('id') ? 'id' : '$ref'
-          const className = memberObj[classNameKey]
-          if (className && (typeof className === 'string')) {
-            result += `new ${this.getClassName(className)}()`
+          const typeUrn = this.getUrnForType(memberObj)
+          if (typeUrn && (typeof typeUrn === 'string')) {
+            result += `new ${this.getClassName(typeUrn)}()`
           } else if (this.isMapObject(memberObj)) {
             result += `{}`  // This is a "map" object or a POJO object
           } else {
@@ -130,10 +126,9 @@ class ClassGenerator {
       Object.keys(properties).forEach((propertyKey) => {
         const property = properties[propertyKey]
         if (property.type === 'object') {
-          const classNameKey = property.hasOwnProperty('id') ? 'id' : '$ref'
-          const fullClassName = property[classNameKey]
-          if (fullClassName) {
-            const className = this.getClassName(fullClassName)
+          const typeUrn = this.getUrnForType(property)
+          if (typeUrn) {
+            const className = this.getClassName(typeUrn)
             importsString += `import ${className} from './${className}'\n`
           } else if (this.isMapObject(property)) {
             // Do nothing - A "map" object is "{}"
@@ -160,29 +155,50 @@ class ClassGenerator {
     }
   }
 
-  static buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties) {
+  // We have the definition of a "type container". This object will contain details on the type and its properties.
+  // This is done because for 'array' types, the type container is within the "items" property of the array definition.
+  static getTypeContainer(typeDefinition) {
+    var typeContainer = null
     // Only generate source code if we haven't generated it before.
-    if (classDefinition.type === 'object' && classDefinition.id && !typeToSourceCode.hasOwnProperty(classDefinition.id)) {
+    if (typeDefinition.type === 'object') {
+      typeContainer = typeDefinition
+    } else if (typeDefinition.type === 'array') {
+      typeContainer = typeDefinition.items
+    }
+    return typeContainer  // CAN RETURN NULL for typeDefinition.type = 'string', etc.
+  }
+
+  // Builds the source code for the specified type
+  static buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties) {
+
+    var typeContainer = this.getTypeContainer(classDefinition)
+    if (typeContainer && typeContainer.hasOwnProperty('id') && !typeToSourceCode.hasOwnProperty(typeContainer.id)) {
       // Build the source for this class
-      typeToSourceCode[classDefinition.id] = handlebarsCompiler({
-        classDef: classDefinition,
-        display: typeToDisplayProperties[classDefinition.id]
+      typeToSourceCode[typeContainer.id] = handlebarsCompiler({
+        classDef: typeContainer,
+        display: typeToDisplayProperties[typeContainer.id]
       })
-      if (classDefinition.properties) {
-        Object.keys(classDefinition.properties).forEach((propertyKey) => {
-          const property = classDefinition.properties[propertyKey]
+      if (typeContainer.properties) {
+        Object.keys(typeContainer.properties).forEach((propertyKey) => {
+          const property = typeContainer.properties[propertyKey]
           this.buildTypeSourceCode(property, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties)
         })
       }
-    } else if (classDefinition.type === 'array' && classDefinition.items.hasOwnProperty('id') && !typeToSourceCode.hasOwnProperty(classDefinition.items.id)) {
-      typeToSourceCode[classDefinition.items.id] = handlebarsCompiler({
-        classDef: classDefinition.items,
-        display: typeToDisplayProperties[classDefinition.items.id]
-      })
-      if (classDefinition.items.properties) {
-        Object.keys(classDefinition.items.properties).forEach((propertyKey) => {
-          const property = classDefinition.items.properties[propertyKey]
-          this.buildTypeSourceCode(property, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties)
+    }
+  }
+
+  // Gets a list of all types referenced in a type definition
+  static getAllTypes(typeDefinition, referencedTypes) {
+    const typeContainer = this.getTypeContainer(typeDefinition)
+    if (typeContainer) {
+      const typeUrn = this.getUrnForType(typeContainer)
+      if (typeUrn) {
+        referencedTypes.add(typeUrn)
+      }
+      if (typeContainer.properties) {
+        Object.keys(typeContainer.properties).forEach((propertyKey) => {
+          const property = typeContainer.properties[propertyKey]
+          this.getAllTypes(property, referencedTypes)
         })
       }
     }
