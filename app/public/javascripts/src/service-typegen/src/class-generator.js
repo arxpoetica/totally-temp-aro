@@ -19,10 +19,10 @@ class ClassGenerator {
     var typeToSourceCode = {}
     var handlebarsCompiler = Handlebars.compile(templateSource)
     // Create a map of type URN to its display properties
-    var classMetas = require('./src/typesmeta.json')
+    var classMetas = require('./typesmeta.json')
     var typeToDisplayProperties = {}
     classMetas.forEach((classMeta) => typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties)
-    var classDefinitions = require('./src/types.json')
+    var classDefinitions = require('./types.json')
     classDefinitions.forEach((classDefinition) => this.buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties))
 
     // // Dump to console
@@ -34,17 +34,17 @@ class ClassGenerator {
     // Save to distribution folder
     this.deleteDistributionFolder()
       .then(() => {
-        fs.mkdirSync(path.join(__dirname, './dist'))
+        fs.mkdirSync(path.join(__dirname, '../dist'))
         Object.keys(typeToSourceCode).forEach((typeKey) => {
           const className = this.getClassName(typeKey)
-          const fileName = path.join(__dirname, `./dist/${className}.js`)
+          const fileName = path.join(__dirname, `../dist/${className}.js`)
           fs.writeFileSync(fileName, typeToSourceCode[typeKey])
         })
 
         // Build the AroFeatureFactory
         var templateFactory = Handlebars.compile(fs.readFileSync('./aro-feature-factory.hbs').toString())
-        var dataTypeToUrnList = require('./src/dataTypeToUrn.json')
-        const fileName = path.join(__dirname, `./dist/AroFeatureFactory.js`)
+        var dataTypeToUrnList = require('./dataTypeToUrn.json')
+        const fileName = path.join(__dirname, `../dist/AroFeatureFactory.js`)
         console.log(templateFactory(dataTypeToUrnList))
         fs.writeFileSync(fileName, templateFactory(dataTypeToUrnList))
       })
@@ -190,7 +190,7 @@ class ClassGenerator {
 
   static deleteDistributionFolder() {
     return new Promise((resolve, reject) => {
-      rimraf('./dist', () => resolve())
+      rimraf('../dist', () => resolve())
     })
   }
 }
