@@ -90,7 +90,11 @@
 }
 
 .network-plan {
-  background: #D9272D;
+  background: #D9272D !important;
+}
+
+.expander-content :hover {
+    color: #D9272D !important;
 }
 
 #global-search-toolbutton .select2-chosen {
