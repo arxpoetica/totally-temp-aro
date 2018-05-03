@@ -1305,15 +1305,52 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
 
   service.entityTypeList = {
-    censusBlock: []
+    HouseholdObjectEntity: [],
+    NetworkEquipmentEntity: [],
+    CensusBlocksEntity: []
   }
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
+    
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
+
     var filter = ''
-    filter = filterObj ? `substringof(${searchColumn},${filterObj})` : filter
-    $http.get(`/service/odata/${entityType}?$select=${select}&$filter=${filter}&$orderby=id&$top=10`)
+    if(entityType === 'CensusBlocksEntity') {
+      filter = filterObj ? `substringof(${searchColumn},${filterObj})` : filter
+    } else {
+      //for UUID odata doesn't support substring
+      var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+      if(pattern.test(filterObj)) {
+        filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
+      }  
+    }  
+
+    var libraryItems = []
+    if(entityType === 'HouseholdObjectEntity') {
+      var selectedLocationLibraries = service.dataItems && service.dataItems.location && service.dataItems.location.selectedLibraryItems
+      if(selectedLocationLibraries) libraryItems = selectedLocationLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
+      if(libraryItems.length > 0) {
+        var libfilter = libraryItems.map(id => `libraryId eq ${id}`).join(" or ")
+        filter = filter ? filter.concat(` and (${libfilter})`) : `${libfilter}`
+        //filter = filter ? filter.concat(` and libraryId eq ${libraryItems.toString()}`) : `libraryId eq ${libraryItems.toString()}`
+      }
+    }
+
+    if(entityType === 'NetworkEquipmentEntity') {
+      var selectedEquipmentLibraries = service.dataItems && service.dataItems.equipment && service.dataItems.equipment.selectedLibraryItems
+      if(selectedEquipmentLibraries) libraryItems = selectedEquipmentLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
+      if(libraryItems.length > 0) {
+        var libfilter = libraryItems.map(id => `libraryId eq ${id}`).join(" or ")
+        filter = filter ? filter.concat(` and (${libfilter})`) : `${libfilter}`
+      }
+    }
+
+    entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
+
+    $http.get(entityListUrl)
     .then((results) => {
-      service.entityTypeList.censusBlock = results.data
+      service.entityTypeList[entityType] = results.data
     })
+
   }
 
   return service

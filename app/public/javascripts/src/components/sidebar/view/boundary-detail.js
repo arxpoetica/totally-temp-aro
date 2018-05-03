@@ -13,7 +13,7 @@ let boundaryDetail = {
     <div class="mb-5 mt-2">
       <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO"
         object-name="Census Block"
-        search-list="$ctrl.state.entityTypeList.censusBlock"
+        search-list="$ctrl.state.entityTypeList.CensusBlocksEntity"
         selected="$ctrl.selectedBoundary"
         refresh-tag-list="$ctrl.state.loadEntityList('CensusBlocksEntity',searchObj,'id,tabblockId','tabblockId')"
         on-selection-changed="$ctrl.viewSelectedBoundary(selectedObj)">
