@@ -1318,7 +1318,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       filter = filterObj ? `substringof(${searchColumn},${filterObj})` : filter
     } else {
       //for UUID odata doesn't support substring
-      filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
+      var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+      if(pattern.test(filterObj)) {
+        filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
+      }  
     }  
 
     var libraryItems = []
