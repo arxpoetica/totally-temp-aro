@@ -10,6 +10,15 @@ let boundaryDetail = {
         margin-top: 10px;
       }
     </style>
+    <div class="mb-5 mt-2">
+      <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO"
+        object-name="Census Block"
+        search-list="$ctrl.state.entityTypeList.censusBlock"
+        selected="$ctrl.selectedBoundary"
+        refresh-tag-list="$ctrl.state.loadEntityList('CensusBlocksEntity',searchObj,'id,tabblockId','tabblockId')"
+        on-selection-changed="$ctrl.viewSelectedBoundary(selectedObj)">
+      </aro-search>
+    </div>
     <div class="boundary-detail" ng-if="$ctrl.selectedBoundaryInfo !== null">
       <div>Census Block Code: {{$ctrl.selectedBoundaryInfo.tabblock_id}}</div>
       <div>Area(sq. miles): {{$ctrl.selectedBoundaryInfo.area_meters / (1609.34 * 1609.34) | number: 2}}</div>
