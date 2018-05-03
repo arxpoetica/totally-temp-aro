@@ -41,12 +41,12 @@ let viewMode = {
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Road Segment Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.currentUser.rol === 'admin'"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="currentUser.rol === 'sales'">
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.currentUser.rol === 'admin'">
         <road-segment-detail></road-segment-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.currentUser.rol === 'admin'"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="currentUser.rol === 'sales'">
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.currentUser.rol === 'admin'">
         <network-plan-manage ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></network-plan-manage>
       </accordion-panel-contents>
       <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
