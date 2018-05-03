@@ -15,6 +15,7 @@ class ToolBarController {
     this.heatMapOption = true
     this.measuringStickEnabled = false
     this.currentUser = state.getUser()
+    this.switchIcon = config.ARO_CLIENT === 'frontier'
 
     this.min = 0
     // Map tile settings used for debugging
