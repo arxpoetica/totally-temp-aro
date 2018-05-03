@@ -44,6 +44,12 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     reload: 'always'
   }
 
+  if(config.ARO_CLIENT === 'frontier') {
+    $scope.roadLayer.style_options.normal.strokeColor = '#ffffff'
+    $scope.roadLayer.style_options.normal.strokeWeight = 5
+    $scope.roadLayer.style_options.highlight.strokeWeight = 6
+  }
+
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateRoadMapLayers)
   

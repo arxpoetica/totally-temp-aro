@@ -5,6 +5,7 @@ class BoundaryDetailController {
     this.state = state
     this.selectedBoundaryInfo = null
     this.selectedBoundaryTags = []
+    this.selectedBoundary = null
     
     this.censusCategories = this.state.censusCategories.getValue()
     this.state.censusCategories.subscribe((newValue) => {
@@ -31,10 +32,7 @@ class BoundaryDetailController {
       
       let censusBlockId = event.censusFeatures[0].id
       this.state.reloadSelectedCensusBlockId(censusBlockId)
-      this.getCensusBlockInfo(censusBlockId).then((cbInfo) => {
-        this.selectedBoundaryInfo = cbInfo
-        this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
-      })
+      this.viewCensusBlockInfo(censusBlockId)
     })
 
     state.clearViewMode.subscribe((clear) => {
@@ -48,6 +46,22 @@ class BoundaryDetailController {
         return response.data
       })
   }
+
+  viewCensusBlockInfo(censusBlockId) {
+    return this.getCensusBlockInfo(censusBlockId).then((cbInfo) => {
+      this.selectedBoundaryInfo = cbInfo
+      this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+    })
+  }
+
+  viewSelectedBoundary(selectedBoundary) {
+    this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
+    this.viewCensusBlockInfo(selectedBoundary.id)
+    .then(() => {
+      map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
+    })
+  }
+ 
 }
 
 BoundaryDetailController.$inject = ['$http', 'state']

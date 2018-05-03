@@ -1,0 +1,14 @@
+<ui-select theme="bootstrap" ng-model="$ctrl.selected" close-on-select="true"
+  on-select="$ctrl.onSelectionChanged({selectedObj:$select.selected})">
+  <ui-select-match placeholder="Select or search a {{$ctrl.objectName}} in the list...">
+    {{$select.selected.name || $select.selected.code || $select.selected.tabblockId || $select.selected.objectId}}
+  </ui-select-match>
+  <ui-select-choices class="ui-select-width-300" 
+    repeat="item in $ctrl.searchList | filter: $select.search" 
+    refresh="$ctrl.refreshTagList({searchObj:$select.search})"
+    refresh-delay="100">
+    <div>
+      {{item.name || item.code || item.tabblockId || item.objectId}}
+    </div>
+  </ui-select-choices>
+</ui-select>

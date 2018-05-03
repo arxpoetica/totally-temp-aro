@@ -5,6 +5,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools
   $scope.configuration = configuration
   $scope.planState = state
+  $scope.currentUser = state.getUser()
   $scope.layerTypeVisibility = {
     existing: false,
     planned: false

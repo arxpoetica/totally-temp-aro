@@ -25,6 +25,15 @@
     </div>
   </div>
   -->
+  <div class="mb-5 mt-2">
+    <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
+      object-name="Equipment"
+      search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
+      selected="$ctrl.selectedEquipment"
+      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,objectId','objectId')"
+      on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj)">
+    </aro-search>
+  </div>
   <div class="ei-panel">
 	  <div class="ei-panel-header clearfix">
 	    <img class="ei-panel-header-icon" ng-src="{{$ctrl.headerIcon}}">

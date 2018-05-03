@@ -267,6 +267,17 @@ class EquipmentDetailController {
     console.log('send changed data to DB:')
     console.log(this.selectedEquipmentInfo)
   }
+
+  viewSelectedEquipment(selectedEquipment) {
+    this.getEquipmentInfo(selectedEquipment.id)
+    .then((equipmentInfo) => {
+      this.selectedEquipmentInfo = equipmentInfo
+      //this.treeState = equipmentInfo
+    })
+    .then(() => {
+      map.setCenter({ lat: this.selectedEquipmentInfo.geog.coordinates[1], lng: this.selectedEquipmentInfo.geog.coordinates[0] })
+    })
+  }
   
 }
 
