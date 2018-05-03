@@ -185,8 +185,9 @@ class EquipmentDetailController {
         this.getEquipmentInfo(plan.id, selectedFeature.object_id).then((equipmentInfo) => {
           console.log(equipmentInfo)
           if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-            this.selectedEquipmentInfo = equipmentInfo
-            this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
+            //this.selectedEquipmentInfo = equipmentInfo
+            this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
+            this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
             
             angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
             
