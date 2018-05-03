@@ -1,0 +1,504 @@
+[
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:ServiceAreaFeature",
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "location",
+          "edge",
+          "equipment",
+          "fiber",
+          "construction_location",
+          "service_layer",
+          "tile_system",
+          "cable_construction_area",
+          "equipment_boundary",
+          "census_block"
+        ]
+      },
+      "objectId": {
+        "type": "string"
+      },
+      "geometry": {
+        "type": "any",
+        "description": "type=Geometry"
+      },
+      "attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "name": {
+        "type": "string"
+      },
+      "source_id": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment",
+    "properties": {
+      "siteInfo": {
+        "type": "object",
+        "id": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
+        "properties": {
+          "siteClli": {
+            "type": "string"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "dpiEnvironment": {
+            "type": "string"
+          },
+          "hsiOfficeCode": {
+            "type": "string"
+          }
+        }
+      },
+      "existingEquipment": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "id": "urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
+          "properties": {
+            "clliCode": {
+              "type": "string"
+            },
+            "deploymentDate": {
+              "type": "integer",
+              "format": "utc-millisec"
+            },
+            "serialNumber": {
+              "type": "string"
+            },
+            "modelNumber": {
+              "type": "string"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "switchType": {
+              "type": "string"
+            },
+            "maxSpeed": {
+              "type": "number"
+            },
+            "latency": {
+              "type": "number"
+            },
+            "uplinkSpeed": {
+              "type": "number"
+            },
+            "assignedEquipment": {
+              "type": "object",
+              "id": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+              "properties": {
+                "equipmentItemId": {
+                  "type": "integer"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "constructionCost": {
+                  "type": "number"
+                },
+                "installCost": {
+                  "type": "number"
+                },
+                "rank": {
+                  "type": "integer"
+                },
+                "equipmentName": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "extendedAttributes": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "subComponents": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+                  }
+                },
+                "oneTimeCost": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "marketableEquipments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "id": "urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment",
+                "properties": {
+                  "equipmentId": {
+                    "type": "integer"
+                  },
+                  "daysFrom": {
+                    "type": "integer"
+                  },
+                  "daysTo": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "plannedEquipment": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+        }
+      },
+      "notes": {
+        "type": "string"
+      },
+      "physicallyLinked": {
+        "type": "boolean"
+      },
+      "t1": {
+        "type": "boolean"
+      },
+      "fiberAvailable": {
+        "type": "boolean"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:LocationFeature",
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "location",
+          "edge",
+          "equipment",
+          "fiber",
+          "construction_location",
+          "service_layer",
+          "tile_system",
+          "cable_construction_area",
+          "equipment_boundary",
+          "census_block"
+        ]
+      },
+      "objectId": {
+        "type": "string"
+      },
+      "geometry": {
+        "type": "any",
+        "description": "type=Geometry"
+      },
+      "attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "locationCategory": {
+        "type": "string",
+        "enum": [
+          "business",
+          "household",
+          "celltower"
+        ]
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentFeature",
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "location",
+          "edge",
+          "equipment",
+          "fiber",
+          "construction_location",
+          "service_layer",
+          "tile_system",
+          "cable_construction_area",
+          "equipment_boundary",
+          "census_block"
+        ]
+      },
+      "objectId": {
+        "type": "string"
+      },
+      "geometry": {
+        "type": "any",
+        "description": "type=Geometry"
+      },
+      "attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "networkNodeType": {
+        "type": "string",
+        "enum": [
+          "undefined",
+          "central_office",
+          "splice_point",
+          "fiber_distribution_hub",
+          "fiber_distribution_terminal",
+          "bulk_distribution_terminal",
+          "bulk_distribution_consumer",
+          "cell_5g",
+          "junction_splitter",
+          "dslam"
+        ]
+      },
+      "networkNodeEquipment": {
+        "type": "object",
+        "id": "urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment",
+        "properties": {
+          "siteInfo": {
+            "type": "object",
+            "id": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
+            "properties": {
+              "siteClli": {
+                "type": "string"
+              },
+              "siteName": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "dpiEnvironment": {
+                "type": "string"
+              },
+              "hsiOfficeCode": {
+                "type": "string"
+              }
+            }
+          },
+          "existingEquipment": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "id": "urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
+              "properties": {
+                "clliCode": {
+                  "type": "string"
+                },
+                "deploymentDate": {
+                  "type": "integer",
+                  "format": "utc-millisec"
+                },
+                "serialNumber": {
+                  "type": "string"
+                },
+                "modelNumber": {
+                  "type": "string"
+                },
+                "manufacturer": {
+                  "type": "string"
+                },
+                "switchType": {
+                  "type": "string"
+                },
+                "maxSpeed": {
+                  "type": "number"
+                },
+                "latency": {
+                  "type": "number"
+                },
+                "uplinkSpeed": {
+                  "type": "number"
+                },
+                "assignedEquipment": {
+                  "type": "object",
+                  "id": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+                  "properties": {
+                    "equipmentItemId": {
+                      "type": "integer"
+                    },
+                    "quantity": {
+                      "type": "number"
+                    },
+                    "constructionCost": {
+                      "type": "number"
+                    },
+                    "installCost": {
+                      "type": "number"
+                    },
+                    "rank": {
+                      "type": "integer"
+                    },
+                    "equipmentName": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "extendedAttributes": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "subComponents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+                      }
+                    },
+                    "oneTimeCost": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "marketableEquipments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "id": "urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment",
+                    "properties": {
+                      "equipmentId": {
+                        "type": "integer"
+                      },
+                      "daysFrom": {
+                        "type": "integer"
+                      },
+                      "daysTo": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "plannedEquipment": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+            }
+          },
+          "notes": {
+            "type": "string"
+          },
+          "physicallyLinked": {
+            "type": "boolean"
+          },
+          "t1": {
+            "type": "boolean"
+          },
+          "fiberAvailable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "boundary": {
+        "type": "any"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentBoundaryFeature",
+    "properties": {
+      "dataType": {
+        "type": "string",
+        "enum": [
+          "unknown",
+          "location",
+          "edge",
+          "equipment",
+          "fiber",
+          "construction_location",
+          "service_layer",
+          "tile_system",
+          "cable_construction_area",
+          "equipment_boundary",
+          "census_block"
+        ]
+      },
+      "objectId": {
+        "type": "string"
+      },
+      "geometry": {
+        "type": "any",
+        "description": "type=Geometry"
+      },
+      "attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "boundaryTypeId": {
+        "type": "integer"
+      },
+      "networkNodeType": {
+        "type": "string",
+        "enum": [
+          "undefined",
+          "central_office",
+          "splice_point",
+          "fiber_distribution_hub",
+          "fiber_distribution_terminal",
+          "bulk_distribution_terminal",
+          "bulk_distribution_consumer",
+          "cell_5g",
+          "junction_splitter",
+          "dslam"
+        ]
+      },
+      "networkObjectId": {
+        "type": "string"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
+    "properties": {
+      "siteClli": {
+        "type": "string"
+      },
+      "siteName": {
+        "type": "string"
+      },
+      "address": {
+        "type": "string"
+      },
+      "dpiEnvironment": {
+        "type": "string"
+      },
+      "hsiOfficeCode": {
+        "type": "string"
+      }
+    }
+  }
+]
