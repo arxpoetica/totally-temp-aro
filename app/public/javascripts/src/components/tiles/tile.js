@@ -728,6 +728,7 @@ class MapTileRenderer {
     var promises = []
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
       var mapLayer = this.mapLayers[mapLayerKey]
+      console.log(mapLayer)
       if (mapLayer.selectable) {
         promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
       }
@@ -898,6 +899,7 @@ class MapTileRenderer {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
+      //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
@@ -1248,7 +1250,7 @@ class TileComponentController {
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-              //console.log(result)
+              console.log(result)
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)

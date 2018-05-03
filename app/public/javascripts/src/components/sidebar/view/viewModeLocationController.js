@@ -38,8 +38,7 @@ class ViewModeLocationController {
         //$timeout()
         locationId = options.locations[0].location_id;
 
-        getLocationInfo(this.plan.id,locationId)
-        .then((locationInfo) => {
+        getLocationInfo(this.plan.id,locationId).then((locationInfo) => {
           this.selectedLocationInfo = locationInfo
           this.showAttributes = this.currentUser.rol === 'sales' && !angular.equals(locationInfo.attributes, {})
           
@@ -64,10 +63,9 @@ class ViewModeLocationController {
 
     // Get the location Information
     function getLocationInfo(planId, id, callback) {
-      return $http.get('/locations/' + planId + '/' + id + '/show')
-        .then((response) => {
-          return response.data
-        })
+      return $http.get('/locations/' + planId + '/' + id + '/show').then((response) => {
+        return response.data
+      })
     }
 
     this.showDetailLocationInfo = () => {

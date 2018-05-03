@@ -1,14 +1,19 @@
+import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
+import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+
 class EquipmentDetailController {
 
 	constructor($http, $timeout, state) {
     this.$http = $http
     this.state = state
-    this.selectedEquipmentInfo = null
+    this.selectedEquipmentInfo = {}
+    this.selectedEquipmentInfoChanges = {}
+    this.selectedEquipmentInfoDispProps = {}
     
     this.isEdit = false
     // ToDo: get all this dynamically 
     this.headerIcon = "/images/map_icons/aro/remote_terminal.png"
-    
+    /*
     this.treeData = {
       "General": {
         "summary": {
@@ -139,62 +144,103 @@ class EquipmentDetailController {
         ],
         "rows": this.rowsState
     }
-    
+    */
     
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
-      var equipmentList = []
-      if (options.hasOwnProperty('equipmentFeatures')) equipmentList = options.equipmentFeatures
+      // most of this funcltion is assuring the properties we need exist. 
+      // ToDo: the feature selection system could use some refactoring 
+      if (!options.hasOwnProperty('equipmentFeatures')) return
+      if (0 == options.equipmentFeatures.length) return
       
-      var equipmentId = null
+      var plan = state.plan.getValue()
+      if (!plan || !plan.hasOwnProperty('id')) return
       
-      if (options.equipmentFeatures && options.equipmentFeatures.length > 0 && options.equipmentFeatures[0].id) {
+      
+      var equipmentList = options.equipmentFeatures
+      var selectedFeature = null
+      var featureId = null
+      //equipmentList.forEach((feature) => 
+      for (var featureI = 0; featureI < equipmentList.length; featureI++){
+        var feature = equipmentList[featureI]
+        if (feature.hasOwnProperty('object_id')){
         
-        var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
-        selectedViewFeaturesByType.equipment = {}
-        equipmentList.forEach((feature) => {
-          var id = null
           if ( feature.hasOwnProperty('id') ){
-            id = feature.id
+            featureId = feature.id
           }else if ( feature.hasOwnProperty('location_id') ){
-            id = feature.location_id
+            featureId = feature.location_id
           }
           
-          if (null != id) selectedViewFeaturesByType.equipment[ id ] = feature
-        })
-        state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
-        
-        state.activeViewModePanel = state.viewModePanels.EQUIPMENT_INFO
-        $timeout()
-        equipmentId = options.equipmentFeatures[0].id;
-
-        //this.selectedEquipmentInfo = options.equipmentFeatures[0]
-        this.getEquipmentInfo(equipmentId)
-          .then((equipmentInfo) => {
-            //console.log(equipmentInfo)
+          if (null != featureId){
+            selectedFeature = feature
+            break
+          }
+        }
+      }//)
+      
+      
+      if (null != selectedFeature){
+          
+        this.getEquipmentInfo(plan.id, selectedFeature.object_id).then((equipmentInfo) => {
+          console.log(equipmentInfo)
+          if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
             this.selectedEquipmentInfo = equipmentInfo
-          })
+            this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
+            
+            angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
+            
+            console.log('=== DISP INFO ===')
+            console.log(this.selectedEquipmentInfo)
+            console.log(this.selectedEquipmentInfoDispProps)
+            
+            // tell state
+            var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
+            selectedViewFeaturesByType.equipment = {}
+            selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+            state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+            
+            state.activeViewModePanel = state.viewModePanels.EQUIPMENT_INFO
+            $timeout()
+          }
+        })
+        
       }
     })
-
+    
+    
+    
     state.clearViewMode.subscribe((clear) => {
-      if(clear) this.selectedEquipmentInfo = null
+      if(clear){
+        this.selectedEquipmentInfo = {}
+        this.selectedEquipmentInfoChanges = {}
+        this.selectedEquipmentInfoDispProps = {}
+      }
     })
   }
-
+	
+	
+	
+	getEquipmentInfo(planId, objectId){
+	  return this.$http.get('/service/plan-feature/'+planId+'/equipment/'+objectId).then((response) => {
+      return response.data
+    })
+	}
+	
+	/*
   getEquipmentInfo(equipmentId) {
-    return this.$http.get('/network/nodes/' + equipmentId + '/details')
-    .then((response) => {
+    return this.$http.get('/network/nodes/' + equipmentId + '/details').then((response) => {
       return response.data
     })
   }
-
+  */
+	
+	/*
   showDetailEquipmentInfo() {
     this.selectedEquipmentInfo.id = +this.selectedEquipmentInfo.id   
     this.state.showDetailedEquipmentInfo.next(this.selectedEquipmentInfo)
   }
-  
+  */
   
   //ToDo: these perhaps get moved to the UI component 
   beginEdit(){
@@ -204,20 +250,21 @@ class EquipmentDetailController {
   
   cancelEdit(){
     // return the object to init state
-    angular.copy(this.treeData, this.treeState)
-    angular.copy(this.rowsData, this.rowsState)
+    //angular.copy(this.treeData, this.treeState)
+    //angular.copy(this.rowsData, this.rowsState)
+    angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
     this.isEdit = false
   }
   
   commitEdit(){
     // set the object to the edited object and tell the DB
     // may need to compare to check for deletes and creates 
-    angular.copy(this.treeState, this.treeData)
-    angular.copy(this.rowsState, this.rowsData)
+    //angular.copy(this.treeState, this.treeData)
+    //angular.copy(this.rowsState, this.rowsData)
+    angular.copy(this.selectedEquipmentInfoChanges, this.selectedEquipmentInfo)
     this.isEdit = false
     console.log('send changed data to DB:')
-    console.log(this.treeData)
-    console.log(this.rowsData)
+    console.log(this.selectedEquipmentInfo)
   }
   
 }

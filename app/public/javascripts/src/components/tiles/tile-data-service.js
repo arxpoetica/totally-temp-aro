@@ -161,6 +161,7 @@ app.service('tileDataService', ['$http', ($http) => {
           if (hasSelectedIcon) {
             tileData.selectedIcon = results[results.length - 1]
           }
+          //console.log(tileData)
           resolve(tileData)
         })
     })
