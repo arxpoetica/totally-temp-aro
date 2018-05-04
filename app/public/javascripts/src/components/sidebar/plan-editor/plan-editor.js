@@ -1,5 +1,6 @@
 import EquipmentProperties from './equipment-properties'
 import BoundaryProperties from './boundary-properties'
+import Constants from '../../common/constants'
 
 class PlanEditorController {
 
@@ -17,6 +18,7 @@ class PlanEditorController {
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
+    this.Constants = Constants
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
     this.uuidStore = []
@@ -117,7 +119,8 @@ class PlanEditorController {
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
-                                                    attributes.selected_site_boundary_generation, distance)
+                                                    attributes.selected_site_boundary_generation, distance,
+                                                    attributes.spatialEdgeType)
           this.objectIdToProperties[feature.objectId] = properties
         })
         // Save the equipment and boundary ID associations
@@ -154,15 +157,16 @@ class PlanEditorController {
     }
     // Delete the associated boundary if it exists
     const boundaryObjectId = this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
+    const spatialEdgeType = eventArgs.dropEvent.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
     if (boundaryObjectId) {
       delete this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
       delete this.boundaryIdToEquipmentId[boundaryObjectId]
       this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
     }
-    this.calculateCoverage(equipmentMapObject)
+    this.calculateCoverage(equipmentMapObject, spatialEdgeType)
   }
 
-  calculateCoverage(mapObject) {
+  calculateCoverage(mapObject, spatialEdgeType) {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
@@ -171,6 +175,8 @@ class PlanEditorController {
       type: 'Point',
       coordinates: [mapObject.position.lng(), mapObject.position.lat()]
     }
+    optimizationBody.spatialEdgeType = spatialEdgeType;
+    optimizationBody.directed = (spatialEdgeType === Constants.SPATIAL_EDGE_COPPER)  // directed analysis if we are using copper networks
     // Always send radius in meters to the back end
     optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
 
@@ -184,7 +190,8 @@ class PlanEditorController {
         }
         // Construct a feature that we will pass to the map object editor, which will create the map object
         var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
-                                                        Math.round(optimizationBody.radius * this.configuration.units.meters_to_length_units))
+                                                        Math.round(optimizationBody.radius * this.configuration.units.meters_to_length_units),
+                                                        optimizationBody.spatialEdgeType)
         var feature = {
           objectId: this.getUUID(),
           geometry: {
@@ -196,7 +203,8 @@ class PlanEditorController {
             boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-            network_node_object_id: equipmentObjectId // This is the Network Equipment that this boundary is associated with
+            network_node_object_id: equipmentObjectId, // This is the Network Equipment that this boundary is associated with
+            spatialEdgeType: boundaryProperties.spatialEdgeType
           }
         }
         this.objectIdToProperties[feature.objectId] = boundaryProperties
@@ -310,9 +318,10 @@ class PlanEditorController {
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-        network_node_object_id: this.boundaryIdToEquipmentId[objectId]
+        network_node_object_id: this.boundaryIdToEquipmentId[objectId],
+        spatialEdgeType: boundaryProperties.spatialEdgeType
       },
-      dataType: 'equipment'
+      dataType: 'equipment_boundary'
     }
     return serviceFeature
   }
@@ -410,7 +419,7 @@ class PlanEditorController {
           delete this.equipmentIdToBoundaryId[mapObject.objectId]
           delete this.boundaryIdToEquipmentId[boundaryObjectId]
           this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-          this.calculateCoverage(mapObject)
+          this.calculateCoverage(mapObject, boundaryProperties.spatialEdgeType)
         }
       }
     } else {
