@@ -321,7 +321,7 @@ class PlanEditorController {
         network_node_object_id: this.boundaryIdToEquipmentId[objectId],
         spatialEdgeType: boundaryProperties.spatialEdgeType
       },
-      dataType: 'equipment'
+      dataType: 'equipment_boundary'
     }
     return serviceFeature
   }
