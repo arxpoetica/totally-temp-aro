@@ -30,7 +30,7 @@
       object-name="Equipment"
       search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
       selected="$ctrl.selectedEquipment"
-      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,clli','clli')"
+      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli')"
       on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj)">
     </aro-search>
   </div>
