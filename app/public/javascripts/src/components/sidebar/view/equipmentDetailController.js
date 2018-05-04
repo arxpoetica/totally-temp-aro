@@ -5,7 +5,8 @@ class EquipmentDetailController {
 
 	constructor($http, $timeout, state) {
     this.angular = angular
-	  this.$http = $http
+    this.$http = $http
+    this.$timeout = $timeout
     this.state = state
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
@@ -291,7 +292,7 @@ class EquipmentDetailController {
       //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         this.networkNodeType = equipmentInfo.networkNodeType
-        //this.selectedEquipmentInfo = equipmentInfo
+        this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         this.selectedEquipmentInfo = equipmentInfo.networkNodeEquipment
 
         //this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
@@ -307,9 +308,9 @@ class EquipmentDetailController {
         //console.log(this.selectedEquipmentInfoDispProps)
         
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
-        $timeout()
+        this.$timeout()
       }
-      //return equipmentInfo
+      return equipmentInfo
     })
 	}
 	
@@ -346,7 +347,7 @@ class EquipmentDetailController {
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
     //console.log(map)
     this.displayEquipment(plan.id, selectedEquipment.objectId)
-    .then(() => map.setCenter({ lat: this.selectedEquipmentInfo.geog.coordinates[1], lng: this.selectedEquipmentInfo.geog.coordinates[0] }))
+    .then((equipmentInfo) => map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] }))
     
     
   }
