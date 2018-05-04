@@ -62,9 +62,6 @@ class MapObjectEditorController {
     }
     return this.uuidStore.pop()
   }
-  dropTargetClicked(text) {
-    console.log('Drop target was clicked - ' + text);
-  }
 
   $onInit() {
     // We should have a map variable at this point

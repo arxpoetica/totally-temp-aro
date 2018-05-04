@@ -1,5 +1,6 @@
 import EquipmentProperties from './equipment-properties'
 import BoundaryProperties from './boundary-properties'
+import Constants from '../../common/constants'
 
 class PlanEditorController {
 
@@ -17,6 +18,7 @@ class PlanEditorController {
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
+    this.Constants = Constants
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
     this.uuidStore = []
@@ -154,15 +156,16 @@ class PlanEditorController {
     }
     // Delete the associated boundary if it exists
     const boundaryObjectId = this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
+    const spatialEdgeType = eventArgs.dropEvent.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
     if (boundaryObjectId) {
       delete this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
       delete this.boundaryIdToEquipmentId[boundaryObjectId]
       this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
     }
-    this.calculateCoverage(equipmentMapObject)
+    this.calculateCoverage(equipmentMapObject, spatialEdgeType)
   }
 
-  calculateCoverage(mapObject) {
+  calculateCoverage(mapObject, spatialEdgeType) {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
@@ -171,6 +174,8 @@ class PlanEditorController {
       type: 'Point',
       coordinates: [mapObject.position.lng(), mapObject.position.lat()]
     }
+    optimizationBody.spatialEdgeType = spatialEdgeType;
+    optimizationBody.directed = (spatialEdgeType === Constants.SPATIAL_EDGE_COPPER)  // directed analysis if we are using copper networks
     // Always send radius in meters to the back end
     optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
 
