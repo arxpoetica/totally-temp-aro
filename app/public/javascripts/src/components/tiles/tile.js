@@ -728,7 +728,6 @@ class MapTileRenderer {
     var promises = []
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
       var mapLayer = this.mapLayers[mapLayerKey]
-      console.log(mapLayer)
       if (mapLayer.selectable) {
         promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
       }
@@ -1250,7 +1249,7 @@ class TileComponentController {
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-              console.log(result)
+              //console.log(result)
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)

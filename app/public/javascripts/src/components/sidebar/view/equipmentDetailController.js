@@ -7,6 +7,7 @@ class EquipmentDetailController {
     this.angular = angular
 	  this.$http = $http
     this.state = state
+    this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     this.selectedEquipmentInfoChanges = {}
     this.selectedEquipmentInfoDispProps = []
@@ -15,138 +16,7 @@ class EquipmentDetailController {
     // ToDo: get all this dynamically 
     this.headerIcon = "/images/map_icons/aro/remote_terminal.png"
     
-    /*
-    this.treeData = {
-      "General": {
-        "summary": {
-          "Site Name": "Fenske Rd", 
-          "Site CLLI": "PCVLWIAC", 
-          "Site Type": "Remote Terminal", 
-          "Site HSI Deployment Date": "10/2013", 
-          "Latitude": "43.60396", 
-          "Longitude": "-89.23765", 
-          "Fiber Availability": "Not Available" 
-        }, 
-        "Location": "0.15 MI N/ ROSS RD ON FENSKE RD, PARDEEVILLE, 53954", 
-        "Is Physically Linked": "Yes", 
-        "CAF Phase": "Phase I - Part I", 
-        "DPI Environment": "CW", 
-        "HSI Office Code": "VSFEN", 
-        "T1": "No", 
-        "Notes": "Bonded"
-      }, 
-      "Equipment": {
-        "summary": {
-          "Equipment Count": "2", 
-          "Technology 1": "ADSL (32.416 Mbps max speed)", 
-          "Technology 2": "ADSL2+ (32.416 Mbps max speed)", 
-          "Technology 3": "ADSL2+P (32.416 Mbps max speed)", 
-          "Technology 4": "ADSL-B (32.416 Mbps max speed)"
-        },
-        "Equipment 1": {
-          "summary": {
-            "Equipment CLLI": "PDVLWIACRL0", 
-            "Technology": "", 
-            "HSI Deployment Date": "10/2013", 
-          }, 
-          "Equipment Type": "SIEMENS MLC24/DLC", 
-          "Deployment Cost": "", 
-          "Quantity": "1", 
-          "Switch Type": "Pair Gain", 
-          "Max Speed": "Unrestricted", 
-          "Latency": "Unknown", 
-          "Uplink Speed": "Unknown", 
-          "Subject To Site Boundaries": "Yes", 
-          "Marketable Technologies": "", 
-          "Congestion": ""
-        }, 
-        "Equipment 2": {
-          "summary": {
-            "Equipment CLLI": "PDVLWIACH00", 
-            "Technology": "", 
-            "HSI Deployment Date": "10/2013", 
-          }, 
-          "Equipment Type": "ADTRAN TA 1148A IP/HSI - FIBER", 
-          "Deployment Cost": "", 
-          "Quantity": "1", 
-          "Switch Type": "DSLAM", 
-          "Max Speed": "32.416", 
-          "Latency": "Unknown", 
-          "Uplink Speed": "Unknown", 
-          "Subject To Site Boundaries": "Yes", 
-          "Marketable Technologies": {
-            "1": "ADSL", 
-            "2": "ADSL2+", 
-            "3": "ADSL2+P", 
-            "4": "ADSL-B"
-          }, 
-          "Congestion": ""
-        } 
-      }
-    }
-    this.treeState = angular.copy(this.treeData)
     
-    this.rowsData = [
-      {
-        "equipmentCLLI": "PDVLWIACRL0", 
-        "pathBand": "none", 
-        "uplinkSpeed": "unknown", 
-        "topology": "none", 
-        "pathHops": 2
-      }, 
-      {
-        "equipmentCLLI": "PDVLWIACH00", 
-        "pathBand": "high", 
-        "uplinkSpeed": "unknown", 
-        "topology": "path", 
-        "pathHops": 3
-      }, 
-      {
-        "equipmentCLLI": "null test", 
-        "pathHops": 4
-      } 
-    ]
-    this.rowsState = angular.copy(this.rowsData)
-    
-    this.tableViewStructure = {
-        "title": "Congestion", 
-        "editSwitch": "isEdit", 
-        "canAdd": true,  
-        "cols": [
-          {
-            "label": "Equipment CLLI", 
-            "property": "equipmentCLLI", 
-            "defaultVal": "default CLLI", 
-            "editType": "false"
-          }, 
-          {
-            "label": "Path Band", 
-            "property": "pathBand", 
-            "defaultVal": "none", 
-            "editType": "select", 
-            "editorData": ['none', 'high', 'option 2']
-          }, 
-          {
-            "label": "Uplink Speed", 
-            "property": "uplinkSpeed", 
-            "editType": "text"
-          }, 
-          {
-            "label": "Topology", 
-            "property": "topology", 
-            "defaultVal": "", 
-            "editType": "text"
-          }, 
-          {
-            "label": "Path Hops", 
-            "property": "pathHops", 
-            "defaultVal": 2, 
-            "editType": "number"
-          }
-        ],
-        "rows": this.rowsState
-    }
-    */
     
     
     this.debugFeature = {
@@ -211,7 +81,7 @@ class EquipmentDetailController {
         'displayName': "Site Info", 
         'editable': false, 
         'format': "tree", 
-        'propertyName': "site_info", 
+        'propertyName': "siteInfo", 
         'visible': true, 
         'children': [
           {
@@ -362,7 +232,7 @@ class EquipmentDetailController {
       }
       
       if (null != selectedFeature){
-        console.log(selectedFeature)
+        //console.log(selectedFeature)
         this.updateSelectedState(selectedFeature, featureId)
         this.displayEquipment(plan.id, selectedFeature.object_id)
       }
@@ -372,6 +242,7 @@ class EquipmentDetailController {
     
     state.clearViewMode.subscribe((clear) => {
       if(clear){
+        this.networkNodeType = ''
         this.selectedEquipmentInfo = {}
         this.selectedEquipmentInfoChanges = {}
         this.selectedEquipmentInfoDispProps = []
@@ -414,12 +285,15 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-	  console.log(planId)
-	  console.log(objectId)
+	  //console.log(planId)
+	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      console.log(equipmentInfo)
+      //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-        this.selectedEquipmentInfo = equipmentInfo
+        this.networkNodeType = equipmentInfo.networkNodeType
+        //this.selectedEquipmentInfo = equipmentInfo
+        this.selectedEquipmentInfo = equipmentInfo.networkNodeEquipment
+
         //this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
         this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
         
@@ -428,9 +302,9 @@ class EquipmentDetailController {
         
         angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
         
-        console.log('=== DISP INFO ===')
-        console.log(this.selectedEquipmentInfo)
-        console.log(this.selectedEquipmentInfoDispProps)
+        //console.log('=== DISP INFO ===')
+        //console.log(this.selectedEquipmentInfo)
+        //console.log(this.selectedEquipmentInfoDispProps)
         
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
         $timeout()
@@ -465,12 +339,12 @@ class EquipmentDetailController {
   }
 
   viewSelectedEquipment(selectedEquipment) {
-    console.log(selectedEquipment)
+    //console.log(selectedEquipment)
     
     var plan = this.state.plan.getValue()
     //if (!plan || !plan.hasOwnProperty('id')) return
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
-    console.log(map)
+    //console.log(map)
     this.displayEquipment(plan.id, selectedEquipment.objectId)
     .then(() => map.setCenter({ lat: this.selectedEquipmentInfo.geog.coordinates[1], lng: this.selectedEquipmentInfo.geog.coordinates[0] }))
     
