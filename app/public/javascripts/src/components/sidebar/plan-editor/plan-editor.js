@@ -276,12 +276,13 @@ class PlanEditorController {
         type: 'Point',
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
       },
-      categoryType: 'dslam',
+      networkNodeType: 'dslam',
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
         selectedEquipmentType: objectProperties.selectedEquipmentType
-      }
+      },
+      dataType: 'equipment'
     }
     return serviceFeature
   }
@@ -310,7 +311,8 @@ class PlanEditorController {
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId]
-      }
+      },
+      dataType: 'equipment'
     }
     return serviceFeature
   }
