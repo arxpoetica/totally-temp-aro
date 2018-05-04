@@ -123,3 +123,12 @@
 #global-search-toolbutton .select2-chosen {
   background-color: #D9272D !important;
 }
+
+.map-tools-button.active {
+  background-color: #D9272D !important;
+}
+
+.checkboxfill:checked {
+  background: #D9272D !important;
+  border: #D9272D !important;
+}

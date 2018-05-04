@@ -68,16 +68,28 @@ class ToolBarController {
   }
 
   setSelectionSingle() {
+    if (this.state.selectedToolBarAction === this.state.toolbarActions.SINGLE_SELECT) {
+      this.state.selectedToolBarAction= null
+      return
+    }
     this.state.selectedToolBarAction = this.state.toolbarActions.SINGLE_SELECT
     this.setSelectionMode(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
   }
 
   setSelectionPolygon() {
+    if (this.state.selectedToolBarAction === this.state.toolbarActions.POLYGON_SELECT) {
+      this.state.selectedToolBarAction= null
+      return
+    }
     this.state.selectedToolBarAction = this.state.toolbarActions.POLYGON_SELECT
     this.setSelectionMode(this.state.targetSelectionModes.POLYGON_PLAN_TARGET)
   }
 
   setSelectionExport(){
+    if (this.state.selectedToolBarAction === this.state.toolbarActions.POLYGON_EXPORT) {
+      this.state.selectedToolBarAction= null
+      return
+    }
     this.state.selectedToolBarAction = this.state.toolbarActions.POLYGON_EXPORT
     this.setSelectionMode(this.state.targetSelectionModes.POLYGON_EXPORT_TARGET)
   }
@@ -112,6 +124,7 @@ class ToolBarController {
     } else {
       google.maps.event.removeListener(this.clickListener)      
     }
+    this.state.selectedToolBarAction = null
   }
 
   addToRulerSegments(latLng) {
