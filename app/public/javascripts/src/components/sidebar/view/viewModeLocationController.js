@@ -1,6 +1,6 @@
 class ViewModeLocationController {
 
-  constructor($http,state,configuration) {
+  constructor($http, $timeout, state, configuration) {
     this.$http = $http
     this.state = state
     this.configuration = configuration
@@ -10,37 +10,65 @@ class ViewModeLocationController {
     this.currentUser = state.getUser()
     this.selectedLocation = null
 
-    state.plan
-    .subscribe((plan) => {
+    state.plan.subscribe((plan) => {
       this.plan = plan
     })
 
-    state.mapFeaturesSelectedEvent
-    .subscribe((options) => {
-      var locationId = null
+    state.mapFeaturesSelectedEvent.subscribe((options) => {
+      var locationsList = []
+      if (options.hasOwnProperty('locations')) locationsList = options.locations
+      
+      
+      // Update state's selected location list 
       if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
-        locationId = options.locations[0].location_id;
-
-        this.getLocationInfo(this.plan.id,locationId)
-        .then(locationInfo => this.showStaticMap(locationInfo))
+        
+        var selectedFeature = null
+        var locationId = null
+        for (var featureI = 0; featureI < locationsList.length; featureI++){
+          var feature = locationsList[featureI]
+          
+          if ( feature.hasOwnProperty('location_id') ){
+            locationId = feature.location_id
+          }else if ( feature.hasOwnProperty('id') ){
+            locationId = feature.id
+          }
+          
+          if (null != locationId){
+            selectedFeature = feature
+            break
+          }
+        }
+        
+        this.updateSelectedState(feature, locationId)
+        this.getLocationInfo(this.plan.id,locationId).then(locationInfo => this.showStaticMap(locationInfo))
       } else {
         this.selectedLocationInfo = null
       }
     })
-
+    
     state.clearViewMode.subscribe((clear) => {
-      if(clear) this.selectedLocationInfo = null
+      if(clear){
+        this.selectedLocationInfo = null
+        this.updateSelectedState()
+      }
     })
   }
-
   // Get the location Information
-  getLocationInfo(planId, id, callback) {
-    return this.$http.get('/locations/' + planId + '/' + id + '/show')
-      .then((response) => {
-        return response.data
-      })
+  getLocationInfo(planId, id, callback){
+    return this.$http.get('/locations/' + planId + '/' + id + '/show').then((response) => {
+      return response.data
+    })
   }
-
+  
+  updateSelectedState(feature, id){
+    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+    selectedViewFeaturesByType.location = {}
+    if ('undefined' != typeof feature && 'undefined' != typeof id){
+      selectedViewFeaturesByType.location[ id ] = feature
+    }
+    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+  }
+  
   showStaticMap(locationInfo) {
     this.selectedLocationInfo = locationInfo
     this.showAttributes = this.currentUser.rol === 'sales' && !angular.equals(locationInfo.attributes, {})
@@ -58,6 +86,8 @@ class ViewModeLocationController {
     }
     this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
+    
+    this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
   }
 
   showDetailLocationInfo() {
@@ -66,15 +96,17 @@ class ViewModeLocationController {
   }
 
   viewSelectedLocation(selectedLocation) {
+    //console.log(selectedLocation)
+    this.updateSelectedState(selectedLocation, selectedLocation.id)
     this.getLocationInfo(this.plan.id,selectedLocation.id)
     .then(locationInfo => this.showStaticMap(locationInfo))
     .then(() => {
       map.setCenter({ lat: this.selectedLocationInfo.geog.coordinates[1], lng: this.selectedLocationInfo.geog.coordinates[0] })
     })
   }
-
+  
 }
 
-ViewModeLocationController.$inject = ['$http','state','configuration']
+ViewModeLocationController.$inject = ['$http','$timeout','state','configuration']
 
 export default ViewModeLocationController

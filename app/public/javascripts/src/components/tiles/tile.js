@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -23,6 +23,7 @@ class MapTileRenderer {
     this.selectedCensusBlockId = selectedCensusBlockId
     this.censusCategories = censusCategories
     this.selectedCensusCategoryId = selectedCensusCategoryId
+    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     
     this.displayModes = displayModes
     this.renderBatches = []
@@ -75,7 +76,12 @@ class MapTileRenderer {
     this.selectedRoadSegment = selectedRoadSegment
     this.tileDataService.markHtmlCacheDirty()
   }
-
+  
+  setSelectedViewFeaturesByType(selectedViewFeaturesByType) {
+    this.selectedViewFeaturesByType = selectedViewFeaturesByType
+    this.tileDataService.markHtmlCacheDirty()
+  }
+  
   // Sets the selected display mode
   setselectedDisplayMode(selectedDisplayMode) {
     this.selectedDisplayMode = selectedDisplayMode
@@ -314,7 +320,8 @@ class MapTileRenderer {
         renderingData[mapLayerKey].data.forEach((featureData, index) => {
           var features = []
           Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-          this.renderFeatures(ctx, features, featureData.icon, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+          //console.log(featureData)
+          this.renderFeatures(ctx, features, featureData, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
         })
       }
     })
@@ -373,19 +380,34 @@ class MapTileRenderer {
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, entityImage, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+  renderFeatures(ctx, features, featureData, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+    var entityImage = featureData.icon
+    
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
       if (feature.properties) {
         // Try object_id first, else try location_id
-        var featureId = feature.properties.object_id || feature.properties.location_id
+        var featureId = feature.properties.object_id || feature.properties.location_id  
         if (this.tileDataService.featuresToExclude.has(featureId)) {
           // This feature is to be excluded. Do not render it.
           continue
         }
       }
+      
+      var selectedListType = null 
+      var selectedListId = null 
+      if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
+        var fullDataType = feature.properties._data_type + '.'
+        selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
+        if ( feature.properties.hasOwnProperty('location_id') ){
+          selectedListId = feature.properties.location_id
+        }else if ( feature.properties.hasOwnProperty('id') ){
+          selectedListId = feature.properties.id
+        } 
+      }
+      
       var geometry = feature.loadGeometry()
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
@@ -393,30 +415,51 @@ class MapTileRenderer {
       geometry.forEach((shape) => {
         // Shape is an array of coordinates
         if (1 == shape.length) {
-	      // This is a point
-	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
-	      var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
-	
-	      //Draw the location icons with its original color
-	      ctx.globalCompositeOperation = 'source-over'
-	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
-	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
-	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
-	          //show selected location icon at analysis mode -> selection type is locations    
-	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
-	          // Draw selected icon
-	          ctx.drawImage(selectedLocationImage[0], x, y)
-	        } else {
-	          ctx.drawImage(entityImage, x, y)
-	        }
-	      } else {
-	        // Display heatmap
-	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
-	        if (aggregationProperty) {
-	          var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
-	          heatMapData.push([x, y, adjustedWeight])
-	        }
-	      }  
+  	      // This is a point
+  	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
+  	      var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
+          
+  	      //Draw the location icons with its original color
+  	      ctx.globalCompositeOperation = 'source-over'
+  	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
+  	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
+  	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
+  	          //show selected location icon at analysis mode -> selection type is locations    
+  	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
+  	          // Draw selected icon
+  	          ctx.drawImage(selectedLocationImage[0], x, y)
+  	        }else if(this.selectedDisplayMode == this.displayModes.VIEW 
+  	                 && null != selectedListId 
+  	                 && null != selectedListType
+  	                 && this.selectedViewFeaturesByType.hasOwnProperty(selectedListType) 
+  	                 && this.selectedViewFeaturesByType[selectedListType].hasOwnProperty(selectedListId) 
+  	                ){
+  	          
+  	          ctx.fillStyle='#e8ffe8'
+  	          ctx.strokeStyle = '#008000'
+  	          ctx.lineWidth = 2
+  	          //ctx.fillRect(x,y,entityImage.width,entityImage.height)
+  	          ctx.beginPath();
+  	          var halfWidth = 0.5*entityImage.width
+  	          ctx.arc(x+halfWidth, y+(0.5*entityImage.height), halfWidth+4, 0, 2 * Math.PI);
+  	          ctx.fill();
+  	          ctx.stroke();
+  	          
+  	          ctx.drawImage(entityImage, x, y) //<--------------------------------------------------- highlight here ---<<<
+  	          //ctx.globalCompositeOperation='difference'
+  	          
+  	          //ctx.globalCompositeOperation='source-over'
+  	        } else {
+  	          ctx.drawImage(entityImage, x, y)
+  	        }
+  	      } else {
+  	        // Display heatmap
+  	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
+  	        if (aggregationProperty) {
+  	          var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
+  	          heatMapData.push([x, y, adjustedWeight])
+  	        }
+  	      }  
         }else{
           // Check if this is a closed polygon
           var firstPoint = shape[0]
@@ -854,6 +897,7 @@ class MapTileRenderer {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon) => {
+      //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
@@ -1003,8 +1047,6 @@ class TileComponentController {
       }
     })
     
-    
-    
     // If selected census category map changes or gets loaded, set that in the tile data road
     state.censusCategories.subscribe((censusCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -1012,7 +1054,11 @@ class TileComponentController {
       }
     })
     
-    
+    state.selectedViewFeaturesByType.subscribe((selectedViewFeaturesByType) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedViewFeaturesByType(selectedViewFeaturesByType)
+      }
+    })
     
     
     // If selected road_segment ids change, set that in the tile data road
@@ -1155,6 +1201,7 @@ class TileComponentController {
                                                            this.state.censusCategories.getValue(),
                                                            this.state.selectedCensusCategoryId.getValue(),
                                                            this.state.selectedRoadSegments.getValue(),
+                                                           this.state.selectedViewFeaturesByType.getValue(),
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
                                                            this.state.displayModes
@@ -1201,6 +1248,7 @@ class TileComponentController {
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
+              //console.log(result)
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)
@@ -1220,9 +1268,10 @@ class TileComponentController {
             if (hitFeatures.length > 0) {
               state.hackRaiseEvent(hitFeatures)
             }
-
+            
             //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            state.mapFeaturesSelectedEvent.next({
+            // ToDo: now that we have types these categories should to be dynamic
+            state.mapFeaturesSelectedEvent.next({ 
               latLng: event.latLng,
               locations: hitFeatures,
               serviceAreas: serviceAreaFeatures,

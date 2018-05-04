@@ -480,6 +480,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
   }
   
+  service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
+  service.reloadSelectedViewFeaturesByType = (featuresByType) => {
+    service.selectedViewFeaturesByType.next(featuresByType)
+    service.requestMapLayerRefresh.next({})
+  }
   
   service.selectedCensusBlockId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusBlockId = (censusBlock) => {

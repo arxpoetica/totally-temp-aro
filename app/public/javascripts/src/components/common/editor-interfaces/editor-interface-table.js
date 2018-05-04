@@ -11,21 +11,21 @@ class EditorInterfaceTableController {
   
   addItem(){
     console.log(this)
-    console.log(this.struct)
+    console.log(this.displayProps)
     let newItem = {}
     
     // ToDo: should actually make a new instance of a defined class. 
     //  we should pass in a class. There may be properties that we don't show bu want to pass. It can also cut down on the structure definition 
-    this.struct.cols.forEach(col => {
+    this.displayProps.cols.forEach(col => {
       newItem[col.property] = col.hasOwnProperty('defaultVal') ? col.defaultVal : null 
     }) 
     
-    this.struct.rows.push(newItem)
+    this.displayProps.rows.push(newItem)
   }
   
   deleteItem(index){
     console.log(index)
-    this.struct.rows.splice(index, 1)
+    this.displayProps.rows.splice(index, 1)
   }
   
 }
@@ -33,7 +33,7 @@ class EditorInterfaceTableController {
 let editorInterfaceTable = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-table.html',
   bindings: {
-    struct: '=', 
+    displayProps: '=', 
     isEdit: '<'
   },
   controller: EditorInterfaceTableController

@@ -55,7 +55,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     }
     return {
       dataUrls: [tileUrl],
-      iconUrl: networkEquipment.iconUrl,
+      iconUrl: networkEquipment.iconUrl, 
       renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
       lineWidth: 2,

@@ -16,7 +16,7 @@ class MapSplitController {
       if (!this.splitterObj) {
         this.splitterObj = Split(['#map-canvas-container', '#sidebar'], {
           sizes: [75, 25],
-          minSize: [680, 250],
+          minSize: [680, 310],
           onDragEnd: () => {
             // Trigger a resize so that any tiles that have been uncovered will be loaded
             if (map) {
