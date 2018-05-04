@@ -152,6 +152,7 @@
       "equipmentType": "line",
       "zIndex": 5555,
       "drawingOptions": {
+	"lineWidth": 2,
         "strokeStyle": "#0000ff",
         "showPolylineDirection": true
       },
@@ -169,6 +170,7 @@
       "equipmentType": "line",
       "zIndex": 5580,
       "drawingOptions": {
+	"lineWidth": 2,
         "strokeStyle": "#ff0000",
         "showPolylineDirection": true
       },
@@ -186,6 +188,7 @@
       "equipmentType": "line",
       "zIndex": 5570,
       "drawingOptions": {
+	"lineWidth": 2,
         "strokeStyle": "#000000",
         "showPolylineDirection": true
       },
@@ -203,6 +206,7 @@
       "equipmentType": "line",
       "zIndex": 5530,
       "drawingOptions": {
+	"lineWidth": 2,
         "strokeStyle": "#808080",
         "showPolylineDirection": true
       },
@@ -220,6 +224,7 @@
       "equipmentType": "line",
       "zIndex": 5540,
       "drawingOptions": {
+	"lineWidth": 2,
         "strokeStyle": "#b87333",
         "showPolylineDirection": true
       },
