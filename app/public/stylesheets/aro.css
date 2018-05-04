@@ -1252,3 +1252,15 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .mt-2 {
   margin-top: 2px;
 }
+
+.app_wrapper_container {
+  position:absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px
+}
+
+.app_wrapper_container.footer {
+  bottom: 20px;
+}
