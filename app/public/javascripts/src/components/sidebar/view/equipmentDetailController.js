@@ -161,7 +161,6 @@ class EquipmentDetailController {
       var equipmentList = options.equipmentFeatures
       var selectedFeature = null
       var featureId = null
-      //equipmentList.forEach((feature) => 
       for (var featureI = 0; featureI < equipmentList.length; featureI++){
         var feature = equipmentList[featureI]
         if (feature.hasOwnProperty('object_id')){
@@ -177,35 +176,12 @@ class EquipmentDetailController {
             break
           }
         }
-      }//)
-      
+      }
       
       if (null != selectedFeature){
-          
-        this.getEquipmentInfo(plan.id, selectedFeature.object_id).then((equipmentInfo) => {
-          console.log(equipmentInfo)
-          if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-            //this.selectedEquipmentInfo = equipmentInfo
-            this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
-            this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
-            
-            angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
-            
-            console.log('=== DISP INFO ===')
-            console.log(this.selectedEquipmentInfo)
-            console.log(this.selectedEquipmentInfoDispProps)
-            
-            // tell state
-            var selectedViewFeaturesByType = state.selectedViewFeaturesByType.getValue()
-            selectedViewFeaturesByType.equipment = {}
-            selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
-            state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
-            
-            state.activeViewModePanel = state.viewModePanels.EQUIPMENT_INFO
-            $timeout()
-          }
-        })
-        
+        console.log(selectedFeature)
+        this.updateSelectedState(selectedFeature, featureId)
+        this.displayEquipment(plan.id, selectedFeature.object_id)
       }
     })
     
@@ -243,6 +219,40 @@ class EquipmentDetailController {
   }
   */
   
+	updateSelectedState(selectedFeature, featureId){
+	  // tell state
+    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+    selectedViewFeaturesByType.equipment = {}
+    selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+	}
+	
+	displayEquipment(planId, objectId){
+	  console.log(planId)
+	  console.log(objectId)
+	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
+      console.log(equipmentInfo)
+      if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
+        this.selectedEquipmentInfo = equipmentInfo
+        this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
+        
+        
+        //this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
+        //this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
+        
+        angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
+        
+        console.log('=== DISP INFO ===')
+        console.log(this.selectedEquipmentInfo)
+        console.log(this.selectedEquipmentInfoDispProps)
+        
+        this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
+        $timeout()
+      }
+      //return equipmentInfo
+    })
+	}
+	
   //ToDo: these perhaps get moved to the UI component 
   beginEdit(){
     // set up listeners etc
@@ -269,14 +279,16 @@ class EquipmentDetailController {
   }
 
   viewSelectedEquipment(selectedEquipment) {
-    this.getEquipmentInfo(selectedEquipment.id)
-    .then((equipmentInfo) => {
-      this.selectedEquipmentInfo = equipmentInfo
-      //this.treeState = equipmentInfo
-    })
-    .then(() => {
-      map.setCenter({ lat: this.selectedEquipmentInfo.geog.coordinates[1], lng: this.selectedEquipmentInfo.geog.coordinates[0] })
-    })
+    console.log(selectedEquipment)
+    
+    var plan = this.state.plan.getValue()
+    //if (!plan || !plan.hasOwnProperty('id')) return
+    this.updateSelectedState(selectedEquipment, selectedEquipment.id)
+    console.log(map)
+    this.displayEquipment(plan.id, selectedEquipment.objectId)
+    .then(() => map.setCenter({ lat: this.selectedEquipmentInfo.geog.coordinates[1], lng: this.selectedEquipmentInfo.geog.coordinates[0] }))
+    
+    
   }
   
 }

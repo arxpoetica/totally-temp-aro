@@ -91,7 +91,7 @@ class ViewModeLocationController {
   }
 
   viewSelectedLocation(selectedLocation) {
-    console.log(selectedLocation)
+    //console.log(selectedLocation)
     this.updateSelectedState(selectedLocation, selectedLocation.id)
     this.getLocationInfo(this.plan.id,selectedLocation.id)
     .then(locationInfo => this.showStaticMap(locationInfo))

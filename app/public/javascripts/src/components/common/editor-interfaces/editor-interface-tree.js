@@ -27,6 +27,14 @@ class EditorInterfaceTreeController {
   toggleIsKeyExpanded(index) {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
+  
+  doShow(prop){
+    console.log(prop)
+    if (!prop.visible) return false
+    if (!this.objectToView.hasOwnProperty(prop.propertyName)) return false
+    
+    return true
+  }
 }
 
 // AroInfoObjectViewController.$inject = []
@@ -35,6 +43,7 @@ let editorInterfaceTree = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-tree.html',
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
+    displayProps: '<', 
     isEdit: '<', 
     indentationLevel: '<'
   },
