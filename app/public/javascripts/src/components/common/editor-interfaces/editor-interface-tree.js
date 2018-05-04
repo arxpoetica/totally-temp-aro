@@ -28,12 +28,35 @@ class EditorInterfaceTreeController {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
   
-  doShow(prop){
-    console.log(prop)
+  doShow(prop, data){
+    if ('undefined' == typeof data) data = this.objectToView
+    //console.log(prop)
     if (!prop.visible) return false
-    if (!this.objectToView.hasOwnProperty(prop.propertyName)) return false
+    if (!data.hasOwnProperty(prop.propertyName)) return false
     
     return true
+  }
+  
+  getSummeryCount(props){
+    var summeryCount = 0
+    for (var i=0; i<props.length; i++){
+      if (props[i].hasOwnProperty('levelOfDetail') && "1" == props[i].levelOfDetail){
+        summeryCount++
+      }
+    }
+    
+    return summeryCount
+  }
+  
+  makeList(prop){
+    var listVals = []
+    if ("tree" == prop.format){
+      listVals = [this.objectToView[prop.propertyName]]
+    }else if("list" == prop.format){
+      listVals = this.objectToView[prop.propertyName]
+    }
+    console.log(listVals)
+    return listVals
   }
 }
 

@@ -1,24 +1,24 @@
 
 <div>
-  <div class="ei-header">{{$ctrl.struct.title}}</div>
+  <div class="ei-header">{{$ctrl.displayProps.title}}</div>
   
   <div class="ei-table-contain">
 	  <div class="ei-table-table">
 	    <div class="ei-table-body">
 	      <div class="ei-table-header-row">
-	        <div class="ei-table-col-head" ng-repeat="(colKey, colValue) in $ctrl.struct.cols">
+	        <div class="ei-table-col-head" ng-repeat="(colKey, colValue) in $ctrl.displayProps.cols">
 	          {{colValue.label}}
 	        </div>
-	        <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" class="ei-table-col-head"></div>
+	        <div ng-if="$ctrl.isEdit && $ctrl.displayProps.canAdd" class="ei-table-col-head"></div>
 	      </div>
 	      
-	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.struct.rows">
-	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.struct.cols">
+	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.displayProps.rows">
+	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps.cols">
 	          
-	          <editor-interface-value struct="colValue" model="rowValue[ colValue.property ]" is-edit="$ctrl.isEdit"></editor-interface-value>
+	          <editor-interface-value display-props="colValue" model="rowValue[ colValue.property ]" is-edit="$ctrl.isEdit"></editor-interface-value>
 	          
 	        </div>
-	        <div ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" class="ei-table-cell">
+	        <div ng-if="$ctrl.isEdit && $ctrl.displayProps.canAdd" class="ei-table-cell">
 	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)">delete</button>
 	        </div>
 	      </div>
@@ -27,7 +27,7 @@
 	  </div>
   </div>
   <button class="btn btn-primary btn-sm" 
-          ng-if="$ctrl.isEdit && $ctrl.struct.canAdd" 
+          ng-if="$ctrl.isEdit && $ctrl.displayProps.canAdd" 
           ng-click="$ctrl.addItem()"
           style="display: inline-block;">add item</button>
 </div>

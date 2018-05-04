@@ -14,7 +14,7 @@ class EditorInterfaceValueController {
 let editorInterfaceValue = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-value.html',
   bindings: {
-    struct: '=', 
+    displayProps: '=', 
     model: '=', 
     isEdit: '<'
   },

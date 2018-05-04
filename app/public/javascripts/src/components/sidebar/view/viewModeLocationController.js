@@ -47,7 +47,10 @@ class ViewModeLocationController {
     })
     
     state.clearViewMode.subscribe((clear) => {
-      if(clear) this.selectedLocationInfo = null
+      if(clear){
+        this.selectedLocationInfo = null
+        this.updateSelectedState()
+      }
     })
   }
   // Get the location Information
@@ -60,7 +63,9 @@ class ViewModeLocationController {
   updateSelectedState(feature, id){
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.location = {}
-    selectedViewFeaturesByType.location[ id ] = feature
+    if ('undefined' != typeof feature && 'undefined' != typeof id){
+      selectedViewFeaturesByType.location[ id ] = feature
+    }
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
   }
   

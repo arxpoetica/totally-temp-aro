@@ -4,15 +4,17 @@ import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 class EquipmentDetailController {
 
 	constructor($http, $timeout, state) {
-    this.$http = $http
+    this.angular = angular
+	  this.$http = $http
     this.state = state
     this.selectedEquipmentInfo = {}
     this.selectedEquipmentInfoChanges = {}
-    this.selectedEquipmentInfoDispProps = {}
+    this.selectedEquipmentInfoDispProps = []
     
     this.isEdit = false
     // ToDo: get all this dynamically 
     this.headerIcon = "/images/map_icons/aro/remote_terminal.png"
+    
     /*
     this.treeData = {
       "General": {
@@ -147,6 +149,187 @@ class EquipmentDetailController {
     */
     
     
+    this.debugFeature = {
+      "physicallyLinked":"true",
+      "site_info":{  
+         "siteName":"ROAD 7 & HWY 281",
+         "siteClli":"QNCYWADX",
+         "hsiOfficeCode":null,
+         "dpiEnvironment":null,
+         "address":"16968 Road 7 NW, QUINCY 98848"
+      },
+      "notes":null,
+      "t1":null,
+      "fiberAvailable":null,
+      "existingEquipment":[
+        {  
+         "latency":null,
+         "clliCode":"QNCYWADXH00",
+         "modelNumber":"ADTRAN TA 5004",
+         "switchType":null,
+         "deploymentDate":"2017-06-01",
+         "uplinkSpeed":null
+        }, 
+        {  
+          "latency":null,
+          "clliCode":"QNCYWADXH00",
+          "modelNumber":"ADTRAN TA 5004",
+          "switchType":null,
+          "deploymentDate":"2017-06-01",
+          "uplinkSpeed":null
+         }
+      ]
+    }
+    
+    
+    
+    
+    this.dispProps = {}
+    this.dispProps['equipment'] = [
+      {
+        'displayName': "Physically Linked", 
+        'editable': true, 
+        'format': "check", 
+        'propertyName': "physicallyLinked", 
+        'visible': true
+      }, 
+      {
+        'displayName': "Fiber Available", 
+        'editable': true, 
+        'format': "check", 
+        'propertyName': "fiberAvailable", 
+        'visible': true
+      }, 
+      {
+        'displayName': "T1", 
+        'editable': true, 
+        'format': "check", 
+        'propertyName': "t1", 
+        'visible': true
+      }, 
+      {
+        'displayName': "Site Info", 
+        'editable': false, 
+        'format': "tree", 
+        'propertyName': "site_info", 
+        'visible': true, 
+        'children': [
+          {
+            'displayName': "Name", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "siteName", 
+            'levelOfDetail': "1", 
+            'visible': true
+          },
+          {
+            'displayName': "CLLI", 
+            'editable': false, 
+            'format': "", 
+            'propertyName': "siteClli", 
+            'levelOfDetail': "1", 
+            'visible': true
+          },
+          {
+            'displayName': "Address", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "address", 
+            'levelOfDetail': "2", 
+            'visible': true
+          },
+          {
+            'displayName': "DPI Environment", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "dpiEnvironment", 
+            'levelOfDetail': "2", 
+            'visible': true
+          },
+          {
+            'displayName': "HSI OfficeCode", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "hsiOfficeCode", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }
+        ]
+      }, 
+      {
+        'displayName': "Equipment", 
+        'editable': false, 
+        'format': "list", 
+        'propertyName': "existingEquipment", 
+        'visible': true, 
+        'children': [
+          {
+            'displayName': "CLLI", 
+            'editable': false, 
+            'format': "string", 
+            'propertyName': "clliCode", 
+            'levelOfDetail': "1", 
+            'visible': true
+          },
+          {
+            'displayName': "modelNumber", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "modelNumber", 
+            'levelOfDetail': "1", 
+            'visible': true
+          },
+          {
+            'displayName': "Latency", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "latency", 
+            'levelOfDetail': "1", 
+            'visible': true
+          },
+          {
+            'displayName': "Switch Type", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "switchType", 
+            'levelOfDetail': "2", 
+            'visible': true
+          },
+          {
+            'displayName': "Deployment Date", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "deploymentDate", 
+            'levelOfDetail': "2", 
+            'visible': true
+          },
+          {
+            'displayName': "Uplink Speed", 
+            'editable': true, 
+            'format': "string", 
+            'propertyName': "uplinkSpeed", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }
+        ]
+      }, 
+      {
+        'displayName': "notes", 
+        'editable': true, 
+        'enumEntityName': "", 
+        'format': "text", 
+        'propertyName': "Notes", 
+        'visible': true
+      }
+      
+    ]
+    
+    
+    // DEBUG ONLY 
+    this.selectedEquipmentInfoChanges = this.debugFeature
+    this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
+    
+    
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this funcltion is assuring the properties we need exist. 
@@ -191,7 +374,8 @@ class EquipmentDetailController {
       if(clear){
         this.selectedEquipmentInfo = {}
         this.selectedEquipmentInfoChanges = {}
-        this.selectedEquipmentInfoDispProps = {}
+        this.selectedEquipmentInfoDispProps = []
+        this.updateSelectedState()
       }
     })
   }
@@ -223,7 +407,9 @@ class EquipmentDetailController {
 	  // tell state
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
-    selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+    if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
+      selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+    }
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
 	}
 	

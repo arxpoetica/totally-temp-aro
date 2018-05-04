@@ -48,7 +48,7 @@
 
 /* === common === */
 
-.ei-internal-gen > .ei-gen-level{
+.ei-internal-gen > .ei-gen-level, .ei-internal-level{
   /*
   margin-top: -6px;
   */

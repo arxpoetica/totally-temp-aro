@@ -1,12 +1,18 @@
 
-<div ng-if="$ctrl.isEdit" ng-switch="$ctrl.struct.editType">
+<div ng-if="$ctrl.isEdit" ng-switch="$ctrl.displayProps.format">
   
-  <input ng-switch-when="text" type="text" ng-model="$ctrl.model" class="form-control input-sm ei-input-text">
+  <input ng-switch-when="string" type="text" ng-model="$ctrl.model" class="form-control input-sm ei-input-text">
   <input ng-switch-when="number" type="number" ng-model="$ctrl.model" class="form-control input-sm ei-input-number">
+  
+  
+  <input ng-switch-when="check" type="checkbox" class="checkboxfill layer-type-checkboxes" ng-model="$ctrl.model">
+  
+  <textarea ng-switch-when="text" ng-model="$ctrl.model" class="form-control" rows="3"></textarea>
+  
   
   <select ng-switch-when="select" class="form-control ei-input-select" 
       ng-model="$ctrl.model"
-      ng-options="item for item in $ctrl.struct.editorData">
+      ng-options="item for item in $ctrl.displayProps.editorData">
   </select>
   
   <div ng-switch-default>

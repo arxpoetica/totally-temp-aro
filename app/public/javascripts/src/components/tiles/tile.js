@@ -402,11 +402,11 @@ class MapTileRenderer {
       if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
         var fullDataType = feature.properties._data_type + '.'
         selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
-        if ( feature.properties.hasOwnProperty('id') ){
-          selectedListId = feature.properties.id
-        }else if ( feature.properties.hasOwnProperty('location_id') ){
+        if ( feature.properties.hasOwnProperty('location_id') ){
           selectedListId = feature.properties.location_id
-        }
+        }else if ( feature.properties.hasOwnProperty('id') ){
+          selectedListId = feature.properties.id
+        } 
       }
       
       var geometry = feature.loadGeometry()
