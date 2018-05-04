@@ -297,6 +297,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     if (current) $scope.measuredDistance = null
   }
 
+  $scope.currentUser = state.getUser()
+  $scope.showFilters = config.ARO_CLIENT === 'frontier'
+
   $(document).keydown(function (e) {
     if (e.keyCode === 27 && $scope.measuringStickEnabled) {
       $scope.toggleMeasuringStick()
