@@ -167,7 +167,8 @@ class LocationEditorController {
       },
       attributes: {
         number_of_households: objectProperties.numberOfLocations
-      }
+      },
+      dataType: 'location'
     }
     return featureObj
   }

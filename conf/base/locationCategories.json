@@ -1,145 +1,164 @@
 {
-	"mapIconFolder": "/images/map_icons/aro/",
-	"business": {
-		"user_upload": {
-			"active": true,
-			"label": "User Uploaded Customers"
-		},
-		"segments": {
-			"small": {
-				"show": true,
-				"label": "Small Businesses"
-			},
-			"medium": {
-				"show": true,
-				"label": "Medium Businesses"
-			},
-			"large": {
-				"show": true,
-				"label": "Large Businesses"
-			}
-		}
-	},
-	"household": {
-		"show": true,
-		"label": "Residential"
-	},
-	"celltower": {
-		"show": true,
-		"label": "Cell Sites"
-	},
-	"categories": {
-		"small_businesses": {
-			"show": true,
-			"label": "Small Businesses",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/businesses_small_default.png",
-			"selectedIconUrl": "/images/map_icons/aro/businesses_small_selected.png",
-			"zIndex": 6560,
-			"categoryKey": "business",
-			"plannerKey": "small",
-			"key": "small_businesses",
-			"selected": false,
-			"can_view": ["admin"]
-		},
-		"medium_businesses":{
-			"show": true,
-			"label": "Medium Businesses",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/medium/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
-			"selectedIconUrl": "/images/map_icons/aro/businesses_medium_selected.png",
+  "mapIconFolder": "/images/map_icons/aro/",
+  "business": {
+    "user_upload": {
+      "active": true,
+      "label": "User Uploaded Customers"
+    },
+    "segments": {
+      "small": {
+        "show": true,
+        "label": "Small Businesses"
+      },
+      "medium": {
+        "show": true,
+        "label": "Medium Businesses"
+      },
+      "large": {
+        "show": true,
+        "label": "Large Businesses"
+      }
+    }
+  },
+  "household": {
+    "show": true,
+    "label": "Residential"
+  },
+  "celltower": {
+    "show": true,
+    "label": "Cell Sites"
+  },
+  "categories": {
+    "small_businesses": {
+      "show": true,
+      "label": "Small Businesses",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/entity/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
+      "zIndex": 6560,
+      "categoryKey": "business",
+      "plannerKey": "small",
+      "key": "small_businesses",
+      "selected": false,
+      "can_view": ["admin"]
+    },
+    "medium_businesses":{
+      "show": true,
+      "label": "Medium Businesses",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/medium/${tilePointTransform}/entity/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
       "zIndex": 6570,
-			"categoryKey": "business",
-			"plannerKey": "medium",
-			"key": "medium_businesses",
-			"selected": false,
-			"can_view": ["admin"]
-		},
-		"large_businesses":		{
-			"show": true,
-			"label": "Large Businesses",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/large/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/businesses_large_default.png",
-			"selectedIconUrl": "/images/map_icons/aro/businesses_large_selected.png",
+      "categoryKey": "business",
+      "plannerKey": "medium",
+      "key": "medium_businesses",
+      "selected": false,
+      "can_view": ["admin"]
+    },
+    "large_businesses":   {
+      "show": true,
+      "label": "Large Businesses",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/large/${tilePointTransform}/entity/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/businesses_large_default.png",
       "zIndex": 6580,
-			"categoryKey": "business",
-			"plannerKey": "large",
-			"key": "large_businesses",
-			"selected": false,
-			"can_view": ["admin"]
-		},
-		"household": {
-			"show": true,
-			"label": "Residential",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/household/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/households_default.png",
-			"selectedIconUrl": "/images/map_icons/aro/households_selected.png",
+      "categoryKey": "business",
+      "plannerKey": "large",
+      "key": "large_businesses",
+      "selected": false,
+      "can_view": ["admin"]
+    },
+    "household": {
+      "show": true,
+      "label": "Residential",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/household/${tilePointTransform}/entity/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/households_default.png",
       "zIndex": 6500,
-			"categoryKey": "household",
-			"plannerKey": "household",
-			"key": "household",
-			"selected": false,
-			"can_view": ["admin"]
-		},
-		"celltower":{
-			"show": true,
-			"label": "Cell Sites",
-			"tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
-			"aggregateZoomThreshold": "15",
-			"iconUrl": "/images/map_icons/aro/tower.png",
-			"selectedIconUrl": "/images/map_icons/aro/tower.png",
+      "categoryKey": "household",
+      "plannerKey": "household",
+      "key": "household",
+      "selected": false,
+      "can_view": ["admin"]
+    },
+    "celltower":{
+      "show": true,
+      "label": "Cell Sites",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/tower.png",
       "zIndex": 6590,
-			"categoryKey": "celltower",
-			"plannerKey": "celltower",
-			"key": "celltower",
-			"selected": false,
-			"can_view": ["admin"]
-		},
-		"ethernet_lit_building": {
-			"iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
-			"selectedIconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
-      "label": "Ethernet Lit Buildings",
-			"key": "ethernet_lit_building",
-			"selected": false,
-			"can_view": ["sales"]
-		},
-		"lit_building":{
-			"iconUrl": "/images/map_icons/aro/lit_building.png",
-			"selectedIconUrl": "/images/map_icons/aro/lit_building.png",
-      "label": "Lit Building",
-			"key": "lit_building",
-			"selected": false,
-			"can_view": ["sales"]
-		},
-		"tier_1":{
-			"iconUrl": "/images/map_icons/aro/tier_1.png",
-			"selectedIconUrl": "/images/map_icons/aro/tier_1.png",
-      "label": "Tier 1",
-			"key": "tier_1",
-			"selected": false,
-			"can_view": ["sales"]
-		},
-		"tier_2":{
-			"iconUrl": "/images/map_icons/aro/tier_2.png",
-			"selectedIconUrl": "/images/map_icons/aro/tier_2.png",
-      "label": "Tier 2",
-			"key": "tier_2",
-			"selected": false,
-			"can_view": ["sales"]
-		},
-		"tier_3":{
-			"iconUrl": "/images/map_icons/aro/tier_3.png",
-			"selectedIconUrl": "/images/map_icons/aro/tier_3.png",
-      "label": "Tier 3",
-			"key": "tier_3",
-			"selected": false,
-			"can_view": ["sales"]
-		}
-
-	},
-	"env_is_test": false
+      "categoryKey": "celltower",
+      "plannerKey": "celltower",
+      "key": "celltower",
+      "selected": false,
+      "can_view": ["admin"]
+    },
+    "ethernet_lit_building": {
+            "show": true,
+            "label": "Ethernet Lit Buildings",
+            "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/ethernet_lit_buildings/",
+            "aggregateZoomThreshold": "15",
+            "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
+            "zIndex": 6680,
+            "categoryKey": "ethernet_lit_building",
+            "plannerKey": "ethernet_lit_building",
+            "key": "ethernet_lit_building",
+            "selected": false,
+            "can_view": ["sales"]
+    },
+    "lit_building":{
+          "show": true,
+          "label": "Lit Building",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/lit_buildings/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/lit_building.png",
+          "zIndex": 6770,
+          "categoryKey": "lit_building",
+          "plannerKey": "lit_building",
+          "key": "lit_building",
+          "selected": false,
+          "can_view": ["sales"]
+        },
+    "tier_1":{
+          "show": true,
+          "label": "Tier 1",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_1/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/tier_1.png",
+          "zIndex": 6860,
+          "categoryKey": "tier_1",
+          "plannerKey": "tier_1",
+          "key": "tier_1",
+          "selected": false,
+          "can_view": ["sales"]
+    },
+    "tier_2":{
+          "show": true,
+          "label": "Tier 2",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_2/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/tier_2.png",
+          "zIndex": 6950,
+          "categoryKey": "tier_2",
+          "plannerKey": "tier_2",
+          "key": "tier_2",
+          "selected": false,
+          "can_view": ["sales"]
+    },
+    "tier_3":{
+          "show": true,
+          "label": "Tier 3",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_3/",
+          "aggregateZoomThreshold": "15",
+          "iconUrl":  "/images/map_icons/aro/tier_3.png",
+          "zIndex": 7040,
+          "categoryKey": "tier_3",
+          "plannerKey": "tier_3",
+          "key": "tier_3",
+          "selected": false,
+          "can_view": ["sales"]
+    }
+  },
+  "env_is_test": false
 }

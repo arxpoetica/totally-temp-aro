@@ -382,7 +382,6 @@ class MapTileRenderer {
   // Render a set of features on the map
   renderFeatures(ctx, features, featureData, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     var entityImage = featureData.icon
-    var entitySelectedImage = featureData.hasOwnProperty('selectedIcon') ? featureData.selectedIcon : featureData.icon
     
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
@@ -439,14 +438,14 @@ class MapTileRenderer {
   	          ctx.fillStyle='#e8ffe8'
   	          ctx.strokeStyle = '#008000'
   	          ctx.lineWidth = 2
-  	          //ctx.fillRect(x,y,entitySelectedImage.width,entitySelectedImage.height)
+  	          //ctx.fillRect(x,y,entityImage.width,entityImage.height)
   	          ctx.beginPath();
-  	          var halfWidth = 0.5*entitySelectedImage.width
-  	          ctx.arc(x+halfWidth, y+(0.5*entitySelectedImage.height), halfWidth+4, 0, 2 * Math.PI);
+  	          var halfWidth = 0.5*entityImage.width
+  	          ctx.arc(x+halfWidth, y+(0.5*entityImage.height), halfWidth+4, 0, 2 * Math.PI);
   	          ctx.fill();
   	          ctx.stroke();
   	          
-  	          ctx.drawImage(entitySelectedImage, x, y) //<--------------------------------------------------- highlight here ---<<<
+  	          ctx.drawImage(entityImage, x, y) //<--------------------------------------------------- highlight here ---<<<
   	          //ctx.globalCompositeOperation='difference'
   	          
   	          //ctx.globalCompositeOperation='source-over'
