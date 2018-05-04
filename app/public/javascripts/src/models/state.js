@@ -480,6 +480,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
   }
   
+  service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
+  service.reloadSelectedViewFeaturesByType = (featuresByType) => {
+    service.selectedViewFeaturesByType.next(featuresByType)
+    service.requestMapLayerRefresh.next({})
+  }
   
   service.selectedCensusBlockId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusBlockId = (censusBlock) => {
@@ -1314,15 +1319,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
 
     var filter = ''
-    if(entityType === 'CensusBlocksEntity') {
-      filter = filterObj ? `substringof(${searchColumn},${filterObj})` : filter
-    } else {
+    if(entityType === 'HouseholdObjectEntity') {
       //for UUID odata doesn't support substring
       var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
       if(pattern.test(filterObj)) {
         filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
-      }  
-    }  
+      } 
+    } else {
+      filter = filterObj ? `substringof(${searchColumn},'${filterObj}')` : filter
+    }
 
     var libraryItems = []
     if(entityType === 'HouseholdObjectEntity') {

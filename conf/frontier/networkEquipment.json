@@ -30,13 +30,17 @@
     "feeder_fiber": {
       "iconUrl": "/images/map_icons/frontier/fiber_feeder.png",
       "drawingOptions": {
-        "strokeStyle": "#ff0000"
+	"opacity": 0.5,
+	"lineWidth": 5,
+        "strokeStyle": "#63210d"
       }
     },
     "distribution_fiber": {
       "iconUrl": "/images/map_icons/frontier/fiber_distribution.png",
       "drawingOptions": {
-        "strokeStyle": "#0000ff"
+	"opacity": 0.5,
+	"lineWidth": 5,
+        "strokeStyle": "#000099"
       }
     },
     "iof_fiber": {

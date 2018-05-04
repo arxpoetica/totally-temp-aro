@@ -30,19 +30,26 @@
       object-name="Equipment"
       search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
       selected="$ctrl.selectedEquipment"
-      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,objectId','objectId')"
+      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,clli','clli')"
       on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj)">
     </aro-search>
   </div>
   <div class="ei-panel">
-	  <div class="ei-panel-header">
-	    <div class="ei-panel-header-title">{{$ctrl.treeData["General"]["summary"]["Site Type"]}}</div>
-	    <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.commitEdit()">Save</button>
-	    <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.cancelEdit()">Cancel</button>
-	    <button class="btn btn-primary ei-panel-header-btn" ng-if="!$ctrl.isEdit" ng-click="$ctrl.beginEdit()">Edit</button>
+	  <div class="ei-panel-header clearfix" ng-if="!$ctrl.angular.equals({}, $ctrl.selectedEquipmentInfo)">
+	    <!-- 
+	    <img class="ei-panel-header-icon" ng-src="{{$ctrl.headerIcon}}">
+	    -->
+	    <div class="ei-panel-header-title">{{$ctrl.networkNodeType}}</div>
+	    <div class="ei-panel-header-btn-set">
+	      <button class="btn btn-default ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.cancelEdit()">Cancel</button>
+	      <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.commitEdit()">Save</button>
+	      <button class="btn btn-primary ei-panel-header-btn" ng-if="!$ctrl.isEdit" ng-click="$ctrl.beginEdit()">Edit</button>
+	    </div>
 	  </div>
 	  <div class="equipment-detail ei-panel-content">
-	    <editor-interface-tree object-to-view="$ctrl.treeState" is-edit="$ctrl.isEdit"></editor-interface-tree>
-	    <editor-interface-table struct="$ctrl.tableViewStructure" is-edit="$ctrl.isEdit"></editor-interface-table>
+	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfoChanges" display-props="$ctrl.selectedEquipmentInfoDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
+	    <!-- 
+	    <editor-interface-table displayProps="$ctrl.tableViewStructure" is-edit="$ctrl.isEdit"></editor-interface-table>
+	    -->
 	  </div>
 	</div>
