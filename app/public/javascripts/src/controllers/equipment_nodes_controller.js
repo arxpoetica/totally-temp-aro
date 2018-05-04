@@ -58,7 +58,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       iconUrl: networkEquipment.iconUrl,
       renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
-      lineWidth: 2,
+      lineWidth: networkEquipment.drawingOptions.lineWidth || 2,
       fillStyle: networkEquipment.drawingOptions.fillStyle,
       opacity: networkEquipment.drawingOptions.opacity || 0.5,
       selectable: true,
