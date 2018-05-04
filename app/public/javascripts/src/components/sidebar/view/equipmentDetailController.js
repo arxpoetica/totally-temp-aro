@@ -326,8 +326,8 @@ class EquipmentDetailController {
     
     
     // DEBUG ONLY 
-    this.selectedEquipmentInfoChanges = this.debugFeature
-    this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
+    //this.selectedEquipmentInfoChanges = this.debugFeature
+    //this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
     
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
@@ -420,8 +420,8 @@ class EquipmentDetailController {
       console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         this.selectedEquipmentInfo = equipmentInfo
-        this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
-        
+        //this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
+        this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
         
         //this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
         //this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()

@@ -55,7 +55,6 @@ class EditorInterfaceTreeController {
     }else if("list" == prop.format){
       listVals = this.objectToView[prop.propertyName]
     }
-    console.log(listVals)
     return listVals
   }
 }
