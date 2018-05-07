@@ -12,6 +12,7 @@ class MapSelectorExportLocationsController {
     })
     this.state = state
     this.selectionModes = state.selectionModes
+    this.document = $document
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
@@ -45,11 +46,6 @@ class MapSelectorExportLocationsController {
       })
     })
 
-
-    $document.ready(()=>{
-      this.doInit()
-    })
-
   }
 
   $onDestroy() {
@@ -79,7 +75,9 @@ class MapSelectorExportLocationsController {
   }
 
   $onInit() {
-
+    this.document.ready(()=>{
+      this.doInit()
+    })
   }
 
   doInit() {

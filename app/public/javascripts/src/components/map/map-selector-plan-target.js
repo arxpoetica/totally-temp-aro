@@ -12,6 +12,7 @@ class MapSelectorPlanTargetController {
     })
     this.state = state
     this.selectionModes = state.selectionModes
+    this.document = $document
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
@@ -74,10 +75,6 @@ class MapSelectorPlanTargetController {
       }
     })
 
-
-    $document.ready(()=> {
-      this.doInit()
-    })
   }
 
   updateDrawingManagerState() {
@@ -97,7 +94,9 @@ class MapSelectorPlanTargetController {
   }
 
   $onInit() {
-
+    this.document.ready(()=> {
+      this.doInit()
+    })
   }
 
   doInit() {
