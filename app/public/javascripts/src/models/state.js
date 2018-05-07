@@ -184,6 +184,20 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     ]
   }
 
+  //ruler actions
+  service.defaultRulerActions = Object.freeze({
+    STRAIGHT_LINE:{ id: 'STRAIGHT_LINE', label: 'Straight Line' }
+  });
+
+  service.allRulerActions = Object.freeze({
+    STRAIGHT_LINE:{ id: 'STRAIGHT_LINE', label: 'Straight Line' },
+    COPPER: { id: 'COPPER', label: 'Copper' }
+  });
+
+  service.rulerActions = service.defaultRulerActions
+
+  service.currentRulerAction = service.rulerActions.STRAIGHT_LINE
+
   // The panels in the view mode
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js

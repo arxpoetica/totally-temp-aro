@@ -14,6 +14,7 @@ class ToolBarController {
     this.showDropDown = false
     this.heatMapOption = true
     this.measuringStickEnabled = false
+    this.rulerActionEnabled = false
     this.currentUser = state.getUser()
     this.switchIcon = config.ARO_CLIENT === 'frontier'
 
@@ -49,6 +50,13 @@ class ToolBarController {
         $(this).find('.view-dropdown').toggle()
         e.stopPropagation();
         e.preventDefault();
+    })
+
+    //toggle ruler dropdown
+    $('.rulerDropdown').on('show.bs.dropdown', function (e) {
+      $(this).find('.ruler-dropdown').toggle()
+      e.stopPropagation();
+      e.preventDefault();
     })
 
     //toggle toolbar dropdown
@@ -115,7 +123,7 @@ class ToolBarController {
   }
 
   toggleMeasuringStick() {
-    this.measuringStickEnabled = !this.measuringStickEnabled
+    this.measuringStickEnabled = true
     this.clearRulers()
     if(this.measuringStickEnabled) {
       this.clickListener = google.maps.event.addListener(this.mapRef, 'click', (point) => {
@@ -125,6 +133,12 @@ class ToolBarController {
       google.maps.event.removeListener(this.clickListener)      
     }
     this.state.selectedToolBarAction = null
+  }
+
+  clearStraightLineAction() {
+    this.measuringStickEnabled = false
+    this.clearRulers()
+    this.clickListener && google.maps.event.removeListener(this.clickListener) 
   }
 
   addToRulerSegments(latLng) {
@@ -335,6 +349,29 @@ class ToolBarController {
 
   showCableDirection() {
     this.state.viewSettingsChanged.next()
+  }
+
+  rulerAction() {
+    this.rulerActionEnabled = !this.rulerActionEnabled
+    if(!this.rulerActionEnabled) {
+      //clear straight line ruler action
+      this.clearStraightLineAction()
+      //clear copper ruler action
+      return
+    } else {
+      this.onChangeRulerAction()
+    }
+  }
+
+  onChangeRulerAction() {
+    if(this.state.currentRulerAction === this.state.rulerActions.STRAIGHT_LINE) {
+      this.toggleMeasuringStick()
+      //clear copper ruler action
+    } else if (this.state.currentRulerAction === this.state.rulerActions.COPPER) {
+      //clear straight line ruler action
+      this.clearStraightLineAction()
+      console.log("Ruler copper action")
+    }
   }
 }
 
