@@ -45,6 +45,11 @@ class MapSelectorExportLocationsController {
       })
     })
 
+
+    $document.ready(()=>{
+      this.doInit()
+    })
+
   }
 
   $onDestroy() {
@@ -74,6 +79,10 @@ class MapSelectorExportLocationsController {
   }
 
   $onInit() {
+
+  }
+
+  doInit() {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
@@ -94,6 +103,7 @@ class MapSelectorExportLocationsController {
       setTimeout(() => e.overlay.setMap(null), 100)
     })
   }
+
 
   $doCheck() {
     // Do a manual check on selectedTargetSelectionMode, as it is no longer a BehaviorSubject

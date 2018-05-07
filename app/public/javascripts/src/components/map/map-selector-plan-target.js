@@ -73,6 +73,11 @@ class MapSelectorPlanTargetController {
           state.reloadSelectedRoadSegments(event.roadSegments)
       }
     })
+
+
+    $document.ready(()=> {
+      this.doInit()
+    })
   }
 
   updateDrawingManagerState() {
@@ -92,6 +97,10 @@ class MapSelectorPlanTargetController {
   }
 
   $onInit() {
+
+  }
+
+  doInit() {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
@@ -112,6 +121,7 @@ class MapSelectorPlanTargetController {
     })
 
   }
+
 
   $onDestroy() {
     if(this.unsub)
