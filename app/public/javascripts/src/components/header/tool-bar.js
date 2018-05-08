@@ -1,11 +1,14 @@
+import Constants from '../common/constants'
+
 class ToolBarController {
 
-  constructor($element, $timeout,$document ,state, map_tools, $window, configuration) {
+  constructor($element, $timeout,$document ,$http,state, map_tools, $window, configuration) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
     this.$document = $document
     this.$window = $window
+    this.$http = $http
     this.configuration = configuration
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
@@ -17,6 +20,7 @@ class ToolBarController {
     this.rulerActionEnabled = false
     this.currentUser = state.getUser()
     this.switchIcon = config.ARO_CLIENT === 'frontier'
+    this.Constants = Constants
 
     this.min = 0
     // Map tile settings used for debugging
@@ -349,6 +353,7 @@ class ToolBarController {
       //clear straight line ruler action
       this.clearStraightLineAction()
       //clear copper ruler action
+      this.clearRulerCopperAction()
       return
     } else {
       this.onChangeRulerAction()
@@ -359,15 +364,97 @@ class ToolBarController {
     if(this.state.currentRulerAction === this.state.rulerActions.STRAIGHT_LINE) {
       this.toggleMeasuringStick()
       //clear copper ruler action
+      this.clearRulerCopperAction()
     } else if (this.state.currentRulerAction === this.state.rulerActions.COPPER) {
       //clear straight line ruler action
       this.clearStraightLineAction()
-      console.log("Ruler copper action")
+      this.rulerCopperAction()
     }
   }
+
+  rulerCopperAction() {
+
+    this.getCopperPoints()
+    .then(() => {
+      // Get the POST body for optimization based on the current application state
+      var optimizationBody = this.state.getOptimizationBody()
+      // Replace analysis_type and add a point and radius
+      optimizationBody.analysis_type = 'POINT_TO_POINT'
+      optimizationBody.pointFrom = {
+        type: 'Point',
+        coordinates: [this.copperPoints[0].latLng.lng(), this.copperPoints[0].latLng.lat()]
+      }
+      let pointTo = this.copperPoints[this.copperPoints.length - 1]
+      optimizationBody.pointTo = {
+        type: 'Point',
+        coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
+      }
+      optimizationBody.spatialEdgeType = 'road';
+      optimizationBody.directed = false
+
+      this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
+      .then((result) => {
+        //get copper properties
+        let copperFeatures = this.configuration.networkEquipment.cables['copper']
+        var geoJson = {
+          "type": "FeatureCollection",
+          "features": [{
+            "type": "Feature",
+            "properties": {},
+            "geometry":{}
+          }]
+        }
+
+        geoJson.features[0].geometry = result.data.path
+        this.mapRef.data.addGeoJson(geoJson)
+        this.mapRef.data.setStyle(function (feature) {
+          return {
+            strokeColor: copperFeatures.drawingOptions.strokeStyle
+          };
+        });
+        this.state.measuredDistance.next(result.data.length)
+        this.copperPoints = []
+      })
+    })
+  }
+
+  getCopperPoints() {
+    this.copperPoints = []
+    return new Promise((resolve, reject) => {
+      // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
+      this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
+        if (!event || !event.latLng || this.state.currentRulerAction != this.state.rulerActions.COPPER) {
+          return
+        }
+        var copperMarker = new google.maps.Marker({
+          position: event.latLng,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 2
+          },
+          map: this.mapRef,
+          draggable: false,
+          zIndex: 100
+        });
+
+        this.copperPoints.push(event)
+        if(this.copperPoints.length > 1) {
+          resolve()
+        }
+      })
+    })
+  }
+
+  clearRulerCopperAction() {
+    this.mapFeaturesSelectedEventObserver && this.mapFeaturesSelectedEventObserver.unsubscribe()
+    this.copperPoints = []
+    this.mapRef.setMap(null)
+  }
+
+
 }
 
-ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools', '$window', 'configuration']
+ToolBarController.$inject = ['$element', '$timeout', '$document','$http' ,'state', 'map_tools', '$window', 'configuration']
 
 let toolBar = {
   templateUrl: '/components/header/tool-bar.html',
