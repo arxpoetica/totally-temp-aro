@@ -375,52 +375,15 @@ class ToolBarController {
   rulerCopperAction() {
 
     this.getCopperPoints()
-    .then(() => {
-      // Get the POST body for optimization based on the current application state
-      var optimizationBody = this.state.getOptimizationBody()
-      // Replace analysis_type and add a point and radius
-      optimizationBody.analysis_type = 'POINT_TO_POINT'
-      optimizationBody.pointFrom = {
-        type: 'Point',
-        coordinates: [this.copperPoints[0].latLng.lng(), this.copperPoints[0].latLng.lat()]
-      }
-      let pointTo = this.copperPoints[this.copperPoints.length - 1]
-      optimizationBody.pointTo = {
-        type: 'Point',
-        coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
-      }
-      optimizationBody.spatialEdgeType = 'road';
-      optimizationBody.directed = false
+    //.then(() => {
 
-      this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
-      .then((result) => {
-        //get copper properties
-        let copperFeatures = this.configuration.networkEquipment.cables['copper']
-        var geoJson = {
-          "type": "FeatureCollection",
-          "features": [{
-            "type": "Feature",
-            "properties": {},
-            "geometry":{}
-          }]
-        }
-
-        geoJson.features[0].geometry = result.data.path
-        this.mapRef.data.addGeoJson(geoJson)
-        this.mapRef.data.setStyle(function (feature) {
-          return {
-            strokeColor: copperFeatures.drawingOptions.strokeStyle
-          };
-        });
-        this.state.measuredDistance.next(result.data.length)
-        this.copperPoints = []
-      })
-    })
+    //})
   }
 
   getCopperPoints() {
     this.copperPoints = []
-    return new Promise((resolve, reject) => {
+    this.copperMarkers = []
+    //return new Promise((resolve, reject) => {
       // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
       this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
         if (!event || !event.latLng || this.state.currentRulerAction != this.state.rulerActions.COPPER) {
@@ -437,18 +400,71 @@ class ToolBarController {
           zIndex: 100
         });
 
+        this.copperMarkers.push(copperMarker)
         this.copperPoints.push(event)
         if(this.copperPoints.length > 1) {
-          resolve()
+          //resolve()
+          this.drawCopperPath()
         }
       })
+    //})
+  }
+
+  drawCopperPath() {
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = this.state.getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.analysis_type = 'POINT_TO_POINT'
+    optimizationBody.pointFrom = {
+      type: 'Point',
+      coordinates: [this.copperPoints[0].latLng.lng(), this.copperPoints[0].latLng.lat()]
+    }
+    let pointTo = this.copperPoints[this.copperPoints.length - 1]
+    optimizationBody.pointTo = {
+      type: 'Point',
+      coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
+    }
+    optimizationBody.spatialEdgeType = 'road';
+    optimizationBody.directed = false
+
+    this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
+    .then((result) => {
+      //get copper properties
+      let copperFeatures = this.configuration.networkEquipment.cables['copper']
+      var geoJson = {
+        "type": "FeatureCollection",
+        "features": [{
+          "type": "Feature",
+          "properties": {},
+          "geometry":{}
+        }]
+      }
+
+      geoJson.features[0].geometry = result.data.path
+      this.copperPath = this.mapRef.data.addGeoJson(geoJson)
+      this.mapRef.data.setStyle(function (feature) {
+        return {
+          strokeColor: copperFeatures.drawingOptions.strokeStyle
+        };
+      });
+      this.state.measuredDistance.next(result.data.length)
+      this.mapFeaturesSelectedEventObserver.unsubscribe()
+      this.copperPoints = []
     })
   }
 
   clearRulerCopperAction() {
     this.mapFeaturesSelectedEventObserver && this.mapFeaturesSelectedEventObserver.unsubscribe()
-    this.copperPoints = []
-    this.mapRef.setMap(null)
+    if (this.copperPath != null) {
+      for (var i = 0; i < this.copperPath.length; i++) {
+          this.mapRef.data.remove(this.copperPath[i]);
+      }
+    }
+    this.clearCopperMarkers()
+  }
+
+  clearCopperMarkers() {
+    this.copperMarkers && this.copperMarkers.map((marker)=>this.clearRulerMarker(marker))
   }
 
 
