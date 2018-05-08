@@ -12,6 +12,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   $scope.mapZoom = 0//map.getZoom()
   
+  var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
+  
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
@@ -37,7 +39,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
-
+  
   // Creates a single map layer by substituting tileUrl parameters
   var createSingleMapLayer = (equipmentKey, networkEquipment, tileUrlType, libraryId, rootPlanId) => {
     var tileUrl = networkEquipment[tileUrlType]
@@ -75,8 +77,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
       
-      //       V----------------------------------------------------------------{ FOR TESTING }--------<<<
-      if ($scope.mapZoom > networkEquipment.aggregateZoomThreshold && 'point' === networkEquipment.equipmentType){
+      if ('point' !== networkEquipment.equipmentType 
+          || usePointAggregate
+          || $scope.mapZoom > networkEquipment.aggregateZoomThreshold){
         
         if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
@@ -94,7 +97,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'plannedTileUrl', null, planId)
           createdMapLayerKeys.add(mapLayerKey)
         }
-      }// <--------<<<
+      }
     })
   }
 
