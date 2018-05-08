@@ -204,7 +204,7 @@ class BoundariesController {
     	    opacity: 0.3
     	  }
     	}
-    	
+
     	layerSettings['census_blocks'] = {
     	  dataUrls: [],
     	  renderMode: 'PRIMITIVE_FEATURES',
@@ -224,7 +224,7 @@ class BoundariesController {
     	  renderMode: 'PRIMITIVE_FEATURES',
     	  selectable: true,
     	  aggregateMode: 'FLATTEN',
-    	  strokeStyle: '#333333',
+    	  strokeStyle: '#00ff00',
     	  lineWidth: 1,
     	  fillStyle: "transparent",
     	  opacity: 0.7,
