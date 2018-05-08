@@ -68,20 +68,12 @@ class ToolBarController {
   }
 
   setSelectionSingle() {
-    if (this.state.selectedToolBarAction === this.state.toolbarActions.SINGLE_SELECT) {
-      this.state.selectedToolBarAction= null
-      return
-    }
-    this.state.selectedToolBarAction = this.state.toolbarActions.SINGLE_SELECT
+    this.state.selectedToolBarAction = null
     this.setSelectionMode(this.state.targetSelectionModes.SINGLE_PLAN_TARGET)
   }
 
   setSelectionPolygon() {
-    if (this.state.selectedToolBarAction === this.state.toolbarActions.POLYGON_SELECT) {
-      this.state.selectedToolBarAction= null
-      return
-    }
-    this.state.selectedToolBarAction = this.state.toolbarActions.POLYGON_SELECT
+    this.state.selectedToolBarAction = null
     this.setSelectionMode(this.state.targetSelectionModes.POLYGON_PLAN_TARGET)
   }
 
