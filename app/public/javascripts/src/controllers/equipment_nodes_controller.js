@@ -10,7 +10,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     existing: false,
     planned: false
   }
-
+  $scope.mapZoom = 0//map.getZoom()
+  
+  var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
+  
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
     var mapZoom = map.getZoom()
@@ -36,7 +39,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
-
+  
   // Creates a single map layer by substituting tileUrl parameters
   var createSingleMapLayer = (equipmentKey, networkEquipment, tileUrlType, libraryId, rootPlanId) => {
     var tileUrl = networkEquipment[tileUrlType]
@@ -70,23 +73,30 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Creates map layers for a specified category (e.g. "equipment")
   var createMapLayersForCategory = (categoryItems, mapLayers, createdMapLayerKeys) => {
     // First loop through all the equipment types (e.g. central_office)
+    $scope.mapZoom = map.getZoom()
     Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
-      if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
-        // We need to show the existing network equipment. Loop through all the selected library ids.
-        state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
-          var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
-          mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
+      
+      if ('point' !== networkEquipment.equipmentType 
+          || usePointAggregate
+          || $scope.mapZoom > networkEquipment.aggregateZoomThreshold){
+        
+        if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
+          // We need to show the existing network equipment. Loop through all the selected library ids.
+          state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+            var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
+            mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
+            createdMapLayerKeys.add(mapLayerKey)
+          })
+        }
+  
+        const planId = state.plan && state.plan.getValue() && state.plan.getValue().id
+        if ($scope.layerTypeVisibility.planned && networkEquipment.checked && planId) {
+          // We need to show the planned network equipment for this plan.
+          var mapLayerKey = `${categoryItemKey}_planned`
+          mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'plannedTileUrl', null, planId)
           createdMapLayerKeys.add(mapLayerKey)
-        })
-      }
-
-      const planId = state.plan && state.plan.getValue() && state.plan.getValue().id
-      if ($scope.layerTypeVisibility.planned && networkEquipment.checked && planId) {
-        // We need to show the planned network equipment for this plan.
-        var mapLayerKey = `${categoryItemKey}_planned`
-        mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'plannedTileUrl', null, planId)
-        createdMapLayerKeys.add(mapLayerKey)
+        }
       }
     })
   }
@@ -136,7 +146,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.layerTypeVisibility[type] = newValue
     updateMapLayers()
   }
-
+  
+  $scope.zoomTo = (zoomLevel) => { 
+    zoomLevel = Number(zoomLevel) + 1
+    //console.log(zoomLevel)
+    state.requestSetMapZoom.next(zoomLevel)
+  }
+  
   // Create a new set of map layers
   state.appReadyPromise.then(() => {
     updateMapLayers()

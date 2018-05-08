@@ -1106,7 +1106,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
     $http.post(apiUrl, optimizationBody)
       .then((response) => {
-        console.log(response)
+        //console.log(response)
         if (response.status >= 200 && response.status <= 299) {
           service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
           service.startPolling()

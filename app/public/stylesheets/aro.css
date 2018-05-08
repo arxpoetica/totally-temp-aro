@@ -544,6 +544,10 @@ footer nav {
   border-color: #217fdf;
 }
 
+.btn.btn-thin{
+	padding: 1px 8px;
+}
+
 ul.customer-type li{
   list-style: none;
   display: flex;

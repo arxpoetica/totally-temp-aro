@@ -8,7 +8,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/central_office.png",
       "selectedIconUrl": "/images/map_icons/aro/central_office_selected.png",
-      "aggregateZoomThreshold": "7",
+      "aggregateZoomThreshold": "8",
       "equipmentType": "point",
       "zIndex": 7590, 
       "drawingOptions": {
@@ -25,7 +25,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
       "selectedIconUrl": "/images/map_icons/aro/remote_terminal.png",
-      "aggregateZoomThreshold": "7",
+      "aggregateZoomThreshold": "10",
       "equipmentType": "point",
       "zIndex": 7580,
       "drawingOptions": {
@@ -45,7 +45,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/fiber_distribution_hub.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_distribution_hub.png",
-      "aggregateZoomThreshold": "12",
+      "aggregateZoomThreshold": "11",
       "equipmentType": "point",
       "zIndex": 7570, 
       "drawingOptions": {
@@ -79,7 +79,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
       "selectedIconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
-      "aggregateZoomThreshold": "14",
+      "aggregateZoomThreshold": "11",
       "equipmentType": "point",
       "zIndex": 7550, 
       "drawingOptions": {
@@ -96,7 +96,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/splice_point.png",
       "selectedIconUrl": "/images/map_icons/aro/splice_point.png",
-      "aggregateZoomThreshold": "14",
+      "aggregateZoomThreshold": "12",
       "equipmentType": "point",
       "zIndex": 7540, 
       "drawingOptions": {
@@ -112,7 +112,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
       "selectedIconUrl": "/images/map_icons/aro/service_layer_cran.png",
-      "aggregateZoomThreshold": "13",
+      "aggregateZoomThreshold": "11",
       "equipmentType": "polygon",
       "zIndex": 7490, 
       "drawingOptions": {
@@ -130,7 +130,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
       "selectedIconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
-      "aggregateZoomThreshold": "14",
+      "aggregateZoomThreshold": "11",
       "equipmentType": "point",
       "zIndex": 7530, 
       "drawingOptions": {
