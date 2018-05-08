@@ -19,11 +19,11 @@ class EditorInterfaceTreeController {
   isEditable(obj) {
     return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
   }
-
+  /*
   isExpandable(obj) {
     return (typeof obj === 'object' && !angular.equals({}, obj))// && object isn't empty, ToDo: check that at least one child it showable
   }
-
+  */
   toggleIsKeyExpanded(index) {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }

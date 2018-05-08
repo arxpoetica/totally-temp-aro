@@ -3,6 +3,14 @@
     padding-left: 5px;
     padding-right: 5px;
   }
+  
+  .label-message{
+    display: inline-block;
+    color: #888888;
+    float: right;
+    cursor: pointer;
+  }
+  
 </style>
 <div id="equipment_nodes_controller">
 
@@ -30,7 +38,12 @@
         <tbody>
           <tr><td colspan="2"><strong>Equipment</strong></td></tr>
           <tr ng-repeat="(layerKey, equipmentLayer) in configuration.networkEquipment.equipments" ng-if="equipmentLayer.can_view.indexOf(currentUser.rol) != -1">
-            <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
+            <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}
+              <div class="label-message" 
+                ng-if="mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
+                ng-click="zoomTo(equipmentLayer.aggregateZoomThreshold)"
+              >[zoom to]</div>
+            </td>
             <td>
               <input type="checkbox" class="checkboxfill"
                      ng-checked="equipmentLayer.checked"
