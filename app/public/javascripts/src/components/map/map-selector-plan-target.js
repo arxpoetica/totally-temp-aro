@@ -12,6 +12,7 @@ class MapSelectorPlanTargetController {
     })
     this.state = state
     this.selectionModes = state.selectionModes
+    this.document = $document
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
@@ -73,6 +74,7 @@ class MapSelectorPlanTargetController {
           state.reloadSelectedRoadSegments(event.roadSegments)
       }
     })
+
   }
 
   updateDrawingManagerState() {
@@ -92,6 +94,12 @@ class MapSelectorPlanTargetController {
   }
 
   $onInit() {
+    this.document.ready(()=> {
+      this.doInit()
+    })
+  }
+
+  doInit() {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
@@ -112,6 +120,7 @@ class MapSelectorPlanTargetController {
     })
 
   }
+
 
   $onDestroy() {
     if(this.unsub)
