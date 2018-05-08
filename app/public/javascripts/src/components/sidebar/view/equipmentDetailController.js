@@ -3,21 +3,19 @@ import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 
 class EquipmentDetailController {
 
-	constructor($http, $timeout, state) {
+	constructor($http, $timeout, state, configuration) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+    this.configuration = configuration
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     this.selectedEquipmentInfoChanges = {}
     this.selectedEquipmentInfoDispProps = []
     
     this.isEdit = false
-    // ToDo: get all this dynamically 
-    this.headerIcon = "/images/map_icons/aro/remote_terminal.png"
-    
-    
+    this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
     
     
     this.debugFeature = {
@@ -291,6 +289,13 @@ class EquipmentDetailController {
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
       //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
+        console.log()
+        if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
+          this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
+        }else{
+          this.headerIcon = ''
+        }
+        
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         this.selectedEquipmentInfo = equipmentInfo.networkNodeEquipment
@@ -354,6 +359,6 @@ class EquipmentDetailController {
   
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state']
+EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
 
 export default EquipmentDetailController
