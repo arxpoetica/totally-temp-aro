@@ -1,6 +1,6 @@
 class MapSplitController {
   
-  constructor($document, $timeout, $scope, state) {
+  constructor($document, $timeout, $scope, state, $compile) {
     this.$timeout = $timeout
     this.state = state
     this.displayModes = state.displayModes
@@ -36,6 +36,9 @@ class MapSplitController {
         })
         state.splitterObj.next(this.splitterObj)
       }
+      let element = $compile('<map-toggle-component></map-toggle-component>')($scope)
+      element[0].index = 3
+      map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(element[0])
     })
   }
 
@@ -62,7 +65,7 @@ class MapSplitController {
   }
 }
 
-MapSplitController.$inject = ['$document', '$timeout', '$scope', 'state']
+MapSplitController.$inject = ['$document', '$timeout', '$scope', 'state', '$compile']
 
 let mapSplit = {
   // NOTE: Cannot use a templateUrl for this component, as there is code in index.html that depends upon the "map-canvas"
