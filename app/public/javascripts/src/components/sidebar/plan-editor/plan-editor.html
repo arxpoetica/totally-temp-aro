@@ -77,21 +77,21 @@
               <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
                                 is-disabled="false"
                                 is-boundary="true"
-                                entity-details="{{$ctrl.Constants.SPATIAL_EDGE_ROAD}}">
+                                entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.SPATIAL_EDGE_ROAD}}", "directed": false }'>
               </draggable-button>
             </div>
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_copper.png"
                                 is-disabled="false"
                                 is-boundary="true"
-                                entity-details="{{$ctrl.Constants.SPATIAL_EDGE_COPPER}}">
+                                entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.SPATIAL_EDGE_COPPER}}", "directed": false }'>
               </draggable-button>
             </div>
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_copper_directed.png"
                                 is-disabled="false"
                                 is-boundary="true"
-                                entity-details="{{$ctrl.Constants.SPATIAL_EDGE_COPPER_DIRECTED}}">
+                                entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.SPATIAL_EDGE_COPPER}}", "directed": true }'>
               </draggable-button>
             </div>
             <div style="flex: 0 0 auto; line-height: 45px; padding-left: 5px; padding-right: 5px;">
