@@ -176,7 +176,7 @@ class PlanEditorController {
       coordinates: [mapObject.position.lng(), mapObject.position.lat()]
     }
     optimizationBody.spatialEdgeType = spatialEdgeType;
-    optimizationBody.directed = (spatialEdgeType === Constants.SPATIAL_EDGE_COPPER)  // directed analysis if we are using copper networks
+    optimizationBody.directed = (spatialEdgeType === Constants.SPATIAL_EDGE_COPPER_DIRECTED)  // directed analysis if thats what the user wants
     // Always send radius in meters to the back end
     optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
 
