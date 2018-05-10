@@ -14,6 +14,7 @@ class PlanEditorController {
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
     this.equipmentIdToBoundaryId = {}
+    this.boundaryInfoById = {}
     this.objectIdsToHide = new Set()
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
@@ -116,12 +117,14 @@ class PlanEditorController {
       .then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
+          console.log(feature)
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
                                                     attributes.selected_site_boundary_generation, distance,
                                                     attributes.spatialEdgeType)
           this.objectIdToProperties[feature.objectId] = properties
+          
         })
         // Save the equipment and boundary ID associations
         result.data.forEach((boundaryFeature) => {
@@ -158,14 +161,40 @@ class PlanEditorController {
     // Delete the associated boundary if it exists
     const boundaryObjectId = this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
     const spatialEdgeType = eventArgs.dropEvent.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
-    if (boundaryObjectId) {
-      delete this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
-      delete this.boundaryIdToEquipmentId[boundaryObjectId]
-      this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-    }
+    //if (boundaryObjectId) {
+    //  delete this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
+    //  delete this.boundaryIdToEquipmentId[boundaryObjectId]
+    //  this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+    //}
+    this.deleteBoundary(boundaryObjectId)
+    
     this.calculateCoverage(equipmentMapObject, spatialEdgeType)
   }
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  onRequestCalculateCoverage(){
+    
+    if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)){
+      var boundaryId = this.selectedMapObject.objectId 
+      var objectId = this.boundaryIdToEquipmentId[boundaryId]
+      var mapObject = this.objectIdToMapObject[objectId]
+      var spatialEdgeType = this.objectIdToProperties[objectId].spatialEdgeType
+      console.log(mapObject)
+      this.deleteBoundary(boundaryId)
+      this.calculateCoverage(mapObject, spatialEdgeType);
+    }
+  }
+  
   calculateCoverage(mapObject, spatialEdgeType) {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
@@ -211,10 +240,27 @@ class PlanEditorController {
         this.boundaryIdToEquipmentId[feature.objectId] = equipmentObjectId
         this.equipmentIdToBoundaryId[equipmentObjectId] = feature.objectId
         this.createMapObjects && this.createMapObjects([feature])
+        
+        this.boundaryInfoById[feature.objectId] = {
+          'coverageInfo': result.data.coverageInfo
+        }
+        
+        this.chartBoundaryCoverage(result.data.coverageInfo)
+        
+        console.log(result)
       })
       .catch((err) => console.error(err))
   }
-
+  
+  
+  
+  
+  
+  
+  chartBoundaryCoverage(coverageInfo){
+    
+  }
+  
   commitTransaction() {
     if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
@@ -377,12 +423,16 @@ class PlanEditorController {
       if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
         // If the associated equipment has a boundary associated with it, first delete *that* boundary
         var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
-        if (existingBoundaryId) {
-          delete this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
-          delete this.boundaryIdToEquipmentId[existingBoundaryId]
-          this.deleteObjectWithId && this.deleteObjectWithId(existingBoundaryId)
-          existingBoundaryId = null
-        }
+        
+        //if (existingBoundaryId) {
+        //  delete this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
+        //  delete this.boundaryIdToEquipmentId[existingBoundaryId]
+        //  this.deleteObjectWithId && this.deleteObjectWithId(existingBoundaryId)
+        //  existingBoundaryId = null
+        //}
+        this.deleteBoundary(existingBoundaryId)
+        existingBoundaryId = null
+        
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 0)
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
@@ -394,8 +444,21 @@ class PlanEditorController {
     this.updateObjectIdsToHide()
     this.$timeout()
   }
-
+  
+  
+  
+  
+  
+  deleteBoundary(boundaryId){
+    if (!boundaryId) return
+    var eqId = this.boundaryIdToEquipmentId[boundaryId]
+    delete this.equipmentIdToBoundaryId[eqId]
+    delete this.boundaryIdToEquipmentId[boundaryId]
+    this.deleteObjectWithId && this.deleteObjectWithId(boundaryId)
+  }
+  
   handleSelectedObjectChanged(mapObject) {
+    console.log(mapObject)
     this.selectedMapObject = mapObject
     this.$timeout()
   }
@@ -416,9 +479,11 @@ class PlanEditorController {
         // We have a boundary object. Delete it and recalculate coverage only if the boundary properties say to do so.
         const boundaryProperties = this.objectIdToProperties[boundaryObjectId]
         if (boundaryProperties.selectedSiteMoveUpdate === 'Auto-redraw') {
-          delete this.equipmentIdToBoundaryId[mapObject.objectId]
-          delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+          //delete this.equipmentIdToBoundaryId[mapObject.objectId]
+          //delete this.boundaryIdToEquipmentId[boundaryObjectId]
+          //this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+          this.deleteBoundary(boundaryObjectId)
+          
           this.calculateCoverage(mapObject, boundaryProperties.spatialEdgeType)
         }
       }
@@ -439,12 +504,13 @@ class PlanEditorController {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
       // If this is an equipment, delete its associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
-      if (boundaryObjectId) {
-        delete this.equipmentIdToBoundaryId[mapObject.objectId]
-        delete this.boundaryIdToEquipmentId[boundaryObjectId]
-        this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
+      //if (boundaryObjectId) {
+        //delete this.equipmentIdToBoundaryId[mapObject.objectId]
+        //delete this.boundaryIdToEquipmentId[boundaryObjectId]
+        //this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
         // No need to delete from the server, we will get another delete event for the boundary.
-      }
+      //}
+      this.deleteBoundary(boundaryObjectId)
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
     }
@@ -454,7 +520,13 @@ class PlanEditorController {
     this.saveSelectedBoundaryProperties() // I don't like to do this, but the boundary type affects the visibility of the boundary, so best to save it here.
     this.updateObjectIdsToHide()
   }
-
+  
+  toggleSiteBoundary() {
+    //if(this.state.showSiteBoundary && this.selectedBoundaryType) {
+      this.state.viewSettingsChanged.next()
+    //} 
+  }
+  
   updateObjectIdsToHide() {
     this.objectIdsToHide = new Set()
     Object.keys(this.objectIdToProperties).forEach((objectId) => {

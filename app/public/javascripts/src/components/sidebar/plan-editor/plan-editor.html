@@ -72,6 +72,18 @@
           <div ng-if="!$ctrl.state.showSiteBoundary" class="alert alert-warning">
             You can add site boundaries only if the "Site Boundaries" option is selected in View Settings
           </div>
+          
+          <div>
+            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
+			        style="margin-left: 2px;">
+			      <font>Site Boundaries</font>
+			      <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
+			        ng-model="$ctrl.state.selectedBoundaryType"
+			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
+			        ng-change="$ctrl.toggleSiteBoundary()">
+			      </select>
+          </div>
+          
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
@@ -200,6 +212,17 @@
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
           </button>
           <br>
+          <div ng-if="!$ctrl.boundaryInfoById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
+               ng-click="$ctrl.onRequestCalculateCoverage()"
+          >
+            [calculate coverage]
+          </div>
+          <div ng-if="$ctrl.boundaryInfoById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
+            <div>
+              Site boundary coverage: {{$ctrl.boundaryInfoById[$ctrl.selectedMapObject.objectId].coverageInfo.length}}
+            </div>
+            <canvas id="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
+          </div>
         </div>
       </div>
     </accordion-panel-contents>
