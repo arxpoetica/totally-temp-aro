@@ -52,6 +52,14 @@ services:
         working_dir: /srv/www/aro
         command: bash -c "/usr/sbin/sshd -D"
 
+    # Uncomment the container below if you want to run the PG Admin server
+    # pgadmin:
+    #     image: dpage/pgadmin4
+    #     ports:
+    #       - "8082:80"
+    #     environment:
+    #         PGADMIN_DEFAULT_EMAIL: parag@metronconsulting.com
+    #         PGADMIN_DEFAULT_PASSWORD: changeMePlease
 
 volumes:
     postgres-data:
