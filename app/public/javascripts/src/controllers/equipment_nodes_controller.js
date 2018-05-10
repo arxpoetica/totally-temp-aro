@@ -117,9 +117,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
     // Hack to show copper in toolbar ruler options
     Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
-      if(cable === 'copper') {  
-        state.rulerActions = $scope.configuration.networkEquipment.cables[cable].checked ? state.allRulerActions : state.defaultRulerActions
-        state.currentRulerAction = state.rulerActions.STRAIGHT_LINE        
+      if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
+        state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
+      } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
+        var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
+        index !== -1 && state.rulerActions.splice(index, 1)
+        state.currentRulerAction = state.allRulerActions.STRAIGHT_LINE
       }
     })
     createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)

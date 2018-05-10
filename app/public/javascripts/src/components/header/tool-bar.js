@@ -69,6 +69,7 @@ class ToolBarController {
       e.stopPropagation();
       e.preventDefault();
     })
+
   }
 
   $onInit() {
@@ -123,7 +124,7 @@ class ToolBarController {
     this.clearRulers()
     if(this.measuringStickEnabled) {
       this.clickListener = google.maps.event.addListener(this.mapRef, 'click', (point) => {
-        this.addToRulerSegments(point.latLng);
+        this.state.currentRulerAction.id === this.state.allRulerActions.STRAIGHT_LINE.id && this.addToRulerSegments(point.latLng);
       }); 
     } else {
       google.maps.event.removeListener(this.clickListener)      
@@ -349,6 +350,10 @@ class ToolBarController {
 
   rulerAction() {
     this.rulerActionEnabled = !this.rulerActionEnabled
+    this.enableRulerAction()
+  }
+
+  enableRulerAction() {
     if(!this.rulerActionEnabled) {
       //clear straight line ruler action
       this.clearStraightLineAction()
@@ -361,11 +366,11 @@ class ToolBarController {
   }
 
   onChangeRulerAction() {
-    if(this.state.currentRulerAction === this.state.rulerActions.STRAIGHT_LINE) {
+    if(this.state.currentRulerAction.id === this.state.allRulerActions.STRAIGHT_LINE.id) {
       this.toggleMeasuringStick()
       //clear copper ruler action
       this.clearRulerCopperAction()
-    } else if (this.state.currentRulerAction === this.state.rulerActions.COPPER) {
+    } else if (this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id) {
       //clear straight line ruler action
       this.clearStraightLineAction()
       this.rulerCopperAction()
@@ -373,41 +378,43 @@ class ToolBarController {
   }
 
   rulerCopperAction() {
-
     this.getCopperPoints()
-    //.then(() => {
-
-    //})
   }
 
   getCopperPoints() {
     this.copperPoints = []
     this.copperMarkers = []
-    //return new Promise((resolve, reject) => {
-      // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
-      this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-        if (!event || !event.latLng || this.state.currentRulerAction != this.state.rulerActions.COPPER) {
-          return
-        }
-        var copperMarker = new google.maps.Marker({
-          position: event.latLng,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 2
-          },
-          map: this.mapRef,
-          draggable: false,
-          zIndex: 100
-        });
+    this.listenForCopperMarkers()
+  }
 
-        this.copperMarkers.push(copperMarker)
-        this.copperPoints.push(event)
-        if(this.copperPoints.length > 1) {
-          //resolve()
-          this.drawCopperPath()
-        }
-      })
-    //})
+  listenForCopperMarkers() {
+    // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
+    this.copperClicklistener = google.maps.event.addListener(this.mapRef, 'click', (event) => {
+      if (!event || !event.latLng || this.state.currentRulerAction.id != this.state.allRulerActions.COPPER.id) {
+        console.log(event)
+        return
+      }
+      
+      var copperMarker = new google.maps.Marker({
+        position: event.latLng,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 2
+        },
+        map: this.mapRef,
+        draggable: false,
+        zIndex: 100
+      });
+
+      this.copperMarkers.push(copperMarker)
+      this.copperPoints.push(event)
+      if(this.copperPoints.length > 1) {
+        // clear copper ruler path if any
+        this.clearRulerCopperPath()
+        this.clearCopperMarkers()
+        this.drawCopperPath()
+      }
+    })
   }
 
   drawCopperPath() {
@@ -448,25 +455,26 @@ class ToolBarController {
         };
       });
       this.state.measuredDistance.next(result.data.length)
-      this.mapFeaturesSelectedEventObserver.unsubscribe()
       this.copperPoints = []
     })
   }
 
   clearRulerCopperAction() {
-    this.mapFeaturesSelectedEventObserver && this.mapFeaturesSelectedEventObserver.unsubscribe()
+    this.copperClicklistener && google.maps.event.removeListener(this.copperClicklistener)
+    this.clearRulerCopperPath()
+    this.clearCopperMarkers()
+  }
+
+  clearRulerCopperPath() {
     if (this.copperPath != null) {
       for (var i = 0; i < this.copperPath.length; i++) {
           this.mapRef.data.remove(this.copperPath[i]);
       }
     }
-    this.clearCopperMarkers()
   }
-
   clearCopperMarkers() {
     this.copperMarkers && this.copperMarkers.map((marker)=>this.clearRulerMarker(marker))
   }
-
 
 }
 

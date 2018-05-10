@@ -183,7 +183,7 @@
     <div class="dropdown-menu dropdown-menu-right ruler-dropdown">
       <select class="form-control" style="margin-top: 10px"
         ng-model="$ctrl.state.currentRulerAction"
-        ng-options="item as item.label for item in $ctrl.state.rulerActions"
+        ng-options="item as item.label for item in $ctrl.state.rulerActions track by item.id"
         ng-change="$ctrl.onChangeRulerAction()">
       </select>
     </div>
