@@ -944,6 +944,7 @@ module.exports = class NetworkPlan {
         if (this.inrange(-90,latlngSearch[0],90) && this.inrange(-180,latlngSearch[1],180)) {
           searchText = {
             name: text,
+            type: 'latlng',
             centroid: {
               type: 'Point',
               coordinates: [+latlngSearch[1], +latlngSearch[0]]

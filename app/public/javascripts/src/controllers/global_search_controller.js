@@ -1,6 +1,6 @@
 /* global app $ map */
 // Search Controller
-app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', 'state', ($scope, $rootScope, $http, map_tools, $timeout, state) => {
+app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', 'state', 'Utils', ($scope, $rootScope, $http, map_tools, $timeout, state, Utils) => {
   var ids = 0
   var search = $('#global-search-toolbutton .select2')
   search.select2({
@@ -19,7 +19,8 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
             id: 'id-' + (++ids),
             text: location.name,
             bounds: location.bounds,
-            centroid: location.centroid
+            centroid: location.centroid,
+            type: location.type
           }
         })
         $scope.search_results = items
@@ -37,6 +38,11 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
     if (selected) {
       var centroid = selected.centroid.coordinates
       map.setCenter({ lat: centroid[1], lng: centroid[0] })
+      if (selected.type === 'latlng') {
+        const pointSearchZoom = 17
+        map.setZoom(pointSearchZoom)
+        Utils.blinkMarker()
+      }  
     }
   })
   
