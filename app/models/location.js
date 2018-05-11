@@ -429,17 +429,35 @@ module.exports = class Location {
           SELECT attributes FROM businesses
           WHERE location_id=$1
         `
-
         return database.findOne(attributeQuery, [location_id])
-          .then((values) => {
-            locationInfo.attributes = {}
-            if(values && values.attributes) {
-              hstore.parse(values.attributes, function (result) {
-                locationInfo.attributes = result
-              })
+      })
+      .then((result)=>{
+        locationInfo.attributes = []
+        let order_property_query = 'select spf.name, sp.string_value from client.system_property sp join client.system_rule sr on sp.system_rule_id = sr.id join client.system_property_field spf on sp.property_field_id = spf.id where spf.name = \'business_attribute_order\''
+        let order_promise = database.findOne(order_property_query).then((order)=>{
+
+          hstore.parse(result.attributes , function (result) {
+            if(order) {
+              let order_array = order.string_value.split(',')
+              for(let k in order_array){
+                locationInfo.attributes.push({
+                  key: order_array[k],
+                  value: result[order_array[k]]
+                })
+              }
+            }else {
+              for(let k in result){
+                locationInfo.attributes.push({
+                  key: k,
+                  value: result[k]
+                })
+              }
             }
           })
 
+
+        })
+        return Promise.all([order_promise])
       })
       .then(() => {
         locationInfo.locSourceIds = locationSources

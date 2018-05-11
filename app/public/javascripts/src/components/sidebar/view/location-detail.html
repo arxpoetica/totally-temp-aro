@@ -71,8 +71,8 @@
         </td>
       </tr>
       <tr ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes" ng-if="$ctrl.showAttributes">
-        <td>{{k + ':'}}</td>
-        <td>{{v}}</td>
+        <td>{{v.key + ':'}}</td>
+        <td>{{v.value}}</td>
       </tr>
       <tr>
         <td>HouseHolds</td>
