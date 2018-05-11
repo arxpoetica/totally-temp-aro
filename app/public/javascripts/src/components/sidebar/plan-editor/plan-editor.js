@@ -123,7 +123,7 @@ class PlanEditorController {
       .then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
-          console.log(feature)
+          //console.log(feature)
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
@@ -195,7 +195,7 @@ class PlanEditorController {
       var objectId = this.boundaryIdToEquipmentId[boundaryId]
       var mapObject = this.objectIdToMapObject[objectId]
       var spatialEdgeType = this.objectIdToProperties[objectId].spatialEdgeType
-      console.log(mapObject)
+      //console.log(mapObject)
       this.deleteBoundary(boundaryId)
       this.calculateCoverage(mapObject, spatialEdgeType);
     }
@@ -250,7 +250,7 @@ class PlanEditorController {
         this.digestBoundaryCoverage(feature.objectId, result.data)
         //this.showCoverageChart(feature.objectId)
         
-        console.log(result)
+        //console.log(result)
       })
       .catch((err) => console.error(err))
   }
@@ -289,33 +289,52 @@ class PlanEditorController {
     
     this.getCensusTagsForBoundaryCoverage(objectId)
     
-    console.log(boundsCoverage.censusBlockCountById)
+    //console.log(boundsCoverage.censusBlockCountById)
   }
   
   getCensusTagsForBoundaryCoverage(objectId){
-    console.log(this.censusCategories)
+    //console.log(this.censusCategories)
     //this.boundaryCoverageById[objectId]
     
     var censusBlockIds = Object.keys(this.boundaryCoverageById[objectId].censusBlockCountById)
+    //console.log(censusBlockIds.length)
+    
     if (censusBlockIds.length > 0){
+      
       //id eq 61920 or id eq 56829
+      // we can't ask for more than about 100 at a time so we'll have to split up the batches 
       var filter = ''
+      var filterSets = []
       for (var cbI=0; cbI<censusBlockIds.length; cbI++){
-        if (cbI>0){
-          filter += ' or '
+        var setIndex = Math.floor( cbI / 100)
+        if ("string" != typeof filterSets[setIndex]){
+          filterSets[setIndex] = ''
+        }else{
+          filterSets[setIndex] += ' or '
         }
-        filter += 'id eq '+censusBlockIds[cbI]
+        
+        filterSets[setIndex] += 'id eq '+censusBlockIds[cbI]
       }
-      var entityListUrl = `/service/odata/censusBlocksEntity?$select=id,tagInfo&$filter=${filter}`
-      this.$http.get(entityListUrl).then((results) => {
-        console.log(results)
+      //console.log(filterSets)
+      
+      var censusBlockPromises = []
+      for (var promiseI=0; promiseI<filterSets.length; promiseI++){
+        var entityListUrl = `/service/odata/censusBlocksEntity?$select=id,tagInfo&$filter=${filterSets[promiseI]}`
+        censusBlockPromises.push(this.$http.get(entityListUrl))
+      }
+      Promise.all(censusBlockPromises).then((results) => {
+        //console.log(results)
+        var rows = []
+        for (var resultI=0; resultI<results.length; resultI++){
+          rows = rows.concat(results[resultI].data)
+        }
         var censusTagsByCat = {}
         // iterate through each censusblock
-        for (var rowI=0; rowI<results.data.length; rowI++){
-          var row = results.data[rowI]
-          console.log(row)
+        for (var rowI=0; rowI<rows.length; rowI++){
+          var row = rows[rowI]
+          //console.log(row)
           var tagInfo = this.formatCensusBlockData(row.tagInfo)
-          console.log(tagInfo)
+          //console.log(tagInfo)
           
           // iterate through each category of the CB
           Object.keys(tagInfo).forEach((catId) => {
@@ -331,17 +350,19 @@ class PlanEditorController {
               if (!censusTagsByCat[catId].tags.hasOwnProperty(tagId)){
                 censusTagsByCat[catId].tags[tagId] = {}
                 censusTagsByCat[catId].tags[tagId].description = this.censusCategories[catId].tags[tagId].description
+                censusTagsByCat[catId].tags[tagId].colourHash = this.censusCategories[catId].tags[tagId].colourHash
                 censusTagsByCat[catId].tags[tagId].count = 0
               }
-              console.log(this.boundaryCoverageById[objectId].censusBlockCountById[row.id])
+              //console.log(this.boundaryCoverageById[objectId].censusBlockCountById[row.id])
               censusTagsByCat[catId].tags[tagId].count += this.boundaryCoverageById[objectId].censusBlockCountById[row.id]
             })
             
           })
         }
         
-        console.log(censusTagsByCat)
+        //console.log(censusTagsByCat)
         this.boundaryCoverageById[objectId].censusTagsByCat = censusTagsByCat
+        this.$timeout()
       })
       
     }else{
@@ -412,7 +433,7 @@ class PlanEditorController {
       }     
     }
     
-    console.log(data)
+    //console.log(data)
     var coverageChart = new Chart(ctx, {
       type: 'bar',
       data: settingsData,
@@ -621,7 +642,7 @@ class PlanEditorController {
   }
   
   handleSelectedObjectChanged(mapObject) {
-    console.log(mapObject)
+    //console.log(mapObject)
     this.selectedMapObject = mapObject
     this.$timeout()
   }
