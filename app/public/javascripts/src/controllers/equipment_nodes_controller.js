@@ -132,7 +132,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
         var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
         index !== -1 && state.rulerActions.splice(index, 1)
-        state.currentRulerAction = state.allRulerActions.STRAIGHT_LINE
       }
     })
     createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)
