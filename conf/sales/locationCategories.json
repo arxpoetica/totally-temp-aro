@@ -8,22 +8,22 @@
 		},
 		{
 			"iconUrl": "/images/map_icons/sales/businesses_medium_default.png",
-			"label": "Lit Building",
+			"label": "Fiber Lit Building",
 			"key": "lit_building"
 		},
 		{
 			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
-			"label": "Tier 1 (<1,000 ft from splice point)",
+			"label": "DNB Tier 1 (<1,000 ft from splice point)",
 			"key": "tier_1"
 		},
 		{
 			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
-			"label": "Tier 2 (1,000-3,000 ft)",
+			"label": "DNB Tier 2 (1,000-3,000 ft)",
 			"key": "tier_2"
 		},
 		{
 			"iconUrl": "/images/map_icons/sales/businesses_large_default.png",
-			"label": "Tier 3 (>3,000 ft)",
+			"label": "DNB Tier 3 (>3,000 ft)",
 			"key": "tier_3"
 		}
 	],
