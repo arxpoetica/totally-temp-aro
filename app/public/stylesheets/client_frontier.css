@@ -86,7 +86,8 @@
 
 
 .map_tool_label {
-  background: #D9272D;
+  background: transparent;
+  color: #D9272D;
 }
 
 .network-plan {
