@@ -1,5 +1,5 @@
 class BoundaryProperties {
-  constructor(selectedSiteBoundaryTypeId, selectedSiteMoveUpdate, selectedSiteBoundaryGeneration, distance, spatialEdgeType) {
+  constructor(selectedSiteBoundaryTypeId, selectedSiteMoveUpdate, selectedSiteBoundaryGeneration, distance, spatialEdgeType, directed) {
     this.selectedSiteBoundaryTypeId = selectedSiteBoundaryTypeId  // List of all types is in state.js
     this.siteMoveUpdates = [
       'Auto-redraw',
@@ -11,6 +11,7 @@ class BoundaryProperties {
     ]
     this.selectedSiteBoundaryGeneration = selectedSiteBoundaryGeneration
     this.spatialEdgeType = spatialEdgeType
+    this.directed = directed
     this.isDirty = false
   }
 }
