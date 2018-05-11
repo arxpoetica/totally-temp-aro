@@ -81,10 +81,10 @@
           "fiberAvailable": {
             "type": "boolean"
           },
-          "physicallyLinked": {
+          "t1": {
             "type": "boolean"
           },
-          "t1": {
+          "physicallyLinked": {
             "type": "boolean"
           }
         }
@@ -321,10 +321,10 @@
               "fiberAvailable": {
                 "type": "boolean"
               },
-              "physicallyLinked": {
+              "t1": {
                 "type": "boolean"
               },
-              "t1": {
+              "physicallyLinked": {
                 "type": "boolean"
               }
             }
@@ -527,10 +527,53 @@
       "fiberAvailable": {
         "type": "boolean"
       },
-      "physicallyLinked": {
+      "t1": {
         "type": "boolean"
       },
-      "t1": {
+      "physicallyLinked": {
+        "type": "boolean"
+      }
+    }
+  },
+  {
+    "type": "object",
+    "id": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+    "properties": {
+      "equipmentItemId": {
+        "type": "integer"
+      },
+      "quantity": {
+        "type": "number"
+      },
+      "constructionCost": {
+        "type": "number"
+      },
+      "installCost": {
+        "type": "number"
+      },
+      "rank": {
+        "type": "integer"
+      },
+      "equipmentName": {
+        "type": "string"
+      },
+      "code": {
+        "type": "string"
+      },
+      "extendedAttributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "subComponents": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
+        }
+      },
+      "oneTimeCost": {
         "type": "boolean"
       }
     }

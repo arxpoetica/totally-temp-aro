@@ -78,8 +78,6 @@ class ClassGenerator {
       }
       const inputUrn = this.getUrnForType(classDef)
       const containerUrn = this.getUrnForType(containerType)
-      console.log(inputUrn)
-      console.log(containerUrn)
       return (input.type === 'array') && (inputUrn !== containerUrn)
     })
     this.registerImportsHelper(Handlebars)

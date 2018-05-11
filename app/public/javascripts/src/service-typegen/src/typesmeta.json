@@ -366,6 +366,94 @@
     ]
   },
   {
+    "schemaReference": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+    "displayProperties": [
+      {
+        "propertyName": "quantity",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Quantity",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "code",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Code",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "installCost",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Install Cost",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "oneTimeCost",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "One Time Cost",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "rank",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Rank",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "subComponents",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Sub Components",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "equipmentName",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Name",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "equipmentItemId",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Equipment Item Id",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "extendedAttributes",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Extended Attributes",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "constructionCost",
+        "levelOfDetail": 1,
+        "format": "",
+        "displayName": "Cost",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
+      }
+    ]
+  },
+  {
     "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
     "displayProperties": [
       {
