@@ -437,17 +437,25 @@ module.exports = class Location {
         let order_property_query = `select spf.name, sp.string_value from client.system_property sp join client.system_rule sr on sp.system_rule_id = sr.id join client.system_property_field spf on sp.property_field_id = spf.id where spf.name = \'${order_property_string}\'`
         let order_promise = database.findOne(order_property_query).then((order)=>{
 
-          hstore.parse(result.attributes , function (result) {
-            if(order) {
-              let order_array = order.string_value.split(',')
-              for(let k in order_array){
-                locationInfo.attributes.push({
-                  key: order_array[k],
-                  value: result[order_array[k]]
-                })
+          hstore.parse(result.attributes, function (result) {
+            if (order) {
+              let order_array = JSON.parse(order.string_value)
+              let last_index = order_array.length
+              let index = -1
+              for (let k in result) {
+                if (order_array.indexOf(k) !== -1) {
+                  index = order_array.indexOf(k)
+                } else {
+                  index = last_index
+                  last_index++
+                }
+                locationInfo.attributes[index] = {
+                  key: k,
+                  value: result[k]
+                }
               }
-            }else {
-              for(let k in result){
+            } else {
+              for (let k in result) {
                 locationInfo.attributes.push({
                   key: k,
                   value: result[k]
