@@ -73,16 +73,21 @@
             You can add site boundaries only if the "Site Boundaries" option is selected in View Settings
           </div>
           
-          <div>
-            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
-			        style="margin-left: 2px;">
-			      <font>Site Boundaries</font>
-			      <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
+          <div style="display: flex">
+            <div style="flex: 0 0 auto; padding-right: 20px;">
+	            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
+				        style="margin-left: 2px;">
+				        Site Boundaries
+				    </div>
+			      <select class="form-control" style="flex: 1 1 auto"
+			        ng-if="$ctrl.state.showSiteBoundary" 
 			        ng-model="$ctrl.state.selectedBoundaryType"
 			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
 			        ng-change="$ctrl.toggleSiteBoundary()">
 			      </select>
           </div>
+          
+          <hr class="plan-editor-hr">
           
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
@@ -203,25 +208,39 @@
               </tr>
             </tbody>
           </table>
-          <button ng-class="{ 'btn btn-sm pull-right': true,
-                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
-                  style="margin-bottom: 10px">
-            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
-          </button>
-          <br>
-          <div ng-if="!$ctrl.boundaryInfoById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
-               ng-click="$ctrl.onRequestCalculateCoverage()"
-          >
-            [calculate coverage]
+          <div class="clearfix">
+	          <button ng-class="{ 'btn btn-sm pull-right': true,
+	                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+	                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+	                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+	                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
+	                  style="margin-bottom: 10px">
+	            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
+	          </button>
           </div>
-          <div ng-if="$ctrl.boundaryInfoById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
+          
+          <hr class="plan-editor-hr">
+          
+          <button class="btn btn-primary btn-sm" 
+                  ng-if="!$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
+                  ng-click="$ctrl.onRequestCalculateCoverage()"
+          >
+            calculate coverage
+          </button>
+          <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
             <div>
-              Site boundary coverage: {{$ctrl.boundaryInfoById[$ctrl.selectedMapObject.objectId].coverageInfo.length}}
+              Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
             </div>
-            <canvas id="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
+            <canvas ng-init="$ctrl.showCoverageChart()" id="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
+            <div>
+              Locations by Census Block Tag
+              <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
+                {{cat.description}}
+                <div ng-repeat="tag in cat.tags">
+                  {{tag.description}}: {{tag.count}}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
