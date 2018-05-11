@@ -19,6 +19,21 @@
     margin-top: 10px;
     margin-bottom: 10px;
   }
+  
+  .plan-editor-census-cat{
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  
+  .plan-editor-census-tag{
+    padding-left: 20px;
+  }
+  
+  .plan-editor-census-tag-count{
+    margin-left: 10px;
+    font-weight: bold;
+  }
+  
 </style>
 
 <div class="edit-plan-container">
@@ -72,6 +87,23 @@
           <div ng-if="!$ctrl.state.showSiteBoundary" class="alert alert-warning">
             You can add site boundaries only if the "Site Boundaries" option is selected in View Settings
           </div>
+          
+          <div style="display: flex">
+            <div style="flex: 0 0 auto; padding-right: 20px;">
+	            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
+				        style="margin-left: 2px;">
+				        Site Boundaries
+				    </div>
+			      <select class="form-control" style="flex: 1 1 auto"
+			        ng-if="$ctrl.state.showSiteBoundary" 
+			        ng-model="$ctrl.state.selectedBoundaryType"
+			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
+			        ng-change="$ctrl.toggleSiteBoundary()">
+			      </select>
+          </div>
+          
+          <hr class="plan-editor-hr">
+          
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
@@ -198,15 +230,45 @@
               </tr>
             </tbody>
           </table>
-          <button ng-class="{ 'btn btn-sm pull-right': true,
-                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
-                  style="margin-bottom: 10px">
-            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
+          <div class="clearfix">
+	          <button ng-class="{ 'btn btn-sm pull-right': true,
+	                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+	                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+	                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+	                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
+	                  style="margin-bottom: 10px">
+	            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
+	          </button>
+          </div>
+          
+          <hr class="plan-editor-hr">
+          
+          <button class="btn btn-primary btn-sm" 
+                  ng-if="!$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
+                  ng-click="$ctrl.onRequestCalculateCoverage()"
+          >
+            calculate coverage
           </button>
-          <br>
+          <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
+            <div class="ei-header">
+              Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
+            </div>
+            <canvas ng-init="$ctrl.showCoverageChart()" id="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
+            <div style="margin-bottom: 20px;">
+              <div class="ei-header">
+                Locations by Census Block Tag
+              </div>
+              <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
+                <div class="ei-property-item plan-editor-census-cat">
+                  {{cat.description}}
+                </div>
+                <div class="plan-editor-census-tag" ng-repeat="tag in cat.tags">
+                  <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div>
+                  {{tag.description}}: <span class="plan-editor-census-tag-count">{{tag.count}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </accordion-panel-contents>

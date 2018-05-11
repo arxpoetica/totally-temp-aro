@@ -1325,7 +1325,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     CensusBlocksEntity: []
   }
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
-    
+    // the query is currently causing a DB query that never returns and kills resources. 
+    /*
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
 
     var filter = ''
@@ -1365,7 +1366,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((results) => {
       service.entityTypeList[entityType] = results.data
     })
-
+    */
   }
 
   return service
