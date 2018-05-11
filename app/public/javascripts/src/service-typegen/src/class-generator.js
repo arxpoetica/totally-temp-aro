@@ -68,6 +68,20 @@ class ClassGenerator {
     Handlebars.registerHelper('isArray', (input) => {
       return input.type === 'array'
     })
+    Handlebars.registerHelper('shouldIncludePropertyType', (input, containerType) => {
+      if (!input) {
+        return false
+      }
+      const classDef = input.items || input
+      if (!classDef) {
+        return false
+      }
+      const inputUrn = this.getUrnForType(classDef)
+      const containerUrn = this.getUrnForType(containerType)
+      console.log(inputUrn)
+      console.log(containerUrn)
+      return (input.type === 'array') && (inputUrn !== containerUrn)
+    })
     this.registerImportsHelper(Handlebars)
     this.registerAssignmentHelper(Handlebars)
   }

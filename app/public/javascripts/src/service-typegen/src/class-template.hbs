@@ -8,7 +8,7 @@
 {{!-- Import dependent classes that are required by the current class --}}
 {{importDependentClasses classDef.properties}}
 {{#each classDef.properties}}
-{{#if (isArray this)}}
+{{#if (shouldIncludePropertyType this ../classDef)}}
 import {{classNameExtractor this.items}} from './{{classNameExtractor this.items}}'
 {{/if}}
 {{/each}}
