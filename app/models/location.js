@@ -433,7 +433,8 @@ module.exports = class Location {
       })
       .then((result)=>{
         locationInfo.attributes = []
-        let order_property_query = 'select spf.name, sp.string_value from client.system_property sp join client.system_rule sr on sp.system_rule_id = sr.id join client.system_property_field spf on sp.property_field_id = spf.id where spf.name = \'business_attribute_order\''
+        let order_property_string = 'business_attribute_order_' + process.env.ARO_CLIENT.toString().toLowerCase()
+        let order_property_query = `select spf.name, sp.string_value from client.system_property sp join client.system_rule sr on sp.system_rule_id = sr.id join client.system_property_field spf on sp.property_field_id = spf.id where spf.name = \'${order_property_string}\'`
         let order_promise = database.findOne(order_property_query).then((order)=>{
 
           hstore.parse(result.attributes , function (result) {
