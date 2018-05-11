@@ -1324,9 +1324,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     NetworkEquipmentEntity: [],
     CensusBlocksEntity: []
   }
-  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
-    // the query is currently causing a DB query that never returns and kills resources. 
-    /*
+  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
 
     var filter = ''
@@ -1335,7 +1333,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
       if(pattern.test(filterObj)) {
         filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
-      } 
+      } else {
+        return //157501341: Location search should not reach out to endpoint without supplying a valid object id
+      }
     } else {
       filter = filterObj ? `substringof(${searchColumn},'${filterObj}')` : filter
     }
@@ -1366,7 +1366,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((results) => {
       service.entityTypeList[entityType] = results.data
     })
-    */
+    
   }
 
   return service

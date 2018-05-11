@@ -1280,3 +1280,17 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .app_wrapper_container.footer {
   bottom: 25px;
 }
+
+.blink {
+  position: absolute;
+  left:  50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: #ff0000;
+  border-radius: 50%;
+  -webkit-transform-origin: 0 0;
+  animation: grow .3s linear forwards;
+  -webkit-animation: grow .3s linear forwards;
+          animation: grow .3s linear forwards;
+}
