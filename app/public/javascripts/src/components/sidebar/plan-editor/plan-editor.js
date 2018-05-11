@@ -267,7 +267,7 @@ class PlanEditorController {
     for (var localI=0; localI<boundaryData.coverageInfo.length; localI++){
       var location = boundaryData.coverageInfo[localI]
       if ("number" != typeof location.distance) continue // skip these 
-      
+      if ('feet' == this.configuration.units.length_units) location.distance *= 3.28084
       locations.push(location)
       if (!censusBlockCountById.hasOwnProperty(location.censusBlockId)){
         censusBlockCountById[location.censusBlockId] = 0
