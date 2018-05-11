@@ -184,6 +184,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     ]
   }
 
+  //ruler actions
+  service.allRulerActions = Object.freeze({
+    STRAIGHT_LINE:{ id: 'STRAIGHT_LINE', label: 'Straight Line' },
+    COPPER: { id: 'COPPER', label: 'Copper' }
+  });
+
+  service.rulerActions = [service.allRulerActions.STRAIGHT_LINE]
+
+  service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
+
   // The panels in the view mode
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
@@ -1314,8 +1324,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     NetworkEquipmentEntity: [],
     CensusBlocksEntity: []
   }
-  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
-    
+  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
 
     var filter = ''
@@ -1324,7 +1333,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
       if(pattern.test(filterObj)) {
         filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
-      } 
+      } else {
+        return //157501341: Location search should not reach out to endpoint without supplying a valid object id
+      }
     } else {
       filter = filterObj ? `substringof(${searchColumn},'${filterObj}')` : filter
     }
@@ -1355,7 +1366,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((results) => {
       service.entityTypeList[entityType] = results.data
     })
-
+    
   }
 
   return service

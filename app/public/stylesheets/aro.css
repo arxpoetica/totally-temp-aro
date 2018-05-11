@@ -1257,6 +1257,18 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   margin-top: 2px;
 }
 
+.map-toggle {
+  user-select: none;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+  border-radius: 2px;
+  cursor: pointer;
+  background-color: rgb(255, 255, 255);
+  width: 28px;
+  height: 28px;
+  position: relative;
+  right: 11px;
+}
+
 .app_wrapper_container {
   position:absolute;
   top: 0px;
@@ -1267,4 +1279,18 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 .app_wrapper_container.footer {
   bottom: 25px;
+}
+
+.blink {
+  position: absolute;
+  left:  50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: #ff0000;
+  border-radius: 50%;
+  -webkit-transform-origin: 0 0;
+  animation: grow .3s linear forwards;
+  -webkit-animation: grow .3s linear forwards;
+          animation: grow .3s linear forwards;
 }

@@ -13,6 +13,17 @@ class Utilities {
     a.click();
     this.document.body.removeChild(a);
   }
+
+  blinkMarker(){
+    setTimeout( function(){
+      var blink = this.document.createElement( 'div' );
+      blink.className = 'blink';
+      this.document.querySelector('#map-canvas').appendChild( blink );
+      setTimeout( function(){
+        blink.remove();
+      }, 1000 );
+    }, 1000 );
+  }
 }
 
 Utilities.$inject =['$document'];

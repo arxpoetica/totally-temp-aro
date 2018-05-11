@@ -166,7 +166,7 @@
       <p ng-if="!tool.separator">
 
 
-        <a ng-if="currentUser.rol === 'admin'" href="javascript:void(0)" class="btn btn-primary map-tools-button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
+        <a ng-if="currentUser.rol !== 'sales'" href="javascript:void(0)" class="btn btn-primary map-tools-button" ng-attr-title="{{tool.name}}" data-toggle="tooltip" data-placement="right"
            ng-attr-id="map_tools_toggle_{{tool.id}}"
            ng-class="{'active': map_tools.is_visible(tool.id), 'disabled': (!map_tools.isEnabled(tool.id)) }"
            ng-click="map_tools.toggle(tool)"><span ng-attr-class="{{tool.icon}} map-tools-button-icon"></span></a>

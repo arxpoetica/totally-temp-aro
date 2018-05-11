@@ -42,6 +42,7 @@ import boundaries from './views/boundaries'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
+import mapToggleComponent from './map/map-toggle'
 import toolBar from './header/tool-bar'
 import reportModal from './header/report-modal'
 import networkPlanModal from './header/network-plan-modal'
@@ -114,6 +115,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('mapSplit', mapSplit)
    .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
    .component('mapSelectorExportLocations', mapSelectorExportLocations)
+   .component('mapToggleComponent', mapToggleComponent)
    .component('toolBar', toolBar)
    .component('reportModal', reportModal)
    .component('networkPlanModal', networkPlanModal)

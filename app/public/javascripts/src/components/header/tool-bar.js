@@ -1,11 +1,14 @@
+import Constants from '../common/constants'
+
 class ToolBarController {
 
-  constructor($element, $timeout,$document ,state, map_tools, $window, configuration) {
+  constructor($element, $timeout,$document ,$http,state, map_tools, $window, configuration) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
     this.$document = $document
     this.$window = $window
+    this.$http = $http
     this.configuration = configuration
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
@@ -14,8 +17,10 @@ class ToolBarController {
     this.showDropDown = false
     this.heatMapOption = true
     this.measuringStickEnabled = false
+    this.rulerActionEnabled = false
     this.currentUser = state.getUser()
     this.switchIcon = config.ARO_CLIENT === 'frontier'
+    this.Constants = Constants
 
     this.min = 0
     // Map tile settings used for debugging
@@ -51,12 +56,20 @@ class ToolBarController {
         e.preventDefault();
     })
 
+    //toggle ruler dropdown
+    $('.rulerDropdown').on('show.bs.dropdown', function (e) {
+      $(this).find('.ruler-dropdown').toggle()
+      e.stopPropagation();
+      e.preventDefault();
+    })
+
     //toggle toolbar dropdown
     $('.dropdown').on('show.bs.dropdown', function (e) {
       $(this).find('.tool-bar-dropdown').toggle()
       e.stopPropagation();
       e.preventDefault();
     })
+
   }
 
   $onInit() {
@@ -107,16 +120,22 @@ class ToolBarController {
   }
 
   toggleMeasuringStick() {
-    this.measuringStickEnabled = !this.measuringStickEnabled
+    this.measuringStickEnabled = true
     this.clearRulers()
     if(this.measuringStickEnabled) {
       this.clickListener = google.maps.event.addListener(this.mapRef, 'click', (point) => {
-        this.addToRulerSegments(point.latLng);
+        this.state.currentRulerAction.id === this.state.allRulerActions.STRAIGHT_LINE.id && this.addToRulerSegments(point.latLng);
       }); 
     } else {
       google.maps.event.removeListener(this.clickListener)      
     }
     this.state.selectedToolBarAction = null
+  }
+
+  clearStraightLineAction() {
+    this.measuringStickEnabled = false
+    this.clearRulers()
+    this.clickListener && google.maps.event.removeListener(this.clickListener) 
   }
 
   addToRulerSegments(latLng) {
@@ -328,9 +347,138 @@ class ToolBarController {
   showCableDirection() {
     this.state.viewSettingsChanged.next()
   }
+
+  rulerAction() {
+    this.rulerActionEnabled = !this.rulerActionEnabled
+    this.enableRulerAction()
+  }
+
+  enableRulerAction() {
+    if(!this.rulerActionEnabled) {
+      //clear straight line ruler action
+      this.clearStraightLineAction()
+      //clear copper ruler action
+      this.clearRulerCopperAction()
+      return
+    } else {
+      this.onChangeRulerAction()
+    }
+  }
+
+  onChangeRulerAction() {
+    if(this.state.currentRulerAction.id === this.state.allRulerActions.STRAIGHT_LINE.id) {
+      this.toggleMeasuringStick()
+      //clear copper ruler action
+      this.clearRulerCopperAction()
+    } else if (this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id) {
+      //clear straight line ruler action
+      this.clearStraightLineAction()
+      this.rulerCopperAction()
+    }
+  }
+
+  rulerCopperAction() {
+    this.getCopperPoints()
+  }
+
+  getCopperPoints() {
+    this.copperPoints = []
+    this.copperMarkers = []
+    this.listenForCopperMarkers()
+  }
+
+  listenForCopperMarkers() {
+    // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
+    this.copperClicklistener = google.maps.event.addListener(this.mapRef, 'click', (event) => {
+      if (!event || !event.latLng || this.state.currentRulerAction.id != this.state.allRulerActions.COPPER.id) {
+        console.log(event)
+        return
+      }
+      
+      var copperMarker = new google.maps.Marker({
+        position: event.latLng,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 2
+        },
+        map: this.mapRef,
+        draggable: false,
+        zIndex: 100
+      });
+
+      this.copperMarkers.push(copperMarker)
+      this.copperPoints.push(event)
+      if(this.copperPoints.length > 1) {
+        // clear copper ruler path if any
+        this.clearRulerCopperPath()
+        this.clearCopperMarkers()
+        this.drawCopperPath()
+      }
+    })
+  }
+
+  drawCopperPath() {
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = this.state.getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.analysis_type = 'POINT_TO_POINT'
+    optimizationBody.pointFrom = {
+      type: 'Point',
+      coordinates: [this.copperPoints[0].latLng.lng(), this.copperPoints[0].latLng.lat()]
+    }
+    let pointTo = this.copperPoints[this.copperPoints.length - 1]
+    optimizationBody.pointTo = {
+      type: 'Point',
+      coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
+    }
+    optimizationBody.spatialEdgeType = 'road';
+    optimizationBody.directed = false
+
+    this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
+    .then((result) => {
+      //get copper properties
+      let copperFeatures = this.configuration.networkEquipment.cables['copper']
+      var geoJson = {
+        "type": "FeatureCollection",
+        "features": [{
+          "type": "Feature",
+          "properties": {},
+          "geometry":{}
+        }]
+      }
+
+      geoJson.features[0].geometry = result.data.path
+      this.copperPath = this.mapRef.data.addGeoJson(geoJson)
+      this.mapRef.data.setStyle(function (feature) {
+        return {
+          strokeColor: copperFeatures.drawingOptions.strokeStyle
+        };
+      });
+      this.state.measuredDistance.next(result.data.length)
+      this.copperPoints = []
+    })
+  }
+
+  clearRulerCopperAction() {
+    this.copperClicklistener && google.maps.event.removeListener(this.copperClicklistener)
+    this.clearRulerCopperPath()
+    this.clearCopperMarkers()
+  }
+
+  clearRulerCopperPath() {
+    if (this.copperPath != null) {
+      for (var i = 0; i < this.copperPath.length; i++) {
+          this.mapRef.data.remove(this.copperPath[i]);
+      }
+    }
+  }
+  clearCopperMarkers() {
+    this.copperMarkers && this.copperMarkers.map((marker)=>this.clearRulerMarker(marker))
+  }
+
 }
 
-ToolBarController.$inject = ['$element', '$timeout', '$document', 'state', 'map_tools', '$window', 'configuration']
+ToolBarController.$inject = ['$element', '$timeout', '$document','$http' ,'state', 'map_tools', '$window', 'configuration']
 
 let toolBar = {
   templateUrl: '/components/header/tool-bar.html',
