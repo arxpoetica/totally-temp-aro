@@ -21,7 +21,7 @@ class Utilities {
       this.document.querySelector('#map-canvas').appendChild( blink );
       setTimeout( function(){
         blink.remove();
-      }, 1000 );
+      }, 5000 );
     }, 1000 );
   }
 }

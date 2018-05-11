@@ -187,10 +187,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   //ruler actions
   service.allRulerActions = Object.freeze({
     STRAIGHT_LINE:{ id: 'STRAIGHT_LINE', label: 'Straight Line' },
+    ROAD_SEGMENT:{ id: 'ROAD_SEGMENT', label: 'Road Segment' },
     COPPER: { id: 'COPPER', label: 'Copper' }
   });
 
-  service.rulerActions = [service.allRulerActions.STRAIGHT_LINE]
+  service.rulerActions = [
+    service.allRulerActions.STRAIGHT_LINE,
+    service.allRulerActions.ROAD_SEGMENT
+  ]
 
   service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
 

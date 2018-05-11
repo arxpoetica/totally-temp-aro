@@ -370,9 +370,11 @@ class ToolBarController {
       this.toggleMeasuringStick()
       //clear copper ruler action
       this.clearRulerCopperAction()
-    } else if (this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id) {
+    } else if (this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id
+      || this.state.currentRulerAction.id === this.state.allRulerActions.ROAD_SEGMENT.id) {
       //clear straight line ruler action
       this.clearStraightLineAction()
+      this.clearRulerCopperAction()
       this.rulerCopperAction()
     }
   }
@@ -390,7 +392,7 @@ class ToolBarController {
   listenForCopperMarkers() {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.copperClicklistener = google.maps.event.addListener(this.mapRef, 'click', (event) => {
-      if (!event || !event.latLng || this.state.currentRulerAction.id != this.state.allRulerActions.COPPER.id) {
+      if (!event || !event.latLng || this.state.currentRulerAction.id === this.state.allRulerActions.STRAIGHT_LINE.id) {
         console.log(event)
         return
       }
@@ -431,7 +433,8 @@ class ToolBarController {
       type: 'Point',
       coordinates: [pointTo.latLng.lng(), pointTo.latLng.lat()]
     }
-    optimizationBody.spatialEdgeType = 'road';
+    var spatialEdgeType = this.state.currentRulerAction.id === this.state.allRulerActions.COPPER.id ? this.Constants.SPATIAL_EDGE_COPPER : this.Constants.SPATIAL_EDGE_ROAD
+    optimizationBody.spatialEdgeType = spatialEdgeType
     optimizationBody.directed = false
 
     this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
