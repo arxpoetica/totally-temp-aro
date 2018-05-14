@@ -493,6 +493,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return Promise.resolve()
     }
   }
+
+  service.selectedServiceArea = new Rx.BehaviorSubject()
+  service.reloadSelectedServiceArea = (serviceAreaId) => {
+    //Display only one Selected SA Details in viewMode at a time
+    service.selectedServiceArea.next(serviceAreaId)
+    service.requestMapLayerRefresh.next({})     
+  }
   
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {

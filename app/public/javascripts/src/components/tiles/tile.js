@@ -49,9 +49,15 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
-  // Sets the selected service area ids
+  // Sets the selected service area ids for analysis
   setselectedServiceAreas(selectedServiceAreas) {
-	this.selectedServiceAreas = selectedServiceAreas
+    this.selectedServiceAreas = selectedServiceAreas
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected service area id to view details
+  setselectedServiceArea(selectedServiceArea) {
+    this.selectedServiceArea = selectedServiceArea
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -641,7 +647,7 @@ class MapTileRenderer {
         }
       }
       
-    }else if(  this.selectedServiceAreas.has(feature.properties.id)
+    } else if (this.selectedServiceAreas.has(feature.properties.id)
          && this.selectedDisplayMode == this.displayModes.ANALYSIS 
          && this.analysisSelectionMode == "SELECTED_AREAS") {
     	  //Highlight the selected SA
@@ -649,6 +655,11 @@ class MapTileRenderer {
     	  drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
+      ctx.globalCompositeOperation = 'multiply'
+    } else if (this.selectedServiceArea == feature.properties.id
+      && this.selectedDisplayMode == this.displayModes.VIEW) {
+      //Highlight the selected SA in view mode
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       ctx.globalCompositeOperation = 'multiply'
     }
 
@@ -1032,6 +1043,13 @@ class TileComponentController {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
       }
     })
+
+    // If selected SA in viewmode change, set that in the tile data service
+    state.selectedServiceArea.subscribe((selectedServiceArea) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceArea(selectedServiceArea)
+      }
+    })
     
     // If selected census block ids change, set that in the tile data road
     state.selectedCensusBlockId.subscribe((selectedCensusBlockId) => {
@@ -1237,14 +1255,18 @@ class TileComponentController {
             var canSelectLoc  = false
             var canSelectSA   = false
             
-            switch (this.state.optimizationOptions.analysisSelectionMode) {
-              case 'SELECTED_AREAS':
-                canSelectSA = !canSelectSA
-                break
-              case 'SELECTED_LOCATIONS':
-                canSelectLoc = !canSelectLoc
-                break
-            }
+            if(state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
+              switch (this.state.optimizationOptions.analysisSelectionMode) {
+                case 'SELECTED_AREAS':
+                  canSelectSA = !canSelectSA
+                  break
+                case 'SELECTED_LOCATIONS':
+                  canSelectLoc = !canSelectLoc
+                  break
+              }
+            } else if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+              canSelectSA = true
+            }  
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays

@@ -38,11 +38,22 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
     if (selected) {
       var centroid = selected.centroid.coordinates
       map.setCenter({ lat: centroid[1], lng: centroid[0] })
-      if (selected.type === 'latlng') {
+
+      $timeout( function(){
+        var marker = new google.maps.Marker({
+          map: map,
+          animation: google.maps.Animation.BOUNCE,
+          position: {lat: centroid[1], lng: centroid[0]}
+        });
+        $timeout( function(){
+          marker.setMap(null);
+        }, 5000 );
+      }, 1000 );
+
+      if(selected.type === 'latlng') {
         const pointSearchZoom = 17
         map.setZoom(pointSearchZoom)
-        Utils.blinkMarker()
-      }  
+      }
     }
   })
   
