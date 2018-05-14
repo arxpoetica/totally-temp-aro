@@ -245,8 +245,7 @@
           
           <button class="btn btn-primary btn-sm" 
                   ng-if="!$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
-                  ng-click="$ctrl.onRequestCalculateCoverage()"
-          >
+                  ng-click="$ctrl.onRequestCalculateCoverage()">
             calculate coverage
           </button>
           <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">

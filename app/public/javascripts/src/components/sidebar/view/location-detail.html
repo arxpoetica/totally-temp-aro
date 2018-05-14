@@ -70,25 +70,10 @@
           {{$ctrl.selectedLocationInfo.tabblock_id}}
         </td>
       </tr>
-      <tr>
-        <td>
-          Additional Attributes
-        </td>
-
-        <td>
-          <div class="loc_attributes_container" ng-if="$ctrl.showAttributes">
-            <table id="tblNetworkBuild" class="table table-condensed table-striped">
-              <tbody>
-                <tr ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes">
-                  <td>{{k + ':'}}</td>
-                  <td>{{v}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </td>
+      <tr ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes" ng-if="$ctrl.showAttributes">
+        <td>{{v.key + ':'}}</td>
+        <td>{{v.value}}</td>
       </tr>
-
       <tr>
         <td>HouseHolds</td>
         <td>

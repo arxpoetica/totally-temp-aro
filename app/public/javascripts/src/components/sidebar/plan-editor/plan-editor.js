@@ -97,12 +97,10 @@ class PlanEditorController {
           // Create a new transaction and return it.
           return this.$http.post(`/service/plan-transactions`, { userId: this.state.getUserId(), planId: this.state.plan.getValue().id })
         }
-      })
-      .then((result) => {
+      }).then((result) => {
         this.currentTransaction = result.data
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
-      })
-      .then((result) => {
+      }).then((result) => {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
@@ -119,8 +117,7 @@ class PlanEditorController {
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
-      })
-      .then((result) => {
+      }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
           //console.log(feature)
@@ -167,29 +164,13 @@ class PlanEditorController {
     // Delete the associated boundary if it exists
     const boundaryObjectId = this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
     const edgeOptions = JSON.parse(eventArgs.dropEvent.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
-    //if (boundaryObjectId) {
-    //  delete this.equipmentIdToBoundaryId[equipmentMapObject.objectId]
-    //  delete this.boundaryIdToEquipmentId[boundaryObjectId]
-    //  this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-    //}
     this.deleteBoundary(boundaryObjectId)
     
     this.calculateCoverage(equipmentMapObject, edgeOptions.spatialEdgeType, edgeOptions.directed)
   }
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   onRequestCalculateCoverage(){
-    
     if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)){
       var boundaryId = this.selectedMapObject.objectId 
       var objectId = this.boundaryIdToEquipmentId[boundaryId]
@@ -249,8 +230,6 @@ class PlanEditorController {
         this.createMapObjects && this.createMapObjects([feature])
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
-        //this.showCoverageChart(feature.objectId)
-        
         //console.log(result)
       })
       .catch((err) => console.error(err))
@@ -267,7 +246,7 @@ class PlanEditorController {
     for (var localI=0; localI<boundaryData.coverageInfo.length; localI++){
       var location = boundaryData.coverageInfo[localI]
       if ("number" != typeof location.distance) continue // skip these 
-      
+      if ('feet' == this.configuration.units.length_units) location.distance *= 3.28084
       locations.push(location)
       if (!censusBlockCountById.hasOwnProperty(location.censusBlockId)){
         censusBlockCountById[location.censusBlockId] = 0
@@ -281,27 +260,20 @@ class PlanEditorController {
       barChartData[barIndex]++
     }
     
-    
     boundsCoverage.boundaryData.coverageInfo = locations
     boundsCoverage.censusBlockCountById = censusBlockCountById
     boundsCoverage.barChartData = barChartData
     
     this.boundaryCoverageById[objectId] = boundsCoverage
-    
     this.getCensusTagsForBoundaryCoverage(objectId)
-    
-    //console.log(boundsCoverage.censusBlockCountById)
   }
   
   getCensusTagsForBoundaryCoverage(objectId){
     //console.log(this.censusCategories)
-    //this.boundaryCoverageById[objectId]
-    
     var censusBlockIds = Object.keys(this.boundaryCoverageById[objectId].censusBlockCountById)
     //console.log(censusBlockIds.length)
     
     if (censusBlockIds.length > 0){
-      
       //id eq 61920 or id eq 56829
       // we can't ask for more than about 100 at a time so we'll have to split up the batches 
       var filter = ''
@@ -313,11 +285,9 @@ class PlanEditorController {
         }else{
           filterSets[setIndex] += ' or '
         }
-        
         filterSets[setIndex] += 'id eq '+censusBlockIds[cbI]
       }
       //console.log(filterSets)
-      
       var censusBlockPromises = []
       for (var promiseI=0; promiseI<filterSets.length; promiseI++){
         var entityListUrl = `/service/odata/censusBlocksEntity?$select=id,tagInfo&$filter=${filterSets[promiseI]}`
@@ -360,7 +330,6 @@ class PlanEditorController {
             
           })
         }
-        
         //console.log(censusTagsByCat)
         this.boundaryCoverageById[objectId].censusTagsByCat = censusTagsByCat
         this.$timeout()
@@ -441,7 +410,6 @@ class PlanEditorController {
       options: options
     });
   }
-  
   
   
   // --- //
@@ -630,9 +598,6 @@ class PlanEditorController {
     this.updateObjectIdsToHide()
     this.$timeout()
   }
-  
-  
-  
   
   
   deleteBoundary(boundaryId){
