@@ -256,7 +256,9 @@
             <div style="margin-bottom: 20px;">
               <div class="ei-header">
                 Locations by Census Block Tag
+                {{ Object.keys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length }}
               </div>
+              <div ng-if="Object.keys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
               <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
                 <div class="ei-property-item plan-editor-census-cat">
                   {{cat.description}}
