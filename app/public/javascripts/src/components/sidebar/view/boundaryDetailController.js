@@ -1,9 +1,11 @@
 class BoundaryDetailController {
 
-  constructor($http, state) {
+  constructor($http, $timeout, state) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
     this.selectedBoundaryInfo = null
+    this.selectedSAInfo = null
     this.selectedBoundaryTags = []
     this.selectedBoundary = null
     
@@ -12,32 +14,51 @@ class BoundaryDetailController {
       this.censusCategories = newValue
     })
 
-    state.mapFeaturesSelectedEvent.subscribe((event) => {
-      if ( !event.hasOwnProperty('censusFeatures') 
-    		  || event.censusFeatures.length <= 0 
-    		  || !event.censusFeatures[0].hasOwnProperty('id') ) return
-    	  
-    		let tagList = []
-    	  let tags = event.censusFeatures[0].tags
-    	  
-    	  for (var key in tags){
-    	    if (tags.hasOwnProperty(key)){
-    	      let tag = {}
-    	      tag.censusCatDescription = this.censusCategories[key].description
-    	      tag.tagInfo = this.censusCategories[key].tags[ tags[key] ]
-    	      tagList.push(tag)
+    this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+        if ( event.hasOwnProperty('censusFeatures') 
+            && event.censusFeatures.length > 0 
+            && event.censusFeatures[0].hasOwnProperty('id') ) {
+          
+            let tagList = []
+            let tags = event.censusFeatures[0].tags
+            
+            for (var key in tags){
+              if (tags.hasOwnProperty(key)){
+                let tag = {}
+                tag.censusCatDescription = this.censusCategories[key].description
+                tag.tagInfo = this.censusCategories[key].tags[ tags[key] ]
+                tagList.push(tag)
+            }
+            }
+          this.selectedBoundaryTags = tagList
+          
+          let censusBlockId = event.censusFeatures[0].id
+          this.state.reloadSelectedCensusBlockId(censusBlockId)
+          this.viewCensusBlockInfo(censusBlockId)
+        } else if (event.hasOwnProperty('serviceAreas')
+          && event.serviceAreas.length > 0
+          && event.serviceAreas[0].hasOwnProperty('code') ){
+            this.viewServiceAreaInfo(event.serviceAreas[0])
+            this.state.reloadSelectedServiceArea(event.serviceAreas[0].id)
         }
-    	  }
-      this.selectedBoundaryTags = tagList
-      
-      let censusBlockId = event.censusFeatures[0].id
-      this.state.reloadSelectedCensusBlockId(censusBlockId)
-      this.viewCensusBlockInfo(censusBlockId)
+      } else {
+        return
+      }
     })
 
     state.clearViewMode.subscribe((clear) => {
-      if(clear) this.selectedBoundaryInfo = null
+      if(clear) {
+        this.selectedBoundaryInfo = null
+        this.selectedSAInfo = null
+      }  
     })
+  }
+
+  viewServiceAreaInfo(serviceArea) {
+    this.selectedBoundaryInfo = null
+    this.selectedSAInfo = serviceArea
+    this.$timeout()
   }
 
   getCensusBlockInfo(cbId) {
@@ -49,6 +70,7 @@ class BoundaryDetailController {
 
   viewCensusBlockInfo(censusBlockId) {
     return this.getCensusBlockInfo(censusBlockId).then((cbInfo) => {
+      this.selectedSAInfo = null
       this.selectedBoundaryInfo = cbInfo
       this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
     })
@@ -61,9 +83,13 @@ class BoundaryDetailController {
       map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
     })
   }
+
+  $onDestroy() {
+    this.mapFeaturesSelectedEventObserver.unsubscribe();
+  }
  
 }
 
-BoundaryDetailController.$inject = ['$http', 'state']
+BoundaryDetailController.$inject = ['$http','$timeout','state']
 
 export default BoundaryDetailController

@@ -30,6 +30,9 @@ let boundaryDetail = {
         {{tag.censusCatDescription}} : <div class="outlineLegendIcon" style="border-color: {{tag.tagInfo.colourHash}}; background-color: {{tag.tagInfo.colourHash}}33;"></div> {{tag.tagInfo.description}}
       </div>
     </div>
+    <div class="boundary-detail" ng-if="$ctrl.selectedSAInfo !== null">
+      <div>Service Area Code: {{$ctrl.selectedSAInfo.code}}</div>
+    </div>
     `,
     bindings: {},
     controller: BoundaryDetailController

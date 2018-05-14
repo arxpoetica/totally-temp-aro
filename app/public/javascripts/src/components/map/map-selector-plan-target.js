@@ -19,7 +19,8 @@ class MapSelectorPlanTargetController {
     	
       var plan = state.plan.getValue()
       
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0) {
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 
+        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
       // Get a list of ids to add and remove
       var existingIds = state.selectedLocations.getValue()
       var idsToAdd = new Set(), idsToRemove = new Set()
@@ -42,7 +43,8 @@ class MapSelectorPlanTargetController {
         })
       }
       
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0) {
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0 
+          && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
         // Get a list of ids to add and remove
         var existingIds = state.selectedServiceAreas.getValue()
         var idsToAdd = new Set(), idsToRemove = new Set()
