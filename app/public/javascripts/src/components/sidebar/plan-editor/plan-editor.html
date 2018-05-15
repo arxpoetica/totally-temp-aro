@@ -191,8 +191,16 @@
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment boundary -->
-        <div>calculating coverage <span class="fa fa-repeat map-layer-spinner"></span></div>
-        <div ng-if="$ctrl.isWorkingOnCoverage">calculating coverage <span class="map-layer-spinner"></span></div>
+        <div ng-if="$ctrl.isWorkingOnCoverage">
+          <p>Calculating coverage area...</p>
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+          </div>
+        </div>
         <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
