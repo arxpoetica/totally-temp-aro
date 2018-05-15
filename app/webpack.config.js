@@ -3,7 +3,7 @@ var glob = require('glob');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
-  entry: './public/javascripts/src/components/index.js',  
+  entry: './public/javascripts/src/components/index.js', 
   output: {
     filename:'./public/javascripts/bundle.js'
   },
@@ -11,7 +11,10 @@ module.exports = {
     loaders: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: [
+          '/node_modules/',
+          './public/javascripts/src/service-typegen/**'
+        ],
         use:{
           loader: "babel-loader",
           options: {
