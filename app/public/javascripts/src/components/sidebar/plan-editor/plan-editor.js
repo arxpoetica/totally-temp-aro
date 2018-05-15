@@ -4,9 +4,10 @@ import Constants from '../../common/constants'
 
 class PlanEditorController {
 
-  constructor($timeout, $http, state, configuration) {
+  constructor($timeout, $http, $element, state, configuration) {
     this.$timeout = $timeout
     this.$http = $http
+    this.$element = $element
     this.state = state
     this.configuration = configuration
     this.selectedMapObject = null
@@ -367,7 +368,7 @@ class PlanEditorController {
   showCoverageChart(){
     var objectId = this.selectedMapObject.objectId
     //this.boundaryCoverageById[objectId]
-    var ctx = document.getElementById('plan-editor-bounds-dist-chart').getContext('2d');
+    var ctx = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0].getContext('2d')
     
     var data = this.boundaryCoverageById[objectId].barChartData
     var labels = []
@@ -723,7 +724,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', 'state', 'configuration']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',
