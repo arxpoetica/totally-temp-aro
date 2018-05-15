@@ -503,6 +503,11 @@ class MapTileRenderer {
   // Renders a polyline feature onto the canvas
   renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, isPolygonBorder) {
 
+    const oldOpacity = ctx.globalAlpha
+    if (drawingStyles.lineOpacity) {
+      ctx.globalAlpha = drawingStyles.lineOpacity
+    }
+
     ctx.strokeStyle = drawingStyles ? drawingStyles.strokeStyle : mapLayer.strokeStyle
     ctx.lineWidth = drawingStyles ? drawingStyles.lineWidth : (mapLayer.lineWidth || 1)
 
@@ -538,6 +543,8 @@ class MapTileRenderer {
     if (mapLayer.showPolylineDirection) {
       this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
     }
+
+    ctx.globalAlpha = oldOpacity
   }
 
   // Draws an arrow showing the direction of a polyline
@@ -694,6 +701,7 @@ class MapTileRenderer {
       strokeStyle: mapLayer.strokeStyle,
       fillStyle: mapLayer.fillStyle,
       lineWidth: mapLayer.lineWidth || 1,
+      lineOpacity: mapLayer.lineOpacity || 0.7,
       opacity: mapLayer.opacity || 0.7
     }
 

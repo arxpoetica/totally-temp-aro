@@ -246,8 +246,9 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff",
         "lineWidth": 3,
+        "lineOpacity": 0.7,
         "fillStyle": "#0000ff",
-        "opacity": 0.5
+        "opacity": 0.2
       }
   }
 },
