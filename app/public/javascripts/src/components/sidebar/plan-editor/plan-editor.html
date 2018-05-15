@@ -191,6 +191,8 @@
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment boundary -->
+        <div>calculating coverage <span class="fa fa-repeat map-layer-spinner"></span></div>
+        <div ng-if="$ctrl.isWorkingOnCoverage">calculating coverage <span class="map-layer-spinner"></span></div>
         <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
@@ -252,6 +254,7 @@
                   ng-click="$ctrl.onRequestCalculateCoverage()">
             calculate coverage
           </button>
+          
           <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
             <div class="ei-header plan-editor-coverage-header">
               Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}

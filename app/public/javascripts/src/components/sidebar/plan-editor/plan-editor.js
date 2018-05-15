@@ -23,6 +23,7 @@ class PlanEditorController {
     this.Constants = Constants
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
+    this.isWorkingOnCoverage = false
     this.uuidStore = []
     this.getUUIDsFromServer()
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
@@ -198,6 +199,7 @@ class PlanEditorController {
     optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
 
     var equipmentObjectId = mapObject.objectId
+    this.isWorkingOnCoverage = true
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
         // The user may have destroyed the component before we get here. In that case, just return
@@ -232,8 +234,12 @@ class PlanEditorController {
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
         //console.log(result)
+        this.isWorkingOnCoverage = false
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        this.isWorkingOnCoverage = false
+      })
   }
   
   
