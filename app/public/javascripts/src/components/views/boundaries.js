@@ -158,6 +158,13 @@ class BoundariesController {
       aggregateZoomThreshold: 10
     	  
     })
+
+    this.state.boundaries.tileLayers.push({
+      name: 'CMA',
+      type: 'cma',
+      api_endpoint: "/tile/v1/analysis_area/tiles/1/${tilePointTransform}/",
+      aggregateZoomThreshold: 10
+    })
     
     this.selectedCensusCat
     
@@ -215,6 +222,21 @@ class BoundariesController {
     	  opacity: 0.7,
     	  zIndex: 3520, // ToDo: MOVE THIS TO A SETTINGS FILE!
     	  highlightStyle: {
+    	    lineWidth: 8
+    	  }
+      }
+      
+      layerSettings['cma'] = {
+    	  dataUrls: [],
+    	  renderMode: 'PRIMITIVE_FEATURES',
+    	  selectable: true,
+    	  strokeStyle: 'coral',
+    	  lineWidth: 3,
+    	  fillStyle: "transparent",
+    	  opacity: 0.7,
+    	  zIndex: 3530, // ToDo: MOVE THIS TO A SETTINGS FILE!
+    	  highlightStyle: {
+          strokeStyle: '#000000',
     	    lineWidth: 8
     	  }
     	}
