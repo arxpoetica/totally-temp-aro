@@ -288,7 +288,7 @@ class EquipmentDetailController {
 	  //console.log(planId)
 	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      //console.log(equipmentInfo)
+      console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
@@ -304,6 +304,17 @@ class EquipmentDetailController {
         
         //this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
         //this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
+        
+        var test_selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
+        var test_selectedEquipmentInfoDispProps = test_selectedEquipmentInfo.getDisplayProperties()
+        
+        console.log('this.selectedEquipmentInfo')
+        console.log(this.selectedEquipmentInfo)
+        console.log(test_selectedEquipmentInfo)
+        
+        console.log('this.selectedEquipmentInfoDispProps')
+        console.log(this.selectedEquipmentInfoDispProps)
+        console.log(test_selectedEquipmentInfoDispProps)
         
         //console.log( AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties() )
         
