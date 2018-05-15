@@ -55,27 +55,7 @@ class EquipmentDetailController {
     
     this.dispProps = {}
     this.dispProps['equipment'] = [
-      {
-        'displayName': "Physically Linked", 
-        'editable': true, 
-        'format': "check", 
-        'propertyName': "physicallyLinked", 
-        'visible': true
-      }, 
-      {
-        'displayName': "Fiber Available", 
-        'editable': true, 
-        'format': "check", 
-        'propertyName': "fiberAvailable", 
-        'visible': true
-      }, 
-      {
-        'displayName': "T1", 
-        'editable': true, 
-        'format': "check", 
-        'propertyName': "t1", 
-        'visible': true
-      }, 
+      
       {
         'displayName': "Site Info", 
         'editable': false, 
@@ -122,7 +102,31 @@ class EquipmentDetailController {
             'propertyName': "hsiOfficeCode", 
             'levelOfDetail': "2", 
             'visible': true
-          }
+          }, 
+          {
+            'displayName': "Physically Linked", 
+            'editable': true, 
+            'format': "check", 
+            'propertyName': "physicallyLinked", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }, 
+          {
+            'displayName': "Fiber Available", 
+            'editable': true, 
+            'format': "check", 
+            'propertyName': "fiberAvailable", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }, 
+          {
+            'displayName': "T1", 
+            'editable': true, 
+            'format': "check", 
+            'propertyName': "t1", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }, 
         ]
       }, 
       {
