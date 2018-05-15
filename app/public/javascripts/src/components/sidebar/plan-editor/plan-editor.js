@@ -341,8 +341,6 @@ class PlanEditorController {
             
           })
         }
-        console.log(censusTagsByCat)
-        console.log(Object.keys(censusTagsByCat).length)
         this.boundaryCoverageById[objectId].censusTagsByCat = censusTagsByCat
         this.$timeout()
       })
@@ -423,6 +421,12 @@ class PlanEditorController {
     });
   }
   
+  // --- //
+  
+  objKeys(obj){
+    if ('undefined' == typeof obj) obj = {}
+    return Object.keys(obj)
+  }
   
   // --- //
   

@@ -20,6 +20,10 @@
     margin-bottom: 10px;
   }
   
+  .plan-editor-coverage-header{
+    cursor: auto;
+  }
+  
   .plan-editor-census-cat{
     margin-top: 10px;
     margin-bottom: 4px;
@@ -249,16 +253,15 @@
             calculate coverage
           </button>
           <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
-            <div class="ei-header">
+            <div class="ei-header plan-editor-coverage-header">
               Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
             </div>
             <canvas ng-init="$ctrl.showCoverageChart()" id="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
             <div style="margin-bottom: 20px;">
-              <div class="ei-header">
+              <div class="ei-header plan-editor-coverage-header">
                 Locations by Census Block Tag
-                {{ Object.keys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length }}
               </div>
-              <div ng-if="Object.keys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
+              <div class="plan-editor-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
               <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
                 <div class="ei-property-item plan-editor-census-cat">
                   {{cat.description}}
