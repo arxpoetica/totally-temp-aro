@@ -203,6 +203,7 @@ class EquipmentDetailController {
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this funcltion is assuring the properties we need exist. 
       // ToDo: the feature selection system could use some refactoring 
+      //console.log(options)
       if (!options.hasOwnProperty('equipmentFeatures')) return
       if (0 == options.equipmentFeatures.length) return
       
@@ -289,7 +290,6 @@ class EquipmentDetailController {
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
       //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-        console.log()
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
         }else{
@@ -298,13 +298,14 @@ class EquipmentDetailController {
         
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
+        
         this.selectedEquipmentInfo = equipmentInfo.networkNodeEquipment
-
-        //this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
         this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
         
         //this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
         //this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
+        
+        //console.log( AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties() )
         
         angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
         

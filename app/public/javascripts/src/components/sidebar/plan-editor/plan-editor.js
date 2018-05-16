@@ -4,9 +4,10 @@ import Constants from '../../common/constants'
 
 class PlanEditorController {
 
-  constructor($timeout, $http, state, configuration) {
+  constructor($timeout, $http, $element, state, configuration) {
     this.$timeout = $timeout
     this.$http = $http
+    this.$element = $element
     this.state = state
     this.configuration = configuration
     this.selectedMapObject = null
@@ -319,18 +320,28 @@ class PlanEditorController {
             // iterate through each tag of the category 
             tagIds.forEach((tagId) => {
               if (!censusTagsByCat[catId].tags.hasOwnProperty(tagId)){
-                censusTagsByCat[catId].tags[tagId] = {}
-                censusTagsByCat[catId].tags[tagId].description = this.censusCategories[catId].tags[tagId].description
-                censusTagsByCat[catId].tags[tagId].colourHash = this.censusCategories[catId].tags[tagId].colourHash
-                censusTagsByCat[catId].tags[tagId].count = 0
+                // ToDo: check that this.censusCategories[catId].tags[tagId] exists! 
+                var isError = false
+                
+                if ( !this.censusCategories.hasOwnProperty(catId) ){
+                  isError = true
+                  console.error(`Unrecognized census category Id: ${catId} on census block with Id: ${row.id}`)
+                }else if( !this.censusCategories[catId].tags.hasOwnProperty(tagId) ){
+                  isError = true
+                  console.error(`Unrecognized census tag Id: ${tagId} on census block with Id: ${row.id}`)
+                }else{
+                  censusTagsByCat[catId].tags[tagId] = {}
+                  censusTagsByCat[catId].tags[tagId].description = this.censusCategories[catId].tags[tagId].description
+                  censusTagsByCat[catId].tags[tagId].colourHash = this.censusCategories[catId].tags[tagId].colourHash
+                  censusTagsByCat[catId].tags[tagId].count = 0
+                }
               }
               //console.log(this.boundaryCoverageById[objectId].censusBlockCountById[row.id])
-              censusTagsByCat[catId].tags[tagId].count += this.boundaryCoverageById[objectId].censusBlockCountById[row.id]
+              if (!isError) censusTagsByCat[catId].tags[tagId].count += this.boundaryCoverageById[objectId].censusBlockCountById[row.id]
             })
             
           })
         }
-        //console.log(censusTagsByCat)
         this.boundaryCoverageById[objectId].censusTagsByCat = censusTagsByCat
         this.$timeout()
       })
@@ -357,7 +368,7 @@ class PlanEditorController {
   showCoverageChart(){
     var objectId = this.selectedMapObject.objectId
     //this.boundaryCoverageById[objectId]
-    var ctx = document.getElementById('plan-editor-bounds-dist-chart').getContext('2d');
+    var ctx = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0].getContext('2d')
     
     var data = this.boundaryCoverageById[objectId].barChartData
     var labels = []
@@ -411,6 +422,12 @@ class PlanEditorController {
     });
   }
   
+  // --- //
+  
+  objKeys(obj){
+    if ('undefined' == typeof obj) obj = {}
+    return Object.keys(obj)
+  }
   
   // --- //
   
@@ -707,7 +724,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', 'state', 'configuration']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',
