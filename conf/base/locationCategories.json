@@ -40,7 +40,7 @@
       "plannerKey": "small",
       "key": "small_businesses",
       "selected": false,
-      "can_view": ["admin"]
+      "can_view": ["admin", "", "biz-dev"]
     },
     "medium_businesses":{
       "show": true,
@@ -53,7 +53,7 @@
       "plannerKey": "medium",
       "key": "medium_businesses",
       "selected": false,
-      "can_view": ["admin"]
+      "can_view": ["admin", "", "biz-dev"]
     },
     "large_businesses":   {
       "show": true,
@@ -66,7 +66,7 @@
       "plannerKey": "large",
       "key": "large_businesses",
       "selected": false,
-      "can_view": ["admin"]
+      "can_view": ["admin", "", "biz-dev"]
     },
     "household": {
       "show": true,
@@ -79,7 +79,7 @@
       "plannerKey": "household",
       "key": "household",
       "selected": false,
-      "can_view": ["admin"]
+      "can_view": ["admin", "", "biz-dev"]
     },
     "celltower":{
       "show": true,
@@ -92,7 +92,7 @@
       "plannerKey": "celltower",
       "key": "celltower",
       "selected": false,
-      "can_view": ["admin"]
+      "can_view": ["admin", "", "biz-dev"]
     },
     "ethernet_lit_building": {
             "show": true,
