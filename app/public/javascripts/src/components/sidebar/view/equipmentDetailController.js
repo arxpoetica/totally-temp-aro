@@ -17,7 +17,7 @@ class EquipmentDetailController {
     this.isEdit = false
     this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
     
-    
+    /*
     this.debugFeature = {
       "physicallyLinked":"true",
       "site_info":{  
@@ -49,8 +49,6 @@ class EquipmentDetailController {
          }
       ]
     }
-    
-    
     
     
     this.dispProps = {}
@@ -196,7 +194,7 @@ class EquipmentDetailController {
       }
       
     ]
-    
+    */
     
     // DEBUG ONLY 
     //this.selectedEquipmentInfoChanges = this.debugFeature
@@ -292,35 +290,33 @@ class EquipmentDetailController {
 	  //console.log(planId)
 	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      console.log(equipmentInfo)
+      //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
         }else{
+          // no icon
           this.headerIcon = ''
         }
         
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         
-        this.selectedEquipmentInfo = equipmentInfo.networkNodeEquipment
-        this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
+        var aroEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
+        var aroEquipmentInfoDispProps = aroEquipmentInfo.getDisplayProperties()
         
-        //this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
-        //this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
+        try{
+          aroEquipmentInfoDispProps = this.traverseProperties(aroEquipmentInfo, aroEquipmentInfoDispProps)
+        }catch(error) {
+          console.error(error)
+          return 
+        }
         
-        var test_selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
-        var test_selectedEquipmentInfoDispProps = test_selectedEquipmentInfo.getDisplayProperties()
+        //console.log(aroEquipmentInfo)
+        //console.log(aroEquipmentInfoDispProps)
         
-        console.log('this.selectedEquipmentInfo')
-        console.log(this.selectedEquipmentInfo)
-        console.log(test_selectedEquipmentInfo)
-        
-        console.log('this.selectedEquipmentInfoDispProps')
-        console.log(this.selectedEquipmentInfoDispProps)
-        console.log(test_selectedEquipmentInfoDispProps)
-        
-        //console.log( AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties() )
+        this.selectedEquipmentInfo = aroEquipmentInfo
+        this.selectedEquipmentInfoDispProps = aroEquipmentInfoDispProps
         
         angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
         
@@ -333,6 +329,50 @@ class EquipmentDetailController {
       }
       return equipmentInfo
     })
+	}
+	
+	traverseProperties(eqInfo, eqDispProps){
+	  for (var i=0; i<eqDispProps.length; i++){// loop on values not disp props
+	    var dispProp = eqDispProps[i]
+	    if (!dispProp.visible || !eqInfo.hasOwnProperty(dispProp.propertyName)) continue
+	    var propVal = eqInfo[ dispProp.propertyName ]
+	    if (null == propVal) continue
+	    var type = typeof propVal
+	    if ('object' == type && Array.isArray(propVal)) type = 'array'
+	    
+	    // ToDo: check for format override? 
+	    // drop down list
+	    // text area vs single line?
+	    // date
+	    switch (type) {
+	      case 'boolean':
+	        eqDispProps[i].format = "check"
+	        break
+	      case 'number':
+	        eqDispProps[i].format = "number"
+	        break
+	      case 'string':
+          eqDispProps[i].format = "string"
+          break
+	      case 'array':
+          eqDispProps[i].format = "list"
+          break
+	      case 'object':
+          eqDispProps[i].format = "tree"
+          break
+	    }
+	        
+	    if ('array' == type){
+	      if (propVal.length > 0 && 'function' == typeof propVal[0].getDisplayProperties ){
+	        eqDispProps[i].children = this.traverseProperties(propVal[0], propVal[0].getDisplayProperties())
+	      }
+	    }else if ('object' == type){
+	      if ('function' == typeof propVal.getDisplayProperties){
+  	      eqDispProps[i].children = this.traverseProperties(propVal, propVal.getDisplayProperties())
+	      }
+	    }
+	  }
+	  return eqDispProps
 	}
 	
   //ToDo: these perhaps get moved to the UI component 
@@ -367,8 +407,11 @@ class EquipmentDetailController {
     //if (!plan || !plan.hasOwnProperty('id')) return
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
     //console.log(map)
-    this.displayEquipment(plan.id, selectedEquipment.objectId)
-    .then((equipmentInfo) => map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] }))
+    this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
+      if ("undefined" != typeof equipmentInfo){
+        map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
+      }
+    })
     
     
   }
