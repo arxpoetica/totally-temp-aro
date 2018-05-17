@@ -1,6 +1,7 @@
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 
+
 class EquipmentDetailController {
 
 	constructor($http, $timeout, state, configuration) {
@@ -287,10 +288,10 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-	  //console.log(planId)
-	  //console.log(objectId)
+	  console.log(planId)
+	  console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      //console.log(equipmentInfo)
+      console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
@@ -302,18 +303,20 @@ class EquipmentDetailController {
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         
-        var aroEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
-        var aroEquipmentInfoDispProps = aroEquipmentInfo.getDisplayProperties()
+        var aroEquipmentInfo
+        var aroEquipmentInfoDispProps
         
-        try{
+        try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
+          aroEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
+          aroEquipmentInfoDispProps = aroEquipmentInfo.getDisplayProperties()
           aroEquipmentInfoDispProps = this.traverseProperties(aroEquipmentInfo, aroEquipmentInfoDispProps)
         }catch(error) {
-          console.error(error)
-          return 
+          console.error(error) 
+          return
         }
         
-        //console.log(aroEquipmentInfo)
-        //console.log(aroEquipmentInfoDispProps)
+        console.log(aroEquipmentInfo)
+        console.log(aroEquipmentInfoDispProps)
         
         this.selectedEquipmentInfo = aroEquipmentInfo
         this.selectedEquipmentInfoDispProps = aroEquipmentInfoDispProps
