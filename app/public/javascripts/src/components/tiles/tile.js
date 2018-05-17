@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -17,6 +17,7 @@ class MapTileRenderer {
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
     this.selectedServiceAreas = selectedServiceAreas 
+    this.selectedAnalysisArea = selectedAnalysisArea
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
@@ -58,6 +59,12 @@ class MapTileRenderer {
   // Sets the selected service area id to view details
   setselectedServiceArea(selectedServiceArea) {
     this.selectedServiceArea = selectedServiceArea
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected analysis area id to view details
+  setselectedAnalysisArea(selectedAnalysisArea) {
+    this.selectedAnalysisArea = selectedAnalysisArea
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -503,6 +510,11 @@ class MapTileRenderer {
   // Renders a polyline feature onto the canvas
   renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, isPolygonBorder) {
 
+    const oldOpacity = ctx.globalAlpha
+    if (drawingStyles.lineOpacity) {
+      ctx.globalAlpha = drawingStyles.lineOpacity
+    }
+
     ctx.strokeStyle = drawingStyles ? drawingStyles.strokeStyle : mapLayer.strokeStyle
     ctx.lineWidth = drawingStyles ? drawingStyles.lineWidth : (mapLayer.lineWidth || 1)
 
@@ -538,6 +550,8 @@ class MapTileRenderer {
     if (mapLayer.showPolylineDirection) {
       this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
     }
+
+    ctx.globalAlpha = oldOpacity
   }
 
   // Draws an arrow showing the direction of a polyline
@@ -661,6 +675,13 @@ class MapTileRenderer {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       ctx.globalCompositeOperation = 'multiply'
+    } else if (feature.properties.hasOwnProperty('_data_type')
+      && 'analysis_area' === feature.properties._data_type
+      && this.selectedAnalysisArea == feature.properties.id
+      && this.selectedDisplayMode == this.displayModes.VIEW) {
+      //Highlight the selected SA in view mode
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      ctx.globalCompositeOperation = 'multiply'
     }
 
     ctx.fillStyle = drawingStyles.fillStyle
@@ -694,6 +715,7 @@ class MapTileRenderer {
       strokeStyle: mapLayer.strokeStyle,
       fillStyle: mapLayer.fillStyle,
       lineWidth: mapLayer.lineWidth || 1,
+      lineOpacity: mapLayer.lineOpacity || 0.7,
       opacity: mapLayer.opacity || 0.7
     }
 
@@ -1050,6 +1072,13 @@ class TileComponentController {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceArea(selectedServiceArea)
       }
     })
+
+    // If selected Analysis Area in viewmode change, set that in the tile data service
+    state.selectedAnalysisArea.subscribe((selectedAnalysisArea) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedAnalysisArea(selectedAnalysisArea)
+      }
+    })
     
     // If selected census block ids change, set that in the tile data road
     state.selectedCensusBlockId.subscribe((selectedCensusBlockId) => {
@@ -1215,6 +1244,7 @@ class TileComponentController {
                                                            this.state.mapTileOptions.getValue(),
                                                            this.state.selectedLocations.getValue(),
                                                            this.state.selectedServiceAreas.getValue(),
+                                                           this.state.selectedAnalysisArea.getValue(),
                                                            this.state.selectedCensusBlockId.getValue(),
                                                            this.state.censusCategories.getValue(),
                                                            this.state.selectedCensusCategoryId.getValue(),
@@ -1247,6 +1277,7 @@ class TileComponentController {
         Promise.all(hitPromises)
           .then((results) => {
             var hitFeatures = []
+            var analysisAreaFeatures = []
             var serviceAreaFeatures = []
             var roadSegments = new Set()
             var equipmentFeatures = []
@@ -1274,6 +1305,9 @@ class TileComponentController {
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)
+              } else if ( result.hasOwnProperty('_data_type') && 
+                result.code && 'analysis_area' === result._data_type ) {
+                analysisAreaFeatures.push(result)
               } else if (result.code && canSelectSA) {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
               } else if (result.gid) {
@@ -1297,6 +1331,7 @@ class TileComponentController {
               latLng: event.latLng,
               locations: hitFeatures,
               serviceAreas: serviceAreaFeatures,
+              analysisAreas: analysisAreaFeatures,
               roadSegments: roadSegments,
               equipmentFeatures: equipmentFeatures, 
               censusFeatures: censusFeatures

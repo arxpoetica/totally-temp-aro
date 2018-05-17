@@ -500,6 +500,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.selectedServiceArea.next(serviceAreaId)
     service.requestMapLayerRefresh.next({})     
   }
+
+  service.selectedAnalysisArea = new Rx.BehaviorSubject()
+  service.reloadSelectedAnalysisArea = (analysisArea) => {
+    service.selectedAnalysisArea.next(analysisArea)
+    service.requestMapLayerRefresh.next({})
+  }
   
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {

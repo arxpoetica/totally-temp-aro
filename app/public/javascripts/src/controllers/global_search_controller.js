@@ -24,6 +24,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
           }
         })
         $scope.search_results = items
+        $scope.userSearch = true
         return {
           results: items,
           pagination: {
@@ -50,7 +51,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
         }, 5000 );
       }, 1000 );
 
-      if(selected.type === 'latlng') {
+      if($scope.userSearch) {
         const pointSearchZoom = 17
         map.setZoom(pointSearchZoom)
       }
@@ -86,6 +87,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
           centroid: location.centroid
         };
         $scope.firstLocation = loc;
+        $scope.userSearch = false
         search.select2("val", loc, true)
       } else if ($scope.searchRetry < 5) {
         $scope.searchRetry++

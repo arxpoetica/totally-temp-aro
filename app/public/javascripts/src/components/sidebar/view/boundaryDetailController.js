@@ -41,6 +41,12 @@ class BoundaryDetailController {
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
             this.state.reloadSelectedServiceArea(event.serviceAreas[0].id)
+        } else if (event.hasOwnProperty('analysisAreas')
+          && event.analysisAreas.length > 0
+          && event.analysisAreas[0].hasOwnProperty('code')
+          && event.analysisAreas[0].hasOwnProperty('_data_type') ){
+            this.viewServiceAreaInfo(event.analysisAreas[0])
+            this.state.reloadSelectedAnalysisArea(event.analysisAreas[0].id)
         }
       } else {
         return
