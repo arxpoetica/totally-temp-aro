@@ -1339,10 +1339,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.entityTypeList = {
     HouseholdObjectEntity: [],
     NetworkEquipmentEntity: [],
-    CensusBlocksEntity: []
+    CensusBlocksEntity: [],
+    AnalysisLayer: []
   }
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
-    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
+    if(entityType !== 'AnalysisLayer') {
+      entityListUrl = entityListUrl + "&$top=10"
+    }
 
     var filter = ''
     if(entityType === 'HouseholdObjectEntity') {
@@ -1379,7 +1383,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
 
-    $http.get(entityListUrl)
+    return $http.get(entityListUrl)
     .then((results) => {
       service.entityTypeList[entityType] = results.data
     })

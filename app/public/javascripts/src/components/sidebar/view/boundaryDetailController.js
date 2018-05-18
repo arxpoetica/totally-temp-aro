@@ -6,6 +6,7 @@ class BoundaryDetailController {
     this.state = state
     this.selectedBoundaryInfo = null
     this.selectedSAInfo = null
+    this.selectedAnalysisAreaInfo = null
     this.selectedBoundaryTags = []
     this.selectedBoundary = null
     
@@ -16,6 +17,7 @@ class BoundaryDetailController {
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+        this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
         if ( event.hasOwnProperty('censusFeatures') 
             && event.censusFeatures.length > 0 
             && event.censusFeatures[0].hasOwnProperty('id') ) {
@@ -45,7 +47,7 @@ class BoundaryDetailController {
           && event.analysisAreas.length > 0
           && event.analysisAreas[0].hasOwnProperty('code')
           && event.analysisAreas[0].hasOwnProperty('_data_type') ){
-            this.viewServiceAreaInfo(event.analysisAreas[0])
+            this.viewAnalysisAreaInfo(event.analysisAreas[0])
             this.state.reloadSelectedAnalysisArea(event.analysisAreas[0].id)
         }
       } else {
@@ -57,13 +59,22 @@ class BoundaryDetailController {
       if(clear) {
         this.selectedBoundaryInfo = null
         this.selectedSAInfo = null
+        this.selectedAnalysisAreaInfo = null
       }  
     })
   }
 
   viewServiceAreaInfo(serviceArea) {
     this.selectedBoundaryInfo = null
+    this.selectedAnalysisAreaInfo = null
     this.selectedSAInfo = serviceArea
+    this.$timeout()
+  }
+
+  viewAnalysisAreaInfo(analysisArea) {
+    this.selectedBoundaryInfo = null
+    this.selectedSAInfo = null
+    this.selectedAnalysisAreaInfo = analysisArea
     this.$timeout()
   }
 
@@ -77,6 +88,7 @@ class BoundaryDetailController {
   viewCensusBlockInfo(censusBlockId) {
     return this.getCensusBlockInfo(censusBlockId).then((cbInfo) => {
       this.selectedSAInfo = null
+      this.selectedAnalysisAreaInfo = null
       this.selectedBoundaryInfo = cbInfo
       this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
     })
