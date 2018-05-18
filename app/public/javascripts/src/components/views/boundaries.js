@@ -183,11 +183,11 @@ class BoundariesController {
             if (pointTransform === 'smooth') {
               mergedLayerUrls.push(url)
             } else {
-              // We want to create an individual layer            	  
-              var settingsKey = layer.type
-              if (!layerSettings.hasOwnProperty(settingsKey)) { settingsKey = 'default' }
-              oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-              oldMapLayers[mapLayerKey].dataUrls = [url]
+              // We want to create an individual layer
+            	var settingsKey = layer.type
+            	if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
+            	oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
+            	oldMapLayers[mapLayerKey].dataUrls = [url]
             	  
               this.createdMapLayerKeys.add(mapLayerKey)
             }
