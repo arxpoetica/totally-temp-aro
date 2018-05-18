@@ -60,7 +60,7 @@ class BoundariesController {
       name: 'CMA',
       type: 'cma',
       api_endpoint: "/tile/v1/analysis_area/tiles/1/${tilePointTransform}/",
-      aggregateZoomThreshold: 10
+      aggregateZoomThreshold: 3
     })
     
     this.selectedCensusCat
@@ -190,28 +190,10 @@ class BoundariesController {
               mergedLayerUrls.push(url)
             } else {
               // We want to create an individual layer
-              /*
-            	  oldMapLayers[mapLayerKey] = {
-                dataUrls: [url],
-                renderMode: 'PRIMITIVE_FEATURES',
-                selectable: true,
-                strokeStyle: '#00ff00',
-                lineWidth: 4,
-                fillStyle: "transparent",
-                opacity: 0.7,
-                zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                highlightStyle: {
-                  strokeStyle: '#000000',
-                  fillStyle: 'green',
-                  opacity: 0.3
-                }
-              }
-              */
-            	  
-            	  var settingsKey = layer.type
-            	  if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
-            	  oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-            	  oldMapLayers[mapLayerKey].dataUrls = [url]
+            	var settingsKey = layer.type
+            	if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
+            	oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
+            	oldMapLayers[mapLayerKey].dataUrls = [url]
             	  
               this.createdMapLayerKeys.add(mapLayerKey)
             }
@@ -224,30 +206,12 @@ class BoundariesController {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
       var mapLayerKey = 'aggregated_wirecenters'
-      /*
-    	  oldMapLayers[mapLayerKey] = {
-        dataUrls: mergedLayerUrls,
-        renderMode: 'PRIMITIVE_FEATURES',
-        selectable: true,
-        aggregateMode: 'FLATTEN',
-        strokeStyle: '#00ff00',
-        lineWidth: 4,
-        fillStyle: "transparent",
-        opacity: 0.7,
-        zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-        highlightStyle: {
-          strokeStyle: '#000000',
-          fillStyle: 'green',
-          opacity: 0.3
-        }
-      }
-      */
+      
+    	var settingsKey = mapLayerKey
+    	if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
     	  
-    	  var settingsKey = mapLayerKey
-    	  if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
-    	  
-    	  oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-    	  oldMapLayers[mapLayerKey].dataUrls = mergedLayerUrls
+    	oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
+    	oldMapLayers[mapLayerKey].dataUrls = mergedLayerUrls
       this.createdMapLayerKeys.add(mapLayerKey)
     }
 
