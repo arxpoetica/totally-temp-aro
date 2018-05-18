@@ -16,7 +16,7 @@
 	      <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
 	        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
 	        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
-	        {{prop.displayName}}
+	        {{prop.displayName}} <span ng-if="'list' == prop.format">{{$index}}</span>
 	        <!-- 
 	        <div class="ei-foldout-btn" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && value.hasOwnProperty('summary')">[ + ]</div>
 	        <div class="ei-foldout-btn" ng-if="$ctrl.isKeyExpanded[foldoutIndex] && value.hasOwnProperty('summary')">[ - ]</div>

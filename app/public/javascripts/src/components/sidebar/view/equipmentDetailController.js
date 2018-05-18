@@ -51,7 +51,7 @@ class EquipmentDetailController {
       ]
     }
     
-    
+    // an example display property object 
     this.dispProps = {}
     this.dispProps['equipment'] = [
       
@@ -261,21 +261,6 @@ class EquipmentDetailController {
       return response.data
     })
 	}
-	
-	/*
-  getEquipmentInfo(equipmentId) {
-    return this.$http.get('/network/nodes/' + equipmentId + '/details').then((response) => {
-      return response.data
-    })
-  }
-  */
-	
-	/*
-  showDetailEquipmentInfo() {
-    this.selectedEquipmentInfo.id = +this.selectedEquipmentInfo.id   
-    this.state.showDetailedEquipmentInfo.next(this.selectedEquipmentInfo)
-  }
-  */
   
 	updateSelectedState(selectedFeature, featureId){
 	  // tell state
@@ -288,10 +273,10 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-	  console.log(planId)
-	  console.log(objectId)
+	  //console.log(planId)
+	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      console.log(equipmentInfo)
+      //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
@@ -315,11 +300,11 @@ class EquipmentDetailController {
           return
         }
         
-        console.log(aroEquipmentInfo)
-        console.log(aroEquipmentInfoDispProps)
+        //console.log(aroEquipmentInfo)
+        //console.log(aroEquipmentInfoDispProps)
         
-        this.selectedEquipmentInfo = aroEquipmentInfo
-        this.selectedEquipmentInfoDispProps = aroEquipmentInfoDispProps
+        this.selectedEquipmentInfo = aroEquipmentInfo.networkNodeEquipment
+        this.selectedEquipmentInfoDispProps = this.setChildPropAsRoot(aroEquipmentInfoDispProps, 'networkNodeEquipment')
         
         angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
         
@@ -332,6 +317,25 @@ class EquipmentDetailController {
       }
       return equipmentInfo
     })
+	}
+	
+	// ToDo: the following should go into a AroFeatureFactory companion utility 
+	setChildPropAsRoot(propList, propName){
+	  // if prop name isn't found we return the original
+	  // if the prop has no child properties, and empty array is returned 
+	  var newRoot = propList
+	  for (var i=0; i<propList.length; i++){
+	    if (propList[i].propertyName == propName){
+	      if (!propList[i].hasOwnProperty('children')){
+	        newRoot = []
+	      }else{
+	        newRoot = propList[i].children
+	      }
+	      break
+	    }
+	  }
+	  
+	  return newRoot
 	}
 	
 	traverseProperties(eqInfo, eqDispProps){
@@ -378,6 +382,8 @@ class EquipmentDetailController {
 	  return eqDispProps
 	}
 	
+	// ---
+	
   //ToDo: these perhaps get moved to the UI component 
   beginEdit(){
     // set up listeners etc
@@ -386,8 +392,6 @@ class EquipmentDetailController {
   
   cancelEdit(){
     // return the object to init state
-    //angular.copy(this.treeData, this.treeState)
-    //angular.copy(this.rowsData, this.rowsState)
     angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
     this.isEdit = false
   }
@@ -395,21 +399,20 @@ class EquipmentDetailController {
   commitEdit(){
     // set the object to the edited object and tell the DB
     // may need to compare to check for deletes and creates 
-    //angular.copy(this.treeState, this.treeData)
-    //angular.copy(this.rowsState, this.rowsData)
     angular.copy(this.selectedEquipmentInfoChanges, this.selectedEquipmentInfo)
     this.isEdit = false
     console.log('send changed data to DB:')
     console.log(this.selectedEquipmentInfo)
   }
-
+  
+  // ---
+  
   viewSelectedEquipment(selectedEquipment) {
     //console.log(selectedEquipment)
     
     var plan = this.state.plan.getValue()
     //if (!plan || !plan.hasOwnProperty('id')) return
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
-    //console.log(map)
     this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){
         map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
