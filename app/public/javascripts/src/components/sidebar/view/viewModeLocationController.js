@@ -10,11 +10,11 @@ class ViewModeLocationController {
     this.currentUser = state.getUser()
     this.selectedLocation = null
 
-    state.plan.subscribe((plan) => {
+    this.planSubscription = state.plan.subscribe((plan) => {
       this.plan = plan
     })
 
-    state.mapFeaturesSelectedEvent.subscribe((options) => {
+    this.mapFeaturesSelectedSubscription = state.mapFeaturesSelectedEvent.subscribe((options) => {
       var locationsList = []
       if (options.hasOwnProperty('locations')) locationsList = options.locations
       
@@ -46,7 +46,7 @@ class ViewModeLocationController {
       }
     })
     
-    state.clearViewMode.subscribe((clear) => {
+    this.clearViewModeSubscription = state.clearViewMode.subscribe((clear) => {
       if(clear){
         this.selectedLocationInfo = null
         this.updateSelectedState()
@@ -105,6 +105,11 @@ class ViewModeLocationController {
     })
   }
   
+  $onDestroy() {
+    this.planSubscription.unsubscribe()
+    this.mapFeaturesSelectedSubscription.unsubscribe()
+    this.clearViewModeSubscription.unsubscribe()
+  }
 }
 
 ViewModeLocationController.$inject = ['$http','$timeout','state','configuration']
