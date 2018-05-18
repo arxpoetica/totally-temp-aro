@@ -27,7 +27,9 @@ let viewMode = {
     <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeViewModePanel">
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
-        <location-detail></location-detail>
+        <location-detail ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
+                                && ($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO)">
+        </location-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO"></accordion-panel-title>
