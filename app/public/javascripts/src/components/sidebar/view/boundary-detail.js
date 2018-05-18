@@ -31,7 +31,11 @@ let boundaryDetail = {
       </div>
     </div>
     <div class="boundary-detail" ng-if="$ctrl.selectedSAInfo !== null">
-      <div>Area Code: {{$ctrl.selectedSAInfo.code}}</div>
+      <div>Code: {{$ctrl.selectedSAInfo.code}}</div>
+      <div>Name: {{$ctrl.selectedSAInfo.name}}</div>
+    </div>
+    <div class="boundary-detail" ng-if="$ctrl.selectedAnalysisAreaInfo !== null">
+      <div>Name: {{$ctrl.selectedAnalysisAreaInfo.code}}</div>
     </div>
     `,
     bindings: {},

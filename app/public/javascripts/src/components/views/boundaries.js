@@ -55,13 +55,6 @@ class BoundariesController {
       aggregateZoomThreshold: 10
     	  
     })
-
-    this.state.boundaries.tileLayers.push({
-      name: 'CMA',
-      type: 'cma',
-      api_endpoint: "/tile/v1/analysis_area/tiles/1/${tilePointTransform}/",
-      aggregateZoomThreshold: 3
-    })
     
     this.selectedCensusCat
     
@@ -123,12 +116,12 @@ class BoundariesController {
     	  }
       }
       
-      layerSettings['cma'] = {
+      layerSettings['analysis_layer'] = {
     	  dataUrls: [],
     	  renderMode: 'PRIMITIVE_FEATURES',
     	  selectable: true,
-    	  strokeStyle: 'coral',
-    	  lineWidth: 3,
+    	  strokeStyle: '#333333',
+    	  lineWidth: 1,
     	  fillStyle: "transparent",
     	  opacity: 0.7,
     	  zIndex: 3530, // ToDo: MOVE THIS TO A SETTINGS FILE!
@@ -185,6 +178,7 @@ class BoundariesController {
 
             var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
             url = url.replace('${layerId}', selectedServiceAreaLibrary.identifier)
+            url = url.replace('${analysisLayerId}', layer.analysisLayerId)
 
             if (pointTransform === 'smooth') {
               mergedLayerUrls.push(url)
@@ -205,13 +199,13 @@ class BoundariesController {
     if (mergedLayerUrls.length > 0) {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
-      var mapLayerKey = 'aggregated_wirecenters'
-      
-    	var settingsKey = mapLayerKey
-    	if ( !layerSettings.hasOwnProperty(settingsKey) ){ settingsKey = 'default' }
-    	  
-    	oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-    	oldMapLayers[mapLayerKey].dataUrls = mergedLayerUrls
+      var mapLayerKey = "aggregated_wirecenters" //'aggregated_' + layer.type
+
+      var settingsKey = mapLayerKey
+      if (!layerSettings.hasOwnProperty(settingsKey)) { settingsKey = 'default' }
+
+      oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
+      oldMapLayers[mapLayerKey].dataUrls = mergedLayerUrls
       this.createdMapLayerKeys.add(mapLayerKey)
     }
 
@@ -225,6 +219,21 @@ class BoundariesController {
     // If we are zoomed in beyond a threshold, use 'select'. If we are zoomed out, use 'aggregate'
     // (Google maps zoom starts at 0 for the entire world and increases as you zoom in)
     return (mapZoom > zoomThreshold) ? 'select' : 'smooth'
+  }
+
+  $onInit() {
+    this.state.loadEntityList('AnalysisLayer',null,'id,name,description',null)
+    .then(() => {
+      this.state.entityTypeList.AnalysisLayer.forEach((analysisLayer) => {
+        this.state.boundaries.tileLayers.push({
+          name: analysisLayer.description,
+          type: 'analysis_layer',
+          api_endpoint: "/tile/v1/analysis_area/tiles/${analysisLayerId}/${tilePointTransform}/",
+          analysisLayerId: analysisLayer.id,
+          aggregateZoomThreshold: 10
+        })
+      })
+    })
   }
 
 }

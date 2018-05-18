@@ -680,8 +680,7 @@ class MapTileRenderer {
       && this.selectedAnalysisArea == feature.properties.id
       && this.selectedDisplayMode == this.displayModes.VIEW) {
       //Highlight the selected SA in view mode
-      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
-      ctx.globalCompositeOperation = 'multiply'
+      drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
 
     ctx.fillStyle = drawingStyles.fillStyle
