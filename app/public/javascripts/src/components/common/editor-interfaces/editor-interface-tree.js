@@ -15,15 +15,7 @@ class EditorInterfaceTreeController {
   $onInit() {
     this.indentationLevel = this.indentationLevel || 0
   }
-
-  isEditable(obj) {
-    return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
-  }
-  /*
-  isExpandable(obj) {
-    return (typeof obj === 'object' && !angular.equals({}, obj))// && object isn't empty, ToDo: check that at least one child it showable
-  }
-  */
+  
   toggleIsKeyExpanded(index) {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
@@ -54,7 +46,7 @@ class EditorInterfaceTreeController {
   makeList(prop){
     var listVals = []
     if ("tree" == prop.format){
-      listVals = [this.objectToView[prop.propertyName]]
+      listVals = [this.objectToView[prop.propertyName]] // note the array wrapper 
     }else if("list" == prop.format){
       listVals = this.objectToView[prop.propertyName]
     }

@@ -11,7 +11,7 @@
     
 	    <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
 	         RECURSIVELY show the object editor for the sub-object -->
-	    <div class="ei-foldout" ng-if="prop.children && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
+	    <div class="ei-foldout" ng-if="prop.children && prop.children.length > 0 && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
 	      {{summeryCount = $ctrl.getSummeryCount(prop.children);""}}
 	      <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
 	        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
@@ -54,8 +54,7 @@
 	                      ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">[ - summary ]
 	      </div>
 	    </div>
-    
-    
+      
     </div>
     
     <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->

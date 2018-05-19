@@ -12,7 +12,7 @@ class EquipmentDetailController {
     this.configuration = configuration
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
-    this.selectedEquipmentInfoChanges = {}
+    //this.selectedEquipmentInfoChanges = {}
     this.selectedEquipmentInfoDispProps = []
     
     this.isEdit = false
@@ -247,8 +247,8 @@ class EquipmentDetailController {
       if(clear){
         this.networkNodeType = ''
         this.selectedEquipmentInfo = {}
-        this.selectedEquipmentInfoChanges = {}
-        this.selectedEquipmentInfoDispProps = []
+        //this.selectedEquipmentInfoChanges = {}
+        //this.selectedEquipmentInfoDispProps = []
         this.updateSelectedState()
       }
     })
@@ -288,25 +288,13 @@ class EquipmentDetailController {
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         
-        var aroEquipmentInfo
-        var aroEquipmentInfoDispProps
-        
         try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
-          aroEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
-          aroEquipmentInfoDispProps = aroEquipmentInfo.getDisplayProperties()
-          aroEquipmentInfoDispProps = this.traverseProperties(aroEquipmentInfo, aroEquipmentInfoDispProps)
+          this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
+          this.selectedEquipmentInfoDispProps = this.traverseProperties(this.selectedEquipmentInfo)
         }catch(error) {
           console.error(error) 
           return
         }
-        
-        //console.log(aroEquipmentInfo)
-        //console.log(aroEquipmentInfoDispProps)
-        
-        this.selectedEquipmentInfo = aroEquipmentInfo.networkNodeEquipment
-        this.selectedEquipmentInfoDispProps = this.setChildPropAsRoot(aroEquipmentInfoDispProps, 'networkNodeEquipment')
-        
-        angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
         
         //console.log('=== DISP INFO ===')
         //console.log(this.selectedEquipmentInfo)
@@ -319,63 +307,47 @@ class EquipmentDetailController {
     })
 	}
 	
-	// ToDo: the following should go into a AroFeatureFactory companion utility 
-	setChildPropAsRoot(propList, propName){
-	  // if prop name isn't found we return the original
-	  // if the prop has no child properties, and empty array is returned 
-	  var newRoot = propList
-	  for (var i=0; i<propList.length; i++){
-	    if (propList[i].propertyName == propName){
-	      if (!propList[i].hasOwnProperty('children')){
-	        newRoot = []
-	      }else{
-	        newRoot = propList[i].children
-	      }
-	      break
-	    }
-	  }
-	  
-	  return newRoot
-	}
 	
-	traverseProperties(eqInfo, eqDispProps){
+	traverseProperties(eqPropVals){
+	  if ('function' != typeof eqPropVals.getDisplayProperties) return []
+	  var eqDispProps = eqPropVals.getDisplayProperties()
 	  for (var i=0; i<eqDispProps.length; i++){// loop on values not disp props
 	    var dispProp = eqDispProps[i]
-	    if (!dispProp.visible || !eqInfo.hasOwnProperty(dispProp.propertyName)) continue
-	    var propVal = eqInfo[ dispProp.propertyName ]
+	    if (!dispProp.visible || !eqPropVals.hasOwnProperty(dispProp.propertyName)) continue
+	    var propVal = eqPropVals[ dispProp.propertyName ]
 	    if (null == propVal) continue
 	    var type = typeof propVal
 	    if ('object' == type && Array.isArray(propVal)) type = 'array'
 	    
-	    // ToDo: check for format override? 
 	    // drop down list
 	    // text area vs single line?
 	    // date
-	    switch (type) {
-	      case 'boolean':
-	        eqDispProps[i].format = "check"
-	        break
-	      case 'number':
-	        eqDispProps[i].format = "number"
-	        break
-	      case 'string':
-          eqDispProps[i].format = "string"
-          break
-	      case 'array':
-          eqDispProps[i].format = "list"
-          break
-	      case 'object':
-          eqDispProps[i].format = "tree"
-          break
+	    if (!dispProp.format){
+  	    switch (type) {
+  	      case 'boolean':
+  	        eqDispProps[i].format = "check"
+  	        break
+  	      case 'number':
+  	        eqDispProps[i].format = "number"
+  	        break
+  	      case 'string':
+            eqDispProps[i].format = "string"
+            break
+  	      case 'array':
+            eqDispProps[i].format = "list"
+            break
+  	      case 'object':
+            eqDispProps[i].format = "tree"
+            break
+  	    }
 	    }
-	        
 	    if ('array' == type){
 	      if (propVal.length > 0 && 'function' == typeof propVal[0].getDisplayProperties ){
-	        eqDispProps[i].children = this.traverseProperties(propVal[0], propVal[0].getDisplayProperties())
+	        eqDispProps[i].children = this.traverseProperties(propVal[0])
 	      }
 	    }else if ('object' == type){
 	      if ('function' == typeof propVal.getDisplayProperties){
-  	      eqDispProps[i].children = this.traverseProperties(propVal, propVal.getDisplayProperties())
+  	      eqDispProps[i].children = this.traverseProperties(propVal)
 	      }
 	    }
 	  }
@@ -392,14 +364,14 @@ class EquipmentDetailController {
   
   cancelEdit(){
     // return the object to init state
-    angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
+    //angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
     this.isEdit = false
   }
   
   commitEdit(){
     // set the object to the edited object and tell the DB
     // may need to compare to check for deletes and creates 
-    angular.copy(this.selectedEquipmentInfoChanges, this.selectedEquipmentInfo)
+    //angular.copy(this.selectedEquipmentInfoChanges, this.selectedEquipmentInfo)
     this.isEdit = false
     console.log('send changed data to DB:')
     console.log(this.selectedEquipmentInfo)
