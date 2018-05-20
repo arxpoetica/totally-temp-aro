@@ -1,6 +1,9 @@
 import EquipmentProperties from './equipment-properties'
 import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
+import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
+import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+
 
 class PlanEditorController {
 
@@ -11,6 +14,7 @@ class PlanEditorController {
     this.state = state
     this.configuration = configuration
     this.selectedMapObject = null
+    this.selectedEquipmentInfo = {}
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.boundaryIdToEquipmentId = {}
@@ -634,6 +638,24 @@ class PlanEditorController {
   handleSelectedObjectChanged(mapObject) {
     //console.log(mapObject)
     this.selectedMapObject = mapObject
+    console.log(this.selectedMapObject)
+    
+    // ToDo: similar to code in equipmentDetailContoller, abstract it
+    
+    var plan = this.state.plan.getValue()
+    console.log(plan.id)
+    console.log(this.selectedMapObject.objectId)
+    //this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+this.selectedMapObject.objectId).then((response) => {
+    //  console.log(response)
+    //})
+    this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${this.selectedMapObject.objectId}`)
+    .then((response) => {
+      console.log(response)
+      this.selectedEquipmentInfo = AroFeatureFactory.createObject(response.data).networkNodeEquipment
+    })
+    
+    
+    
     this.$timeout()
   }
 

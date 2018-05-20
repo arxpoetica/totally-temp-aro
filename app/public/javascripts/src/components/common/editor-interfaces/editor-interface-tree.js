@@ -43,6 +43,11 @@ class EditorInterfaceTreeController {
     return summeryCount
   }
   
+  hasChildren(data){
+    if ('undefined' == typeof data || null == data) return false
+    return ('function' == typeof data.getDisplayProperties)
+  }
+  
   makeList(prop){
     var listVals = []
     if ("tree" == prop.format){
@@ -60,7 +65,7 @@ let editorInterfaceTree = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-tree.html',
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
-    displayProps: '<', 
+    //displayProps: '<', 
     isEdit: '<', 
     indentationLevel: '<'
   },

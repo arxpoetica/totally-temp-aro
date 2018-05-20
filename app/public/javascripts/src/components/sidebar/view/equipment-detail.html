@@ -42,16 +42,19 @@
 	    <img class="ei-panel-header-icon" ng-if=" '' != $ctrl.headerIcon" ng-src="{{$ctrl.headerIcon}}">
 	    
 	    <div class="ei-panel-header-title">{{$ctrl.networkNodeType}}</div>
+	    <!-- 
 	    <div class="ei-panel-header-btn-set">
 	      <button class="btn btn-default ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.cancelEdit()">Cancel</button>
 	      <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.commitEdit()">Save</button>
 	      <button class="btn btn-primary ei-panel-header-btn" ng-if="!$ctrl.isEdit" ng-click="$ctrl.beginEdit()">Edit</button>
 	    </div>
+	    -->
 	  </div>
 	  <div class="equipment-detail ei-panel-content">
-	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" display-props="$ctrl.selectedEquipmentInfoDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
 	    <!-- 
-	    <editor-interface-table displayProps="$ctrl.tableViewStructure" is-edit="$ctrl.isEdit"></editor-interface-table>
+	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" display-props="$ctrl.selectedEquipmentInfoDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
 	    -->
+	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" is-edit="false"></editor-interface-tree>
+      
 	  </div>
 	</div>

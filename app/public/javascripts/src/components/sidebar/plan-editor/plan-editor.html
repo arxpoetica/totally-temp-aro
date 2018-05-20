@@ -148,6 +148,8 @@
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
           </div>
           <!-- A table containing the editable properties of the selected object -->
+          
+          
           <table id="tblEquipmentProperties"
                  class="table table-condensed table-striped sidebar-table"
                  style="margin-bottom: 10px">
@@ -180,6 +182,12 @@
               </tr>
             </tbody>
           </table>
+          
+          
+          
+          <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" is-edit="true"></editor-interface-tree>
+          
+          
           <button ng-class="{ 'btn btn-sm pull-right': true,
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
@@ -193,8 +201,8 @@
 
 
 
-
-
+        
+        
 
 
 

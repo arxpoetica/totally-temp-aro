@@ -13,9 +13,9 @@ class EquipmentDetailController {
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     //this.selectedEquipmentInfoChanges = {}
-    this.selectedEquipmentInfoDispProps = []
+    //this.selectedEquipmentInfoDispProps = []
     
-    this.isEdit = false
+    //this.isEdit = false
     this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
     
     /*
@@ -290,7 +290,7 @@ class EquipmentDetailController {
         
         try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
           this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
-          this.selectedEquipmentInfoDispProps = this.traverseProperties(this.selectedEquipmentInfo)
+          //this.selectedEquipmentInfoDispProps = this.traverseProperties(this.selectedEquipmentInfo)
         }catch(error) {
           console.error(error) 
           return
@@ -307,7 +307,7 @@ class EquipmentDetailController {
     })
 	}
 	
-	
+	/*
 	traverseProperties(eqPropVals){
 	  if ('function' != typeof eqPropVals.getDisplayProperties) return []
 	  var eqDispProps = eqPropVals.getDisplayProperties()
@@ -353,9 +353,10 @@ class EquipmentDetailController {
 	  }
 	  return eqDispProps
 	}
-	
+	*/
 	// ---
 	
+	/*
   //ToDo: these perhaps get moved to the UI component 
   beginEdit(){
     // set up listeners etc
@@ -376,7 +377,7 @@ class EquipmentDetailController {
     console.log('send changed data to DB:')
     console.log(this.selectedEquipmentInfo)
   }
-  
+  */
   // ---
   
   viewSelectedEquipment(selectedEquipment) {
