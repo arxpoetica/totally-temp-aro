@@ -16,8 +16,9 @@ class BoundaryDetailController {
     })
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-        this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+      //In ruler mode click should not enable boundary view action
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        !this.state.isRulerEnabled) {
         if ( event.hasOwnProperty('censusFeatures') 
             && event.censusFeatures.length > 0 
             && event.censusFeatures[0].hasOwnProperty('id') ) {
@@ -68,6 +69,7 @@ class BoundaryDetailController {
     this.selectedBoundaryInfo = null
     this.selectedAnalysisAreaInfo = null
     this.selectedSAInfo = serviceArea
+    this.viewBoundaryInfo()
     this.$timeout()
   }
 
@@ -75,6 +77,7 @@ class BoundaryDetailController {
     this.selectedBoundaryInfo = null
     this.selectedSAInfo = null
     this.selectedAnalysisAreaInfo = analysisArea
+    this.viewBoundaryInfo()
     this.$timeout()
   }
 
@@ -90,7 +93,7 @@ class BoundaryDetailController {
       this.selectedSAInfo = null
       this.selectedAnalysisAreaInfo = null
       this.selectedBoundaryInfo = cbInfo
-      this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+      this.viewBoundaryInfo()
     })
   }
 
@@ -100,6 +103,10 @@ class BoundaryDetailController {
     .then(() => {
       map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
     })
+  }
+
+  viewBoundaryInfo() {
+    this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
   }
 
   $onDestroy() {

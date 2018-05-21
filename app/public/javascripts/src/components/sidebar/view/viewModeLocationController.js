@@ -15,6 +15,9 @@ class ViewModeLocationController {
     })
 
     this.mapFeaturesSelectedSubscription = state.mapFeaturesSelectedEvent.subscribe((options) => {
+      //In ruler mode click should not perform any view action's
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        !this.state.isRulerEnabled) {
       var locationsList = []
       if (options.hasOwnProperty('locations')) locationsList = options.locations
       
@@ -43,6 +46,7 @@ class ViewModeLocationController {
         this.getLocationInfo(this.plan.id,locationId).then(locationInfo => this.showStaticMap(locationInfo))
       } else {
         this.selectedLocationInfo = null
+      }
       }
     })
     

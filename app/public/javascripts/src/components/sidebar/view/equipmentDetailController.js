@@ -204,6 +204,9 @@ class EquipmentDetailController {
       // most of this funcltion is assuring the properties we need exist. 
       // ToDo: the feature selection system could use some refactoring 
       //console.log(options)
+      //In ruler mode click should not perform any view action's
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        !this.state.isRulerEnabled) {
       if (!options.hasOwnProperty('equipmentFeatures')) return
       if (0 == options.equipmentFeatures.length) return
       
@@ -235,6 +238,7 @@ class EquipmentDetailController {
         //console.log(selectedFeature)
         this.updateSelectedState(selectedFeature, featureId)
         this.displayEquipment(plan.id, selectedFeature.object_id)
+      }
       }
     })
     

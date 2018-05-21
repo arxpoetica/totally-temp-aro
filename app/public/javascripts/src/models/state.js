@@ -198,6 +198,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
 
+  service.isRulerEnabled = false
+
   // The panels in the view mode
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
