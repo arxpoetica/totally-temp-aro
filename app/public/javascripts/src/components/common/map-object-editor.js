@@ -302,6 +302,7 @@ class MapObjectEditorController {
   }
 
   handleMapEntitySelected(event) {
+    console.log('MapEntitySelected')
     if (!event || !event.latLng) {
       return
     }

@@ -184,8 +184,9 @@
           </table>
           
           
-          
-          <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" is-edit="true"></editor-interface-tree>
+          {{$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment}}
+          {{selectedNetworkNodeEquipment = $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment;""}}
+          <editor-interface-tree object-to-view="selectedNetworkNodeEquipment" is-edit="true"></editor-interface-tree>
           
           
           <button ng-class="{ 'btn btn-sm pull-right': true,

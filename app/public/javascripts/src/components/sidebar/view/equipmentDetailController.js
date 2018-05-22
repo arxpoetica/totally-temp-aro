@@ -276,7 +276,7 @@ class EquipmentDetailController {
 	  //console.log(planId)
 	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      //console.log(equipmentInfo)
+      console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
