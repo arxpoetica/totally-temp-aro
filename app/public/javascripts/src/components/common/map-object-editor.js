@@ -212,6 +212,7 @@ class MapObjectEditorController {
     // Create a "point" map object - a marker
     console.log(feature.objectId)
     this.tileDataService.addFeatureToExclude(feature.objectId)
+    this.state.requestMapLayerRefresh.next({})
     return new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
@@ -244,8 +245,11 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMapObject(feature, usingMapClick) {
-
+  createMapObject(feature, usingMapClick, featureData) {
+    console.log('createMapObject')
+    console.log(featureData)
+    if ('undefined' == typeof featureData) featureData = {}
+    
     var mapObject = null
     if (feature.geometry.type === 'Point') {
       mapObject = this.createPointMapObject(feature)
@@ -298,9 +302,23 @@ class MapObjectEditorController {
       this.selectMapObject(mapObject)
       this.$timeout()
     })
-
+    
+    /*
+    // is this an existing equipment? 
+    var plan = this.state.plan.getValue()
+    this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+mapObject.objectId)
+    .then((response) => {
+      console.log( response.data )
+      this.createdMapObjects[mapObject.objectId] = mapObject
+      this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: response.data})
+      // can't run this until 
+      this.selectMapObject(mapObject)
+    })
+    */
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: featureData})
+    //this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: {} })
+    
     this.selectMapObject(mapObject)
   }
 
@@ -346,23 +364,20 @@ class MapObjectEditorController {
       isExistingObject = false
     }
     
-    // Corr: this gotta change <----------------------------------------------------------------<<<
     
-    this.createMapObject(feature, true)
-    if (isExistingObject) {
-      // We have clicked on an existing object. Stop rendering this object in the tile,
-      //this.tileDataService.addFeatureToExclude(feature.objectId)
-      //this.state.requestMapLayerRefresh.next({})
-    }
-    
-    /*
     if (isExistingObject && isEquipment) {
-      this.selectMapObject()
-      console.log(event.equipmentFeatures[0])
+      // editing existing or planned equipment, get that data
+      var plan = this.state.plan.getValue()
+      this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
+      .then((response) => {
+        console.log('service return')
+        console.log( response.data )
+        this.createMapObject(feature, true, response.data)
+      })
     }else{
       this.createMapObject(feature, true)
     }
-    */
+    
   }
 
   isMarker(mapObject) {

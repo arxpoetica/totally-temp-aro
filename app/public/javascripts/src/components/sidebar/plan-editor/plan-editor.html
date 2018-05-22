@@ -53,7 +53,7 @@
                          create-object-on-click="false"
                          allow-boundary-creation="$ctrl.state.showSiteBoundary"
                          hide-object-ids="$ctrl.objectIdsToHide"
-                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
+                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature, featureData)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"

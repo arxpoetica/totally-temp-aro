@@ -595,24 +595,40 @@ class PlanEditorController {
   isMarker(mapObject) {
     return mapObject && mapObject.icon
   }
-
-  handleObjectCreated(mapObject, usingMapClick, feature) {
+  
+  
+  
+  handleObjectCreated(mapObject, usingMapClick, feature, featureData) {
     console.log("CREATED")
+    console.log(mapObject)
+    console.log(usingMapClick)
+    console.log(feature)
+    //console.log('---')
+    console.log(featureData)
+    if ('undefined' == typeof featureData) featureData = {}
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
+      var isNew = true
       
-      var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
-      this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'dslam', this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
-      var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-      this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-      /*
-      .then((response) => {
-        console.log("created registered")
-        console.log(response)
-        this.objectIdToProperties[mapObject.objectId].networkNodeEquipment = AroFeatureFactory.createObject(response.data).networkNodeEquipment  
-      })
-      */
+      if (featureData.objectId){
+        // clone of existing or planned equipment
+        var attributes = featureData.attributes
+        var networkNodeEquipment = AroFeatureFactory.createObject(featureData).networkNodeEquipment
+        //                                                                          siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment
+        this.objectIdToProperties[featureData.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, featureData.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
+        var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+        this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+        
+      }else{
+        // nope it's new
+        var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
+        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'dslam', this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
+        var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+        this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+        
+      }
+      
     } else if (!this.isMarker(mapObject)) {
       // If the user has drawn the boundary, we will have an associated object in the "feature" attributes. Save associations.
       if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
