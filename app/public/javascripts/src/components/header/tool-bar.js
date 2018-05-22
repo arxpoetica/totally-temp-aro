@@ -17,7 +17,7 @@ class ToolBarController {
     this.showDropDown = false
     this.heatMapOption = true
     this.measuringStickEnabled = false
-    this.rulerActionEnabled = false
+    this.isViewSettingsEnabled = false
     this.currentUser = state.getUser()
     this.switchIcon = config.ARO_CLIENT === 'frontier'
     this.Constants = Constants
@@ -238,6 +238,22 @@ class ToolBarController {
     this.state.measuredDistance.next(this.measuredDistance)
   }
 
+  removeLastRulerMarker() {
+    var last;
+
+    if (this.rulerSegments.length) {
+      last = _(this.rulerSegments).last();
+      this.rulerSegments = _(this.rulerSegments).without(last);
+
+      this.clearRulerMarker(last);
+      this.rulerDrawEvent();
+    }
+  }
+
+  showRemoveRulerButton(){
+    return this.rulerSegments && (this.rulerSegments.length > 1);
+  }
+
   refreshToolbar() {
     if (this.$element) {
       // Some of the buttons may be in the dropdown menu because the toolbar is collapsed.
@@ -306,6 +322,11 @@ class ToolBarController {
     setTimeout(() => this.refreshSlidertrack(), 0)
   }
 
+  viewSettingsAction() {
+    !this.isViewSettingsEnabled && this.closeDropdowns()
+    this.isViewSettingsEnabled = !this.isViewSettingsEnabled
+  }
+
   // Take the mapTileOptions defined and set it on the state
   toggleHeatMapOptions() {
     var newMapTileOptions = angular.copy(this.mapTileOptions)
@@ -349,12 +370,15 @@ class ToolBarController {
   }
 
   rulerAction() {
-    this.rulerActionEnabled = !this.rulerActionEnabled
+    !this.state.isRulerEnabled && this.closeDropdowns()
+    this.state.isRulerEnabled = !this.state.isRulerEnabled 
     this.enableRulerAction()
+
+    this.state.isRulerEnabled ? this.mapRef.setOptions({ draggableCursor: 'crosshair' }) : this.mapRef.setOptions({ draggableCursor: null })
   }
 
   enableRulerAction() {
-    if(!this.rulerActionEnabled) {
+    if(!this.state.isRulerEnabled) {  
       //clear straight line ruler action
       this.clearStraightLineAction()
       //clear copper ruler action
@@ -454,7 +478,8 @@ class ToolBarController {
       this.copperPath = this.mapRef.data.addGeoJson(geoJson)
       this.mapRef.data.setStyle(function (feature) {
         return {
-          strokeColor: copperFeatures.drawingOptions.strokeStyle
+          strokeColor: '#000000',
+          strokeWeight: 4
         };
       });
       this.state.measuredDistance.next(result.data.length)
@@ -475,10 +500,21 @@ class ToolBarController {
       }
     }
   }
+
   clearCopperMarkers() {
     this.copperMarkers && this.copperMarkers.map((marker)=>this.clearRulerMarker(marker))
   }
 
+  closeDropdowns() {
+    if(this.isViewSettingsEnabled) {
+      this.$element.find('.view-dropdown').toggle()
+      this.isViewSettingsEnabled = false
+    }
+    if(this.state.isRulerEnabled) {
+      this.$element.find('.ruler-dropdown').toggle()
+      this.rulerAction()
+    }
+  }
 }
 
 ToolBarController.$inject = ['$element', '$timeout', '$document','$http' ,'state', 'map_tools', '$window', 'configuration']

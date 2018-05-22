@@ -16,8 +16,9 @@ class BoundaryDetailController {
     })
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-        this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+      //In ruler mode click should not enable boundary view action
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        !this.state.isRulerEnabled) {
         if ( event.hasOwnProperty('censusFeatures') 
             && event.censusFeatures.length > 0 
             && event.censusFeatures[0].hasOwnProperty('id') ) {
@@ -68,6 +69,7 @@ class BoundaryDetailController {
     this.selectedBoundaryInfo = null
     this.selectedAnalysisAreaInfo = null
     this.selectedSAInfo = serviceArea
+    this.viewBoundaryInfo()
     this.$timeout()
   }
 
@@ -75,6 +77,7 @@ class BoundaryDetailController {
     this.selectedBoundaryInfo = null
     this.selectedSAInfo = null
     this.selectedAnalysisAreaInfo = analysisArea
+    this.viewBoundaryInfo()
     this.$timeout()
   }
 
@@ -90,16 +93,29 @@ class BoundaryDetailController {
       this.selectedSAInfo = null
       this.selectedAnalysisAreaInfo = null
       this.selectedBoundaryInfo = cbInfo
-      this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+      this.viewBoundaryInfo()
     })
   }
 
   viewSelectedBoundary(selectedBoundary) {
-    this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
-    this.viewCensusBlockInfo(selectedBoundary.id)
-    .then(() => {
-      map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
-    })
+    var visibleBoundaryLayer = _.find(this.state.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
+    if(visibleBoundaryLayer.type === 'census_blocks') {
+      this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
+      this.viewCensusBlockInfo(selectedBoundary.id)
+      .then(() => {
+        map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
+      })
+    } else if(visibleBoundaryLayer.type === 'wirecenter') {
+      this.state.reloadSelectedServiceArea(selectedBoundary.id)
+      this.viewServiceAreaInfo(selectedBoundary)
+    } else if(visibleBoundaryLayer.type === 'analysis_layer') {
+      this.state.reloadSelectedAnalysisArea(selectedBoundary.id)
+      this.viewAnalysisAreaInfo(selectedBoundary)
+    }  
+  }
+
+  viewBoundaryInfo() {
+    this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
   }
 
   $onDestroy() {
