@@ -200,6 +200,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.isRulerEnabled = false
 
+  //Boundary Layer Mode
+  service.boundaryLayerMode = Object.freeze({
+    VIEW: 'VIEW',
+    SEARCH: 'SEARCH'
+  })
+
+  service.activeboundaryLayerMode = service.boundaryLayerMode.VIEW
+
   // The panels in the view mode
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
@@ -1341,9 +1349,25 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.entityTypeList = {
     HouseholdObjectEntity: [],
     NetworkEquipmentEntity: [],
+    ProcessArea: [],
     CensusBlocksEntity: [],
+    AnalysisArea: [],
     AnalysisLayer: []
   }
+  //list of matched boundary list (ProcessArea/CensusBlocksEntity/AnalysisArea)
+  service.entityTypeBoundaryList = []
+
+  service.loadBoundaryEntityList = (filterObj) => {
+    if(filterObj == '') return
+    if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
+      var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
+      
+      visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ProcessArea',filterObj,'id,code','code')
+      visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code','code')
+    }
+  }
+
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
     if(entityType !== 'AnalysisLayer') {
@@ -1383,11 +1407,19 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       }
     }
 
+    if(entityType === 'ProcessArea') {
+      filter = filter ? filter.concat(' and layer/id eq 1') : filter
+    }  
+
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
 
     return $http.get(entityListUrl)
     .then((results) => {
       service.entityTypeList[entityType] = results.data
+      if(entityType === 'ProcessArea' || entityType === 'CensusBlocksEntity' 
+        || entityType === 'AnalysisArea') {
+          service.entityTypeBoundaryList = service.entityTypeList[entityType]
+        }
     })
     
   }

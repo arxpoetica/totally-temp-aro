@@ -98,11 +98,20 @@ class BoundaryDetailController {
   }
 
   viewSelectedBoundary(selectedBoundary) {
-    this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
-    this.viewCensusBlockInfo(selectedBoundary.id)
-    .then(() => {
-      map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
-    })
+    var visibleBoundaryLayer = _.find(this.state.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
+    if(visibleBoundaryLayer.type === 'census_blocks') {
+      this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
+      this.viewCensusBlockInfo(selectedBoundary.id)
+      .then(() => {
+        map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
+      })
+    } else if(visibleBoundaryLayer.type === 'wirecenter') {
+      this.state.reloadSelectedServiceArea(selectedBoundary.id)
+      this.viewServiceAreaInfo(selectedBoundary)
+    } else if(visibleBoundaryLayer.type === 'analysis_layer') {
+      this.state.reloadSelectedAnalysisArea(selectedBoundary.id)
+      this.viewAnalysisAreaInfo(selectedBoundary)
+    }  
   }
 
   viewBoundaryInfo() {

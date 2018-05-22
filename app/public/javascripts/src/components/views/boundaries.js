@@ -40,6 +40,8 @@ class BoundariesController {
         type: serviceLayer.name,
         api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
         layerId: serviceLayer.id,
+        visible: false,
+        disabled: false,
         aggregateZoomThreshold: 10
       }
     
@@ -52,6 +54,8 @@ class BoundariesController {
       type: 'census_blocks',
       api_endpoint: "/tile/v1/census_block/tiles/${tilePointTransform}/",
       //layerId: serviceLayer.id,
+      visible: false,
+      disabled: false,
       aggregateZoomThreshold: 10
     	  
     })
@@ -77,9 +81,47 @@ class BoundariesController {
   // for layers drawn on vector tiles
   tilesToggleVisibility(layer) {
     layer.visible = layer.visible_check;
+    this.disableOtherLayers()
     this.updateMapLayers()
   }
   
+  layerView(mode) {
+    this.state.activeboundaryLayerMode = this.state.boundaryLayerMode[mode]
+    this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.VIEW && this.enableAllLayers()
+    this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH && this.clearLayerSelections()
+  }
+
+  enableAllLayers() {
+    this.state.boundaries.tileLayers.forEach((boundaryLayer) => {
+      boundaryLayer.disabled = false
+    })
+  }
+
+  clearLayerSelections() {
+    this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
+    this.state.boundaries.tileLayers.forEach((boundaryLayer) => {
+      boundaryLayer.visible_check = false
+      boundaryLayer.visible = boundaryLayer.visible_check;
+    })
+    this.updateMapLayers()
+  }
+
+  disableOtherLayers() {
+    if(this.state.activeViewModePanel === this.state.viewModePanels.BOUNDARIES_INFO && 
+      this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH) {
+      var isOneLayerEnable = false
+      this.state.boundaries.tileLayers.forEach((boundary) => {
+        if (boundary.visible) isOneLayerEnable = true
+      })
+      if(isOneLayerEnable) {
+        _.filter(this.state.boundaries.tileLayers,(boundary) => !boundary.visible).forEach((boundary) => {
+          boundary.disabled = true
+        })
+      } else {
+        this.enableAllLayers()
+      }
+    }  
+  }
   
   updateMapLayers() {
     // ToDo: this function could stand to be cleaned up
@@ -230,6 +272,8 @@ class BoundariesController {
           type: 'analysis_layer',
           api_endpoint: "/tile/v1/analysis_area/tiles/${analysisLayerId}/${tilePointTransform}/",
           analysisLayerId: analysisLayer.id,
+          visible: false,
+          disabled: false,
           aggregateZoomThreshold: 10
         })
       })
