@@ -141,7 +141,7 @@
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment node -->
-        <div ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+        <div class="clearfix" ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">

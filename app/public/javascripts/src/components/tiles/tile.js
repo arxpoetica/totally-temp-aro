@@ -403,8 +403,8 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id  
-        if (this.tileDataService.featuresToExclude.has(featureId)) {
-          // This feature is to be excluded. Do not render it.
+        if (this.tileDataService.featuresToExclude.has(featureId) && this.selectedDisplayMode == this.displayModes.EDIT_PLAN) {
+          // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
           continue
         }
       }

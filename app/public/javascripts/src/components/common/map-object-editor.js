@@ -210,6 +210,8 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
+    console.log(feature.objectId)
+    this.tileDataService.addFeatureToExclude(feature.objectId)
     return new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
@@ -280,10 +282,11 @@ class MapObjectEditorController {
     }
 
     mapObject.addListener('rightclick', (event) => {
+      //console.log(event)
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.va.clientX}px`
-      this.contextMenuCss.top = `${event.va.clientY}px`
+      this.contextMenuCss.left = `${event.xa.clientX}px`
+      this.contextMenuCss.top = `${event.xa.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -319,6 +322,7 @@ class MapObjectEditorController {
       }
     }
     var isExistingObject = false
+    var isEquipment = false
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
@@ -327,6 +331,7 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.equipmentFeatures[0].object_id
       isExistingObject = true
+      isEquipment = true
     } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
@@ -340,12 +345,24 @@ class MapObjectEditorController {
       feature.objectId = this.getUUID()
       isExistingObject = false
     }
+    
+    // Corr: this gotta change <----------------------------------------------------------------<<<
+    
     this.createMapObject(feature, true)
     if (isExistingObject) {
       // We have clicked on an existing object. Stop rendering this object in the tile,
-      this.tileDataService.addFeatureToExclude(feature.objectId)
-      this.state.requestMapLayerRefresh.next({})
+      //this.tileDataService.addFeatureToExclude(feature.objectId)
+      //this.state.requestMapLayerRefresh.next({})
     }
+    
+    /*
+    if (isExistingObject && isEquipment) {
+      this.selectMapObject()
+      console.log(event.equipmentFeatures[0])
+    }else{
+      this.createMapObject(feature, true)
+    }
+    */
   }
 
   isMarker(mapObject) {
@@ -353,6 +370,8 @@ class MapObjectEditorController {
   }
 
   selectMapObject(mapObject) {
+    console.log('selected mapObject')
+    console.log(mapObject)
     // First de-select the currently selected map object (if any)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {

@@ -245,8 +245,6 @@ class EquipmentDetailController {
       }
     })
     
-    
-    
     state.clearViewMode.subscribe((clear) => {
       if(clear){
         this.networkNodeType = ''
@@ -257,8 +255,6 @@ class EquipmentDetailController {
       }
     })
   }
-	
-	
 	
 	getEquipmentInfo(planId, objectId){
 	  return this.$http.get('/service/plan-feature/'+planId+'/equipment/'+objectId).then((response) => {
