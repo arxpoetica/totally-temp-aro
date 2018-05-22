@@ -37,14 +37,15 @@
 	        <div class="ei-items-contain" ng-repeat="childProp in listVal.getDisplayProperties()" ng-if=" '1' == childProp.levelOfDetail && $ctrl.doShow(childProp, listVal)">
 	          <div class="ei-property-item" ng-if="'tree' != childProp.format && 'list' != childProp.format" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
 				      <div style="flex: 1 1 50%;"><div>{{childProp.displayName}}</div></div>
-				      <editor-interface-value display-props="childProp" model="listVal[childProp.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
+				      <editor-interface-value display-props="childProp" on-change="$ctrl.onChange()" model="listVal[childProp.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
 				    </div>
 	        </div>
 	      </div>
 	      
 	      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
 	      <editor-interface-tree class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
-	                         object-to-view="listVal" 
+	                         object-to-view="listVal"
+	                         on-change="$ctrl.onChange()" 
 	                         is-edit="$ctrl.isEdit" 
 	                         indentation-level="$ctrl.indentationLevel + 1"
 	                         ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">
@@ -71,7 +72,7 @@
       <input ng-if="$ctrl.isEdit && prop.editable" type="text" ng-model="$ctrl.objectToView[prop.propertyName]" class="form-control input-sm ei-input-text" style="flex: 0 0 50%">
       <div ng-if="!$ctrl.isEdit || !prop.editable" style="flex: 0 0 50%"><div>{{value}}</div></div>
       -->
-      <editor-interface-value display-props="prop" model="$ctrl.objectToView[prop.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
+      <editor-interface-value display-props="prop" on-change="$ctrl.onChange()" model="$ctrl.objectToView[prop.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
     </div>
   </div>
 </div>

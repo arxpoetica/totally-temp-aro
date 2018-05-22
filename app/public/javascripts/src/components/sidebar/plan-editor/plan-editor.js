@@ -119,8 +119,9 @@ class PlanEditorController {
         result.data.forEach((feature) => {
           console.log(feature)
           const attributes = feature.attributes
+          var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
-                                                     'dslam', attributes.selectedEquipmentType, feature.networkNodeEquipment)
+                                                     'dslam', attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)

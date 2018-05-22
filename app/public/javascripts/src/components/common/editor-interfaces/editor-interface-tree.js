@@ -65,7 +65,7 @@ let editorInterfaceTree = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-tree.html',
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
-    //displayProps: '<', 
+    onChange: '&', 
     isEdit: '<', 
     indentationLevel: '<'
   },

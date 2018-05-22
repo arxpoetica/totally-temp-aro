@@ -184,9 +184,10 @@
           </table>
           
           
-          {{$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment}}
-          {{selectedNetworkNodeEquipment = $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment;""}}
-          <editor-interface-tree object-to-view="selectedNetworkNodeEquipment" is-edit="true"></editor-interface-tree>
+          <editor-interface-tree 
+                              on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
+                              object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" 
+                              is-edit="true"></editor-interface-tree>
           
           
           <button ng-class="{ 'btn btn-sm pull-right': true,
