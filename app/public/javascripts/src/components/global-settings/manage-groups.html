@@ -1,0 +1,48 @@
+<div style="display:flex; flex-direction: column; height: 100%;">
+  <div style="flex: 1 1 auto; overflow-y: auto;">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Admin</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="group in $ctrl.groups">
+          <td style="max-width: 160px">
+            <span ng-if="!group.isEditing" style="line-height: 23px;">{{group.name}}</span>
+            <input ng-if="group.isEditing" type="text" class="form-control" ng-model="group.name">
+          </td>
+          <td>
+            <span ng-if="!group.isEditing" style="line-height: 23px;">{{group.description}}</span>
+            <textarea ng-if="group.isEditing" type="text" class="form-control" style="resize: none" ng-model="group.description"></textarea>
+          </td>
+          <td style="text-align: center; padding-top: 6px;">
+            <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
+                  ng-model="group.isAdministrator"
+                  ng-disabled="!group.isEditing">
+          </td>
+          <td>
+            <button ng-if="!group.isEditing" class="btn btn-primary btn-xs" ng-click="group.isEditing = true"><i class="fa fa-pencil"></i></button>
+            <button ng-if="group.isEditing" class="btn btn-primary btn-xs" ng-click="$ctrl.saveGroup(group)"><i class="fa fa-save"></i></button>
+            <button class='btn btn-danger btn-xs' ng-click="$ctrl.deleteGroup(group)"><i class="fa fa-trash"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="flex: 0 0 auto;">
+    <button class="btn btn-default" ng-click="$ctrl.addGroup()"><i class="fa fa-plus"></i>&nbsp; Add new group</button>
+  </div>
+  <div style="flex: 0 0 auto;">
+    <div ng-if="$ctrl.userMessage.show"
+         ng-class="{ 'alert': true,
+                     'alert-success': $ctrl.userMessage.type === 'success',
+                     'alert-danger': $ctrl.userMessage.type === 'failure' }"
+         style="margin-bottom: 0px;">
+      {{$ctrl.userMessage.text}}
+    </div>
+  </div>
+</div>

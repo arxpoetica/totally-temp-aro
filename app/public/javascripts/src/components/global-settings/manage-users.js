@@ -1,11 +1,37 @@
 class ManageUsersController {
 
-  constructor($http, state, globalSettingsService) {
+  constructor($http, $timeout, state, globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
     this.$http = $http
-    this.users = []
-    this.user_id = user_id
+    this.$timeout = $timeout
+    this.allUsers = []
+    this.filteredUsers = []
+    this.isLoadingUsers = false
+    this.allGroups = []
+    this.mapIdToGroup = {}
+    this.searchText = ''
+    this.searchPromise = null
+    this.pagination = {
+      itemsPerPage: 8,
+      currentPage: 1,
+      allPages: [1],
+      visiblePages: [1]
+    }
+    $http.get('/admin/users/count')
+      .then((result) => {
+        this.recalculatePagination(result.data[0].count)
+        this.pagination.currentPage = 1
+        this.recalculateVisiblePages()
+        this.$timeout()
+      })
+    this.$http.get('/service/auth/groups')
+      .then((result) => {
+        this.allGroups = result.data
+        result.data.forEach((group) => this.mapIdToGroup[group.id] = group)
+        this.loadUsers()
+        $timeout()
+      })
     this.userTypes = [
       {
         name: 'Admin',
@@ -20,26 +46,110 @@ class ManageUsersController {
         rol: 'sales'
       }
     ]
+    this.initializeNewUser()
   }
 
-  $onInit() {
-    this.loadUsers()
+  recalculatePagination(maxNumberOfItems) {
+    this.pagination.allPages = []
+    const numPages = Math.floor(maxNumberOfItems / this.pagination.itemsPerPage) + 1
+    for (var iPage = 0; iPage < numPages; ++iPage) {
+      this.pagination.allPages.push(iPage + 1)
+    }
+  }
+
+  recalculateVisiblePages() {
+    const NUM_VISIBLE_PAGES_BY2 = 3
+    const visiblePageStart = Math.max(0, this.pagination.currentPage - NUM_VISIBLE_PAGES_BY2)
+    const visiblePageEnd = 1 + Math.min(this.pagination.allPages.length - 1, this.pagination.currentPage + NUM_VISIBLE_PAGES_BY2 - 2)
+    this.pagination.visiblePages = this.pagination.allPages.slice(visiblePageStart, visiblePageEnd)
+    this.$timeout()
+  }
+
+  selectPage(newPageNumber) {
+    if (this.pagination.allPages.indexOf(newPageNumber) < 0) {
+      console.error(`Page ${newPageNumber} selected, but this page does not exist in our list`)
+      return
+    }
+    this.pagination.currentPage = newPageNumber
+    this.filterUsers(false)
+    this.recalculateVisiblePages()
+  }
+
+  selectPreviousPage() {
+    const currentIndex = this.pagination.allPages.indexOf(this.pagination.currentPage)
+    if (currentIndex > 0) {
+      this.selectPage(this.pagination.allPages[currentIndex - 1])
+    }
+  }
+
+  selectNextPage() {
+    const currentIndex = this.pagination.allPages.indexOf(this.pagination.currentPage)
+    if (currentIndex < this.pagination.allPages.length - 1) {
+      this.selectPage(this.pagination.allPages[currentIndex + 1])
+    }    
+  }
+
+  filterUsers(repaginate) {
+    this.filteredUsers = []
+    if (this.searchText === '') {
+      this.filteredUsers = this.allUsers
+    } else {
+      // For now do search in a crude way. Will get this from the ODATA endpoint later
+      this.allUsers.forEach((user) => {
+        if (JSON.stringify(user).indexOf(this.searchText) >= 0) {
+          this.filteredUsers.push(user)
+        }
+      })
+    }
+    if (repaginate) {
+      this.recalculatePagination(this.filteredUsers.length)
+      this.pagination.currentPage = 1
+      this.recalculateVisiblePages()
+    }
+    const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
+    this.filteredUsers = this.filteredUsers.slice(startIndex, startIndex + this.pagination.itemsPerPage)
+    this.$timeout()
+  }
+
+  onSearchKeyUp(event) {
+    const SEARCH_DELAY = 500  // milliseconds. Delay before we fire a search request on the server
+    if (this.searchPromise) {
+      // We have already scheduled a search (from the previous keystroke). Cancel it.
+      this.$timeout.cancel(this.searchPromise)
+      this.searchPromise = null
+    }
+    this.searchPromise = this.$timeout(() => this.filterUsers(true), SEARCH_DELAY)
   }
 
   loadUsers() {
-    this.$http.get('/admin/users')
-      .then((response) => {
-        this.users = response.data
-        this.sortBy('first_name', false)
+    this.isLoadingUsers = true
+    this.$timeout()
+    this.$http.get('/service/auth/users')
+      .then((result) => {
+        this.isLoadingUsers = false
+        this.allUsers = result.data
+        // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
+        // Remove the group ids property and replace it with group objects
+        this.allUsers.forEach((user, index) => {
+          var selectedGroupObjects = []
+          user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(this.mapIdToGroup[userGroupId]))
+          this.allUsers[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
+          delete this.allUsers[index].groupIds
+        })
+        this.filterUsers(true)
       })
+    .catch((err) => console.error(err))
   }
 
-  sortBy(key, descending) {
-    this.users = _.sortBy(this.users, (user) => {
-      return user[key] || ''
-    })
-    if (descending) {
-      this.users = this.users.reverse()
+  initializeNewUser() {
+    this.newUser = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      confirmEmail: '',
+      companyName: '',
+      rol: this.userTypes[0],
+      groups: []
     }
   }
 
@@ -104,9 +214,46 @@ class ManageUsersController {
     })
   }
 
+  // Save any modifications made to the filtered users
+  saveUsers() {
+    this.filteredUsers.forEach((user, index) => {
+      // aro-service requires group ids in the user objects. replace group objects by group ids
+      var serviceUser = angular.copy(user)
+      serviceUser.groupIds = []
+      serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
+      delete serviceUser.userGroups
+      // Save the user to aro-service
+      this.$http.put('/service/auth/users', serviceUser)
+        .catch((err) => console.error(err))
+    })
+  }
+
+  registerUser() {
+    if (this.newUser.email !== this.newUser.confirmEmail) {
+      return swal({
+        title: 'Error',
+        text: 'Emails do not match',
+        type: 'error'
+      })
+    }
+    var serviceUser = angular.copy(this.newUser)
+    serviceUser.groupIds = []
+    this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
+
+
+    this.$http.post('/admin/users/register', this.newUser)
+      .then((response) => {
+        globalSettings.new_user = {}
+        swal({ title: 'User registered', type: 'success' })
+        globalSettings.openUserView()
+      })
+      .catch((err) => console.error(err))
+    this.initializeNewUser()
+    this.loadUsers()
+  }
 }
 
-ManageUsersController.$inject = ['$http', 'state', 'globalSettingsService']
+ManageUsersController.$inject = ['$http', '$timeout', 'state', 'globalSettingsService']
 
 let manageUsers = {
   templateUrl: '/components/global-settings/manage-users.html',

@@ -10,6 +10,18 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
+  app.post('/admin/users/hashPassword', check_admin, (request, response, next) => {
+    models.User.hashPassword(request.body.password)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  app.get('/admin/users/count', check_admin, (request, response, next) => {
+    models.User.getUsersCount()
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
   app.post('/admin/users/register', check_admin, (request, response, next) => {
     var options = request.body
     models.User.register(options)
