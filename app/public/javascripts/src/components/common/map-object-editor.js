@@ -15,6 +15,7 @@ class MapObjectEditorController {
     this.selectedMapObject = null
     this.uuidStore = []
     this.getUUIDsFromServer()
+    this.iconAnchors = {}
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
     this.contextMenuCss = {
@@ -42,6 +43,7 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4,
     }
+    
   }
 
   // Get a list of UUIDs from the server
@@ -70,7 +72,10 @@ class MapObjectEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-
+    
+    //this.makeIconAnchor(this.objectIconUrl)
+    //this.makeIconAnchor(this.objectSelectedIconUrl)
+    
     // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
@@ -142,7 +147,30 @@ class MapObjectEditorController {
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
   }
-
+  
+  makeIconAnchor(iconUrl, callback){
+    if ('undefined' == typeof callback) callback = {}
+    var img = new Image();
+    var loadCallBack = (w, h) => {
+      this.iconAnchors[iconUrl] = new google.maps.Point(w*0.5, h*0.5)
+      callback()
+    }
+    img.addEventListener("load", function(){
+      loadCallBack( this.naturalWidth, this.naturalHeight)
+    })
+    img.src = iconUrl
+  }
+  
+  setMapObjectIcon(mapObject, iconUrl){
+    if (!this.iconAnchors.hasOwnProperty(iconUrl)){
+      this.makeIconAnchor(iconUrl, () => {
+        mapObject.setIcon({url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+      })
+    }else{
+      mapObject.setIcon({url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+    }
+  }
+  
   handleOnDropped(eventArgs) {
     this.onObjectDroppedOnMarker && this.onObjectDroppedOnMarker(eventArgs)
   }
@@ -210,11 +238,14 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
+    this.tileDataService.addFeatureToExclude(feature.objectId)
+    this.state.requestMapLayerRefresh.next({})
     return new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
       icon: {
-        url: this.objectIconUrl
+        url: this.objectIconUrl, 
+        anchor: this.iconAnchors[this.objectIconUrl]
       },
       draggable: true,
       map: this.mapRef
@@ -242,8 +273,9 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMapObject(feature, usingMapClick) {
-
+  createMapObject(feature, usingMapClick, featureData) {
+    if ('undefined' == typeof featureData) featureData = {}
+    
     var mapObject = null
     if (feature.geometry.type === 'Point') {
       mapObject = this.createPointMapObject(feature)
@@ -282,8 +314,8 @@ class MapObjectEditorController {
     mapObject.addListener('rightclick', (event) => {
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.va.clientX}px`
-      this.contextMenuCss.top = `${event.va.clientY}px`
+      this.contextMenuCss.left = `${event.xa.clientX}px`
+      this.contextMenuCss.top = `${event.xa.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -295,9 +327,10 @@ class MapObjectEditorController {
       this.selectMapObject(mapObject)
       this.$timeout()
     })
-
+    
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: featureData})
+    
     this.selectMapObject(mapObject)
   }
 
@@ -318,6 +351,7 @@ class MapObjectEditorController {
       }
     }
     var isExistingObject = false
+    var isEquipment = false
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
@@ -326,6 +360,7 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.equipmentFeatures[0].object_id
       isExistingObject = true
+      isEquipment = true
     } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
@@ -339,12 +374,21 @@ class MapObjectEditorController {
       feature.objectId = this.getUUID()
       isExistingObject = false
     }
-    this.createMapObject(feature, true)
-    if (isExistingObject) {
-      // We have clicked on an existing object. Stop rendering this object in the tile,
-      this.tileDataService.addFeatureToExclude(feature.objectId)
-      this.state.requestMapLayerRefresh.next({})
+    
+    
+    if (isExistingObject && isEquipment) {
+      // editing existing or planned equipment, get that data
+      var plan = this.state.plan.getValue()
+      this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
+      .then((response) => {
+        if (!response.data) response.data = {}
+        if (response.data.geometry) feature.geometry = response.data.geometry
+        this.createMapObject(feature, true, response.data)
+      })
+    }else{
+      this.createMapObject(feature, true)
     }
+    
   }
 
   isMarker(mapObject) {
@@ -355,7 +399,9 @@ class MapObjectEditorController {
     // First de-select the currently selected map object (if any)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {
-        this.selectedMapObject.setIcon(this.objectIconUrl)
+        //this.selectedMapObject.setIcon(this.objectIconUrl)
+        //this.selectedMapObject.setIcon({url: this.objectIconUrl, anchor: new google.maps.Point(13, 18)})
+        this.setMapObjectIcon(this.selectedMapObject, this.objectIconUrl)
       } else {
         this.selectedMapObject.setOptions(this.polygonOptions)
         this.selectedMapObject.setEditable(false)
@@ -365,8 +411,9 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) {  // Can be null if we are de-selecting everything
       if (this.isMarker(mapObject)) {
-        //console.log('item selected')
-        mapObject.setIcon(this.objectSelectedIconUrl)
+        //mapObject.setIcon(this.objectSelectedIconUrl)
+        //mapObject.setIcon({url: this.objectSelectedIconUrl, anchor: new google.maps.Point(13, 18)})
+        this.setMapObjectIcon(mapObject, this.objectSelectedIconUrl)
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
       }

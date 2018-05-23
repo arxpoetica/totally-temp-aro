@@ -16,6 +16,7 @@ let editorInterfaceValue = {
   bindings: {
     displayProps: '=', 
     model: '=', 
+    onChange: '&', 
     isEdit: '<'
   },
   controller: EditorInterfaceValueController

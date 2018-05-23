@@ -15,15 +15,7 @@ class EditorInterfaceTreeController {
   $onInit() {
     this.indentationLevel = this.indentationLevel || 0
   }
-
-  isEditable(obj) {
-    return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
-  }
-  /*
-  isExpandable(obj) {
-    return (typeof obj === 'object' && !angular.equals({}, obj))// && object isn't empty, ToDo: check that at least one child it showable
-  }
-  */
+  
   toggleIsKeyExpanded(index) {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
@@ -51,10 +43,15 @@ class EditorInterfaceTreeController {
     return summeryCount
   }
   
+  hasChildren(data){
+    if ('undefined' == typeof data || null == data) return false
+    return ('function' == typeof data.getDisplayProperties)
+  }
+  
   makeList(prop){
     var listVals = []
     if ("tree" == prop.format){
-      listVals = [this.objectToView[prop.propertyName]]
+      listVals = [this.objectToView[prop.propertyName]] // note the array wrapper 
     }else if("list" == prop.format){
       listVals = this.objectToView[prop.propertyName]
     }
@@ -68,7 +65,7 @@ let editorInterfaceTree = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-tree.html',
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
-    displayProps: '<', 
+    onChange: '&', 
     isEdit: '<', 
     indentationLevel: '<'
   },
