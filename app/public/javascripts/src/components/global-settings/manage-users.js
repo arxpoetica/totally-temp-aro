@@ -1,10 +1,33 @@
+import MockService from './mockService'
 class ManageUsersController {
 
-  constructor($http, state, globalSettingsService) {
+  constructor($http, $timeout, state, globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
     this.$http = $http
+    this.userService = new MockService($http)
     this.users = []
+    this.allGroups = []
+    this.userService.get('/getAllGroups')
+      .then((result) => {
+        this.allGroups = result
+        $timeout()
+        return this.userService.get('/getAllUsers')
+      })
+      .then((result) => {
+        var mapIdToGroup = {}
+        this.allGroups.forEach((group) => mapIdToGroup[group.id] = group)
+        this.users = result
+        // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
+        // Just replace the groups array with actual group objects
+        this.users.forEach((user, index) => {
+          var selectedGroupObjects = []
+          user.userGroups.forEach((userGroupId) => selectedGroupObjects.push(mapIdToGroup[userGroupId]))
+          this.users[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
+        })
+        $timeout()
+      })
+      .catch((err) => console.error(err))
     this.user_id = user_id
     this.userTypes = [
       {
@@ -22,17 +45,17 @@ class ManageUsersController {
     ]
   }
 
-  $onInit() {
-    this.loadUsers()
-  }
+  // $onInit() {
+  //   this.loadUsers()
+  // }
 
-  loadUsers() {
-    this.$http.get('/admin/users')
-      .then((response) => {
-        this.users = response.data
-        this.sortBy('first_name', false)
-      })
-  }
+  // loadUsers() {
+  //   this.$http.get('/admin/users')
+  //     .then((response) => {
+  //       this.users = response.data
+  //       this.sortBy('first_name', false)
+  //     })
+  // }
 
   sortBy(key, descending) {
     this.users = _.sortBy(this.users, (user) => {
@@ -106,7 +129,7 @@ class ManageUsersController {
 
 }
 
-ManageUsersController.$inject = ['$http', 'state', 'globalSettingsService']
+ManageUsersController.$inject = ['$http', '$timeout', 'state', 'globalSettingsService']
 
 let manageUsers = {
   templateUrl: '/components/global-settings/manage-users.html',

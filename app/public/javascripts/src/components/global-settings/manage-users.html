@@ -18,27 +18,36 @@
           <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', false)">↑</a>
         </th>
         <th>
+          Groups
+        </th>
+        <th>
+          Actions
         </th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="user in $ctrl.users">
-        <td>{{user.first_name}} {{user.last_name}}</td>
+        <td>{{user.firstName}} {{user.lastName}}</td>
         <td>{{user.email}}</td>
         <td>
-          <select ng-show="user.id !== $ctrl.user_id" class="form-control" ng-options="type.rol as type.name for type in $ctrl.userTypes" ng-model="user.rol"
-            ng-change="$ctrl.changeRol(user)">
+          <!-- <select ng-show="user.id !== $ctrl.user_id" class="form-control" ng-options="type.rol as type.name for type in $ctrl.userTypes" ng-model="user.rol"
+                  ng-change="$ctrl.changeRol(user)">
               <option value="">Basic</option>
-          </select>
+          </select> -->
           <span ng-show="user.id === $ctrl.user_id">Admin</span>
+        </td>
+        <td>
+          <aro-multi-select model="user.userGroups"
+                            all-items="$ctrl.allGroups">
+          </aro-multi-select>
         </td>
         <td>
           <div class="pull-right">
             <input type="text" id="resend-link-input-{{ user.id }}" value="{{user.resend_link}}" style="position: absolute; margin-left: -999999px">
-            <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-sm btn-default"
+            <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-xs btn-default"
               ng-click="$ctrl.copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
-            <a class="btn btn-sm btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
-            <a class="btn btn-sm btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
+            <a class="btn btn-xs btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
+            <a class="btn btn-xs btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
           </div>
         </td>
       </tr>
