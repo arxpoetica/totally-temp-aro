@@ -1,9 +1,20 @@
 class ManageGroupsController {
 
-  constructor($http) {
+  constructor($http, $timeout) {
     this.$http = $http
+    this.$timeout = $timeout
     this.groups = []
     this.loadGroups()
+    this.initEmptyUserMessage()
+    this.USER_MESSAGE_TIMEOUT = 5000  // Number of milliseconds a user message will be shown on the screen
+  }
+
+  initEmptyUserMessage() {
+    this.userMessage = {
+      show: false,
+      type: '',
+      text: ''
+    }
   }
 
   loadGroups() {
@@ -94,7 +105,15 @@ class ManageGroupsController {
         // Our resource permissions may have been modifed. Save the whole lot.
         return this.$http.put('/service/auth/acl/SYSTEM/1', acls)
       })
-      .then((result) => this.loadGroups())
+      .then((result) => {
+        this.userMessage = {
+          show: true,
+          type: 'success',
+          text: 'Group saved successfully'
+        }
+        this.$timeout(() => this.initEmptyUserMessage(), this.USER_MESSAGE_TIMEOUT)
+        this.loadGroups()
+      })
       .catch((err) => {
         group.isEditing = false
         console.error(err)
@@ -103,12 +122,20 @@ class ManageGroupsController {
 
   deleteGroup(group) {
     this.$http.delete(`/service/auth/groups/${group.id}`)
-      .then((result) => this.loadGroups())
+      .then((result) => {
+        this.userMessage = {
+          show: true,
+          type: 'success',
+          text: 'Group deleted successfully'
+        }
+        this.$timeout(() => this.initEmptyUserMessage(), this.USER_MESSAGE_TIMEOUT)
+        this.loadGroups()
+      })
       .catch((err) => console.error(err))
   }
 }
 
-ManageGroupsController.$inject = ['$http']
+ManageGroupsController.$inject = ['$http', '$timeout']
 
 let manageGroups = {
   templateUrl: '/components/global-settings/manage-groups.html',
