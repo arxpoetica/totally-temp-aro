@@ -48,9 +48,7 @@ let aroMultiSelect = {
   bindings: {
     model: '=',             // Will be passed in as a ng-model to our select. Two Way binding for now!
     allItems: '<',          // All the items to show.
-    currentSelectedItems: '<', // currently Selected Items
-    maxHeightInPixels: '<', // [Optional] The maximum height of the component in pixels
-    selectionChanged: '&',   // [Optional] Called when the selected items change
+    selectionChanged: '&',  // [Optional] Called when the selected items change
     enableSearch: '@',
     placeholder: '@'  // [optional] placeholder to show
   },

@@ -6,13 +6,14 @@ class GlobalSettingsController {
     this.currentUser = globalUser
 
     this.views = Object.freeze({
-      Global_Settings: 0,
-      My_Account: 1,
-      Manage_Users: 2,
-      User_Settings: 3,
-      Tag_Manager: 4
+      GLOBAL_SETTINGS: 0,
+      MY_ACCOUNT: 1,
+      MANAGE_USERS: 2,
+      USER_SETTINGS: 3,
+      TAG_MANAGER: 4,
+      MANAGE_GROUPS: 5
     })
-    this.currentView = this.views.Global_Settings
+    this.currentView = this.views.GLOBAL_SETTINGS
   }
 
   modalShown() {
@@ -24,19 +25,23 @@ class GlobalSettingsController {
   }
   
   toggleViewMode() {
-    this.currentView = this.views.Global_Settings
+    this.currentView = this.views.GLOBAL_SETTINGS
   }
 
   toggleMyAccountMode() {
-    this.currentView = this.views.My_Account
+    this.currentView = this.views.MY_ACCOUNT
   }
 
   toggleManageUsersMode() {
-    this.currentView = this.views.Manage_Users
+    this.currentView = this.views.MANAGE_USERS
+  }
+
+  toggleManageGroupsMode() {
+    this.currentView = this.views.MANAGE_GROUPS
   }
 
   toggleUserSettings() {
-    this.currentView = this.views.User_Settings
+    this.currentView = this.views.USER_SETTINGS
   }
 
 }
@@ -61,7 +66,7 @@ let globalSettings = {
       <modal-header title="Global Settings"></modal-header>
       <modal-body style="height: 500px;overflow: auto;">
 
-        <div id="global-settings" ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">  
+        <div id="global-settings" ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS">  
           <button class="btn settings-btn"
             ng-click="$ctrl.toggleMyAccountMode()">
               <i class="fa fa-2x fa-user"></i>
@@ -76,6 +81,13 @@ let globalSettings = {
           </button>
 
           <button class="btn settings-btn"
+            ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'"
+            ng-click="$ctrl.toggleManageGroupsMode()">
+              <i class="fa fa-2x fa-users"></i>
+              <br>Manage Groups
+          </button>
+
+          <button class="btn settings-btn"
             ng-click="$ctrl.toggleUserSettings()">
               <i class="fa fa-2x fa-cogs"></i>
               <br>User Settings
@@ -83,38 +95,46 @@ let globalSettings = {
 
           <button class="btn settings-btn"
             ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'"
-            ng-click="$ctrl.currentView = $ctrl.views.Tag_Manager">
+            ng-click="$ctrl.currentView = $ctrl.views.TAG_MANAGER">
               <i class="fa fa-2x fa-tags"></i>
               <br>Tag Manager
           </button>
         </div>
 
-        <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.My_Account"></user-account-settings>
+        <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
 
-        <manage-users ng-if="$ctrl.currentView === $ctrl.views.Manage_Users"
-          manager-view="$ctrl.globalSettingsService.currentManageUserView"></manage-users>  
+        <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
+                      manager-view="$ctrl.globalSettingsService.currentManageUserView">
+        </manage-users>
 
-        <user-settings ng-show="$ctrl.currentView === $ctrl.views.User_Settings"></user-settings>  
+        <manage-groups ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS"
+                      manager-view="$ctrl.globalSettingsService.currentManageUserView">
+        </manage-groups>
 
-        <tag-manager ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager"
+        <user-settings ng-show="$ctrl.currentView === $ctrl.views.USER_SETTINGS"></user-settings>  
+
+        <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER"
           manager-view="$ctrl.globalSettingsService.currentTagManagerView"><tag-manager>
       </modal-body>
 
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Global_Settings">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS">
         <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.My_Account">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT">
         <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.User_Settings">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.USER_SETTINGS">
         <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.saveLocation()">Update settings</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Manage_Users && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users">
         <a type="button" class="btn btn-default" ng-href='/admin/users/csv'>Download CSV</a>
         <a type="button" class="btn btn-default" ng-click="$ctrl.globalSettingsService.openSendMailView()">Send email to all users</a>
         <a type="button" class="btn btn-default" ng-click="$ctrl.globalSettingsService.openNewUserView()">Register a new user</a>
+        <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
+      </modal-footer>
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS">
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>
       <modal-footer ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.SendEmail">
@@ -125,15 +145,15 @@ let globalSettings = {
         <button type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.register_user()">Register user</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.Tags">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.Tags">
         <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.CreateTag">Create Tag</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.toggleViewMode()">Back</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.UpdateTag">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.UpdateTag">
         <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.updateTag()">Update Tag</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.Tags">Back</button>
       </modal-footer>
-      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.Tag_Manager && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag">
+      <modal-footer ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag">
         <button type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
         <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.currentTagManagerView = $ctrl.globalSettingsService.TagManagerViews.Tags">Back</button>
       </modal-footer>

@@ -51,6 +51,7 @@ import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
+import manageGroups from './global-settings/manage-groups'
 import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
@@ -124,6 +125,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('networkPlan', networkPlan)
    .component('userAccountSettings', userAccountSettings)
    .component('manageUsers', manageUsers)
+   .component('manageGroups', manageGroups)
    .component('globalSettings', globalSettings)
    .component('aroPanel', aroPanel)
    .component('aroMultiSelect', aroMultiSelect)
