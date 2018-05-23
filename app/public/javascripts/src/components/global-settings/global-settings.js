@@ -6,12 +6,12 @@ class GlobalSettingsController {
     this.currentUser = globalUser
 
     this.views = Object.freeze({
-      GLOBAL_SETTINGS: 0,
-      MY_ACCOUNT: 1,
-      MANAGE_USERS: 2,
-      USER_SETTINGS: 3,
-      TAG_MANAGER: 4,
-      MANAGE_GROUPS: 5
+      GLOBAL_SETTINGS: 'Global Settings',
+      MY_ACCOUNT: 'My Account',
+      MANAGE_USERS: 'Manage Users',
+      MANAGE_GROUPS: 'Manage Groups',
+      USER_SETTINGS: 'User Settings',
+      TAG_MANAGER: 'Tag Manager'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
     this.isAdministrator = false
