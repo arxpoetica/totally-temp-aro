@@ -1342,8 +1342,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.clearViewMode = new Rx.BehaviorSubject(false)
+  service.clearEditingMode = new Rx.BehaviorSubject(false)
   $rootScope.$on('map_tool_esc_clear_view_mode', () => {
     service.clearViewMode.next(true)
+    service.clearEditingMode.next(true)
   })
 
   service.entityTypeList = {
@@ -1363,8 +1365,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
       
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ProcessArea',filterObj,'id,code','code')
-      visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code','code')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ProcessArea',filterObj,'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
 
