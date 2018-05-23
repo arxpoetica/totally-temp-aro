@@ -27,32 +27,12 @@ class AroMultiSelectController {
   }
 
   $doCheck() {
-    if (this.isRebuildNeed()) {
+    if (this.previousItemsLength != this.allItems.length) {
       this.previousItemsLength = this.allItems.length
-      this.previousSelectedItems = this.currentSelectedItems
       setTimeout(() => {
         this.selectElement.multiselect('rebuild');
       }, 0);
     }
-  }
-
-  isRebuildNeed() {
-    //This will rebuild, when we add new data items.
-    if(this.previousItemsLength != this.allItems.length) {
-      return true
-    }
-
-    if(this.currentSelectedItems.length != this.previousSelectedItems.length) {
-      return true
-    }
-    
-    //Rebuilding multi-select when haskey missmatch between UI and bootstrab
-    if(this.currentSelectedItems.length > 0 && this.previousSelectedItems.length > 0) {
-      if (!angular.equals(this.currentSelectedItems[0].$$hashKey, this.previousSelectedItems[0].$$hashKey)) {
-         return true
-      }
-    }
-    return false
   }
 }
 
