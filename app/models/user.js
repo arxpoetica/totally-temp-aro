@@ -86,6 +86,7 @@ module.exports = class User {
 
   static register (user) {
     var code = user.password ? null : this.randomCode()
+    var hashedPassword = null
 
     return validate((expect) => {
       expect(user, 'user', 'object')
@@ -95,19 +96,23 @@ module.exports = class User {
     })
     .then(() => user.password ? this.hashPassword(user.password) : null)
     .then((hash) => {
+      hashedPassword = hash;
+      return database.query('INSERT INTO auth.system_actor(actor_type, is_deleted) VALUES (2, false);')
+    })
+    .then(() => {
       var params = [
         user.firstName,
         user.lastName,
         user.email.toLowerCase(),
         user.companyName || null,
         user.rol || null,
-        hash || code
+        hashedPassword || code
       ]
       var sql
-      if (hash) {
+      if (hashedPassword) {
         sql = `
-          INSERT INTO auth.users (first_name, last_name, email, company_name, rol, password)
-          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
+          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, password)
+          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6) RETURNING id
         `
         return database.findOne(sql, params)
       } else {
