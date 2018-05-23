@@ -27,6 +27,10 @@ module.exports = class User {
     })
   }
 
+  static getUsersCount() {
+    return database.query('SELECT COUNT(*) FROM auth.users');
+  }
+
   static checkPassword (plain, hash) {
     return new Promise((resolve, reject) => {
       bcrypt.compare(plain, hash, (err, ok) => {
@@ -85,17 +89,17 @@ module.exports = class User {
 
     return validate((expect) => {
       expect(user, 'user', 'object')
-      expect(user, 'user.first_name', 'string')
-      expect(user, 'user.last_name', 'string')
+      expect(user, 'user.firstName', 'string')
+      expect(user, 'user.lastName', 'string')
       expect(user, 'user.email', 'string')
     })
     .then(() => user.password ? this.hashPassword(user.password) : null)
     .then((hash) => {
       var params = [
-        user.first_name,
-        user.last_name,
+        user.firstName,
+        user.lastName,
         user.email.toLowerCase(),
-        user.company_name || null,
+        user.companyName || null,
         user.rol || null,
         hash || code
       ]

@@ -1,34 +1,38 @@
-import MockService from './mockService'
 class ManageUsersController {
 
   constructor($http, $timeout, state, globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
     this.$http = $http
-    this.userService = new MockService($http)
+    this.$timeout = $timeout
     this.users = []
     this.allGroups = []
-    this.userService.get('/getAllGroups')
+    this.mapIdToGroup = {}
+    this.pagination = {
+      itemsPerPage: 5,
+      currentPage: 1,
+      allPages: [1],
+      visiblePages: [1]
+    }
+    $http.get('/admin/users/count')
       .then((result) => {
-        this.allGroups = result
-        $timeout()
-        return this.userService.get('/getAllUsers')
+        console.log(result.data)
+        this.pagination.allPages = []
+        const numPages = Math.floor(result.data[0].count / this.pagination.itemsPerPage) + 1
+        for (var iPage = 0; iPage < numPages; ++iPage) {
+          this.pagination.allPages.push(iPage + 1)
+        }
+        this.pagination.currentPage = 1
+        this.recalculateVisiblePages()
+        this.$timeout()
       })
+    this.$http.get('/service/auth/groups')
       .then((result) => {
-        var mapIdToGroup = {}
-        this.allGroups.forEach((group) => mapIdToGroup[group.id] = group)
-        this.users = result
-        // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
-        // Just replace the groups array with actual group objects
-        this.users.forEach((user, index) => {
-          var selectedGroupObjects = []
-          user.userGroups.forEach((userGroupId) => selectedGroupObjects.push(mapIdToGroup[userGroupId]))
-          this.users[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
-        })
+        this.allGroups = result.data
+        result.data.forEach((group) => this.mapIdToGroup[group.id] = group)
+        this.loadUsers()
         $timeout()
       })
-      .catch((err) => console.error(err))
-    this.user_id = user_id
     this.userTypes = [
       {
         name: 'Admin',
@@ -43,26 +47,68 @@ class ManageUsersController {
         rol: 'sales'
       }
     ]
+    this.initializeNewUser()
   }
 
-  // $onInit() {
-  //   this.loadUsers()
-  // }
+  recalculateVisiblePages() {
+    const NUM_VISIBLE_PAGES_BY2 = 3
+    const visiblePageStart = Math.max(0, this.pagination.currentPage - NUM_VISIBLE_PAGES_BY2)
+    const visiblePageEnd = 1 + Math.min(this.pagination.allPages.length - 1, this.pagination.currentPage + NUM_VISIBLE_PAGES_BY2)
+    this.pagination.visiblePages = this.pagination.allPages.slice(visiblePageStart, visiblePageEnd)
+    this.$timeout()
+  }
 
-  // loadUsers() {
-  //   this.$http.get('/admin/users')
-  //     .then((response) => {
-  //       this.users = response.data
-  //       this.sortBy('first_name', false)
-  //     })
-  // }
+  selectPage(newPageNumber) {
+    if (this.pagination.allPages.indexOf(newPageNumber) < 0) {
+      console.error(`Page ${newPageNumber} selected, but this page does not exist in our list`)
+      return
+    }
+    this.pagination.currentPage = newPageNumber
+    this.loadUsers()
+    this.recalculateVisiblePages()
+  }
 
-  sortBy(key, descending) {
-    this.users = _.sortBy(this.users, (user) => {
-      return user[key] || ''
-    })
-    if (descending) {
-      this.users = this.users.reverse()
+  selectPreviousPage() {
+    const currentIndex = this.pagination.allPages.indexOf(this.pagination.currentPage)
+    if (currentIndex > 0) {
+      this.selectPage(this.pagination.allPages[currentIndex - 1])
+    }
+  }
+
+  selectNextPage() {
+    const currentIndex = this.pagination.allPages.indexOf(this.pagination.currentPage)
+    if (currentIndex < this.pagination.allPages.length - 1) {
+      this.selectPage(this.pagination.allPages[currentIndex + 1])
+    }    
+  }
+
+  loadUsers() {
+    this.$http.get('/service/auth/users')
+      .then((result) => {
+        const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
+        this.users = result.data.slice(startIndex, startIndex + this.pagination.itemsPerPage)
+        // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
+        // Remove the group ids property and replace it with group objects
+        this.users.forEach((user, index) => {
+          var selectedGroupObjects = []
+          user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(this.mapIdToGroup[userGroupId]))
+          this.users[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
+          delete this.users[index].groupIds
+        })
+        this.$timeout()
+      })
+    .catch((err) => console.error(err))
+  }
+
+  initializeNewUser() {
+    this.newUser = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      confirmEmail: '',
+      companyName: '',
+      rol: this.userTypes[0],
+      groups: []
     }
   }
 
@@ -127,6 +173,53 @@ class ManageUsersController {
     })
   }
 
+  // Save any modifications made to the users
+  saveUsers() {
+    this.users.forEach((user, index) => {
+      // aro-service requires group ids in the user objects. replace group objects by group ids
+      var serviceUser = angular.copy(user)
+      serviceUser.groupIds = []
+      serviceUser.userGroups.forEach((userGroup) => serviceUser.groupIds.push(userGroup.id))
+      delete serviceUser.userGroups
+      // Save the user to aro-service
+      this.$http.put('/service/auth/users', serviceUser)
+        .catch((err) => console.error(err))
+    })
+  }
+
+  registerUser() {
+    if (this.newUser.email !== this.newUser.confirmEmail) {
+      return swal({
+        title: 'Error',
+        text: 'Emails do not match',
+        type: 'error'
+      })
+    }
+    var serviceUser = angular.copy(this.newUser)
+    serviceUser.groupIds = []
+    this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
+
+
+    this.$http.post('/admin/users/register', this.newUser)
+      .then((response) => {
+        globalSettings.new_user = {}
+        swal({ title: 'User registered', type: 'success' })
+        globalSettings.openUserView()
+      })
+      .catch((err) => console.error(err))
+    
+
+    // this.$http.post('/admin/users/hashPassword', { password: this.newUser.password })
+    //   .then((result) => {
+    //     console.log(result)
+    //     return this.$http.post('/service/auth/users', this.newUser)
+    //   })
+    //   .then((response) => {
+    //     swal({ title: 'User registered', type: 'success' })
+    //   })
+    //   .catch((err) => console.error(err))
+    this.initializeNewUser()
+  }
 }
 
 ManageUsersController.$inject = ['$http', '$timeout', 'state', 'globalSettingsService']

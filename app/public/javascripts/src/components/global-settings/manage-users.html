@@ -4,18 +4,9 @@
       <tr>
         <th>
           Name
-          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('first_name', true)">↓</a>
-          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('first_name', false)">↑</a>
         </th>
         <th>
           Email
-          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('email', true)">↓</a>
-          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('email', false)">↑</a>
-        </th>
-        <th>
-          Rol
-          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', true)">↓</a>
-          <a href="javascript:void(0)" ng-click="$ctrl.sortBy('rol', false)">↑</a>
         </th>
         <th>
           Groups
@@ -29,13 +20,6 @@
       <tr ng-repeat="user in $ctrl.users">
         <td>{{user.firstName}} {{user.lastName}}</td>
         <td>{{user.email}}</td>
-        <td>
-          <!-- <select ng-show="user.id !== $ctrl.user_id" class="form-control" ng-options="type.rol as type.name for type in $ctrl.userTypes" ng-model="user.rol"
-                  ng-change="$ctrl.changeRol(user)">
-              <option value="">Basic</option>
-          </select> -->
-          <span ng-show="user.id === $ctrl.user_id">Admin</span>
-        </td>
         <td>
           <aro-multi-select model="user.userGroups"
                             all-items="$ctrl.allGroups">
@@ -53,6 +37,27 @@
       </tr>
     </tbody>
   </table>
+  <div class="pull-right">
+    <nav aria-label="Page navigation">
+      <ul class="pagination pagination-sm">
+        <li>
+          <a href="#" aria-label="Previous" ng-click="$ctrl.selectPreviousPage()">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <li ng-repeat="page in $ctrl.pagination.visiblePages"
+            ng-class="{ 'active': $ctrl.pagination.currentPage === page }">
+          <a href="#" ng-click="$ctrl.selectPage(page)">{{page}}</a>
+        </li>
+        <li>
+          <a href="#" aria-label="Next" ng-click="$ctrl.selectNextPage()">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <button class="btn btn-primary" ng-click="$ctrl.saveUsers()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save</button>
+  </div>
 </div>
 
 <div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.SendEmail">
@@ -74,37 +79,37 @@
   <div class="form-group">
     <label class="col-sm-4 control-label">First name</label>
     <div class="col-sm-8">
-      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.first_name">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newUser.firstName">
     </div>
   </div>
   <div class="form-group">
     <label class="col-sm-4 control-label">Last name</label>
     <div class="col-sm-8">
-      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.last_name">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newUser.lastName">
     </div>
   </div>
   <div class="form-group">
     <label class="col-sm-4 control-label">Email</label>
     <div class="col-sm-8">
-      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.email">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newUser.email">
     </div>
   </div>
   <div class="form-group">
     <label class="col-sm-4 control-label">Confirm email</label>
     <div class="col-sm-8">
-      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.email_confirm">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newUser.confirmEmail">
     </div>
   </div>
   <div class="form-group">
     <label class="col-sm-4 control-label">Company name</label>
     <div class="col-sm-8">
-      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.new_user.company_name">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.newUser.companyName">
     </div>
   </div>
   <div class="form-group">
     <label class="col-sm-4 control-label">Permissions</label>
     <div class="col-sm-8">
-      <select class="form-control" ng-model="$ctrl.globalSettingsService.new_user.rol">
+      <select class="form-control" ng-model="$ctrl.globalSettingsService.newUser.rol">
         <option value="">No permissions</option>
         <option value="biz-dev">Biz-Dev</option>
         <option value="admin">Admin</option>
@@ -113,4 +118,5 @@
     </div>
   </div>
   </form>
+  <button class="btn btn-primary pull-right" ng-click="$ctrl.registerUser()"><i class="fa fa-save"></i>&nbsp;&nbsp;Register user</button>
 </div> 
