@@ -21,12 +21,12 @@
         <br>My Account
       </button>
 
-      <button class="btn settings-btn" ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'" ng-click="$ctrl.toggleManageUsersMode()">
+      <button class="btn settings-btn" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.toggleManageUsersMode()">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Users
       </button>
 
-      <button class="btn settings-btn" ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'" ng-click="$ctrl.toggleManageGroupsMode()">
+      <button class="btn settings-btn" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.toggleManageGroupsMode()">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Groups
       </button>
@@ -81,7 +81,6 @@
     <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
   </modal-footer>
   <modal-footer ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.RegisterUser">
-    <button type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.register_user()">Register user</button>
     <button class="btn btn-primary pull-right" ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
   </modal-footer>
   <modal-footer ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.Tags">
