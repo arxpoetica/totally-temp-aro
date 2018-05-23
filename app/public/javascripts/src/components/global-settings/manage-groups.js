@@ -3,6 +3,21 @@ import MockService from './mockService'
 class ManageGroupsController {
 
   constructor($http) {
+
+    this.groups = [
+      {
+        name: 'Administrators',
+        isAdmin: true
+      },
+      {
+        name: 'CAF Planners',
+        isAdmin: false
+      },
+      {
+        name: 'Ohio CAF PLanners',
+        isAdmin: false
+      }
+    ]
   }
 }
 
