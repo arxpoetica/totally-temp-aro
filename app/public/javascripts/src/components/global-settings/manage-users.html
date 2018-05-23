@@ -3,7 +3,7 @@
     <div class="pull-right input-group" style="max-width: 250px;">
       <input class="form-control" type="text" ng-model="$ctrl.searchText" ng-keyup="$ctrl.onSearchKeyUp($event)">
       <span class="input-group-btn">
-        <button class="btn btn-default" type="button" ng-click="$ctrl.loadUsers()"><i class="fa fa-search"></i></button>
+        <button class="btn btn-default" type="button" ng-click="$ctrl.filterUsers(true)"><i class="fa fa-search"></i></button>
       </span>
     </div>
   </div>
@@ -26,7 +26,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="user in $ctrl.users">
+        <tr ng-repeat="user in $ctrl.filteredUsers">
           <td>{{user.firstName}} {{user.lastName}}</td>
           <td>{{user.email}}</td>
           <td>

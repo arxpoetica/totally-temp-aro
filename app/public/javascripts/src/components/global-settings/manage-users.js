@@ -5,25 +5,22 @@ class ManageUsersController {
     this.globalSettingsService = globalSettingsService
     this.$http = $http
     this.$timeout = $timeout
-    this.users = []
+    this.allUsers = []
+    this.filteredUsers = []
     this.isLoadingUsers = false
     this.allGroups = []
     this.mapIdToGroup = {}
     this.searchText = ''
     this.searchPromise = null
     this.pagination = {
-      itemsPerPage: 5,
+      itemsPerPage: 7,
       currentPage: 1,
       allPages: [1],
       visiblePages: [1]
     }
     $http.get('/admin/users/count')
       .then((result) => {
-        this.pagination.allPages = []
-        const numPages = Math.floor(result.data[0].count / this.pagination.itemsPerPage) + 1
-        for (var iPage = 0; iPage < numPages; ++iPage) {
-          this.pagination.allPages.push(iPage + 1)
-        }
+        this.recalculatePagination(result.data[0].count)
         this.pagination.currentPage = 1
         this.recalculateVisiblePages()
         this.$timeout()
@@ -52,10 +49,18 @@ class ManageUsersController {
     this.initializeNewUser()
   }
 
+  recalculatePagination(maxNumberOfItems) {
+    this.pagination.allPages = []
+    const numPages = Math.floor(maxNumberOfItems / this.pagination.itemsPerPage) + 1
+    for (var iPage = 0; iPage < numPages; ++iPage) {
+      this.pagination.allPages.push(iPage + 1)
+    }
+  }
+
   recalculateVisiblePages() {
     const NUM_VISIBLE_PAGES_BY2 = 3
     const visiblePageStart = Math.max(0, this.pagination.currentPage - NUM_VISIBLE_PAGES_BY2)
-    const visiblePageEnd = 1 + Math.min(this.pagination.allPages.length - 1, this.pagination.currentPage + NUM_VISIBLE_PAGES_BY2)
+    const visiblePageEnd = 1 + Math.min(this.pagination.allPages.length - 1, this.pagination.currentPage + NUM_VISIBLE_PAGES_BY2 - 2)
     this.pagination.visiblePages = this.pagination.allPages.slice(visiblePageStart, visiblePageEnd)
     this.$timeout()
   }
@@ -66,7 +71,7 @@ class ManageUsersController {
       return
     }
     this.pagination.currentPage = newPageNumber
-    this.loadUsers()
+    this.filterUsers(false)
     this.recalculateVisiblePages()
   }
 
@@ -84,18 +89,26 @@ class ManageUsersController {
     }    
   }
 
-  filterUsersBySearch(users) {
+  filterUsers(repaginate) {
+    this.filteredUsers = []
     if (this.searchText === '') {
-      return users  // Nothing to filter out
+      this.filteredUsers = this.allUsers
+    } else {
+      // For now do search in a crude way. Will get this from the ODATA endpoint later
+      this.allUsers.forEach((user) => {
+        if (JSON.stringify(user).indexOf(this.searchText) >= 0) {
+          this.filteredUsers.push(user)
+        }
+      })
     }
-    // For now do search in a crude way. Will get this from the ODATA endpoint later
-    var filteredUsers = []
-    users.forEach((user) => {
-      if (JSON.stringify(user).indexOf(this.searchText) >= 0) {
-        filteredUsers.push(user)
-      }
-    })
-    return filteredUsers
+    if (repaginate) {
+      this.recalculatePagination(this.filteredUsers.length)
+      this.pagination.currentPage = 1
+      this.recalculateVisiblePages()
+    }
+    const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
+    this.filteredUsers = this.filteredUsers.slice(startIndex, startIndex + this.pagination.itemsPerPage)
+    this.$timeout()
   }
 
   onSearchKeyUp(event) {
@@ -105,7 +118,7 @@ class ManageUsersController {
       this.$timeout.cancel(this.searchPromise)
       this.searchPromise = null
     }
-    this.searchPromise = this.$timeout(() => this.loadUsers(), SEARCH_DELAY)
+    this.searchPromise = this.$timeout(() => this.filterUsers(true), SEARCH_DELAY)
   }
 
   loadUsers() {
@@ -114,18 +127,16 @@ class ManageUsersController {
     this.$http.get('/service/auth/users')
       .then((result) => {
         this.isLoadingUsers = false
-        const filteredUsers = this.filterUsersBySearch(result.data)
-        const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
-        this.users = filteredUsers.slice(startIndex, startIndex + this.pagination.itemsPerPage)
+        this.allUsers = result.data
         // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
         // Remove the group ids property and replace it with group objects
-        this.users.forEach((user, index) => {
+        this.allUsers.forEach((user, index) => {
           var selectedGroupObjects = []
           user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(this.mapIdToGroup[userGroupId]))
-          this.users[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
-          delete this.users[index].groupIds
+          this.allUsers[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
+          delete this.allUsers[index].groupIds
         })
-        this.$timeout()
+        this.filterUsers(true)
       })
     .catch((err) => console.error(err))
   }
