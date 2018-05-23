@@ -108,9 +108,11 @@ class BoundaryDetailController {
     } else if(visibleBoundaryLayer.type === 'wirecenter') {
       this.state.reloadSelectedServiceArea(selectedBoundary.id)
       this.viewServiceAreaInfo(selectedBoundary)
+      map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     } else if(visibleBoundaryLayer.type === 'analysis_layer') {
       this.state.reloadSelectedAnalysisArea(selectedBoundary.id)
       this.viewAnalysisAreaInfo(selectedBoundary)
+      map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     }  
   }
 
