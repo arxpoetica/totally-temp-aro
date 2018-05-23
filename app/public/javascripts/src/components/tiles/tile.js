@@ -1300,7 +1300,7 @@ class TileComponentController {
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-              console.log(result)
+              //console.log(result)
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)

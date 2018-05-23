@@ -15,7 +15,6 @@ class EquipmentProperties {
     this.selectedEquipmentType = selectedEquipmentType || this.equipmentTypes[0]
     this.networkNodeEquipment = networkNodeEquipment || null
     this.isDirty = false
-    console.log(this.networkNodeEquipment)
   }
 }
 

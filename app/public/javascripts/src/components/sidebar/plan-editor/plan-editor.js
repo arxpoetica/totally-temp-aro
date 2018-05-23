@@ -117,7 +117,6 @@ class PlanEditorController {
         this.createMapObjects && this.createMapObjects(result.data)
         // We now have objectIdToMapObject populated.
         result.data.forEach((feature) => {
-          console.log(feature)
           const attributes = feature.attributes
           var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
@@ -128,7 +127,6 @@ class PlanEditorController {
       }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
-          //console.log(feature)
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
@@ -184,7 +182,6 @@ class PlanEditorController {
       var objectId = this.boundaryIdToEquipmentId[boundaryId]
       var mapObject = this.objectIdToMapObject[objectId]
       var spatialEdgeType = this.objectIdToProperties[objectId].spatialEdgeType
-      //console.log(mapObject)
       this.deleteBoundary(boundaryId)
       this.calculateCoverage(mapObject, spatialEdgeType);
     }
@@ -239,7 +236,6 @@ class PlanEditorController {
         this.createMapObjects && this.createMapObjects([feature])
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
-        //console.log(result)
         this.isWorkingOnCoverage = false
       })
       .catch((err) => {
@@ -282,9 +278,7 @@ class PlanEditorController {
   }
   
   getCensusTagsForBoundaryCoverage(objectId){
-    //console.log(this.censusCategories)
     var censusBlockIds = Object.keys(this.boundaryCoverageById[objectId].censusBlockCountById)
-    //console.log(censusBlockIds.length)
     
     if (censusBlockIds.length > 0){
       //id eq 61920 or id eq 56829
@@ -300,14 +294,13 @@ class PlanEditorController {
         }
         filterSets[setIndex] += 'id eq '+censusBlockIds[cbI]
       }
-      //console.log(filterSets)
+      
       var censusBlockPromises = []
       for (var promiseI=0; promiseI<filterSets.length; promiseI++){
         var entityListUrl = `/service/odata/censusBlocksEntity?$select=id,tagInfo&$filter=${filterSets[promiseI]}`
         censusBlockPromises.push(this.$http.get(entityListUrl))
       }
       Promise.all(censusBlockPromises).then((results) => {
-        //console.log(results)
         var rows = []
         for (var resultI=0; resultI<results.length; resultI++){
           rows = rows.concat(results[resultI].data)
@@ -316,9 +309,7 @@ class PlanEditorController {
         // iterate through each censusblock
         for (var rowI=0; rowI<rows.length; rowI++){
           var row = rows[rowI]
-          //console.log(row)
           var tagInfo = this.formatCensusBlockData(row.tagInfo)
-          //console.log(tagInfo)
           
           // iterate through each category of the CB
           Object.keys(tagInfo).forEach((catId) => {
@@ -348,7 +339,6 @@ class PlanEditorController {
                   censusTagsByCat[catId].tags[tagId].count = 0
                 }
               }
-              //console.log(this.boundaryCoverageById[objectId].censusBlockCountById[row.id])
               if (!isError) censusTagsByCat[catId].tags[tagId].count += this.boundaryCoverageById[objectId].censusBlockCountById[row.id]
             })
             
@@ -426,7 +416,6 @@ class PlanEditorController {
       }     
     }
     
-    //console.log(data)
     var coverageChart = new Chart(ctx, {
       type: 'bar',
       data: settingsData,
@@ -486,7 +475,6 @@ class PlanEditorController {
 
   // Marks the properties of the selected equipment as dirty (changed).
   markSelectedEquipmentPropertiesDirty() {
-    console.log("USER CHANGE")
     if (this.selectedMapObject) {
       var objectProperties = this.objectIdToProperties[this.selectedMapObject.objectId]
       objectProperties.isDirty = true
@@ -599,12 +587,6 @@ class PlanEditorController {
   
   
   handleObjectCreated(mapObject, usingMapClick, feature, featureData) {
-    console.log("CREATED")
-    console.log(mapObject)
-    console.log(usingMapClick)
-    console.log(feature)
-    //console.log('---')
-    console.log(featureData)
     if ('undefined' == typeof featureData) featureData = {}
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
@@ -666,14 +648,11 @@ class PlanEditorController {
   }
   
   handleSelectedObjectChanged(mapObject) {
-    console.log(mapObject)
     if (null == this.currentTransaction) return
     // check to see if the object is new
     //  if so clear the current selection and wait for the return from service when we can get the proper data
     //if (mapObject.objectId == this.creatingObjectId) mapObject = null
     this.selectedMapObject = mapObject
-    console.log("SELECTED CHANGED")
-    console.log(this.objectIdToProperties)
     
     this.$timeout()
   }
@@ -681,7 +660,6 @@ class PlanEditorController {
   handleObjectModified(mapObject) {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
-      console.log('OBJECT MODIFIED')
       var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
         .then((result) => {

@@ -204,9 +204,7 @@ class EquipmentDetailController {
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
-      // most of this funcltion is assuring the properties we need exist. 
-      // ToDo: the feature selection system could use some refactoring 
-      //console.log(options)
+      // most of this function is assuring the properties we need exist. 
       //In ruler mode click should not perform any view action's
       if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
         !this.state.isRulerEnabled) {
@@ -238,22 +236,28 @@ class EquipmentDetailController {
       }
       
       if (null != selectedFeature){
-        //console.log(selectedFeature)
         this.updateSelectedState(selectedFeature, featureId)
         this.displayEquipment(plan.id, selectedFeature.object_id)
       }
       }
     })
     
+    
     state.clearViewMode.subscribe((clear) => {
       if(clear){
-        this.networkNodeType = ''
-        this.selectedEquipmentInfo = {}
-        //this.selectedEquipmentInfoChanges = {}
-        //this.selectedEquipmentInfoDispProps = []
-        this.updateSelectedState()
+        this.clearSelection()
       }
     })
+  }
+	
+	
+	// ----- //
+	
+	
+	clearSelection(){
+    this.networkNodeType = ''
+    this.selectedEquipmentInfo = {}
+    this.updateSelectedState()
   }
 	
 	getEquipmentInfo(planId, objectId){
@@ -273,10 +277,7 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-	  //console.log(planId)
-	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
@@ -290,101 +291,24 @@ class EquipmentDetailController {
         
         try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
           this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
-          //this.selectedEquipmentInfoDispProps = this.traverseProperties(this.selectedEquipmentInfo)
         }catch(error) {
           console.error(error) 
           return
         }
         
-        //console.log('=== DISP INFO ===')
-        //console.log(this.selectedEquipmentInfo)
-        //console.log(this.selectedEquipmentInfoDispProps)
-        
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
         this.$timeout()
+      }else{
+        this.clearSelection()
       }
       return equipmentInfo
     })
 	}
 	
-	/*
-	traverseProperties(eqPropVals){
-	  if ('function' != typeof eqPropVals.getDisplayProperties) return []
-	  var eqDispProps = eqPropVals.getDisplayProperties()
-	  for (var i=0; i<eqDispProps.length; i++){// loop on values not disp props
-	    var dispProp = eqDispProps[i]
-	    if (!dispProp.visible || !eqPropVals.hasOwnProperty(dispProp.propertyName)) continue
-	    var propVal = eqPropVals[ dispProp.propertyName ]
-	    if (null == propVal) continue
-	    var type = typeof propVal
-	    if ('object' == type && Array.isArray(propVal)) type = 'array'
-	    
-	    // drop down list
-	    // text area vs single line?
-	    // date
-	    if (!dispProp.format){
-  	    switch (type) {
-  	      case 'boolean':
-  	        eqDispProps[i].format = "check"
-  	        break
-  	      case 'number':
-  	        eqDispProps[i].format = "number"
-  	        break
-  	      case 'string':
-            eqDispProps[i].format = "string"
-            break
-  	      case 'array':
-            eqDispProps[i].format = "list"
-            break
-  	      case 'object':
-            eqDispProps[i].format = "tree"
-            break
-  	    }
-	    }
-	    if ('array' == type){
-	      if (propVal.length > 0 && 'function' == typeof propVal[0].getDisplayProperties ){
-	        eqDispProps[i].children = this.traverseProperties(propVal[0])
-	      }
-	    }else if ('object' == type){
-	      if ('function' == typeof propVal.getDisplayProperties){
-  	      eqDispProps[i].children = this.traverseProperties(propVal)
-	      }
-	    }
-	  }
-	  return eqDispProps
-	}
-	*/
-	// ---
-	
-	/*
-  //ToDo: these perhaps get moved to the UI component 
-  beginEdit(){
-    // set up listeners etc
-    this.isEdit = true
-  }
-  
-  cancelEdit(){
-    // return the object to init state
-    //angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
-    this.isEdit = false
-  }
-  
-  commitEdit(){
-    // set the object to the edited object and tell the DB
-    // may need to compare to check for deletes and creates 
-    //angular.copy(this.selectedEquipmentInfoChanges, this.selectedEquipmentInfo)
-    this.isEdit = false
-    console.log('send changed data to DB:')
-    console.log(this.selectedEquipmentInfo)
-  }
-  */
   // ---
   
   viewSelectedEquipment(selectedEquipment) {
-    //console.log(selectedEquipment)
-    
     var plan = this.state.plan.getValue()
-    //if (!plan || !plan.hasOwnProperty('id')) return
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
     this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){

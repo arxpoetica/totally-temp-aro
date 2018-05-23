@@ -210,7 +210,6 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
-    console.log(feature.objectId)
     this.tileDataService.addFeatureToExclude(feature.objectId)
     this.state.requestMapLayerRefresh.next({})
     return new google.maps.Marker({
@@ -246,8 +245,6 @@ class MapObjectEditorController {
   }
 
   createMapObject(feature, usingMapClick, featureData) {
-    console.log('createMapObject')
-    console.log(featureData)
     if ('undefined' == typeof featureData) featureData = {}
     
     var mapObject = null
@@ -286,7 +283,6 @@ class MapObjectEditorController {
     }
 
     mapObject.addListener('rightclick', (event) => {
-      //console.log(event)
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
       this.contextMenuCss.left = `${event.xa.clientX}px`
@@ -303,27 +299,13 @@ class MapObjectEditorController {
       this.$timeout()
     })
     
-    /*
-    // is this an existing equipment? 
-    var plan = this.state.plan.getValue()
-    this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+mapObject.objectId)
-    .then((response) => {
-      console.log( response.data )
-      this.createdMapObjects[mapObject.objectId] = mapObject
-      this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: response.data})
-      // can't run this until 
-      this.selectMapObject(mapObject)
-    })
-    */
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: featureData})
-    //this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: {} })
     
     this.selectMapObject(mapObject)
   }
 
   handleMapEntitySelected(event) {
-    console.log('MapEntitySelected')
     if (!event || !event.latLng) {
       return
     }
@@ -370,8 +352,8 @@ class MapObjectEditorController {
       var plan = this.state.plan.getValue()
       this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
       .then((response) => {
-        console.log('service return')
-        console.log( response.data )
+        if (!response.data) response.data = {}
+        if (response.data.geometry) feature.geometry = response.data.geometry
         this.createMapObject(feature, true, response.data)
       })
     }else{
@@ -385,8 +367,6 @@ class MapObjectEditorController {
   }
 
   selectMapObject(mapObject) {
-    console.log('selected mapObject')
-    console.log(mapObject)
     // First de-select the currently selected map object (if any)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {
@@ -400,7 +380,6 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) {  // Can be null if we are de-selecting everything
       if (this.isMarker(mapObject)) {
-        //console.log('item selected')
         mapObject.setIcon(this.objectSelectedIconUrl)
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
