@@ -49,6 +49,7 @@ class ManageGroupsController {
     // Create a group in aro-service and then add it to our groups list. This ensures we will have a valid group id.
     // Don't do anything with ACL as the default is a non-administrator group
     this.groups.forEach((group) => group.isEditing = false)
+    this.$timeout()
     this.$http.post('/service/auth/groups', {
       name: `Group ${Math.round(Math.random() * 10000)}`, // Try to not have a duplicate group name
       description: 'Group Description'
@@ -57,6 +58,7 @@ class ManageGroupsController {
         var group = result.data
         group.isEditing = true
         this.groups.push(group)
+        this.$timeout()
       })
       .catch((err) => console.error(err))
   }
