@@ -8,6 +8,8 @@ class ManageUsersController {
     this.users = []
     this.allGroups = []
     this.mapIdToGroup = {}
+    this.searchText = ''
+    this.searchPromise = null
     this.pagination = {
       itemsPerPage: 5,
       currentPage: 1,
@@ -16,7 +18,6 @@ class ManageUsersController {
     }
     $http.get('/admin/users/count')
       .then((result) => {
-        console.log(result.data)
         this.pagination.allPages = []
         const numPages = Math.floor(result.data[0].count / this.pagination.itemsPerPage) + 1
         for (var iPage = 0; iPage < numPages; ++iPage) {
@@ -82,11 +83,36 @@ class ManageUsersController {
     }    
   }
 
+  filterUsersBySearch(users) {
+    if (this.searchText === '') {
+      return users  // Nothing to filter out
+    }
+    // For now do search in a crude way. Will get this from the ODATA endpoint later
+    var filteredUsers = []
+    users.forEach((user) => {
+      if (JSON.stringify(user).indexOf(this.searchText) >= 0) {
+        filteredUsers.push(user)
+      }
+    })
+    return filteredUsers
+  }
+
+  onSearchKeyUp(event) {
+    const SEARCH_DELAY = 500  // milliseconds. Delay before we fire a search request on the server
+    if (this.searchPromise) {
+      // We have already scheduled a search (from the previous keystroke). Cancel it.
+      this.$timeout.cancel(this.searchPromise)
+      this.searchPromise = null
+    }
+    this.searchPromise = this.$timeout(() => this.loadUsers(), SEARCH_DELAY)
+  }
+
   loadUsers() {
     this.$http.get('/service/auth/users')
       .then((result) => {
+        const filteredUsers = this.filterUsersBySearch(result.data)
         const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
-        this.users = result.data.slice(startIndex, startIndex + this.pagination.itemsPerPage)
+        this.users = filteredUsers.slice(startIndex, startIndex + this.pagination.itemsPerPage)
         // For a user we will get the IDs of the groups that the user belongs to. Our control uses objects to bind to the model.
         // Remove the group ids property and replace it with group objects
         this.users.forEach((user, index) => {

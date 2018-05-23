@@ -1,62 +1,74 @@
-<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.Users">
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>
-          Name
-        </th>
-        <th>
-          Email
-        </th>
-        <th>
-          Groups
-        </th>
-        <th>
-          Actions
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="user in $ctrl.users">
-        <td>{{user.firstName}} {{user.lastName}}</td>
-        <td>{{user.email}}</td>
-        <td>
-          <aro-multi-select model="user.userGroups"
-                            all-items="$ctrl.allGroups">
-          </aro-multi-select>
-        </td>
-        <td>
-          <div class="pull-right">
-            <input type="text" id="resend-link-input-{{ user.id }}" value="{{user.resend_link}}" style="position: absolute; margin-left: -999999px">
-            <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-xs btn-default"
-              ng-click="$ctrl.copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
-            <a class="btn btn-xs btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
-            <a class="btn btn-xs btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="pull-right">
-    <nav aria-label="Page navigation">
-      <ul class="pagination pagination-sm">
-        <li>
-          <a href="#" aria-label="Previous" ng-click="$ctrl.selectPreviousPage()">
-            <span aria-hidden="true">&laquo;</span>
-          </a>
-        </li>
-        <li ng-repeat="page in $ctrl.pagination.visiblePages"
-            ng-class="{ 'active': $ctrl.pagination.currentPage === page }">
-          <a href="#" ng-click="$ctrl.selectPage(page)">{{page}}</a>
-        </li>
-        <li>
-          <a href="#" aria-label="Next" ng-click="$ctrl.selectNextPage()">
-            <span aria-hidden="true">&raquo;</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    <button class="btn btn-primary" ng-click="$ctrl.saveUsers()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save</button>
+<div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.Users" style="display: flex; flex-direction: column; height: 100%;">
+  <div style="flex: 0 0 auto;">
+    <div class="pull-right input-group" style="max-width: 250px;">
+      <input class="form-control" type="text" ng-model="$ctrl.searchText" ng-keyup="$ctrl.onSearchKeyUp($event)">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button" ng-click="$ctrl.loadUsers()"><i class="fa fa-search"></i></button>
+      </span>
+    </div>
+  </div>
+  <div style="flex: 1 1 auto; overflow-y: auto;">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>
+            Name
+          </th>
+          <th>
+            Email
+          </th>
+          <th>
+            Groups
+          </th>
+          <th>
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="user in $ctrl.users">
+          <td>{{user.firstName}} {{user.lastName}}</td>
+          <td>{{user.email}}</td>
+          <td>
+            <aro-multi-select model="user.userGroups"
+                              all-items="$ctrl.allGroups">
+            </aro-multi-select>
+          </td>
+          <td>
+            <div class="pull-right">
+              <input type="text" id="resend-link-input-{{ user.id }}" value="{{user.resend_link}}" style="position: absolute; margin-left: -999999px">
+              <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-xs btn-default"
+                ng-click="$ctrl.copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
+              <a class="btn btn-xs btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
+              <a class="btn btn-xs btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="flex: 0 0 auto;">
+    <div class="pull-right">
+      <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm" style="display: inline; padding-right: 20px;">
+          <li>
+            <a href="#" aria-label="Previous" ng-click="$ctrl.selectPreviousPage()">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li ng-repeat="page in $ctrl.pagination.visiblePages"
+              ng-class="{ 'active': $ctrl.pagination.currentPage === page }">
+            <a href="#" ng-click="$ctrl.selectPage(page)">{{page}}</a>
+          </li>
+          <li>
+            <a href="#" aria-label="Next" ng-click="$ctrl.selectNextPage()">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+        <button class="btn btn-primary btn-sm" ng-click="$ctrl.saveUsers()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save</button>
+      </nav>
+    </div>
   </div>
 </div>
 
