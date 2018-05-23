@@ -117,8 +117,8 @@ module.exports = class User {
         return database.findOne(sql, params)
       } else {
         sql = `
-          INSERT INTO auth.users (first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration)
-          VALUES ($1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\'))
+          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration)
+          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\'))
           RETURNING id
         `
         return database.findOne(sql, params)

@@ -13,7 +13,7 @@ class ManageUsersController {
     this.searchText = ''
     this.searchPromise = null
     this.pagination = {
-      itemsPerPage: 7,
+      itemsPerPage: 8,
       currentPage: 1,
       allPages: [1],
       visiblePages: [1]
@@ -214,9 +214,9 @@ class ManageUsersController {
     })
   }
 
-  // Save any modifications made to the users
+  // Save any modifications made to the filtered users
   saveUsers() {
-    this.users.forEach((user, index) => {
+    this.filteredUsers.forEach((user, index) => {
       // aro-service requires group ids in the user objects. replace group objects by group ids
       var serviceUser = angular.copy(user)
       serviceUser.groupIds = []
@@ -248,18 +248,8 @@ class ManageUsersController {
         globalSettings.openUserView()
       })
       .catch((err) => console.error(err))
-    
-
-    // this.$http.post('/admin/users/hashPassword', { password: this.newUser.password })
-    //   .then((result) => {
-    //     console.log(result)
-    //     return this.$http.post('/service/auth/users', this.newUser)
-    //   })
-    //   .then((response) => {
-    //     swal({ title: 'User registered', type: 'success' })
-    //   })
-    //   .catch((err) => console.error(err))
     this.initializeNewUser()
+    this.loadUsers()
   }
 }
 
