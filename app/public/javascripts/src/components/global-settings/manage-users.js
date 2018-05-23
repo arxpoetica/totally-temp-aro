@@ -6,6 +6,7 @@ class ManageUsersController {
     this.$http = $http
     this.$timeout = $timeout
     this.users = []
+    this.isLoadingUsers = false
     this.allGroups = []
     this.mapIdToGroup = {}
     this.searchText = ''
@@ -108,8 +109,11 @@ class ManageUsersController {
   }
 
   loadUsers() {
+    this.isLoadingUsers = true
+    this.$timeout()
     this.$http.get('/service/auth/users')
       .then((result) => {
+        this.isLoadingUsers = false
         const filteredUsers = this.filterUsersBySearch(result.data)
         const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage
         this.users = filteredUsers.slice(startIndex, startIndex + this.pagination.itemsPerPage)

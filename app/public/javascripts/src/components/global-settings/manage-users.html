@@ -72,6 +72,11 @@
   </div>
 </div>
 
+<!-- Spinner that will show up if the UI configuration is being loaded from the server -->
+<div ng-show="$ctrl.isLoadingUsers" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
+  <i class="fa fa-refresh fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
+</div>
+
 <div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.SendEmail">
   <form>
     <div class="form-group">
