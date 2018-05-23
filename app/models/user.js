@@ -151,6 +151,31 @@ module.exports = class User {
     })
   }
 
+  // Used to set administrator permissions for a user in the new permissions schema
+  static makeAdministrator(email) {
+
+    return database.query(`
+      -- Set admin permissions for the user
+      INSERT INTO auth.global_actor_permission
+      SELECT u.id, (SELECT permissions FROM auth.role WHERE name='ADMINISTRATOR')
+      FROM auth.users u
+      WHERE u.email=$1;
+    `, [email])
+    .then(() =>
+      database.query(`
+      -- Add the user to the default Administrators group
+      INSERT INTO auth.user_auth_group
+      SELECT u.id, (SELECT id FROM auth.auth_group WHERE name='Administrators')
+      FROM auth.users u
+      WHERE u.email=$1;
+    `, [email])
+    )
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
+    })
+  }
+
   static find_by_id (id) {
     return database.findOne(`
         SELECT id, first_name, last_name, email, rol, company_name, default_location

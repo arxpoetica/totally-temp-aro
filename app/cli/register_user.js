@@ -22,6 +22,9 @@ var models = require('../models')
 models.User.register(argv)
   .then((user) => {
     console.log('User registered successfully with id =', user.id)
+    return (argv.rol === 'admin') ? models.User.makeAdministrator(argv.email) : Promise.resolve()
+  })
+  .then(() => {
     process.exit(0)
   })
   .catch((err) => {
