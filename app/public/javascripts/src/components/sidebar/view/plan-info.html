@@ -76,12 +76,25 @@
           selected-list="$ctrl.saPlanTags"
           refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
         <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
-        <!-- <span class="input-group-addon" ng-if="$ctrl.isEditMode" ng-click="$ctrl.addSATags = true">
-            <span class="fa fa-plus pointer"></span>
-        </span> -->
       </div>
     </div>
 
+    <!-- Plan permissions -->
+    <div class="row" ng-repeat="(accessKey, access) in $ctrl.accessType">
+      <div class="col-sm-4">{{access.displayName}}</div>
+      <div class="col-sm-8">
+        <aro-multi-select model="access.actors"
+                          all-items="$ctrl.systemActors"
+                          enable-search="true">
+        </aro-multi-select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-8"></div>
+      <div class="col-sm-4">
+        <button class="btn btn-primary btn-block" ng-click="$ctrl.saveAccess()"><i class="fa fa-key"></i>&nbsp;Save access</button>
+      </div>
+    </div>
   </div> 
 
 </div>  

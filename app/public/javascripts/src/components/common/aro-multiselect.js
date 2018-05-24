@@ -27,8 +27,9 @@ class AroMultiSelectController {
   }
 
   $doCheck() {
-    if (this.previousItemsLength != this.allItems.length) {
+    if (this.previousItemsLength != this.allItems.length || this.previousModelLength !== this.model.length) {
       this.previousItemsLength = this.allItems.length
+      this.previousModelLength = this.model.length
       setTimeout(() => {
         this.selectElement.multiselect('rebuild');
       }, 0);
