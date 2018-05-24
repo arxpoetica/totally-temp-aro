@@ -34,8 +34,8 @@ class ManageUsersController {
       })
     this.userTypes = [
       {
-        name: 'Admin',
-        rol: 'admin'
+        name: 'Standard',
+        rol: 'standard'
       },
       {
         name: 'Biz-dev',
