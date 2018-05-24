@@ -146,6 +146,12 @@ class MapObjectEditorController {
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
+
+    this.state.clearEditingMode.skip(1).subscribe((clear) => {
+      if (clear) {
+        this.selectMapObject(null) //deselects the selected equipment 
+      }
+    })
   }
   
   makeIconAnchor(iconUrl, callback){

@@ -107,8 +107,9 @@ class BoundariesController {
   }
 
   disableOtherLayers() {
-    if(this.state.activeViewModePanel === this.state.viewModePanels.BOUNDARIES_INFO && 
-      this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH) {
+    // if(this.state.activeViewModePanel === this.state.viewModePanels.BOUNDARIES_INFO && 
+    //   this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH) {
+    if(this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH) {
       var isOneLayerEnable = false
       this.state.boundaries.tileLayers.forEach((boundary) => {
         if (boundary.visible) isOneLayerEnable = true
