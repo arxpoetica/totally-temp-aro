@@ -13,25 +13,6 @@ class PlanInfoController {
       GROUP: 'GROUP',
       USER: 'USER'
     })
-    this.systemActors = []  // Groups and users
-    $http.get('/service/auth/groups')
-      .then((result) => {
-        result.data.forEach((group) => {
-          group.type = this.systemActorTypes.GROUP
-          this.systemActors.push(group)
-        })
-        return $http.get('/service/auth/users')
-      })
-      .then((result) => {
-        result.data.forEach((user) => {
-          user.name = `${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
-          user.type = this.systemActorTypes.USER
-          this.systemActors.push(user)
-        })
-        console.log(this.systemActors)
-        this.reloadPlanAccess()
-      })
-      .catch((err) => console.error(err))
 
     state.plan
     .subscribe((plan) => {
@@ -47,20 +28,35 @@ class PlanInfoController {
       RESOURCE_WRITE: { displayName: 'Write Access', permissionBits: null, actors: [] },
       RESOURCE_ADMIN: { displayName: 'Owner Access', permissionBits: null, actors: [] }
     })
-    // Get the permission bits for each access type
-    this.$http.get('/service/auth/permissions')
+    this.systemActors = []  // Groups and users
+    this.$http.get('/service/auth/groups')
+      .then((result) => {
+        result.data.forEach((group) => {
+          group.type = this.systemActorTypes.GROUP
+          this.systemActors.push(group)
+        })
+        return this.$http.get('/service/auth/users')
+      })
+      .then((result) => {
+        result.data.forEach((user) => {
+          user.name = `${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          user.type = this.systemActorTypes.USER
+          this.systemActors.push(user)
+        })
+        console.log(this.systemActors)
+        // Get the permission bits for each access type
+        return this.$http.get('/service/auth/permissions')
+      })
       .then((result) => {
         result.data.forEach((authPermissionEntity) => {
           if (this.accessType.hasOwnProperty(authPermissionEntity.name)) {
             this.accessType[authPermissionEntity.name].permissionBits = authPermissionEntity.id
           }
         })
+        // Get the actors that have access for this plan
+        const planId = this.state.plan.getValue().id
+        return this.$http.get(`/service/auth/acl/PLAN/${planId}`)
       })
-      .catch((err) => console.error(err))
-
-    // Get the actors that have access for this plan
-    const planId = this.state.plan.getValue().id
-    this.$http.get(`/service/auth/acl/PLAN/${planId}`)
       .then((result) => {
         var idToSystemActor = {}
         this.systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
