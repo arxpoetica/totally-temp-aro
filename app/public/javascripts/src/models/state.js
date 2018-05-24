@@ -206,7 +206,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     SEARCH: 'SEARCH'
   })
 
-  service.activeboundaryLayerMode = service.boundaryLayerMode.VIEW
+  service.activeboundaryLayerMode = service.boundaryLayerMode.SEARCH
 
   // The panels in the view mode
 
@@ -1351,12 +1351,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.entityTypeList = {
     HouseholdObjectEntity: [],
     NetworkEquipmentEntity: [],
-    ProcessArea: [],
+    ServiceAreaView: [],
     CensusBlocksEntity: [],
     AnalysisArea: [],
     AnalysisLayer: []
   }
-  //list of matched boundary list (ProcessArea/CensusBlocksEntity/AnalysisArea)
+  //list of matched boundary list (ServiceAreaView/CensusBlocksEntity/AnalysisArea)
   service.entityTypeBoundaryList = []
 
   service.loadBoundaryEntityList = (filterObj) => {
@@ -1365,7 +1365,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
       
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ProcessArea',filterObj,'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code')
       visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
@@ -1386,7 +1386,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         return //157501341: Location search should not reach out to endpoint without supplying a valid object id
       }
     } else {
-      filter = filterObj ? `substringof(${searchColumn},'${filterObj}')` : filter
+      filter = filterObj ? searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `substringof(${searchColumn},'${filterObj}')` : filter
     }
 
     var libraryItems = []
@@ -1409,7 +1409,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       }
     }
 
-    if(entityType === 'ProcessArea') {
+    if(entityType === 'ServiceAreaView') {
       filter = filter ? filter.concat(' and layer/id eq 1') : filter
     }  
 
@@ -1418,10 +1418,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(entityListUrl)
     .then((results) => {
       service.entityTypeList[entityType] = results.data
-      if(entityType === 'ProcessArea' || entityType === 'CensusBlocksEntity' 
+      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' 
         || entityType === 'AnalysisArea') {
           service.entityTypeBoundaryList = service.entityTypeList[entityType]
         }
+      return results.data  
     })
     
   }

@@ -68,17 +68,37 @@ class BoundaryDetailController {
   viewServiceAreaInfo(serviceArea) {
     this.selectedBoundaryInfo = null
     this.selectedAnalysisAreaInfo = null
-    this.selectedSAInfo = serviceArea
+    this.getServiceAreaInfo(serviceArea.id)
+    .then((serviceAreaInfo) => {
+      this.selectedSAInfo = serviceAreaInfo
+    })
     this.viewBoundaryInfo()
     this.$timeout()
+  }
+
+  getServiceAreaInfo(serviceAreaId) {
+    return this.state.loadEntityList('ServiceAreaView',serviceAreaId,'id,code,name','id')
+    .then((serviceAreaInfo) => {
+      return serviceAreaInfo[0]
+    })
   }
 
   viewAnalysisAreaInfo(analysisArea) {
     this.selectedBoundaryInfo = null
     this.selectedSAInfo = null
-    this.selectedAnalysisAreaInfo = analysisArea
+    this.getAnalysisAreaInfo(analysisArea.id)
+    .then((analysisAreaInfo) => {
+      this.selectedAnalysisAreaInfo = analysisAreaInfo
+    })
     this.viewBoundaryInfo()
     this.$timeout()
+  }
+
+  getAnalysisAreaInfo(analysisAreaId) {
+    return this.state.loadEntityList('AnalysisArea',analysisAreaId,'id,code','id')
+    .then((analysisAreaInfo) => {
+      return analysisAreaInfo[0]
+    })
   }
 
   getCensusBlockInfo(cbId) {
