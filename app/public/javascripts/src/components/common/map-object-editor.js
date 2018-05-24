@@ -113,10 +113,12 @@ class MapObjectEditorController {
       return !(hasEntityType || hasBoundaryType);  // false == allow dropping
     }
     this.dragStartEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
+      console.log('drag ... start?')
       this.objectIdToDropCSS = {} // So that we will regenerate the CSS in case the map has zoomed/panned
       this.$timeout()
     })
     this.dragEndEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
+      console.log(event)
       this.isHavingBoundaryDraggedOver = false
       this.$timeout()
     })
@@ -130,13 +132,19 @@ class MapObjectEditorController {
       }      
       // Convert pixels to latlng
       var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
+      // ToDo feature should probably be a class
       var feature = {
         objectId: this.getUUID(),
         geometry: {
           type: 'Point',
           coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-        }
+        }, 
+        networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
       }
+      
+      console.log(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
+      console.log(feature)
+      
       this.createMapObject(feature, true)
       event.preventDefault();
     };
