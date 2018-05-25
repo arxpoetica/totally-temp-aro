@@ -86,12 +86,6 @@ class PlanEditorController {
   $onInit() {
     // Select the first boundary in the list
     this.resumeOrCreateTransaction()
-
-    this.state.clearEditingMode.skip(1).subscribe((clear) => {
-      if (clear) {
-        this.state.showSiteBoundary = false
-      }
-    })
   }
 
   resumeOrCreateTransaction() {
