@@ -139,7 +139,6 @@ class PlanInfoController {
 
     this.$http.put(`/service/v1/plan?user_id=${this.currentUser.id}`, updatePlan)
       .then((response) => {
-        this.state.loadPlan(this.currentPlanInfo.id)
         this.loadPlans()
       })
   }
