@@ -237,6 +237,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
+  service.requestSetLocation = new Rx.BehaviorSubject({})  
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
@@ -967,6 +968,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         var plan = service.plan.getValue()
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
+        service.requestSetLocation.next(plan)
         return Promise.resolve()
       })
   }
@@ -1159,7 +1161,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
         var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
         newPlan.planState = response.data.optimizationState
-        service.plan.next(newPlan)
+        service.checkPollingStatus(newPlan)
         if (response.data.optimizationState === 'COMPLETED'
             || response.data.optimizationState === 'CANCELED'
             || response.data.optimizationState === 'FAILED') {
@@ -1175,6 +1177,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         var seconds = Math.ceil(diff % 60)
         service.progressPercent = response.data.progress * 100
         service.progressMessage = `${minutes < 10 ? '0': ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+        $timeout()  // Trigger a digest cycle so that components can update
       })
     }, 1000)
   }
@@ -1210,7 +1213,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
-  service.plan.subscribe((newPlan) => {
+  service.checkPollingStatus = (newPlan) => {
     service.stopPolling()
     service.Optimizingplan = newPlan
     service.isCanceling = false
@@ -1218,6 +1221,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       // Optimization is in progress. We can start polling for the results
       service.startPolling()
     }
+  }
+
+  service.plan.subscribe((newPlan) => {
+    service.checkPollingStatus(newPlan)
   })
 
   service.getDefaultPlanInputs = () => {
