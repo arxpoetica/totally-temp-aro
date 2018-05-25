@@ -44,7 +44,6 @@ class PlanInfoController {
           user.type = this.systemActorTypes.USER
           this.systemActors.push(user)
         })
-        console.log(this.systemActors)
         // Get the permission bits for each access type
         return this.$http.get('/service/auth/permissions')
       })
@@ -71,7 +70,6 @@ class PlanInfoController {
           })
         })
         this.$timeout()
-        console.log(this.accessType)
       })
       .catch((err) => console.error(err))
   }
