@@ -1,7 +1,6 @@
 <style scoped>
   .plan-details-container {
     position: relative;
-    top: 20px;
   }
   .plan-actions {
     display: flex;
@@ -18,6 +17,9 @@
   }
   #tblPlanInfo td {
     line-height: 33px;
+  }
+  #tblPlanInfo > tbody > tr:first-child > td {
+    border: none;
   }
 </style>
 <div class="plan-details-container" ng-if="!$ctrl.currentPlanInfo.ephemeral">

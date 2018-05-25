@@ -1,6 +1,7 @@
 <style scoped>
   .plan-info-container {
     height: 100%;
+    padding-top: 10px;
   }
   .plan-info {
     display: flex;
@@ -43,14 +44,17 @@
 </style>    
 <div class="plan-info-container">
 
-  <div class="plan-info">
-    <button ng-class="{ 'btn': true, 'btn-primary': $ctrl.currentView == $ctrl.views.Plan_Info }"
-      ng-click="$ctrl.currentView = $ctrl.views.Plan_Info">Plan Info</button>
-    <button ng-class="{ 'btn': true, 'btn-primary': $ctrl.currentView == $ctrl.views.Search_plans }" 
-      ng-click="$ctrl.currentView = $ctrl.views.Search_plans">Search Plans</button>
-    <button ng-class="{ 'btn': true, 'btn-primary': $ctrl.currentView == $ctrl.views.Recent_plans }"
-      ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">Recent Plans</button>
-  </div>  
+  <ul class="nav nav-tabs">
+    <li role="presentation" ng-class="{ 'active': $ctrl.currentView === $ctrl.views.Plan_Info }" ng-click="$ctrl.currentView = $ctrl.views.Plan_Info">
+      <a href="#">Plan Info</a>
+    </li>
+    <li role="presentation" ng-class="{ 'active': $ctrl.currentView === $ctrl.views.Search_plans }" ng-click="$ctrl.currentView = $ctrl.views.Search_plans">
+      <a href="#">Search Plans</a>
+    </li>
+    <li role="presentation" ng-class="{ 'active': $ctrl.currentView === $ctrl.views.Recent_plans }" ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">
+      <a href="#">Recent Plans</a>
+    </li>
+  </ul>
 
   <plan-info ng-if="$ctrl.currentView == $ctrl.views.Plan_Info"
     current-user="$ctrl.user"
