@@ -32,6 +32,7 @@ class PlanInfoController {
     this.$http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
+          group.name = `[G] ${group.name}`  // For now, text instead of icons
           group.type = this.systemActorTypes.GROUP
           this.systemActors.push(group)
         })
@@ -39,7 +40,7 @@ class PlanInfoController {
       })
       .then((result) => {
         result.data.forEach((user) => {
-          user.name = `${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
           user.type = this.systemActorTypes.USER
           this.systemActors.push(user)
         })
