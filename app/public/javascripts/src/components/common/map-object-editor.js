@@ -143,8 +143,8 @@ class MapObjectEditorController {
         networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
       }
       
-      console.log(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
-      console.log(feature)
+      //console.log(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
+      //console.log(feature)
       
       this.createMapObject(feature, true)
       event.preventDefault();
@@ -166,7 +166,7 @@ class MapObjectEditorController {
   // ---
   
   getIconsByFeatureType(featureType){
-    console.log(featureType)
+    //console.log(featureType)
     var icons = {}
     icons.iconUrl = this.objectIconUrl
     icons.selectedIconUrl = this.objectSelectedIconUrl
@@ -278,7 +278,7 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
-    console.log(feature)
+    //console.log(feature)
     
     //var iconUrl = this.objectIconUrl
     //if (feature.networkNodeType){
@@ -337,8 +337,8 @@ class MapObjectEditorController {
     
     var mapObject = null
     if (feature.geometry.type === 'Point') {
-      console.log(feature)
-      console.log(featureData)
+      //console.log(feature)
+      //console.log(featureData)
       mapObject = this.createPointMapObject(feature)
       //makeIconAnchor()
       // Set up listeners on the map object
@@ -442,7 +442,7 @@ class MapObjectEditorController {
     
     if (isExistingObject && isEquipment) {
       // editing existing or planned equipment, get that data
-      console.log(feature)
+      //console.log(feature)
       var plan = this.state.plan.getValue()
       this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
       .then((response) => {
@@ -462,7 +462,7 @@ class MapObjectEditorController {
 
   selectMapObject(mapObject) {
     // First de-select the currently selected map object (if any)
-    console.log(mapObject)
+    //console.log(mapObject)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {
         //this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
@@ -482,7 +482,7 @@ class MapObjectEditorController {
         //this.setMapObjectIcon(mapObject, this.getIconsByFeatureType(mapObject.featureType).selectedIconUrl)
         //mapObject.label.color = "green"
         var label = mapObject.getLabel()
-        label.color="#008000";
+        label.color="#009900";
         mapObject.setLabel(label);
         //mapObject.label: 
       } else {

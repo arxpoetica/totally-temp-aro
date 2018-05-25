@@ -99,7 +99,7 @@ class PlanEditorController {
       }
     })
     
-    console.log(this.configuration)
+    //console.log(this.configuration)
   }
 
   resumeOrCreateTransaction() {
