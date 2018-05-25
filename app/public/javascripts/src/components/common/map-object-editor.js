@@ -252,6 +252,7 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
+    console.log(feature)
     this.tileDataService.addFeatureToExclude(feature.objectId)
     this.state.requestMapLayerRefresh.next({})
     return new google.maps.Marker({
@@ -366,12 +367,14 @@ class MapObjectEditorController {
     }
     var isExistingObject = false
     var isEquipment = false
+    console.log(event)
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       isExistingObject = true
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
+      
       feature.objectId = event.equipmentFeatures[0].object_id
       isExistingObject = true
       isEquipment = true
@@ -392,6 +395,7 @@ class MapObjectEditorController {
     
     if (isExistingObject && isEquipment) {
       // editing existing or planned equipment, get that data
+      console.log(feature)
       var plan = this.state.plan.getValue()
       this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
       .then((response) => {

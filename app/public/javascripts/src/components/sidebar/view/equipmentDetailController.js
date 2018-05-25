@@ -17,6 +17,7 @@ class EquipmentDetailController {
     
     //this.isEdit = false
     this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
+    this.networkNodeLabel = ''
     
     /*
     this.debugFeature = {
@@ -282,9 +283,11 @@ class EquipmentDetailController {
 	    if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
+          this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
         }else{
           // no icon
           this.headerIcon = ''
+          this.networkNodeLabel = equipmentInfo.networkNodeType
         }
         
         this.networkNodeType = equipmentInfo.networkNodeType

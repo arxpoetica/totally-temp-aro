@@ -6,7 +6,9 @@ class EditorInterfaceValueController {
   }
 
   $onInit() {
-    //
+    if ("number" == this.displayProps.format){
+      this.model = parseFloat(this.model)
+    }
   }
   
 }
