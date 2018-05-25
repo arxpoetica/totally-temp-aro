@@ -6,9 +6,10 @@ class EditorInterfaceValueController {
   }
 
   $onInit() {
-    if ("number" == this.displayProps.format){
-      this.model = parseFloat(this.model)
-    }
+    // I think its better to get an error so we know a format is wrong
+    //if ("number" == this.displayProps.format){
+    //  this.model = parseFloat(this.model)
+    //}
   }
   
 }

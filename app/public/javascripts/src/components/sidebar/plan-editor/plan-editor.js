@@ -131,7 +131,6 @@ class PlanEditorController {
         this.createMapObjects && this.createMapObjects(result.data)
         // We now have objectIdToMapObject populated.
         result.data.forEach((feature) => {
-          console.log(feature)
           const attributes = feature.attributes
           var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
@@ -510,7 +509,6 @@ class PlanEditorController {
     // Format the object and send it over to aro-service
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
-    console.log(objectProperties)
     var serviceFeature = {
       objectId: objectId,
       geometry: {
@@ -541,9 +539,7 @@ class PlanEditorController {
     })
     
     var objectProperties = this.objectIdToProperties[ this.boundaryIdToEquipmentId[objectId] ]
-    console.log(objectProperties)
     const boundaryProperties = this.objectIdToProperties[objectId]
-    console.log(boundaryProperties)
     var serviceFeature = {
       objectId: objectId,
       geometry: {
@@ -594,12 +590,6 @@ class PlanEditorController {
 
   // Returns the configuration of the currently selected network type
   getSelectedNetworkConfig() {
-    /*
-    var layers = this.configuration.networkEquipment.equipments
-    var networkNodeType = this.objectIdToProperties[this.selectedMapObject.objectId].siteNetworkNodeType
-    console.log(networkNodeType)
-    return layers[networkNodeType]
-    */
     return this.getNetworkConfig(this.selectedMapObject.objectId)
   }
   
@@ -610,6 +600,11 @@ class PlanEditorController {
   getNetworkConfig(objectId){
     var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
+    
+    // ToDo: there are discrepancies in out naming, fix that
+    if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
+    if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
+    if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
   
@@ -628,18 +623,15 @@ class PlanEditorController {
       
       if (featureData.objectId){
         // clone of existing or planned equipment
-        console.log(featureData)
         var attributes = featureData.attributes
         var networkNodeEquipment = AroFeatureFactory.createObject(featureData).networkNodeEquipment
-        //                                                                          siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment
+        // ---------------------------------------------------------------------  siteIdentifier,            siteName,            siteNetworkNodeType,         selectedEquipmentType,            networkNodeEquipment
         this.objectIdToProperties[featureData.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, featureData.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
         
       }else{
         // nope it's new
-        console.log(feature)
-        console.log(featureData)
         var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
