@@ -114,6 +114,7 @@ class PlanInfoController {
   commitUpdatestoPlan() {
     this.updatePlanTags()
     this.getPlanTagDetails()
+    this.saveAccess()
     this.isEditMode = false
     this.addGeneralTags = false
     this.addSATags = false
