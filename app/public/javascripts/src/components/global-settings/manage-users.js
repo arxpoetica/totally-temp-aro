@@ -38,6 +38,10 @@ class ManageUsersController {
         rol: 'admin'
       },
       {
+        name: 'Standard',
+        rol: 'standard'
+      },
+      {
         name: 'Biz-dev',
         rol: 'biz-dev'
       },
