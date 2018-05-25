@@ -396,7 +396,7 @@
       {
         "propertyName": "oneTimeCost",
         "levelOfDetail": 0,
-        "format": "number",
+        "format": "check",
         "displayName": "One Time Cost",
         "visible": true,
         "editable": true
