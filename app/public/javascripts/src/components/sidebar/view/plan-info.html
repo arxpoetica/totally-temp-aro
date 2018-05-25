@@ -1,100 +1,101 @@
 <style scoped>
-.plan-details-container {
-  position: relative;
-  height: 99%;
-  margin-top: 1%;
-}
-.plan-actions {
-  display: flex;
-  flex-direction: row;
-}
-.plan-actions button {
-  margin-left: 1px;
-  margin-right: 1px;
-  flex: 1
-}
-.info {
-  width: -webkit-fill-available;
-  margin: 2px;
-}
+  .plan-details-container {
+    position: relative;
+  }
+  .plan-actions {
+    display: flex;
+    flex-direction: row;
+  }
+  .plan-actions button {
+    margin-left: 1px;
+    margin-right: 1px;
+    flex: 1 1 auto;
+  }
+  .info {
+    width: -webkit-fill-available;
+    margin: 2px;
+  }
+  #tblPlanInfo td {
+    line-height: 33px;
+  }
+  #tblPlanInfo > tbody > tr:first-child > td {
+    border: none;
+  }
 </style>
 <div class="plan-details-container" ng-if="!$ctrl.currentPlanInfo.ephemeral">
-
-  <div class="plan-actions">
-    <button class="btn btn-primary" ng-if="!$ctrl.isEditMode" ng-click="$ctrl.editCurrentPlan()">Edit Plan Details</button>
-    <button class="btn btn-primary" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatestoPlan()">Lock Changes</button>
-    <button class="btn btn-danger" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})">Delete Plan</button>
+  <div style="position: relative;">
+    <table id="tblPlanInfo" class="table table-condensed table-striped">
+      <tbody>
+        <tr>
+          <td>Plan Name</td>
+          <td>
+            <span ng-if="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.name}}</span>
+            <input ng-if="$ctrl.isEditMode" type="text" class="form-control text-left"
+                  placeholder="Plan Name" ng-model="$ctrl.currentPlanInfo.name">
+          </td>
+        </tr>
+        <tr>
+          <td>Owner</td>
+          <td>{{$ctrl.currentUser.first_name}} {{$ctrl.currentUser.last_name}}</td>
+        </tr>
+        <tr>
+          <td>General tags</td>
+          <td>
+            <span class="tags">
+              <div ng-if="!$ctrl.addGeneralTags" ng-repeat="tag in $ctrl.getTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.global}) track by tag.id" 
+                class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
+                <span class="label"> {{tag.name}} 
+                  <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('general',tag)"></i>
+                </span>
+              </div>
+            </span>
+            <edit-plan-tag ng-if="$ctrl.addGeneralTags"
+              object-name="Tag"
+              search-list="$ctrl.state.listOfTags"
+              selected-list="$ctrl.generalPlanTags"></edit-plan-tag>
+            <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addGeneralTags" ng-click="$ctrl.addGeneralTags = true"></i></span>
+          </td>
+        </tr>
+        <tr>
+          <td>Service area tags</td>
+          <td>
+            <span class="tags">
+              <div ng-if="!$ctrl.addSATags" ng-repeat="tag in $ctrl.getSaTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.linkTags.serviceAreaIds}) track by tag.id" 
+                class="tag label satags">
+                <span class="label satag"> {{tag.code}} 
+                  <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('svc',tag)"></i>
+                </span>
+              </div>
+            </span>
+            <edit-plan-tag ng-if="$ctrl.addSATags"
+              object-name="Service Area"
+              search-list="$ctrl.state.listOfServiceAreaTags"
+              selected-list="$ctrl.saPlanTags"
+              refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
+            <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
+          </td>
+        </tr>
+        <tr ng-repeat="(accessKey, access) in $ctrl.accessType">
+          <td>{{access.displayName}}</td>
+          <td>
+            <aro-multi-select model="access.actors"
+                              all-items="$ctrl.systemActors"
+                              enable-search="true">
+            </aro-multi-select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+    <div class="disable-sibling-controls"
+        ng-hide="$ctrl.isEditMode">
+    </div>
   </div>
 
-  <div class="grid container info">
-    <div class="row">
-      <div class="col-sm-4 form-group">Plan Name</div>
-      <div class="col-sm-8" ng-if="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.name}}</div>
-      <div class="col-sm-8" ng-if="$ctrl.isEditMode">
-        <input type="text" class="form-control text-left" placeholder="Plan Name"
-          ng-model="$ctrl.currentPlanInfo.name">
-      </div>
-    </div> 
-    
-    <div class="row">
-      <div class="col-sm-4 form-group">Owner</div>
-      <div class="col-sm-8">{{$ctrl.currentUser.first_name}} {{$ctrl.currentUser.last_name}}</div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-4 form-group">General Tags</div>
-      <div class="col-sm-8">
-        <span class="tags">
-          <div ng-if="!$ctrl.addGeneralTags" ng-repeat="tag in $ctrl.getTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.global}) track by tag.id" 
-            class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
-            <span class="label"> {{tag.name}} 
-              <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('general',tag)"></i>
-            </span>
-          </div>
-        </span>
-        <edit-plan-tag ng-if="$ctrl.addGeneralTags"
-          object-name="Tag"
-          search-list="$ctrl.state.listOfTags"
-          selected-list="$ctrl.generalPlanTags"></edit-plan-tag>
-        <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addGeneralTags" ng-click="$ctrl.addGeneralTags = true"></i></span>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-4 form-group">Service Area Tags</div>
-      <div class="col-sm-8">
-        <span class="tags">
-          <div ng-if="!$ctrl.addSATags" ng-repeat="tag in $ctrl.getSaTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.linkTags.serviceAreaIds}) track by tag.id" 
-            class="tag label satags">
-            <span class="label satag"> {{tag.code}} 
-              <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('svc',tag)"></i>
-            </span>
-          </div>
-        </span>
-        <edit-plan-tag ng-if="$ctrl.addSATags"
-          object-name="Service Area"
-          search-list="$ctrl.state.listOfServiceAreaTags"
-          selected-list="$ctrl.saPlanTags"
-          refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
-        <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
-      </div>
-    </div>
-
-    <!-- Plan permissions -->
-    <div class="row" ng-repeat="(accessKey, access) in $ctrl.accessType">
-      <div class="col-sm-4">{{access.displayName}}</div>
-      <div class="col-sm-8">
-        <aro-multi-select model="access.actors"
-                          all-items="$ctrl.systemActors"
-                          enable-search="true">
-        </aro-multi-select>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-8"></div>
-      <div class="col-sm-4">
-        <button class="btn btn-primary btn-block" ng-click="$ctrl.saveAccess()"><i class="fa fa-key"></i>&nbsp;Save access</button>
-      </div>
-    </div>
-  </div> 
+  <div class="plan-actions">
+    <button class="btn btn-primary" ng-if="!$ctrl.isEditMode" ng-click="$ctrl.editCurrentPlan()"><i class="fa fa-pencil"></i>&nbsp;&nbsp;Edit Plan Details</button>
+    <button class="btn btn-primary" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatestoPlan()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save Changes</button>
+    <button class="btn btn-danger" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete Plan</button>
+  </div>
 
 </div>  

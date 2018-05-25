@@ -42,7 +42,13 @@ class PlanEditorController {
     ]
     // Create a list of enabled network node types that we WILL allow the user to drag onto the map
     this.enabledNetworkNodeTypes = [
-      'dslam'
+      'central_office',
+      'dslam',
+      'fiber_distribution_hub',
+      'fiber_distribution_terminal',
+      'cell_5g',
+      'splice_point',
+      'bulk_distribution_terminal'
     ]
     
     this.censusCategories = this.state.censusCategories.getValue()
@@ -120,7 +126,7 @@ class PlanEditorController {
           const attributes = feature.attributes
           var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
-                                                     'dslam', attributes.selectedEquipmentType, networkNodeEquipment)
+                                                     feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
@@ -501,7 +507,7 @@ class PlanEditorController {
         type: 'Point',
         coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
       },
-      networkNodeType: 'dslam',
+      networkNodeType: objectProperties.siteNetworkNodeType,
       attributes: {
         siteIdentifier: objectProperties.siteIdentifier,
         siteName: objectProperties.siteName,
@@ -523,7 +529,8 @@ class PlanEditorController {
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
       allPaths.push(pathPoints)
     })
-
+    
+    var objectProperties = this.objectIdToProperties[ this.boundaryIdToEquipmentId[objectId] ]
     const boundaryProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
@@ -532,7 +539,7 @@ class PlanEditorController {
         coordinates: allPaths
       },
       attributes: {
-        network_node_type: 'dslam',
+        network_node_type: objectProperties.siteNetworkNodeType,
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -575,11 +582,24 @@ class PlanEditorController {
 
   // Returns the configuration of the currently selected network type
   getSelectedNetworkConfig() {
+    return this.getNetworkConfig(this.selectedMapObject.objectId)
+  }
+  
+  getSelectedBoundaryNetworkConfig() {
+    return this.getNetworkConfig( this.boundaryIdToEquipmentId[this.selectedMapObject.objectId] )
+  }
+  
+  getNetworkConfig(objectId){
     var layers = this.configuration.networkEquipment.equipments
-    var networkNodeType = this.objectIdToProperties[this.selectedMapObject.objectId].siteNetworkNodeType
+    var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
+    
+    // ToDo: there are discrepancies in out naming, fix that
+    if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
+    if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
+    if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
-
+  
   isMarker(mapObject) {
     return mapObject && mapObject.icon
   }
@@ -597,7 +617,7 @@ class PlanEditorController {
         // clone of existing or planned equipment
         var attributes = featureData.attributes
         var networkNodeEquipment = AroFeatureFactory.createObject(featureData).networkNodeEquipment
-        //                                                                          siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment
+        // ---------------------------------------------------------------------  siteIdentifier,            siteName,            siteNetworkNodeType,         selectedEquipmentType,            networkNodeEquipment
         this.objectIdToProperties[featureData.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, featureData.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
@@ -605,7 +625,7 @@ class PlanEditorController {
       }else{
         // nope it's new
         var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
-        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', 'dslam', this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
+        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
         

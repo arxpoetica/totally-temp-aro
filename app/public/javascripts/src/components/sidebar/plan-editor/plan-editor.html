@@ -81,7 +81,7 @@
           <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
           <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipments"
                             ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
-                            icon="{{equipment.iconUrl}}",
+                            icon="{{equipment.iconUrl}}" 
                             is-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0"
                             entity-type="networkEquipment"
                             entity-details="{{equipment.networkNodeType}}">
@@ -149,7 +149,7 @@
           </div>
           <!-- A table containing the editable properties of the selected object -->
           
-          
+          <!-- 
           <table id="tblEquipmentProperties"
                  class="table table-condensed table-striped sidebar-table"
                  style="margin-bottom: 10px">
@@ -182,7 +182,7 @@
               </tr>
             </tbody>
           </table>
-          
+          -->
           
           <editor-interface-tree 
                               on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
@@ -228,7 +228,7 @@
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
               <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
-              <span>Remote Terminal boundary</span>
+              <span>{{$ctrl.getSelectedBoundaryNetworkConfig().label}} boundary</span>
           </div>
           <!-- A table containing the editable properties of the selected object -->
           <table id="tblBoundaryProperties"
