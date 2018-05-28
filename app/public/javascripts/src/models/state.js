@@ -18,6 +18,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
+
+  service.STANDARD_ROLES = ['admin', 'sales', 'sales_engineers', 'account_exec']
   
   service.viewFiberOptions = [
     {
@@ -510,7 +512,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var locations = configuration.locationCategories.categories
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        if(service.getUser() && (location.can_view.indexOf(service.getUser().rol) !== -1)){
+        let role =  service.getVisiblilityRole()//configuration.locationCategories.visiblilty[]
+        if(service.getUser() && (configuration.locationCategories.visibility[role].indexOf(locationKey) !== -1)){
           location.checked = location.selected
           locationTypes.push(location)
         }
@@ -599,6 +602,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.getUser = () => {
     return globalUser
+  }
+
+  service.getVisiblilityRole = () =>{
+    return service.STANDARD_ROLES.indexOf(service.getUser().rol) === -1 ? 'default': service.getUser().rol
   }
 
   service.getProjectId = () => {
