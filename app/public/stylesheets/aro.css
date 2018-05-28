@@ -1294,3 +1294,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   -webkit-animation: grow .3s linear forwards;
           animation: grow .3s linear forwards;
 }
+
+.close {
+  /* large close icon for modal window */
+  font-size: 27px; 
+}  

@@ -17,6 +17,7 @@ class ViewModeLocationController {
     this.mapFeaturesSelectedSubscription = state.mapFeaturesSelectedEvent.subscribe((options) => {
       //In ruler mode click should not perform any view action's
       if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE_PLAN_TARGET &&
         !this.state.isRulerEnabled) {
       var locationsList = []
       if (options.hasOwnProperty('locations')) locationsList = options.locations

@@ -91,6 +91,7 @@ class ToolBarController {
   }
 
   setSelectionExport(){
+    if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW) return
     if (this.state.selectedToolBarAction === this.state.toolbarActions.POLYGON_EXPORT) {
       this.state.selectedToolBarAction= null
       return
@@ -101,6 +102,7 @@ class ToolBarController {
 
   setSelectionMode(selectionMode) {
     this.state.selectedTargetSelectionMode = selectionMode
+    this.$timeout() // Trigger a digest cycle as the toolbar state has changed
   }
 
   showPlanModal() {
