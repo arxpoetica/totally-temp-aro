@@ -1434,5 +1434,83 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     
   }
 
+  service.systemActors = [] // All the system actors (i.e. users and groups)
+  service.reloadSystemActors = () => {
+    service.systemActors = []
+    return $http.get('/service/auth/groups')
+      .then((result) => {
+        result.data.forEach((group) => {
+          group.name = `[G] ${group.name}`  // For now, text instead of icons
+          service.systemActors.push(group)
+        })
+        return $http.get('/service/auth/users')
+      })
+      .then((result) => {
+        result.data.forEach((user) => {
+          user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          service.systemActors.push(user)
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+  service.reloadSystemActors()
+
+  service.loadResourceAccess = (resourceType, resourceId, accessTypes, systemActors, $http) => {
+    return $http.get('/service/auth/permissions')
+      .then((result) => {
+        result.data.forEach((authPermissionEntity) => {
+          if (accessTypes.hasOwnProperty(authPermissionEntity.name)) {
+            accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
+          }
+        })
+        // Get the actors that have access for this resource
+        return $http.get(`/service/auth/acl/${resourceType}/${resourceId}`)
+      })
+      .then((result) => {
+        var idToSystemActor = {}
+        systemActors.forEach((systemActor) => idToSystemActor[systemActor.id] = systemActor)
+        result.data.resourcePermissions.forEach((access) => {
+          const systemActor = idToSystemActor[access.systemActorId]
+          const permission = access.rolePermissions
+          Object.keys(accessTypes).forEach((accessTypeKey) => {
+            if ((permission & accessTypes[accessTypeKey].permissionBits) != 0) {
+              accessTypes[accessTypeKey].actors.push(systemActor)
+            }
+          })
+        })
+        return Promise.resolve()
+      })
+      .catch((err) => console.error(err))
+  }
+
+  service.saveResourceAccess = (resourceType, resourceId, accessTypes) => {
+    return $http.get(`/service/auth/acl/${resourceType}/${resourceId}`)
+      .then((result) => {
+        // Loop through all our access types
+        var systemActorIdToPermissions = {}
+        Object.keys(accessTypes).forEach((accessTypeKey) => {
+          // Get the actors selected for this access type
+          const selectedActors = accessTypes[accessTypeKey].actors
+          selectedActors.forEach((selectedActor) => {
+            if (!systemActorIdToPermissions.hasOwnProperty(selectedActor.id)) {
+              systemActorIdToPermissions[selectedActor.id] = 0
+            }
+            // Set the permission bit
+            systemActorIdToPermissions[selectedActor.id] |= accessTypes[accessTypeKey].permissionBits
+          })
+        })
+        // Construct a put body with all the permissions we will send over to aro-service
+        var putBody = { resourcePermissions: [] }
+        Object.keys(systemActorIdToPermissions).forEach((actorId) => {
+          putBody.resourcePermissions.push({
+            systemActorId: actorId,
+            rolePermissions: systemActorIdToPermissions[actorId]
+          })
+        })
+        return $http.put(`/service/auth/acl/${resourceType}/${resourceId}`, putBody)
+      })
+      .catch((err) => console.error(err))
+  }
+
   return service
 }])

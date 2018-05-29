@@ -75,11 +75,11 @@
             <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
           </td>
         </tr>
-        <tr ng-repeat="(accessKey, access) in $ctrl.accessType">
+        <tr ng-repeat="(accessKey, access) in $ctrl.accessTypes">
           <td>{{access.displayName}}</td>
           <td>
             <aro-multi-select model="access.actors"
-                              all-items="$ctrl.systemActors"
+                              all-items="$ctrl.state.systemActors"
                               enable-search="true">
             </aro-multi-select>
           </td>
