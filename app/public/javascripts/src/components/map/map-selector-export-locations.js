@@ -17,6 +17,8 @@ class MapSelectorExportLocationsController {
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
+      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
+
       if( angular.equals(event, {}) || event.locations.length  === 0 
         || this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.POLYGON_EXPORT_TARGET){
     	  return

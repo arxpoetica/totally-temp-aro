@@ -74,6 +74,8 @@ class ToolBarController {
 
   $onInit() {
     this.mapRef = this.$window[this.mapGlobalObjectName]
+
+    this.state.clearToolbarActions.skip(1).subscribe((clear) => clear && this.closeDropdowns())
   } 
 
   openGlobalSettings() {

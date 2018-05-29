@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, configuration, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -27,6 +27,7 @@ class MapTileRenderer {
     this.selectedViewFeaturesByType = selectedViewFeaturesByType
     
     this.displayModes = displayModes
+    this.configuration = configuration
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -480,9 +481,22 @@ class MapTileRenderer {
           var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
 
           if (isClosedPolygon) {
+            var selectedEquipments = []
+            Object.keys(this.configuration.networkEquipment.equipments).forEach((categoryItemKey) => {
+              var networkEquipment = this.configuration.networkEquipment.equipments[categoryItemKey]
+              networkEquipment.checked && selectedEquipments.push(networkEquipment.networkNodeType)
+            })
+
             // First draw a filled polygon with the fill color
-            this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
-            ctx.globalAlpha = 1.0
+            //show siteboundaries for the equipments that are selected
+            if((feature.properties && _.has(feature.properties,'network_node_type')
+              && (_.indexOf(selectedEquipments,feature.properties.network_node_type) > -1)) 
+              || (!_.has(feature.properties,'network_node_type')) ) {
+                this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
+                ctx.globalAlpha = 1.0
+            } else {
+              return
+            }
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
@@ -1005,12 +1019,13 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, state, tileDataService) {
+  constructor($document, state, tileDataService, configuration) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
     this.tileDataService = tileDataService
+    this.configuration = configuration
     this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
@@ -1251,7 +1266,8 @@ class TileComponentController {
                                                            this.state.selectedViewFeaturesByType.getValue(),
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
-                                                           this.state.displayModes
+                                                           this.state.displayModes,
+                                                           this.configuration
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
@@ -1451,7 +1467,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', 'state', 'tileDataService']
+TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'configuration']
 
 let tile = {
   template: '',

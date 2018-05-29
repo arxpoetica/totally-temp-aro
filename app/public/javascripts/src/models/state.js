@@ -1350,9 +1350,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.clearViewMode = new Rx.BehaviorSubject(false)
   service.clearEditingMode = new Rx.BehaviorSubject(false)
+  service.clearToolbarActions = new Rx.BehaviorSubject(false)
   $rootScope.$on('map_tool_esc_clear_view_mode', () => {
     service.clearViewMode.next(true)
     service.clearEditingMode.next(true)
+    service.clearToolbarActions.next(true)
   })
 
   service.entityTypeList = {

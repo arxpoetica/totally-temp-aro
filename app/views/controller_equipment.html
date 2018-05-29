@@ -51,6 +51,7 @@
             </td>
             <td>
               <input type="checkbox" class="checkboxfill"
+                     ng-disabled="mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
                      ng-checked="equipmentLayer.checked"
                      ng-click="changeLayerVisibility(equipmentLayer, !equipmentLayer.checked)">
             </td>
