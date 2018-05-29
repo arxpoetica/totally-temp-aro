@@ -157,7 +157,13 @@
         "show": true
       },
       "showViewSettings": {
-        "show": true
+        "show": true,
+        "site_boundaries": {
+          "show": true
+        },
+        "directed_boundaries": {
+          "show": true
+        }
       },
       "selectionSingle":{
         "show": true
@@ -345,7 +351,13 @@
         "show": true
       },
       "showViewSettings": {
-        "show": true
+        "show": true,
+        "site_boundaries": {
+          "show": true
+        },
+        "directed_boundaries": {
+          "show": true
+        }
       },
       "selectionSingle":{
         "show": true
@@ -533,7 +545,13 @@
         "show": true
       },
       "showViewSettings": {
-        "show": true
+        "show": true,
+        "site_boundaries": {
+          "show": false
+        },
+        "directed_boundaries": {
+          "show": false
+        }
       },
       "selectionSingle":{
         "show": true
