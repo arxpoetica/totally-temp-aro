@@ -118,7 +118,7 @@ class DataSourceUploadController {
     var dataType = this.state.uploadDataSource.name
 
     var libraryOptions = {
-      url: '/service/v1/project/' + this.projectId + '/library?user_id=' + this.userId,
+      url: '/service/v1/library-entry?user_id=' + this.userId,
       method: 'POST',
       data: {
         dataType: dataType,
@@ -177,7 +177,7 @@ class DataSourceUploadController {
   }
 
   deleteDatasource(dataSource) {
-    this.$http.delete(`/service/v1/project/${this.projectId}/library/${dataSource.identifier}?user_id=${this.userId}`)
+    this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.userId}`)
       .then(() => {
         var index = this.state.dataItems[dataSource.dataType].allLibraryItems.indexOf(dataSource)
         if(index > -1) {
