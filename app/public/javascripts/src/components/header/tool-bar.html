@@ -223,20 +223,26 @@
       <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
         style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">
 
-      <div class="dropdown-divider"></div>
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name" ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.site_boundaries.show"
-        style="margin-left: 2px;">
-      <font>Site Boundaries</font>
-      <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
-        ng-model="$ctrl.state.selectedBoundaryType"
-        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
-        ng-change="$ctrl.toggleSiteBoundary()">
-      </select>
+      <div ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.site_boundaries.show">
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
+               style="margin-left: 2px;">
+        <font>Site Boundaries</font>
+        <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
+                ng-model="$ctrl.state.selectedBoundaryType"
+                ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
+                ng-change="$ctrl.toggleSiteBoundary()">
+        </select>
+      </div>
 
-      <div class="dropdown-divider"></div>
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection()" name="ctype-name" ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.directed_boundaries.show"
-        style="margin-left: 2px;">
-      <font>Directed Cable</font>
+      <div ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.directed_boundaries.show">
+        <div class="dropdown-divider"></div>
+
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection()" name="ctype-name"
+               style="margin-left: 2px;">
+        <font>Directed Cable</font>
+      </div>
+
     </div>
   </div>
 

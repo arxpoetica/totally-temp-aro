@@ -1,12 +1,15 @@
 <div id="fiber_plant_controller">
 
   <form>
-    <p><strong>Competitor Types</strong></p>
-    <select class="form-control"
-            ng-model="planState.competition.selectedCompetitorType"
-            ng-options="item as item.label for item in planState.competition.allCompetitorTypes"
-            ng-change="onCompetitorTypeChanged()">
-    </select>
+
+    <div ng-if="configuration.perspective.competitorNetworks.showCompetitorTypes">
+      <p><strong>Competitor Types</strong></p>
+      <select class="form-control"
+              ng-model="planState.competition.selectedCompetitorType"
+              ng-options="item as item.label for item in planState.competition.allCompetitorTypes"
+              ng-change="onCompetitorTypeChanged()">
+      </select>
+    </div>
 
     <br>
     <p><strong>Competitors</strong></p>

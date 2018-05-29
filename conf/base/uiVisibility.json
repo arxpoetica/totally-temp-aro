@@ -132,6 +132,9 @@
         "show": true
       }
     },
+    "competitorNetworks":{
+      "showCompetitorTypes": false
+    },
     "targetBuilder":{
       "expertMode": {
         "show": true
@@ -161,7 +164,7 @@
         "site_boundaries": {
           "show": true
         },
-        "directed_boundaries": {
+        "directed_cable": {
           "show": true
         }
       },
@@ -318,13 +321,16 @@
         "show": false
       },
       "PLAN_SETTINGS": {
-        "show": false
+        "show": true
       }
     },
     "areaNetworkPlanning":{
       "expertMode": {
         "show": false
       }
+    },
+    "competitorNetworks":{
+      "showCompetitorTypes": false
     },
     "targetBuilder":{
       "expertMode": {
@@ -355,7 +361,7 @@
         "site_boundaries": {
           "show": true
         },
-        "directed_boundaries": {
+        "directed_cable": {
           "show": true
         }
       },
@@ -392,23 +398,23 @@
     "mapTools": {
       "locations": {
         "showIcon": true,
-        "showLabel": false
+        "showLabel": true
       },
       "network_nodes": {
         "showIcon": true,
-        "showLabel": false
+        "showLabel": true
       },
       "construction_sites": {
-        "showIcon": true,
+        "showIcon": false,
         "showLabel": false
       },
       "fiber_plant": {
         "showIcon": true,
-        "showLabel": false
+        "showLabel": true
       },
       "boundaries": {
         "showIcon": true,
-        "showLabel": false
+        "showLabel": true
       },
       "prosects": {
         "show": true
@@ -416,34 +422,34 @@
     },
     "locationCategories": {
       "small_businesses": {
-        "show": true
+        "show": false
       },
       "medium_businesses": {
-        "show": true
+        "show": false
       },
       "large_businesses": {
-        "show": true
+        "show": false
       },
       "household": {
-        "show": true
+        "show": false
       },
       "celltower":{
         "show": false
       },
       "ethernet_lit_building": {
-        "show": false
+        "show": true
       },
       "lit_building": {
-        "show": false
+        "show": true
       },
       "tier_1": {
-        "show": false
+        "show": true
       },
       "tier_2": {
-        "show": false
+        "show": true
       },
       "tier_3": {
-        "show": false
+        "show": true
       }
     },
     "networkEquipment":{
@@ -460,7 +466,7 @@
         "show": true
       },
       "bulk_distribution_terminal":{
-        "show": true
+        "show": false
       },
       "splice_point":{
         "show": true
@@ -495,7 +501,7 @@
         "show": true
       },
       "PLAN_INFO":{
-        "show": true
+        "show": false
       }
     },
     "displayModeButtons":{
@@ -519,6 +525,9 @@
       "expertMode": {
         "show": false
       }
+    },
+    "competitorNetworks":{
+      "showCompetitorTypes": false
     },
     "targetBuilder":{
       "expertMode": {
@@ -549,7 +558,7 @@
         "site_boundaries": {
           "show": false
         },
-        "directed_boundaries": {
+        "directed_cable": {
           "show": false
         }
       },
