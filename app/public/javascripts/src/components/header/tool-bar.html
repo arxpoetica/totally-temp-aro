@@ -137,7 +137,7 @@
 
   <button class="btn"
           ng-click="$ctrl.openGlobalSettings()"
-          ng-if="$ctrl.configuration.perspective.toolbar.globalSettings.show"
+          ng-show="$ctrl.configuration.perspective.toolbar.globalSettings.show"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Global Settings...">
@@ -147,7 +147,7 @@
   <div class="separator"></div>
 
   <button class="btn"
-          ng-if="$ctrl.configuration.perspective.toolbar.emphericalPlan.show"
+          ng-show="$ctrl.configuration.perspective.toolbar.emphericalPlan.show"
           ng-click="$ctrl.createEphemeralPlan()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -156,7 +156,7 @@
   </button>
 
   <button class="btn"
-          ng-if="$ctrl.configuration.perspective.toolbar.savePlanAs.show"
+          ng-show="$ctrl.configuration.perspective.toolbar.savePlanAs.show"
           ng-click="$ctrl.savePlanAs()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -165,7 +165,7 @@
   </button>
 
   <button class="btn"
-          ng-if="$ctrl.configuration.perspective.toolbar.showPlanModel.show"
+          ng-show="$ctrl.configuration.perspective.toolbar.showPlanModel.show"
           ng-click="$ctrl.showPlanModal()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -174,7 +174,7 @@
   </button>
 
   <button class="btn"
-          ng-if="$ctrl.configuration.perspective.toolbar.showExportSelection.show"
+          ng-show="$ctrl.configuration.perspective.toolbar.showExportSelection.show"
           ng-click="$ctrl.setSelectionExport()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -184,7 +184,7 @@
 
   <div class="separator"></div>
 
-  <div class="rulerDropdown" ng-if="$ctrl.configuration.perspective.toolbar.measuringStick.show">
+  <div class="rulerDropdown" ng-show="$ctrl.configuration.perspective.toolbar.measuringStick.show">
     <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.isRulerEnabled }"
       ng-click="$ctrl.rulerAction()"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
@@ -207,7 +207,7 @@
 
   <div class="myDropdown1">
     <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.isViewSettingsEnabled }"
-      ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.show"
+            ng-show="$ctrl.configuration.perspective.toolbar.showViewSettings.show"
       ng-click = "$ctrl.viewSettingsAction()"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
       title="Show view settings...">
