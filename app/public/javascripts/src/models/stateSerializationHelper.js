@@ -17,7 +17,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     var optimizationBody = {
       planId: state.plan.getValue().id,
-      projectTemplateId: globalUser.projectId,
+      projectTemplateId: state.loggedInUser.projectId,
       analysis_type: 'NETWORK_PLAN'
     }
 

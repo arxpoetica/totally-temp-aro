@@ -2,7 +2,7 @@ class ViewModeController {
   
   constructor($scope, state, configuration) {
     this.state = state
-    this.currentUser = state.getUser()
+    this.currentUser = state.loggedInUser
     $scope.configuration = configuration
   }
 }

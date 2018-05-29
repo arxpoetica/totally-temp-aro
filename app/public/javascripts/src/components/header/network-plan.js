@@ -2,7 +2,7 @@ class NetworkPlanController {
 
   constructor($timeout, state)  {
     this.plan = null
-    this.currentUser = state.getUser();
+    this.currentUser = state.loggedInUser;
     this.showPlan = true;
 
     state.plan.subscribe((newValue) => {

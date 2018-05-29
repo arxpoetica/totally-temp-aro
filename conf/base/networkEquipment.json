@@ -237,7 +237,24 @@
         "fillStyle": "#0000ff",
         "opacity": 0.15
       }
-  }
+  },
+   "fiveg_coverage": {
+      "label": "5G Coverage",
+      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/cell_5g/polygon/{polyTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
+      "selectedIconUrl": "/images/map_icons/aro/service_layer_cran.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "polygon",
+      "zIndex": 7490, 
+      "drawingOptions": {
+        "strokeStyle": "#00a000",
+        "fillStyle": "#a0ffa0"
+      },
+      "isequipment": true,
+      "can_view": ["admin"]
+    }
 },
   "tileCacheKeywords": [
     "central_office",

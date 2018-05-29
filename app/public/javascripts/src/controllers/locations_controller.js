@@ -298,7 +298,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     if (current) $scope.measuredDistance = null
   }
 
-  $scope.currentUser = state.getUser()
+  $scope.currentUser = state.loggedInUser
   $scope.showFilters = config.ARO_CLIENT === 'frontier'
 
   $(document).keydown(function (e) {

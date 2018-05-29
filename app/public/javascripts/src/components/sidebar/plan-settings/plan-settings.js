@@ -3,8 +3,7 @@ class PlanSettingsController {
     this.plan = {}
     state.plan.subscribe((newPlan) => this.plan = newPlan)
     this.state = state
-    this.userId = state.getUserId()
-    this.currentUser = state.getUser()
+    this.currentUser = state.loggedInUser
     this.$timeout = $timeout
     $scope.configuration = configuration
 

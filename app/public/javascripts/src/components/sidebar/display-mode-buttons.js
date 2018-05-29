@@ -3,7 +3,7 @@ class DisplayModeButtonsController {
   constructor($scope, state, configuration) {
     this.selectedDisplayModeSubject = state.selectedDisplayMode
     this.displayModes = state.displayModes
-    this.currentUser = globalUser
+    this.currentUser = state.loggedInUser
     $scope.configuration = configuration
 
     // Data flow from state to component

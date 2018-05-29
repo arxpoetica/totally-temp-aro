@@ -98,7 +98,7 @@ class PlanEditorController {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
-    this.$http.get(`/service/plan-transaction?user_id=${this.state.getUserId()}`)
+    this.$http.get(`/service/plan-transaction?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         if (result.data.length > 0) {
           // At least one transaction exists. Return it
@@ -107,7 +107,7 @@ class PlanEditorController {
           })
         } else {
           // Create a new transaction and return it.
-          return this.$http.post(`/service/plan-transactions`, { userId: this.state.getUserId(), planId: this.state.plan.getValue().id })
+          return this.$http.post(`/service/plan-transactions`, { userId: this.state.loggedInUser.id, planId: this.state.plan.getValue().id })
         }
       }).then((result) => {
         this.currentTransaction = result.data
