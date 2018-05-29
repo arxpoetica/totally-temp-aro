@@ -66,9 +66,36 @@
         <div ng-show="$ctrl.isDataManagementView">
           <div class="form-group">
             <label class="col-sm-4 control-label">Data Sources</label>
-            <div class="col-sm-8" style="min-height: 100px; width: 63%;">
-              <show-targets remove-target="$ctrl.removeDatasource({target:target})"
-                targets="$ctrl.dataSources"></show-targets>
+            <div class="col-sm-8" style="min-height: 100px; width: 63%; max-height: 400px; overflow-y: auto;">
+              <ul class="list-group">
+                <li class="list-group-item clearfix"
+                    style="padding: 0px 0px 0px 15px; line-height: 33px;"
+                    ng-repeat="dataSource in $ctrl.dataSources">
+                  <strong ng-if="dataSource.isExpanded">{{dataSource.name}}</strong>
+                  <span ng-if="!dataSource.isExpanded">{{dataSource.name}}</span>
+                  <div class="btn-group pull-right">
+                    <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                    <button ng-if="dataSource.isExpanded" class="btn btn-default" ng-click="$ctrl.saveAccessSettings()">
+                      <i class="fa fa-save"></i>&nbsp; Save
+                    </button>
+                    <button class="btn btn-default"
+                            ng-click="$ctrl.toggleDataSourceExpanded(dataSource)">
+                      <i ng-class="{ 'fa': true, 'fa-user-plus': !dataSource.isExpanded, 'fa-times': dataSource.isExpanded }"></i>
+                    </button>
+                  </div>
+                  <div style="margin-left: 15px;">
+                    <resource-permissions-editor ng-if="dataSource.isExpanded" 
+                                                resource-type="LIBRARY"
+                                                resource-id="{{dataSource.identifier}}"
+                                                system-actors="$ctrl.state.systemActors"
+                                                register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
+                                                style="margin-left: 10px;">
+                    </resource-permissions-editor>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>

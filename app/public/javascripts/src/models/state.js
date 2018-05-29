@@ -652,7 +652,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var currentPlan = service.plan.getValue()
     var promises = [
       $http.get('/service/odata/datatypeentity'),
-      $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
+      $http.get(`/service/v1/library-entry?user_id=${globalUser.id}`),
       $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
     ]
 
@@ -1435,6 +1435,27 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
     
   }
+
+  service.systemActors = [] // All the system actors (i.e. users and groups)
+  service.reloadSystemActors = () => {
+    service.systemActors = []
+    return $http.get('/service/auth/groups')
+      .then((result) => {
+        result.data.forEach((group) => {
+          group.name = `[G] ${group.name}`  // For now, text instead of icons
+          service.systemActors.push(group)
+        })
+        return $http.get('/service/auth/users')
+      })
+      .then((result) => {
+        result.data.forEach((user) => {
+          user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          service.systemActors.push(user)
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+  service.reloadSystemActors()
 
   return service
 }])
