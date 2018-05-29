@@ -652,7 +652,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var currentPlan = service.plan.getValue()
     var promises = [
       $http.get('/service/odata/datatypeentity'),
-      $http.get(`/service/v1/project/${globalUser.projectId}/library?user_id=${globalUser.id}`),
+      $http.get(`/service/v1/library-entry?user_id=${globalUser.id}`),
       $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
     ]
 
