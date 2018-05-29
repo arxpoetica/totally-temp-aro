@@ -133,7 +133,11 @@
       }
     },
     "competitorNetworks":{
-      "showCompetitorTypes": false
+      "fiberPlantAlternateLabel": false,
+      "showCompetitorTypes": true,
+      "disableGeotel": false,
+      "disableRoutes": false,
+      "disableRoutesBuffer": false
     },
     "targetBuilder":{
       "expertMode": {
@@ -330,7 +334,11 @@
       }
     },
     "competitorNetworks":{
-      "showCompetitorTypes": false
+      "fiberPlantAlternateLabel": true,
+      "showCompetitorTypes": false,
+      "disableGeotel": true,
+      "disableRoutes": true,
+      "disableRoutesBuffer": true
     },
     "targetBuilder":{
       "expertMode": {
@@ -376,7 +384,6 @@
       }
 
     },
-    "fiberPlantAlternateLabel": true,
     "planSettings":{
       "resourceSelection":{
         "show": true
@@ -527,7 +534,11 @@
       }
     },
     "competitorNetworks":{
-      "showCompetitorTypes": false
+      "showCompetitorTypes": false,
+      "disableGeotel": true,
+      "disableFiberRouteData": true,
+      "showRoute": true,
+      "showRouteBuffers": true
     },
     "targetBuilder":{
       "expertMode": {

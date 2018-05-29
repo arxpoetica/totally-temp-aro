@@ -36,8 +36,8 @@
 
     <br>
     <p><strong>Survey Data</strong></p>
-    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> {{configuration.perspective.fiberPlantAlternateLabel  ? 'FCC Form 477': 'NBM'}}
-    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()"> Geotel
+    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> {{configuration.perspective.competitorNetworks.fiberPlantAlternateLabel  ? 'FCC Form 477': 'NBM'}}
+    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()" ng-disabled="configuration.perspective.competitorNetworks.disableGeotel"> Geotel
 
     <br>
     <p><strong>Survey Data</strong></p>
@@ -51,11 +51,14 @@
     <p><strong>Fiber Route Data</strong></p>
     <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showFiberRoutes"
+           ng-disabled="configuration.perspective.competitorNetworks.disableRoutes"
            ng-click="toggleShowFiberRoutesData()">
     Routes
+
     <br>
     <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showFiberRoutesBuffer"
+           ng-disabled="configuration.perspective.competitorNetworks.disableRoutesBuffer"
            ng-click="toggleShowFiberRoutesBufferData()">
     Routes Buffer
 
