@@ -429,17 +429,45 @@ module.exports = class Location {
           SELECT attributes FROM businesses
           WHERE location_id=$1
         `
-
         return database.findOne(attributeQuery, [location_id])
-          .then((values) => {
-            locationInfo.attributes = {}
-            if(values && values.attributes) {
-              hstore.parse(values.attributes, function (result) {
-                locationInfo.attributes = result
+      })
+      .then((result)=>{
+        if (!result || !result.attributes) {
+          return Promise.resolve() // There are no attributes for households, celltowers
+        } else {
+          locationInfo.attributes = []
+          let order_property_string = 'business_attribute_order_' + process.env.ARO_CLIENT.toString().toLowerCase()
+          let order_property_query = `select spf.name, sp.string_value from client.system_property sp join client.system_rule sr on sp.system_rule_id = sr.id join client.system_property_field spf on sp.property_field_id = spf.id where spf.name = \'${order_property_string}\'`
+          return database.findOne(order_property_query)
+            .then((order)=>{
+              hstore.parse(result.attributes, function (result) {
+                if (order) {
+                  let order_array = JSON.parse(order.string_value)
+                  let last_index = order_array.length
+                  let index = -1
+                  for (let k in result) {
+                    if (order_array.indexOf(k) !== -1) {
+                      index = order_array.indexOf(k)
+                    } else {
+                      index = last_index
+                      last_index++
+                    }
+                    locationInfo.attributes[index] = {
+                      key: k,
+                      value: result[k]
+                    }
+                  }
+                } else {
+                  for (let k in result) {
+                    locationInfo.attributes.push({
+                      key: k,
+                      value: result[k]
+                    })
+                  }
+                }
               })
-            }
-          })
-
+            })
+        }
       })
       .then(() => {
         locationInfo.locSourceIds = locationSources

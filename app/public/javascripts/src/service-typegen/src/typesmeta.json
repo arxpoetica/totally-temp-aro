@@ -4,24 +4,27 @@
     "displayProperties": [
       {
         "propertyName": "daysFrom",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "date",
         "displayName": "Days From",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "daysTo",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "date",
         "displayName": "Days To",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "equipmentId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Equipment Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -30,46 +33,53 @@
     "displayProperties": [
       {
         "propertyName": "dataType",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "name",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Name",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "geometry",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "tree",
         "displayName": "Geometry",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": false,
+        "editable": true
       },
       {
         "propertyName": "attributes",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Attributes",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "source_id",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Source Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "objectId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Object Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -77,53 +87,36 @@
     "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment",
     "displayProperties": [
       {
-        "propertyName": "fiberAvailable",
-        "format": "",
-        "displayName": "Fiber Available",
-        "editable": true,
-        "visible": true
-      },
-      {
         "propertyName": "notes",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "text",
         "displayName": "Notes",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "existingEquipment",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "list",
         "displayName": "Existing Equipment",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "plannedEquipment",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "list",
         "displayName": "Planned Equipment",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "siteInfo",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Site Info",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "physicallyLinked",
-        "format": "",
-        "displayName": "Physically Linked",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "t1",
-        "format": "",
-        "displayName": "T 1",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -132,39 +125,45 @@
     "displayProperties": [
       {
         "propertyName": "locationCategory",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "select",
         "displayName": "Location Category",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "dataType",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "geometry",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "tree",
         "displayName": "Geometry",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": false,
+        "editable": true
       },
       {
         "propertyName": "attributes",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Attributes",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "objectId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Object Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -173,54 +172,62 @@
     "displayProperties": [
       {
         "propertyName": "boundary",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "list",
         "displayName": "Boundary",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "networkNodeType",
-        "format": "",
-        "displayName": "Network Node Type",
+        "levelOfDetail": 2,
+        "format": "string",
+        "displayName": "Equipment Type",
         "enumEntityName": "",
-        "editable": false,
-        "visible": true
+        "visible": true,
+        "editable": false
       },
       {
         "propertyName": "dataType",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "networkNodeEquipment",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Network Node Equipment",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "geometry",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "tree",
         "displayName": "Geometry",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": false,
+        "editable": true
       },
       {
         "propertyName": "attributes",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Attributes",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "objectId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Object Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -229,53 +236,61 @@
     "displayProperties": [
       {
         "propertyName": "networkNodeType",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Network Node Type",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "dataType",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "boundaryTypeId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Boundary Type Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "geometry",
-        "format": "",
+        "levelOfDetail": 2,
+        "format": "list",
         "displayName": "Geometry",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": false,
+        "editable": true
       },
       {
         "propertyName": "attributes",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Attributes",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "networkObjectId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Network Object Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "objectId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Object Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -283,39 +298,70 @@
     "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
     "displayProperties": [
       {
+        "propertyName": "fiberAvailable",
+        "levelOfDetail": 0,
+        "format": "check",
+        "displayName": "Fiber Available",
+        "visible": true,
+        "editable": true
+      },
+      {
         "propertyName": "address",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "text",
         "displayName": "Address",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "siteName",
-        "format": "",
+        "levelOfDetail": 1,
+        "format": "string",
         "displayName": "Site Name",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "siteClli",
-        "format": "",
+        "levelOfDetail": 1,
+        "format": "string",
         "displayName": "Site Clli",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "dpiEnvironment",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Dpi Environment",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "physicallyLinked",
+        "levelOfDetail": 0,
+        "format": "check",
+        "displayName": "Physically Linked",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "t1",
+        "levelOfDetail": 0,
+        "format": "check",
+        "displayName": "T 1",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "hsiOfficeCode",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Hsi Office Code",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -324,73 +370,86 @@
     "displayProperties": [
       {
         "propertyName": "quantity",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "number",
         "displayName": "Quantity",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "code",
-        "format": "",
+        "levelOfDetail": 1,
+        "format": "string",
         "displayName": "Code",
-        "editable": true,
-        "visible": true
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "installCost",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "number",
         "displayName": "Install Cost",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "oneTimeCost",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "check",
         "displayName": "One Time Cost",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "rank",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "number",
         "displayName": "Rank",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "subComponents",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "list",
         "displayName": "Sub Components",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "equipmentName",
-        "format": "",
-        "displayName": "Equipment Name",
-        "editable": true,
-        "visible": true
+        "levelOfDetail": 1,
+        "format": "string",
+        "displayName": "Name",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "equipmentItemId",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Equipment Item Id",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "extendedAttributes",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "tree",
         "displayName": "Extended Attributes",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "constructionCost",
-        "format": "",
-        "displayName": "Construction Cost",
-        "editable": true,
-        "visible": true
+        "levelOfDetail": 1,
+        "format": "number",
+        "displayName": "Cost",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
       }
     ]
   },
@@ -398,81 +457,110 @@
     "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
     "displayProperties": [
       {
-        "propertyName": "marketableEquipments",
-        "format": "",
-        "displayName": "Marketable Equipments",
-        "editable": true,
-        "visible": true
+        "propertyName": "code",
+        "levelOfDetail": 0,
+        "format": "string",
+        "displayName": "Code",
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "serialNumber",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Serial Number",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "switchType",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Switch Type",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "deploymentDate",
-        "format": "",
-        "displayName": "Deployment Date",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "latency",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "number",
         "displayName": "Latency",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "uplinkSpeed",
-        "format": "",
-        "displayName": "Uplink Speed",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "modelNumber",
-        "format": "",
-        "displayName": "Model Number",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "clliCode",
-        "format": "",
-        "displayName": "Clli Code",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "maxSpeed",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "number",
         "displayName": "Max Speed",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "assignedEquipment",
-        "format": "",
-        "displayName": "Assigned Equipment",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
       },
       {
         "propertyName": "manufacturer",
-        "format": "",
+        "levelOfDetail": 0,
+        "format": "string",
         "displayName": "Manufacturer",
-        "editable": true,
-        "visible": true
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "marketableEquipments",
+        "levelOfDetail": 0,
+        "format": "list",
+        "displayName": "Marketable Equipments",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "deploymentDate",
+        "levelOfDetail": 1,
+        "format": "date",
+        "displayName": "Deployment Date",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "uplinkSpeed",
+        "levelOfDetail": 0,
+        "format": "number",
+        "displayName": "Uplink Speed",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "equipmentName",
+        "levelOfDetail": 0,
+        "format": "string",
+        "displayName": "Equipment Name",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "modelNumber",
+        "levelOfDetail": 0,
+        "format": "string",
+        "displayName": "Model Number",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "clliCode",
+        "levelOfDetail": 1,
+        "format": "string",
+        "displayName": "Clli Code",
+        "enumEntityName": "",
+        "visible": true,
+        "editable": true
+      },
+      {
+        "propertyName": "equipmentItemId",
+        "levelOfDetail": 0,
+        "format": "string",
+        "displayName": "Equipment Item Id",
+        "visible": true,
+        "editable": true
       }
     ]
   }

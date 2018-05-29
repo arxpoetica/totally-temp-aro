@@ -9,7 +9,7 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, configuration, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -17,6 +17,7 @@ class MapTileRenderer {
     this.mapTileOptions = mapTileOptions
     this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
     this.selectedServiceAreas = selectedServiceAreas 
+    this.selectedAnalysisArea = selectedAnalysisArea
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
@@ -26,6 +27,7 @@ class MapTileRenderer {
     this.selectedViewFeaturesByType = selectedViewFeaturesByType
     
     this.displayModes = displayModes
+    this.configuration = configuration
     this.renderBatches = []
     this.isRendering = false
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
@@ -49,9 +51,21 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
-  // Sets the selected service area ids
+  // Sets the selected service area ids for analysis
   setselectedServiceAreas(selectedServiceAreas) {
-	this.selectedServiceAreas = selectedServiceAreas
+    this.selectedServiceAreas = selectedServiceAreas
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected service area id to view details
+  setselectedServiceArea(selectedServiceArea) {
+    this.selectedServiceArea = selectedServiceArea
+    this.tileDataService.markHtmlCacheDirty()
+  }
+
+  // Sets the selected analysis area id to view details
+  setselectedAnalysisArea(selectedAnalysisArea) {
+    this.selectedAnalysisArea = selectedAnalysisArea
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -390,8 +404,8 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id  
-        if (this.tileDataService.featuresToExclude.has(featureId)) {
-          // This feature is to be excluded. Do not render it.
+        if (this.tileDataService.featuresToExclude.has(featureId) && this.selectedDisplayMode == this.displayModes.EDIT_PLAN) {
+          // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
           continue
         }
       }
@@ -467,9 +481,22 @@ class MapTileRenderer {
           var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
 
           if (isClosedPolygon) {
+            var selectedEquipments = []
+            Object.keys(this.configuration.networkEquipment.equipments).forEach((categoryItemKey) => {
+              var networkEquipment = this.configuration.networkEquipment.equipments[categoryItemKey]
+              networkEquipment.checked && selectedEquipments.push(networkEquipment.networkNodeType)
+            })
+
             // First draw a filled polygon with the fill color
-            this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
-            ctx.globalAlpha = 1.0
+            //show siteboundaries for the equipments that are selected
+            if((feature.properties && _.has(feature.properties,'network_node_type')
+              && (_.indexOf(selectedEquipments,feature.properties.network_node_type) > -1)) 
+              || (!_.has(feature.properties,'network_node_type')) ) {
+                this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
+                ctx.globalAlpha = 1.0
+            } else {
+              return
+            }
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
@@ -496,6 +523,11 @@ class MapTileRenderer {
 
   // Renders a polyline feature onto the canvas
   renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, isPolygonBorder) {
+
+    const oldOpacity = ctx.globalAlpha
+    if (drawingStyles.lineOpacity) {
+      ctx.globalAlpha = drawingStyles.lineOpacity
+    }
 
     ctx.strokeStyle = drawingStyles ? drawingStyles.strokeStyle : mapLayer.strokeStyle
     ctx.lineWidth = drawingStyles ? drawingStyles.lineWidth : (mapLayer.lineWidth || 1)
@@ -532,6 +564,8 @@ class MapTileRenderer {
     if (mapLayer.showPolylineDirection) {
       this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
     }
+
+    ctx.globalAlpha = oldOpacity
   }
 
   // Draws an arrow showing the direction of a polyline
@@ -641,7 +675,7 @@ class MapTileRenderer {
         }
       }
       
-    }else if(  this.selectedServiceAreas.has(feature.properties.id)
+    } else if (this.selectedServiceAreas.has(feature.properties.id)
          && this.selectedDisplayMode == this.displayModes.ANALYSIS 
          && this.analysisSelectionMode == "SELECTED_AREAS") {
     	  //Highlight the selected SA
@@ -650,6 +684,17 @@ class MapTileRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       ctx.globalCompositeOperation = 'multiply'
+    } else if (this.selectedServiceArea == feature.properties.id
+      && this.selectedDisplayMode == this.displayModes.VIEW) {
+      //Highlight the selected SA in view mode
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      ctx.globalCompositeOperation = 'multiply'
+    } else if (feature.properties.hasOwnProperty('_data_type')
+      && 'analysis_area' === feature.properties._data_type
+      && this.selectedAnalysisArea == feature.properties.id
+      && this.selectedDisplayMode == this.displayModes.VIEW) {
+      //Highlight the selected SA in view mode
+      drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
 
     ctx.fillStyle = drawingStyles.fillStyle
@@ -683,6 +728,7 @@ class MapTileRenderer {
       strokeStyle: mapLayer.strokeStyle,
       fillStyle: mapLayer.fillStyle,
       lineWidth: mapLayer.lineWidth || 1,
+      lineOpacity: mapLayer.lineOpacity || 0.7,
       opacity: mapLayer.opacity || 0.7
     }
 
@@ -973,12 +1019,13 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, state, tileDataService) {
+  constructor($document, state, tileDataService, configuration) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
     this.tileDataService = tileDataService
+    this.configuration = configuration
     this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
@@ -1030,6 +1077,20 @@ class TileComponentController {
     state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
+      }
+    })
+
+    // If selected SA in viewmode change, set that in the tile data service
+    state.selectedServiceArea.subscribe((selectedServiceArea) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceArea(selectedServiceArea)
+      }
+    })
+
+    // If selected Analysis Area in viewmode change, set that in the tile data service
+    state.selectedAnalysisArea.subscribe((selectedAnalysisArea) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedAnalysisArea(selectedAnalysisArea)
       }
     })
     
@@ -1197,6 +1258,7 @@ class TileComponentController {
                                                            this.state.mapTileOptions.getValue(),
                                                            this.state.selectedLocations.getValue(),
                                                            this.state.selectedServiceAreas.getValue(),
+                                                           this.state.selectedAnalysisArea.getValue(),
                                                            this.state.selectedCensusBlockId.getValue(),
                                                            this.state.censusCategories.getValue(),
                                                            this.state.selectedCensusCategoryId.getValue(),
@@ -1204,7 +1266,8 @@ class TileComponentController {
                                                            this.state.selectedViewFeaturesByType.getValue(),
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
-                                                           this.state.displayModes
+                                                           this.state.displayModes,
+                                                           this.configuration
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
@@ -1229,6 +1292,7 @@ class TileComponentController {
         Promise.all(hitPromises)
           .then((results) => {
             var hitFeatures = []
+            var analysisAreaFeatures = []
             var serviceAreaFeatures = []
             var roadSegments = new Set()
             var equipmentFeatures = []
@@ -1237,14 +1301,18 @@ class TileComponentController {
             var canSelectLoc  = false
             var canSelectSA   = false
             
-            switch (this.state.optimizationOptions.analysisSelectionMode) {
-              case 'SELECTED_AREAS':
-                canSelectSA = !canSelectSA
-                break
-              case 'SELECTED_LOCATIONS':
-                canSelectLoc = !canSelectLoc
-                break
-            }
+            if(state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
+              switch (this.state.optimizationOptions.analysisSelectionMode) {
+                case 'SELECTED_AREAS':
+                  canSelectSA = !canSelectSA
+                  break
+                case 'SELECTED_LOCATIONS':
+                  canSelectLoc = !canSelectLoc
+                  break
+              }
+            } else if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
+              canSelectSA = true
+            }  
 
             results[0].forEach((result) => {
             	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
@@ -1252,6 +1320,9 @@ class TileComponentController {
               if(result.location_id && (canSelectLoc || 
                   state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
                 hitFeatures = hitFeatures.concat(result)
+              } else if ( result.hasOwnProperty('_data_type') && 
+                result.code && 'analysis_area' === result._data_type ) {
+                analysisAreaFeatures.push(result)
               } else if (result.code && canSelectSA) {
                 serviceAreaFeatures = serviceAreaFeatures.concat(result)
               } else if (result.gid) {
@@ -1275,6 +1346,7 @@ class TileComponentController {
               latLng: event.latLng,
               locations: hitFeatures,
               serviceAreas: serviceAreaFeatures,
+              analysisAreas: analysisAreaFeatures,
               roadSegments: roadSegments,
               equipmentFeatures: equipmentFeatures, 
               censusFeatures: censusFeatures
@@ -1395,7 +1467,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', 'state', 'tileDataService']
+TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'configuration']
 
 let tile = {
   template: '',

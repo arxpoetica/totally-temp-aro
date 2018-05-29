@@ -7,7 +7,7 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootSc
 
   var accordion = $('#map-tools-accordion')
 
-  $document.on("keydown",(event) => hideModal(event))
+  $document.on("keydown keyup",(event) => hideModal(event))
 
   function hideModal(e) {
     if (e.keyCode == 27) {

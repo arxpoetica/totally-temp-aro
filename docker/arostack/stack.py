@@ -15,7 +15,7 @@ DEVELOPER_GROUP_NAME = 'aro-developers'
 DEVELOPER_GROUP_ARN = 'arn:aws:iam::976168524097:group/' + DEVELOPER_GROUP_NAME
 CREATE_POLL_INTERVAL = 10  # seconds
 # This seems like a really long time but in fact RDS instance creation is very slow
-CREATE_TIMEOUT = 1200  # seconds
+CREATE_TIMEOUT = 1400  # seconds
 
 
 def get_cfn_stack_output(stack, key):
@@ -60,6 +60,7 @@ def add_developer_group_to_stack(stack_id, opsworks_client, iam_client, environm
 
 
 def create_aro_cfn_stack(stack_name,
+                         aws_region='',
                          environment='staging',
                          parameters={},
                          tags={},
@@ -78,8 +79,8 @@ def create_aro_cfn_stack(stack_name,
            make a new one.
     :return: CloudFormation.Stack object describing the new stack.
     """
-    cloudformation_client = cloudformation_client or boto3.client('cloudformation', region_name='us-east-1')
-    session = Session(region_name='us-east-1')
+    cloudformation_client = cloudformation_client or boto3.client('cloudformation', region_name=aws_region)
+    session = Session(region_name=aws_region)
     cloudformation = session.resource('cloudformation')
 
     create_response = cloudformation_client.create_stack(
@@ -131,67 +132,70 @@ def get_stack_name(environment, name, name_component):
     return name_bases[environment]
 
 
-def provision_aro_stack(opsworks_stack_id=None,
-                        opsworks_layer_id=None,
-                        internal_layer_id=None,
+def provision_aro_stack(aws_region='',
+                        opsworks_stack_id=None,
+                        opsworks_manager_layer_id=None,
+                        opsworks_ignite_layer_id=None,
                         rds_instance_identifier=None,
                         environment='STAGING',
                         name='',
                         name_component='',
                         db={},
-                        dbuser='',
-                        dbhost='',
-                        dbpass='',
-                        dbdatabase='',
                         environment_vars=[],
                         start_stack=False,
                         initialize_database=False,
                         opsworks_client=None,
                         logs_client=None,
                         iam_client=None,
-                        instance_type=''):
+                        ignite_instance_type='',
+                        manager_instance_type=''):
     """Provision a newly created OpsWorks stack by hooking up the app and RDS"""
-    opsworks_client = opsworks_client or boto3.client('opsworks', region_name='us-east-1')
-    logs_client = logs_client or boto3.client('logs', region_name='us-east-1')
-    iam_client = iam_client or boto3.client('iam', region_name='us-east-1')
+    opsworks_client = opsworks_client or boto3.client('opsworks', region_name=aws_region)
+    logs_client = logs_client or boto3.client('logs', region_name=aws_region)
+    iam_client = iam_client or boto3.client('iam', region_name=aws_region)
 
     TIMEOUT = 1200
     INSTANCE_CREATE_DELAY = 10
 
     # Attach RDS instance to OpsWorks stack if provided
-    # if db:
-    #     rds_instance_arn = "arn:aws:rds:us-east-1:%s:db:%s" % (AWS_ACCOUNT_ID, rds_instance_identifier)
-    #     rds_response = opsworks_client.register_rds_db_instance(
-    #         StackId=opsworks_stack_id,
-    #         RdsDbInstanceArn=rds_instance_arn,
-    #         DbUser=db['user'],
-    #         DbPassword=db['pass']
-    #     )
+    if db:
+        rds_instance_arn = "arn:aws:rds:%s:%s:db:%s" % (aws_region, AWS_ACCOUNT_ID, rds_instance_identifier)
+        rds_response = opsworks_client.register_rds_db_instance(
+            StackId=opsworks_stack_id,
+            RdsDbInstanceArn=rds_instance_arn,
+            DbUser=db['user'],
+            DbPassword=db['pass']
+        )
 
     # Add an app and an instance
-    # data_sources = [
-    #         { 'Type': 'RdsDbInstance',
-    #           'Arn': rds_instance_arn,
-    #           'DatabaseName': db.get('name') or 'aro' }
-    #     ] if db else []
+    data_sources = [
+            { 'Type': 'RdsDbInstance',
+              'Arn': rds_instance_arn,
+              'DatabaseName': db.get('name') or 'aro' }
+        ] if db else []
     app_response = opsworks_client.create_app(
         StackId=opsworks_stack_id,
         Shortname='aro',
         Name='aro',
-        # DataSources=data_sources,
+        DataSources=data_sources,
         Type='other',
         EnableSsl=False,
-        Environment=[ { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
-                      { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
-                      { 'Key': 'PGDATABASE', 'Value': str(dbdatabase), 'Secure': False},
-                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
+        Environment=environment_vars
     )
-    ids = [opsworks_layer_id]
-    instance_response = opsworks_client.create_instance(
+    
+    manager_ids = [opsworks_manager_layer_id ]
+    manager_instance_response = opsworks_client.create_instance(
         StackId=opsworks_stack_id,
-        LayerIds=[id for id in ids if id],
-        InstanceType=instance_type
+        LayerIds=[id for id in manager_ids if id],
+        InstanceType=manager_instance_type
     )
+
+    # ignite_ids = [opsworks_ignite_layer_id ]
+    # ignite_instance_response = opsworks_client.create_instance(
+    #     StackId=opsworks_stack_id,
+    #     LayerIds=[id for id in ignite_ids if id],
+    #     InstanceType=ignite_instance_type
+    # )
 
     # Add the log group with its retention policy to cloudwatch logs
     lg_name = get_stack_name(environment, name, name_component)
@@ -201,7 +205,7 @@ def provision_aro_stack(opsworks_stack_id=None,
         )
         retention_policy_response = logs_client.put_retention_policy(
             logGroupName=lg_name,
-            retentionInDays=60
+            retentionInDays=30
         )
     except ClientError:  # assume it already exists :p
         pass
@@ -212,55 +216,62 @@ def provision_aro_stack(opsworks_stack_id=None,
         print "Starting stack..."
         start_response = opsworks_client.start_stack(StackId=opsworks_stack_id)
 
-    # Here is where we need to initialize the database
-    # if initialize_database:
-    #     print "Initializing and populating database..."
+    
+        print "Initializing swarm..."
 
-    #     # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
-    #     # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
-    #     # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
+        # First run a loop that continually polls the status of the instance using opsworks_client.describe_instances 
+        # Status should progress through `requested`, `pending`, `booting`, `running_setup`, until reaching `online`
+        # Any error along the way will generate a failure. Successful attainment of `online` status proceeds 
 
-    #     # TODO: actually add error handling other than the timeout
+        # TODO: actually add error handling other than the timeout
 
-    #     # populate array of instances
-    #     instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
-    #     instances = []
-    #     for inst in instances_response['Instances']:
-    #         id = inst['InstanceId']
-    #         instances.append(id)
-    #     delay = 0
-    #     # start wait loop until they reach 'running' status
-    #     while delay < TIMEOUT:
-    #         print "Sleeping for %d seconds (%d so far) for instance startup..." \
-    #             % (INSTANCE_CREATE_DELAY, delay)
-    #         time.sleep(INSTANCE_CREATE_DELAY)
-    #         described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
-    #         inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
-    #         print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
+        # populate array of instances
+        instances_response = opsworks_client.describe_instances(StackId=opsworks_stack_id)
+        instances = []
+        for inst in instances_response['Instances']:
+            id = inst['InstanceId']
+            instances.append(id)
+        delay = 0
+        # start wait loop until they reach 'running' status
+        while delay < TIMEOUT:
+            print "Sleeping for %d seconds (%d so far) for instance startup..." \
+                % (INSTANCE_CREATE_DELAY, delay)
+            time.sleep(INSTANCE_CREATE_DELAY)
+            described_instances = opsworks_client.describe_instances(InstanceIds=instances)['Instances']
+            inst_names = [described_instances[i]['Hostname'] for i in range(len(instances))]
+            print "Waiting for instances: %s to reach running status" % ", ".join(i for i in inst_names)
 
-    #         for inst in described_instances:
-    #             status = inst['Status']
-    #             name = inst['Hostname']
-    #             id = inst['InstanceId']
-    #             if status == 'online':
-    #                 print "Instance %s is online" % name
-    #                 instances.remove(id)
+            for inst in described_instances:
+                status = inst['Status']
+                name = inst['Hostname']
+                id = inst['InstanceId']
+                if status == 'online':
+                    print "Instance %s is online" % name
+                    instances.remove(id)
 
-    #         if not instances:
-    #             break
+            if not instances:
+                break
 
-    #         delay += INSTANCE_CREATE_DELAY
-    #         if delay >= TIMEOUT:
-    #             raise StandardError("Instance creation timeout exhausted")
+            delay += INSTANCE_CREATE_DELAY
+            if delay >= TIMEOUT:
+                raise StandardError("Instance creation timeout exhausted")
 
-        # Run the opsworks/chef recipe that will handle the various commands required to configure the database and run ETL
-        # I don't think we should wait for the deployment to actually complate, since it can take over an hour to run
+        
+        # Now that the manager/swarm is created, we can add a processing node        
+        ignite_ids = [opsworks_ignite_layer_id ]
+        ignite_instance_response = opsworks_client.create_instance(
+            StackId=opsworks_stack_id,
+            LayerIds=[id for id in ignite_ids if id],
+            InstanceType=ignite_instance_type
+        )
+
+        # start_response = opsworks_client.start_stack(StackId=opsworks_stack_id)
 
         # deploy_response = opsworks_client.create_deployment(
         #     StackId=opsworks_stack_id,
         #     AppId=app_response['AppId'],
         #     Command={
-        #         'Name': 'execute_recipes',
+        #         'Name': 'deploy',
         #         'Args': {
         #             'recipes' : ['aro_ops::compose-initialize']
         #         }
@@ -271,13 +282,10 @@ def provision_aro_stack(opsworks_stack_id=None,
 
 
 
-def deploy_aro_stack(opsworks_stack_id=None,
+def deploy_aro_stack(aws_region='',
+                     opsworks_stack_id=None,
                      environment_vars=[],
-                     opsworks_client=None,
-                     dbpass='',
-                     dbuser='',
-                     dbhost='',
-                     dbdatabase=''):
+                     opsworks_client=None):
     """Update a previously created and provisioned stack"""
     opsworks_client = opsworks_client or boto3.client('opsworks', region='us-east-1')
 
@@ -285,11 +293,7 @@ def deploy_aro_stack(opsworks_stack_id=None,
     app_id = apps_response['Apps'][0]['AppId']
     update_response = opsworks_client.update_app(
         AppId=app_id,
-        
-        Environment=[ { 'Key': 'PGHOST', 'Value': str(dbhost), 'Secure': False},
-                      { 'Key': 'PGUSER', 'Value': str(dbuser), 'Secure': False},
-                      { 'Key': 'PGDATABASE', 'Value': str(dbdatabase), 'Secure': False},
-                      { 'Key': 'PGPASSWORD', 'Value': str(dbpass), 'Secure': True} ] + environment_vars
+        Environment=environment_vars
     )
 
     deploy_response = opsworks_client.create_deployment(

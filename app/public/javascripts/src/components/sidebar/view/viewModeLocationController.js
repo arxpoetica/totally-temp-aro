@@ -10,11 +10,15 @@ class ViewModeLocationController {
     this.currentUser = state.getUser()
     this.selectedLocation = null
 
-    state.plan.subscribe((plan) => {
+    this.planSubscription = state.plan.subscribe((plan) => {
       this.plan = plan
     })
 
-    state.mapFeaturesSelectedEvent.subscribe((options) => {
+    this.mapFeaturesSelectedSubscription = state.mapFeaturesSelectedEvent.subscribe((options) => {
+      //In ruler mode click should not perform any view action's
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE_PLAN_TARGET &&
+        !this.state.isRulerEnabled) {
       var locationsList = []
       if (options.hasOwnProperty('locations')) locationsList = options.locations
       
@@ -26,7 +30,7 @@ class ViewModeLocationController {
         var locationId = null
         for (var featureI = 0; featureI < locationsList.length; featureI++){
           var feature = locationsList[featureI]
-          
+          console.log(feature)
           if ( feature.hasOwnProperty('location_id') ){
             locationId = feature.location_id
           }else if ( feature.hasOwnProperty('id') ){
@@ -44,9 +48,10 @@ class ViewModeLocationController {
       } else {
         this.selectedLocationInfo = null
       }
+      }
     })
     
-    state.clearViewMode.subscribe((clear) => {
+    this.clearViewModeSubscription = state.clearViewMode.subscribe((clear) => {
       if(clear){
         this.selectedLocationInfo = null
         this.updateSelectedState()
@@ -105,6 +110,11 @@ class ViewModeLocationController {
     })
   }
   
+  $onDestroy() {
+    this.planSubscription.unsubscribe()
+    this.mapFeaturesSelectedSubscription.unsubscribe()
+    this.clearViewModeSubscription.unsubscribe()
+  }
 }
 
 ViewModeLocationController.$inject = ['$http','$timeout','state','configuration']

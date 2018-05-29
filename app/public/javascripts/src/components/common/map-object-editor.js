@@ -1,7 +1,7 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService) {
+  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, configuration) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -9,12 +9,14 @@ class MapObjectEditorController {
     this.$timeout = $timeout
     this.state = state
     this.tileDataService = tileDataService
+    this.configuration = configuration  // ToDo: configuration should come from parent I think
     this.mapRef = null
     this.createObjectOnClick = true
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.uuidStore = []
     this.getUUIDsFromServer()
+    this.iconAnchors = {}
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
     this.contextMenuCss = {
@@ -42,6 +44,7 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4,
     }
+    
   }
 
   // Get a list of UUIDs from the server
@@ -70,7 +73,10 @@ class MapObjectEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-
+    
+    //this.makeIconAnchor(this.objectIconUrl)
+    //this.makeIconAnchor(this.objectSelectedIconUrl)
+    
     // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
@@ -91,6 +97,7 @@ class MapObjectEditorController {
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
+      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
       this.handleMapEntitySelected(event)
     })
 
@@ -108,10 +115,12 @@ class MapObjectEditorController {
       return !(hasEntityType || hasBoundaryType);  // false == allow dropping
     }
     this.dragStartEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
+      //console.log('drag ... start?')
       this.objectIdToDropCSS = {} // So that we will regenerate the CSS in case the map has zoomed/panned
       this.$timeout()
     })
     this.dragEndEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
+      //console.log(event)
       this.isHavingBoundaryDraggedOver = false
       this.$timeout()
     })
@@ -125,13 +134,19 @@ class MapObjectEditorController {
       }      
       // Convert pixels to latlng
       var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
+      // ToDo feature should probably be a class
       var feature = {
         objectId: this.getUUID(),
         geometry: {
           type: 'Point',
           coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-        }
+        }, 
+        networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
       }
+      
+      //console.log(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
+      //console.log(feature)
+      
       this.createMapObject(feature, true)
       event.preventDefault();
     };
@@ -141,8 +156,62 @@ class MapObjectEditorController {
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
-  }
 
+    this.state.clearEditingMode.skip(1).subscribe((clear) => {
+      if (clear) {
+        this.selectMapObject(null) //deselects the selected equipment 
+      }
+    })
+  }
+  
+  // ---
+  
+  getIconsByFeatureType(featureType){
+    //console.log(featureType)
+    var icons = {}
+    icons.iconUrl = this.objectIconUrl
+    icons.selectedIconUrl = this.objectSelectedIconUrl
+    
+    if ('undefined' != typeof featureType && null != featureType){
+      // ToDo: there are discrepancies in out naming, fix that
+      if ('fiber_distribution_hub' == featureType) featureType = 'fdh' 
+      if ('fiber_distribution_terminal' == featureType) featureType = 'fdt' 
+      if ('cell_5g' == featureType) featureType = 'fiveg_site'
+      if (this.configuration.networkEquipment.equipments.hasOwnProperty(featureType)){
+        icons.iconUrl = this.configuration.networkEquipment.equipments[featureType].iconUrl
+      }else if(this.configuration.locationCategories.categories.hasOwnProperty(featureType)){
+        icons.iconUrl = this.configuration.locationCategories.categories[featureType].iconUrl
+      }
+    }
+    
+    return icons
+  }
+  
+  makeIconAnchor(iconUrl, callback){
+    if ('undefined' == typeof callback) callback = {}
+    var img = new Image();
+    var loadCallBack = (w, h) => {
+      this.iconAnchors[iconUrl] = new google.maps.Point(w*0.5, h*0.5)
+      callback()
+    }
+    img.addEventListener("load", function(){
+      loadCallBack( this.naturalWidth, this.naturalHeight)
+    })
+    img.src = iconUrl
+  }
+  
+  setMapObjectIcon(mapObject, iconUrl){
+    if (!this.iconAnchors.hasOwnProperty(iconUrl)){
+      this.makeIconAnchor(iconUrl, () => {
+        //mapObject.setIcon({path: google.maps.SymbolPath.CIRCLE, url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+        mapObject.setIcon({url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+      })
+    }else{
+      //mapObject.setIcon({path: google.maps.SymbolPath.CIRCLE, url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+      mapObject.setIcon({url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+    }
+  }
+  
   handleOnDropped(eventArgs) {
     this.onObjectDroppedOnMarker && this.onObjectDroppedOnMarker(eventArgs)
   }
@@ -210,15 +279,37 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
-    return new google.maps.Marker({
+    //console.log(feature)
+    
+    //var iconUrl = this.objectIconUrl
+    //if (feature.networkNodeType){
+    //  iconUrl = getIconsByFeatureType(feature.networkNodeType).iconUrl
+    //}
+    this.tileDataService.addFeatureToExclude(feature.objectId)
+    this.state.requestMapLayerRefresh.next({})
+    var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
+      featureType: feature.networkNodeType, 
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
       icon: {
-        url: this.objectIconUrl
+        url: this.getIconsByFeatureType(feature.networkNodeType).iconUrl, //iconUrl, 
+        anchor: this.iconAnchors[this.objectIconUrl]//, 
+        //path: google.maps.SymbolPath.CIRCLE
       },
+      label: {
+        //text: '  ҉',
+        //text: '▢', 
+        //text: '◌', 
+        text: '◯', 
+        color: "#000000",
+        fontSize: "46px"
+      }, 
       draggable: true,
       map: this.mapRef
     })
+    
+    this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
+    return mapMarker
   }
 
   createPolygonMapObject(feature) {
@@ -242,11 +333,15 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMapObject(feature, usingMapClick) {
-
+  createMapObject(feature, usingMapClick, featureData) {
+    if ('undefined' == typeof featureData) featureData = {}
+    
     var mapObject = null
     if (feature.geometry.type === 'Point') {
+      //console.log(feature)
+      //console.log(featureData)
       mapObject = this.createPointMapObject(feature)
+      //makeIconAnchor()
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
       mapObject.addListener('click', (event) => {
@@ -282,8 +377,8 @@ class MapObjectEditorController {
     mapObject.addListener('rightclick', (event) => {
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.va.clientX}px`
-      this.contextMenuCss.top = `${event.va.clientY}px`
+      this.contextMenuCss.left = `${event.xa.clientX}px`
+      this.contextMenuCss.top = `${event.xa.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -295,10 +390,11 @@ class MapObjectEditorController {
       this.selectMapObject(mapObject)
       this.$timeout()
     })
-
+    
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
-    this.selectMapObject(mapObject)
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: featureData})
+    
+    if (usingMapClick) this.selectMapObject(mapObject)
   }
 
   handleMapEntitySelected(event) {
@@ -318,14 +414,18 @@ class MapObjectEditorController {
       }
     }
     var isExistingObject = false
+    var isEquipment = false
+    
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       isExistingObject = true
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
+      
       feature.objectId = event.equipmentFeatures[0].object_id
       isExistingObject = true
+      isEquipment = true
     } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
@@ -339,12 +439,22 @@ class MapObjectEditorController {
       feature.objectId = this.getUUID()
       isExistingObject = false
     }
-    this.createMapObject(feature, true)
-    if (isExistingObject) {
-      // We have clicked on an existing object. Stop rendering this object in the tile,
-      this.tileDataService.addFeatureToExclude(feature.objectId)
-      this.state.requestMapLayerRefresh.next({})
+    
+    
+    if (isExistingObject && isEquipment) {
+      // editing existing or planned equipment, get that data
+      //console.log(feature)
+      var plan = this.state.plan.getValue()
+      this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
+      .then((response) => {
+        if (!response.data) response.data = {}
+        if (response.data.geometry) feature.geometry = response.data.geometry
+        this.createMapObject(feature, true, response.data)
+      })
+    }else{
+      this.createMapObject(feature, true)
     }
+    
   }
 
   isMarker(mapObject) {
@@ -353,9 +463,14 @@ class MapObjectEditorController {
 
   selectMapObject(mapObject) {
     // First de-select the currently selected map object (if any)
+    //console.log(mapObject)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {
-        this.selectedMapObject.setIcon(this.objectIconUrl)
+        //this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
+        //this.selectedMapObject.label.color = "black"
+        var label = this.selectedMapObject.getLabel()
+        label.color="#000000";
+        this.selectedMapObject.setLabel(label);
       } else {
         this.selectedMapObject.setOptions(this.polygonOptions)
         this.selectedMapObject.setEditable(false)
@@ -365,8 +480,12 @@ class MapObjectEditorController {
     // Then select the map object
     if (mapObject) {  // Can be null if we are de-selecting everything
       if (this.isMarker(mapObject)) {
-        //console.log('item selected')
-        mapObject.setIcon(this.objectSelectedIconUrl)
+        //this.setMapObjectIcon(mapObject, this.getIconsByFeatureType(mapObject.featureType).selectedIconUrl)
+        //mapObject.label.color = "green"
+        var label = mapObject.getLabel()
+        label.color="#009900";
+        mapObject.setLabel(label);
+        //mapObject.label: 
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
       }
@@ -504,7 +623,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'configuration']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',

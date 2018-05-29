@@ -16,15 +16,12 @@ class MapSelectorPlanTargetController {
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
-    	  //console.log(event)
-    	  // ToDo: Corr isn't sure if this is where this should go
-    	  //if (event.hasOwnProperty('censusFeatures') && event.censusFeatures.length > 0){
-      //  $rootScope.$broadcast('map_layer_census_block_click', event.censusFeatures[0])
-    	  //}
-    	  
+      
+      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
       var plan = state.plan.getValue()
       
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0) {
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 
+        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
       // Get a list of ids to add and remove
       var existingIds = state.selectedLocations.getValue()
       var idsToAdd = new Set(), idsToRemove = new Set()
@@ -47,7 +44,8 @@ class MapSelectorPlanTargetController {
         })
       }
       
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0) {
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0 
+          && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
         // Get a list of ids to add and remove
         var existingIds = state.selectedServiceAreas.getValue()
         var idsToAdd = new Set(), idsToRemove = new Set()

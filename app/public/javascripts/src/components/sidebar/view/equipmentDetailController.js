@@ -1,6 +1,7 @@
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 
+
 class EquipmentDetailController {
 
 	constructor($http, $timeout, state, configuration) {
@@ -11,13 +12,14 @@ class EquipmentDetailController {
     this.configuration = configuration
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
-    this.selectedEquipmentInfoChanges = {}
-    this.selectedEquipmentInfoDispProps = []
+    //this.selectedEquipmentInfoChanges = {}
+    //this.selectedEquipmentInfoDispProps = []
     
-    this.isEdit = false
+    //this.isEdit = false
     this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
+    this.networkNodeLabel = ''
     
-    
+    /*
     this.debugFeature = {
       "physicallyLinked":"true",
       "site_info":{  
@@ -50,32 +52,10 @@ class EquipmentDetailController {
       ]
     }
     
-    
-    
-    
+    // an example display property object 
     this.dispProps = {}
     this.dispProps['equipment'] = [
-      {
-        'displayName': "Physically Linked", 
-        'editable': true, 
-        'format': "check", 
-        'propertyName': "physicallyLinked", 
-        'visible': true
-      }, 
-      {
-        'displayName': "Fiber Available", 
-        'editable': true, 
-        'format': "check", 
-        'propertyName': "fiberAvailable", 
-        'visible': true
-      }, 
-      {
-        'displayName': "T1", 
-        'editable': true, 
-        'format': "check", 
-        'propertyName': "t1", 
-        'visible': true
-      }, 
+      
       {
         'displayName': "Site Info", 
         'editable': false, 
@@ -122,7 +102,31 @@ class EquipmentDetailController {
             'propertyName': "hsiOfficeCode", 
             'levelOfDetail': "2", 
             'visible': true
-          }
+          }, 
+          {
+            'displayName': "Physically Linked", 
+            'editable': true, 
+            'format': "check", 
+            'propertyName': "physicallyLinked", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }, 
+          {
+            'displayName': "Fiber Available", 
+            'editable': true, 
+            'format': "check", 
+            'propertyName': "fiberAvailable", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }, 
+          {
+            'displayName': "T1", 
+            'editable': true, 
+            'format': "check", 
+            'propertyName': "t1", 
+            'levelOfDetail': "2", 
+            'visible': true
+          }, 
         ]
       }, 
       {
@@ -192,7 +196,7 @@ class EquipmentDetailController {
       }
       
     ]
-    
+    */
     
     // DEBUG ONLY 
     //this.selectedEquipmentInfoChanges = this.debugFeature
@@ -201,8 +205,10 @@ class EquipmentDetailController {
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
-      // most of this funcltion is assuring the properties we need exist. 
-      // ToDo: the feature selection system could use some refactoring 
+      // most of this function is assuring the properties we need exist. 
+      //In ruler mode click should not perform any view action's
+      if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
+        !this.state.isRulerEnabled) {
       if (!options.hasOwnProperty('equipmentFeatures')) return
       if (0 == options.equipmentFeatures.length) return
       
@@ -231,47 +237,35 @@ class EquipmentDetailController {
       }
       
       if (null != selectedFeature){
-        //console.log(selectedFeature)
         this.updateSelectedState(selectedFeature, featureId)
         this.displayEquipment(plan.id, selectedFeature.object_id)
+      }
       }
     })
     
     
-    
     state.clearViewMode.subscribe((clear) => {
       if(clear){
-        this.networkNodeType = ''
-        this.selectedEquipmentInfo = {}
-        this.selectedEquipmentInfoChanges = {}
-        this.selectedEquipmentInfoDispProps = []
-        this.updateSelectedState()
+        this.clearSelection()
       }
     })
   }
 	
 	
+	// ----- //
+	
+	
+	clearSelection(){
+    this.networkNodeType = ''
+    this.selectedEquipmentInfo = {}
+    this.updateSelectedState()
+  }
 	
 	getEquipmentInfo(planId, objectId){
 	  return this.$http.get('/service/plan-feature/'+planId+'/equipment/'+objectId).then((response) => {
       return response.data
     })
 	}
-	
-	/*
-  getEquipmentInfo(equipmentId) {
-    return this.$http.get('/network/nodes/' + equipmentId + '/details').then((response) => {
-      return response.data
-    })
-  }
-  */
-	
-	/*
-  showDetailEquipmentInfo() {
-    this.selectedEquipmentInfo.id = +this.selectedEquipmentInfo.id   
-    this.state.showDetailedEquipmentInfo.next(this.selectedEquipmentInfo)
-  }
-  */
   
 	updateSelectedState(selectedFeature, featureId){
 	  // tell state
@@ -284,75 +278,47 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-	  //console.log(planId)
-	  //console.log(objectId)
 	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
       //console.log(equipmentInfo)
-      if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-        console.log()
+	    if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
+          this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
         }else{
+          // no icon
           this.headerIcon = ''
+          this.networkNodeLabel = equipmentInfo.networkNodeType
         }
         
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
-        this.selectedEquipmentInfo = equipmentInfo.networkNodeEquipment
-
-        //this.selectedEquipmentInfoDispProps = AroFeatureFactory.createObject(equipmentInfo).getDisplayProperties()
-        this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
         
-        //this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo)
-        //this.selectedEquipmentInfoDispProps = this.selectedEquipmentInfo.getDisplayProperties()
-        
-        angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
-        
-        //console.log('=== DISP INFO ===')
-        //console.log(this.selectedEquipmentInfo)
-        //console.log(this.selectedEquipmentInfoDispProps)
+        try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
+          this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
+        }catch(error) {
+          console.error(error) 
+          return
+        }
         
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
         this.$timeout()
+      }else{
+        this.clearSelection()
       }
       return equipmentInfo
     })
 	}
 	
-  //ToDo: these perhaps get moved to the UI component 
-  beginEdit(){
-    // set up listeners etc
-    this.isEdit = true
-  }
+  // ---
   
-  cancelEdit(){
-    // return the object to init state
-    //angular.copy(this.treeData, this.treeState)
-    //angular.copy(this.rowsData, this.rowsState)
-    angular.copy(this.selectedEquipmentInfo, this.selectedEquipmentInfoChanges)
-    this.isEdit = false
-  }
-  
-  commitEdit(){
-    // set the object to the edited object and tell the DB
-    // may need to compare to check for deletes and creates 
-    //angular.copy(this.treeState, this.treeData)
-    //angular.copy(this.rowsState, this.rowsData)
-    angular.copy(this.selectedEquipmentInfoChanges, this.selectedEquipmentInfo)
-    this.isEdit = false
-    console.log('send changed data to DB:')
-    console.log(this.selectedEquipmentInfo)
-  }
-
   viewSelectedEquipment(selectedEquipment) {
-    //console.log(selectedEquipment)
-    
     var plan = this.state.plan.getValue()
-    //if (!plan || !plan.hasOwnProperty('id')) return
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
-    //console.log(map)
-    this.displayEquipment(plan.id, selectedEquipment.objectId)
-    .then((equipmentInfo) => map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] }))
+    this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
+      if ("undefined" != typeof equipmentInfo){
+        map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
+      }
+    })
     
     
   }

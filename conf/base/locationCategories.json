@@ -103,7 +103,7 @@
     },
     "lit_building":{
           "show": true,
-          "label": "Lit Building",
+          "label": "Fiber Lit Building",
           "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/lit_buildings/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/lit_building.png",
@@ -115,7 +115,7 @@
         },
     "tier_1":{
           "show": true,
-          "label": "Tier 1",
+          "label": "DNB Tier 1 (<1,000 ft from splice point)",
           "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_1/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/tier_1.png",
@@ -127,7 +127,7 @@
     },
     "tier_2":{
           "show": true,
-          "label": "Tier 2",
+          "label": "DNB Tier 2 (1,000-3,000 ft)",
           "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_2/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/tier_2.png",
@@ -139,7 +139,7 @@
     },
     "tier_3":{
           "show": true,
-          "label": "Tier 3",
+          "label": "DNB Tier 3 (>3,000 ft)",
           "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_3/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/tier_3.png",

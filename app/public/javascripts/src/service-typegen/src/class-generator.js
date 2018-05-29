@@ -27,7 +27,6 @@ class ClassGenerator {
 
     var referencedTypes = new Set()
     typeDefinitions.forEach((typeDefinition) => this.getAllTypes(typeDefinition, referencedTypes))
-    console.log(referencedTypes)
 
     // Save to distribution folder
     this.deleteDistributionFolder()
@@ -43,7 +42,6 @@ class ClassGenerator {
         var templateFactory = Handlebars.compile(fs.readFileSync('./aro-feature-factory.hbs').toString())
         var dataTypeToUrnList = require('./dataTypeToUrn.json')
         const fileName = path.join(__dirname, `../dist/AroFeatureFactory.js`)
-        console.log(templateFactory(dataTypeToUrnList))
         fs.writeFileSync(fileName, templateFactory(dataTypeToUrnList))
       })
   }
@@ -59,10 +57,29 @@ class ClassGenerator {
       // If we don't have a URN return 'object'
     Handlebars.registerHelper('classNameExtractor', (obj) => this.getClassName(this.getUrnForType(obj)) || 'object')
     Handlebars.registerHelper('classUrnExtractor', (obj) => this.getUrnForType(obj) || 'object')
-    Handlebars.registerHelper('isNotObject', (input) => input !== 'object')
+    Handlebars.registerHelper('isPrimitive', (input) => {
+      const primitives = ['string', 'number', 'boolean', 'integer']
+      return primitives.indexOf(input) >= 0
+    })
     Handlebars.registerHelper('toJSON', (input) => JSON.stringify(input, null, 2))
     // Helper to detect if the object is a map (Java Map, or Javascript POJO)
     Handlebars.registerHelper('isMapObject', (input) => this.isMapObject(input))
+    Handlebars.registerHelper('isAnyObject', (input) => input.type === 'any')
+    Handlebars.registerHelper('isArray', (input) => {
+      return input.type === 'array'
+    })
+    Handlebars.registerHelper('shouldIncludePropertyType', (input, containerType) => {
+      if (!input) {
+        return false
+      }
+      const classDef = input.items || input
+      if (!classDef) {
+        return false
+      }
+      const inputUrn = this.getUrnForType(classDef)
+      const containerUrn = this.getUrnForType(containerType)
+      return (input.type === 'array') && (inputUrn !== containerUrn)
+    })
     this.registerImportsHelper(Handlebars)
     this.registerAssignmentHelper(Handlebars)
   }

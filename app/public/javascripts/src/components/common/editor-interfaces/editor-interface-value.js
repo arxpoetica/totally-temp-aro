@@ -6,7 +6,10 @@ class EditorInterfaceValueController {
   }
 
   $onInit() {
-    //
+    // I think its better to get an error so we know a format is wrong
+    //if ("number" == this.displayProps.format){
+    //  this.model = parseFloat(this.model)
+    //}
   }
   
 }
@@ -16,6 +19,7 @@ let editorInterfaceValue = {
   bindings: {
     displayProps: '=', 
     model: '=', 
+    onChange: '&', 
     isEdit: '<'
   },
   controller: EditorInterfaceValueController

@@ -1,6 +1,6 @@
 /* global app $ map */
 // Search Controller
-app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', 'state', ($scope, $rootScope, $http, map_tools, $timeout, state) => {
+app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'map_tools' ,'$timeout', 'state', 'Utils', ($scope, $rootScope, $http, map_tools, $timeout, state, Utils) => {
   var ids = 0
   var search = $('#global-search-toolbutton .select2')
   search.select2({
@@ -19,10 +19,12 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
             id: 'id-' + (++ids),
             text: location.name,
             bounds: location.bounds,
-            centroid: location.centroid
+            centroid: location.centroid,
+            type: location.type
           }
         })
         $scope.search_results = items
+        $scope.userSearch = true
         return {
           results: items,
           pagination: {
@@ -37,12 +39,29 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
     if (selected) {
       var centroid = selected.centroid.coordinates
       map.setCenter({ lat: centroid[1], lng: centroid[0] })
+
+      if($scope.userSearch) {
+        const pointSearchZoom = 17
+
+        $timeout( function(){
+          var marker = new google.maps.Marker({
+            map: map,
+            animation: google.maps.Animation.BOUNCE,
+            position: {lat: centroid[1], lng: centroid[0]}
+          });
+          $timeout( function(){
+            marker.setMap(null);
+          }, 5000 );
+        }, 1000 );
+
+        map.setZoom(pointSearchZoom)
+      }
     }
   })
   
   
-  state.plan.subscribe((newPlan) => {
-	if (newPlan && !newPlan.ephemeral){
+  state.requestSetLocation.subscribe((newPlan) => {
+	  if (newPlan && !newPlan.ephemeral){
 	  searchAddress(newPlan.areaName)
     }
   })
@@ -69,6 +88,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
           centroid: location.centroid
         };
         $scope.firstLocation = loc;
+        $scope.userSearch = false
         search.select2("val", loc, true)
       } else if ($scope.searchRetry < 5) {
         $scope.searchRetry++

@@ -27,6 +27,10 @@ module.exports = class User {
     })
   }
 
+  static getUsersCount() {
+    return database.query('SELECT COUNT(*) FROM auth.users');
+  }
+
   static checkPassword (plain, hash) {
     return new Promise((resolve, reject) => {
       bcrypt.compare(plain, hash, (err, ok) => {
@@ -82,34 +86,39 @@ module.exports = class User {
 
   static register (user) {
     var code = user.password ? null : this.randomCode()
+    var hashedPassword = null
 
     return validate((expect) => {
       expect(user, 'user', 'object')
-      expect(user, 'user.first_name', 'string')
-      expect(user, 'user.last_name', 'string')
+      expect(user, 'user.firstName', 'string')
+      expect(user, 'user.lastName', 'string')
       expect(user, 'user.email', 'string')
     })
     .then(() => user.password ? this.hashPassword(user.password) : null)
     .then((hash) => {
+      hashedPassword = hash;
+      return database.query('INSERT INTO auth.system_actor(actor_type, is_deleted) VALUES (2, false);')
+    })
+    .then(() => {
       var params = [
-        user.first_name,
-        user.last_name,
+        user.firstName,
+        user.lastName,
         user.email.toLowerCase(),
-        user.company_name || null,
+        user.companyName || null,
         user.rol || null,
-        hash || code
+        hashedPassword || code
       ]
       var sql
-      if (hash) {
+      if (hashedPassword) {
         sql = `
-          INSERT INTO auth.users (first_name, last_name, email, company_name, rol, password)
-          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
+          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, password)
+          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6) RETURNING id
         `
         return database.findOne(sql, params)
       } else {
         sql = `
-          INSERT INTO auth.users (first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration)
-          VALUES ($1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\'))
+          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration)
+          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\'))
           RETURNING id
         `
         return database.findOne(sql, params)
@@ -139,6 +148,31 @@ module.exports = class User {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
       }
       return Promise.reject(err)
+    })
+  }
+
+  // Used to set administrator permissions for a user in the new permissions schema
+  static makeAdministrator(email) {
+
+    return database.query(`
+      -- Set admin permissions for the user
+      INSERT INTO auth.global_actor_permission
+      SELECT u.id, (SELECT permissions FROM auth.role WHERE name='ADMINISTRATOR')
+      FROM auth.users u
+      WHERE u.email=$1;
+    `, [email])
+    .then(() =>
+      database.query(`
+      -- Add the user to the default Administrators group
+      INSERT INTO auth.user_auth_group
+      SELECT u.id, (SELECT id FROM auth.auth_group WHERE name='Administrators')
+      FROM auth.users u
+      WHERE u.email=$1;
+    `, [email])
+    )
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
     })
   }
 

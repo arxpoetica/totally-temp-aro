@@ -38,7 +38,6 @@ PlanNetworkConfigurationController.$inject = ['$http', 'state']
 let planNetworkConfiguration = {
   templateUrl: '/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration.html',
   bindings: {
-    projectId: '<',
     userId: '<',
     planId: '<'
   },

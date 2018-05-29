@@ -41,7 +41,6 @@ ResourceSelectionController.$inject = ['$http', '$timeout', 'state']
 let planResourceSelection = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection.html',
   bindings: {
-    projectId: '<',
     userId: '<',
     planId: '<'
   },

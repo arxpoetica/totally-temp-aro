@@ -8,6 +8,7 @@ class MapSelectorExportLocationsController {
     this.displayModes = state.displayModes
     state.selectedDisplayMode.subscribe((newValue) => {
       this.selectedDisplayMode = newValue
+      this.targetSelectionMode = this.state && this.state.selectedTargetSelectionMode
       this.updateDrawingManagerState()
     })
     this.state = state
@@ -16,7 +17,10 @@ class MapSelectorExportLocationsController {
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
-    	if( angular.equals(event, {}) || event.locations.length  === 0){
+      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
+
+      if( angular.equals(event, {}) || event.locations.length  === 0 
+        || this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.POLYGON_EXPORT_TARGET){
     	  return
       }
 
@@ -63,7 +67,7 @@ class MapSelectorExportLocationsController {
       return
     }
 
-    if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW)
+    if (this.selectedDisplayMode === this.displayModes.VIEW
         && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)

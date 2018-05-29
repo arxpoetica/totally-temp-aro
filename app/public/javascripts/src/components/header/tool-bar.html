@@ -76,6 +76,15 @@
     color: #1f7de6;
   }
 
+  .ruler-container {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ruler-undo-btn {
+    border-radius: 5px!important;
+    margin-left: 2px!important;
+  }
 </style>
 
 <style scoped>
@@ -166,6 +175,7 @@
 
   <button class="btn"
           ng-if="$ctrl.configuration.perspective.toolbar.showExportSelection.show"
+          ng-click="$ctrl.setSelectionExport()"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Export selected polygon">
@@ -174,17 +184,33 @@
 
   <div class="separator"></div>
 
-  <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.measuringStickEnabled }"
-          ng-if="$ctrl.configuration.perspective.toolbar.measuringStick.show"
-          ng-click="$ctrl.toggleMeasuringStick()"
-          data-toggle="tooltip"
-          data-placement="bottom"
-          title="Ruler">
-    <i class="fa fa-arrows-h"></i>
-  </button>
+  <div class="rulerDropdown" ng-if="$ctrl.configuration.perspective.toolbar.measuringStick.show">
+    <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.isRulerEnabled }"
+      ng-click="$ctrl.rulerAction()"
+      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+      title="Ruler">
+      <i class="fa fa-arrows-h"></i>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right ruler-dropdown">
+      <div class="ruler-container">
+        <select class="form-control"
+          ng-model="$ctrl.state.currentRulerAction"
+          ng-options="item as item.label for item in $ctrl.state.rulerActions track by item.id"
+          ng-change="$ctrl.onChangeRulerAction()">
+        </select>
+        <button type="button" class="btn btn-primary btn-sm ruler-undo-btn form-control" ng-if="$ctrl.showRemoveRulerButton()"
+          ng-click="$ctrl.removeLastRulerMarker()"><i class="fa fa-minus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div class="myDropdown1">
-    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Show view settings..." ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.show">
+    <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.isViewSettingsEnabled }"
+      ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.show"
+      ng-click = "$ctrl.viewSettingsAction()"
+      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+      title="Show view settings...">
       <i class="fa fa-eye"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right view-dropdown">

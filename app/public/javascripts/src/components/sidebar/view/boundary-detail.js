@@ -12,10 +12,10 @@ let boundaryDetail = {
     </style>
     <div class="mb-5 mt-2">
       <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO"
-        object-name="Census Block"
-        search-list="$ctrl.state.entityTypeList.CensusBlocksEntity"
+        object-name="Boundary Layer"
+        search-list="$ctrl.state.entityTypeBoundaryList"
         selected="$ctrl.selectedBoundary"
-        refresh-tag-list="$ctrl.state.loadEntityList('CensusBlocksEntity',searchObj,'id,tabblockId','tabblockId')"
+        refresh-tag-list="$ctrl.state.loadBoundaryEntityList(searchObj)"
         on-selection-changed="$ctrl.viewSelectedBoundary(selectedObj)">
       </aro-search>
     </div>
@@ -29,6 +29,13 @@ let boundaryDetail = {
       <div ng-repeat="tag in $ctrl.selectedBoundaryTags" ng-if="undefined != tag.tagInfo">
         {{tag.censusCatDescription}} : <div class="outlineLegendIcon" style="border-color: {{tag.tagInfo.colourHash}}; background-color: {{tag.tagInfo.colourHash}}33;"></div> {{tag.tagInfo.description}}
       </div>
+    </div>
+    <div class="boundary-detail" ng-if="$ctrl.selectedSAInfo !== null">
+      <div>Code: {{$ctrl.selectedSAInfo.code}}</div>
+      <div>Name: {{$ctrl.selectedSAInfo.name}}</div>
+    </div>
+    <div class="boundary-detail" ng-if="$ctrl.selectedAnalysisAreaInfo !== null">
+      <div>Name: {{$ctrl.selectedAnalysisAreaInfo.code}}</div>
     </div>
     `,
     bindings: {},

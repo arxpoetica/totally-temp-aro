@@ -26,10 +26,10 @@ let viewMode = {
 
   <div class="plan-settings-container">
     <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeViewModePanel">
-      <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO].show"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO].show">
+      <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
         <location-detail ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                                && ($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO)">
+                                && ($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO)&&(configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO].show)">
         </location-detail>
       </accordion-panel-contents>
 

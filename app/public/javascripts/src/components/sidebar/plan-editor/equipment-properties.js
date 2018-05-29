@@ -1,5 +1,5 @@
 class EquipmentProperties {
-  constructor(siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType) {
+  constructor(siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment) {
     this.siteIdentifier = siteIdentifier || ''
     this.siteName = siteName || ''
     this.siteNetworkNodeType = siteNetworkNodeType
@@ -13,6 +13,7 @@ class EquipmentProperties {
       'Generic VDSL DSLAM'
     ]
     this.selectedEquipmentType = selectedEquipmentType || this.equipmentTypes[0]
+    this.networkNodeEquipment = networkNodeEquipment || null
     this.isDirty = false
   }
 }

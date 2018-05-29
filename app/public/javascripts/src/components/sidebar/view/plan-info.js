@@ -1,7 +1,8 @@
 class PlanInfoController {
-  constructor($http,state) {
+  constructor($http, state, $timeout) {
     this.$http = $http
     this.state = state
+    this.$timeout = $timeout
     this.generalPlanTags = []
     this.saPlanTags = []
     this.isEditMode = false
@@ -12,7 +13,12 @@ class PlanInfoController {
     .subscribe((plan) => {
       this.currentPlanInfo = plan
       this.getPlanTagDetails()
-    })  
+    })
+  }
+
+  registerSaveAccessCallback(saveResourceAccess) {
+    // We will call this function in resource-permissions-editor when we want to save the access settings for a plan.
+    this.saveResourceAccess = saveResourceAccess
   }
 
   editCurrentPlan() {
@@ -22,6 +28,8 @@ class PlanInfoController {
   commitUpdatestoPlan() {
     this.updatePlanTags()
     this.getPlanTagDetails()
+    // This will call a function into the resource permissions editor that will do the actual save
+    this.saveResourceAccess && this.saveResourceAccess()
     this.isEditMode = false
     this.addGeneralTags = false
     this.addSATags = false
@@ -47,7 +55,6 @@ class PlanInfoController {
 
     this.$http.put(`/service/v1/plan?user_id=${this.currentUser.id}`, updatePlan)
       .then((response) => {
-        this.state.loadPlan(this.currentPlanInfo.id)
         this.loadPlans()
       })
   }
@@ -61,7 +68,7 @@ class PlanInfoController {
   }
 }
 
-PlanInfoController.$inject = ['$http','state']
+PlanInfoController.$inject = ['$http', 'state', '$timeout']
 
 let planInfo = {
   templateUrl: '/components/sidebar/view/plan-info.html',

@@ -125,6 +125,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
       $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = state.showSiteBoundary
     })
+    // Hack to show copper in toolbar ruler options
+    Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
+      if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
+        state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
+      } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
+        var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
+        index !== -1 && state.rulerActions.splice(index, 1)
+      }
+    })
     createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state

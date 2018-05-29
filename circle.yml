@@ -66,11 +66,16 @@ deployment:
       - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
       - rm -f opsworks_ssh_key
   dockerhub:
-    branch: [dockerhub]
+    branch: [unify]
     owner: AIT
     commands:
-      - docker push ${IMAGE_TAG}
-      - docker push ${LATEST_TAG}
+      # - docker push ${IMAGE_TAG}
+      # - docker push ${LATEST_TAG}
       - docker push ${ECR_IMAGE_TAG}
       - docker push ${ECR_LATEST_TAG}
+      - python docker/publish_version.py ait-master app $CIRCLE_BUILD_NUM
+      - printf -- "${OPSWORKS_SSH_KEY}" > opsworks_ssh_key
+      - chmod 400 opsworks_ssh_key
+      - PYTHONPATH=. ARO_APP_OPSWORKS_SSH_KEY=$(cat opsworks_ssh_key) docker/stack_ops.sh update qa
+      - rm -f opsworks_ssh_key
   

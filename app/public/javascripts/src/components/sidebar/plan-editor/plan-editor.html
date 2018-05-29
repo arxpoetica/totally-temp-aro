@@ -19,6 +19,25 @@
     margin-top: 10px;
     margin-bottom: 10px;
   }
+  
+  .plan-editor-coverage-header{
+    cursor: auto;
+  }
+  
+  .plan-editor-census-cat{
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  
+  .plan-editor-census-tag{
+    padding-left: 20px;
+  }
+  
+  .plan-editor-census-tag-count{
+    margin-left: 10px;
+    font-weight: bold;
+  }
+  
 </style>
 
 <div class="edit-plan-container">
@@ -34,7 +53,7 @@
                          create-object-on-click="false"
                          allow-boundary-creation="$ctrl.state.showSiteBoundary"
                          hide-object-ids="$ctrl.objectIdsToHide"
-                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
+                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature, featureData)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
@@ -62,7 +81,7 @@
           <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
           <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipments"
                             ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
-                            icon="{{equipment.iconUrl}}",
+                            icon="{{equipment.iconUrl}}" 
                             is-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0"
                             entity-type="networkEquipment"
                             entity-details="{{equipment.networkNodeType}}">
@@ -72,19 +91,43 @@
           <div ng-if="!$ctrl.state.showSiteBoundary" class="alert alert-warning">
             You can add site boundaries only if the "Site Boundaries" option is selected in View Settings
           </div>
+          
+          <div style="display: flex">
+            <div style="flex: 0 0 auto; padding-right: 20px;">
+	            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
+				        style="margin-left: 2px;">
+				        Site Boundaries
+				    </div>
+			      <select class="form-control" style="flex: 1 1 auto"
+			        ng-if="$ctrl.state.showSiteBoundary" 
+			        ng-model="$ctrl.state.selectedBoundaryType"
+			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
+			        ng-change="$ctrl.toggleSiteBoundary()">
+			      </select>
+          </div>
+          
+          <hr class="plan-editor-hr">
+          
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png"
                                 is-disabled="false"
                                 is-boundary="true"
-                                entity-details="{{$ctrl.Constants.SPATIAL_EDGE_ROAD}}">
+                                entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.SPATIAL_EDGE_ROAD}}", "directed": false }'>
               </draggable-button>
             </div>
             <div style="flex: 0 0 auto">
               <draggable-button icon="/images/map_icons/aro/boundary_copper.png"
                                 is-disabled="false"
                                 is-boundary="true"
-                                entity-details="{{$ctrl.Constants.SPATIAL_EDGE_COPPER}}">
+                                entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.SPATIAL_EDGE_COPPER}}", "directed": false }'>
+              </draggable-button>
+            </div>
+            <div style="flex: 0 0 auto">
+              <draggable-button icon="/images/map_icons/aro/boundary_copper_directed.png"
+                                is-disabled="false"
+                                is-boundary="true"
+                                entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.SPATIAL_EDGE_COPPER}}", "directed": true }'>
               </draggable-button>
             </div>
             <div style="flex: 0 0 auto; line-height: 45px; padding-left: 5px; padding-right: 5px;">
@@ -98,13 +141,15 @@
         </div>
 
         <!-- Section to show properties when the selected map object is an equipment node -->
-        <div ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+        <div class="clearfix" ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
           </div>
           <!-- A table containing the editable properties of the selected object -->
+          
+          <!-- 
           <table id="tblEquipmentProperties"
                  class="table table-condensed table-striped sidebar-table"
                  style="margin-bottom: 10px">
@@ -137,6 +182,14 @@
               </tr>
             </tbody>
           </table>
+          -->
+          
+          <editor-interface-tree 
+                              on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
+                              object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" 
+                              is-edit="true"></editor-interface-tree>
+          
+          
           <button ng-class="{ 'btn btn-sm pull-right': true,
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
@@ -147,12 +200,35 @@
           </button>
         </div>
 
+
+
+
+        
+        
+
+
+
+
+
+
+
+
         <!-- Section to show properties when the selected map object is an equipment boundary -->
+        <div ng-if="$ctrl.isWorkingOnCoverage">
+          <p>Calculating coverage area...</p>
+          <div class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+          </div>
+        </div>
         <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header">
               <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
-              <span>Remote Terminal boundary</span>
+              <span>{{$ctrl.getSelectedBoundaryNetworkConfig().label}} boundary</span>
           </div>
           <!-- A table containing the editable properties of the selected object -->
           <table id="tblBoundaryProperties"
@@ -191,15 +267,46 @@
               </tr>
             </tbody>
           </table>
-          <button ng-class="{ 'btn btn-sm pull-right': true,
-                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
-                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
-                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
-                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
-                  style="margin-bottom: 10px">
-            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
+          <div class="clearfix">
+	          <button ng-class="{ 'btn btn-sm pull-right': true,
+	                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+	                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+	                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+	                  ng-click="$ctrl.saveSelectedBoundaryProperties()"
+	                  style="margin-bottom: 10px">
+	            <i class="fa fa-save"></i>&nbsp;&nbsp;Save boundary properties
+	          </button>
+          </div>
+          
+          <hr class="plan-editor-hr">
+          
+          <button class="btn btn-primary btn-sm" 
+                  ng-if="!$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
+                  ng-click="$ctrl.onRequestCalculateCoverage()">
+            calculate coverage
           </button>
-          <br>
+          
+          <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
+            <div class="ei-header plan-editor-coverage-header">
+              Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
+            </div>
+            <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
+            <div style="margin-bottom: 20px;">
+              <div class="ei-header plan-editor-coverage-header">
+                Locations by Census Block Tag
+              </div>
+              <div class="plan-editor-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
+              <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
+                <div class="ei-property-item plan-editor-census-cat">
+                  {{cat.description}}
+                </div>
+                <div class="plan-editor-census-tag" ng-repeat="tag in cat.tags">
+                  <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div>
+                  {{tag.description}}: <span class="plan-editor-census-tag-count">{{tag.count}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </accordion-panel-contents>

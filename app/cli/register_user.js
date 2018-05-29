@@ -8,12 +8,12 @@ var argv = require('yargs')
   .describe('p', 'Password')
   .describe('r', 'Rol')
   .describe('c', 'Company name')
-  .alias('f', 'first_name')
-  .alias('l', 'last_name')
+  .alias('f', 'firstName')
+  .alias('l', 'lastName')
   .alias('e', 'email')
   .alias('p', 'password')
   .alias('r', 'rol')
-  .alias('c', 'company_name')
+  .alias('c', 'companyName')
   .demand(['f', 'l', 'e'])
   .argv
 
@@ -22,6 +22,9 @@ var models = require('../models')
 models.User.register(argv)
   .then((user) => {
     console.log('User registered successfully with id =', user.id)
+    return (argv.rol === 'admin') ? models.User.makeAdministrator(argv.email) : Promise.resolve()
+  })
+  .then(() => {
     process.exit(0)
   })
   .catch((err) => {

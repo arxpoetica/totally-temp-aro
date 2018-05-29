@@ -68,23 +68,6 @@ let planInputsModal = {
           search-list="$ctrl.state.listOfServiceAreaTags"
           selected-list="$ctrl.state.currentPlanServiceAreaTags"
           refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
-        <!--<aro-multi-select
-          model="$ctrl.state.currentPlanTags" 
-          all-items="$ctrl.state.listOfTags" 
-          current-selected-items="$ctrl.state.currentPlanTags"
-          selection-changed="$ctrl.onTagSelectionChanged()"
-          enable-search = "true"
-          placeholder="add tags">
-        </aro-multi-select>
-        </div>
-        <aro-multi-select
-          model="$ctrl.state.currentPlanServiceAreaTags" 
-          all-items="$ctrl.state.listOfServiceAreaTags" 
-          current-selected-items="$ctrl.state.currentPlanServiceAreaTags"
-          selection-changed="$ctrl.onTagSelectionChanged()"
-          enable-search = "true"
-          placeholder="add service area tags">
-        </aro-multi-select>-->
       </modal-body>
     <modal-footer>
       <button class="btn btn-primary pull-left" ng-click="$ctrl.savePlanAs()">Create Plan</button>
