@@ -16,7 +16,8 @@ class MapSelectorPlanTargetController {
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
-    	
+      
+      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
       var plan = state.plan.getValue()
       
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 

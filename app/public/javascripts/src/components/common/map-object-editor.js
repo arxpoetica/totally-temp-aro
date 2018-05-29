@@ -97,6 +97,7 @@ class MapObjectEditorController {
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
+      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
       this.handleMapEntitySelected(event)
     })
 

@@ -74,6 +74,8 @@ class ToolBarController {
 
   $onInit() {
     this.mapRef = this.$window[this.mapGlobalObjectName]
+
+    this.state.clearToolbarActions.skip(1).subscribe((clear) => clear && this.closeDropdowns())
   } 
 
   openGlobalSettings() {
@@ -91,6 +93,7 @@ class ToolBarController {
   }
 
   setSelectionExport(){
+    if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW) return
     if (this.state.selectedToolBarAction === this.state.toolbarActions.POLYGON_EXPORT) {
       this.state.selectedToolBarAction= null
       return
@@ -101,6 +104,7 @@ class ToolBarController {
 
   setSelectionMode(selectionMode) {
     this.state.selectedTargetSelectionMode = selectionMode
+    this.$timeout() // Trigger a digest cycle as the toolbar state has changed
   }
 
   showPlanModal() {
