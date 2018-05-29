@@ -75,13 +75,13 @@
             <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
           </td>
         </tr>
-        <tr ng-repeat="(accessKey, access) in $ctrl.accessTypes">
-          <td>{{access.displayName}}</td>
-          <td>
-            <aro-multi-select model="access.actors"
-                              all-items="$ctrl.state.systemActors"
-                              enable-search="true">
-            </aro-multi-select>
+        <tr>
+          <td colspan="2">
+            <resource-permissions-editor resource-type="PLAN"
+                                         resource-id="{{$ctrl.state.plan.getValue().id}}"
+                                         system-actors="$ctrl.state.systemActors"
+                                         register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)">
+            </resource-permissions-editor>
           </td>
         </tr>
       </tbody>

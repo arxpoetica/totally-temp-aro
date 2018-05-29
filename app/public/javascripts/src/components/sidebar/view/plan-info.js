@@ -8,23 +8,17 @@ class PlanInfoController {
     this.isEditMode = false
     this.addGeneralTags = false
     this.addSATags = false
-    this.RESOURCE_TYPE = 'PLAN'
 
     state.plan
     .subscribe((plan) => {
-      this.reloadPlanAccess(plan.id)
       this.currentPlanInfo = plan
       this.getPlanTagDetails()
     })
   }
 
-  reloadPlanAccess(planId) {
-    this.accessTypes = Object.freeze({
-      RESOURCE_READ: { displayName: 'Read Access', permissionBits: null, actors: [] },
-      RESOURCE_WRITE: { displayName: 'Write Access', permissionBits: null, actors: [] },
-      RESOURCE_ADMIN: { displayName: 'Owner Access', permissionBits: null, actors: [] }
-    })
-    this.state.loadResourceAccess(this.RESOURCE_TYPE, planId, this.accessTypes, this.state.systemActors, this.$http)
+  registerSaveAccessCallback(saveResourceAccess) {
+    // We will call this function in resource-permissions-editor when we want to save the access settings for a plan.
+    this.saveResourceAccess = saveResourceAccess
   }
 
   editCurrentPlan() {
@@ -34,7 +28,8 @@ class PlanInfoController {
   commitUpdatestoPlan() {
     this.updatePlanTags()
     this.getPlanTagDetails()
-    this.state.saveResourceAccess(this.RESOURCE_TYPE, this.state.plan.getValue().id, this.accessTypes)
+    // This will call a function into the resource permissions editor that will do the actual save
+    this.saveResourceAccess && this.saveResourceAccess()
     this.isEditMode = false
     this.addGeneralTags = false
     this.addSATags = false
