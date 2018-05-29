@@ -10,8 +10,10 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       'locationCategories',
       'networkEquipment',
       'units',
-      'aroClient'
+      'aroClient',
+      'uiVisibility'
     ]
+
     configurationTypes.forEach((configurationType) => {
       configurationPromises.push(
         new Promise((resolve, reject) => {

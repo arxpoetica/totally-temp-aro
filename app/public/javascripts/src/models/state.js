@@ -1365,5 +1365,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   }
 
+  service.isVisible = function (name) {
+
+    let role = service.getVisiblilityRole()
+    if(configuration['uiVisibility']){
+      let cfg = configuration['uiVisibility'][role]
+
+      return cfg.indexOf(name) !== -1
+    }
+
+    return false
+  }
+
   return service
 }])
