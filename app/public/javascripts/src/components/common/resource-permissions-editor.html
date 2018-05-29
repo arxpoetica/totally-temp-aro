@@ -1,0 +1,11 @@
+<div ng-repeat="(accessKey, access) in $ctrl.accessTypes">
+  <div class="row">
+    <div class="col-sm-2" style="line-height: 33px;">
+      {{access.displayName}}
+    </div>
+    <div class="col-sm-10">
+      <aro-multi-select model="access.actors" all-items="$ctrl.systemActors" enable-search="true">
+      </aro-multi-select>
+    </div>
+  </div>
+</div>

@@ -1,8 +1,9 @@
 class DataSourceUploadController {
   
-  constructor($http, state) {
+  constructor($http, $timeout, state) {
     this.state = state
     this.$http = $http
+    this.$timeout = $timeout
     this.userId = state.getUserId()
     this.projectId = state.getProjectId()
     this.conicTileSystemUploaderApi = null  // Will be set if the conic tile uploader is active
@@ -60,6 +61,17 @@ class DataSourceUploadController {
 
   onDestroyConicUploader() {
     this.conicTileSystemUploaderApi = null
+  }
+
+  registerSaveAccessCallback(saveResourceAccess) {
+    // We will call this function in resource-permissions-editor when we want to save the access settings for a data source.
+    // Note that this will get overwritten every time we open a datasources access editor (and only one editor can be active at a time).
+    this.saveResourceAccess = saveResourceAccess
+  }
+
+  saveAccessSettings() {
+    // This will call a function into the resource permissions editor that will do the actual save
+    this.saveResourceAccess && this.saveResourceAccess()
   }
 
   save() {
@@ -164,13 +176,15 @@ class DataSourceUploadController {
     })
   }
 
-  removeDatasource(target) {
-    this.$http.delete(`/service/v1/project/${this.projectId}/library/${target.target[0].identifier}?user_id=${this.userId}`).then(() => {
-        var index = this.state.dataItems[target.target[0].dataType].allLibraryItems.indexOf(target.target[0])
+  deleteDatasource(dataSource) {
+    this.$http.delete(`/service/v1/project/${this.projectId}/library/${dataSource.identifier}?user_id=${this.userId}`)
+      .then(() => {
+        var index = this.state.dataItems[dataSource.dataType].allLibraryItems.indexOf(dataSource)
         if(index > -1) {
-          this.state.dataItems[target.target[0].dataType].allLibraryItems.splice(index, 1)
+          this.state.dataItems[dataSource.dataType].allLibraryItems.splice(index, 1)
         }
-    })
+        this.$timeout()
+      })
   }
 
   addDatasource(data) {
@@ -180,7 +194,15 @@ class DataSourceUploadController {
   loadDataSources() {
     if(this.isDataManagementView) {
       this.dataSources = this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems
+      this.dataSources.forEach((item, index) => this.dataSources[index].isExpanded = false)
     }
+  }
+
+  toggleDataSourceExpanded(dataSource) {
+    const newValue = !dataSource.isExpanded
+    // Collapse all datasources, then expand/collapse the selected one
+    this.dataSources.forEach((item, index) => this.dataSources[index].isExpanded = false)
+    dataSource.isExpanded = newValue
   }
 
   toggleView() {
@@ -190,7 +212,7 @@ class DataSourceUploadController {
 
 }
 
-DataSourceUploadController.$inject = ['$http', 'state']
+DataSourceUploadController.$inject = ['$http', '$timeout', 'state']
 
 let globalDataSourceUploadModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal.html',
