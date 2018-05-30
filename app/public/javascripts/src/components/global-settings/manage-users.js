@@ -17,7 +17,7 @@ class ManageUsersController {
       },
       {
         name: 'Sales Engineers',
-        rol: 'sales'
+        rol: 'sales_engineer'
       },
       {
         name : "Account Executive",

@@ -33,7 +33,7 @@
 
     <br>
     <p><strong>Survey Data</strong></p>
-    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> {{currentUser.rol === 'sales'? 'FCC Form 477': 'NBM'}}
+    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> {{configuration.perspective.fiberPlantAlternateLabel  ? 'FCC Form 477': 'NBM'}}
     <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()"> Geotel
 
     <br>

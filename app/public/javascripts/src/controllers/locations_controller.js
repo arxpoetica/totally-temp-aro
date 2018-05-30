@@ -168,6 +168,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
+  $scope.configuration = configuration
 
   $scope.new_location_data = null
 

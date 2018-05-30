@@ -1,0 +1,566 @@
+[
+  {
+    "name": "default",
+    "mapTools": {
+      "locations": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "network_nodes": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "construction_sites": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "fiber_plant": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "boundaries": {
+        "showIcon": true,
+        "showLabel": false
+      }
+    },
+    "locationCategories": {
+      "small_businesses": {
+        "show": true
+      },
+      "medium_businesses": {
+        "show": true
+      },
+      "large_businesses": {
+        "show": true
+      },
+      "celltower":{
+        "show": true
+      },
+      "household": {
+        "show": true
+      },
+      "ethernet_lit_building": {
+        "show": false
+      },
+      "lit_building": {
+        "show": false
+      },
+      "tier_1": {
+        "show": false
+      },
+      "tier_2": {
+        "show": false
+      },
+      "tier_3": {
+        "show": false
+      },
+      "prosects": {
+        "show": true
+      }
+    },
+    "networkEquipment":{
+      "central_office":{
+        "show": true
+      },
+      "dslam":{
+        "show": true
+      },
+      "fdh":{
+        "show": true
+      },
+      "fdt":{
+        "show": true
+      },
+      "bulk_distribution_terminal":{
+        "show": true
+      },
+      "splice_point":{
+        "show": true
+      },
+      "fiveg_coverage":{
+        "show": true
+      },
+      "fiveg_site":{
+        "show": true
+      },
+      "planned":{
+        "show": true
+      },
+      "existing":{
+        "show": true
+      }
+    },
+    "viewModePanels":{
+      "LOCATION_INFO":{
+        "show": true
+      },
+      "EQUIPMENT_INFO":{
+        "show": true
+      },
+      "BOUNDARIES_INFO":{
+        "show": true
+      },
+      "COVERAGE_BOUNDARY":{
+        "show": true
+      },
+      "EDIT_LOCATIONS":{
+        "show": true
+      },
+      "PLAN_INFO":{
+        "show": true
+      }
+    },
+    "displayModeButtons":{
+      "VIEW": {
+        "show": true
+      },
+      "ANALYSIS": {
+        "show": true
+      },
+      "EDIT_PLAN": {
+        "show": true
+      },
+      "DEBUG": {
+        "show": true
+      },
+      "PLAN_SETTINGS": {
+        "show": true
+      }
+    },
+    "areaNetworkPlanning":{
+      "expertMode": {
+        "show": true
+      }
+    },
+    "targetBuilder":{
+      "expertMode": {
+        "show": true
+      }
+    },
+    "toolbar": {
+      "globalSettings":{
+        "show":true
+      },
+      "emphericalPlan":{
+        "show": true
+      },
+      "savePlanAs": {
+        "show": true
+      },
+      "showPlanModel": {
+        "show": true
+      },
+      "showExportSelection": {
+        "show": true
+      },
+      "measuringStick": {
+        "show": true
+      },
+      "showViewSettings": {
+        "show": true
+      },
+      "selectionSingle":{
+        "show": true
+      },
+      "selectionPolygon":{
+        "show": true
+      },
+      "openCoverageBoundary":{
+        "show": true
+      }
+
+    },
+    "fiberPlantAlternateLabel": false,
+    "planSettings":{
+      "resourceSelection":{
+        "show": true
+      },
+      "networkConfiguration":{
+        "show": true
+      },
+      "projectConfiguration":{
+        "show": true
+      },
+      "dataSelection":{
+        "show": true
+      }
+    },
+    "extendedAnalysis": true
+  },
+  {
+    "name": "sales_engineer",
+    "mapTools": {
+      "locations": {
+        "showIcon": true,
+        "showLabel": true
+      },
+      "network_nodes": {
+        "showIcon": true,
+        "showLabel": true
+      },
+      "construction_sites": {
+        "showIcon": false,
+        "showLabel": false
+      },
+      "fiber_plant": {
+        "showIcon": true,
+        "showLabel": true
+      },
+      "boundaries": {
+        "showIcon": true,
+        "showLabel": true
+      },
+      "prosects": {
+        "show": true
+      }
+    },
+    "locationCategories": {
+      "small_businesses": {
+        "show": false
+      },
+      "medium_businesses": {
+        "show": false
+      },
+      "large_businesses": {
+        "show": false
+      },
+      "household": {
+        "show": false
+      },
+      "celltower":{
+        "show": false
+      },
+      "ethernet_lit_building": {
+        "show": true
+      },
+      "lit_building": {
+        "show": true
+      },
+      "tier_1": {
+        "show": true
+      },
+      "tier_2": {
+        "show": true
+      },
+      "tier_3": {
+        "show": true
+      }
+    },
+    "networkEquipment":{
+      "central_office":{
+        "show": true
+      },
+      "dslam":{
+        "show": true
+      },
+      "fdh":{
+        "show": true
+      },
+      "fdt":{
+        "show": true
+      },
+      "bulk_distribution_terminal":{
+        "show": false
+      },
+      "splice_point":{
+        "show": true
+      },
+      "fiveg_coverage":{
+        "show": false
+      },
+      "fiveg_site":{
+        "show": true
+      },
+      "planned":{
+        "show": true
+      },
+      "existing":{
+        "show": true
+      }
+    },
+    "viewModePanels":{
+      "LOCATION_INFO":{
+        "show": true
+      },
+      "EQUIPMENT_INFO":{
+        "show": true
+      },
+      "BOUNDARIES_INFO":{
+        "show": true
+      },
+      "COVERAGE_BOUNDARY":{
+        "show": true
+      },
+      "EDIT_LOCATIONS":{
+        "show": true
+      },
+      "PLAN_INFO":{
+        "show": false
+      }
+    },
+    "displayModeButtons":{
+      "VIEW": {
+        "show": true
+      },
+      "ANALYSIS": {
+        "show": false
+      },
+      "EDIT_PLAN": {
+        "show": false
+      },
+      "DEBUG": {
+        "show": false
+      },
+      "PLAN_SETTINGS": {
+        "show": false
+      }
+    },
+    "areaNetworkPlanning":{
+      "expertMode": {
+        "show": false
+      }
+    },
+    "targetBuilder":{
+      "expertMode": {
+        "show": false
+      }
+    },
+    "toolbar": {
+      "globalSettings":{
+        "show":true
+      },
+      "emphericalPlan":{
+        "show": false
+      },
+      "savePlanAs": {
+        "show": false
+      },
+      "showPlanModel": {
+        "show": false
+      },
+      "showExportSelection": {
+        "show": true
+      },
+      "measuringStick": {
+        "show": true
+      },
+      "showViewSettings": {
+        "show": true
+      },
+      "selectionSingle":{
+        "show": true
+      },
+      "selectionPolygon":{
+        "show": true
+      },
+      "openCoverageBoundary":{
+        "show": true
+      }
+
+    },
+    "fiberPlantAlternateLabel": true,
+    "planSettings":{
+      "resourceSelection":{
+        "show": true
+      },
+      "networkConfiguration":{
+        "show": true
+      },
+      "projectConfiguration":{
+        "show": true
+      },
+      "dataSelection":{
+        "show": true
+      }
+    },
+    "extendedAnalysis": true
+  },
+  {
+    "name": "account_exec",
+    "mapTools": {
+      "locations": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "network_nodes": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "construction_sites": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "fiber_plant": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "boundaries": {
+        "showIcon": true,
+        "showLabel": false
+      },
+      "prosects": {
+        "show": true
+      }
+    },
+    "locationCategories": {
+      "small_businesses": {
+        "show": true
+      },
+      "medium_businesses": {
+        "show": true
+      },
+      "large_businesses": {
+        "show": true
+      },
+      "household": {
+        "show": true
+      },
+      "celltower":{
+        "show": false
+      },
+      "ethernet_lit_building": {
+        "show": false
+      },
+      "lit_building": {
+        "show": false
+      },
+      "tier_1": {
+        "show": false
+      },
+      "tier_2": {
+        "show": false
+      },
+      "tier_3": {
+        "show": false
+      }
+    },
+    "networkEquipment":{
+      "central_office":{
+        "show": true
+      },
+      "dslam":{
+        "show": true
+      },
+      "fdh":{
+        "show": true
+      },
+      "fdt":{
+        "show": true
+      },
+      "bulk_distribution_terminal":{
+        "show": true
+      },
+      "splice_point":{
+        "show": true
+      },
+      "fiveg_coverage":{
+        "show": false
+      },
+      "fiveg_site":{
+        "show": true
+      },
+      "planned":{
+        "show": false
+      },
+      "existing":{
+        "show": true
+      }
+    },
+    "viewModePanels":{
+      "LOCATION_INFO":{
+        "show": true
+      },
+      "EQUIPMENT_INFO":{
+        "show": false
+      },
+      "BOUNDARIES_INFO":{
+        "show": false
+      },
+      "COVERAGE_BOUNDARY":{
+        "show": true
+      },
+      "EDIT_LOCATIONS":{
+        "show": true
+      },
+      "PLAN_INFO":{
+        "show": true
+      }
+    },
+    "displayModeButtons":{
+      "VIEW": {
+        "show": true
+      },
+      "ANALYSIS": {
+        "show": false
+      },
+      "EDIT_PLAN": {
+        "show": false
+      },
+      "DEBUG": {
+        "show": false
+      },
+      "PLAN_SETTINGS": {
+        "show": false
+      }
+    },
+    "areaNetworkPlanning":{
+      "expertMode": {
+        "show": false
+      }
+    },
+    "targetBuilder":{
+      "expertMode": {
+        "show": false
+      }
+    },
+    "toolbar": {
+      "globalSettings":{
+        "show":true
+      },
+      "emphericalPlan":{
+        "show": false
+      },
+      "savePlanAs": {
+        "show": false
+      },
+      "showPlanModel": {
+        "show": false
+      },
+      "showExportSelection": {
+        "show": true
+      },
+      "measuringStick": {
+        "show": true
+      },
+      "showViewSettings": {
+        "show": true
+      },
+      "selectionSingle":{
+        "show": true
+      },
+      "selectionPolygon":{
+        "show": true
+      },
+      "openCoverageBoundary":{
+        "show": true
+      }
+
+    },
+    "fiberPlantAlternateLabel": true,
+    "planSettings":{
+      "resourceSelection":{
+        "show": true
+      },
+      "networkConfiguration":{
+        "show": true
+      },
+      "projectConfiguration":{
+        "show": true
+      },
+      "dataSelection":{
+        "show": true
+      }
+    },
+    "extendedAnalysis": true
+  }
+]

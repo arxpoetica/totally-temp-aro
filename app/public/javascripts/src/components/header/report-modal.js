@@ -1,8 +1,10 @@
 class ReportModalController {
-  constructor($http, state) {
+  constructor($scope ,$http, state, configuration) {
     this.state = state
     this.analysis = []
     this.$http = $http
+    $scope.configuration = configuration
+
     this.plan
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -110,7 +112,7 @@ class ReportModalController {
           url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${this.plan.id}.csv`
         }
       ])
-      if (globalUser.rol === 'biz-dev' || globalUser.rol === 'admin'|| globalUser.rol === 'sales' ) {
+      if (configuration.perspective.extendedAnalysis) {
         analysis = analysis.concat([
           {
             name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Output`,
@@ -130,7 +132,7 @@ class ReportModalController {
 
 }
 
-ReportModalController.$inject = ['$http', 'state']
+ReportModalController.$inject = ['$scope', '$http', 'state', 'configuration']
 
 let reportModal = {
   template: `

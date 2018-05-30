@@ -7,7 +7,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
-  service.MAX_EXPORTABLE_AREA = 1000000
+  service.MAX_EXPORTABLE_AREA = 25000000
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
@@ -18,8 +18,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
-
-  service.STANDARD_ROLES = ['admin', 'sales', 'sales_engineers', 'account_exec']
   
   service.viewFiberOptions = [
     {
@@ -61,7 +59,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
-    $rootScope.$on('configuration_loaded', (event, data) => resolve())
+    $rootScope.$on('configuration_loaded', (event, data) => {
+      configuration.loadPerspective(service.getUser().rol)
+      resolve()
+    })
   })
   var mapReadyPromise = new Promise((resolve, reject) => {
     $document.ready(() => {
@@ -186,6 +187,30 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     ]
   }
 
+  //ruler actions
+  service.allRulerActions = Object.freeze({
+    STRAIGHT_LINE:{ id: 'STRAIGHT_LINE', label: 'Straight Line' },
+    ROAD_SEGMENT:{ id: 'ROAD_SEGMENT', label: 'Road Segment' },
+    COPPER: { id: 'COPPER', label: 'Copper' }
+  });
+
+  service.rulerActions = [
+    service.allRulerActions.STRAIGHT_LINE,
+    service.allRulerActions.ROAD_SEGMENT
+  ]
+
+  service.currentRulerAction = service.allRulerActions.STRAIGHT_LINE
+
+  service.isRulerEnabled = false
+
+  //Boundary Layer Mode
+  service.boundaryLayerMode = Object.freeze({
+    VIEW: 'VIEW',
+    SEARCH: 'SEARCH'
+  })
+
+  service.activeboundaryLayerMode = service.boundaryLayerMode.SEARCH
+
   // The panels in the view mode
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
@@ -215,6 +240,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
+  service.requestSetLocation = new Rx.BehaviorSubject({})  
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
   service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
@@ -481,6 +507,19 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return Promise.resolve()
     }
   }
+
+  service.selectedServiceArea = new Rx.BehaviorSubject()
+  service.reloadSelectedServiceArea = (serviceAreaId) => {
+    //Display only one Selected SA Details in viewMode at a time
+    service.selectedServiceArea.next(serviceAreaId)
+    service.requestMapLayerRefresh.next({})     
+  }
+
+  service.selectedAnalysisArea = new Rx.BehaviorSubject()
+  service.reloadSelectedAnalysisArea = (analysisArea) => {
+    service.selectedAnalysisArea.next(analysisArea)
+    service.requestMapLayerRefresh.next({})
+  }
   
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {
@@ -512,10 +551,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var locations = configuration.locationCategories.categories
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        let role =  service.getVisiblilityRole()//configuration.locationCategories.visiblilty[]
-        if(service.getUser() && (configuration.locationCategories.visibility[role].indexOf(locationKey) !== -1)){
-          location.checked = location.selected
-          locationTypes.push(location)
+
+        if (configuration.perspective.locationCategories[locationKey].show) {
+            location.checked = location.selected
+            locationTypes.push(location)
         }
       })
     }
@@ -604,8 +643,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return globalUser
   }
 
-  service.getVisiblilityRole = () =>{
-    return service.STANDARD_ROLES.indexOf(service.getUser().rol) === -1 ? 'default': service.getUser().rol
+  service.getUserRol = () => {
+    return globalUser.rol
   }
 
   service.getProjectId = () => {
@@ -937,6 +976,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         var plan = service.plan.getValue()
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
+        service.requestSetLocation.next(plan)
         return Promise.resolve()
       })
   }
@@ -1129,7 +1169,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
         var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
         newPlan.planState = response.data.optimizationState
-        service.plan.next(newPlan)
+        service.checkPollingStatus(newPlan)
         if (response.data.optimizationState === 'COMPLETED'
             || response.data.optimizationState === 'CANCELED'
             || response.data.optimizationState === 'FAILED') {
@@ -1145,6 +1185,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         var seconds = Math.ceil(diff % 60)
         service.progressPercent = response.data.progress * 100
         service.progressMessage = `${minutes < 10 ? '0': ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds} Runtime`
+        $timeout()  // Trigger a digest cycle so that components can update
       })
     }, 1000)
   }
@@ -1180,7 +1221,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
-  service.plan.subscribe((newPlan) => {
+  service.checkPollingStatus = (newPlan) => {
     service.stopPolling()
     service.Optimizingplan = newPlan
     service.isCanceling = false
@@ -1188,6 +1229,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       // Optimization is in progress. We can start polling for the results
       service.startPolling()
     }
+  }
+
+  service.plan.subscribe((newPlan) => {
+    service.checkPollingStatus(newPlan)
   })
 
   service.getDefaultPlanInputs = () => {
@@ -1312,18 +1357,39 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.clearViewMode = new Rx.BehaviorSubject(false)
+  service.clearEditingMode = new Rx.BehaviorSubject(false)
   $rootScope.$on('map_tool_esc_clear_view_mode', () => {
     service.clearViewMode.next(true)
+    service.clearEditingMode.next(true)
   })
 
   service.entityTypeList = {
     HouseholdObjectEntity: [],
     NetworkEquipmentEntity: [],
-    CensusBlocksEntity: []
+    ServiceAreaView: [],
+    CensusBlocksEntity: [],
+    AnalysisArea: [],
+    AnalysisLayer: []
   }
-  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
-    
-    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id&$top=10`
+  //list of matched boundary list (ServiceAreaView/CensusBlocksEntity/AnalysisArea)
+  service.entityTypeBoundaryList = []
+
+  service.loadBoundaryEntityList = (filterObj) => {
+    if(filterObj == '') return
+    if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
+      var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
+      
+      visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
+    }
+  }
+
+  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
+    if(entityType !== 'AnalysisLayer') {
+      entityListUrl = entityListUrl + "&$top=10"
+    }
 
     var filter = ''
     if(entityType === 'HouseholdObjectEntity') {
@@ -1331,9 +1397,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
       if(pattern.test(filterObj)) {
         filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
-      } 
+      } else {
+        return //157501341: Location search should not reach out to endpoint without supplying a valid object id
+      }
     } else {
-      filter = filterObj ? `substringof(${searchColumn},'${filterObj}')` : filter
+      filter = filterObj ? searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `substringof(${searchColumn},'${filterObj}')` : filter
     }
 
     var libraryItems = []
@@ -1356,26 +1424,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       }
     }
 
+    if(entityType === 'ServiceAreaView') {
+      filter = filter ? filter.concat(' and layer/id eq 1') : filter
+    }  
+
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
 
     $http.get(entityListUrl)
     .then((results) => {
       service.entityTypeList[entityType] = results.data
+      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' 
+        || entityType === 'AnalysisArea') {
+          service.entityTypeBoundaryList = service.entityTypeList[entityType]
+        }
+      return results.data  
     })
-
+    
   }
-
-  service.isVisible = function (name) {
-
-    let role = service.getVisiblilityRole()
-    if(configuration['uiVisibility']){
-      let cfg = configuration['uiVisibility'][role]
-
-      return cfg.indexOf(name) !== -1
-    }
-
-    return false
-  }
-
   return service
 }])

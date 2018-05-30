@@ -117,7 +117,7 @@
 <div class="tool-bar" ng-style="{ margin: $ctrl.marginPixels + 'px' }">
 
   <img ng-if="!$ctrl.switchIcon" src="images/logos/aro/logo_navbar.png" class="no-collapse" style="align-self: center; padding-left: 10px; padding-right: 10px">
-  <span ng-if="$ctrl.switchIcon" style="align-self: center; padding-left: 10px; padding-right: 10px"><b>NPM BSA</b></span>
+  <span ng-if="$ctrl.switchIcon" style="align-self: center; padding-left: 10px; padding-right: 10px"><b>NPM BSAF</b></span>
   <div ng-controller="global-search-controller" class="no-collapse" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
     <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
   </div>
@@ -128,6 +128,7 @@
 
   <button class="btn"
           ng-click="$ctrl.openGlobalSettings()"
+          ng-if="$ctrl.configuration.perspective.toolbar.globalSettings.show"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Global Settings...">
@@ -137,7 +138,7 @@
   <div class="separator"></div>
 
   <button class="btn"
-          ng-if="$ctrl.currentUser.rol != 'sales'"
+          ng-if="$ctrl.configuration.perspective.toolbar.emphericalPlan.show"
           ng-click="$ctrl.createEphemeralPlan()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -146,7 +147,7 @@
   </button>
 
   <button class="btn"
-          ng-if="$ctrl.currentUser.rol != 'sales'"
+          ng-if="$ctrl.configuration.perspective.toolbar.savePlanAs.show"
           ng-click="$ctrl.savePlanAs()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -155,7 +156,7 @@
   </button>
 
   <button class="btn"
-          ng-if="$ctrl.currentUser.rol != 'sales'"
+          ng-if="$ctrl.configuration.perspective.toolbar.showPlanModel.show"
           ng-click="$ctrl.showPlanModal()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -164,7 +165,7 @@
   </button>
 
   <button class="btn"
-          ng-click="$ctrl.setSelectionExport()"
+          ng-if="$ctrl.configuration.perspective.toolbar.showExportSelection.show"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Export selected polygon">
@@ -174,6 +175,7 @@
   <div class="separator"></div>
 
   <button ng-class="{ 'btn': true, 'btn-selected': $ctrl.measuringStickEnabled }"
+          ng-if="$ctrl.configuration.perspective.toolbar.measuringStick.show"
           ng-click="$ctrl.toggleMeasuringStick()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -182,7 +184,7 @@
   </button>
 
   <div class="myDropdown1">
-    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Show view settings...">
+    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Show view settings..." ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.show">
       <i class="fa fa-eye"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right view-dropdown">
@@ -216,7 +218,8 @@
 
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS
+                   && $ctrl.configuration.perspective.toolbar.selectionSingle.show"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE_PLAN_TARGET }"
           ng-click="$ctrl.setSelectionSingle()"
           data-toggle="tooltip"
@@ -227,7 +230,8 @@
 
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+                   && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS
+                   && $ctrl.configuration.perspective.toolbar.selectionPolygon.show"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_PLAN_TARGET }"
           ng-click="$ctrl.setSelectionPolygon()"
           data-toggle="tooltip"
@@ -239,7 +243,7 @@
   <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
-          ng-if="$ctrl.currentUser.rol != 'sales'"
+          ng-if="$ctrl.configuration.perspective.toolbar.selectionPolygon.show"
           ng-class="{ 'btn': true,
                       'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
                                       && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
