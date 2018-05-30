@@ -57,7 +57,7 @@
     </accordion-panel-contents>
     <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.currentUser.rol != 'sales'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.currentUser.rol != 'sales'">
-      <plan-project-configuration project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-project-configuration>
+      <plan-project-configuration user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-project-configuration>
     </accordion-panel-contents>
   </accordion>
 </div>

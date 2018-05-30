@@ -7,14 +7,41 @@
     .indent {
       margin: 5px;
     }
+    #tblProjectConfiguration td {
+      line-height: 33px;
+      border: none;
+    }
   </style>
 <div style="position: relative; padding: 10px">
-  
-  <div class="container">  
-    <button class="btn btn-primary indent" ng-click="$ctrl.planToProjectDefaults()">Reset Plan to Project Defaults</button>
-    <button class="btn btn-primary indent" ng-click="$ctrl.commitToProject()">Commit Changes to Project</button>
-    <button class="btn btn-secondary indent" ng-click="$ctrl.createNewProject()" disabled>Create New Project With Settings</button>
-  </div>
+  <table id="tblProjectConfiguration" class="table">
+    <tbody>
+      <tr>
+        <td>Projects:</td>
+        <td>
+          <select class="form-control"
+                  ng-model="$ctrl.selectedProject"
+                  ng-options="item.name for item in $ctrl.allProjects">
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button class="btn btn-block btn-default" ng-click="$ctrl.projectSettingsToPlan()">
+            <i class="fa fa-download"></i>&nbsp;&nbsp;Copy project settings to current plan
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button class="btn btn-block btn-default" ng-click="$ctrl.planSettingsToProject()">
+            <i class="fa fa-upload"></i>&nbsp;&nbsp;Save plan settings to selected project
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
   
   <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
   <div class="disable-sibling-controls"

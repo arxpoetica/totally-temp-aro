@@ -1,28 +1,41 @@
 class PlanProjectConfigurationController {
-  constructor($http, state) {
+  constructor($http, $timeout, state) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+    this.allProjects = []
+    this.selectedProject = null
   }
 
-  planToProjectDefaults() {
-    this.loadProjectDataAndResourceSelection()
-    .then((response)=> {
-      return this.SaveToPlanDataAndResourceSelection(response.data)
-    })
-    .then((response)=> {
-      this.state.loadPlanDataSelectionFromServer()
-      this.state.loadPlanResourceSelectionFromServer()
-    })   
+  $onInit() {
+    this.$http.get(`/service/v1/project-template?user_id=${this.userId}`)
+      .then((result) => {
+        this.allProjects = result.data
+        this.selectedProject = (this.allProjects.length > 0) ? this.allProjects[0] : null
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
-  commitToProject() {
+  projectSettingsToPlan() {
+    this.$http.get(`/service/v1/project-template/${this.selectedProject.id}/configuration?user_id=${this.userId}`)
+      .then((response)=> {
+        return this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, response.data)
+      })
+      .then((response)=> this.state.loadPlanInputs(this.planId))
+      .then(()=> this.state.loadNetworkConfigurationFromServer(this.selectedProject.id))
+      .then(() => this.state.recreateTilesAndCache())
+      .catch((err) => console.error(err))
+  }
+
+  planSettingsToProject() {
     this.savePlanDataAndResourceSelectionToProject()
-    this.state.saveNetworkConfigurationToServer()
+    this.state.saveNetworkConfigurationToServer(this.selectedProject.id)
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
@@ -57,25 +70,15 @@ class PlanProjectConfigurationController {
     })
 
     // Save the configuration to the project
-    this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
+    this.$http.put(`/service/v1/project-template/${this.selectedProject.id}/configuration?user_id=${this.userId}`, putBody)
   }    
-
-  loadProjectDataAndResourceSelection() {
-    return this.$http.get(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`)
-  }
-
-  SaveToPlanDataAndResourceSelection(configuration) {
-    return this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, configuration)
-  }
-
 }
 
-PlanProjectConfigurationController.$inject = ['$http', 'state']
+PlanProjectConfigurationController.$inject = ['$http', '$timeout', 'state']
 
 let planProjectConfiguration = {
   templateUrl: '/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration.html',
   bindings: {
-    projectId: '<',
     userId: '<',
     planId: '<'
   },

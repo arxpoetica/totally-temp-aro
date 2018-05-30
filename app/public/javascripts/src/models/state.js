@@ -774,8 +774,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.loadNetworkConfigurationFromServer = () => {
-    $http.get(`/service/v1/project/${globalUser.projectId}/network_configuration?user_id=${globalUser.id}`)
+  service.loadNetworkConfigurationFromServer = (projectId) => {
+    projectId = projectId || globalUser.projectId
+    $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${globalUser.id}`)
     .then((result) => {
       service.networkConfigurations = {}
       result.data.forEach((networkConfiguration) => {
@@ -836,12 +837,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   // Save the Network Configurations to the server
-  service.saveNetworkConfigurationToServer = () => {
+  service.saveNetworkConfigurationToServer = (projectId) => {
     var configSavePromises = []
+    projectId = projectId || globalUser.projectId
     Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
       // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
       if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
-        var url = `/service/v1/project/${globalUser.projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
+        var url = `/service/v1/project-template/${projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
         configSavePromises.push($http.put(url, service.networkConfigurations[networkConfigurationKey]))
       }
     })
