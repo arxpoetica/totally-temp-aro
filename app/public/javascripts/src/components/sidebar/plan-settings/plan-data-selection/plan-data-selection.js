@@ -124,7 +124,6 @@ DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state']
 let planDataSelection = {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/plan-data-selection.html',
   bindings: {
-    projectId: '<',
     userId: '<',
     planId: '<',
     allDataItems: '='
