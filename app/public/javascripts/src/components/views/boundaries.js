@@ -83,6 +83,7 @@ class BoundariesController {
     layer.visible = layer.visible_check;
     this.disableOtherLayers()
     this.updateMapLayers()
+    this.state.resetBoundarySearch.next(true)
   }
   
   layerView(mode) {

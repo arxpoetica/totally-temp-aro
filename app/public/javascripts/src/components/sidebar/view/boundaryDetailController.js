@@ -55,14 +55,6 @@ class BoundaryDetailController {
         return
       }
     })
-
-    state.clearViewMode.subscribe((clear) => {
-      if(clear) {
-        this.selectedBoundaryInfo = null
-        this.selectedSAInfo = null
-        this.selectedAnalysisAreaInfo = null
-      }  
-    })
   }
 
   viewServiceAreaInfo(serviceArea) {
@@ -140,8 +132,30 @@ class BoundaryDetailController {
     this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
   }
 
+  clearBoundariesInfo() {
+    this.selectedBoundaryInfo = null
+    this.selectedSAInfo = null
+    this.selectedAnalysisAreaInfo = null
+  }
+
+  $onInit() {
+    this.clearViewModeObserver = this.state.clearViewMode.subscribe((clear) => {
+      clear && this.clearBoundariesInfo()  
+    })
+
+    this.resetSearchObserver = this.state.resetBoundarySearch.skip(1).subscribe((reset) => {
+      if(reset) {
+        this.state.clearEntityTypeBoundaryList() //clear boundaries search list
+        this.selectedBoundary = null
+        this.clearBoundariesInfo()
+      }
+    })
+  }
+
   $onDestroy() {
     this.mapFeaturesSelectedEventObserver.unsubscribe();
+    this.resetSearchObserver.unsubscribe()
+    this.clearViewModeObserver.unsubscribe()
   }
  
 }
