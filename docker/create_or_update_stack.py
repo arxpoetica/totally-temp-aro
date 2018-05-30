@@ -70,7 +70,7 @@ aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
 ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
 
-etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl')
+aro_etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
 aro_nginx_image_version = versioning.get_component_version(environment=aro_environment, component='nginx') 
 aro_service_image_version = versioning.get_component_version(environment=aro_environment, component='service') 
 
