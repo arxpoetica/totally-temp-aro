@@ -1368,6 +1368,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   //list of matched boundary list (ServiceAreaView/CensusBlocksEntity/AnalysisArea)
   service.entityTypeBoundaryList = []
 
+  service.resetBoundarySearch = new Rx.BehaviorSubject(false)
+  service.clearEntityTypeBoundaryList = () => {
+    service.entityTypeBoundaryList = []
+  }
+
   service.loadBoundaryEntityList = (filterObj) => {
     if(filterObj == '') return
     if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
