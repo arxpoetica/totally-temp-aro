@@ -39,19 +39,22 @@ TEMPLATE_URLS = {
 if environment == 'PROD':
     TEMPLATE_FILE = os.path.dirname(__file__) + '/P-ARO-template.yml'
 elif environment == 'QA':
-    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-APP-QA-template.yml'
+    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-QA-template.yml'
 else:
     TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json' 
 with open(TEMPLATE_FILE, 'r') as template_file:
     TEMPLATE_BODY=template_file.read()
 
 # Config from environment
-vz_qa_master = os.environ.get('VZ_QA_MASTER')
-branch_name = 'vz-master' if vz_qa_master == 'true' else os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
+branch_name = os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
 build_num = os.environ['CIRCLE_BUILD_NUM']
-aro_app_image_name = os.environ.get('ARO_APP_IMAGE_NAME') or 'aro/aro-app'
+
 aro_etl_image_name = os.environ.get('ARO_ETL_IMAGE_NAME') or 'aro/aro-etl'
-nginx_image_version = os.environ.get('ARO_NGINX_IMAGE_VERSION') 
+aro_app_image_name = os.environ.get('ARO_APP_IMAGE_NAME') or 'aro/aro-app'
+aro_service_image_name = os.environ.get('ARO_SERVICE_IMAGE_NAME') or 'aro/aro-service'
+aro_app_image_version = os.environ['CIRCLE_BUILD_NUM']
+aro_nginx_image_name = os.environ.get('ARO_NGINX_IMAGE_NAME') or 'aro/aro-app-nginx'
+
 domain_name = os.environ.get('ARO_APP_CLIENT_DOMAIN')
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
@@ -67,11 +70,13 @@ aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
 ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
 
-etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') or 'latest'
+aro_etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
+aro_nginx_image_version = versioning.get_component_version(environment=aro_environment, component='nginx') 
+aro_service_image_version = versioning.get_component_version(environment=aro_environment, component='service') 
 
 session = Session(region_name='us-east-1')
 
-cloudformation_stack_name = PROJECT_BASE_NAME[environment] + SERVICE_TAG + '-' + name_component
+cloudformation_stack_name = PROJECT_BASE_NAME[environment] + name_component
 # host_name = domain_name + '.aro.app.altvil.com' if environment == 'PRODUCTION' else branch_name + '.aro.staging.app.altvil.com'
 
 if environment == 'PRODUCTION':
@@ -81,7 +86,7 @@ elif environment == 'STAGING':
 else:
     host_name = branch_name + '.aro.qa.app.altvil.com'
 app_base_url = 'https://' + host_name
-aro_service_url = os.environ.get('ARO_SERVICE_URL') or 'http://service.master.aro.qa.app.altvil.com'
+
 db_host = os.environ.get('ARO_DB_HOST')
 
 cloudformation_client = boto3.client('cloudformation', region_name='us-east-1')
@@ -133,10 +138,7 @@ def create_new_stack():
             environment=environment,
             parameters=parameters,
             tags={
-                'Name': cloudformation_stack_name,
-                'Project': PROJECT_TAG,
-                'Branch': branch_name,
-                'Build': build_num
+                'Project': PROJECT_TAG
             },
             template_body=TEMPLATE_BODY,
             #template_urls=TEMPLATE_URLS,
@@ -150,24 +152,24 @@ def provision_stack(cloudformation_stack):
     """Provision and start a newly created QA OpsWorks stack."""
     real_name_component = branch_name if environment == 'staging' else name_component
     stack.provision_aro_stack(
+        aws_region=aws_region,
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
-        opsworks_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'Layer'),
-        rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance'),
+        opsworks_manager_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ManagerLayer'),
+        opsworks_ignite_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'IgniteLayer'),
+        rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance') if SERVICE_TAG == 'SERVICE' else 'None',
         environment=environment,
         name='ARO-' + SERVICE_TAG,
         name_component=real_name_component,
-        db={'user': db_user, 'pass': db_pass, 'host': db_host },
-        dbpass=db_pass,
-        dbhost=db_host,
-        dbuser=db_user,
-        dbdatabase=db_database,
+        db={'user': db_user, 'pass': db_pass},
         environment_vars=_set_environment(),
         start_stack=True,
+        # initialize_database = True if (environment == 'qa' and SERVICE_TAG == 'service') else False,
         initialize_database = False,
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        instance_type='t2.medium'
+        ignite_instance_type='c4.xlarge',
+        manager_instance_type='t2.large'
     )
 
 
@@ -179,31 +181,27 @@ def update_stack(outputs):
     cloudwatch_client.disable_alarm_actions(AlarmNames=[http_alarm, elb_alarm])
     # deploy
     stack.deploy_aro_stack(
+        aws_region=aws_region,
         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
         environment_vars=_set_environment(),
-        opsworks_client=opsworks_client,
-        dbhost=db_host,
-        dbpass=db_pass,
-        dbuser=db_user,
-        dbdatabase=db_database
-        
+        opsworks_client=opsworks_client
     )
     # re-enable alarms
     cloudwatch_client.enable_alarm_actions(AlarmNames=[http_alarm, elb_alarm])
 
 def _set_environment():
     """ returns a list of hashes of environment variables """
-    return [{ 'Key': 'aro_app_container_tag', 'Value': str(build_num), 'Secure': False },
-            { 'Key': 'aro_app_image_name', 'Value': str(aro_app_image_name), 'Secure': False },
-            { 'Key': 'aro_etl_container_tag', 'Value': str(etl_image_version), 'Secure': False },
-            { 'Key': 'aro_nginx_container_tag', 'Value': str(nginx_image_version), 'Secure': False },
+    return [{ 'Key': 'aro_etl_container_tag', 'Value': str(aro_etl_image_version), 'Secure': False },
             { 'Key': 'aro_etl_image_name', 'Value': str(aro_etl_image_name), 'Secure': False },
-            # { 'Key': 'database_url', 'Value': str(database_url), 'Secure': True },
+            { 'Key': 'aro_service_container_tag', 'Value': str(aro_service_image_version), 'Secure': False },
+            { 'Key': 'aro_service_image_name', 'Value': str(aro_service_image_name), 'Secure': False },
+            { 'Key': 'aro_app_container_tag', 'Value': str(aro_app_image_version), 'Secure': False },
+            { 'Key': 'aro_app_image_name', 'Value': str(aro_app_image_name), 'Secure': False },
+            { 'Key': 'aro_nginx_container_tag', 'Value': str(aro_nginx_image_version), 'Secure': False },
+            { 'Key': 'aro_nginx_image_name', 'Value': str(aro_nginx_image_name), 'Secure': False },
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
-            { 'Key': 'client_slug', 'Value': str(name_component), 'Secure': False },
-            { 'Key': 'host_name', 'Value': str(host_name), 'Secure': False },
             { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
-            { 'Key': 'ARO_SERVICE_URL', 'Value': str(aro_service_url), 'Secure': False },
+            { 'Key': 'AWS_REGION', 'Value': "us-east-1", 'Secure': False },
             { 'Key': 'ecr_uri_root', 'Value': str(ecr_uri_root), 'Secure': False } ]
 
 
