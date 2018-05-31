@@ -22,15 +22,8 @@ class PlanProjectConfigurationController {
       .catch((err) => console.error(err))
   }
 
-  projectSettingsToPlan() {
-    this.$http.get(`/service/v1/project-template/${this.selectedProject.id}/configuration?user_id=${this.userId}`)
-      .then((response)=> {
-        return this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, response.data)
-      })
-      .then((response)=> this.state.loadPlanInputs(this.planId))
-      .then(()=> this.state.loadNetworkConfigurationFromServer(this.selectedProject.id))
-      .then(() => this.state.recreateTilesAndCache())
-      .catch((err) => console.error(err))
+  copySelectedProjectSettingsToPlan() {
+    this.state.copyProjectSettingsToPlan(this.selectedProject.id, this.planId, this.userId)
   }
 
   planSettingsToProject() {
