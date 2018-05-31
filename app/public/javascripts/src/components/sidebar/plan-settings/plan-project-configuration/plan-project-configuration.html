@@ -19,8 +19,8 @@
         <td>Projects:</td>
         <td>
           <select class="form-control"
-                  ng-model="$ctrl.selectedProject"
-                  ng-options="item.name for item in $ctrl.allProjects">
+                  ng-model="$ctrl.selectedProjectId"
+                  ng-options="item.id as item.name for item in $ctrl.allProjects">
           </select>
         </td>
       </tr>

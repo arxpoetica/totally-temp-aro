@@ -9,26 +9,29 @@ class PlanProjectConfigurationController {
       }
     })
     this.allProjects = []
-    this.selectedProject = null
+    this.selectedProjectId = null
   }
 
   $onInit() {
     this.$http.get(`/service/v1/project-template?user_id=${this.userId}`)
       .then((result) => {
         this.allProjects = result.data
-        this.selectedProject = (this.allProjects.length > 0) ? this.allProjects[0] : null
+        return this.$http.get(`/service/auth/users/${this.userId}/configuration`)
+      })
+      .then((result) => {
+        this.selectedProjectId = result.data.projectTemplateId
         this.$timeout()
       })
       .catch((err) => console.error(err))
   }
 
   copySelectedProjectSettingsToPlan() {
-    this.state.copyProjectSettingsToPlan(this.selectedProject.id, this.planId, this.userId)
+    this.state.copyProjectSettingsToPlan(this.selectedProjectId, this.planId, this.userId)
   }
 
   planSettingsToProject() {
     this.savePlanDataAndResourceSelectionToProject()
-    this.state.saveNetworkConfigurationToServer(this.selectedProject.id)
+    this.state.saveNetworkConfigurationToServer(this.selectedProjectId)
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
@@ -63,7 +66,7 @@ class PlanProjectConfigurationController {
     })
 
     // Save the configuration to the project
-    this.$http.put(`/service/v1/project-template/${this.selectedProject.id}/configuration?user_id=${this.userId}`, putBody)
+    this.$http.put(`/service/v1/project-template/${this.selectedProjectId.id}/configuration?user_id=${this.userId}`, putBody)
   }    
 }
 
