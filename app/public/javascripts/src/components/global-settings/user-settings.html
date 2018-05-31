@@ -1,12 +1,31 @@
-<div class="no-collapse" id="set-default-location" style="flex: 0 0 250px; margin: auto;">
-  <table class="table table-condensed table-striped">
-    <tbody>
-      <tr>
-        <td>Map Start Location</td>
-        <td> 
-          <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
-        </td>
-      </tr>
-    </tbody>
-  </table>  
+<style scoped>
+  #tblUserSettings td {
+    line-height: 33px;
+  }
+</style>
+<div class="no-collapse" id="set-default-location" style="display: flex; flex-direction: column; height: 100%;">
+  <div style="flex: 1 1 auto;">
+    <table id="tblUserSettings" class="table table-condensed table-striped">
+      <tbody>
+        <tr>
+          <td>Map Start Location</td>
+          <td> 
+            <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
+          </td>
+        </tr>
+        <tr>
+          <td>Default template</td>
+          <td>
+            <select class="form-control"
+                    ng-model="$ctrl.userConfiguration.projectTemplateId"
+                    ng-options="item.id as item.name for item in $ctrl.allProjectTemplates">
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="flex: 0 0 auto;">
+    <button class="btn btn-primary pull-right" ng-click="$ctrl.saveSettings()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save Settings</button>
+  </div>
 </div>

@@ -149,7 +149,7 @@ class NetworkPlanModalController {
 
       this.planOptions.params.user_id = this.user_id
       this.planOptions.params.search = this.search_text
-      this.planOptions.params.project_id = this.projectId
+      this.planOptions.params.project_template_id = this.projectId
 
       this.$http(this.planOptions)
         .then((response) => {

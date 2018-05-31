@@ -774,8 +774,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.loadNetworkConfigurationFromServer = () => {
-    $http.get(`/service/v1/project/${globalUser.projectId}/network_configuration?user_id=${globalUser.id}`)
+  service.loadNetworkConfigurationFromServer = (projectId) => {
+    projectId = projectId || globalUser.projectId
+    return $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${globalUser.id}`)
     .then((result) => {
       service.networkConfigurations = {}
       result.data.forEach((networkConfiguration) => {
@@ -836,42 +837,41 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   // Save the Network Configurations to the server
-  service.saveNetworkConfigurationToServer = () => {
-    var configSavePromises = []
+  service.saveNetworkConfigurationToServer = (projectId) => {
+    // Making parallel calls causes a crash in aro-service. Make sequential calls.
+    var lastResult = Promise.resolve()
+    projectId = projectId || globalUser.projectId
     Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
       // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
       if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
-        var url = `/service/v1/project/${globalUser.projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
-        configSavePromises.push($http.put(url, service.networkConfigurations[networkConfigurationKey]))
+        var url = `/service/v1/project-template/${projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
+        lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
       }
     })
-    Promise.all(configSavePromises)
   }
 
   service.createEphemeralPlan = () => {
     // Use reverse geocoding to get the address at the current center of the map
     var planOptions = {
-      projectId: globalUser.projectId, // Ugh. Depending on global variable "globalUser"
       areaName: '',
       latitude: service.defaultPlanCoordinates.latitude,
       longitude: service.defaultPlanCoordinates.longitude,
       zoomIndex: service.defaultPlanCoordinates.zoom,
       ephemeral: true
     }
+    var ephemeralPlanId = -1
     return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
         planOptions.areaName = address
-        var userId = service.getUserId()
-        var apiEndpoint = `/service/v1/plan?user_id=${userId}` // Ugh. Depending on global variable "globalUser"
-        return $http.post(apiEndpoint, planOptions)
+        // Get the configuration for this user - this will contain the default project template to use
+        return $http.get(`/service/auth/users/${service.getUserId()}/configuration`)
       })
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          return Promise.resolve(result.data)
-        } else {
-          return Promise.reject(result)
-        }
+        const userId = service.getUserId()
+        const apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}` // Ugh. Depending on global variable "globalUser"
+        return $http.post(apiEndpoint, planOptions)
       })
+      .catch((err) => console.error(err))
   }
 
   // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
@@ -879,25 +879,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var userId = service.getUserId()
     return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${userId}`)
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          // We have a valid ephemeral plan if we get back an object with *some* properties
-          var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
-          if (isValidEphemeralPlan) {
-            // We have a valid ephemeral plan. Return it.
-            return Promise.resolve(result.data)
-          } else {
-            // We dont have an ephemeral plan. Create one and send it back
-            return service.createEphemeralPlan()
-          }
+        // We have a valid ephemeral plan if we get back an object with *some* properties
+        var isValidEphemeralPlan = Object.getOwnPropertyNames(result.data).length > 0
+        if (isValidEphemeralPlan) {
+          // We have a valid ephemeral plan. Return it.
+          return Promise.resolve(result)
         } else {
-          return Promise.reject(result)
+          // We dont have an ephemeral plan. Create one and send it back
+          return service.createEphemeralPlan()
         }
       })
   }
   service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
-    .then((ephemeralPlan) => {
-      service.setPlan(ephemeralPlan)
-  })
+    .then((result) => {
+      service.setPlan(result.data)
+    })
+    .catch((err) => console.error(err))
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
@@ -930,6 +927,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           console.error(result)
         }
       })
+  }
+
+  // Copies the settings from a project template to a plan
+  service.copyProjectSettingsToPlan = (projectTemplateId, planId, userId) => {
+    return $http.get(`/service/v1/project-template/${projectTemplateId}/configuration?user_id=${userId}`)
+      .then((result)=> $http.put(`/service/v1/plan/${planId}/configuration?user_id=${userId}`, result.data))
+      .then(() => service.loadPlanInputs(planId))
+      .then(()=> service.loadNetworkConfigurationFromServer(projectTemplateId))
+      .then(() => service.recreateTilesAndCache())
+      .catch((err) => console.error(err))
   }
 
   service.copyCurrentPlanTo = (planName) => {
