@@ -66,7 +66,7 @@ class PlanProjectConfigurationController {
     })
 
     // Save the configuration to the project
-    this.$http.put(`/service/v1/project-template/${this.selectedProjectId.id}/configuration?user_id=${this.userId}`, putBody)
+    this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration?user_id=${this.userId}`, putBody)
   }    
 }
 
