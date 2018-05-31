@@ -168,8 +168,8 @@ def provision_stack(cloudformation_stack):
         opsworks_client=opsworks_client,
         logs_client=logs_client,
         iam_client= iam_client,
-        ignite_instance_type='c4.2xlarge',
-        manager_instance_type='t2.medium'
+        ignite_instance_type='c4.xlarge',
+        manager_instance_type='t2.large'
     )
 
 
