@@ -30,8 +30,11 @@ class PlanProjectConfigurationController {
   }
 
   planSettingsToProject() {
+    // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()
-    this.state.saveNetworkConfigurationToServer(this.selectedProjectId)
+      .then(() => this.state.saveNetworkConfigurationToServer(this.selectedProjectId))
+      .catch((err) => console.error(err))
+    
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
@@ -66,7 +69,7 @@ class PlanProjectConfigurationController {
     })
 
     // Save the configuration to the project
-    this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration?user_id=${this.userId}`, putBody)
+    return this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration?user_id=${this.userId}`, putBody)
   }    
 }
 

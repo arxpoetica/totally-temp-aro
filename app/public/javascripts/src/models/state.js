@@ -838,16 +838,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Save the Network Configurations to the server
   service.saveNetworkConfigurationToServer = (projectId) => {
-    var configSavePromises = []
+    // Making parallel calls causes a crash in aro-service. Make sequential calls.
+    var lastResult = Promise.resolve()
     projectId = projectId || globalUser.projectId
     Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
       // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
       if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
         var url = `/service/v1/project-template/${projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
-        configSavePromises.push($http.put(url, service.networkConfigurations[networkConfigurationKey]))
+        lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
       }
     })
-    Promise.all(configSavePromises)
   }
 
   service.createEphemeralPlan = () => {
