@@ -776,7 +776,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.loadNetworkConfigurationFromServer = (projectId) => {
     projectId = projectId || globalUser.projectId
-    $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${globalUser.id}`)
+    return $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${globalUser.id}`)
     .then((result) => {
       service.networkConfigurations = {}
       result.data.forEach((networkConfiguration) => {
