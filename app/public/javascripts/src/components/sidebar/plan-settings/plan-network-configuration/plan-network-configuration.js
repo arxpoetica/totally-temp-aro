@@ -25,7 +25,7 @@ class PlanNetworkConfigurationController {
       }, (result) => {
         if (result) {
           // Save the changed settings to aro-service
-          this.state.saveNetworkConfigurationToServer()
+          this.state.saveNetworkConfigurationToDefaultProject()
         }
       })
     }

@@ -762,9 +762,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.loadNetworkConfigurationFromServer = (projectId) => {
-    projectId = projectId || service.loggedInUser.projectId
-    return $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${service.loggedInUser.id}`)
+  service.getDefaultProjectForUser = (userId) => {
+    return $http.get(`/service/auth/users/${userId}/configuration`)
+      .then((result) => Promise.resolve(result.data.projectTemplateId))
+      .catch((err) => console.error(err))
+  }
+
+  service.loadNetworkConfigurationFromServer = () => {
+    return service.getDefaultProjectForUser(service.loggedInUser.id)
+    .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`))
     .then((result) => {
       service.networkConfigurations = {}
       result.data.forEach((networkConfiguration) => {
@@ -825,17 +831,24 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   // Save the Network Configurations to the server
-  service.saveNetworkConfigurationToServer = (projectId) => {
-    // Making parallel calls causes a crash in aro-service. Make sequential calls.
-    var lastResult = Promise.resolve()
-    projectId = projectId || service.loggedInUser.projectId
-    Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-      // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
-      if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
-        var url = `/service/v1/project-template/${projectId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
-        lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
-      }
-    })
+  service.saveNetworkConfigurationToDefaultProject = () => {
+    return service.getDefaultProjectForUser(service.loggedInUser.id)
+      .then((projectTemplateId) => {
+        // Making parallel calls causes a crash in aro-service. Make sequential calls.
+        var lastResult = Promise.resolve()
+        Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
+          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
+          lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+
+  // Get the default project template id for a given user
+  service.getDefaultProjectTemplate = (userId) => {
+    return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
+      .then((result) => Promise.resolve(result.data.projectTemplateId))
+      .catch((err) => console.error(err))
   }
 
   service.createEphemeralPlan = () => {
@@ -847,7 +860,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       zoomIndex: service.defaultPlanCoordinates.zoom,
       ephemeral: true
     }
-    var ephemeralPlanId = -1
     return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
         planOptions.areaName = address
@@ -917,7 +929,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/v1/project-template/${projectTemplateId}/configuration?user_id=${userId}`)
       .then((result)=> $http.put(`/service/v1/plan/${planId}/configuration?user_id=${userId}`, result.data))
       .then(() => service.loadPlanInputs(planId))
-      .then(()=> service.loadNetworkConfigurationFromServer(projectTemplateId))
+      .then(()=> service.loadNetworkConfigurationFromServer())
       .then(() => service.recreateTilesAndCache())
       .catch((err) => console.error(err))
   }
