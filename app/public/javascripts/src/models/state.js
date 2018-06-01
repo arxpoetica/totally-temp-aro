@@ -1286,6 +1286,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/boundary_type`)
     .then((result) => {
       service.boundaryTypes = result.data
+      service.boundaryTypes.push({id: result.data.length + 1, name: "fiveg_coverage", description: "Undefined"})
       service.selectedBoundaryType = result.data[0]
     })  
   }

@@ -446,6 +446,15 @@ class ToolBarController {
   }
 
   drawCopperPath() {
+    var maxDistance = 25 * config.length.length_units_to_meters
+    if (google.maps.geometry.spherical.computeDistanceBetween(this.copperPoints[0].latLng, 
+      this.copperPoints[this.copperPoints.length - 1].latLng) > maxDistance) {
+      var errorText = 'Selected points are too far apart for ruler analysis. Please select points which are closer.'
+      swal({ title: 'Error!', text: errorText, type: 'error' })
+      this.copperPoints = []
+      this.clearCopperMarkers()
+      return
+    }
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
@@ -505,6 +514,7 @@ class ToolBarController {
 
   clearCopperMarkers() {
     this.copperMarkers && this.copperMarkers.map((marker)=>this.clearRulerMarker(marker))
+    this.copperMarkers = []
   }
 
   closeDropdowns() {
