@@ -73,7 +73,7 @@ app.controller('navigation_menu_controller', ['$scope', '$rootScope', '$http', '
   $scope.plans = []
 
   $scope.user_id = user_id
-  $scope.projectId = globalUser.projectId
+  $scope.projectId = state.loggedInUser.projectId
 
   $scope.show_market_profile = config.ui.top_bar_tools.indexOf('market_profile') >= 0
   $scope.show_customer_profile = config.ui.top_bar_tools.indexOf('customer_profile') >= 0

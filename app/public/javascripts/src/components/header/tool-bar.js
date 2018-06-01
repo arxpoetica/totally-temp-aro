@@ -18,7 +18,7 @@ class ToolBarController {
     this.heatMapOption = true
     this.measuringStickEnabled = false
     this.isViewSettingsEnabled = false
-    this.currentUser = state.getUser()
+    this.currentUser = state.loggedInUser
     this.switchIcon = config.ARO_CLIENT === 'frontier'
     this.Constants = Constants
 

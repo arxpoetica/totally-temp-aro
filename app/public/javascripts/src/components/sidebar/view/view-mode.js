@@ -2,7 +2,7 @@ class ViewModeController {
   
   constructor(state) {
     this.state = state
-    this.currentUser = state.getUser()
+    this.currentUser = state.loggedInUser
   }
 }
 

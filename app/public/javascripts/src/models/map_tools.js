@@ -146,7 +146,7 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootSc
   }
 
   $rootScope.$on("configuration_loaded", function () {
-    var user = state.getUser()
+    var user = state.loggedInUser
     if (user.rol === 'sales') {
       var tool = tools.available_tools.find(function (item) {
         return item.id === tools.TOOL_IDS.CONSTRUCTION_SITES;

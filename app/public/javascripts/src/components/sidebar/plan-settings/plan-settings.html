@@ -45,19 +45,19 @@
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'DATA_SELECTION'">
     <accordion-panel-title title="'Data Selection'" panel-id="'DATA_SELECTION'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'DATA_SELECTION'">
-      <plan-data-selection user-id="$ctrl.userId" plan-id="$ctrl.plan.id" all-data-items="$ctrl.state.dataItems"></plan-data-selection>
+      <plan-data-selection user-id="$ctrl.state.loggedInUser.id" plan-id="$ctrl.plan.id" all-data-items="$ctrl.state.dataItems"></plan-data-selection>
     </accordion-panel-contents>
     <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.currentUser.rol != 'sales'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.currentUser.rol != 'sales'">
-      <plan-resource-selection user-id="$ctrl.userId" plan-id="$ctrl.plan.id" ng-if="$ctrl.currentUser.rol != 'sales'"></plan-resource-selection>
+      <plan-resource-selection user-id="$ctrl.state.loggedInUser.id" plan-id="$ctrl.plan.id" ng-if="$ctrl.currentUser.rol != 'sales'"></plan-resource-selection>
     </accordion-panel-contents>
     <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.currentUser.rol != 'sales'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.currentUser.rol != 'sales'">
-      <plan-network-configuration user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-network-configuration>
+      <plan-network-configuration user-id="$ctrl.state.loggedInUser.id" plan-id="$ctrl.plan.id"></plan-network-configuration>
     </accordion-panel-contents>
     <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.currentUser.rol != 'sales'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.currentUser.rol != 'sales'">
-      <plan-project-configuration user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-project-configuration>
+      <plan-project-configuration user-id="$ctrl.state.loggedInUser.id" plan-id="$ctrl.plan.id"></plan-project-configuration>
     </accordion-panel-contents>
   </accordion>
 </div>
