@@ -124,8 +124,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     // Hack to check/uncheck site boundaries based on view settings
     Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
       var selectedBoundaryName
-      boundaryKey !== 'fiveg_site' ? selectedBoundaryName = 'CAF2' : selectedBoundaryName = boundaryKey
-      $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && state.selectedBoundaryType.name === selectedBoundaryName)
+      state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
+      $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
     })
     // Hack to show copper in toolbar ruler options
     Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
