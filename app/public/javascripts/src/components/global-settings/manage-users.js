@@ -247,7 +247,6 @@ class ManageUsersController {
 
     this.$http.post('/admin/users/register', this.newUser)
       .then((response) => {
-        globalSettings.new_user = {}
         swal({ title: 'User registered', type: 'success' })
         globalSettings.openUserView()
       })
