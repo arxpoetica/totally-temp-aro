@@ -5,11 +5,11 @@ class NetworkPlanModalController {
     this.$q        = $q
     this.tracker   = tracker
     
-    this.user      = globalUser
+    this.user      = state.loggedInUser
     this.user_id   = user_id
     
     this.allPlans  = false
-    this.projectId = globalUser.projectId
+    this.projectId = state.loggedInUser.projectId
 
     this.plan      = null
     this.plans     = []

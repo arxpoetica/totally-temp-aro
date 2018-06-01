@@ -3,7 +3,7 @@ class DisplayModeButtonsController {
   constructor(state) {
     this.selectedDisplayModeSubject = state.selectedDisplayMode
     this.displayModes = state.displayModes
-    this.currentUser = globalUser
+    this.currentUser = state.loggedInUser
 
     // Data flow from state to component
     this.selectedDisplayModeSubject.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)

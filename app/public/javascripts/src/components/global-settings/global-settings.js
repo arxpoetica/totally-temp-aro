@@ -3,7 +3,7 @@ class GlobalSettingsController {
   constructor(state, globalSettingsService, $http) {
     this.state = state
     this.globalSettingsService = globalSettingsService
-    this.currentUser = globalUser
+    this.currentUser = state.loggedInUser
 
     this.views = Object.freeze({
       GLOBAL_SETTINGS: 'Global Settings',
@@ -24,7 +24,7 @@ class GlobalSettingsController {
       })
       .then((result) => {
         // Get the acl entry corresponding to the currently logged in user
-        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === state.getUserId())[0]
+        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === state.loggedInUser.id)[0]
         // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
         // the logged in user is an administrator.
         this.isAdministrator = (userAcl.rolePermissions & userAdminPermissions) > 0

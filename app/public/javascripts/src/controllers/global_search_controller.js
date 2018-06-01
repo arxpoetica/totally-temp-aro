@@ -75,7 +75,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', 'ma
   },10);
 
   function searchAddress (searchText) {
-	if ('undefined' == typeof searchText) searchText = globalUser.default_location ? globalUser.default_location : config.ui.defaultSearch
+	if ('undefined' == typeof searchText) searchText = state.loggedInUser.default_location ? state.loggedInUser.default_location : config.ui.defaultSearch
 	$http.get("/search/addresses", { params: { text: searchText } }).then(function (results) {
 
       var location = results.data[0];

@@ -4,8 +4,7 @@ class DataSourceUploadController {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
-    this.userId = state.getUserId()
-    this.projectId = state.getProjectId()
+    this.projectId = state.loggedInUser.projectId
     this.conicTileSystemUploaderApi = null  // Will be set if the conic tile uploader is active
     this.editingDataset = {
       name: ''
@@ -71,7 +70,15 @@ class DataSourceUploadController {
 
   saveAccessSettings() {
     // This will call a function into the resource permissions editor that will do the actual save
-    this.saveResourceAccess && this.saveResourceAccess()
+    if (this.saveResourceAccess) {
+      this.saveResourceAccess() 
+        .then(() => Promise.all([
+          service.loadPlanDataSelectionFromServer(),
+          service.loadPlanResourceSelectionFromServer(),
+          service.loadNetworkConfigurationFromServer()
+        ]))
+        .catch((err) => console.error(err))
+    }
   }
 
   save() {
@@ -118,7 +125,7 @@ class DataSourceUploadController {
     var dataType = this.state.uploadDataSource.name
 
     var libraryOptions = {
-      url: '/service/v1/library-entry?user_id=' + this.userId,
+      url: '/service/v1/library-entry?user_id=' + this.state.loggedInUser.id,
       method: 'POST',
       data: {
         dataType: dataType,
@@ -139,7 +146,7 @@ class DataSourceUploadController {
     var file = $('#data_source_upload_modal input[type=file]').get(0).files[0]
     fd.append("file", file);
     var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
-    var url = `/uploadservice/v1/library/${libraryId}?userId=${this.userId}&media=${fileExtension}`
+    var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
     
     this.$http.post(url, fd, {
       withCredentials: true,
@@ -157,7 +164,7 @@ class DataSourceUploadController {
 
   layerBoundary(equipmentLibraryId,serviceLayerLibraryId) {
     var boundaryOptions = {
-      url: '/service/v1/project/' + this.projectId + '/serviceLayers-cmd?user_id=' + this.userId,
+      url: '/service/v1/project/' + this.projectId + '/serviceLayers-cmd?user_id=' + this.state.loggedInUser.id,
       method: 'POST',
       data: {
         action: 'GENERATE_POLYGONS',
@@ -177,7 +184,7 @@ class DataSourceUploadController {
   }
 
   deleteDatasource(dataSource) {
-    this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.userId}`)
+    this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.state.loggedInUser.id}`)
       .then(() => {
         var index = this.state.dataItems[dataSource.dataType].allLibraryItems.indexOf(dataSource)
         if(index > -1) {

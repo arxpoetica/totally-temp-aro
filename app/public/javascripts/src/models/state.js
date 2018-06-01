@@ -548,7 +548,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var locations = configuration.locationCategories.categories
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        if(service.getUser() && (location.can_view.indexOf(service.getUser().rol) !== -1)){
+        if(service.loggedInUser && (location.can_view.indexOf(service.loggedInUser.rol) !== -1)){
           location.checked = location.selected
           locationTypes.push(location)
         }
@@ -631,18 +631,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.getUserId = () => {
-    return globalUser.id // Ugh. Depending on global variable "globalUser"
-  }
-
-  service.getUser = () => {
-    return globalUser
-  }
-
-  service.getProjectId = () => {
-    return globalUser.projectId // Ugh. Depending on global variable "globalUser"
-  }
-
   service.loadPlanDataSelectionFromServer = () => {
 
     if(!service.plan) {
@@ -652,8 +640,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var currentPlan = service.plan.getValue()
     var promises = [
       $http.get('/service/odata/datatypeentity'),
-      $http.get(`/service/v1/library-entry?user_id=${globalUser.id}`),
-      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
+      $http.get(`/service/v1/library-entry?user_id=${service.loggedInUser.id}`),
+      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`)
     ]
 
     return Promise.all(promises)
@@ -735,7 +723,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return Promise.all([
       $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
       $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
-      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
+      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`)
     ])
     .then((results) => {
       var resourceManagerTypes = results[0].data
@@ -774,9 +762,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.loadNetworkConfigurationFromServer = (projectId) => {
-    projectId = projectId || globalUser.projectId
-    return $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${globalUser.id}`)
+  service.getDefaultProjectForUser = (userId) => {
+    return $http.get(`/service/auth/users/${userId}/configuration`)
+      .then((result) => Promise.resolve(result.data.projectTemplateId))
+      .catch((err) => console.error(err))
+  }
+
+  service.loadNetworkConfigurationFromServer = () => {
+    return service.getDefaultProjectForUser(service.loggedInUser.id)
+    .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`))
     .then((result) => {
       service.networkConfigurations = {}
       result.data.forEach((networkConfiguration) => {
@@ -808,7 +802,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     var currentPlan = service.plan.getValue()
     // Save the configuration to the server
-    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
   }
 
   // Save the plan resource selections to the server
@@ -833,21 +827,28 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
-    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
   }
 
   // Save the Network Configurations to the server
-  service.saveNetworkConfigurationToServer = (projectId) => {
-    // Making parallel calls causes a crash in aro-service. Make sequential calls.
-    var lastResult = Promise.resolve()
-    projectId = projectId || globalUser.projectId
-    Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-      // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
-      if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
-        var url = `/service/v1/project-template/${projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
-        lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
-      }
-    })
+  service.saveNetworkConfigurationToDefaultProject = () => {
+    return service.getDefaultProjectForUser(service.loggedInUser.id)
+      .then((projectTemplateId) => {
+        // Making parallel calls causes a crash in aro-service. Make sequential calls.
+        var lastResult = Promise.resolve()
+        Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
+          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
+          lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+
+  // Get the default project template id for a given user
+  service.getDefaultProjectTemplate = (userId) => {
+    return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
+      .then((result) => Promise.resolve(result.data.projectTemplateId))
+      .catch((err) => console.error(err))
   }
 
   service.createEphemeralPlan = () => {
@@ -859,16 +860,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       zoomIndex: service.defaultPlanCoordinates.zoom,
       ephemeral: true
     }
-    var ephemeralPlanId = -1
     return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
         planOptions.areaName = address
         // Get the configuration for this user - this will contain the default project template to use
-        return $http.get(`/service/auth/users/${service.getUserId()}/configuration`)
+        return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
       })
       .then((result) => {
-        const userId = service.getUserId()
-        const apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}` // Ugh. Depending on global variable "globalUser"
+        const userId = service.loggedInUser.id
+        const apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
         return $http.post(apiEndpoint, planOptions)
       })
       .catch((err) => console.error(err))
@@ -876,7 +876,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
   service.getOrCreateEphemeralPlan = () => {
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${userId}`)
       .then((result) => {
         // We have a valid ephemeral plan if we get back an object with *some* properties
@@ -890,11 +890,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         }
       })
   }
-  service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
-    .then((result) => {
-      service.setPlan(result.data)
-    })
-    .catch((err) => console.error(err))
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
@@ -915,7 +910,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
-        var userId = service.getUserId()
+        var userId = service.loggedInUser.id
         return $http.put(`/service/v1/plan?user_id=${userId}`, newPlan)
       })
       .then((result) => {
@@ -934,7 +929,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/v1/project-template/${projectTemplateId}/configuration?user_id=${userId}`)
       .then((result)=> $http.put(`/service/v1/plan/${planId}/configuration?user_id=${userId}`, result.data))
       .then(() => service.loadPlanInputs(planId))
-      .then(()=> service.loadNetworkConfigurationFromServer(projectTemplateId))
+      .then(()=> service.loadNetworkConfigurationFromServer())
       .then(() => service.recreateTilesAndCache())
       .catch((err) => console.error(err))
   }
@@ -951,7 +946,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         delete newPlan[key]
       }
     })
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.getValue().id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
     return $http.post(url, {})
       .then((result) => {
@@ -966,7 +961,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadPlan = (planId) => {
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
         return service.setPlan(result.data)
@@ -1000,7 +995,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Load the plan inputs for the given plan and populate them in state
   service.loadPlanInputs = (planId) => {
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
@@ -1058,7 +1053,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.handleModifyClicked = () => {
     var currentPlan = service.plan.getValue()
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     if (currentPlan.ephemeral) {
       // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
       var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
@@ -1202,7 +1197,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
       .then((response) => {
         // Optimization process was cancelled. Get the plan status from the server
-        return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.getUserId()}`)
+        return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.loggedInUser.id}`)
       })
       .then((response) => {
         service.isCanceling = false
@@ -1469,6 +1464,19 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       .catch((err) => console.error(err))
   }
   service.reloadSystemActors()
+
+  // The logged in user is currently set by using the AngularJS injector in index.html
+  service.loggedInUser = null
+  service.setLoggedInUser = (user) => {
+    // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
+    service.loggedInUser = user
+
+    service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+    .then((result) => {
+      service.setPlan(result.data)
+    })
+    .catch((err) => console.error(err))
+  }
 
   return service
 }])
