@@ -1,28 +1,40 @@
 class PlanProjectConfigurationController {
-  constructor($http, state) {
+  constructor($http, $timeout, state) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+    this.allProjects = []
+    this.selectedProjectId = null
   }
 
-  planToProjectDefaults() {
-    this.loadProjectDataAndResourceSelection()
-    .then((response)=> {
-      return this.SaveToPlanDataAndResourceSelection(response.data)
-    })
-    .then((response)=> {
-      this.state.loadPlanDataSelectionFromServer()
-      this.state.loadPlanResourceSelectionFromServer()
-    })   
+  $onInit() {
+    this.$http.get(`/service/v1/project-template?user_id=${this.userId}`)
+      .then((result) => {
+        this.allProjects = result.data
+        return this.$http.get(`/service/auth/users/${this.userId}/configuration`)
+      })
+      .then((result) => {
+        this.selectedProjectId = result.data.projectTemplateId
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
-  commitToProject() {
+  copySelectedProjectSettingsToPlan() {
+    this.state.copyProjectSettingsToPlan(this.selectedProjectId, this.planId, this.userId)
+  }
+
+  planSettingsToProject() {
+    // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()
-    this.state.saveNetworkConfigurationToServer()
+      .then(() => this.state.saveNetworkConfigurationToServer(this.selectedProjectId))
+      .catch((err) => console.error(err))
+    
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
@@ -57,25 +69,15 @@ class PlanProjectConfigurationController {
     })
 
     // Save the configuration to the project
-    this.$http.put(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`, putBody)
+    return this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration?user_id=${this.userId}`, putBody)
   }    
-
-  loadProjectDataAndResourceSelection() {
-    return this.$http.get(`/service/v1/project/${this.projectId}/configuration?user_id=${this.userId}`)
-  }
-
-  SaveToPlanDataAndResourceSelection(configuration) {
-    return this.$http.put(`/service/v1/plan/${this.planId}/configuration?user_id=${this.userId}`, configuration)
-  }
-
 }
 
-PlanProjectConfigurationController.$inject = ['$http', 'state']
+PlanProjectConfigurationController.$inject = ['$http', '$timeout', 'state']
 
 let planProjectConfiguration = {
   templateUrl: '/components/sidebar/plan-settings/plan-project-configuration/plan-project-configuration.html',
   bindings: {
-    projectId: '<',
     userId: '<',
     planId: '<'
   },
