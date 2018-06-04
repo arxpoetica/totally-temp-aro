@@ -152,7 +152,7 @@ class ManageUsersController {
       email: '',
       confirmEmail: '',
       companyName: '',
-      rol: this.userTypes[0],
+      rol: this.userTypes[0].rol,
       groups: []
     }
   }
