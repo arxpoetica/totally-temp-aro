@@ -247,11 +247,11 @@ class ManageUsersController {
 
     this.$http.post('/admin/users/register', this.newUser)
       .then((response) => {
+        this.loadUsers()
         swal({ title: 'User registered', type: 'success' })
       })
       .catch((err) => console.error(err))
     this.initializeNewUser()
-    this.loadUsers()
   }
 }
 

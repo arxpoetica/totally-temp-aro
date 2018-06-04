@@ -77,7 +77,8 @@ module.exports = class User {
   }
 
   static deleteUser (user_id) {
-    return database.execute('DELETE FROM auth.users WHERE id=$1', [user_id])
+    return database.execute(`DELETE FROM auth.user_auth_group WHERE user_id=$1`, [user_id])
+      .then(() => database.execute('DELETE FROM auth.users WHERE id=$1', [user_id]))
   }
 
   static changeRol (user_id, rol) {
@@ -85,64 +86,20 @@ module.exports = class User {
   }
 
   static register (user) {
-    var code = user.password ? null : this.randomCode()
-    var hashedPassword = null
 
+    var createdUserId = null;
     return validate((expect) => {
       expect(user, 'user', 'object')
       expect(user, 'user.firstName', 'string')
       expect(user, 'user.lastName', 'string')
       expect(user, 'user.email', 'string')
     })
-    .then(() => user.password ? this.hashPassword(user.password) : null)
-    .then((hash) => {
-      hashedPassword = hash;
-      return database.query('INSERT INTO auth.system_actor(actor_type, is_deleted) VALUES (2, false);')
+    .then(() => database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`))
+    .then((createdUser) => {
+      createdUserId = createdUser[0].add_user
+      return database.query(`UPDATE auth.users SET company_name='${user.companyName}', rol='${user.rol}' WHERE id=${createdUserId};`)
     })
-    .then(() => {
-      var params = [
-        user.firstName,
-        user.lastName,
-        user.email.toLowerCase(),
-        user.companyName || null,
-        user.rol || null,
-        hashedPassword || code
-      ]
-      var sql
-      if (hashedPassword) {
-        sql = `
-          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, password)
-          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6) RETURNING id
-        `
-        return database.findOne(sql, params)
-      } else {
-        sql = `
-          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration)
-          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\'))
-          RETURNING id
-        `
-        return database.findOne(sql, params)
-      }
-    })
-    .then((row) => (
-      database.findOne('SELECT id, first_name, last_name, email FROM auth.users WHERE id=$1', [row.id])
-    ))
-    .then((usr) => {
-      if (!user.password) {
-        var email = user.email
-        var base_url = config.base_url
-        var url = base_url + '/reset_password?' + querystring.stringify({ code: code })
-        var text = 'Follow the link below to set your password\n' + url
-
-        helpers.mail.sendMail({
-          subject: 'Set password',
-          to: email,
-          text: text
-        })
-        console.log('Reset link:', url)
-      }
-      return usr
-    })
+    .then(() => this.resendLink(createdUserId))
     .catch((err) => {
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
@@ -248,6 +205,8 @@ module.exports = class User {
           to: user.email,
           text: text
         })
+        console.log('************************************** Password reset email **************************************')
+        console.log(text)
       })
   }
 
