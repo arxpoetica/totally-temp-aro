@@ -140,11 +140,9 @@
   <div class="form-group">
     <label class="col-sm-4 control-label">Permissions</label>
     <div class="col-sm-8">
-      <select class="form-control" ng-model="$ctrl.newUser.rol">
-        <option value="">No permissions</option>
-        <option value="biz-dev">Biz-Dev</option>
-        <option value="admin">Admin</option>
-        <option value="sales">Sales</option>
+      <select class="form-control"
+              ng-model="$ctrl.newUser.rol"
+              ng-options="item.rol as item.name for item in $ctrl.userTypes">
       </select>
     </div>
   </div>
