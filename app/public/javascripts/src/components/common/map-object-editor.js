@@ -444,6 +444,9 @@ class MapObjectEditorController {
     if (isExistingObject && isEquipment) {
       // editing existing or planned equipment, get that data
       //console.log(feature)
+      // TODO: This needs to change. map-object-editor is intentionally generic, and should be agnostic
+      //        about the type of feature that it is creating. It will raise an event and the subscriber
+      //        is responsible for storing map object metadata.
       var plan = this.state.plan.getValue()
       this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
       .then((response) => {
