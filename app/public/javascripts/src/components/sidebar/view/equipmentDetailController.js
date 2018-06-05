@@ -260,13 +260,7 @@ class EquipmentDetailController {
     this.selectedEquipmentInfo = {}
     this.updateSelectedState()
   }
-	
-	getEquipmentInfo(planId, objectId){
-	  return this.$http.get('/service/plan-feature/'+planId+'/equipment/'+objectId).then((response) => {
-      return response.data
-    })
-	}
-  
+ 
 	updateSelectedState(selectedFeature, featureId){
 	  // tell state
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
@@ -278,35 +272,37 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-	  return this.getEquipmentInfo(planId, objectId).then((equipmentInfo) => {
-      //console.log(equipmentInfo)
-	    if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-        if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
-          this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
-          this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
+    return this.$http.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${this.state.loggedInUser.id}`)
+      .then((result) => {
+        const equipmentInfo = result.data
+        //console.log(equipmentInfo)
+        if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
+          if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
+            this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
+            this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
+          }else{
+            // no icon
+            this.headerIcon = ''
+            this.networkNodeLabel = equipmentInfo.networkNodeType
+          }
+          
+          this.networkNodeType = equipmentInfo.networkNodeType
+          this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
+          
+          try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
+            this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
+          }catch(error) {
+            console.error(error) 
+            return
+          }
+          
+          this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
+          this.$timeout()
         }else{
-          // no icon
-          this.headerIcon = ''
-          this.networkNodeLabel = equipmentInfo.networkNodeType
+          this.clearSelection()
         }
-        
-        this.networkNodeType = equipmentInfo.networkNodeType
-        this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
-        
-        try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
-          this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
-        }catch(error) {
-          console.error(error) 
-          return
-        }
-        
-        this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
-        this.$timeout()
-      }else{
-        this.clearSelection()
-      }
-      return equipmentInfo
-    })
+        return equipmentInfo
+      })
 	}
 	
   // ---
@@ -319,10 +315,7 @@ class EquipmentDetailController {
         map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
       }
     })
-    
-    
   }
-  
 }
 
 EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
