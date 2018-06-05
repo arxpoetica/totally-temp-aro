@@ -586,10 +586,13 @@ class PlanEditorController {
   }
   
   getSelectedBoundaryNetworkConfig() {
-    return this.getNetworkConfig( this.boundaryIdToEquipmentId[this.selectedMapObject.objectId] )
+    return this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
   }
   
   getNetworkConfig(objectId){
+    if (!this.objectIdToProperties.hasOwnProperty(objectId)) {
+      return
+    }
     var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
     
@@ -603,34 +606,33 @@ class PlanEditorController {
   isMarker(mapObject) {
     return mapObject && mapObject.icon
   }
-  
-  
-  
-  handleObjectCreated(mapObject, usingMapClick, feature, featureData) {
-    if ('undefined' == typeof featureData) featureData = {}
+
+  handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var isNew = true
-      
-      if (featureData.objectId){
+      if (feature.isExistingObject){
         // clone of existing or planned equipment
-        var attributes = featureData.attributes
-        var networkNodeEquipment = AroFeatureFactory.createObject(featureData).networkNodeEquipment
-        // ---------------------------------------------------------------------  siteIdentifier,            siteName,            siteNetworkNodeType,         selectedEquipmentType,            networkNodeEquipment
-        this.objectIdToProperties[featureData.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, featureData.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
-        var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-        this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-        
-      }else{
+        const planId = this.state.plan.getValue().id
+        this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
+          .then((result) => {
+            var attributes = result.data.attributes
+            var networkNodeEquipment = AroFeatureFactory.createObject(result.data).networkNodeEquipment
+            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, result.data.networkNodeType,
+                                                                                  attributes.selectedEquipmentType, networkNodeEquipment)
+            var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+            this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+            this.$timeout()
+          })
+          .catch((err) => console.error(err))
+      } else {
         // nope it's new
         var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-        
       }
-      
     } else if (!this.isMarker(mapObject)) {
       // If the user has drawn the boundary, we will have an associated object in the "feature" attributes. Save associations.
       if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
@@ -657,8 +659,7 @@ class PlanEditorController {
     this.updateObjectIdsToHide()
     this.$timeout()
   }
-  
-  
+
   deleteBoundary(boundaryId){
     if (!boundaryId) return
     var eqId = this.boundaryIdToEquipmentId[boundaryId]
@@ -669,11 +670,7 @@ class PlanEditorController {
   
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
-    // check to see if the object is new
-    //  if so clear the current selection and wait for the return from service when we can get the proper data
-    //if (mapObject.objectId == this.creatingObjectId) mapObject = null
     this.selectedMapObject = mapObject
-    
     this.$timeout()
   }
 
