@@ -156,7 +156,7 @@ class ManageUsersController {
       email: '',
       confirmEmail: '',
       companyName: '',
-      rol: this.userTypes[0],
+      rol: this.userTypes[0].rol,
       groups: []
     }
   }
@@ -251,11 +251,11 @@ class ManageUsersController {
 
     this.$http.post('/admin/users/register', this.newUser)
       .then((response) => {
+        this.loadUsers()
         swal({ title: 'User registered', type: 'success' })
       })
       .catch((err) => console.error(err))
     this.initializeNewUser()
-    this.loadUsers()
   }
 }
 
