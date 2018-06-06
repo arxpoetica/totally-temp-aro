@@ -213,11 +213,9 @@
     </div>-->
 
     <div>
-    	<% if (user.rol === 'admin' || user.rol === 'sales') { %>
-      <p class="pull-left">
+      <p class="pull-left" ng-if="configuration.perspective.targetBuilder.expertMode.show">
         <button class="btn btn-primary" ng-click="runExpertMode()">Expert Mode</button>
       </p>
-      <% } %>
       <p class="pull-right">
         <button class="btn btn-primary" ng-hide="calculating" ng-click="run(state.getOptimizationBody(), state.optimizationOptions.geographies)">Get Results</button>
         <button class="btn btn-danger" ng-show="calculating" ng-click="cancel()"><span class="spin fa fa-repeat"></span> Cancel</button>

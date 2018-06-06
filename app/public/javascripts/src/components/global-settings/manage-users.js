@@ -46,8 +46,12 @@ class ManageUsersController {
         rol: 'biz-dev'
       },
       {
-        name: 'Sales',
-        rol: 'sales'
+        name: 'Sales Engineers',
+        rol: 'sales_engineer'
+      },
+      {
+        name : "Account Executive",
+        rol: "account_exec"
       }
     ]
     this.initializeNewUser()

@@ -10,8 +10,10 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       'locationCategories',
       'networkEquipment',
       'units',
-      'aroClient'
+      'aroClient',
+      "uiVisibility"
     ]
+
     configurationTypes.forEach((configurationType) => {
       configurationPromises.push(
         new Promise((resolve, reject) => {
@@ -35,6 +37,33 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
         $rootScope.$broadcast('configuration_loaded')
       })
       .catch((reason) => console.log('Promise.all() failed, ' + reason))
+
+    // Our configuration object will have a "perspective" property. This decides what the logged in user can see
+    // in the UI (i.e. the users perspective). Start with a default, and allow it to be changed when the logged in user changes.
+
+    var getPerspectiveByKey = (key)=> {
+      return config.uiVisibility.filter((c)=>{
+        return c.name === key
+      })[0]
+    }
+
+    config.loadPerspective = (userPerspective) => {
+      switch (userPerspective) {
+        case 'admin':
+        default:
+          config.perspective = getPerspectiveByKey('default')
+        break
+
+        case 'sales_engineer':
+          config.perspective = getPerspectiveByKey('sales_engineer')
+        break
+
+        case 'account_exec':
+          config.perspective = getPerspectiveByKey('account_exec')
+        break
+      }
+      config.perspective.name = userPerspective
+    }
 
     return config
 }])

@@ -5,6 +5,7 @@
 </style>
 <div class="btn-group pull-left" role="group" aria-label="Mode buttons">
   <button type="button"
+          ng-if="configuration.perspective.displayModeButtons['VIEW'].show"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.VIEW,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW }"
@@ -15,6 +16,7 @@
                 title="View Mode"></div>
   </button>
   <button type="button"
+          ng-if="configuration.perspective.displayModeButtons['ANALYSIS'].show"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
@@ -26,6 +28,7 @@
                 title="Analysis Mode"></div>
   </button>
   <button type="button"
+          ng-if="configuration.perspective.displayModeButtons['EDIT_PLAN'].show"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
@@ -39,7 +42,7 @@
 </div>
 <div class="btn-group pull-right">
   <button type="button"
-          ng-if="$ctrl.currentUser.rol !== 'sales'"
+          ng-if="configuration.perspective.displayModeButtons['DEBUG'].show"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.DEBUG }"
@@ -50,6 +53,7 @@
                   title="Debugging Mode"></div>
   </button>
   <button type="button"
+          ng-if="configuration.perspective.displayModeButtons['PLAN_SETTINGS'].show"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"

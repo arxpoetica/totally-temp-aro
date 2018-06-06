@@ -27,7 +27,7 @@ class GlobalSettingsController {
         var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === state.loggedInUser.id)[0]
         // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
         // the logged in user is an administrator.
-        this.isAdministrator = (userAcl.rolePermissions & userAdminPermissions) > 0
+        this.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
       })
       .catch((err) => console.error(err))
   }

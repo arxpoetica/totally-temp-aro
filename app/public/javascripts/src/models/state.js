@@ -59,7 +59,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
-    $rootScope.$on('configuration_loaded', (event, data) => resolve())
+    $rootScope.$on('configuration_loaded', (event, data) => {
+      configuration.loadPerspective(service.loggedInUser.rol)
+      resolve()
+    })
   })
   var mapReadyPromise = new Promise((resolve, reject) => {
     $document.ready(() => {
@@ -237,8 +240,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
-  service.requestSetLocation = new Rx.BehaviorSubject({})  
-  service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
+  service.requestSetLocation = new Rx.BehaviorSubject({})
+  service.showDetailedLocationInfo = new Rx.BehaviorSubject()
   service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
@@ -509,7 +512,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.reloadSelectedServiceArea = (serviceAreaId) => {
     //Display only one Selected SA Details in viewMode at a time
     service.selectedServiceArea.next(serviceAreaId)
-    service.requestMapLayerRefresh.next({})     
+    service.requestMapLayerRefresh.next({})
   }
 
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
@@ -517,7 +520,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.selectedAnalysisArea.next(analysisArea)
     service.requestMapLayerRefresh.next({})
   }
-  
+
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {
     service.selectedViewFeaturesByType.next(featuresByType)
@@ -548,9 +551,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var locations = configuration.locationCategories.categories
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        if(service.loggedInUser && (location.can_view.indexOf(service.loggedInUser.rol) !== -1)){
-          location.checked = location.selected
-          locationTypes.push(location)
+
+        if (configuration.perspective.locationCategories[locationKey].show) {
+            location.checked = location.selected
+            locationTypes.push(location)
         }
       })
     }
@@ -1380,14 +1384,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     if(filterObj == '') return
     if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
       var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
-      
+
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
       visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code')
       visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
 
-  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
+  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
     if(entityType !== 'AnalysisLayer') {
       entityListUrl = entityListUrl + "&$top=10"
@@ -1428,20 +1432,20 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     if(entityType === 'ServiceAreaView') {
       filter = filter ? filter.concat(' and layer/id eq 1') : filter
-    }  
+    }
 
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
 
     return $http.get(entityListUrl)
     .then((results) => {
       service.entityTypeList[entityType] = results.data
-      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' 
+      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity'
         || entityType === 'AnalysisArea') {
           service.entityTypeBoundaryList = service.entityTypeList[entityType]
         }
-      return results.data  
+      return results.data
     })
-    
+
   }
 
   service.systemActors = [] // All the system actors (i.e. users and groups)

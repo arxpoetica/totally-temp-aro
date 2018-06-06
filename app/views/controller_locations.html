@@ -67,7 +67,7 @@
 
   <!-- Locations layer modal -->
   <div id="locations_controller" ng-show="!isLoadingConfiguration">
-    <div ng-if="currentUser.rol === 'sales'">
+    <div ng-if="configuration.perspective.mapTools['prosects'].show">
       <div style="padding-left: 10px">
         <span style="font-weight: bold">Filter:</span>
       </div>
