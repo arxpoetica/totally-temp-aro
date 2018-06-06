@@ -4,7 +4,6 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
 
   $scope.map_tools = map_tools
   $scope.planState = state
-  $scope.currentUser = state.getUser()
   $scope.configuration = configuration
 
   // Sliders for testing different rendering modes

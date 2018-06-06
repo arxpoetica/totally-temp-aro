@@ -60,7 +60,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
     $rootScope.$on('configuration_loaded', (event, data) => {
-      configuration.loadPerspective(service.getUser().rol)
+      configuration.loadPerspective(service.loggedInUser.rol)
       resolve()
     })
   })
