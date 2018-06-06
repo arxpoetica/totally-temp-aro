@@ -114,10 +114,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   // Upward data flow (updating map layer state)
   $scope.setLocationTypeVisibility = (locationType, isVisible) => {
     var newLocationTypes = angular.copy(state.locationTypes.getValue())
+
     for (var iLocationType = 0; iLocationType < newLocationTypes.length; ++iLocationType) {
       if (newLocationTypes[iLocationType].key === locationType.key) {
-        newLocationTypes[iLocationType].checked = isVisible
-        break
+        newLocationTypes[iLocationType].checked =  isVisible
+      }
+      if (newLocationTypes[iLocationType].group !== locationType.group){
+         newLocationTypes[iLocationType].checked = false
       }
     }
     state.locationTypes.next(newLocationTypes)
