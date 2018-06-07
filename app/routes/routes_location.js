@@ -96,7 +96,7 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/locations/:plan_id/:location_id/show', check_any_permission, (request, response, next) => {
+  api.get('/locations/:plan_id/:location_id/show', (request, response, next) => {
     var plan_id = request.params.plan_id
     var location_id = request.params.location_id
     models.Location.showInformation(plan_id, location_id)
