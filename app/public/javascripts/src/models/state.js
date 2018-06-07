@@ -103,6 +103,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
 
+  service.allowViewModeClickAction = () => {
+    return service.selectedDisplayMode.getValue() === service.displayModes.VIEW && 
+    service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
+    !service.isRulerEnabled //ruler mode click should not enable other  view action
+  }
+
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
     ODN_1: 'Hub-only split',
@@ -942,6 +948,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
     newPlan.name = planName
     newPlan.ephemeral = false
+
     // Only keep the properties needed to create a plan
     var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex'])
     var keysInPlan = Object.keys(newPlan)
@@ -952,16 +959,23 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
     var userId = service.loggedInUser.id
     var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.getValue().id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+
     return $http.post(url, {})
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
-          return service.loadPlan(result.data.id)
+          var center = map.getCenter()
+          result.data.latitude = center.lat()
+          result.data.longitude = center.lng()
+          return $http.put(`/service/v1/plan?user_id=${userId}`, result.data)
         } else {
           console.error('Unable to copy plan')
           console.error(result)
           return Promise.reject()
         }
       })
+      .then((result) => {
+        return service.loadPlan(result.data.id)
+      })  
   }
 
   service.loadPlan = (planId) => {
@@ -972,6 +986,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
       .then(() => {
         var plan = service.plan.getValue()
+        return service.getAddressFor(plan.latitude, plan.longitude)
+      })
+      .then((address) => {
+        var plan = service.plan.getValue()
+        plan.areaName = address
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
         service.requestSetLocation.next(plan)
