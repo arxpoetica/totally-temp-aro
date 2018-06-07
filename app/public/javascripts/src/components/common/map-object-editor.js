@@ -44,7 +44,6 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4,
     }
-    
   }
 
   // Get a list of UUIDs from the server
@@ -73,10 +72,7 @@ class MapObjectEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-    
-    //this.makeIconAnchor(this.objectIconUrl)
-    //this.makeIconAnchor(this.objectSelectedIconUrl)
-    
+
     // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
@@ -144,9 +140,6 @@ class MapObjectEditorController {
         networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
       }
       
-      //console.log(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
-      //console.log(feature)
-      
       this.createMapObject(feature, true)
       event.preventDefault();
     };
@@ -163,8 +156,6 @@ class MapObjectEditorController {
       }
     })
   }
-  
-  // ---
   
   getIconsByFeatureType(featureType){
     //console.log(featureType)
@@ -279,27 +270,17 @@ class MapObjectEditorController {
 
   createPointMapObject(feature) {
     // Create a "point" map object - a marker
-    //console.log(feature)
-    
-    //var iconUrl = this.objectIconUrl
-    //if (feature.networkNodeType){
-    //  iconUrl = getIconsByFeatureType(feature.networkNodeType).iconUrl
-    //}
     this.tileDataService.addFeatureToExclude(feature.objectId)
     this.state.requestMapLayerRefresh.next({})
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
-      featureType: feature.networkNodeType, 
+      featureType: feature.networkNodeType,
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
       icon: {
-        url: this.getIconsByFeatureType(feature.networkNodeType).iconUrl, //iconUrl, 
-        anchor: this.iconAnchors[this.objectIconUrl]//, 
-        //path: google.maps.SymbolPath.CIRCLE
+        url: this.getIconsByFeatureType(feature.networkNodeType).iconUrl,
+        anchor: this.iconAnchors[this.objectIconUrl]
       },
       label: {
-        //text: '  ҉',
-        //text: '▢', 
-        //text: '◌', 
         text: '◯', 
         color: "#000000",
         fontSize: "46px"
@@ -333,15 +314,10 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMapObject(feature, usingMapClick, featureData) {
-    if ('undefined' == typeof featureData) featureData = {}
-    
+  createMapObject(feature, usingMapClick) {
     var mapObject = null
     if (feature.geometry.type === 'Point') {
-      //console.log(feature)
-      //console.log(featureData)
       mapObject = this.createPointMapObject(feature)
-      //makeIconAnchor()
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
       mapObject.addListener('click', (event) => {
@@ -392,7 +368,7 @@ class MapObjectEditorController {
     })
     
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: featureData})
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     
     if (usingMapClick) this.selectMapObject(mapObject)
   }
@@ -411,21 +387,18 @@ class MapObjectEditorController {
       geometry: {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
-      }
+      },
+      isExistingObject: false
     }
-    var isExistingObject = false
-    var isEquipment = false
     
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
-      isExistingObject = true
+      feature.isExistingObject = true
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
-      
       feature.objectId = event.equipmentFeatures[0].object_id
-      isExistingObject = true
-      isEquipment = true
+      feature.isExistingObject = true
     } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
@@ -437,27 +410,9 @@ class MapObjectEditorController {
         return    // We do not want to create the map object on click
       }
       feature.objectId = this.getUUID()
-      isExistingObject = false
+      feature.isExistingObject = false
     }
-    
-    
-    if (isExistingObject && isEquipment) {
-      // editing existing or planned equipment, get that data
-      //console.log(feature)
-      // TODO: This needs to change. map-object-editor is intentionally generic, and should be agnostic
-      //        about the type of feature that it is creating. It will raise an event and the subscriber
-      //        is responsible for storing map object metadata.
-      var plan = this.state.plan.getValue()
-      this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
-      .then((response) => {
-        if (!response.data) response.data = {}
-        if (response.data.geometry) feature.geometry = response.data.geometry
-        this.createMapObject(feature, true, response.data)
-      })
-    }else{
-      this.createMapObject(feature, true)
-    }
-    
+    this.createMapObject(feature, true)
   }
 
   isMarker(mapObject) {
