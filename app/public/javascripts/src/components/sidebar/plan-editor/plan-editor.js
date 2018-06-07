@@ -781,12 +781,12 @@ class PlanEditorController {
         return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${closestCentralOfficeId}`)
       })
       .then((result) => {
-        console.log(result)
         // We have the fiber in result.data.subnetLinks
-        const subnetKey = `${equipmentFeature.objectId}`
-        if (this.subnetMapObjects.hasOwnProperty(subnetKey)) {
-          this.subnetMapObjects[subnetKey].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
-        }
+        const subnetKey = `${closestCentralOfficeId}`
+        Object.keys(this.subnetMapObjects).forEach((key) => {
+          this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
+        })
+        this.subnetMapObjects = {}
         this.subnetMapObjects[subnetKey] = []
         result.data.subnetLinks.forEach((subnetLink) => {
           subnetLink.geometry.coordinates.forEach((line) => {
@@ -795,7 +795,7 @@ class PlanEditorController {
             var subnetLineMapObject = new google.maps.Polyline({
               path: polylineGeometry,
               strokeColor: '#0000FF',
-              strokeWeight: 1,
+              strokeWeight: 2,
               map: this.mapRef
             })
             this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
