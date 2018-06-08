@@ -744,6 +744,8 @@ class PlanEditorController {
   }
 
   recalculateSubnetForEquipmentChange(equipmentFeature) {
+    var recalculatedSubnets = {}
+    var setOfCOIds = new Set()
     var closestCentralOfficeId = null
     var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)
     return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
@@ -767,38 +769,64 @@ class PlanEditorController {
         return this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, currentEquipment)
       })
       .then(() => {
-        return this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${closestCentralOfficeId}`)
+        // Delete subnet features for all central offices
+        var lastResult = Promise.resolve()
+        Object.keys(this.subnetMapObjects).forEach((centralOfficeObjectId) => {
+          lastResult = lastResult.then(() => this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`))
+        })
+        return lastResult
       })
       .then((result) => {
+        // Recalculate for all central offices
         const recalcBody = {
-          subNets: [{
-            objectId: closestCentralOfficeId
-          }]
+          subNets: []
         }
+        Object.keys(this.subnetMapObjects).forEach((centralOfficeObjectId) => setOfCOIds.add(centralOfficeObjectId))
+        setOfCOIds.add(closestCentralOfficeId)
+        setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subNets.push({ objectId: centralOfficeObjectId }))
         return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
       })
       .then((result) => {
-        return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${closestCentralOfficeId}`)
+        var lastResult = Promise.resolve()
+        setOfCOIds.forEach((centralOfficeObjectId) => {
+          lastResult = lastResult.then((result) => {
+            console.log(result)
+            if (result) {
+              console.log(result)
+              recalculatedSubnets[result.data.objectId] = result
+            }
+            return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`)
+          })
+        })
+        lastResult = lastResult.then((result) => {
+          recalculatedSubnets[result.data.objectId] = result
+          console.log(result)
+          return Promise.resolve()
+        })
+        return lastResult
       })
-      .then((result) => {
-        // We have the fiber in result.data.subnetLinks
-        const subnetKey = `${closestCentralOfficeId}`
+      .then(() => {
         Object.keys(this.subnetMapObjects).forEach((key) => {
           this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
         })
         this.subnetMapObjects = {}
-        this.subnetMapObjects[subnetKey] = []
-        result.data.subnetLinks.forEach((subnetLink) => {
-          subnetLink.geometry.coordinates.forEach((line) => {
-            var polylineGeometry = []
-            line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
-            var subnetLineMapObject = new google.maps.Polyline({
-              path: polylineGeometry,
-              strokeColor: '#0000FF',
-              strokeWeight: 2,
-              map: this.mapRef
+        Object.keys(recalculatedSubnets).forEach((centralOfficeObjectId) => {
+          // We have the fiber in result.data.subnetLinks
+          const subnetKey = `${centralOfficeObjectId}`
+          this.subnetMapObjects[subnetKey] = []
+          const result = recalculatedSubnets[centralOfficeObjectId]
+          result.data.subnetLinks.forEach((subnetLink) => {
+            subnetLink.geometry.coordinates.forEach((line) => {
+              var polylineGeometry = []
+              line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
+              var subnetLineMapObject = new google.maps.Polyline({
+                path: polylineGeometry,
+                strokeColor: '#0000FF',
+                strokeWeight: 2,
+                map: this.mapRef
+              })
+              this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
             })
-            this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
           })
         })
       })
