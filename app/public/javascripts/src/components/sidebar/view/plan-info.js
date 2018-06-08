@@ -23,6 +23,7 @@ class PlanInfoController {
 
   editCurrentPlan() {
     this.isEditMode = true
+    this.setPlanLocation()
   }
 
   commitUpdatestoPlan() {
@@ -58,6 +59,57 @@ class PlanInfoController {
       .then((response) => {
         this.loadPlans()
       })
+  }
+
+  setPlanLocation() {
+    if(!this.currentPlanInfo.ephemeral) {
+
+      var default_location = this.currentPlanInfo.areaName
+      var ids = 0
+      var search = $('.plan-details-container .select2')
+      search.select2({
+        placeholder: 'Set an address, city, state or CLLI code',
+        initSelection: function (select, callback) {
+          callback({"id": 0, "text":default_location})
+        },
+        ajax: {
+          url: '/search/addresses',
+          dataType: 'json',
+          delay: 250,
+          data: (term) => ({ text: term }),
+          results: (data, params) => {
+            var items = data.map((location) => {
+              return {
+                id: 'id-' + (++ids),
+                text: location.name,
+                bounds: location.bounds,
+                centroid: location.centroid
+              }
+            })
+            this.search_results = items
+            this.setLocation = true
+            return {
+              results: items,
+              pagination: {
+                more: false
+              }
+            }
+          },
+          cache: true
+        }
+      }).on('change', (e) => {
+        var selected = e.added
+        if (selected && this.setLocation) {
+          this.currentPlanInfo.areaName = selected.text
+          this.currentPlanInfo.latitude = selected.centroid.coordinates[1]
+          this.currentPlanInfo.longitude = selected.centroid.coordinates[0]
+          this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, this.currentPlanInfo)
+          console.log(selected)
+        }
+      })
+  
+      search.select2("val", default_location, true)
+    }
   }
 
   $onInit() {

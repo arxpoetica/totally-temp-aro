@@ -8,6 +8,7 @@ class MapSelectorPlanTargetController {
     this.displayModes = state.displayModes
     state.selectedDisplayMode.subscribe((newValue) => {
       this.selectedDisplayMode = newValue
+      this.targetSelectionMode = this.state && this.state.selectedTargetSelectionMode
       this.updateDrawingManagerState()
     })
     this.state = state
