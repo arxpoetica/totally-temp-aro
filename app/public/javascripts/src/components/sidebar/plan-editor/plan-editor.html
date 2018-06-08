@@ -93,9 +93,9 @@
           </div>
           
           <div style="display: flex">
-            <div style="flex: 0 0 auto; padding-right: 20px;">
+            <div style="flex: 0 0 auto; padding-right: 20px; line-height: 33px;">
 	            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
-				        style="margin-left: 2px;">
+				        style="margin: 0px;">
 				        Site Boundaries
 				    </div>
 			      <select class="form-control" style="flex: 1 1 auto"
@@ -105,8 +105,6 @@
 			        ng-change="$ctrl.toggleSiteBoundary()">
 			      </select>
           </div>
-          
-          <hr class="plan-editor-hr">
           
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
@@ -139,6 +137,38 @@
             </div>
           </div>
         </div>
+
+        <!-- Section to show subnet calculation options -->
+        <table id="tblPlanInfo" class="table table-condensed table-striped" style="margin-top: 15px;">
+          <tbody>
+            <tr>
+              <td>Subnets</td>
+              <td>
+                <input type="checkbox" class="checkboxfill layer-type-checkboxes" style="margin: 0px;"
+                       ng-model="$ctrl.autoRecalculateSubnet">
+                  <span>Auto recalculate</span>
+              </td>
+              <td>
+                <input type="checkbox" class="checkboxfill layer-type-checkboxes" style="margin: 0px;"
+                       ng-model="$ctrl.stickyAssignment">
+                <span>Sticky assignment</span>
+              </td>
+            </tr>
+            <tr>
+              <td>Route to CO</td>
+              <td>
+                <input type="radio" class="checkboxfill layer-type-checkboxes" style="margin: 0px;" name="closestCOFinder"
+                        ng-model="$ctrl.coSearchType" value="SERVICE_AREA">
+                <span>Service Area</span>
+              </td>
+              <td>
+                <input type="radio" class="checkboxfill layer-type-checkboxes" style="margin: 0px;" name="closestCOFinder"
+                        ng-model="$ctrl.coSearchType" value="CLOSEST">
+                <span>Closest</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
         <!-- Section to show properties when the selected map object is an equipment node -->
         <div class="clearfix" ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
