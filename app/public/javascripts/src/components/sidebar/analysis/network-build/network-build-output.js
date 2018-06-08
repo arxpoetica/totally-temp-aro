@@ -7,6 +7,7 @@ class NetworkBuildOutputController {
     this.networkBuildSummary = {}
     this.plannedNetworkDemand = {}
     this.config = config
+    this.plan = null
 
     state.plan
     .subscribe((plan) => {
@@ -14,6 +15,10 @@ class NetworkBuildOutputController {
       if(plan.planState === 'COMPLETED')
         this.getNetworkBuildReport()
     })
+
+    state.optimizationCompleted
+    .subscribe((plan) => {this.getNetworkBuildReport()})
+    
   }
 
   getNetworkBuildReport() {
@@ -33,6 +38,9 @@ class NetworkBuildOutputController {
     this.map_tools.toggle(financialProfileConfig)
   }
 
+  // $onInit() {
+  //   plan.planState === 'COMPLETED' && this.getNetworkBuildReport()
+  // }
 }
 
 NetworkBuildOutputController.$inject = ['$http','state','map_tools']

@@ -1180,6 +1180,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
+  service.optimizationCompleted = new Rx.BehaviorSubject({})
   service.startPolling = () => {
     service.stopPolling()
     service.progressPollingInterval = setInterval(() => {
@@ -1194,6 +1195,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
           service.requestMapLayerRefresh.next({})
+          service.optimizationCompleted.next(newPlan)
           delete service.Optimizingplan.optimizationId
           service.loadPlanInputs(newPlan.id)
         }
