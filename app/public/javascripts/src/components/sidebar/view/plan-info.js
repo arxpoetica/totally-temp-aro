@@ -29,7 +29,8 @@ class PlanInfoController {
     this.updatePlanTags()
     this.getPlanTagDetails()
     // This will call a function into the resource permissions editor that will do the actual save
-    this.saveResourceAccess && this.saveResourceAccess()
+    // DO NOT SAVE ON DESTROY. This may be causing all sorts of issues with threading on service.
+    // this.saveResourceAccess && this.saveResourceAccess()
     this.isEditMode = false
     this.addGeneralTags = false
     this.addSATags = false
