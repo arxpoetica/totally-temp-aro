@@ -398,7 +398,8 @@
         "show": true
       }
     },
-    "extendedAnalysis": true
+    "extendedAnalysis": true,
+    "hasLocationFilters": true
   },
   {
     "name": "account_exec",
@@ -599,6 +600,7 @@
         "show": true
       }
     },
-    "extendedAnalysis": true
+    "extendedAnalysis": true,
+    "hasLocationFilters": true
   }
 ]

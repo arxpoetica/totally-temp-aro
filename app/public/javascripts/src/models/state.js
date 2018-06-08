@@ -303,6 +303,31 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE_PLAN_TARGET
 
+  //location filters for sales
+  service.locationFilters =[
+    {
+      id: 1,
+      label: "Prospect",
+      name: "prospect",
+      icon: "/images/map_icons/aro/prospects.png",
+      checked: false
+    },
+    {
+      id: 2,
+      label: "Winback",
+      name: "winback",
+      icon: "/images/map_icons/aro/winback.png",
+      checked: false,
+    },
+    {
+      id: 3,
+      label: "Customer",
+      name: "customer",
+      icon: "/images/map_icons/aro/customers.png",
+      checked: false
+    }
+  ]
+
   // Competition display
   service.competition = {
     allCompetitorTypes: [
