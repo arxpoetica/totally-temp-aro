@@ -174,7 +174,8 @@
   </button>
 
   <button class="btn"
-          ng-show="$ctrl.configuration.perspective.toolbar.showExportSelection.show"
+          ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
+            $ctrl.configuration.perspective.toolbar.showExportSelection.show"
           ng-click="$ctrl.setSelectionExport()"
           data-toggle="tooltip"
           data-placement="bottom"
