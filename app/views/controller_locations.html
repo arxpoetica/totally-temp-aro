@@ -72,25 +72,11 @@
         <span style="font-weight: bold">Filter:</span>
       </div>
       <div class="row" style="padding-bottom: 5px;margin-right: 0;margin-left: 0;padding-left: 11px;">
-        <div class="col-md-4" style="padding-left: 0;padding-right: 0">
+        <div class="col-md-4" style="padding-left: 0;padding-right: 0" ng-repeat="filter in locationFilters">
           <input type="checkbox" class="checkboxfill layer-type-checkboxes"
-                 checked
-                 disabled>
-          <span>&nbsp;Prospect </span>
-        </div>
-
-        <div class="col-md-4" style="padding-left: 0;padding-right: 0">
-          <input type="checkbox" class="checkboxfill layer-type-checkboxes"
-                 checked
-                 disabled>
-          <span>&nbsp;Winback </span>
-        </div>
-
-        <div class="col-md-4" style="padding-left: 0;padding-right: 0">
-          <input type="checkbox" class="checkboxfill layer-type-checkboxes"
-                 checked
-                 disabled>
-          <span>&nbsp;Customer </span>
+                 ng-model="filter.checked"
+                 ng-checked="filter.checked" ng-change="updateMapLayers()">
+          <span>{{filter.label}} </span>
         </div>
       </div>
     </div>

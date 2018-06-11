@@ -97,7 +97,7 @@
     "ethernet_lit_building": {
             "show": true,
             "label": "Ethernet Lit Buildings",
-            "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/ethernet_lit_buildings/",
+            "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/ethernet_lit_building/",
             "aggregateZoomThreshold": "15",
             "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
             "zIndex": 6680,
@@ -110,7 +110,7 @@
     "lit_building":{
           "show": true,
           "label": "Fiber Lit Building",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/lit_buildings/",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/lit_building/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/lit_building.png",
           "zIndex": 6770,
@@ -123,7 +123,7 @@
     "tier_1":{
           "show": true,
           "label": "DNB Tier 1 (<1,000 ft from splice point)",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_1/",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_1/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/tier_1.png",
           "zIndex": 6860,
@@ -136,7 +136,7 @@
     "tier_2":{
           "show": true,
           "label": "DNB Tier 2 (1,000-3,000 ft)",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_2/",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_2/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/tier_2.png",
           "zIndex": 6950,
@@ -150,7 +150,7 @@
     "tier_3":{
           "show": true,
           "label": "DNB Tier 3 (>3,000 ft)",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/tier_3/",
+          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_3/",
           "aggregateZoomThreshold": "15",
           "iconUrl":  "/images/map_icons/aro/tier_3.png",
           "zIndex": 7040,
