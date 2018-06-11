@@ -618,8 +618,6 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
 
-
-
   handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
@@ -631,9 +629,10 @@ class PlanEditorController {
         this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           .then((result) => {
             var attributes = result.data.attributes
-            var networkNodeEquipment = AroFeatureFactory.createObject(result.data).networkNodeEquipment
-            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, result.data.networkNodeType,
-                                                                                    attributes.selectedEquipmentType, networkNodeEquipment)
+            const equipmentFeature = AroFeatureFactory.createObject(result.data)
+            var networkNodeEquipment = equipmentFeature.networkNodeEquipment
+            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment)
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
