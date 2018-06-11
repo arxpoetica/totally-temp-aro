@@ -129,6 +129,8 @@ class PlanEditorController {
         this.objectIdToMapObject = {}
         this.equipmentIdToBoundaryId = {}
         this.boundaryIdToEquipmentId = {}
+        // Save the iconUrls in the list of objects returned from aro-service
+        result.data.forEach((item) => item.iconUrl = this.configuration.networkEquipment.equipments[item.networkNodeType].iconUrl)
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(result.data)
@@ -901,6 +903,24 @@ class PlanEditorController {
       this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
     })
     this.subnetMapObjects = {}
+  }
+
+  // Returns a promise that resolves to the iconUrl for a given object id
+  getObjectIconUrl(eventArgs) {
+    if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE) {
+      // The value we have been passed is a network node type. Return the icon directly.
+      return Promise.resolve(this.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
+    } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID) {
+      const planId = this.state.plan.getValue().id
+      // /images/map_icons/aro/plan_equipment.png
+      return this.$http.get(`/service/plan-feature/${planId}/equipment/${eventArgs.objectValue}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          const networkNodeType = result.data.networkNodeType
+          return Promise.resolve(this.configuration.networkEquipment.equipments[networkNodeType].iconUrl)
+        })
+        .catch((err) => console.error(err))
+    }
+    return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
   }
 
   $doCheck() {

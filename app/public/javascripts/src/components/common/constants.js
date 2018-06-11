@@ -7,7 +7,9 @@ var Constants = Object.freeze({
   DRAG_DROP_ENTITY_DETAILS_KEY: 'entity_details',
   DRAG_IS_BOUNDARY: 'dragged_object_is_a_boundary',
   SPATIAL_EDGE_ROAD: 'road',
-  SPATIAL_EDGE_COPPER: 'copper'
+  SPATIAL_EDGE_COPPER: 'copper',
+  MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE: 'MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE',
+  MAP_OBJECT_CREATE_KEY_OBJECT_ID: 'MAP_OBJECT_CREATE_KEY_OBJECT_ID'
 })
 
 export default Constants

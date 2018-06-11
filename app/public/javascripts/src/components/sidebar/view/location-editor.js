@@ -62,6 +62,8 @@ class LocationEditorController {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
+        // Put the iconUrl in the features list
+        result.data.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(result.data)
@@ -102,6 +104,16 @@ class LocationEditorController {
         this.$timeout()
         console.error(err)
       })
+  }
+
+  getObjectIconUrl() {
+    // Hardcoded for now
+    return Promise.resolve('/images/map_icons/aro/households_modified.png')
+  }
+
+  getObjectSelectedIconUrl() {
+    // Hardcoded for now
+    return Promise.resolve('/images/map_icons/aro/households_selected.png')
   }
 
   discardTransaction() {

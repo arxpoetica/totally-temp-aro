@@ -1,7 +1,7 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, configuration) {
+  constructor($http, $element, $compile, $document, $timeout, state, tileDataService) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -9,7 +9,6 @@ class MapObjectEditorController {
     this.$timeout = $timeout
     this.state = state
     this.tileDataService = tileDataService
-    this.configuration = configuration  // ToDo: configuration should come from parent I think
     this.mapRef = null
     this.createObjectOnClick = true
     this.createdMapObjects = {}
@@ -140,7 +139,9 @@ class MapObjectEditorController {
         networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
       }
       
-      this.createMapObject(feature, true)
+      this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
+        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+        .catch((err) => console.error(err))
       event.preventDefault();
     };
 
@@ -155,27 +156,6 @@ class MapObjectEditorController {
         this.selectMapObject(null) //deselects the selected equipment 
       }
     })
-  }
-  
-  getIconsByFeatureType(featureType){
-    //console.log(featureType)
-    var icons = {}
-    icons.iconUrl = this.objectIconUrl
-    icons.selectedIconUrl = this.objectSelectedIconUrl
-    
-    if ('undefined' != typeof featureType && null != featureType){
-      // ToDo: there are discrepancies in out naming, fix that
-      if ('fiber_distribution_hub' == featureType) featureType = 'fdh' 
-      if ('fiber_distribution_terminal' == featureType) featureType = 'fdt' 
-      if ('cell_5g' == featureType) featureType = 'fiveg_site'
-      if (this.configuration.networkEquipment.equipments.hasOwnProperty(featureType)){
-        icons.iconUrl = this.configuration.networkEquipment.equipments[featureType].iconUrl
-      }else if(this.configuration.locationCategories.categories.hasOwnProperty(featureType)){
-        icons.iconUrl = this.configuration.locationCategories.categories[featureType].iconUrl
-      }
-    }
-    
-    return icons
   }
   
   makeIconAnchor(iconUrl, callback){
@@ -264,11 +244,11 @@ class MapObjectEditorController {
   createMapObjects(features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
     features.forEach((feature) => {
-      this.createMapObject(feature, false)  // Feature is not created usin a map click
+      this.createMapObject(feature, feature.iconUrl, false)  // Feature is not created usin a map click
     })
   }
 
-  createPointMapObject(feature) {
+  createPointMapObject(feature, iconUrl) {
     // Create a "point" map object - a marker
     this.tileDataService.addFeatureToExclude(feature.objectId)
     this.state.requestMapLayerRefresh.next({})
@@ -277,8 +257,8 @@ class MapObjectEditorController {
       featureType: feature.networkNodeType,
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
       icon: {
-        url: this.getIconsByFeatureType(feature.networkNodeType).iconUrl,
-        anchor: this.iconAnchors[this.objectIconUrl]
+        url: iconUrl
+        // anchor: this.iconAnchors[this.objectIconUrl]
       },
       label: {
         text: '◯', 
@@ -289,7 +269,7 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     
-    this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
+    // this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
     return mapMarker
   }
 
@@ -314,10 +294,10 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMapObject(feature, usingMapClick) {
+  createMapObject(feature, iconUrl, usingMapClick) {
     var mapObject = null
     if (feature.geometry.type === 'Point') {
-      mapObject = this.createPointMapObject(feature)
+      mapObject = this.createPointMapObject(feature, iconUrl)
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
       mapObject.addListener('click', (event) => {
@@ -390,7 +370,7 @@ class MapObjectEditorController {
       },
       isExistingObject: false
     }
-    
+
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
@@ -412,7 +392,10 @@ class MapObjectEditorController {
       feature.objectId = this.getUUID()
       feature.isExistingObject = false
     }
-    this.createMapObject(feature, true)
+    // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
+    this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID, objectValue: feature.objectId })
+      .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+      .catch((err) => console.error(err))
   }
 
   isMarker(mapObject) {
@@ -581,15 +564,15 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'configuration']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
   bindings: {
     mapGlobalObjectName: '@',
     mapContainerId: '@',  // The HTML element that contains the map
-    objectIconUrl: '@',
-    objectSelectedIconUrl: '@',
+    getObjectIconUrl: '&',
+    getObjectSelectedIconUrl: '&',
     deleteMode: '<',
     createObjectOnClick: '<',
     allowBoundaryCreation: '<',
