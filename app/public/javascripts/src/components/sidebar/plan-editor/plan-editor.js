@@ -618,6 +618,8 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
 
+
+
   handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
@@ -631,9 +633,16 @@ class PlanEditorController {
             var attributes = result.data.attributes
             var networkNodeEquipment = AroFeatureFactory.createObject(result.data).networkNodeEquipment
             this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, result.data.networkNodeType,
-                                                                                  attributes.selectedEquipmentType, networkNodeEquipment)
+                                                                                    attributes.selectedEquipmentType, networkNodeEquipment)
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+              .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
+              .then((result) => {
+                // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
+                // later turns on auto-recalculate, it will generate the entire subnet.
+                var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
+                return this.assignSubnetParent(currentEquipmentWithSubnetId)
+              })
               .then(() => {
                 if (this.autoRecalculateSubnet) {
                   this.recalculateSubnetForEquipmentChange(feature)
@@ -649,6 +658,13 @@ class PlanEditorController {
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+          .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
+          .then((result) => {
+            // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
+            // later turns on auto-recalculate, it will generate the entire subnet.
+            var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
+            return this.assignSubnetParent(currentEquipmentWithSubnetId)
+          })
           .then(() => {
             if (this.autoRecalculateSubnet) {
               this.recalculateSubnetForEquipmentChange(feature)
