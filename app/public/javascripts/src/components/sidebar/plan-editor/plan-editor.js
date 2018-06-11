@@ -634,7 +634,11 @@ class PlanEditorController {
                                                                                   attributes.selectedEquipmentType, networkNodeEquipment)
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-              .then(() => this.recalculateSubnetForEquipmentChange(feature))
+              .then(() => {
+                if (this.autoRecalculateSubnet) {
+                  this.recalculateSubnetForEquipmentChange(feature)
+                }
+              })
               .catch((err) => console.error(err))
             this.$timeout()
           })
@@ -645,7 +649,11 @@ class PlanEditorController {
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-          .then(() => this.recalculateSubnetForEquipmentChange(feature))
+          .then(() => {
+            if (this.autoRecalculateSubnet) {
+              this.recalculateSubnetForEquipmentChange(feature)
+            }
+          })
           .catch((err) => console.error(err))
       }
     } else if (!this.isMarker(mapObject)) {
@@ -713,11 +721,7 @@ class PlanEditorController {
         // We have a boundary object. Delete it and recalculate coverage only if the boundary properties say to do so.
         const boundaryProperties = this.objectIdToProperties[boundaryObjectId]
         if (boundaryProperties.selectedSiteMoveUpdate === 'Auto-redraw') {
-          //delete this.equipmentIdToBoundaryId[mapObject.objectId]
-          //delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          //this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
           this.deleteBoundary(boundaryObjectId)
-          
           this.calculateCoverage(mapObject, boundaryProperties.spatialEdgeType, boundaryProperties.directed)
         }
       }
@@ -736,6 +740,21 @@ class PlanEditorController {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+        .then(() => {
+          return this.autoRecalculateSubnet
+                 ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+                 : Promise.resolve()
+        })
+        .then((result) => {
+          if (result && result.data.length > 0) {
+            // There is at least one piece of equipment in the transaction. Use that for routing
+            this.recalculateSubnetForEquipmentChange(result.data[0])
+          } else {
+            // There is no equipment left in the transaction. Just remove the subnet map objects
+            this.clearAllSubnetMapObjects()
+          }
+        })
+        .catch((err) => console.error(err))
       // If this is an equipment, delete its associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
       this.deleteBoundary(boundaryObjectId)
@@ -826,10 +845,7 @@ class PlanEditorController {
         return lastResult
       })
       .then(() => {
-        Object.keys(this.subnetMapObjects).forEach((key) => {
-          this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
-        })
-        this.subnetMapObjects = {}
+        this.clearAllSubnetMapObjects()
         Object.keys(recalculatedSubnets).forEach((centralOfficeObjectId) => {
           // We have the fiber in result.data.subnetLinks
           const subnetKey = `${centralOfficeObjectId}`
@@ -865,6 +881,13 @@ class PlanEditorController {
     })
   }
 
+  clearAllSubnetMapObjects() {
+    Object.keys(this.subnetMapObjects).forEach((key) => {
+      this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
+    })
+    this.subnetMapObjects = {}
+  }
+
   $doCheck() {
     // Doing it this way because we don't have a better way to detect when state.selectedBoundaryType has changed
     if (this.state.selectedBoundaryType.id !== this.cachedSelectedBoundaryTypeId
@@ -880,10 +903,7 @@ class PlanEditorController {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
 
-    Object.keys(this.subnetMapObjects).forEach((key) => {
-      this.subnetMapObjects[key].forEach((mapObject) => mapObject.setMap(null))
-    })
-    this.subnetMapObjects = {}
+    this.clearAllSubnetMapObjects()
   }
 }
 
