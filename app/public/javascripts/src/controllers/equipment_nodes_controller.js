@@ -125,7 +125,13 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
       var selectedBoundaryName
       state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-      $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
+      if(boundaryKey === 'siteBoundaries') {
+        $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
+      } else if (boundaryKey === 'fiveg_coverage') {
+        $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName
+          && $scope.configuration.networkEquipment.equipments['fiveg_site'].checked)
+      }
+      
     })
     // Hack to show copper in toolbar ruler options
     Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {

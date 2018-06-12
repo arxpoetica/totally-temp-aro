@@ -18,9 +18,6 @@
     "splice_point": {
       "iconUrl": "/images/map_icons/aro/splice_point.png"
     },
-    "fiveg_coverage": {
-      "iconUrl": "/images/map_icons/aro/service_layer_cran.png"
-    },
     "fiveg_site": {
       "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png"
     }

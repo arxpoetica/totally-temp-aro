@@ -15,6 +15,12 @@ class NetworkAnalysisController {
       }
     })
 
+    state.planOptimization.subscribe((newPlan) => {
+      if (newPlan) {
+        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+      }
+    })
+
     state.selectedLocations
       .subscribe((selectedLocations) => {
         // The selected locations have changed. Get the count and addresses that we want to show
