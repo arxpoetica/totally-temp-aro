@@ -277,7 +277,6 @@ app.service('tileDataService', ['$http', ($http) => {
   // Add a modified feature to the set of modified features
   tileDataService.addModifiedFeature = (feature) => {
     tileDataService.modifiedFeatures[feature.objectId] = feature
-    console.log(tileDataService.modifiedFeatures)
   }
 
   // Clear the entire tile data cache
