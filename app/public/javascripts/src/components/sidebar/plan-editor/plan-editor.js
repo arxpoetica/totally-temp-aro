@@ -625,10 +625,17 @@ class PlanEditorController {
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var isNew = true
-      if (feature.isExistingObject){
+      if (feature.isExistingObject) {
         // clone of existing or planned equipment
         const planId = this.state.plan.getValue().id
-        this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
+        // Add modified features to vector tiles and do the rendering, etc.
+        this.state.clearTileCachePlanOutputs()
+        this.state.loadModifiedFeatures(planId)
+          .then(() => {
+            this.state.requestRecreateTiles.next({})
+            this.state.requestMapLayerRefresh.next({})
+            return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
+          })
           .then((result) => {
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
