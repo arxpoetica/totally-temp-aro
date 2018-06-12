@@ -129,6 +129,8 @@ class PlanEditorController {
         this.objectIdToMapObject = {}
         this.equipmentIdToBoundaryId = {}
         this.boundaryIdToEquipmentId = {}
+        // Save the iconUrls in the list of objects returned from aro-service
+        result.data.forEach((item) => item.iconUrl = this.configuration.networkEquipment.equipments[item.networkNodeType].iconUrl)
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(result.data)
@@ -623,18 +625,37 @@ class PlanEditorController {
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var isNew = true
-      if (feature.isExistingObject){
+      if (feature.isExistingObject) {
         // clone of existing or planned equipment
         const planId = this.state.plan.getValue().id
-        this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
+        // Add modified features to vector tiles and do the rendering, etc.
+        this.state.clearTileCachePlanOutputs()
+        this.state.loadModifiedFeatures(planId)
+          .then(() => {
+            this.state.requestRecreateTiles.next({})
+            this.state.requestMapLayerRefresh.next({})
+            return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
+          })
           .then((result) => {
             var attributes = result.data.attributes
-            var networkNodeEquipment = AroFeatureFactory.createObject(result.data).networkNodeEquipment
-            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, result.data.networkNodeType,
-                                                                                  attributes.selectedEquipmentType, networkNodeEquipment)
+            const equipmentFeature = AroFeatureFactory.createObject(result.data)
+            var networkNodeEquipment = equipmentFeature.networkNodeEquipment
+            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment)
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-              .then(() => this.recalculateSubnetForEquipmentChange(feature))
+              .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
+              .then((result) => {
+                // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
+                // later turns on auto-recalculate, it will generate the entire subnet.
+                var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
+                return this.assignSubnetParent(currentEquipmentWithSubnetId)
+              })
+              .then(() => {
+                if (this.autoRecalculateSubnet) {
+                  this.recalculateSubnetForEquipmentChange(feature)
+                }
+              })
               .catch((err) => console.error(err))
             this.$timeout()
           })
@@ -645,7 +666,18 @@ class PlanEditorController {
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-          .then(() => this.recalculateSubnetForEquipmentChange(feature))
+          .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
+          .then((result) => {
+            // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
+            // later turns on auto-recalculate, it will generate the entire subnet.
+            var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
+            return this.assignSubnetParent(currentEquipmentWithSubnetId)
+          })
+          .then(() => {
+            if (this.autoRecalculateSubnet) {
+              this.recalculateSubnetForEquipmentChange(feature)
+            }
+          })
           .catch((err) => console.error(err))
       }
     } else if (!this.isMarker(mapObject)) {
@@ -713,11 +745,7 @@ class PlanEditorController {
         // We have a boundary object. Delete it and recalculate coverage only if the boundary properties say to do so.
         const boundaryProperties = this.objectIdToProperties[boundaryObjectId]
         if (boundaryProperties.selectedSiteMoveUpdate === 'Auto-redraw') {
-          //delete this.equipmentIdToBoundaryId[mapObject.objectId]
-          //delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          //this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
           this.deleteBoundary(boundaryObjectId)
-          
           this.calculateCoverage(mapObject, boundaryProperties.spatialEdgeType, boundaryProperties.directed)
         }
       }
@@ -736,6 +764,21 @@ class PlanEditorController {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+        .then(() => {
+          return this.autoRecalculateSubnet
+                 ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+                 : Promise.resolve()
+        })
+        .then((result) => {
+          if (result && result.data.length > 0) {
+            // There is at least one piece of equipment in the transaction. Use that for routing
+            this.recalculateSubnetForEquipmentChange(result.data[0])
+          } else {
+            // There is no equipment left in the transaction. Just remove the subnet map objects
+            this.clearAllSubnetMapObjects()
+          }
+        })
+        .catch((err) => console.error(err))
       // If this is an equipment, delete its associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
       this.deleteBoundary(boundaryObjectId)
@@ -826,10 +869,7 @@ class PlanEditorController {
         return lastResult
       })
       .then(() => {
-        Object.keys(this.subnetMapObjects).forEach((key) => {
-          this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
-        })
-        this.subnetMapObjects = {}
+        this.clearAllSubnetMapObjects()
         Object.keys(recalculatedSubnets).forEach((centralOfficeObjectId) => {
           // We have the fiber in result.data.subnetLinks
           const subnetKey = `${centralOfficeObjectId}`
@@ -865,6 +905,31 @@ class PlanEditorController {
     })
   }
 
+  clearAllSubnetMapObjects() {
+    Object.keys(this.subnetMapObjects).forEach((key) => {
+      this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
+    })
+    this.subnetMapObjects = {}
+  }
+
+  // Returns a promise that resolves to the iconUrl for a given object id
+  getObjectIconUrl(eventArgs) {
+    if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE) {
+      // The value we have been passed is a network node type. Return the icon directly.
+      return Promise.resolve(this.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
+    } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID) {
+      const planId = this.state.plan.getValue().id
+      // /images/map_icons/aro/plan_equipment.png
+      return this.$http.get(`/service/plan-feature/${planId}/equipment/${eventArgs.objectValue}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          const networkNodeType = result.data.networkNodeType
+          return Promise.resolve(this.configuration.networkEquipment.equipments[networkNodeType].iconUrl)
+        })
+        .catch((err) => console.error(err))
+    }
+    return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
+  }
+
   $doCheck() {
     // Doing it this way because we don't have a better way to detect when state.selectedBoundaryType has changed
     if (this.state.selectedBoundaryType.id !== this.cachedSelectedBoundaryTypeId
@@ -880,10 +945,7 @@ class PlanEditorController {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
 
-    Object.keys(this.subnetMapObjects).forEach((key) => {
-      this.subnetMapObjects[key].forEach((mapObject) => mapObject.setMap(null))
-    })
-    this.subnetMapObjects = {}
+    this.clearAllSubnetMapObjects()
   }
 }
 

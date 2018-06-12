@@ -13,8 +13,8 @@
   <!-- Add a component to handle map editing -->
   <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                      map-container-id="map-canvas-container"
-                     object-icon-url="/images/map_icons/aro/households_modified.png"
-                     object-selected-icon-url="/images/map_icons/aro/households_selected.png"
+                     get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
+                     get-object-selected-icon-url="$ctrl.getObjectSelectedIconUrl({objectKey, objectValue})"
                      create-object-on-click="true"
                      allow-boundary-creation="false"
                      on-create-object="$ctrl.handleObjectCreated(mapObject)"

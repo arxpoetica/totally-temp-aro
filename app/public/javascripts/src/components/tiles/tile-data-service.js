@@ -10,6 +10,7 @@ app.service('tileDataService', ['$http', ($http) => {
   // Hold a map of layer keys to image urls (and image data once it is loaded)
   tileDataService.entityImageCache = {}
   tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
+  tileDataService.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
 
   tileDataService.getTileCacheKey = (url) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
@@ -273,10 +274,16 @@ app.service('tileDataService', ['$http', ($http) => {
     tileDataService.featuresToExclude.add(featureId)
   }
 
+  // Add a modified feature to the set of modified features
+  tileDataService.addModifiedFeature = (feature) => {
+    tileDataService.modifiedFeatures[feature.objectId] = feature
+  }
+
   // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
     tileDataService.featuresToExclude = new Set()
+    tileDataService.modifiedFeatures = {}
   }
 
   // Clear only those entries in the tile data cache containing the specified keywords

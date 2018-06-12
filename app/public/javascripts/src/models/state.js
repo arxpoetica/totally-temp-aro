@@ -1023,23 +1023,27 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
-    // The Nuclear option - Delete the tile data and HTML elements cache and force Google Maps to call
-    // our getTile() method again. Any rendering that is in process for the existing tiles will
-    // continue but will not be shown on our map.
+  // The Nuclear option - Delete the tile data and HTML elements cache and force Google Maps to call
+  // our getTile() method again. Any rendering that is in process for the existing tiles will
+  // continue but will not be shown on our map.
   service.recreateTilesAndCache = () => {
-    tileDataService.clearDataCache()
-    service.requestRecreateTiles.next({})
-    service.requestMapLayerRefresh.next({})
+    return new Promise((resolve, reject) => {
+      tileDataService.clearDataCache()
+      return service.loadModifiedFeatures(service.plan.getValue().id)
+    })
+    .then(() => {
+      service.requestRecreateTiles.next({})
+      service.requestMapLayerRefresh.next({})
+    })
+    .catch((err) => console.error(err))
   }
 
   service.setPlan = (plan) => {
     service.plan.next(plan)
     service.planOptimization.next(plan)
     return service.loadPlanInputs(plan.id)
-    .then(() => {
-      service.recreateTilesAndCache()
-      return Promise.resolve()
-    })
+      .then(() => service.recreateTilesAndCache())
+      .catch((err) => console.error(err))
   }
 
   // Load the plan inputs for the given plan and populate them in state
@@ -1060,6 +1064,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       .catch((err) => {
         console.log(err)
       })
+  }
+
+  // Load the modified features for a given plan and save them in the tile data service
+  service.loadModifiedFeatures = (planId) => {
+    return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
+      .then((result) => {
+        result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
+      })
+      .catch((err) => console.error(err))
   }
 
   service.locationInputSelected = (locationKey) => {

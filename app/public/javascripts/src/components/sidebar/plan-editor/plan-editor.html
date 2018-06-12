@@ -48,8 +48,8 @@
       <!-- Add a component to handle map editing -->
       <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                          map-container-id="map-canvas-container"
-                         object-icon-url="/images/map_icons/aro/plan_equipment.png"
-                         object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
+                         get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
+                         object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                          create-object-on-click="false"
                          allow-boundary-creation="$ctrl.state.showSiteBoundary"
                          hide-object-ids="$ctrl.objectIdsToHide"

@@ -9,7 +9,9 @@ var pointInPolygon = require('point-in-polygon')
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType, selectedDisplayMode, analysisSelectionMode, displayModes, configuration, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea,
+              selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,
+              selectedDisplayMode, analysisSelectionMode, displayModes, configuration, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -28,8 +30,17 @@ class MapTileRenderer {
     
     this.displayModes = displayModes
     this.configuration = configuration
+    this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.renderBatches = []
     this.isRendering = false
+
+    this.modificationTypes = Object.freeze({
+      UNMODIFIED: 'UNMODIFIED',
+      ORIGINAL: 'ORIGINAL',
+      MODIFIED: 'MODIFIED',
+      DELETED: 'DELETED'
+    })
+
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
@@ -335,7 +346,7 @@ class MapTileRenderer {
           var features = []
           Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
           //console.log(featureData)
-          this.renderFeatures(ctx, features, featureData, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+          this.renderFeatures(ctx, zoom, coord, features, featureData, selectedLocationImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
         })
       }
     })
@@ -394,7 +405,7 @@ class MapTileRenderer {
   }
 
   // Render a set of features on the map
-  renderFeatures(ctx, features, featureData, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+  renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     var entityImage = featureData.icon
     
     ctx.globalAlpha = 1.0
@@ -460,12 +471,18 @@ class MapTileRenderer {
   	          ctx.stroke();
   	          
   	          ctx.drawImage(entityImage, x, y) //<--------------------------------------------------- highlight here ---<<<
-  	          //ctx.globalCompositeOperation='difference'
-  	          
-  	          //ctx.globalCompositeOperation='source-over'
   	        } else {
-  	          ctx.drawImage(entityImage, x, y)
-  	        }
+              const originalAlpha = ctx.globalAlpha
+              const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+              if (modificationType === this.modificationTypes.ORIGINAL || modificationType === this.modificationTypes.DELETED) {
+                ctx.globalAlpha = 0.5
+              }
+              ctx.drawImage(entityImage, x, y)
+              ctx.globalAlpha = originalAlpha
+            }
+            const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+            const overlaySize = 12
+            this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
@@ -520,6 +537,56 @@ class MapTileRenderer {
       })
     }
   }
+
+  // Gets the modification type for a given feature
+  getModificationTypeForFeature(zoom, tileCoords, shapeX, shapeY, feature) {
+    // If this feature is a "modified feature" then add an overlay. (Its all "object_id" now, no "location_id" anywhere)
+    var modificationType = this.modificationTypes.UNMODIFIED
+    if (this.tileDataService.modifiedFeatures.hasOwnProperty(feature.properties.object_id)) {
+      const modifiedFeature = this.tileDataService.modifiedFeatures[feature.properties.object_id]
+      if (modifiedFeature.deleted) {
+        modificationType = this.modificationTypes.DELETED
+      } else {
+        modificationType = this.modificationTypes.ORIGINAL
+        const modifiedFeatureCoord = modifiedFeature.geometry.coordinates
+        var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, modifiedFeatureCoord[1], modifiedFeatureCoord[0])
+        const pixelTolerance = 3
+        if ((Math.abs(pixelCoords.x - shapeX) < pixelTolerance) && (Math.abs(pixelCoords.y - shapeY) < pixelTolerance)) {
+          modificationType = this.modificationTypes.MODIFIED
+        }
+      }
+    }
+    return modificationType
+  }
+
+  // Renders a "modification" overlay over a feature icon
+  renderModificationOverlay(ctx, x, y, width, height, modificationType) {
+
+    if (modificationType === this.modificationTypes.UNMODIFIED) {
+      return  // Unmodified feature, nothing to do
+    }
+
+    var overlayText = ''
+    switch (modificationType) {
+      case this.modificationTypes.ORIGINAL: overlayText = 'O'; break;
+      case this.modificationTypes.MODIFIED: overlayText = 'M'; break;
+      case this.modificationTypes.DELETED: overlayText = 'D'; break;
+    }
+
+    ctx.fillStyle = '#ffffff'
+    ctx.strokeStyle = '#000000'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.rect(x, y, width, height)
+    ctx.fill()
+    ctx.stroke()
+    ctx.lineWidth = 1
+    ctx.font = '9px Arial'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.strokeText(overlayText, x + width / 2, y + height / 2)
+ }
+  
 
   // Renders a polyline feature onto the canvas
   renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, isPolygonBorder) {
@@ -1267,7 +1334,8 @@ class TileComponentController {
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
                                                            this.state.displayModes,
-                                                           this.configuration
+                                                           this.configuration,
+                                                           this.getPixelCoordinatesWithinTile.bind(this)
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
       this.mapRef.addListener('click', (event) => {
