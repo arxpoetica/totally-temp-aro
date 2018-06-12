@@ -473,14 +473,14 @@ class MapTileRenderer {
   	          ctx.drawImage(entityImage, x, y) //<--------------------------------------------------- highlight here ---<<<
   	        } else {
               const originalAlpha = ctx.globalAlpha
-              const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x, shape[0].y, feature)
+              const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
               if (modificationType === this.modificationTypes.ORIGINAL || modificationType === this.modificationTypes.DELETED) {
                 ctx.globalAlpha = 0.5
               }
               ctx.drawImage(entityImage, x, y)
               ctx.globalAlpha = originalAlpha
             }
-            const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x, shape[0].y, feature)
+            const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
             const overlaySize = 12
             this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
   	      } else {
@@ -547,12 +547,12 @@ class MapTileRenderer {
       if (modifiedFeature.deleted) {
         modificationType = this.modificationTypes.DELETED
       } else {
-        modificationType = this.modificationTypes.MODIFIED
+        modificationType = this.modificationTypes.ORIGINAL
         const modifiedFeatureCoord = modifiedFeature.geometry.coordinates
         var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, modifiedFeatureCoord[1], modifiedFeatureCoord[0])
         const pixelTolerance = 3
-        if (Math.abs(pixelCoords.x - shapeX) < pixelTolerance && Math.abs(pixelCoords.y - shapeY) < pixelTolerance) {
-          modificationType = this.modificationTypes.ORIGINAL
+        if ((Math.abs(pixelCoords.x - shapeX) < pixelTolerance) && (Math.abs(pixelCoords.y - shapeY) < pixelTolerance)) {
+          modificationType = this.modificationTypes.MODIFIED
         }
       }
     }
