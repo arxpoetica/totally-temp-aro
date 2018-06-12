@@ -17,7 +17,7 @@ class NetworkBuildController {
       }
     })
 
-    state.optimizationCompleted.subscribe((newPlan) => {
+    state.planOptimization.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }

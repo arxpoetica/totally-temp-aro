@@ -12,12 +12,13 @@ class NetworkBuildOutputController {
     state.plan
     .subscribe((plan) => {
       this.plan = plan
-      if(plan.planState === 'COMPLETED')
-        this.getNetworkBuildReport()
+      if(plan.planState === 'COMPLETED') this.getNetworkBuildReport()
     })
 
-    state.optimizationCompleted
-    .subscribe((plan) => {this.getNetworkBuildReport()})
+    state.planOptimization
+    .subscribe((plan) => {
+      if(plan && plan.planState === 'COMPLETED') this.getNetworkBuildReport()
+    })
     
   }
 

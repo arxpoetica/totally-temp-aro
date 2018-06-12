@@ -12,6 +12,12 @@ class DataSelectionController {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+
+    state.planOptimization.subscribe((newPlan) => {
+      if (newPlan) {
+        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+      }
+    })
   }
 
   $onInit() {

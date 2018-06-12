@@ -1034,6 +1034,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.setPlan = (plan) => {
     service.plan.next(plan)
+    service.planOptimization.next(plan)
     return service.loadPlanInputs(plan.id)
     .then(() => {
       service.recreateTilesAndCache()
@@ -1205,13 +1206,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
-  service.optimizationCompleted = new Rx.BehaviorSubject({})
+  service.planOptimization = new Rx.BehaviorSubject(null)
   service.startPolling = () => {
     service.stopPolling()
     service.progressPollingInterval = setInterval(() => {
       $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
         var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
         newPlan.planState = response.data.optimizationState
+        service.planOptimization.next(newPlan)
         service.checkPollingStatus(newPlan)
         if (response.data.optimizationState === 'COMPLETED'
             || response.data.optimizationState === 'CANCELED'
@@ -1220,7 +1222,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
           service.requestMapLayerRefresh.next({})
-          service.optimizationCompleted.next(newPlan)
           delete service.Optimizingplan.optimizationId
           service.loadPlanInputs(newPlan.id)
         }
