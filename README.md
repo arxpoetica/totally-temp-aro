@@ -173,6 +173,14 @@ $ docker-compose pull
 ```
 Any changes to the underlying images will be pulled down and used the next time you bring up the environment. The database itself is always preserved, even if the database container/image is replaced, as we are using an external volume to store the actual data.
 
+# Google Maps licensing
+On development machines, there is nothing to do. There will be a warning about license key missing, but Google Maps will use the free tier.
+On client machines, you can specify one of the following environment variables:
+1. No env variables (the licensing then drops to the free tier)
+2. `GOOGLE_MAPS_API_KEY`: This will use the api key
+3. `GOOGLE_MAPS_CLIENT_ID`: This will use the client id and not the API key
+4. `GOOGLE_MAPS_CLIENT_ID and GOOGLE_MAPS_CHANNEL`: This will use the client id and channel
+
 # CI builds and deployments
 The general philosophy around deployments and environments has shifted. Please understand these changes and how they affect everyone's workflow.
 
