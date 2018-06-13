@@ -68,6 +68,11 @@
   margin-bottom: 6px;
 }
 
+.ei-foldout-header-btn{
+	padding: 1px 10px;
+  font-size: 0.8em;
+}
+
 .ei-header{
   font-weight: bold;
   width: 100%;

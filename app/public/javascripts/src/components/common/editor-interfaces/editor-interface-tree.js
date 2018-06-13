@@ -57,6 +57,36 @@ class EditorInterfaceTreeController {
     }
     return listVals
   }
+  
+  deleteItem(parent, index){
+    if (!this.isEdit) return
+    //console.log(parent)
+    //console.log(listVals)
+    //console.log(index)
+    //console.log(this.objectToView)
+    
+    var itemName = parent.propertyName +' '+ index
+    
+    swal({
+      title: 'Delete '+itemName+'?',
+      text: 'Are you sure you want to delete '+itemName+'?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, delete',
+      cancelButtonText: 'No',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (deleteTransaction) => {
+      if (deleteTransaction) {
+        // The user has confirmed that the transaction should be deleted
+        //listVals.splice(index, 1)
+        this.objectToView[parent.propertyName].splice(index, 1)
+        this.onChange()
+      }
+    })
+    
+  }
+  
 }
 
 // AroInfoObjectViewController.$inject = []
