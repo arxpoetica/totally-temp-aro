@@ -126,6 +126,10 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
   var configureSearch = () => {
     var search = $('#area-network-planning-search')
     var bounds = map.getBounds()
+    if (!bounds) {
+      console.warn('map bounds not found in regions.js --> configureSearch(). Returning from function.')
+      return
+    }
     var params = {
       nelat: bounds.getNorthEast().lat(),
       nelon: bounds.getNorthEast().lng(),
