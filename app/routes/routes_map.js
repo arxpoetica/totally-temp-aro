@@ -13,7 +13,16 @@ exports.configure = (api, middleware) => {
       serviceLayers: cache.serviceLayers,
       analysisLayers: cache.analysisLayers,
       existingFiberSourceNames: cache.existingFiberSourceNames,
-      googleMapsKey: process.env.GOOGLE_MAPS_API_KEY
+      // For google maps licensing, specify one of the following:
+      // 1. Nothing (no API_KEY, no CLIENT_ID, no CHANNEL)
+      // 2. API_KEY only
+      // 3. CLIENT_ID only
+      // 4. CHANNEL and CLIENT_ID only
+      googleMapsLicensing: {
+        API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+        CLIENT_ID: process.env.GOOGLE_MAPS_CLIENT_ID,
+        CHANNEL: process.env.GOOGLE_MAPS_CHANNEL
+      }
     })
   })
 }
