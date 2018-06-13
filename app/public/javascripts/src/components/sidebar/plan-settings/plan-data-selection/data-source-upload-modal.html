@@ -77,7 +77,7 @@
                     <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
                       <i class="fa fa-trash"></i>
                     </button>
-                    <button ng-if="dataSource.isExpanded" class="btn btn-default" ng-click="$ctrl.saveAccessSettings()">
+                    <button ng-if="dataSource.isExpanded" class="btn btn-default" ng-click="$ctrl.saveAccessSettings(dataSource)">
                       <i class="fa fa-save"></i>&nbsp; Save
                     </button>
                     <button class="btn btn-default"

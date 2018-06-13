@@ -162,6 +162,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     analysisSelectionMode: service.selectionModes.SELECTED_AREAS
   }
 
+  if(config.ARO_CLIENT === 'frontier')
+    service.optimizationOptions.technologies['FiveG'].label = 'Fixed Wireless'
+
   //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
   service.optimizationOptions.uiAlgorithms = [
     service.OPTIMIZATION_TYPES.UNCONSTRAINED,
@@ -1446,7 +1449,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
 
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj.toUpperCase(),'id,code,name,centroid','code')
       visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
@@ -1514,14 +1517,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
-          group.name = `[G] ${group.name}`  // For now, text instead of icons
+          //group.name = `[G] ${group.name}`  // For now, text instead of icons
+          group.name = `<i class="fa fa-users" aria-hidden="true">${group.name}</i>`
           service.systemActors.push(group)
         })
         return $http.get('/service/auth/users')
       })
       .then((result) => {
         result.data.forEach((user) => {
-          user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          user.name = `<i class="fa fa-user" aria-hidden="true">${user.firstName} ${user.lastName}</i>` 
           service.systemActors.push(user)
         })
       })

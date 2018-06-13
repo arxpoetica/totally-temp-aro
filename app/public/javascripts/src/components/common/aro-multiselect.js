@@ -14,6 +14,7 @@ class AroMultiSelectController {
     this.selectElement = this.$element.find('select')
     setTimeout(() => this.selectElement.multiselect({
         buttonWidth: '100%',
+        enableHTML:true,
         onChange: () => {
           if (this.selectionChanged) {
             this.selectionChanged()
