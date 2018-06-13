@@ -68,14 +68,15 @@ class DataSourceUploadController {
     this.saveResourceAccess = saveResourceAccess
   }
 
-  saveAccessSettings() {
+  saveAccessSettings(dataSource) {
     // This will call a function into the resource permissions editor that will do the actual save
     if (this.saveResourceAccess) {
       this.saveResourceAccess() 
         .then(() => Promise.all([
-          service.loadPlanDataSelectionFromServer(),
-          service.loadPlanResourceSelectionFromServer(),
-          service.loadNetworkConfigurationFromServer()
+          this.state.loadPlanDataSelectionFromServer(),
+          this.state.loadPlanResourceSelectionFromServer(),
+          this.state.loadNetworkConfigurationFromServer(),
+          this.toggleDataSourceExpanded(dataSource)
         ]))
         .catch((err) => console.error(err))
     }

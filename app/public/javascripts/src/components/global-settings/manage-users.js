@@ -104,7 +104,7 @@ class ManageUsersController {
     } else {
       // For now do search in a crude way. Will get this from the ODATA endpoint later
       this.allUsers.forEach((user) => {
-        if (JSON.stringify(user).indexOf(this.searchText) >= 0) {
+        if ((JSON.stringify(user).toLowerCase()).indexOf(this.searchText.toLowerCase()) >= 0) {
           this.filteredUsers.push(user)
         }
       })
