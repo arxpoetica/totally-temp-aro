@@ -59,6 +59,7 @@ class EditorInterfaceTreeController {
   }
   
   deleteItem(parent, index){
+    if (!this.isEdit) return
     //console.log(parent)
     //console.log(listVals)
     //console.log(index)

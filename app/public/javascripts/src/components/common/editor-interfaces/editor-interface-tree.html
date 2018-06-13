@@ -33,7 +33,7 @@
 	        
 	        <button class="btn btn-danger btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
 	                ng-click="$ctrl.deleteItem(prop, $index); $event.stopPropagation();"
-	                ng-if="'list' == prop.format"
+	                ng-if="$ctrl.isEdit && 'list' == prop.format"
 	                >delete</button>
 	        
 	      </div>
