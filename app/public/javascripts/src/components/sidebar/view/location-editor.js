@@ -91,6 +91,7 @@ class LocationEditorController {
     // All modifications will already have been saved to the server. Commit the transaction.
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
       .then((result) => {
+        console.log(result)
         // Transaction has been committed, start a new one
         this.state.recreateTilesAndCache()
         return this.resumeOrCreateTransaction()
@@ -177,6 +178,7 @@ class LocationEditorController {
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties()
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
+    console.log(locationObject)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }

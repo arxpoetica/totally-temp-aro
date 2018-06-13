@@ -497,6 +497,7 @@ class PlanEditorController {
       objectProperties.isDirty = true
       this.lastSelectedEquipmentType = objectProperties.selectedEquipmentType || this.lastSelectedEquipmentType
     }
+    this.$timeout()
   }
 
   // Marks the properties of the selected equipment boundary as dirty (changed).
@@ -628,6 +629,7 @@ class PlanEditorController {
         const planId = this.state.plan.getValue().id
         this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           .then((result) => {
+            console.log(result)
             var attributes = result.data.attributes
             var networkNodeEquipment = AroFeatureFactory.createObject(result.data).networkNodeEquipment
             this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, result.data.networkNodeType,
