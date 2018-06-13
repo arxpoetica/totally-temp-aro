@@ -129,9 +129,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.min.js"></script>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
-  <!-- Hack in the client id for today -->
-  <!-- <script src="https://maps.googleapis.com/maps/api/js?v=3<%- googleMapsKey ? '&amp;key=' + googleMapsKey : '' %>&amp;libraries=visualization,drawing"></script> -->
-  <script src="https://maps.googleapis.com/maps/api/js?v=3&amp;client=gme-frontiercommunications&amp;channel=bsa4&amp;libraries=visualization,drawing"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?v=3<%- googleMapsKey ? '&amp;key=' + googleMapsKey : '' %>&amp;libraries=visualization,drawing"></script>
   <script>
     var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select', 'ng-currency']);
     app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
