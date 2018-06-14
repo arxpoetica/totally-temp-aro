@@ -419,9 +419,7 @@ class MapObjectEditorController {
     var featureToUse = null
     featurePromise
       .then((result) => {
-        console.log(result)
         featureToUse = result
-        console.log(featureToUse)
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
