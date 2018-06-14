@@ -14,7 +14,7 @@ class AroMultiSelectController {
     this.selectElement = this.$element.find('select')
     setTimeout(() => this.selectElement.multiselect({
         buttonWidth: '100%',
-        enableHTML:true,
+        enableHTML:this.enableHtml ? true : false,
         onChange: () => {
           if (this.selectionChanged) {
             this.selectionChanged()
@@ -52,6 +52,7 @@ let aroMultiSelect = {
     allItems: '<',          // All the items to show.
     selectionChanged: '&',  // [Optional] Called when the selected items change
     enableSearch: '@',
+    enableHtml: '@',
     placeholder: '@'  // [optional] placeholder to show
   },
   controller: AroMultiSelectController
