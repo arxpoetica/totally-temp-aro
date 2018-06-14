@@ -386,6 +386,7 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
+      featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       const clickedObject = event.equipmentFeatures[0]
@@ -401,6 +402,8 @@ class MapObjectEditorController {
                              serviceFeature.isExistingObject = true
                              return Promise.resolve(serviceFeature)
                            })
+      } else {
+        featurePromise = Promise.resolve(feature)
       }
     } else {
       // The map was clicked on, but there was no location under the cursor.
@@ -414,6 +417,7 @@ class MapObjectEditorController {
       }
       feature.objectId = this.getUUID()
       feature.isExistingObject = false
+      featurePromise = Promise.resolve(feature)
     }
 
     var featureToUse = null
