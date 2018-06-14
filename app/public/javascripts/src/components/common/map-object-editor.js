@@ -333,8 +333,16 @@ class MapObjectEditorController {
     mapObject.addListener('rightclick', (event) => {
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.xa.clientX}px`
-      this.contextMenuCss.top = `${event.xa.clientY}px`
+      // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
+      // changes with google maps implementations. So iterate over the keys to find the right object.
+      var mouseEvent = null
+      Object.keys(event).forEach((eventKey) => {
+        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+          mouseEvent = event[eventKey]
+        }
+      })
+      this.contextMenuCss.left = `${mouseEvent.clientX}px`
+      this.contextMenuCss.top = `${mouseEvent.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
