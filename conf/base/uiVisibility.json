@@ -100,6 +100,9 @@
       "BOUNDARIES_INFO":{
         "show": true
       },
+      "ROAD_SEGMENT_INFO":{
+        "show": true
+      },
       "COVERAGE_BOUNDARY":{
         "show": true
       },
@@ -301,6 +304,9 @@
       "BOUNDARIES_INFO":{
         "show": true
       },
+      "ROAD_SEGMENT_INFO":{
+        "show": false
+      },
       "COVERAGE_BOUNDARY":{
         "show": true
       },
@@ -500,6 +506,9 @@
         "show": false
       },
       "BOUNDARIES_INFO":{
+        "show": false
+      },
+      "ROAD_SEGMENT_INFO":{
         "show": false
       },
       "COVERAGE_BOUNDARY":{
