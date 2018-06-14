@@ -693,6 +693,8 @@ class PlanEditorController {
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
+      this.state.requestRecreateTiles.next({})
+      this.state.requestMapLayerRefresh.next({})
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
