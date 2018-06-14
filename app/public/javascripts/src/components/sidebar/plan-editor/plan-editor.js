@@ -544,7 +544,6 @@ class PlanEditorController {
       allPaths.push(pathPoints)
     })
     
-    var objectProperties = this.objectIdToProperties[ this.boundaryIdToEquipmentId[objectId] ]
     const boundaryProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
@@ -553,7 +552,6 @@ class PlanEditorController {
         coordinates: allPaths
       },
       attributes: {
-        network_node_type: objectProperties.siteNetworkNodeType,
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -921,13 +919,15 @@ class PlanEditorController {
       return Promise.resolve(this.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
     } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID) {
       const planId = this.state.plan.getValue().id
-      // /images/map_icons/aro/plan_equipment.png
       return this.$http.get(`/service/plan-feature/${planId}/equipment/${eventArgs.objectValue}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           const networkNodeType = result.data.networkNodeType
           return Promise.resolve(this.configuration.networkEquipment.equipments[networkNodeType].iconUrl)
         })
         .catch((err) => console.error(err))
+    } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY) {
+      // Icon doesn't matter for boundaries, just return an empty string
+      return Promise.resolve('')
     }
     return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
   }
