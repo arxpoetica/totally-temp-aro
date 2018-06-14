@@ -275,6 +275,7 @@ class MapObjectEditorController {
 
   createPolygonMapObject(feature) {
     // Create a "polygon" map object
+    this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
     feature.geometry.coordinates[0].forEach((polygonVertex) => {
       polygonPath.push({
@@ -333,8 +334,16 @@ class MapObjectEditorController {
     mapObject.addListener('rightclick', (event) => {
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.xa.clientX}px`
-      this.contextMenuCss.top = `${event.xa.clientY}px`
+      // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
+      // changes with google maps implementations. So iterate over the keys to find the right object.
+      var mouseEvent = null
+      Object.keys(event).forEach((eventKey) => {
+        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+          mouseEvent = event[eventKey]
+        }
+      })
+      this.contextMenuCss.left = `${mouseEvent.clientX}px`
+      this.contextMenuCss.top = `${mouseEvent.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -371,14 +380,31 @@ class MapObjectEditorController {
       isExistingObject: false
     }
 
+    var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
+    var featurePromise = null
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
+      featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
-      feature.objectId = event.equipmentFeatures[0].object_id
+      const clickedObject = event.equipmentFeatures[0]
+      feature.objectId = clickedObject.object_id
       feature.isExistingObject = true
+      if (clickedObject._data_type === 'equipment_boundary.select') {
+        iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
+        // Get the boundary geometry from aro-service
+        featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+                           .then((result) => {
+                             var serviceFeature = result.data
+                             serviceFeature.attributes = { network_node_object_id: serviceFeature.networkObjectId }
+                             serviceFeature.isExistingObject = true
+                             return Promise.resolve(serviceFeature)
+                           })
+      } else {
+        featurePromise = Promise.resolve(feature)
+      }
     } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
@@ -391,10 +417,23 @@ class MapObjectEditorController {
       }
       feature.objectId = this.getUUID()
       feature.isExistingObject = false
+      featurePromise = Promise.resolve(feature)
     }
-    // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
-    this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID, objectValue: feature.objectId })
-      .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+
+    var featureToUse = null
+    featurePromise
+      .then((result) => {
+        featureToUse = result
+        // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
+        return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
+      })
+      .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true))
+      .then(() => {
+        // If we are editing an existing polygon object, make it editable
+        if (feature.isExistingObject && iconKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY) {
+          this.selectedMapObject.setEditable(true)
+        }
+      })
       .catch((err) => console.error(err))
   }
 
