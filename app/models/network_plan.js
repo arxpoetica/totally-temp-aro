@@ -919,11 +919,9 @@ module.exports = class NetworkPlan {
     }
     return models.AROService.request(serviceLayerRequestParams)
       .then((result) => {
-        console.log(result)
         var serviceLayerIds = []
         const serviceLayerGroup = result.configurationItems.filter((item) => item.dataType === 'service_layer')[0]
         serviceLayerGroup.libraryItems.forEach((item) => serviceLayerIds.push(item.identifier))
-        console.log(serviceLayerIds)
         var sql = `
           SELECT
             code AS name,
