@@ -1298,4 +1298,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .close {
   /* large close icon for modal window */
   font-size: 30px; 
-}  
+}
+
+.select2-no-results {
+  color: black;
+}

@@ -65,57 +65,9 @@ class NetworkPlanModalController {
 
   showCombo() {
     this.loadPlans(1, () => {
-      //Load search value
-      this.loadSearch()
       this.tracker.track('Open Analysis')
 
       this.reloadCurrentLocation();
-    })
-  }
-
-  loadSearch() {
-    this.search = $('#create-new-plan .select2')
-
-    this.search.select2({
-      placeholder: 'Search an address, city, state or CLLI code', // config.ui.default_form_values.create_plan.select_area_text,
-      ajax: {
-        url: '/search/addresses',
-        dataType: 'json',
-        delay: 250,
-        data: (term) => ({ text: term }),
-        results: (data, params) => {
-          var items = [];
-          data.forEach((location) => {
-            items.push(
-              {
-                id: 'id-' + (++this.ids),
-                text: location.name,
-                bounds: location.bounds,
-                centroid: location.centroid
-              }
-            );
-          })
-
-          this.search_results = items
-          return {
-            results: items,
-            pagination: {
-              more: false
-            }
-          }
-        },
-        cache: true
-      },
-      initSelection: function (select, callback) {
-        callback(this.customLoc)
-      },
-    }).on('change', (e) => {
-      var selected = e.added
-      if (selected) {
-        this.new_plan_area_name = selected.text
-        this.new_plan_area_bounds = selected.bounds
-        this.new_plan_area_centroid = selected.centroid
-      }
     })
   }
 
@@ -261,20 +213,21 @@ class NetworkPlanModalController {
   }
 
   fetchLocation(location) {
-    return this.$http.get("/search/addresses", { params: { text: location.message } }).then(function (results) {
+    return this.$http.get(`/search/addresses/${this.state.plan.getValue().id}?userId=${this.state.loggedInUser.id}`, { params: { text: location.message } })
+      .then(function (results) {
 
-      var location = results.data[0];
-      var loc = {
-        id: 'id-' + (++this.ids),
-        text: location.name,
-        bounds: location.bounds,
-        centroid: location.centroid,
-        geocoded: true
-      };
+        var location = results.data[0];
+        var loc = {
+          id: 'id-' + (++this.ids),
+          text: location.name,
+          bounds: location.bounds,
+          centroid: location.centroid,
+          geocoded: true
+        };
 
-      return loc;
+        return loc;
 
-    });
+      });
   }
 
   getTagCategories(currentPlanTags) {

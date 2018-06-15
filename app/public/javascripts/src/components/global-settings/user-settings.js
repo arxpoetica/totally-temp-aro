@@ -24,7 +24,7 @@ class UserSettingsController {
         callback({"id": 0, "text":default_location})
       },
       ajax: {
-        url: '/search/addresses',
+        url: `/search/addresses/${state.plan.getValue().id}?userId=${state.loggedInUser.id}`, // Fine since we will have loaded a plan by now
         dataType: 'json',
         delay: 250,
         data: (term) => ({ text: term }),
