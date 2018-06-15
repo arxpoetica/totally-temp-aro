@@ -4,7 +4,7 @@ class PlanSummaryController {
     this.state = state
     this.$http = $http
     this.isKeyExpanded = {
-      Equipment: true,
+      Equipment: false,
       Fiber: false
     }
     this.summaryInstallationTypes = Object.freeze({
