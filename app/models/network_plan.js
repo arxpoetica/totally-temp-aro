@@ -909,35 +909,51 @@ module.exports = class NetworkPlan {
     return database.query(sql, [text.toLowerCase()])
   }
 
-  static searchAddresses (text) {
-    var sql = `
-      SELECT
-        code AS name,
-        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
-        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
-        FROM client.service_area
-       WHERE service_layer_id = (
-          SELECT id FROM client.service_layer WHERE name='wirecenter'
-        )
-        AND lower(unaccent(code)) LIKE lower(unaccent($1))
+  static searchAddresses(planId, userId, text) {
 
-      UNION ALL
+    // First get the selected service layer(s) from the plan data selection
+    const serviceLayerRequestParams = {
+      method: 'GET',
+      url: `${config.aro_service_url}/v1/plan/${planId}/configuration?user_id=${userId}`,
+      json: true
+    }
+    return models.AROService.request(serviceLayerRequestParams)
+      .then((result) => {
+        console.log(result)
+        var serviceLayerIds = []
+        const serviceLayerGroup = result.configurationItems.filter((item) => item.dataType === 'service_layer')[0]
+        serviceLayerGroup.libraryItems.forEach((item) => serviceLayerIds.push(item.identifier))
+        console.log(serviceLayerIds)
+        var sql = `
+          SELECT
+            code AS name,
+            ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+            ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+          FROM client.service_area
+          WHERE service_layer_id = (
+            SELECT id FROM client.service_layer WHERE id IN ($3)
+          )
+          AND lower(unaccent(code)) LIKE lower(unaccent($1))
+    
+          UNION ALL
+    
+          SELECT
+            name,
+            ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
+            ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
+          FROM aro.businesses
+          WHERE to_tsvector('english', name) @@ plainto_tsquery($2)
+    
+          ORDER BY name ASC
+          LIMIT 100
+        `
+        var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase(), serviceLayerIds])
+        var addresses = text.length > 0
+                        ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
+                        : Promise.resolve(null)
+        return Promise.all([wirecenters, addresses])
 
-      SELECT
-        name,
-        ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
-        ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
-      FROM aro.businesses
-      WHERE to_tsvector('english', name) @@ plainto_tsquery($2)
-
-      ORDER BY name ASC
-      LIMIT 100
-    `
-    var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase()])
-    var addresses = text.length > 0
-      ? request({ url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text), json: true })
-      : Promise.resolve(null)
-    return Promise.all([wirecenters, addresses])
+      })
       .then((results) => {
         var latlngSearch = text && text.split(',')
         var searchText
