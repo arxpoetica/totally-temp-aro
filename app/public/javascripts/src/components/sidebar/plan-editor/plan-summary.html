@@ -37,7 +37,7 @@ In plan summary
       </tr>
 
       <tr ng-if="$ctrl.isKeyExpanded[Equipment]" ng-repeat="(equipmentType, info) in $ctrl.transformedEquipmentSummary">
-        <th class="indent-1">{{equipmentType}}</th>
+        <th class="indent-1">{{$ctrl.state.networkNodeTypesEntity[equipmentType]}}</th>
         <!-- <td ng-repeat="(installationType, value) in info">
           {{value[0].count}}
         </td> -->
