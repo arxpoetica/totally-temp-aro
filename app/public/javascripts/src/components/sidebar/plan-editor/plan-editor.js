@@ -141,6 +141,7 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
+          console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
@@ -618,7 +619,15 @@ class PlanEditorController {
   isMarker(mapObject) {
     return mapObject && mapObject.icon
   }
-
+  
+  // ---
+  
+  addPlannedEquipment(){
+    console.log( AroFeatureFactory.createObject({'dataType': 'equipment', 'existingEquipment':[{'equipmentName':''}], 'plannedEquipment':[{}]}) )
+  }
+  
+  // ---
+  
   handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
