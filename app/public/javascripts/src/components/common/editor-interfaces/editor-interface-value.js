@@ -10,6 +10,21 @@ class EditorInterfaceValueController {
     //if ("number" == this.displayProps.format){
     //  this.model = parseFloat(this.model)
     //}
+    
+    if ("date" == this.displayProps.format || "datetime" == this.displayProps.format){
+      this.dateVal = new Date(this.model)
+    }
+    
+  }
+  
+  
+  
+  setDate(){
+    if (!this.isEdit 
+        || 'undefined' == typeof this.dateVal 
+        || (null === this.dateVal && 'object' == typeof this.dateVal)) return
+    this.model = this.dateVal.getTime()
+    this.onChange()
   }
   
 }

@@ -3,6 +3,7 @@ import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 
 
 class PlanEditorController {
@@ -622,8 +623,11 @@ class PlanEditorController {
   
   // ---
   
-  addPlannedEquipment(){
-    console.log( AroFeatureFactory.createObject({'dataType': 'equipment', 'existingEquipment':[{'equipmentName':''}], 'plannedEquipment':[{}]}) )
+  addExistingEquipment(){
+    //console.log( AroFeatureFactory.createObject({'dataType': 'equipment', 'existingEquipment':[{'equipmentName':''}], 'plannedEquipment':[{}]}) )
+    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.existingEquipment.push( new TrackedEquipment() )
+    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
+    //console.log(new TrackedEquipment())
   }
   
   // ---
