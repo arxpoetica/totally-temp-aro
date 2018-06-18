@@ -177,9 +177,12 @@
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
           </div>
-          <!-- 
-          <div ng-click="$ctrl.addExistingEquipment()">[add existing equipment]</div>
-          -->
+          
+          <div style="padding: 10px">
+            <button class="btn btn-sm btn-primary" ng-click="$ctrl.addExistingEquipment()">add existing equipment</button>
+            <button class="btn btn-sm btn-primary" ng-click="$ctrl.addPlannedEquipment()">add planned equipment</button>
+          </div>
+          
           <!-- A table containing the editable properties of the selected object -->
           <editor-interface-tree 
                               on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
