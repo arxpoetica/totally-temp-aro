@@ -15,8 +15,8 @@ class PlanSummaryController {
     })
     this.summaryCategoryTypes = {
       Equipment:{'summaryData': {},'totalSummary':{},'groupBy':'networkNodeType','aggregateBy':'count'},
-      Fiber: {'summaryData': {},'totalSummary':{},'groupBy':'fiberType','aggregateBy':'lengthMeters'},
-      Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'','aggregateBy':''}
+      Fiber: {'summaryData': {},'totalSummary':{},'groupBy':'fiberType','aggregateBy':'lengthMeters'}
+      //Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'','aggregateBy':''}
     }
 
     state.plan
@@ -60,16 +60,12 @@ class PlanSummaryController {
     var equipmentSummary = planSummary.equipmentSummary
     var fiberSummary = planSummary.fiberSummary
 
-    //this.transformedEquipmentSummary = this.transformSummary(equipmentSummary,this.summaryCategoryTypes['Equipment']['groupBy'],this.summaryCategoryTypes['Equipment']['aggregateBy'])
-    //this.transformedFiberSummary = this.transformSummary(fiberSummary,this.summaryCategoryTypes['Fiber']['groupBy'],this.summaryCategoryTypes['Fiber']['aggregateBy'])
     this.summaryCategoryTypes['Equipment']['summaryData'] = this.transformSummary(equipmentSummary,this.summaryCategoryTypes['Equipment']['groupBy'],this.summaryCategoryTypes['Equipment']['aggregateBy'])
     this.summaryCategoryTypes['Fiber']['summaryData'] = this.transformSummary(fiberSummary,this.summaryCategoryTypes['Fiber']['groupBy'],this.summaryCategoryTypes['Fiber']['aggregateBy'])
 
     //Calculating Total Equipment Summary
-    //this.totalEquipmentSummary = this.calculateTotalByInstallationType(equipmentSummary,this.summaryCategoryTypes['Equipment']['aggregateBy'])
     this.summaryCategoryTypes['Equipment']['totalSummary'] = this.calculateTotalByInstallationType(equipmentSummary,this.summaryCategoryTypes['Equipment']['aggregateBy'])
     //Calculating Total Fiber Summary
-    //this.totalFiberSummary = this.calculateTotalByInstallationType(fiberSummary,this.summaryCategoryTypes['Fiber']['aggregateBy'])
     this.summaryCategoryTypes['Fiber']['totalSummary'] = this.calculateTotalByInstallationType(fiberSummary,this.summaryCategoryTypes['Fiber']['aggregateBy'])
   }
 
