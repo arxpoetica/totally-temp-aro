@@ -134,19 +134,20 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
-          console.log(properties)
+          //console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
+          //console.log(feature)
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
-                                                    attributes.selected_site_boundary_generation, distance,
-                                                    attributes.spatialEdgeType, attributes.directed)
+                                                    attributes.selected_site_boundary_generation, 
+                                                    attributes.spatialEdgeType, attributes.directed, attributes.network_node_type)
           this.objectIdToProperties[feature.objectId] = properties
-          
+          //console.log(properties)
         })
         // Save the equipment and boundary ID associations
         result.data.forEach((boundaryFeature) => {
@@ -225,8 +226,8 @@ class PlanEditorController {
         }
         // Construct a feature that we will pass to the map object editor, which will create the map object
         var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
-                                                        Math.round(optimizationBody.radius * this.configuration.units.meters_to_length_units),
-                                                        optimizationBody.spatialEdgeType, optimizationBody.directed)
+                                                        optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
+        
         var feature = {
           objectId: this.getUUID(),
           geometry: {
@@ -234,7 +235,7 @@ class PlanEditorController {
             coordinates: result.data.polygon.coordinates
           },
           attributes: {
-            network_node_type: 'dslam',
+            network_node_type: boundaryProperties.networkNodeType,
             boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -546,6 +547,7 @@ class PlanEditorController {
         coordinates: allPaths
       },
       attributes: {
+        network_node_type: boundaryProperties.networkNodeType,
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -646,7 +648,7 @@ class PlanEditorController {
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           })
           .then((result) => {
-            console.log(result)
+            //console.log(result)
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
@@ -698,7 +700,11 @@ class PlanEditorController {
         this.deleteBoundary(existingBoundaryId)
         existingBoundaryId = null
         
-        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 0)
+        // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
+        console.log(mapObject)
+        console.log(feature)
+        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance')
+        
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
@@ -723,6 +729,12 @@ class PlanEditorController {
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
     this.selectedMapObject = mapObject
+    
+    //if (null != this.selectedMapObject){
+    //  console.log( this.selectedMapObject )
+    //  console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
+    //}
+    
     this.$timeout()
   }
 
