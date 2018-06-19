@@ -1,9 +1,11 @@
 class PlanSummaryController {
   
-  constructor(state,$http) {
+  constructor(state,$http,$timeout) {
     this.state = state
     this.$http = $http
+    this.$timeout = $timeout
     this.currentTransaction = null
+    this.config = config
     this.isKeyExpanded = {
       Equipment: false,
       Fiber: false
@@ -19,6 +21,8 @@ class PlanSummaryController {
       //Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'','aggregateBy':''}
     }
 
+    this.equipmentOrder = ['central_office','dslam','fiber_distribution_hub','fiber_distribution_terminal','bulk_distribution_terminal',
+    'splice_point','cell_5g']
     state.plan
     .subscribe((plan) => {
       this.plan = plan
@@ -30,33 +34,27 @@ class PlanSummaryController {
     //   this.formatSummary(response.data)
     // })
 
-    //TODO: get the currentTransaction from plan editor or move the code to state to get current transaction
+    this.$timeout(() => this.getPlanSummary(),1000)
+  }
+
+  getPlanSummary() {
     if (null == this.currentTransaction) {
-      this.$http.get(`/service/plan-transaction?user_id=${this.state.loggedInUser.id}`)
-      .then((result) => {
-        if (result.data.length > 0) {
-          // At least one transaction exists. Return it
-          return Promise.resolve({
-            data: result.data[0]
+      this.state.resumeTransaction()
+        .then((result) => {
+          this.currentTransaction = result.data
+          this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
+            this.formatSummary(response.data)
           })
-        } else {
-          // Create a new transaction and return it.
-          return this.$http.post(`/service/plan-transactions`, { userId: this.state.loggedInUser.id, planId: this.state.plan.getValue().id })
-        }
-      }).then((result) => {
-        this.currentTransaction = result.data
-        this.$http.get(`/service/plan-transaction/${this.currentTransaction.id - 1}/plan_summary/`).then((response) => {
-          this.formatSummary(response.data)
         })
-      })  
     } else {
-      this.$http.get(`/service/plan-transaction/${this.currentTransaction.id - 1}/plan_summary/`).then((response) => {
+      this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
         this.formatSummary(response.data)
       })
     }
   }
 
   formatSummary(planSummary) {
+   // var temp = _.sortBy(planSummary.equipmentSummary, (obj) => _.indexOf(this.equipmentOrder, obj.networkNodeType))
     var equipmentSummary = planSummary.equipmentSummary
     var fiberSummary = planSummary.fiberSummary
 
@@ -71,17 +69,14 @@ class PlanSummaryController {
 
   calculateTotalByInstallationType(equipmentSummary,aggregateBy) {
     var totalEquipmentSummary = {}
-    var existingEquip = _.filter(equipmentSummary,(equipment) => equipment.deploymentType === this.summaryInstallationTypes['INSTALLED'].id)
-    var plannedEquip = _.filter(equipmentSummary,(equipment) => equipment.deploymentType === this.summaryInstallationTypes['PLANNED'].id)
+    var existingEquip = equipmentSummary.filter(equipment => equipment.deploymentType === this.summaryInstallationTypes['INSTALLED'].id)
+    var plannedEquip = equipmentSummary.filter(equipment => equipment.deploymentType === this.summaryInstallationTypes['PLANNED'].id)
+    
+    var existingEquipCountArray = existingEquip.map(exitingEqu => exitingEqu[aggregateBy])    
+    var plannedEquipCountArray = plannedEquip.map(plannedEqu => plannedEqu[aggregateBy])   
 
-    // var existingEquipCountArray = _.map(existingEquip, (exitingEqu) => 'lengthMeters' in exitingEqu ? exitingEqu.lengthMeters : exitingEqu.count)    
-    // var plannedEquipCountArray = _.map(plannedEquip, (plannedEqu) => 'lengthMeters' in plannedEqu ? plannedEqu.lengthMeters : plannedEqu.count)    
-
-    var existingEquipCountArray = _.map(existingEquip, (exitingEqu) => exitingEqu[aggregateBy])    
-    var plannedEquipCountArray = _.map(plannedEquip, (plannedEqu) => plannedEqu[aggregateBy])    
-
-    var existingEquipCount = _.reduce(existingEquipCountArray, (memo, num) => memo + num, 0)
-    var plannedEquipCount = _.reduce(plannedEquipCountArray, (memo, num) => memo + num, 0)
+    var existingEquipCount = existingEquipCountArray.length && existingEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
+    var plannedEquipCount = plannedEquipCountArray.length && plannedEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
     var totalEuipCount = existingEquipCount + plannedEquipCount
 
     totalEquipmentSummary[this.summaryInstallationTypes['INSTALLED'].id] = [{[aggregateBy]: existingEquipCount}]
@@ -111,7 +106,7 @@ class PlanSummaryController {
   }
 }
   
-PlanSummaryController.$inject = ['state','$http']
+PlanSummaryController.$inject = ['state','$http','$timeout']
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',

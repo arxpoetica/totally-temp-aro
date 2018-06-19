@@ -1545,5 +1545,35 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .catch((err) => console.error(err))
   }
 
+  service.resumeTransaction = () => {
+    return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
+    .then((result) => {
+      if (result.data.length > 0) {
+        // At least one transaction exists. Return it
+        return Promise.resolve({
+          data: result.data[0]
+        })
+      }
+    })    
+  }
+
+  service.createTransaction = () => {
+    return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+      .then((result) => {
+        return Promise.resolve(result)
+      })
+  }
+
+  service.resumeOrCreateTransaction = () => {
+    return service.resumeTransaction()
+      .then((result) => {
+        if (!result) {
+          return service.createTransaction().then((result) => Promise.resolve(result))
+        } else {
+          return Promise.resolve(result)
+        }
+      })
+  }
+
   return service
 }])
