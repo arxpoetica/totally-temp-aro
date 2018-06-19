@@ -3,6 +3,8 @@ import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
+import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 
 
 class PlanEditorController {
@@ -132,6 +134,7 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
+          console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
@@ -609,7 +612,23 @@ class PlanEditorController {
   isMarker(mapObject) {
     return mapObject && mapObject.icon
   }
-
+  
+  // ---
+  
+  addPlannedEquipment(){
+    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
+    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.plannedEquipment.push( new EquipmentComponent() )
+  }
+  
+  addExistingEquipment(){
+    //console.log( AroFeatureFactory.createObject({'dataType': 'equipment', 'existingEquipment':[{'equipmentName':''}], 'plannedEquipment':[{}]}) )
+    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.existingEquipment.push( new TrackedEquipment() )
+    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
+    //console.log(new TrackedEquipment())
+  }
+  
+  // ---
+  
   handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
