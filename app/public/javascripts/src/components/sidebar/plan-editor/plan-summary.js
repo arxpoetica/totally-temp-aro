@@ -1,8 +1,11 @@
 class PlanSummaryController {
   
-  constructor(state,$http) {
+  constructor(state,$http,$timeout) {
     this.state = state
     this.$http = $http
+    this.$timeout = $timeout
+    this.currentTransaction = null
+    this.config = config
     this.isKeyExpanded = {
       Equipment: false,
       Fiber: false
@@ -12,7 +15,14 @@ class PlanSummaryController {
       PLANNED: {id:'PLANNED',Label:'Planned'},
       Total: {id:'Total',Label:'Total'}
     })
+    this.summaryCategoryTypes = {
+      Equipment:{'summaryData': {},'totalSummary':{},'groupBy':'networkNodeType','aggregateBy':'count'},
+      Fiber: {'summaryData': {},'totalSummary':{},'groupBy':'fiberType','aggregateBy':'lengthMeters'}
+      //Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'','aggregateBy':''}
+    }
 
+    this.equipmentOrder = ['central_office','dslam','fiber_distribution_hub','fiber_distribution_terminal','bulk_distribution_terminal',
+    'splice_point','cell_5g']
     state.plan
     .subscribe((plan) => {
       this.plan = plan
@@ -20,49 +30,72 @@ class PlanSummaryController {
   }
 
   $onInit() {
-    this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
-      this.formatSummary(response.data)
-    })
+    // this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
+    //   this.formatSummary(response.data)
+    // })
+
+    this.$timeout(() => this.getPlanSummary(),1000)
+  }
+
+  getPlanSummary() {
+    if (null == this.currentTransaction) {
+      this.state.resumeTransaction()
+        .then((result) => {
+          this.currentTransaction = result.data
+          this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
+            this.formatSummary(response.data)
+          })
+        })
+    } else {
+      this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
+        this.formatSummary(response.data)
+      })
+    }
   }
 
   formatSummary(planSummary) {
+   // var temp = _.sortBy(planSummary.equipmentSummary, (obj) => _.indexOf(this.equipmentOrder, obj.networkNodeType))
     var equipmentSummary = planSummary.equipmentSummary
     var fiberSummary = planSummary.fiberSummary
 
-    this.transformedEquipmentSummary = this.transformSummary(equipmentSummary)
+    this.summaryCategoryTypes['Equipment']['summaryData'] = this.transformSummary(equipmentSummary,this.summaryCategoryTypes['Equipment']['groupBy'],this.summaryCategoryTypes['Equipment']['aggregateBy'])
+    this.summaryCategoryTypes['Fiber']['summaryData'] = this.transformSummary(fiberSummary,this.summaryCategoryTypes['Fiber']['groupBy'],this.summaryCategoryTypes['Fiber']['aggregateBy'])
 
     //Calculating Total Equipment Summary
-    this.totalEquipmentSummary = this.calculateTotalByInstallationType(equipmentSummary)
+    this.summaryCategoryTypes['Equipment']['totalSummary'] = this.calculateTotalByInstallationType(equipmentSummary,this.summaryCategoryTypes['Equipment']['aggregateBy'])
+    //Calculating Total Fiber Summary
+    this.summaryCategoryTypes['Fiber']['totalSummary'] = this.calculateTotalByInstallationType(fiberSummary,this.summaryCategoryTypes['Fiber']['aggregateBy'])
   }
 
-  calculateTotalByInstallationType(equipmentSummary) {
+  calculateTotalByInstallationType(equipmentSummary,aggregateBy) {
     var totalEquipmentSummary = {}
-    var existingEquip = _.filter(equipmentSummary,(equipment) => equipment.deploymentType === this.summaryInstallationTypes['INSTALLED'].id)
-    var plannedEquip = _.filter(equipmentSummary,(equipment) => equipment.deploymentType === this.summaryInstallationTypes['PLANNED'].id)
+    var existingEquip = equipmentSummary.filter(equipment => equipment.deploymentType === this.summaryInstallationTypes['INSTALLED'].id)
+    var plannedEquip = equipmentSummary.filter(equipment => equipment.deploymentType === this.summaryInstallationTypes['PLANNED'].id)
+    
+    var existingEquipCountArray = existingEquip.map(exitingEqu => exitingEqu[aggregateBy])    
+    var plannedEquipCountArray = plannedEquip.map(plannedEqu => plannedEqu[aggregateBy])   
 
-    var existingEquipCountArray = _.map(existingEquip, (exitingEqu) => exitingEqu.count)    
-    var plannedEquipCountArray = _.map(plannedEquip, (plannedEqu) => plannedEqu.count)    
-
-    var existingEquipCount = _.reduce(existingEquipCountArray, (memo, num) => memo + num, 0)
-    var plannedEquipCount = _.reduce(plannedEquipCountArray, (memo, num) => memo + num, 0)
+    var existingEquipCount = existingEquipCountArray.length && existingEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
+    var plannedEquipCount = plannedEquipCountArray.length && plannedEquipCountArray.reduce((accumulator, currentValue) => accumulator + currentValue)
     var totalEuipCount = existingEquipCount + plannedEquipCount
 
-    totalEquipmentSummary[this.summaryInstallationTypes['INSTALLED'].id] = [{'count': existingEquipCount}]
-    totalEquipmentSummary[this.summaryInstallationTypes['PLANNED'].id] = [{'count': plannedEquipCount}]
-    totalEquipmentSummary[this.summaryInstallationTypes['Total'].id] = [{'count': totalEuipCount}]
+    totalEquipmentSummary[this.summaryInstallationTypes['INSTALLED'].id] = [{[aggregateBy]: existingEquipCount}]
+    totalEquipmentSummary[this.summaryInstallationTypes['PLANNED'].id] = [{[aggregateBy]: plannedEquipCount}]
+    totalEquipmentSummary[this.summaryInstallationTypes['Total'].id] = [{[aggregateBy]: totalEuipCount}]
 
     return totalEquipmentSummary
   }
 
-  transformSummary(summary) {
-    var groupByNodeType = _.groupBy(summary,'networkNodeType')
+  transformSummary(summary,groupByCategoryType,aggregateBy) {
+    var groupByNodeType = _.groupBy(summary,groupByCategoryType)
     var transformedSummary = {}
 
     Object.keys( groupByNodeType ).forEach( nodeType => {
       transformedSummary[nodeType] = _.groupBy(groupByNodeType[nodeType],'deploymentType')
 
       //Calculating total for planned and existing of a particular node type
-      transformedSummary[nodeType].Total = [{'count':_.reduce(_.map(groupByNodeType[nodeType],(obj) => obj.count), (memo, num) => memo + num, 0)}]
+      //transformedSummary[nodeType].Total = [{'count':_.reduce(_.map(groupByNodeType[nodeType],(obj) => 'lengthMeters' in obj ? obj.lengthMeters : obj.count), (memo, num) => memo + num, 0)}]
+      transformedSummary[nodeType].Total = [{[aggregateBy]:_.reduce(_.map(groupByNodeType[nodeType],(obj) => obj[aggregateBy]), (memo, num) => memo + num, 0)}]
     });
 
     return transformedSummary
@@ -73,7 +106,7 @@ class PlanSummaryController {
   }
 }
   
-PlanSummaryController.$inject = ['state','$http']
+PlanSummaryController.$inject = ['state','$http','$timeout']
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',

@@ -236,7 +236,7 @@
         </select>
       </div>
 
-      <div ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.directed_boundaries.show">
+      <div ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.directed_cable.show">
         <div class="dropdown-divider"></div>
 
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection()" name="ctype-name"
@@ -276,7 +276,7 @@
   <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
-          ng-if="$ctrl.configuration.perspective.toolbar.selectionPolygon.show"
+          ng-if="$ctrl.configuration.perspective.toolbar.openCoverageBoundary.show"
           ng-class="{ 'btn': true,
                       'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
                                       && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY

@@ -1,4 +1,3 @@
-In plan summary
 <div>
   <style scoped>
     .indent-1 {
@@ -12,9 +11,55 @@ In plan summary
     <thead>
       <tr>
         <th></th>
-        <!-- <td ng-repeat="countTypes in $ctrl.summaryInstallationTypes">
-          {{countTypes.Label}}
-        </td> -->
+        <td ng-repeat="(installationType,info) in $ctrl.summaryInstallationTypes">
+          {{info.Label}}
+        </td>
+      </tr>
+    </thead>  
+    <!-- Display plan summary  -->
+    <tbody ng-repeat="(categoryType, categoryinfo) in $ctrl.summaryCategoryTypes">
+      <!-- Display total summary of a category -->
+      <tr>
+        <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded(categoryType)">
+          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[categoryType]"></i>
+          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[categoryType]"></i>
+          {{categoryType}}
+        </th>
+
+        <!-- Display installation types -->
+        <th ng-if="categoryinfo['aggregateBy'] === 'count'" ng-repeat="(installationType,info) in $ctrl.summaryInstallationTypes">
+            {{ categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] }}
+        </th>
+          <!-- Display with two decimal points -->
+        <th ng-if="categoryinfo['aggregateBy'] !== 'count'" ng-repeat="(installationType,info) in $ctrl.summaryInstallationTypes">
+            <!-- converting to client specific units -->
+            {{ categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] * $ctrl.config.length.meters_to_length_units | number : 2 }}
+        </th>
+      </tr>
+
+      <!-- Display each element summary in category -->
+      <tr ng-if="$ctrl.isKeyExpanded[categoryType]" ng-repeat="(name, installationType) in categoryinfo['summaryData']">
+        <!-- For category type 'Equipment' display nicer names -->
+        <td class="indent-1" ng-if="categoryType === 'Equipment'">{{$ctrl.state.networkNodeTypesEntity[name]}}</td>
+        <td class="indent-1" ng-if="categoryType !== 'Equipment'">{{name}}</td>
+
+        <!-- Display installation types -->
+        <td ng-if="categoryinfo['aggregateBy'] === 'count'" ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
+          {{ installationType[type][0][categoryinfo['aggregateBy']] || 0}}
+        </td>
+          <!-- Display with two decimal points -->
+        <td ng-if="categoryinfo['aggregateBy'] !== 'count'" ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
+          <!-- converting to client specific units -->
+          {{ installationType[type][0][categoryinfo['aggregateBy']] * $ctrl.config.length.meters_to_length_units || 0 | number : 2 }}
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+  <!-- <table id="tblPlanSummary" class="table table-condensed table-striped">
+    <thead>
+      <tr>
+        <th></th>
         <td ng-repeat="(installationType,info) in $ctrl.summaryInstallationTypes">
           {{info.Label}}
         </td>
@@ -28,42 +73,36 @@ In plan summary
           <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Equipment']"></i>
           Equipment
         </th>
-        <!-- <td ng-repeat="(installationType, value) in $ctrl.totalEquipmentSummary">
-          {{value[0].count}}
-        </td> -->
-        <td>{{ $ctrl.totalEquipmentSummary[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
-        <td>{{ $ctrl.totalEquipmentSummary[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
-        <td>{{ $ctrl.totalEquipmentSummary[$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
       </tr>
 
-      <tr ng-if="$ctrl.isKeyExpanded['Equipment']" ng-repeat="(equipmentType, info) in $ctrl.transformedEquipmentSummary">
+      <tr ng-if="$ctrl.isKeyExpanded['Equipment']" ng-repeat="(equipmentType, info) in $ctrl.summaryCategoryTypes['Equipment']['summaryData']">
         <th class="indent-1">{{$ctrl.state.networkNodeTypesEntity[equipmentType]}}</th>
-        <!-- <td ng-repeat="(installationType, value) in info">
-          {{value[0].count}}
-        </td> -->
         <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
         <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
         <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
       </tr>
 
-      <!-- <tr>
+      <tr>
         <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded('Fiber')">
           <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Fiber']"></i>
           <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Fiber']"></i>
           Fiber
         </th>
-        <td>{{ $ctrl.totalEquipmentSummary[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
-        <td>{{ $ctrl.totalEquipmentSummary[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
-        <td>{{ $ctrl.totalEquipmentSummary[$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Fiber']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].lengthMeters | number : 2}}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Fiber']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].lengthMeters | number : 2}}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Fiber']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].lengthMeters | number : 2}}</td>
       </tr>
 
-      <tr ng-if="$ctrl.isKeyExpanded['Fiber']" ng-repeat="(equipmentType, info) in $ctrl.transformedEquipmentSummary">
-        <th class="indent-1">{{$ctrl.state.networkNodeTypesEntity[equipmentType]}}</th>
-        <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
-      </tr> -->
+      <tr ng-if="$ctrl.isKeyExpanded['Fiber']" ng-repeat="(fiberType, info) in $ctrl.summaryCategoryTypes['Fiber']['summaryData']">
+        <th class="indent-1">{{fiberType}}</th>
+        <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].lengthMeters | number : 2}}</td>
+        <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].lengthMeters | number : 2}}</td>
+        <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].lengthMeters | number : 2}}</td>
+      </tr>
 
     </tbody>
-  </table>    
+  </table>     -->
 </div>  
