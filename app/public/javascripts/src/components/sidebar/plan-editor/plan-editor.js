@@ -3,6 +3,7 @@ import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 
@@ -141,6 +142,8 @@ class PlanEditorController {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
           //console.log(feature)
+          //console.log( AroFeatureFactory.createObject(feature) )
+          
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
@@ -227,9 +230,10 @@ class PlanEditorController {
         // Construct a feature that we will pass to the map object editor, which will create the map object
         var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
                                                         optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
-        
+        // ToDo: this should use AroFeatureFactory
         var feature = {
           objectId: this.getUUID(),
+          networkNodeType: boundaryProperties.networkNodeType, 
           geometry: {
             type: 'Polygon',
             coordinates: result.data.polygon.coordinates
@@ -540,8 +544,10 @@ class PlanEditorController {
     })
     
     const boundaryProperties = this.objectIdToProperties[objectId]
+    // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
+      networkNodeType: boundaryProperties.networkNodeType, 
       geometry: {
         type: 'Polygon',
         coordinates: allPaths
@@ -730,10 +736,10 @@ class PlanEditorController {
     if (null == this.currentTransaction) return
     this.selectedMapObject = mapObject
     
-    //if (null != this.selectedMapObject){
-    //  console.log( this.selectedMapObject )
-    //  console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-    //}
+    if (null != this.selectedMapObject){
+      console.log( this.selectedMapObject )
+      console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
+    }
     
     this.$timeout()
   }

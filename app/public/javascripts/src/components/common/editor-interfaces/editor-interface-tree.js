@@ -96,6 +96,7 @@ let editorInterfaceTree = {
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
     onChange: '&', 
+    getNewItem: '&', 
     isEdit: '<', 
     indentationLevel: '<'
   },
