@@ -22,11 +22,10 @@ class PlanSummaryController {
     }
 
     this.equipmentOrder = ['central_office','dslam','fiber_distribution_hub','fiber_distribution_terminal','bulk_distribution_terminal',
-    'splice_point','cell_5g']
-    state.plan
-    .subscribe((plan) => {
-      this.plan = plan
-    })
+    'splice_point','cell_5g','junction_splitter']
+    
+    state.plan.subscribe((plan) => this.plan = plan)
+    this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
   }
 
   $onInit() {
@@ -54,8 +53,8 @@ class PlanSummaryController {
   }
 
   formatSummary(planSummary) {
-   // var temp = _.sortBy(planSummary.equipmentSummary, (obj) => _.indexOf(this.equipmentOrder, obj.networkNodeType))
-    var equipmentSummary = planSummary.equipmentSummary
+    var OrderedEquipmentSummary = _.sortBy(planSummary.equipmentSummary, (obj) => _.indexOf(this.equipmentOrder, obj.networkNodeType))
+    var equipmentSummary = OrderedEquipmentSummary
     var fiberSummary = planSummary.fiberSummary
 
     this.summaryCategoryTypes['Equipment']['summaryData'] = this.transformSummary(equipmentSummary,this.summaryCategoryTypes['Equipment']['groupBy'],this.summaryCategoryTypes['Equipment']['aggregateBy'])
@@ -103,6 +102,10 @@ class PlanSummaryController {
 
   toggleIsKeyExpanded(type) {
     this.isKeyExpanded[type] = !this.isKeyExpanded[type]
+  }
+
+  $onDestroy() {
+    this.planEditorChangedObserver.unsubscribe()
   }
 }
   

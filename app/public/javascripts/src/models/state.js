@@ -1545,6 +1545,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .catch((err) => console.error(err))
   }
 
+  service.planEditorChanged = new Rx.BehaviorSubject(false)
   service.resumeTransaction = () => {
     return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
     .then((result) => {
