@@ -50,7 +50,7 @@
     <manage-groups ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS" manager-view="$ctrl.globalSettingsService.currentManageUserView">
     </manage-groups>
 
-    <user-settings ng-show="$ctrl.currentView === $ctrl.views.USER_SETTINGS"></user-settings>
+    <user-settings ng-if="$ctrl.currentView === $ctrl.views.USER_SETTINGS"></user-settings>
 
     <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER" manager-view="$ctrl.globalSettingsService.currentTagManagerView">
       <tag-manager>
