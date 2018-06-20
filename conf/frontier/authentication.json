@@ -1,0 +1,17 @@
+{
+  "useLdap": true,
+  "LOCALldapOptions": {
+    "distinguishedName": "uid=$USERNAME$,ou=Users,dc=example,dc=org",
+    "url": "ldap://127.0.0.1",
+    "base": "ou=Users,dc=example,dc=org",
+    "firstNameAttribute": "uid",
+    "lastNameAttribute": "uid"
+  },
+  "ldapOptions": {
+    "distinguishedName": "cn=$USERNAME$,ou=People,dc=corp,dc=pvt",
+    "url": "ldap://ldap.ftr.com",
+    "base": "ou=People,dc=corp,dc=pvt",
+    "firstNameAttribute": "givenName",
+    "lastNameAttribute": "sn"
+  }
+}
