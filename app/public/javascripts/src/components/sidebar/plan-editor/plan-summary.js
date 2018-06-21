@@ -1,7 +1,8 @@
 class PlanSummaryController {
   
-  constructor(state,$http,$timeout) {
+  constructor(state,configuration,$http,$timeout) {
     this.state = state
+    this.configuration = configuration
     this.$http = $http
     this.$timeout = $timeout
     this.currentTransaction = null
@@ -21,8 +22,8 @@ class PlanSummaryController {
       //Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'','aggregateBy':''}
     }
 
-    this.equipmentOrder = ['central_office','dslam','fiber_distribution_hub','fiber_distribution_terminal','bulk_distribution_terminal',
-    'splice_point','cell_5g','junction_splitter']
+    this.equipmentOrder = []
+    this.fiberOrder = []
     
     state.plan.subscribe((plan) => this.plan = plan)
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
@@ -33,7 +34,24 @@ class PlanSummaryController {
     //   this.formatSummary(response.data)
     // })
 
+    var equipmentOrderKey = this.summaryCategoryTypes['Equipment']['groupBy']
+    this.equipmentOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.equipments,equipmentOrderKey)
+    this.equipmentOrder.push('junction_splitter')
+    
+    // var fiberOrderKey = this.summaryCategoryTypes['Fiber']['groupBy']
+    // this.fiberOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.cables,fiberOrderKey)
+
     this.$timeout(() => this.getPlanSummary(),1000)
+  }
+
+  orderSummaryByCategory(obj,key) {
+    var categoryOrder = []
+
+    for (const [objKey, objValue] of Object.entries(obj)) {
+      categoryOrder.push(objValue[key])
+    }
+
+    return categoryOrder
   }
 
   getPlanSummary() {
@@ -109,7 +127,7 @@ class PlanSummaryController {
   }
 }
   
-PlanSummaryController.$inject = ['state','$http','$timeout']
+PlanSummaryController.$inject = ['state','configuration','$http','$timeout']
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',
