@@ -87,6 +87,19 @@ class EditorInterfaceTreeController {
     
   }
   
+  // ---
+  
+  debugLog(mess){
+    console.log(mess)
+  }
+  
+  debugSet(){
+    console.log(this.objectToView)
+    console.log(this.objectToView.getDisplayProperties())
+    console.log('')
+  }
+  
+  // ---
 }
 
 // AroInfoObjectViewController.$inject = []

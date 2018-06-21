@@ -6,6 +6,7 @@
   <!-- 
   <div class="ei-items-contain" ng-repeat="prop in $ctrl.displayProps" ng-if="$ctrl.doShow(prop)">
   -->
+  
   <div class="ei-items-contain" ng-repeat="prop in $ctrl.objectToView.getDisplayProperties()" ng-if="$ctrl.doShow(prop)">
     {{listVals=$ctrl.makeList(prop);""}}
     <div ng-repeat="listVal in listVals">
@@ -71,11 +72,6 @@
     <div class="ei-property-item" ng-if="'tree' != prop.format && 'list' != prop.format && '1' != prop.levelOfDetail" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
       <div style="flex: 1 1 50%;"><div>{{prop.displayName}}</div></div>
       <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
-      <!-- ToDo replace below with editor-interface-table once we figure out the settings issue -->
-      <!-- 
-      <input ng-if="$ctrl.isEdit && prop.editable" type="text" ng-model="$ctrl.objectToView[prop.propertyName]" class="form-control input-sm ei-input-text" style="flex: 0 0 50%">
-      <div ng-if="!$ctrl.isEdit || !prop.editable" style="flex: 0 0 50%"><div>{{value}}</div></div>
-      -->
       <editor-interface-value display-props="prop" on-change="$ctrl.onChange()" model="$ctrl.objectToView[prop.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
     </div>
   </div>
