@@ -13,6 +13,9 @@ var dedent = require('dedent')
 var pify = require('pify')
 var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
+const ldap = require('ldapjs')
+const UIConfiguration = require('./ui_configuration')
+const authenticationConfig = (new UIConfiguration()).getConfigurationSet('authentication')
 
 module.exports = class User {
 
@@ -37,6 +40,93 @@ module.exports = class User {
         err ? reject(err) : resolve(ok)
       })
     })
+  }
+
+  // Perform a LDAP binding to authenticate the user with given credentials
+  static ldapBind(ldapClient, distinguishedName, password) {
+    return new Promise((resolve, reject) => {
+      ldapClient.bind(distinguishedName, password, (err) => {
+        if (err) {
+          reject(err) // There was an error binding with the given credentials
+        }
+        resolve() // Successfully bound with the given credentials
+      })
+    })
+  }
+
+  // Retrieve details of a successfully logged in LDAP user
+  static ldapGetUserDetails(ldapClient, distinguishedName) {
+    // We assume that the ldapClient has been successfully bound at this point.
+    return new Promise((resolve, reject) => {
+      const ldapOpts = {
+        scope: 'sub',
+        attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute]
+      };
+      ldapClient.search(distinguishedName, ldapOpts, (err, search) => {
+        if (err) {
+          reject(err) // There was an error when performing the search
+        }
+        search.on('searchEntry', (entry) => {
+          resolve({
+            firstName: entry.object[authenticationConfig.ldapOptions.firstNameAttribute],
+            lastName: entry.object[authenticationConfig.ldapOptions.lastNameAttribute]
+          })
+        })
+        search.on('error', (err) => reject(err))
+      })
+    })
+  }
+
+  // Find or create a user
+  static findOrCreateUser(firstName, lastName, email) {
+    // We have a PSQL function to create users, that will throw an error if the user exists.
+    return database.query(`SELECT auth.add_user('${firstName}', '${lastName}', '${email}');`)
+      .catch((err) => {
+        // Error means that the user exists. Return a resolved promise. Kindof a poor mans UPSERT.
+        return Promise.resolve()
+      })
+  }
+
+  static loginLDAP(username, password) {
+
+    // Create a LDAP client that we will user for authentication
+    const ldapClient = ldap.createClient({
+      url: authenticationConfig.ldapOptions.url
+    });
+    // Create a Distinguished Name (DN) that we represents the user that is trying to login
+    const distinguishedName = authenticationConfig.ldapOptions.distinguishedName.replace('$USERNAME$', username)
+
+    var userDetails = null
+    return this.ldapBind(ldapClient, distinguishedName, password)
+      .then(() => this.ldapGetUserDetails(ldapClient, distinguishedName))
+      .then((result) => {
+        // We have the first and last names, upsert the user
+        userDetails = result
+        return this.findOrCreateUser(userDetails.firstName, userDetails.lastName, username)
+      })
+      .then(() => this.hashPassword(password))
+      .then((hashedPassword) => {
+        // Update the details for this user
+        const sql = `
+          UPDATE auth.users
+          SET first_name = '${userDetails.firstName}', last_name = '${userDetails.lastName}', password = '${hashedPassword}', rol = 'admin'
+          WHERE email='${username}';
+        `
+        return database.query(sql);
+      })
+      .then(() => {
+        var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
+        return database.findOne(sql, [username])
+      })
+      .then((user) => {
+        delete user.password
+        return user
+      })
+      .catch((err) => {
+        console.error('**** Error when logging in with LDAP')
+        console.error(err)
+        return Promise.reject(err)
+      })
   }
 
   static login (email, password) {

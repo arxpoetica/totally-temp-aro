@@ -528,7 +528,7 @@ class PlanEditorController {
   }
 
   // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
-  formatBoundaryForService(objectId) {
+  formatBoundaryForService(objectId, networkNodeType) {
     // Format the object and send it over to aro-service
     var boundaryMapObject = this.objectIdToMapObject[objectId]
     var allPaths = []
@@ -538,6 +538,10 @@ class PlanEditorController {
       allPaths.push(pathPoints)
     })
     
+    // The site network node type can be in our map of obj-to-properties, OR it can be passed in (useful
+    // in case we are editing existing boundaries, in which case the associated network node is not in our map)
+    var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
+    const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
@@ -546,6 +550,7 @@ class PlanEditorController {
         coordinates: allPaths
       },
       attributes: {
+        network_node_type: siteNetworkNodeType,
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -702,7 +707,8 @@ class PlanEditorController {
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
-      var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
+      const networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       this.state.requestRecreateTiles.next({})
       this.state.requestMapLayerRefresh.next({})
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)

@@ -398,7 +398,10 @@ class MapObjectEditorController {
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
                            .then((result) => {
                              var serviceFeature = result.data
-                             serviceFeature.attributes = { network_node_object_id: serviceFeature.networkObjectId }
+                             serviceFeature.attributes = {
+                               network_node_object_id: serviceFeature.networkObjectId,
+                               networkNodeType: serviceFeature.networkNodeType
+                             }
                              serviceFeature.isExistingObject = true
                              return Promise.resolve(serviceFeature)
                            })

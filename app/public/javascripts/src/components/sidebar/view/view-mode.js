@@ -50,7 +50,7 @@ let viewMode = {
 
       <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show">
-        <network-plan-manage></network-plan-manage>
+        <network-plan-manage ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></network-plan-manage>
       </accordion-panel-contents>
       <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
       <accordion-panel-title title="'Coverage Boundary'"
