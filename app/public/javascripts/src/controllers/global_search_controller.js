@@ -5,6 +5,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
 
   // We now need a plan ID in the search address url
   var planId = null
+  var planInfo = null
   var searchControl = null
 
   // Update the search control every time that the plan changes.
@@ -13,6 +14,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     if (!planId) {
       // Initialize select2 only the first time
       planId = plan.id
+      planInfo = plan
       initializeSelect()
     }
     $timeout(() => searchAddress(plan.areaName), 10)
@@ -84,7 +86,8 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
       console.warn('Search control not yet initialized')
       return
     }
-    if ('undefined' == typeof searchText) {
+    //place map to user's default location for ephemeral plan 
+    if ('undefined' == typeof searchText || planInfo.ephemeral) {
       searchText = state.loggedInUser.default_location ? state.loggedInUser.default_location : config.ui.defaultSearch
     }
     const searchUrl = `/search/addresses/${planId}?userId=${state.loggedInUser.id}`
