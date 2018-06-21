@@ -33,7 +33,7 @@
           <!-- Display with two decimal points -->
         <th ng-if="categoryinfo['aggregateBy'] !== 'count'" ng-repeat="(installationType,info) in $ctrl.summaryInstallationTypes">
             <!-- converting to client specific units -->
-            {{ categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] * $ctrl.config.length.meters_to_length_units | number : 2 }}
+            {{ categoryinfo['totalSummary'][installationType][0][categoryinfo['aggregateBy']] * $ctrl.config.length.meters_to_length_units | number : 1 }}
         </th>
       </tr>
 
@@ -50,7 +50,7 @@
           <!-- Display with two decimal points -->
         <td ng-if="categoryinfo['aggregateBy'] !== 'count'" ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
           <!-- converting to client specific units -->
-          {{ installationType[type][0][categoryinfo['aggregateBy']] * $ctrl.config.length.meters_to_length_units || 0 | number : 2 }}
+          {{ installationType[type][0][categoryinfo['aggregateBy']] * $ctrl.config.length.meters_to_length_units || 0 | number : 1 }}
         </td>
       </tr>
 
