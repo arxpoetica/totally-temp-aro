@@ -807,6 +807,7 @@ class PlanEditorController {
             // There is no equipment left in the transaction. Just remove the subnet map objects
             this.clearAllSubnetMapObjects()
           }
+          this.state.planEditorChanged.next(true) //recaluculate plansummary
         })
         .catch((err) => console.error(err))
       // If this is an equipment, delete its associated boundary (if any)
@@ -900,6 +901,7 @@ class PlanEditorController {
       })
       .then(() => {
         this.clearAllSubnetMapObjects()
+        this.state.planEditorChanged.next(true)
         Object.keys(recalculatedSubnets).forEach((centralOfficeObjectId) => {
           // We have the fiber in result.data.subnetLinks
           const subnetKey = `${centralOfficeObjectId}`
