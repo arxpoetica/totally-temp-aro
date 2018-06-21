@@ -8,7 +8,7 @@
     "lastNameAttribute": "uid"
   },
   "ldapOptions": {
-    "distinguishedName": "cn=$USERNAME$,ou=People,dc=corp,dc=pvt",
+    "distinguishedName": "$USERNAME$@corp.pvt",
     "url": "ldap://10.250.64.170",
     "base": "ou=People,dc=corp,dc=pvt",
     "firstNameAttribute": "givenName",
