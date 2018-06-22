@@ -233,9 +233,9 @@ class PlanEditorController {
             type: 'Polygon',
             coordinates: result.data.polygon.coordinates
           },
+          boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
           attributes: {
             network_node_type: 'dslam',
-            boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
             network_node_object_id: equipmentObjectId, // This is the Network Equipment that this boundary is associated with
@@ -549,9 +549,9 @@ class PlanEditorController {
         type: 'Polygon',
         coordinates: allPaths
       },
+      boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: {
         network_node_type: siteNetworkNodeType,
-        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId],
