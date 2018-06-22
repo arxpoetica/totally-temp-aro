@@ -9,7 +9,8 @@ class PlanSummaryController {
     this.config = config
     this.isKeyExpanded = {
       Equipment: false,
-      Fiber: false
+      Fiber: false,
+      Coverage: false
     }
     this.summaryInstallationTypes = Object.freeze({
       INSTALLED:{id:'INSTALLED',Label:'Existing'},
@@ -18,8 +19,8 @@ class PlanSummaryController {
     })
     this.summaryCategoryTypes = {
       Equipment:{'summaryData': {},'totalSummary':{},'groupBy':'networkNodeType','aggregateBy':'count'},
-      Fiber: {'summaryData': {},'totalSummary':{},'groupBy':'fiberType','aggregateBy':'lengthMeters'}
-      //Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'','aggregateBy':''}
+      Fiber: {'summaryData': {},'totalSummary':{},'groupBy':'fiberType','aggregateBy':'lengthMeters'},
+      Coverage: {'summaryData': {},'totalSummary':{},'groupBy':'locationEntityType','aggregateBy':'count'}
     }
 
     this.equipmentOrder = []
@@ -74,14 +75,19 @@ class PlanSummaryController {
     var OrderedEquipmentSummary = _.sortBy(planSummary.equipmentSummary, (obj) => _.indexOf(this.equipmentOrder, obj.networkNodeType))
     var equipmentSummary = OrderedEquipmentSummary
     var fiberSummary = planSummary.fiberSummary
+    var rawCoverageSummary = planSummary.equipmentCoverageSummary
+    var processedCoverageSummary = this.processCoverageSummary(rawCoverageSummary)
 
     this.summaryCategoryTypes['Equipment']['summaryData'] = this.transformSummary(equipmentSummary,this.summaryCategoryTypes['Equipment']['groupBy'],this.summaryCategoryTypes['Equipment']['aggregateBy'])
     this.summaryCategoryTypes['Fiber']['summaryData'] = this.transformSummary(fiberSummary,this.summaryCategoryTypes['Fiber']['groupBy'],this.summaryCategoryTypes['Fiber']['aggregateBy'])
+    this.summaryCategoryTypes['Coverage']['summaryData'] = this.transformSummary(processedCoverageSummary,this.summaryCategoryTypes['Coverage']['groupBy'],this.summaryCategoryTypes['Coverage']['aggregateBy'])
 
     //Calculating Total Equipment Summary
     this.summaryCategoryTypes['Equipment']['totalSummary'] = this.calculateTotalByInstallationType(equipmentSummary,this.summaryCategoryTypes['Equipment']['aggregateBy'])
     //Calculating Total Fiber Summary
     this.summaryCategoryTypes['Fiber']['totalSummary'] = this.calculateTotalByInstallationType(fiberSummary,this.summaryCategoryTypes['Fiber']['aggregateBy'])
+    //Calculating Total Coverage Summary
+    this.summaryCategoryTypes['Coverage']['totalSummary'] = this.calculateTotalByInstallationType(processedCoverageSummary,this.summaryCategoryTypes['Coverage']['aggregateBy'])
   }
 
   calculateTotalByInstallationType(equipmentSummary,aggregateBy) {
@@ -116,6 +122,16 @@ class PlanSummaryController {
     });
 
     return transformedSummary
+  }
+
+  processCoverageSummary(summary) {
+    summary.forEach((row) => {
+      //calculate count by aggregating 'count' in 'tagSetCounts' array of objects
+      var tagSetCountsArray = row['tagSetCounts'].map(tagset => tagset['count']) 
+      row['count'] = tagSetCountsArray.length && tagSetCountsArray.reduce((accumulator, currentValue) => accumulator + currentValue)
+    })
+
+    return summary
   }
 
   toggleIsKeyExpanded(type) {

@@ -250,6 +250,7 @@ class PlanEditorController {
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
         this.isWorkingOnCoverage = false
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
       })
       .catch((err) => {
         console.error(err)
@@ -803,6 +804,9 @@ class PlanEditorController {
       this.deleteBoundary(boundaryObjectId)
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
+      .then(() => {
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
+      })
     }
   }
 
