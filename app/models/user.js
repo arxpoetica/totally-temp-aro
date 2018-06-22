@@ -45,6 +45,9 @@ module.exports = class User {
   // Perform a LDAP binding to authenticate the user with given credentials
   static ldapBind(ldapClient, distinguishedName, password) {
     return new Promise((resolve, reject) => {
+      // Time out if the LDAP bind fails (setting timeout on the client does not help).
+      // The LDAP server may be unreachable, or may not be sending a response.
+      setTimeout(() => reject('LDAP bind timed out'), 4000)
       ldapClient.bind(distinguishedName, password, (err) => {
         if (err) {
           reject(err) // There was an error binding with the given credentials
@@ -58,6 +61,9 @@ module.exports = class User {
   static ldapGetUserDetails(ldapClient, username) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
+      // Time out if the LDAP bind fails (setting timeout on the client does not help).
+      // The LDAP server may be unreachable, or may not be sending a response.
+      setTimeout(() => reject('LDAP bind timed out'), 8000)
       const ldapOpts = {
         filter: `CN=${username}`,
         scope: 'sub',
