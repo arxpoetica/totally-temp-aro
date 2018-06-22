@@ -522,7 +522,8 @@ class PlanEditorController {
         selectedEquipmentType: objectProperties.selectedEquipmentType
       },
       dataType: 'equipment', 
-      networkNodeEquipment: objectProperties.networkNodeEquipment
+      networkNodeEquipment: objectProperties.networkNodeEquipment,
+      deploymentType: 'INSTALLED'
     }
     return serviceFeature
   }
