@@ -65,10 +65,10 @@
       "dslam":{
         "show": true
       },
-      "fdh":{
+      "fiber_distribution_hub":{
         "show": true
       },
-      "fdt":{
+      "fiber_distribution_terminal":{
         "show": true
       },
       "bulk_distribution_terminal":{
@@ -80,7 +80,13 @@
       "fiveg_coverage":{
         "show": true
       },
-      "fiveg_site":{
+      "cell_5g":{
+        "show": true
+      },
+      "loop_extender": {
+        "show": true
+      },
+      "network_anchor": {
         "show": true
       },
       "planned":{
@@ -269,10 +275,10 @@
       "dslam":{
         "show": true
       },
-      "fdh":{
+      "fiber_distribution_hub":{
         "show": true
       },
-      "fdt":{
+      "fiber_distribution_terminal":{
         "show": true
       },
       "bulk_distribution_terminal":{
@@ -284,7 +290,13 @@
       "fiveg_coverage":{
         "show": false
       },
-      "fiveg_site":{
+      "cell_5g":{
+        "show": true
+      },
+      "loop_extender": {
+        "show": true
+      },
+      "network_anchor": {
         "show": true
       },
       "planned":{
@@ -473,10 +485,10 @@
       "dslam":{
         "show": true
       },
-      "fdh":{
+      "fiber_distribution_hub":{
         "show": true
       },
-      "fdt":{
+      "fiber_distribution_terminal":{
         "show": true
       },
       "bulk_distribution_terminal":{
@@ -488,7 +500,13 @@
       "fiveg_coverage":{
         "show": false
       },
-      "fiveg_site":{
+      "cell_5g":{
+        "show": true
+      },
+      "loop_extender": {
+        "show": true
+      },
+      "network_anchor": {
         "show": true
       },
       "planned":{

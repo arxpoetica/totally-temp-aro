@@ -44,7 +44,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     // Create a list of enabled network node types that we WILL allow the user to drag onto the map
     this.enabledNetworkNodeTypes = [
@@ -54,7 +56,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     
     this.censusCategories = this.state.censusCategories.getValue()
@@ -134,7 +138,6 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
-          console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
@@ -524,7 +527,7 @@ class PlanEditorController {
       },
       dataType: 'equipment', 
       networkNodeEquipment: objectProperties.networkNodeEquipment,
-      deploymentType: 'INSTALLED'
+      deploymentType: 'PLANNED'
     }
     return serviceFeature
   }
@@ -608,11 +611,6 @@ class PlanEditorController {
     }
     var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
-    
-    // ToDo: there are discrepancies in out naming, fix that
-    if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
-    if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
-    if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
   

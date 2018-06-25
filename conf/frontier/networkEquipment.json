@@ -6,10 +6,10 @@
     "dslam": {
       "iconUrl": "/images/map_icons/aro/remote_terminal.png"
     },
-    "fdh": {
+    "fiber_distribution_hub": {
       "iconUrl": "/images/map_icons/frontier/fiber_distribution_hub.png"
     },
-    "fdt": {
+    "fiber_distribution_terminal": {
       "iconUrl": "/images/map_icons/frontier/fiber_distribution_terminal.png"
     },
     "bulk_distribution_terminal": {
@@ -18,9 +18,15 @@
     "splice_point": {
       "iconUrl": "/images/map_icons/frontier/splice_point.png"
     },
-    "fiveg_site": {
+    "cell_5g": {
       "label": "Fixed Wireless Site",
       "iconUrl": "/images/map_icons/frontier/composite/all_cell_5g.png"
+    },
+    "loop_extender": {
+      "iconUrl": "/images/map_icons/frontier/loop_extender.png"
+    },
+    "network_anchor": {
+      "iconUrl": "/images/map_icons/frontier/network_anchor.png"
     }
   },
   "cables": {
