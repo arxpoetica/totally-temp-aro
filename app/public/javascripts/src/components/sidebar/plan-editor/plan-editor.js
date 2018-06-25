@@ -134,7 +134,6 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
-          console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
@@ -608,11 +607,6 @@ class PlanEditorController {
     }
     var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
-    
-    // ToDo: there are discrepancies in out naming, fix that
-    if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
-    if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
-    if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
   

@@ -35,7 +35,7 @@
       },
       "isequipment": true
     },
-    "fdh": {
+    "fiber_distribution_hub": {
       "label": "FDH",
       "networkNodeType": "fiber_distribution_hub",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/fiber_distribution_hub/point/{pointTransform}/entity/",
@@ -51,7 +51,7 @@
       },
       "isequipment": true
     },
-    "fdt": {
+    "fiber_distribution_terminal": {
       "label": "FDT",
       "networkNodeType": "fiber_distribution_terminal",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/fiber_distribution_terminal/point/{pointTransform}/entity/",
@@ -99,7 +99,7 @@
       },
       "isequipment": true
     },
-    "fiveg_site": {
+    "cell_5g": {
       "label": "5G Site",
       "networkNodeType": "cell_5g",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/cell_5g/point/{pointTransform}/entity/",
@@ -253,11 +253,11 @@
   ],
   "visibility": {
     "equipments": {
-      "admin": ["central_office", "dslam", "fdh", "fdt", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "fiveg_site"],
-      "sales": ["central_office", "dslam", "fdh", "fdt", "splice_point", "fiveg_site"],
-      "sales_engineers":["central_office", "dslam", "fdh", "fdt", "splice_point", "fiveg_site"],
-      "account_exec":["central_office", "dslam", "fdh", "fdt", "splice_point", "fiveg_site"],
-      "default": ["central_office", "dslam", "fdh", "fdt", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "fiveg_site"]
+      "admin": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g"],
+      "sales": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g"],
+      "sales_engineers":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g"],
+      "account_exec":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g"],
+      "default": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g"]
     },
     "cables": {},
     "boundaries": {}

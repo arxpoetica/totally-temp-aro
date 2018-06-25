@@ -129,7 +129,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
       } else if (boundaryKey === 'fiveg_coverage') {
         $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName
-          && $scope.configuration.networkEquipment.equipments['fiveg_site'].checked)
+          && $scope.configuration.networkEquipment.equipments['cell_5g'].checked)
       }
       
     })
