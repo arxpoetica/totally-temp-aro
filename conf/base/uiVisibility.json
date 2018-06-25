@@ -83,6 +83,12 @@
       "cell_5g":{
         "show": true
       },
+      "loop_extender": {
+        "show": true
+      },
+      "network_anchor": {
+        "show": true
+      },
       "planned":{
         "show": true
       },
@@ -287,6 +293,12 @@
       "cell_5g":{
         "show": true
       },
+      "loop_extender": {
+        "show": true
+      },
+      "network_anchor": {
+        "show": true
+      },
       "planned":{
         "show": true
       },
@@ -489,6 +501,12 @@
         "show": false
       },
       "cell_5g":{
+        "show": true
+      },
+      "loop_extender": {
+        "show": true
+      },
+      "network_anchor": {
         "show": true
       },
       "planned":{

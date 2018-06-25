@@ -21,6 +21,12 @@
     "cell_5g": {
       "label": "Fixed Wireless Site",
       "iconUrl": "/images/map_icons/frontier/composite/all_cell_5g.png"
+    },
+    "loop_extender": {
+      "iconUrl": "/images/map_icons/frontier/loop_extender.png"
+    },
+    "network_anchor": {
+      "iconUrl": "/images/map_icons/frontier/network_anchor.png"
     }
   },
   "cables": {

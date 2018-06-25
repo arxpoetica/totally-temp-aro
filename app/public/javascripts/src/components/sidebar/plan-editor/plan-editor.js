@@ -44,7 +44,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     // Create a list of enabled network node types that we WILL allow the user to drag onto the map
     this.enabledNetworkNodeTypes = [
@@ -54,7 +56,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     
     this.censusCategories = this.state.censusCategories.getValue()

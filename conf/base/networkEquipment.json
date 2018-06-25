@@ -114,6 +114,38 @@
         "strokeStyle": "#0000ff"
       },
       "isequipment": true
+    },
+    "loop_extender": {
+      "label": "Loop Extender",
+      "networkNodeType": "loop_extender",
+      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/loop_extender/point/{pointTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/loop_extender/point/{pointTransform}/entity/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/composite/loop_extender.png",
+      "selectedIconUrl": "/images/map_icons/aro/loop_extender.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "point",
+      "zIndex": 7540, 
+      "drawingOptions": {
+        "strokeStyle": "#0000ff"
+      },
+      "isequipment": true
+    },
+    "network_anchor": {
+      "label": "Network Anchor",
+      "networkNodeType": "network_anchor",
+      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/network_anchor/point/{pointTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/network_anchor/point/{pointTransform}/entity/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/composite/network_anchor.png",
+      "selectedIconUrl": "/images/map_icons/aro/network_anchor.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "point",
+      "zIndex": 7550, 
+      "drawingOptions": {
+        "strokeStyle": "#0000ff"
+      },
+      "isequipment": true
     }
   },
   "cables": {
@@ -253,11 +285,11 @@
   ],
   "visibility": {
     "equipments": {
-      "admin": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g"],
-      "sales": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g"],
-      "sales_engineers":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g"],
-      "account_exec":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g"],
-      "default": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g"]
+      "admin": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g", "loop extender", "network_anchor"],
+      "sales": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g", "loop extender", "network_anchor"],
+      "sales_engineers":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g", "loop extender", "network_anchor"],
+      "account_exec":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g", "loop extender", "network_anchor"],
+      "default": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g", "loop extender", "network_anchor"]
     },
     "cables": {},
     "boundaries": {}
