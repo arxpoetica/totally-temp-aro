@@ -14,9 +14,9 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     if (!planId) {
       // Initialize select2 only the first time
       planId = plan.id
-      planInfo = plan
       initializeSelect()
     }
+    planInfo = plan    
     $timeout(() => searchAddress(plan.areaName), 10)
     planId = plan.id
   })
