@@ -948,7 +948,6 @@ module.exports = class NetworkPlan {
         var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase(), serviceLayerIds])
         var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text)
         url = process.env.GOOGLE_MAPS_API_IP_KEY ? url + `&key=${process.env.GOOGLE_MAPS_API_IP_KEY}` : url
-        console.log(url)
         var addresses = text.length > 0
                         ? request({ url: url, json: true })
                         : Promise.resolve(null)
