@@ -1,10 +1,12 @@
 {
   "equipments": {
     "central_office": {
-      "iconUrl": "/images/map_icons/frontier/central_office.png"
+      "iconUrl": "/images/map_icons/frontier/central_office.png",
+      "checked": true
     },
     "dslam": {
-      "iconUrl": "/images/map_icons/aro/remote_terminal.png"
+      "iconUrl": "/images/map_icons/aro/remote_terminal.png",
+      "checked": true
     },
     "fiber_distribution_hub": {
       "iconUrl": "/images/map_icons/frontier/fiber_distribution_hub.png"

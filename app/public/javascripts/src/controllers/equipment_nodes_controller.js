@@ -10,6 +10,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     existing: false,
     planned: false
   }
+  $scope.layerTypeVisibility.existing = config.ARO_CLIENT === 'frontier' //enable existing for frontier by default
   $scope.mapZoom = 0//map.getZoom()
   
   var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
@@ -83,7 +84,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         
         if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
-          state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+          state.dataItems && state.dataItems[networkEquipment.dataItemKey] 
+            && state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
             var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
             mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
             createdMapLayerKeys.add(mapLayerKey)
