@@ -1028,15 +1028,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // our getTile() method again. Any rendering that is in process for the existing tiles will
   // continue but will not be shown on our map.
   service.recreateTilesAndCache = () => {
-    return new Promise((resolve, reject) => {
-      tileDataService.clearDataCache()
-      return service.loadModifiedFeatures(service.plan.getValue().id)
-    })
-    .then(() => {
-      service.requestRecreateTiles.next({})
-      service.requestMapLayerRefresh.next({})
-    })
-    .catch((err) => console.error(err))
+    tileDataService.clearDataCache()
+    return service.loadModifiedFeatures(service.plan.getValue().id)
+      .then(() => {
+        service.requestRecreateTiles.next({})
+        service.requestMapLayerRefresh.next({})
+      })
+      .catch((err) => console.error(err))
   }
 
   service.setPlan = (plan) => {

@@ -37,11 +37,17 @@
         </th>
       </tr>
 
+      <tr ng-if="$ctrl.isKeyExpanded[categoryType] && categoryType == 'Coverage'">
+        <td colspan="4" class="indent-1">
+          {{ $ctrl.state.selectedBoundaryType.description }}
+        </td>
+      </tr>
+
       <!-- Display each element summary in category -->
       <tr ng-if="$ctrl.isKeyExpanded[categoryType]" ng-repeat="(name, installationType) in categoryinfo['summaryData']">
         <!-- For category type 'Equipment' display nicer names -->
         <td class="indent-1" ng-if="categoryType === 'Equipment'">{{$ctrl.state.networkNodeTypesEntity[name]}}</td>
-        <td class="indent-1" ng-if="categoryType !== 'Equipment'">{{name}}</td>
+        <td class="indent-1 text-capitalize" ng-if="categoryType !== 'Equipment'">{{name}}</td>
 
         <!-- Display installation types -->
         <td ng-if="categoryinfo['aggregateBy'] === 'count'" ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
@@ -55,6 +61,36 @@
       </tr>
 
     </tbody>
+
+    <!-- Display Coverage summary -->
+    <!-- <tbody> -->
+      <!-- coverage total summary -->
+      <!-- <tr>
+        <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded('Coverage')">
+          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Coverage']"></i>
+          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Coverage']"></i>
+          Coverage
+        </th>
+        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
+      </tr> -->
+
+      <!-- coverage detail summary -->
+      <!-- <tr ng-if="$ctrl.isKeyExpanded['Coverage']">
+        <td colspan="4" class="indent-1">
+          {{ $ctrl.state.selectedBoundaryType.description }}
+        </td>  
+      </tr>
+
+      <tr ng-if="$ctrl.isKeyExpanded['Coverage']" ng-repeat="(locationEntityType, info) in $ctrl.transformedCoverageSummary">
+        <td class="indent-1">{{locationEntityType}}</td>
+        <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].tagSetCounts || 0 }}</td>
+        <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].tagSetCounts || 0}}</td>
+        <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].tagSetCounts || 0}}</td>
+      </tr>
+
+    </tbody>   -->
   </table>
   <!-- <table id="tblPlanSummary" class="table table-condensed table-striped">
     <thead>

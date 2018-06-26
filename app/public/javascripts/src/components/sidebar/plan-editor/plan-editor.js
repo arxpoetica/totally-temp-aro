@@ -45,7 +45,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     // Create a list of enabled network node types that we WILL allow the user to drag onto the map
     this.enabledNetworkNodeTypes = [
@@ -55,7 +57,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     
     this.censusCategories = this.state.censusCategories.getValue()
@@ -238,9 +242,9 @@ class PlanEditorController {
             type: 'Polygon',
             coordinates: result.data.polygon.coordinates
           },
+          boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
           attributes: {
             network_node_type: boundaryProperties.networkNodeType,
-            boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
             network_node_object_id: equipmentObjectId, // This is the Network Equipment that this boundary is associated with
@@ -255,6 +259,7 @@ class PlanEditorController {
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
         this.isWorkingOnCoverage = false
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
       })
       .catch((err) => {
         console.error(err)
@@ -527,13 +532,14 @@ class PlanEditorController {
         selectedEquipmentType: objectProperties.selectedEquipmentType
       },
       dataType: 'equipment', 
-      networkNodeEquipment: objectProperties.networkNodeEquipment
+      networkNodeEquipment: objectProperties.networkNodeEquipment,
+      deploymentType: 'PLANNED'
     }
     return serviceFeature
   }
 
   // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
-  formatBoundaryForService(objectId) {
+  formatBoundaryForService(objectId, networkNodeType) {
     // Format the object and send it over to aro-service
     var boundaryMapObject = this.objectIdToMapObject[objectId]
     var allPaths = []
@@ -543,18 +549,22 @@ class PlanEditorController {
       allPaths.push(pathPoints)
     })
     
+    // The site network node type can be in our map of obj-to-properties, OR it can be passed in (useful
+    // in case we are editing existing boundaries, in which case the associated network node is not in our map)
+    var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
+    const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
-      networkNodeType: boundaryProperties.networkNodeType, 
+      networkNodeType: siteNetworkNodeType, 
       geometry: {
         type: 'Polygon',
         coordinates: allPaths
       },
+      boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: {
-        network_node_type: boundaryProperties.networkNodeType,
-        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
+        network_node_type: siteNetworkNodeType,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId],
@@ -611,9 +621,9 @@ class PlanEditorController {
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
     
     // ToDo: there are discrepancies in out naming, fix that
-    if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
-    if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
-    if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
+    //if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
+    //if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
+    //if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
   
@@ -714,7 +724,8 @@ class PlanEditorController {
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
-      var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
+      const networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       this.state.requestRecreateTiles.next({})
       this.state.requestMapLayerRefresh.next({})
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
@@ -815,6 +826,9 @@ class PlanEditorController {
       this.deleteBoundary(boundaryObjectId)
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
+      .then(() => {
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
+      })
     }
   }
 

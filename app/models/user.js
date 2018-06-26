@@ -45,6 +45,9 @@ module.exports = class User {
   // Perform a LDAP binding to authenticate the user with given credentials
   static ldapBind(ldapClient, distinguishedName, password) {
     return new Promise((resolve, reject) => {
+      // Time out if the LDAP bind fails (setting timeout on the client does not help).
+      // The LDAP server may be unreachable, or may not be sending a response.
+      setTimeout(() => reject('LDAP bind timed out'), 4000)
       ldapClient.bind(distinguishedName, password, (err) => {
         if (err) {
           reject(err) // There was an error binding with the given credentials
@@ -55,14 +58,18 @@ module.exports = class User {
   }
 
   // Retrieve details of a successfully logged in LDAP user
-  static ldapGetUserDetails(ldapClient, distinguishedName) {
+  static ldapGetUserDetails(ldapClient, username) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
+      // Time out if the LDAP bind fails (setting timeout on the client does not help).
+      // The LDAP server may be unreachable, or may not be sending a response.
+      setTimeout(() => reject('LDAP bind timed out'), 8000)
       const ldapOpts = {
+        filter: `CN=${username}`,
         scope: 'sub',
         attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute]
       };
-      ldapClient.search(distinguishedName, ldapOpts, (err, search) => {
+      ldapClient.search(authenticationConfig.ldapOptions.base, ldapOpts, (err, search) => {
         if (err) {
           reject(err) // There was an error when performing the search
         }
@@ -98,7 +105,7 @@ module.exports = class User {
 
     var userDetails = null
     return this.ldapBind(ldapClient, distinguishedName, password)
-      .then(() => this.ldapGetUserDetails(ldapClient, distinguishedName))
+      .then(() => this.ldapGetUserDetails(ldapClient, username))
       .then((result) => {
         // We have the first and last names, upsert the user
         userDetails = result

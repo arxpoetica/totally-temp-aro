@@ -93,7 +93,6 @@ class LocationEditorController {
     // All modifications will already have been saved to the server. Commit the transaction.
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
       .then((result) => {
-        console.log(result)
         // Transaction has been committed, start a new one
         this.state.recreateTilesAndCache()
         return this.resumeOrCreateTransaction()
