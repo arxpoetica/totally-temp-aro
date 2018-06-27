@@ -157,6 +157,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // If configuration is loaded again, update default visibility of "show existing equipment"
   $rootScope.$on('configuration_loaded', () => {
     $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
+    $timeout()
   })
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
