@@ -251,7 +251,11 @@ class MapTileRenderer {
 
   // Renders all data for this tile
   renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
-	var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+    // Store the HTML cache object. The object referred to by this.tileDataService.tileHtmlCache[tileId] can
+    // change between now and when the full tile is rendered. We do not want to set the dirty flag on a different object.
+    const tileId = this.getTileId(zoom, coord.x, coord.y)
+    var htmlCache = this.tileDataService.tileHtmlCache[tileId]
     var singleTilePromises = []
     	this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
@@ -296,10 +300,8 @@ class MapTileRenderer {
           var dataIndex = globalIndexToIndex[index]
           renderingData[mapLayerKey].data[dataIndex] = singleTileResult
         })
-        var tileId = this.getTileId(zoom, coord.x, coord.y)
         // We have all the data. Now check the dirty flag. The next call (where we render features)
         // MUST be synchronous for this to work correctly
-        var htmlCache = this.tileDataService.tileHtmlCache[tileId]  // This may be undefined, we are in a async call
         if (htmlCache && htmlCache.isDirty) {
           if (!useNeighbouringTileData) {
             // This is a single tile render. Render only if we do not have neighbouring data yet
@@ -325,7 +327,8 @@ class MapTileRenderer {
               ctx.drawImage(backBufferCanvas, 0, 0)
               // All rendering has been done. Mark the cached HTML tile as not-dirty
               // Mark as "not dirty" only if neighbouring tile data has been rendered
-              this.tileDataService.tileHtmlCache[tileId].isDirty = !useNeighbouringTileData
+              // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
+              htmlCache.isDirty = !useNeighbouringTileData
             }
           }
         }
