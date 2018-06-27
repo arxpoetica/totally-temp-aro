@@ -17,11 +17,12 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     return transform
   }
 
+  $scope.locationFilters = state.locationFilters;
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   $scope.disablelocations = false
-  var updateMapLayers = () => {
+  var updateMapLayers = $scope.updateMapLayers = () => {
 
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())
@@ -48,25 +49,68 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             && map && map.getZoom() >= 10) {
             $scope.disablelocations = false
             $timeout()
-            // Location type is visible
-            var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
-            var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
-            var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
-            url = url.replace('${libraryId}', selectedLocationLibrary.identifier)
 
-            if (pointTransform === 'aggregate') {
-              // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-              mergedLayerUrls.push(url)
-            } else {
-              // We want to create an individual layer
-              oldMapLayers[mapLayerKey] = {
-                dataUrls: [url],
-                iconUrl: `${baseUrl}${locationType.iconUrl}`,
-                renderMode: 'PRIMITIVE_FEATURES',
-                zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                selectable: true
+
+
+            if (configuration.perspective.hasLocationFilters) {
+              var hasFiltersSelected = $scope.locationFilters.filter((f)=>{return f.checked}).length > 0
+              if (hasFiltersSelected){
+                asGroup()
               }
-              createdMapLayerKeys.add(mapLayerKey)
+            }else {
+              asSingle()
+            }
+
+            function asSingle() {
+              // Location type is visible
+              var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
+              var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
+              var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
+              url = url.replace('${libraryId}', selectedLocationLibrary.identifier)
+
+              if (pointTransform === 'aggregate') {
+                // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+                mergedLayerUrls.push(url)
+              } else {
+                // We want to create an individual layer
+                oldMapLayers[mapLayerKey] = {
+                  dataUrls: [url],
+                  iconUrl: `${baseUrl}${locationType.iconUrl}`,
+                  renderMode: 'PRIMITIVE_FEATURES',
+                  zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                  selectable: true
+                }
+                createdMapLayerKeys.add(mapLayerKey)
+              }
+            }
+
+            function asGroup() {
+
+              for (let filter of $scope.locationFilters) {
+                if(filter.checked) {
+                  // Location type is visible
+                  var mapLayerKey = `${locationType.key}_${filter.name}_${selectedLocationLibrary.identifier}`
+                  var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
+                  var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
+                  url = url.replace('${libraryId}', selectedLocationLibrary.identifier)
+                  url = url.replace('${locationType}', filter.name)
+
+                  if (pointTransform === 'aggregate') {
+                    // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+                    mergedLayerUrls.push(url)
+                  } else {
+                    // We want to create an individual layer
+                    oldMapLayers[mapLayerKey] = {
+                      dataUrls: [url],
+                      iconUrl: `${baseUrl}${filter.icon}`,
+                      renderMode: 'PRIMITIVE_FEATURES',
+                      zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                      selectable: true
+                    }
+                    createdMapLayerKeys.add(mapLayerKey)
+                  }
+                }
+              }
             }
           }
           else if (map && map.getZoom() < 10){
@@ -114,10 +158,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   // Upward data flow (updating map layer state)
   $scope.setLocationTypeVisibility = (locationType, isVisible) => {
     var newLocationTypes = angular.copy(state.locationTypes.getValue())
+
     for (var iLocationType = 0; iLocationType < newLocationTypes.length; ++iLocationType) {
       if (newLocationTypes[iLocationType].key === locationType.key) {
-        newLocationTypes[iLocationType].checked = isVisible
-        break
+        newLocationTypes[iLocationType].checked =  isVisible
+      }
+      if (newLocationTypes[iLocationType].group !== locationType.group){
+         newLocationTypes[iLocationType].checked = false
       }
     }
     state.locationTypes.next(newLocationTypes)
@@ -168,6 +215,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
+  $scope.configuration = configuration
 
   $scope.new_location_data = null
 
@@ -297,7 +345,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     if (current) $scope.measuredDistance = null
   }
 
-  $scope.currentUser = state.getUser()
+  $scope.currentUser = state.loggedInUser
   $scope.showFilters = config.ARO_CLIENT === 'frontier'
 
   $(document).keydown(function (e) {

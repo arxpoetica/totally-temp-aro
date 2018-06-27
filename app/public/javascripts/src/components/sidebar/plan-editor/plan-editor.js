@@ -3,6 +3,8 @@ import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
+import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 
 
 class PlanEditorController {
@@ -21,6 +23,7 @@ class PlanEditorController {
     this.equipmentIdToBoundaryId = {}
     this.boundaryCoverageById = {}
     this.objectIdsToHide = new Set()
+    this.subnetMapObjects = {}
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
     this.lastUsedBoundaryDistance = 10000
@@ -29,6 +32,9 @@ class PlanEditorController {
     this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
     this.isWorkingOnCoverage = false
     this.uuidStore = []
+    this.autoRecalculateSubnet = true
+    this.stickyAssignment = true
+    this.coSearchType = 'SERVICE_AREA'
     this.getUUIDsFromServer()
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     this.allEditableNetworkNodeTypes = [
@@ -38,7 +44,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     // Create a list of enabled network node types that we WILL allow the user to drag onto the map
     this.enabledNetworkNodeTypes = [
@@ -48,7 +56,9 @@ class PlanEditorController {
       'fiber_distribution_terminal',
       'cell_5g',
       'splice_point',
-      'bulk_distribution_terminal'
+      'bulk_distribution_terminal',
+      'loop_extender',
+      'network_anchor'
     ]
     
     this.censusCategories = this.state.censusCategories.getValue()
@@ -90,7 +100,14 @@ class PlanEditorController {
   }
 
   $onInit() {
-    // Select the first boundary in the list
+    // We should have a map variable at this point
+    if (!window[this.mapGlobalObjectName]) {
+      console.error('ERROR: Map Object Editor component initialized, but a map object is not available at this time.')
+      return
+    }
+    this.mapRef = window[this.mapGlobalObjectName]
+
+    // Select the first transaction in the list
     this.resumeOrCreateTransaction()
   }
 
@@ -98,18 +115,9 @@ class PlanEditorController {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
-    this.$http.get(`/service/plan-transaction?user_id=${this.state.getUserId()}`)
+    // Moved resume or create transaction to state so can get current transaction is accessed by other components
+    this.state.resumeOrCreateTransaction()
       .then((result) => {
-        if (result.data.length > 0) {
-          // At least one transaction exists. Return it
-          return Promise.resolve({
-            data: result.data[0]
-          })
-        } else {
-          // Create a new transaction and return it.
-          return this.$http.post(`/service/plan-transactions`, { userId: this.state.getUserId(), planId: this.state.plan.getValue().id })
-        }
-      }).then((result) => {
         this.currentTransaction = result.data
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       }).then((result) => {
@@ -118,6 +126,8 @@ class PlanEditorController {
         this.objectIdToMapObject = {}
         this.equipmentIdToBoundaryId = {}
         this.boundaryIdToEquipmentId = {}
+        // Save the iconUrls in the list of objects returned from aro-service
+        result.data.forEach((item) => item.iconUrl = this.configuration.networkEquipment.equipments[item.networkNodeType].iconUrl)
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(result.data)
@@ -226,9 +236,9 @@ class PlanEditorController {
             type: 'Polygon',
             coordinates: result.data.polygon.coordinates
           },
+          boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
           attributes: {
             network_node_type: 'dslam',
-            boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
             network_node_object_id: equipmentObjectId, // This is the Network Equipment that this boundary is associated with
@@ -243,6 +253,7 @@ class PlanEditorController {
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
         this.isWorkingOnCoverage = false
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
       })
       .catch((err) => {
         console.error(err)
@@ -486,6 +497,7 @@ class PlanEditorController {
       objectProperties.isDirty = true
       this.lastSelectedEquipmentType = objectProperties.selectedEquipmentType || this.lastSelectedEquipmentType
     }
+    this.$timeout()
   }
 
   // Marks the properties of the selected equipment boundary as dirty (changed).
@@ -514,13 +526,14 @@ class PlanEditorController {
         selectedEquipmentType: objectProperties.selectedEquipmentType
       },
       dataType: 'equipment', 
-      networkNodeEquipment: objectProperties.networkNodeEquipment
+      networkNodeEquipment: objectProperties.networkNodeEquipment,
+      deploymentType: 'PLANNED'
     }
     return serviceFeature
   }
 
   // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
-  formatBoundaryForService(objectId) {
+  formatBoundaryForService(objectId, networkNodeType) {
     // Format the object and send it over to aro-service
     var boundaryMapObject = this.objectIdToMapObject[objectId]
     var allPaths = []
@@ -530,7 +543,10 @@ class PlanEditorController {
       allPaths.push(pathPoints)
     })
     
-    var objectProperties = this.objectIdToProperties[ this.boundaryIdToEquipmentId[objectId] ]
+    // The site network node type can be in our map of obj-to-properties, OR it can be passed in (useful
+    // in case we are editing existing boundaries, in which case the associated network node is not in our map)
+    var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
+    const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
     var serviceFeature = {
       objectId: objectId,
@@ -538,9 +554,9 @@ class PlanEditorController {
         type: 'Polygon',
         coordinates: allPaths
       },
+      boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: {
-        network_node_type: objectProperties.siteNetworkNodeType,
-        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId,
+        network_node_type: siteNetworkNodeType,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
         network_node_object_id: this.boundaryIdToEquipmentId[objectId],
@@ -586,17 +602,15 @@ class PlanEditorController {
   }
   
   getSelectedBoundaryNetworkConfig() {
-    return this.getNetworkConfig( this.boundaryIdToEquipmentId[this.selectedMapObject.objectId] )
+    return this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
   }
   
   getNetworkConfig(objectId){
+    if (!this.objectIdToProperties.hasOwnProperty(objectId)) {
+      return
+    }
     var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
-    
-    // ToDo: there are discrepancies in out naming, fix that
-    if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
-    if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
-    if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
   
@@ -604,45 +618,88 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
   
+  // ---
   
+  addPlannedEquipment(){
+    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
+    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.plannedEquipment.push( new EquipmentComponent() )
+  }
   
-  handleObjectCreated(mapObject, usingMapClick, feature, featureData) {
-    if ('undefined' == typeof featureData) featureData = {}
+  addExistingEquipment(){
+    //console.log( AroFeatureFactory.createObject({'dataType': 'equipment', 'existingEquipment':[{'equipmentName':''}], 'plannedEquipment':[{}]}) )
+    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.existingEquipment.push( new TrackedEquipment() )
+    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
+    //console.log(new TrackedEquipment())
+  }
+  
+  // ---
+  
+  handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var isNew = true
-      
-      if (featureData.objectId){
+      if (feature.isExistingObject) {
         // clone of existing or planned equipment
-        var attributes = featureData.attributes
-        var networkNodeEquipment = AroFeatureFactory.createObject(featureData).networkNodeEquipment
-        // ---------------------------------------------------------------------  siteIdentifier,            siteName,            siteNetworkNodeType,         selectedEquipmentType,            networkNodeEquipment
-        this.objectIdToProperties[featureData.objectId] = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, featureData.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
-        var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-        this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-        
-      }else{
+        const planId = this.state.plan.getValue().id
+        // Add modified features to vector tiles and do the rendering, etc.
+        this.state.clearTileCachePlanOutputs()
+        this.state.loadModifiedFeatures(planId)
+          .then(() => {
+            this.state.requestRecreateTiles.next({})
+            this.state.requestMapLayerRefresh.next({})
+            return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
+          })
+          .then((result) => {
+            console.log(result)
+            var attributes = result.data.attributes
+            const equipmentFeature = AroFeatureFactory.createObject(result.data)
+            var networkNodeEquipment = equipmentFeature.networkNodeEquipment
+            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment)
+            var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
+            this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+              .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
+              .then((result) => {
+                // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
+                // later turns on auto-recalculate, it will generate the entire subnet.
+                var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
+                return this.assignSubnetParent(currentEquipmentWithSubnetId)
+              })
+              .then(() => {
+                if (this.autoRecalculateSubnet) {
+                  this.recalculateSubnetForEquipmentChange(feature)
+                }
+              })
+              .catch((err) => console.error(err))
+            this.$timeout()
+          })
+          .catch((err) => console.error(err))
+      } else {
         // nope it's new
         var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
-        
+          .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
+          .then((result) => {
+            // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
+            // later turns on auto-recalculate, it will generate the entire subnet.
+            var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
+            return this.assignSubnetParent(currentEquipmentWithSubnetId)
+          })
+          .then(() => {
+            if (this.autoRecalculateSubnet) {
+              this.recalculateSubnetForEquipmentChange(feature)
+            }
+          })
+          .catch((err) => console.error(err))
       }
-      
     } else if (!this.isMarker(mapObject)) {
       // If the user has drawn the boundary, we will have an associated object in the "feature" attributes. Save associations.
       if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
         // If the associated equipment has a boundary associated with it, first delete *that* boundary
         var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
-        
-        //if (existingBoundaryId) {
-        //  delete this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
-        //  delete this.boundaryIdToEquipmentId[existingBoundaryId]
-        //  this.deleteObjectWithId && this.deleteObjectWithId(existingBoundaryId)
-        //  existingBoundaryId = null
-        //}
         this.deleteBoundary(existingBoundaryId)
         existingBoundaryId = null
         
@@ -650,15 +707,17 @@ class PlanEditorController {
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
-      var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
+      const networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
+      this.state.requestRecreateTiles.next({})
+      this.state.requestMapLayerRefresh.next({})
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
     this.updateObjectIdsToHide()
     this.$timeout()
   }
-  
-  
+
   deleteBoundary(boundaryId){
     if (!boundaryId) return
     var eqId = this.boundaryIdToEquipmentId[boundaryId]
@@ -669,35 +728,42 @@ class PlanEditorController {
   
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
-    // check to see if the object is new
-    //  if so clear the current selection and wait for the return from service when we can get the proper data
-    //if (mapObject.objectId == this.creatingObjectId) mapObject = null
     this.selectedMapObject = mapObject
-    
     this.$timeout()
   }
 
   handleObjectModified(mapObject) {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
-      var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
-      this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+      this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+        .then((result) => {
+          var equipmentObject = result.data.filter((item) => item.objectId === mapObject.objectId)[0]
+          equipmentObject.geometry.coordinates = [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
+          return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
+        })
         .then((result) => {
           this.objectIdToProperties[mapObject.objectId].isDirty = false
+          if (this.autoRecalculateSubnet) {
+            const equipmentToRecalculate = {
+              objectId: mapObject.objectId,
+              networkNodeType: this.objectIdToProperties[mapObject.objectId].siteNetworkNodeType,
+              geometry: {
+                coordinates: [mapObject.position.lng(), mapObject.position.lat()]
+              }
+            }
+            this.recalculateSubnetForEquipmentChange(equipmentToRecalculate)
+          }
           this.$timeout()
         })
         .catch((err) => console.error(err))
+
       // Get the associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
       if (boundaryObjectId) {
         // We have a boundary object. Delete it and recalculate coverage only if the boundary properties say to do so.
         const boundaryProperties = this.objectIdToProperties[boundaryObjectId]
         if (boundaryProperties.selectedSiteMoveUpdate === 'Auto-redraw') {
-          //delete this.equipmentIdToBoundaryId[mapObject.objectId]
-          //delete this.boundaryIdToEquipmentId[boundaryObjectId]
-          //this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
           this.deleteBoundary(boundaryObjectId)
-          
           this.calculateCoverage(mapObject, boundaryProperties.spatialEdgeType, boundaryProperties.directed)
         }
       }
@@ -716,17 +782,30 @@ class PlanEditorController {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+        .then(() => {
+          return this.autoRecalculateSubnet
+                 ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+                 : Promise.resolve()
+        })
+        .then((result) => {
+          if (result && result.data.length > 0) {
+            // There is at least one piece of equipment in the transaction. Use that for routing
+            this.recalculateSubnetForEquipmentChange(result.data[0])
+          } else {
+            // There is no equipment left in the transaction. Just remove the subnet map objects
+            this.clearAllSubnetMapObjects()
+          }
+          this.state.planEditorChanged.next(true) //recaluculate plansummary
+        })
+        .catch((err) => console.error(err))
       // If this is an equipment, delete its associated boundary (if any)
       const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
-      //if (boundaryObjectId) {
-        //delete this.equipmentIdToBoundaryId[mapObject.objectId]
-        //delete this.boundaryIdToEquipmentId[boundaryObjectId]
-        //this.deleteObjectWithId && this.deleteObjectWithId(boundaryObjectId)
-        // No need to delete from the server, we will get another delete event for the boundary.
-      //}
       this.deleteBoundary(boundaryObjectId)
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
+      .then(() => {
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
+      })
     }
   }
 
@@ -740,7 +819,103 @@ class PlanEditorController {
       this.state.viewSettingsChanged.next()
     //} 
   }
-  
+
+  assignSubnetParent(equipmentFeature) {
+    const searchBody = {
+      nodeType: equipmentFeature.networkNodeType,
+      point: {
+        type: "Point",
+        coordinates: equipmentFeature.geometry.coordinates
+      },
+      searchType: this.coSearchType
+    }
+    var closestCentralOfficeId = null
+    return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-search`, searchBody)
+      .then((result) => {
+        closestCentralOfficeId = result.data.objectId
+        equipmentFeature.subnetId = closestCentralOfficeId
+        return this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentFeature)
+      })
+      .then(() => Promise.resolve(closestCentralOfficeId))
+  }
+
+  recalculateSubnetForEquipmentChange(equipmentFeature) {
+    var recalculatedSubnets = {}
+    var setOfCOIds = new Set()
+    var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)
+    var closestCentralOfficeId = null
+    return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+      .then((result) => {
+        var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentFeature.objectId)[0]
+        if (this.stickyAssignment && currentEquipmentWithSubnetId.subnetId) {
+          // "Sticky" assignment means that once we assign a RT to a CO, the assignment does not change
+          return Promise.resolve(currentEquipmentWithSubnetId.subnetId)
+        } else {
+          // Either we don't have a "Sticky" assignment, OR this is the first time we are calculating assignment
+          return this.assignSubnetParent(currentEquipmentWithSubnetId)
+        }
+      })
+      .then((closestCO) => {
+        closestCentralOfficeId = closestCO
+        // Delete subnet features for all central offices
+        var lastResult = Promise.resolve()
+        Object.keys(this.subnetMapObjects).forEach((centralOfficeObjectId) => {
+          lastResult = lastResult.then(() => this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`))
+        })
+        return lastResult
+      })
+      .then((result) => {
+        // Recalculate for all central offices
+        const recalcBody = {
+          subNets: []
+        }
+        Object.keys(this.subnetMapObjects).forEach((centralOfficeObjectId) => setOfCOIds.add(centralOfficeObjectId))
+        setOfCOIds.add(closestCentralOfficeId)
+        setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subNets.push({ objectId: centralOfficeObjectId }))
+        return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
+      })
+      .then((result) => {
+        var lastResult = Promise.resolve()
+        setOfCOIds.forEach((centralOfficeObjectId) => {
+          lastResult = lastResult.then((result) => {
+            if (result) {
+              recalculatedSubnets[result.data.objectId] = result
+            }
+            return this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`)
+          })
+        })
+        lastResult = lastResult.then((result) => {
+          recalculatedSubnets[result.data.objectId] = result
+          return Promise.resolve()
+        })
+        return lastResult
+      })
+      .then(() => {
+        this.clearAllSubnetMapObjects()
+        this.state.planEditorChanged.next(true)
+        Object.keys(recalculatedSubnets).forEach((centralOfficeObjectId) => {
+          // We have the fiber in result.data.subnetLinks
+          const subnetKey = `${centralOfficeObjectId}`
+          this.subnetMapObjects[subnetKey] = []
+          const result = recalculatedSubnets[centralOfficeObjectId]
+          result.data.subnetLinks.forEach((subnetLink) => {
+            subnetLink.geometry.coordinates.forEach((line) => {
+              var polylineGeometry = []
+              line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
+              var subnetLineMapObject = new google.maps.Polyline({
+                path: polylineGeometry,
+                strokeColor: '#0000FF',
+                strokeWeight: 2,
+                map: this.mapRef
+              })
+              this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
+            })
+          })
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+
   updateObjectIdsToHide() {
     this.objectIdsToHide = new Set()
     Object.keys(this.objectIdToProperties).forEach((objectId) => {
@@ -751,6 +926,33 @@ class PlanEditorController {
         this.objectIdsToHide.add(objectId)
       }
     })
+  }
+
+  clearAllSubnetMapObjects() {
+    Object.keys(this.subnetMapObjects).forEach((key) => {
+      this.subnetMapObjects[key].forEach((subnetLineMapObject) => subnetLineMapObject.setMap(null))
+    })
+    this.subnetMapObjects = {}
+  }
+
+  // Returns a promise that resolves to the iconUrl for a given object id
+  getObjectIconUrl(eventArgs) {
+    if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE) {
+      // The value we have been passed is a network node type. Return the icon directly.
+      return Promise.resolve(this.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
+    } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID) {
+      const planId = this.state.plan.getValue().id
+      return this.$http.get(`/service/plan-feature/${planId}/equipment/${eventArgs.objectValue}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          const networkNodeType = result.data.networkNodeType
+          return Promise.resolve(this.configuration.networkEquipment.equipments[networkNodeType].iconUrl)
+        })
+        .catch((err) => console.error(err))
+    } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY) {
+      // Icon doesn't matter for boundaries, just return an empty string
+      return Promise.resolve('')
+    }
+    return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
   }
 
   $doCheck() {
@@ -767,6 +969,8 @@ class PlanEditorController {
   $onDestroy() {
     // Useful for cases where the boundary is still generating, but the component has been destroyed. We do not want to create map objects in that case.
     this.isComponentDestroyed = true
+
+    this.clearAllSubnetMapObjects()
   }
 }
 

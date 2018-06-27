@@ -14,8 +14,7 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true,
-      "can_view": ["admin", "sales"]
+      "isequipment": true
     },
     "dslam": {
       "label": "Remote Terminal",
@@ -34,10 +33,9 @@
         "fillStyle": "#0000ff",
         "opacity": 0.2
       },
-      "isequipment": true,
-      "can_view": ["admin", "sales"]
+      "isequipment": true
     },
-    "fdh": {
+    "fiber_distribution_hub": {
       "label": "FDH",
       "networkNodeType": "fiber_distribution_hub",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/fiber_distribution_hub/point/{pointTransform}/entity/",
@@ -51,10 +49,9 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true,
-      "can_view": ["admin", "sales"]
+      "isequipment": true
     },
-    "fdt": {
+    "fiber_distribution_terminal": {
       "label": "FDT",
       "networkNodeType": "fiber_distribution_terminal",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/fiber_distribution_terminal/point/{pointTransform}/entity/",
@@ -68,8 +65,7 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true,
-      "can_view": ["admin", "sales"]
+      "isequipment": true
     },
     "bulk_distribution_terminal": {
       "label": "Bulk Distribution Terminal",
@@ -85,8 +81,7 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true,
-      "can_view": ["admin"]
+      "isequipment": true
     },
     "splice_point": {
       "label": "Splice point",
@@ -102,27 +97,9 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true,
-      "can_view": ["admin", "sales"]
+      "isequipment": true
     },
-    "fiveg_coverage": {
-      "label": "5G Coverage",
-      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/cell_5g/polygon/{polyTransform}/entity/",
-      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
-      "dataItemKey": "equipment",
-      "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
-      "selectedIconUrl": "/images/map_icons/aro/service_layer_cran.png",
-      "aggregateZoomThreshold": "11",
-      "equipmentType": "polygon",
-      "zIndex": 7490, 
-      "drawingOptions": {
-        "strokeStyle": "#00a000",
-        "fillStyle": "#a0ffa0"
-      },
-      "isequipment": true,
-      "can_view": ["admin"]
-    },
-    "fiveg_site": {
+    "cell_5g": {
       "label": "5G Site",
       "networkNodeType": "cell_5g",
       "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/cell_5g/point/{pointTransform}/entity/",
@@ -136,8 +113,39 @@
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
-      "isequipment": true,
-      "can_view": ["admin", "sales"]
+      "isequipment": true
+    },
+    "loop_extender": {
+      "label": "Loop Extender",
+      "networkNodeType": "loop_extender",
+      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/loop_extender/point/{pointTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/loop_extender/point/{pointTransform}/entity/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/composite/loop_extender.png",
+      "selectedIconUrl": "/images/map_icons/aro/loop_extender.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "point",
+      "zIndex": 7540, 
+      "drawingOptions": {
+        "strokeStyle": "#0000ff"
+      },
+      "isequipment": true
+    },
+    "network_anchor": {
+      "label": "Network Anchor",
+      "networkNodeType": "network_anchor",
+      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/network_anchor/point/{pointTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/network_anchor/point/{pointTransform}/entity/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/composite/network_anchor.png",
+      "selectedIconUrl": "/images/map_icons/aro/network_anchor.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "point",
+      "zIndex": 7550, 
+      "drawingOptions": {
+        "strokeStyle": "#0000ff"
+      },
+      "isequipment": true
     }
   },
   "cables": {
@@ -156,8 +164,7 @@
         "strokeStyle": "#0000ff",
         "showPolylineDirection": true
       },
-      "isequipment": false,
-      "can_view": ["admin", "sales"]
+      "isequipment": false
     },
     "distribution_fiber": {
       "label": "Distribution Fiber",
@@ -174,8 +181,7 @@
         "strokeStyle": "#ff0000",
         "showPolylineDirection": true
       },
-      "isequipment": false,
-      "can_view": ["admin", "sales"]
+      "isequipment": false
     },
     "iof_fiber": {
       "label": "IOF Fiber",
@@ -192,8 +198,7 @@
         "strokeStyle": "#000000",
         "showPolylineDirection": true
       },
-      "isequipment": false,
-      "can_view": ["admin", "sales"]
+      "isequipment": false
     },
     "unknown_fiber": {
       "label": "Unknown Fiber",
@@ -210,8 +215,7 @@
         "strokeStyle": "#808080",
         "showPolylineDirection": true
       },
-      "isequipment": false,
-      "can_view": ["admin", "sales"]
+      "isequipment": false
     },
     "copper": {
       "label": "Copper Cable",
@@ -228,8 +232,7 @@
         "strokeStyle": "#b87333",
         "showPolylineDirection": true
       },
-      "isequipment": false,
-      "can_view": ["admin", "sales"]
+      "isequipment": false
     }
   },
   "boundaries": {
@@ -250,7 +253,24 @@
         "fillStyle": "#0000ff",
         "opacity": 0.15
       }
-  }
+  },
+   "fiveg_coverage": {
+      "label": "5G Coverage",
+      "existingTileUrl": "/tile/v1/tiles/equipment/{libraryId}/cell_5g/polygon/{polyTransform}/entity/",
+      "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/equipment/tiles/cell_5g/polygon/{polyTransform}/",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
+      "selectedIconUrl": "/images/map_icons/aro/service_layer_cran.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "polygon",
+      "zIndex": 7490, 
+      "drawingOptions": {
+        "strokeStyle": "#00a000",
+        "fillStyle": "#a0ffa0"
+      },
+      "isequipment": true,
+      "can_view": ["admin"]
+    }
 },
   "tileCacheKeywords": [
     "central_office",
@@ -262,5 +282,16 @@
     "FEEDER",
     "DISTRIBUTION",
     "BACKBONE"
-  ]
+  ],
+  "visibility": {
+    "equipments": {
+      "admin": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g", "loop extender", "network_anchor"],
+      "sales": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g", "loop extender", "network_anchor"],
+      "sales_engineers":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g", "loop extender", "network_anchor"],
+      "account_exec":["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "splice_point", "cell_5g", "loop extender", "network_anchor"],
+      "default": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g", "loop extender", "network_anchor"]
+    },
+    "cables": {},
+    "boundaries": {}
+  }
 }

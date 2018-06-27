@@ -5,9 +5,15 @@ class DataSelectionController {
     this.$rootScope = $rootScope
     this.state = state
     this.isDirty = false
-    this.currentUser = state.getUser()
+    this.currentUser = state.loggedInUser
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
     state.plan.subscribe((newPlan) => {
+      if (newPlan) {
+        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+      }
+    })
+
+    state.planOptimization.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }

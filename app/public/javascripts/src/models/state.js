@@ -59,7 +59,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
-    $rootScope.$on('configuration_loaded', (event, data) => resolve())
+    $rootScope.$on('configuration_loaded', (event, data) => {
+      configuration.loadPerspective(service.loggedInUser.rol)
+      resolve()
+    })
   })
   var mapReadyPromise = new Promise((resolve, reject) => {
     $document.ready(() => {
@@ -99,6 +102,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     PLAN_INFO: 'PLAN_INFO'
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
+
+  service.allowViewModeClickAction = () => {
+    return service.selectedDisplayMode.getValue() === service.displayModes.VIEW && 
+    service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
+    !service.isRulerEnabled //ruler mode click should not enable other  view action
+  }
 
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
@@ -152,6 +161,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     },
     analysisSelectionMode: service.selectionModes.SELECTED_AREAS
   }
+
+  if(config.ARO_CLIENT === 'frontier')
+    service.optimizationOptions.technologies['FiveG'].label = 'Fixed Wireless'
 
   //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
   service.optimizationOptions.uiAlgorithms = [
@@ -237,8 +249,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.splitterObj = new Rx.BehaviorSubject({})
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
-  service.requestSetLocation = new Rx.BehaviorSubject({})  
-  service.showDetailedLocationInfo = new Rx.BehaviorSubject()  
+  service.showDetailedLocationInfo = new Rx.BehaviorSubject()
   service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
@@ -299,6 +310,31 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     COVERAGE_BOUNDARY: 5
   })
   service.selectedTargetSelectionMode = service.targetSelectionModes.SINGLE_PLAN_TARGET
+
+  //location filters for sales
+  service.locationFilters =[
+    {
+      id: 1,
+      label: "Prospect",
+      name: "prospect",
+      icon: "/images/map_icons/aro/prospects.png",
+      checked: false
+    },
+    {
+      id: 2,
+      label: "Winback",
+      name: "winback",
+      icon: "/images/map_icons/aro/winback.png",
+      checked: false,
+    },
+    {
+      id: 3,
+      label: "Customer",
+      name: "customer",
+      icon: "/images/map_icons/aro/customers.png",
+      checked: false
+    }
+  ]
 
   // Competition display
   service.competition = {
@@ -509,7 +545,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.reloadSelectedServiceArea = (serviceAreaId) => {
     //Display only one Selected SA Details in viewMode at a time
     service.selectedServiceArea.next(serviceAreaId)
-    service.requestMapLayerRefresh.next({})     
+    service.requestMapLayerRefresh.next({})
   }
 
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
@@ -517,7 +553,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.selectedAnalysisArea.next(analysisArea)
     service.requestMapLayerRefresh.next({})
   }
-  
+
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {
     service.selectedViewFeaturesByType.next(featuresByType)
@@ -548,9 +584,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       var locations = configuration.locationCategories.categories
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
-        if(service.getUser() && (location.can_view.indexOf(service.getUser().rol) !== -1)){
-          location.checked = location.selected
-          locationTypes.push(location)
+
+        if (configuration.perspective.locationCategories[locationKey].show) {
+            location.checked = location.selected
+            locationTypes.push(location)
         }
       })
     }
@@ -631,18 +668,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.getUserId = () => {
-    return globalUser.id // Ugh. Depending on global variable "globalUser"
-  }
-
-  service.getUser = () => {
-    return globalUser
-  }
-
-  service.getProjectId = () => {
-    return globalUser.projectId // Ugh. Depending on global variable "globalUser"
-  }
-
   service.loadPlanDataSelectionFromServer = () => {
 
     if(!service.plan) {
@@ -652,8 +677,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var currentPlan = service.plan.getValue()
     var promises = [
       $http.get('/service/odata/datatypeentity'),
-      $http.get(`/service/v1/library-entry?user_id=${globalUser.id}`),
-      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
+      $http.get(`/service/v1/library-entry?user_id=${service.loggedInUser.id}`),
+      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`)
     ]
 
     return Promise.all(promises)
@@ -735,7 +760,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return Promise.all([
       $http.get('/service/odata/resourcetypeentity'), // The types of resource managers
       $http.get('/service/odata/resourcemanager?$select=name,id,description,managerType,deleted'), // All resource managers in the system
-      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`)
+      $http.get(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`)
     ])
     .then((results) => {
       var resourceManagerTypes = results[0].data
@@ -774,9 +799,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })
   }
 
-  service.loadNetworkConfigurationFromServer = (projectId) => {
-    projectId = projectId || globalUser.projectId
-    return $http.get(`/service/v1/project-template/${projectId}/network_configuration?user_id=${globalUser.id}`)
+  service.getDefaultProjectForUser = (userId) => {
+    return $http.get(`/service/auth/users/${userId}/configuration`)
+      .then((result) => Promise.resolve(result.data.projectTemplateId))
+      .catch((err) => console.error(err))
+  }
+
+  service.loadNetworkConfigurationFromServer = () => {
+    return service.getDefaultProjectForUser(service.loggedInUser.id)
+    .then((projectTemplateId) => $http.get(`/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`))
     .then((result) => {
       service.networkConfigurations = {}
       result.data.forEach((networkConfiguration) => {
@@ -808,7 +839,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     var currentPlan = service.plan.getValue()
     // Save the configuration to the server
-    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
   }
 
   // Save the plan resource selections to the server
@@ -833,21 +864,28 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     // Save the configuration to the server
     var currentPlan = service.plan.getValue()
-    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${globalUser.id}`, putBody)
+    $http.put(`/service/v1/plan/${currentPlan.id}/configuration?user_id=${service.loggedInUser.id}`, putBody)
   }
 
   // Save the Network Configurations to the server
-  service.saveNetworkConfigurationToServer = (projectId) => {
-    // Making parallel calls causes a crash in aro-service. Make sequential calls.
-    var lastResult = Promise.resolve()
-    projectId = projectId || globalUser.projectId
-    Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-      // Only add the network configurations that have changed (e.g. DIRECT_ROUTING)
-      if (!angular.equals(service.networkConfigurations[networkConfigurationKey], service.pristineNetworkConfigurations[networkConfigurationKey])) {
-        var url = `/service/v1/project-template/${projectId}/network_configuration/${networkConfigurationKey}?user_id=${globalUser.id}`
-        lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
-      }
-    })
+  service.saveNetworkConfigurationToDefaultProject = () => {
+    return service.getDefaultProjectForUser(service.loggedInUser.id)
+      .then((projectTemplateId) => {
+        // Making parallel calls causes a crash in aro-service. Make sequential calls.
+        var lastResult = Promise.resolve()
+        Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
+          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
+          lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
+        })
+      })
+      .catch((err) => console.error(err))
+  }
+
+  // Get the default project template id for a given user
+  service.getDefaultProjectTemplate = (userId) => {
+    return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
+      .then((result) => Promise.resolve(result.data.projectTemplateId))
+      .catch((err) => console.error(err))
   }
 
   service.createEphemeralPlan = () => {
@@ -859,16 +897,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       zoomIndex: service.defaultPlanCoordinates.zoom,
       ephemeral: true
     }
-    var ephemeralPlanId = -1
     return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
         planOptions.areaName = address
         // Get the configuration for this user - this will contain the default project template to use
-        return $http.get(`/service/auth/users/${service.getUserId()}/configuration`)
+        return $http.get(`/service/auth/users/${service.loggedInUser.id}/configuration`)
       })
       .then((result) => {
-        const userId = service.getUserId()
-        const apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}` // Ugh. Depending on global variable "globalUser"
+        const userId = service.loggedInUser.id
+        const apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
         return $http.post(apiEndpoint, planOptions)
       })
       .catch((err) => console.error(err))
@@ -876,7 +913,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Gets the last ephemeral plan in use, or creates a new one if no ephemeral plan exists.
   service.getOrCreateEphemeralPlan = () => {
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/ephemeral/latest?user_id=${userId}`)
       .then((result) => {
         // We have a valid ephemeral plan if we get back an object with *some* properties
@@ -890,11 +927,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         }
       })
   }
-  service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
-    .then((result) => {
-      service.setPlan(result.data)
-    })
-    .catch((err) => console.error(err))
 
   service.makeCurrentPlanNonEphemeral = (planName) => {
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
@@ -915,7 +947,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.getAddressFor(newPlan.latitude, newPlan.longitude)
       .then((address) => {
         newPlan.areaName = address
-        var userId = service.getUserId()
+        var userId = service.loggedInUser.id
         return $http.put(`/service/v1/plan?user_id=${userId}`, newPlan)
       })
       .then((result) => {
@@ -934,7 +966,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/v1/project-template/${projectTemplateId}/configuration?user_id=${userId}`)
       .then((result)=> $http.put(`/service/v1/plan/${planId}/configuration?user_id=${userId}`, result.data))
       .then(() => service.loadPlanInputs(planId))
-      .then(()=> service.loadNetworkConfigurationFromServer(projectTemplateId))
+      .then(()=> service.loadNetworkConfigurationFromServer())
       .then(() => service.recreateTilesAndCache())
       .catch((err) => console.error(err))
   }
@@ -943,6 +975,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
     newPlan.name = planName
     newPlan.ephemeral = false
+
     // Only keep the properties needed to create a plan
     var validProperties = new Set(['projectId', 'areaName', 'latitude', 'longitude', 'ephemeral', 'name', 'zoomIndex'])
     var keysInPlan = Object.keys(newPlan)
@@ -951,56 +984,70 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         delete newPlan[key]
       }
     })
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${service.plan.getValue().id}&is_ephemeral=${newPlan.ephemeral}&name=${newPlan.name}`
+
     return $http.post(url, {})
       .then((result) => {
         if (result.status >= 200 && result.status <= 299) {
-          return service.loadPlan(result.data.id)
+          var center = map.getCenter()
+          result.data.latitude = center.lat()
+          result.data.longitude = center.lng()
+          return $http.put(`/service/v1/plan?user_id=${userId}`, result.data)
         } else {
           console.error('Unable to copy plan')
           console.error(result)
           return Promise.reject()
         }
       })
+      .then((result) => {
+        return service.loadPlan(result.data.id)
+      })  
   }
 
   service.loadPlan = (planId) => {
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
         return service.setPlan(result.data)
       })
       .then(() => {
         var plan = service.plan.getValue()
+        return service.getAddressFor(plan.latitude, plan.longitude)
+      })
+      .then((address) => {
+        var plan = service.plan.getValue()
+        plan.areaName = address
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
-        service.requestSetLocation.next(plan)
         return Promise.resolve()
       })
   }
 
-    // The Nuclear option - Delete the tile data and HTML elements cache and force Google Maps to call
-    // our getTile() method again. Any rendering that is in process for the existing tiles will
-    // continue but will not be shown on our map.
+  // The Nuclear option - Delete the tile data and HTML elements cache and force Google Maps to call
+  // our getTile() method again. Any rendering that is in process for the existing tiles will
+  // continue but will not be shown on our map.
   service.recreateTilesAndCache = () => {
     tileDataService.clearDataCache()
-    service.requestRecreateTiles.next({})
-    service.requestMapLayerRefresh.next({})
+    return service.loadModifiedFeatures(service.plan.getValue().id)
+      .then(() => {
+        service.requestRecreateTiles.next({})
+        service.requestMapLayerRefresh.next({})
+      })
+      .catch((err) => console.error(err))
   }
 
   service.setPlan = (plan) => {
     service.plan.next(plan)
+    service.planOptimization.next(plan)
     return service.loadPlanInputs(plan.id)
-    .then(() => {
-      service.recreateTilesAndCache()
-      return Promise.resolve()
-    })
+      .then(() => service.recreateTilesAndCache())
+      .catch((err) => console.error(err))
   }
 
   // Load the plan inputs for the given plan and populate them in state
   service.loadPlanInputs = (planId) => {
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
@@ -1016,6 +1063,15 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       .catch((err) => {
         console.log(err)
       })
+  }
+
+  // Load the modified features for a given plan and save them in the tile data service
+  service.loadModifiedFeatures = (planId) => {
+    return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
+      .then((result) => {
+        result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
+      })
+      .catch((err) => console.error(err))
   }
 
   service.locationInputSelected = (locationKey) => {
@@ -1058,7 +1114,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.handleModifyClicked = () => {
     var currentPlan = service.plan.getValue()
-    var userId = service.getUserId()
+    var userId = service.loggedInUser.id
     if (currentPlan.ephemeral) {
       // This is an ephemeral plan. Don't show any dialogs to the user, simply copy this plan over to a new ephemeral plan
       var url = `/service/v1/plan-command/copy?user_id=${userId}&source_plan_id=${currentPlan.id}&is_ephemeral=${currentPlan.ephemeral}`
@@ -1162,12 +1218,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
   }
 
+  service.planOptimization = new Rx.BehaviorSubject(null)
   service.startPolling = () => {
     service.stopPolling()
     service.progressPollingInterval = setInterval(() => {
       $http.get(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`).then((response) => {
         var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
         newPlan.planState = response.data.optimizationState
+        service.planOptimization.next(newPlan)
         service.checkPollingStatus(newPlan)
         if (response.data.optimizationState === 'COMPLETED'
             || response.data.optimizationState === 'CANCELED'
@@ -1202,7 +1260,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     $http.delete(`/service/optimization/processes/${service.Optimizingplan.optimizationId}`)
       .then((response) => {
         // Optimization process was cancelled. Get the plan status from the server
-        return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.getUserId()}`)
+        return $http.get(`/service/v1/plan/${service.Optimizingplan.id}?user_id=${service.loggedInUser.id}`)
       })
       .then((response) => {
         service.isCanceling = false
@@ -1286,6 +1344,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get(`/service/boundary_type`)
     .then((result) => {
       service.boundaryTypes = result.data
+      service.boundaryTypes.push({id: result.data.length + 1, name: "fiveg_coverage", description: "Undefined"})
       service.selectedBoundaryType = result.data[0]
     })  
   }
@@ -1384,14 +1443,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     if(filterObj == '') return
     if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
       var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
-      
+
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj.toUpperCase(),'id,code,name,centroid','code')
       visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
 
-  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {    
+  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
     if(entityType !== 'AnalysisLayer') {
       entityListUrl = entityListUrl + "&$top=10"
@@ -1432,20 +1491,20 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     if(entityType === 'ServiceAreaView') {
       filter = filter ? filter.concat(' and layer/id eq 1') : filter
-    }  
+    }
 
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
 
     return $http.get(entityListUrl)
     .then((results) => {
       service.entityTypeList[entityType] = results.data
-      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity' 
+      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity'
         || entityType === 'AnalysisArea') {
           service.entityTypeBoundaryList = service.entityTypeList[entityType]
         }
-      return results.data  
+      return results.data
     })
-    
+
   }
 
   service.systemActors = [] // All the system actors (i.e. users and groups)
@@ -1454,20 +1513,66 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
-          group.name = `[G] ${group.name}`  // For now, text instead of icons
+          //group.name = `[G] ${group.name}`  // For now, text instead of icons
+          group.name = `<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`
           service.systemActors.push(group)
         })
         return $http.get('/service/auth/users')
       })
       .then((result) => {
         result.data.forEach((user) => {
-          user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
+          user.name = `<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}` 
           service.systemActors.push(user)
         })
       })
       .catch((err) => console.error(err))
   }
   service.reloadSystemActors()
+
+  // The logged in user is currently set by using the AngularJS injector in index.html
+  service.loggedInUser = null
+  service.setLoggedInUser = (user) => {
+    // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
+    service.loggedInUser = user
+
+    service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
+    .then((result) => {
+      service.setPlan(result.data)
+    })
+    .catch((err) => console.error(err))
+  }
+
+  service.planEditorChanged = new Rx.BehaviorSubject(false)
+  service.resumeTransaction = () => {
+    return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
+    .then((result) => {
+      if (result.data.length > 0) {
+        // At least one transaction exists. Return it
+        return Promise.resolve({
+          data: result.data[0]
+        })
+      }
+    })    
+  }
+
+  service.createTransaction = () => {
+    return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+      .then((result) => {
+        return Promise.resolve(result)
+      })
+  }
+
+  service.resumeOrCreateTransaction = () => {
+    return service.resumeTransaction()
+      .then((result) => {
+        if (!result) {
+          return service.createTransaction().then((result) => Promise.resolve(result))
+        } else {
+          return Promise.resolve(result)
+        }
+      })
+  }
 
   return service
 }])

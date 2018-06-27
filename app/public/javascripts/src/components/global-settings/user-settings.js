@@ -6,12 +6,12 @@ class UserSettingsController {
     this.globalSettingsService = globalSettingsService
 
     this.userConfiguration = {}
-    $http.get(`/service/auth/users/${state.getUserId()}/configuration`)
+    $http.get(`/service/auth/users/${state.loggedInUser.id}/configuration`)
       .then((result) => this.userConfiguration = result.data)
       .catch((err) => console.error(err))
 
     this.allProjectTemplates = []
-    $http.get(`/service/v1/project-template?user_id=${state.getUserId()}`)
+    $http.get(`/service/v1/project-template?user_id=${state.loggedInUser.id}`)
       .then((result) => this.allProjectTemplates = result.data)
       .catch((err) => console.error(err))
 
@@ -24,7 +24,7 @@ class UserSettingsController {
         callback({"id": 0, "text":default_location})
       },
       ajax: {
-        url: '/search/addresses',
+        url: `/search/addresses/${state.plan.getValue().id}?userId=${state.loggedInUser.id}`, // Fine since we will have loaded a plan by now
         dataType: 'json',
         delay: 250,
         data: (term) => ({ text: term }),
@@ -59,7 +59,7 @@ class UserSettingsController {
 
   saveSettings() {
     this.globalSettingsService.saveLocation()
-    this.$http.post(`/service/auth/users/${this.state.getUserId()}/configuration`, this.userConfiguration)
+    this.$http.post(`/service/auth/users/${this.state.loggedInUser.id}/configuration`, this.userConfiguration)
   }
 }
 

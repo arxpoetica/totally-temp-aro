@@ -1,9 +1,10 @@
 class DisplayModeButtonsController {
 
-  constructor(state) {
+  constructor($scope, state, configuration) {
     this.selectedDisplayModeSubject = state.selectedDisplayMode
     this.displayModes = state.displayModes
-    this.currentUser = globalUser
+    this.currentUser = state.loggedInUser
+    $scope.configuration = configuration
 
     // Data flow from state to component
     this.selectedDisplayModeSubject.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)
@@ -15,7 +16,7 @@ class DisplayModeButtonsController {
   }
 }
 
-DisplayModeButtonsController.$inject = ['state']
+DisplayModeButtonsController.$inject = ['$scope' ,'state', 'configuration']
 
 let displayModeButtons = {
   templateUrl: '/components/sidebar/display-mode-buttons.html',

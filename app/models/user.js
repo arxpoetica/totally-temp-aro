@@ -13,6 +13,9 @@ var dedent = require('dedent')
 var pify = require('pify')
 var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
+const ldap = require('ldapjs')
+const UIConfiguration = require('./ui_configuration')
+const authenticationConfig = (new UIConfiguration()).getConfigurationSet('authentication')
 
 module.exports = class User {
 
@@ -37,6 +40,100 @@ module.exports = class User {
         err ? reject(err) : resolve(ok)
       })
     })
+  }
+
+  // Perform a LDAP binding to authenticate the user with given credentials
+  static ldapBind(ldapClient, distinguishedName, password) {
+    return new Promise((resolve, reject) => {
+      // Time out if the LDAP bind fails (setting timeout on the client does not help).
+      // The LDAP server may be unreachable, or may not be sending a response.
+      setTimeout(() => reject('LDAP bind timed out'), 4000)
+      ldapClient.bind(distinguishedName, password, (err) => {
+        if (err) {
+          reject(err) // There was an error binding with the given credentials
+        }
+        resolve() // Successfully bound with the given credentials
+      })
+    })
+  }
+
+  // Retrieve details of a successfully logged in LDAP user
+  static ldapGetUserDetails(ldapClient, username) {
+    // We assume that the ldapClient has been successfully bound at this point.
+    return new Promise((resolve, reject) => {
+      // Time out if the LDAP bind fails (setting timeout on the client does not help).
+      // The LDAP server may be unreachable, or may not be sending a response.
+      setTimeout(() => reject('LDAP bind timed out'), 8000)
+      const ldapOpts = {
+        filter: `CN=${username}`,
+        scope: 'sub',
+        attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute]
+      };
+      ldapClient.search(authenticationConfig.ldapOptions.base, ldapOpts, (err, search) => {
+        if (err) {
+          reject(err) // There was an error when performing the search
+        }
+        search.on('searchEntry', (entry) => {
+          resolve({
+            firstName: entry.object[authenticationConfig.ldapOptions.firstNameAttribute],
+            lastName: entry.object[authenticationConfig.ldapOptions.lastNameAttribute]
+          })
+        })
+        search.on('error', (err) => reject(err))
+      })
+    })
+  }
+
+  // Find or create a user
+  static findOrCreateUser(firstName, lastName, email) {
+    // We have a PSQL function to create users, that will throw an error if the user exists.
+    return database.query(`SELECT auth.add_user('${firstName}', '${lastName}', '${email}');`)
+      .catch((err) => {
+        // Error means that the user exists. Return a resolved promise. Kindof a poor mans UPSERT.
+        return Promise.resolve()
+      })
+  }
+
+  static loginLDAP(username, password) {
+
+    // Create a LDAP client that we will user for authentication
+    const ldapClient = ldap.createClient({
+      url: authenticationConfig.ldapOptions.url
+    });
+    // Create a Distinguished Name (DN) that we represents the user that is trying to login
+    const distinguishedName = authenticationConfig.ldapOptions.distinguishedName.replace('$USERNAME$', username)
+
+    var userDetails = null
+    return this.ldapBind(ldapClient, distinguishedName, password)
+      .then(() => this.ldapGetUserDetails(ldapClient, username))
+      .then((result) => {
+        // We have the first and last names, upsert the user
+        userDetails = result
+        return this.findOrCreateUser(userDetails.firstName, userDetails.lastName, username)
+      })
+      .then(() => this.hashPassword(password))
+      .then((hashedPassword) => {
+        // Update the details for this user
+        const sql = `
+          UPDATE auth.users
+          SET first_name = '${userDetails.firstName}', last_name = '${userDetails.lastName}', password = '${hashedPassword}', rol = 'admin'
+          WHERE email='${username}';
+        `
+        return database.query(sql);
+      })
+      .then(() => {
+        var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
+        return database.findOne(sql, [username])
+      })
+      .then((user) => {
+        delete user.password
+        return user
+      })
+      .catch((err) => {
+        console.error('**** Error when logging in with LDAP')
+        console.error(err)
+        return Promise.reject(err)
+      })
   }
 
   static login (email, password) {
@@ -77,7 +174,8 @@ module.exports = class User {
   }
 
   static deleteUser (user_id) {
-    return database.execute('DELETE FROM auth.users WHERE id=$1', [user_id])
+    return database.execute(`DELETE FROM auth.user_auth_group WHERE user_id=$1`, [user_id])
+      .then(() => database.execute('DELETE FROM auth.users WHERE id=$1', [user_id]))
   }
 
   static changeRol (user_id, rol) {
@@ -85,64 +183,20 @@ module.exports = class User {
   }
 
   static register (user) {
-    var code = user.password ? null : this.randomCode()
-    var hashedPassword = null
 
+    var createdUserId = null;
     return validate((expect) => {
       expect(user, 'user', 'object')
       expect(user, 'user.firstName', 'string')
       expect(user, 'user.lastName', 'string')
       expect(user, 'user.email', 'string')
     })
-    .then(() => user.password ? this.hashPassword(user.password) : null)
-    .then((hash) => {
-      hashedPassword = hash;
-      return database.query('INSERT INTO auth.system_actor(actor_type, is_deleted) VALUES (2, false);')
+    .then(() => database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`))
+    .then((createdUser) => {
+      createdUserId = createdUser[0].add_user
+      return database.query(`UPDATE auth.users SET company_name='${user.companyName}', rol='${user.rol}' WHERE id=${createdUserId};`)
     })
-    .then(() => {
-      var params = [
-        user.firstName,
-        user.lastName,
-        user.email.toLowerCase(),
-        user.companyName || null,
-        user.rol || null,
-        hashedPassword || code
-      ]
-      var sql
-      if (hashedPassword) {
-        sql = `
-          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, password)
-          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6) RETURNING id
-        `
-        return database.findOne(sql, params)
-      } else {
-        sql = `
-          INSERT INTO auth.users (id, first_name, last_name, email, company_name, rol, reset_code, reset_code_expiration)
-          VALUES ((SELECT MAX(id) FROM auth.system_actor), $1, $2, $3, $4, $5, $6, (NOW() + interval \'1 day\'))
-          RETURNING id
-        `
-        return database.findOne(sql, params)
-      }
-    })
-    .then((row) => (
-      database.findOne('SELECT id, first_name, last_name, email FROM auth.users WHERE id=$1', [row.id])
-    ))
-    .then((usr) => {
-      if (!user.password) {
-        var email = user.email
-        var base_url = config.base_url
-        var url = base_url + '/reset_password?' + querystring.stringify({ code: code })
-        var text = 'Follow the link below to set your password\n' + url
-
-        helpers.mail.sendMail({
-          subject: 'Set password',
-          to: email,
-          text: text
-        })
-        console.log('Reset link:', url)
-      }
-      return usr
-    })
+    .then(() => this.resendLink(createdUserId))
     .catch((err) => {
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
@@ -248,6 +302,8 @@ module.exports = class User {
           to: user.email,
           text: text
         })
+        console.log('************************************** Password reset email **************************************')
+        console.log(text)
       })
   }
 

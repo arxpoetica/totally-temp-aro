@@ -48,12 +48,12 @@
       <!-- Add a component to handle map editing -->
       <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                          map-container-id="map-canvas-container"
-                         object-icon-url="/images/map_icons/aro/plan_equipment.png"
-                         object-selected-icon-url="/images/map_icons/aro/plan_equipment_selected.png"
+                         get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
+                         object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                          create-object-on-click="false"
                          allow-boundary-creation="$ctrl.state.showSiteBoundary"
                          hide-object-ids="$ctrl.objectIdsToHide"
-                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature, featureData)"
+                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
@@ -93,9 +93,9 @@
           </div>
           
           <div style="display: flex">
-            <div style="flex: 0 0 auto; padding-right: 20px;">
+            <div style="flex: 0 0 auto; padding-right: 20px; line-height: 33px;">
 	            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
-				        style="margin-left: 2px;">
+				        style="margin: 0px;">
 				        Site Boundaries
 				    </div>
 			      <select class="form-control" style="flex: 1 1 auto"
@@ -105,8 +105,6 @@
 			        ng-change="$ctrl.toggleSiteBoundary()">
 			      </select>
           </div>
-          
-          <hr class="plan-editor-hr">
           
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
             <div style="flex: 0 0 auto">
@@ -140,56 +138,57 @@
           </div>
         </div>
 
+        <!-- Section to show subnet calculation options -->
+        <table id="tblPlanInfo" class="table table-condensed table-striped" style="margin-top: 15px;">
+          <tbody>
+            <tr>
+              <td>Subnets</td>
+              <td>
+                <input type="checkbox" class="checkboxfill layer-type-checkboxes" style="margin: 0px;"
+                       ng-model="$ctrl.autoRecalculateSubnet">
+                  <span>Auto recalculate</span>
+              </td>
+              <td>
+                <input type="checkbox" class="checkboxfill layer-type-checkboxes" style="margin: 0px;"
+                       ng-model="$ctrl.stickyAssignment">
+                <span>Sticky assignment</span>
+              </td>
+            </tr>
+            <tr>
+              <td>Route to CO</td>
+              <td>
+                <input type="radio" class="checkboxfill layer-type-checkboxes" style="margin: 0px;" name="closestCOFinder"
+                        ng-model="$ctrl.coSearchType" value="SERVICE_AREA">
+                <span>Service Area</span>
+              </td>
+              <td>
+                <input type="radio" class="checkboxfill layer-type-checkboxes" style="margin: 0px;" name="closestCOFinder"
+                        ng-model="$ctrl.coSearchType" value="CLOSEST">
+                <span>Closest</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
         <!-- Section to show properties when the selected map object is an equipment node -->
         <div class="clearfix" ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
-          <div class="sidebar-table-header">
+          <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
           </div>
+          
+          <div style="padding: 10px">
+            <button class="btn btn-sm btn-primary" ng-click="$ctrl.addExistingEquipment()">add existing equipment</button>
+            <button class="btn btn-sm btn-primary" ng-click="$ctrl.addPlannedEquipment()">add planned equipment</button>
+          </div>
+          
           <!-- A table containing the editable properties of the selected object -->
-          
-          <!-- 
-          <table id="tblEquipmentProperties"
-                 class="table table-condensed table-striped sidebar-table"
-                 style="margin-bottom: 10px">
-            <tbody>
-              <tr>
-                <td>Site Identifier</td>
-                <td>
-                  <input class="form-control"
-                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteIdentifier"
-                         ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-                </td>
-              </tr>
-              <tr>
-                <td>Site Name</td>
-                <td>
-                  <input class="form-control"
-                         ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteName"
-                         ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-                </td>
-              </tr>
-              <tr>
-                <td>Equipment</td>
-                <td>
-                  <select class="form-control"
-                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedEquipmentType"
-                          ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].equipmentTypes"
-                          ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
-                  </select>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          -->
-          
           <editor-interface-tree 
                               on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
                               object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" 
                               is-edit="true"></editor-interface-tree>
-          
-          
+
           <button ng-class="{ 'btn btn-sm pull-right': true,
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
@@ -199,19 +198,6 @@
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
           </button>
         </div>
-
-
-
-
-        
-        
-
-
-
-
-
-
-
 
         <!-- Section to show properties when the selected map object is an equipment boundary -->
         <div ng-if="$ctrl.isWorkingOnCoverage">
@@ -226,7 +212,7 @@
         </div>
         <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
-          <div class="sidebar-table-header">
+          <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
               <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.getSelectedBoundaryNetworkConfig().label}} boundary</span>
           </div>
@@ -309,6 +295,11 @@
           </div>
         </div>
       </div>
+    </accordion-panel-contents>
+    <!-- Plan Summary -->
+    <accordion-panel-title title="'Plan Summary'" panel-id="'PLAN_SUMMARY'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'PLAN_SUMMARY'">
+      <plan-summary></plan-summary>
     </accordion-panel-contents>
   </accordion>
 </div>

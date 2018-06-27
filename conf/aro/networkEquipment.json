@@ -6,10 +6,10 @@
     "dslam": {
       "iconUrl": "/images/map_icons/aro/remote_terminal.png"
     },
-    "fdh": {
+    "fiber_distribution_hub": {
       "iconUrl": "/images/map_icons/aro/fiber_distribution_hub.png"
     },
-    "fdt": {
+    "fiber_distribution_terminal": {
       "iconUrl": "/images/map_icons/aro/fiber_distribution_terminal.png"
     },
     "bulk_distribution_terminal": {
@@ -18,11 +18,14 @@
     "splice_point": {
       "iconUrl": "/images/map_icons/aro/splice_point.png"
     },
-    "fiveg_coverage": {
-      "iconUrl": "/images/map_icons/aro/service_layer_cran.png"
+    "cell_5g": {
+      "iconUrl": "/images/map_icons/aro/all_cell_5g.png"
     },
-    "fiveg_site": {
-      "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png"
+    "loop_extender": {
+      "iconUrl": "/images/map_icons/aro/loop_extender.png"
+    },
+    "network_anchor": {
+      "iconUrl": "/images/map_icons/aro/network_anchor.png"
     }
   },
   "cables": {

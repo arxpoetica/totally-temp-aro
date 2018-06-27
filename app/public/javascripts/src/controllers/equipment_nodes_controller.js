@@ -5,11 +5,12 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools
   $scope.configuration = configuration
   $scope.planState = state
-  $scope.currentUser = state.getUser()
+  $scope.currentUser = state.loggedInUser
   $scope.layerTypeVisibility = {
     existing: false,
     planned: false
   }
+  $scope.layerTypeVisibility.existing = config.ARO_CLIENT === 'frontier' //enable existing for frontier by default
   $scope.mapZoom = 0//map.getZoom()
   
   var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
@@ -83,7 +84,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         
         if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
-          state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+          state.dataItems && state.dataItems[networkEquipment.dataItemKey] 
+            && state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
             var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
             mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
             createdMapLayerKeys.add(mapLayerKey)
@@ -123,7 +125,15 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createMapLayersForCategory($scope.configuration.networkEquipment.cables, oldMapLayers, createdMapLayerKeys);
     // Hack to check/uncheck site boundaries based on view settings
     Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
-      $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = state.showSiteBoundary
+      var selectedBoundaryName
+      state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
+      if(boundaryKey === 'siteBoundaries') {
+        $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
+      } else if (boundaryKey === 'fiveg_coverage') {
+        $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName
+          && $scope.configuration.networkEquipment.equipments['cell_5g'].checked)
+      }
+      
     })
     // Hack to show copper in toolbar ruler options
     Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {

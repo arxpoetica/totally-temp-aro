@@ -35,6 +35,15 @@
           </td>
         </tr>
         <tr>
+          <td>Plan Location</td>
+          <td> 
+            <span ng-show="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.areaName}}</span>
+            <span ng-show="$ctrl.isEditMode">
+              <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
+            </span>
+          </td>
+        </tr>
+        <tr>
           <td>Owner</td>
           <td>{{$ctrl.currentUser.first_name}} {{$ctrl.currentUser.last_name}}</td>
         </tr>

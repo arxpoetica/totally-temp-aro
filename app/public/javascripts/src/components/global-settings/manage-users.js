@@ -46,8 +46,12 @@ class ManageUsersController {
         rol: 'biz-dev'
       },
       {
-        name: 'Sales',
-        rol: 'sales'
+        name: 'Sales Engineers',
+        rol: 'sales_engineer'
+      },
+      {
+        name : "Account Executive",
+        rol: "account_exec"
       }
     ]
     this.initializeNewUser()
@@ -100,7 +104,7 @@ class ManageUsersController {
     } else {
       // For now do search in a crude way. Will get this from the ODATA endpoint later
       this.allUsers.forEach((user) => {
-        if (JSON.stringify(user).indexOf(this.searchText) >= 0) {
+        if ((JSON.stringify(user).toLowerCase()).indexOf(this.searchText.toLowerCase()) >= 0) {
           this.filteredUsers.push(user)
         }
       })
@@ -152,7 +156,7 @@ class ManageUsersController {
       email: '',
       confirmEmail: '',
       companyName: '',
-      rol: this.userTypes[0],
+      rol: this.userTypes[0].rol,
       groups: []
     }
   }
@@ -247,13 +251,11 @@ class ManageUsersController {
 
     this.$http.post('/admin/users/register', this.newUser)
       .then((response) => {
-        globalSettings.new_user = {}
+        this.loadUsers()
         swal({ title: 'User registered', type: 'success' })
-        globalSettings.openUserView()
       })
       .catch((err) => console.error(err))
     this.initializeNewUser()
-    this.loadUsers()
   }
 }
 

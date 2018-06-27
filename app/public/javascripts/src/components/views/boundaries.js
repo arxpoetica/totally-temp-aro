@@ -44,13 +44,14 @@ class BoundariesController {
         disabled: false,
         aggregateZoomThreshold: 10
       }
-    
+      
+      //wirecenter_layer.visible_check = config.ARO_CLIENT === 'frontier' //enable wirecenter for frontier by default
       this.state.boundaries.tileLayers.push(wirecenter_layer)
     })
     
     
     this.state.boundaries.tileLayers.push({
-    	  name: 'Census Blocks',
+    	name: 'Census Blocks',
       type: 'census_blocks',
       api_endpoint: "/tile/v1/census_block/tiles/${tilePointTransform}/",
       //layerId: serviceLayer.id,
@@ -279,6 +280,11 @@ class BoundariesController {
           aggregateZoomThreshold: 10
         })
       })
+
+      //enable wirecenter for frontier by default
+      // this.state.boundaries.tileLayers.forEach((tileLayers) => {
+      //   tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
+      // })
     })
   }
 

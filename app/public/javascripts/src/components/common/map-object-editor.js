@@ -1,7 +1,7 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, configuration) {
+  constructor($http, $element, $compile, $document, $timeout, state, tileDataService) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -9,7 +9,6 @@ class MapObjectEditorController {
     this.$timeout = $timeout
     this.state = state
     this.tileDataService = tileDataService
-    this.configuration = configuration  // ToDo: configuration should come from parent I think
     this.mapRef = null
     this.createObjectOnClick = true
     this.createdMapObjects = {}
@@ -44,7 +43,6 @@ class MapObjectEditorController {
       fillColor: '#FF1493',
       fillOpacity: 0.4,
     }
-    
   }
 
   // Get a list of UUIDs from the server
@@ -73,10 +71,7 @@ class MapObjectEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-    
-    //this.makeIconAnchor(this.objectIconUrl)
-    //this.makeIconAnchor(this.objectSelectedIconUrl)
-    
+
     // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
@@ -144,10 +139,9 @@ class MapObjectEditorController {
         networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
       }
       
-      //console.log(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY))
-      //console.log(feature)
-      
-      this.createMapObject(feature, true)
+      this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
+        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+        .catch((err) => console.error(err))
       event.preventDefault();
     };
 
@@ -162,29 +156,6 @@ class MapObjectEditorController {
         this.selectMapObject(null) //deselects the selected equipment 
       }
     })
-  }
-  
-  // ---
-  
-  getIconsByFeatureType(featureType){
-    //console.log(featureType)
-    var icons = {}
-    icons.iconUrl = this.objectIconUrl
-    icons.selectedIconUrl = this.objectSelectedIconUrl
-    
-    if ('undefined' != typeof featureType && null != featureType){
-      // ToDo: there are discrepancies in out naming, fix that
-      if ('fiber_distribution_hub' == featureType) featureType = 'fdh' 
-      if ('fiber_distribution_terminal' == featureType) featureType = 'fdt' 
-      if ('cell_5g' == featureType) featureType = 'fiveg_site'
-      if (this.configuration.networkEquipment.equipments.hasOwnProperty(featureType)){
-        icons.iconUrl = this.configuration.networkEquipment.equipments[featureType].iconUrl
-      }else if(this.configuration.locationCategories.categories.hasOwnProperty(featureType)){
-        icons.iconUrl = this.configuration.locationCategories.categories[featureType].iconUrl
-      }
-    }
-    
-    return icons
   }
   
   makeIconAnchor(iconUrl, callback){
@@ -273,33 +244,23 @@ class MapObjectEditorController {
   createMapObjects(features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
     features.forEach((feature) => {
-      this.createMapObject(feature, false)  // Feature is not created usin a map click
+      this.createMapObject(feature, feature.iconUrl, false)  // Feature is not created usin a map click
     })
   }
 
-  createPointMapObject(feature) {
+  createPointMapObject(feature, iconUrl) {
     // Create a "point" map object - a marker
-    //console.log(feature)
-    
-    //var iconUrl = this.objectIconUrl
-    //if (feature.networkNodeType){
-    //  iconUrl = getIconsByFeatureType(feature.networkNodeType).iconUrl
-    //}
     this.tileDataService.addFeatureToExclude(feature.objectId)
     this.state.requestMapLayerRefresh.next({})
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
-      featureType: feature.networkNodeType, 
+      featureType: feature.networkNodeType,
       position: new google.maps.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]),
       icon: {
-        url: this.getIconsByFeatureType(feature.networkNodeType).iconUrl, //iconUrl, 
-        anchor: this.iconAnchors[this.objectIconUrl]//, 
-        //path: google.maps.SymbolPath.CIRCLE
+        url: iconUrl
+        // anchor: this.iconAnchors[this.objectIconUrl]
       },
       label: {
-        //text: '  ҉',
-        //text: '▢', 
-        //text: '◌', 
         text: '◯', 
         color: "#000000",
         fontSize: "46px"
@@ -308,12 +269,13 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     
-    this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
+    // this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
     return mapMarker
   }
 
   createPolygonMapObject(feature) {
     // Create a "polygon" map object
+    this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
     feature.geometry.coordinates[0].forEach((polygonVertex) => {
       polygonPath.push({
@@ -333,15 +295,10 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMapObject(feature, usingMapClick, featureData) {
-    if ('undefined' == typeof featureData) featureData = {}
-    
+  createMapObject(feature, iconUrl, usingMapClick) {
     var mapObject = null
     if (feature.geometry.type === 'Point') {
-      //console.log(feature)
-      //console.log(featureData)
-      mapObject = this.createPointMapObject(feature)
-      //makeIconAnchor()
+      mapObject = this.createPointMapObject(feature, iconUrl)
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
       mapObject.addListener('click', (event) => {
@@ -377,8 +334,16 @@ class MapObjectEditorController {
     mapObject.addListener('rightclick', (event) => {
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
-      this.contextMenuCss.left = `${event.xa.clientX}px`
-      this.contextMenuCss.top = `${event.xa.clientY}px`
+      // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
+      // changes with google maps implementations. So iterate over the keys to find the right object.
+      var mouseEvent = null
+      Object.keys(event).forEach((eventKey) => {
+        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+          mouseEvent = event[eventKey]
+        }
+      })
+      this.contextMenuCss.left = `${mouseEvent.clientX}px`
+      this.contextMenuCss.top = `${mouseEvent.clientY}px`
 
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -392,7 +357,7 @@ class MapObjectEditorController {
     })
     
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, featureData: featureData})
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     
     if (usingMapClick) this.selectMapObject(mapObject)
   }
@@ -411,21 +376,38 @@ class MapObjectEditorController {
       geometry: {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
-      }
+      },
+      isExistingObject: false
     }
-    var isExistingObject = false
-    var isEquipment = false
-    
+
+    var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
+    var featurePromise = null
     if (event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
-      isExistingObject = true
+      feature.isExistingObject = true
+      featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
-      
-      feature.objectId = event.equipmentFeatures[0].object_id
-      isExistingObject = true
-      isEquipment = true
+      const clickedObject = event.equipmentFeatures[0]
+      feature.objectId = clickedObject.object_id
+      feature.isExistingObject = true
+      if (clickedObject._data_type === 'equipment_boundary.select') {
+        iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
+        // Get the boundary geometry from aro-service
+        featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+                           .then((result) => {
+                             var serviceFeature = result.data
+                             serviceFeature.attributes = {
+                               network_node_object_id: serviceFeature.networkObjectId,
+                               networkNodeType: serviceFeature.networkNodeType
+                             }
+                             serviceFeature.isExistingObject = true
+                             return Promise.resolve(serviceFeature)
+                           })
+      } else {
+        featurePromise = Promise.resolve(feature)
+      }
     } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
@@ -437,24 +419,25 @@ class MapObjectEditorController {
         return    // We do not want to create the map object on click
       }
       feature.objectId = this.getUUID()
-      isExistingObject = false
+      feature.isExistingObject = false
+      featurePromise = Promise.resolve(feature)
     }
-    
-    
-    if (isExistingObject && isEquipment) {
-      // editing existing or planned equipment, get that data
-      //console.log(feature)
-      var plan = this.state.plan.getValue()
-      this.$http.get('/service/plan-feature/'+plan.id+'/equipment/'+feature.objectId)
-      .then((response) => {
-        if (!response.data) response.data = {}
-        if (response.data.geometry) feature.geometry = response.data.geometry
-        this.createMapObject(feature, true, response.data)
+
+    var featureToUse = null
+    featurePromise
+      .then((result) => {
+        featureToUse = result
+        // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
+        return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
-    }else{
-      this.createMapObject(feature, true)
-    }
-    
+      .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true))
+      .then(() => {
+        // If we are editing an existing polygon object, make it editable
+        if (feature.isExistingObject && iconKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY) {
+          this.selectedMapObject.setEditable(true)
+        }
+      })
+      .catch((err) => console.error(err))
   }
 
   isMarker(mapObject) {
@@ -623,15 +606,15 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'configuration']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
   bindings: {
     mapGlobalObjectName: '@',
     mapContainerId: '@',  // The HTML element that contains the map
-    objectIconUrl: '@',
-    objectSelectedIconUrl: '@',
+    getObjectIconUrl: '&',
+    getObjectSelectedIconUrl: '&',
     deleteMode: '<',
     createObjectOnClick: '<',
     allowBoundaryCreation: '<',

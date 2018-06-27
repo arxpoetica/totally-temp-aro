@@ -18,15 +18,15 @@
 .btn-primary,
 .btn-success,
 .btn-primary.active {
-  background-color: #D9272D;
-  border-color: #D9272D
+  background-color: #4d99e5;
+  border-color: #4d99e5
 }
 
 .btn-primary:focus,
 .btn-primary:hover,
 .open>.dropdown-toggle.btn-success {
-  background-color: #d90200;
-  border-color: #D9272D
+  background-color: #1a79db;
+  border-color: #1a79db
 }
 
 .btn-primary.active:focus,
@@ -47,8 +47,8 @@
 
 .panel-primary>.panel-heading {
   color: #fff;
-  background-color: #d90200;
-  border-color: #d90200
+  background-color: #4d99e5;
+  border-color: #4d99e5
 }
 
 .map-tools-button.active {
@@ -84,18 +84,9 @@
   background-color: #D9272D !important;
 }
 
-
 .map_tool_label {
   background: transparent;
   color: #D9272D;
-}
-
-.network-plan {
-  background: #D9272D !important;
-}
-
-.expander-content :hover {
-    color: #D9272D !important;
 }
 
 #global-search-toolbutton .select2-chosen {
@@ -126,10 +117,10 @@
 }
 
 .map-tools-button.active {
-  background-color: #D9272D !important;
+  background-color: #217fdf !important;
 }
 
 .checkboxfill:checked {
-  background: #D9272D !important;
-  border: #D9272D !important;
+  background: #4d99e5 !important;
+  border: #4d99e5 !important;
 }

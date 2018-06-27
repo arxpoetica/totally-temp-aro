@@ -8,6 +8,12 @@ class PlanProjectConfigurationController {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+
+    state.planOptimization.subscribe((newPlan) => {
+      if (newPlan) {
+        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+      }
+    })
     this.allProjects = []
     this.selectedProjectId = null
   }
@@ -32,7 +38,7 @@ class PlanProjectConfigurationController {
   planSettingsToProject() {
     // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()
-      .then(() => this.state.saveNetworkConfigurationToServer(this.selectedProjectId))
+      .then(() => this.state.saveNetworkConfigurationToDefaultProject())
       .catch((err) => console.error(err))
     
   }

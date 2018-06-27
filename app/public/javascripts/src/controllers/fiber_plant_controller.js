@@ -1,9 +1,10 @@
 /* global app config $ _ google map */
 // Fiber Plant Controller
-app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', 'state', 'map_tools', ($scope, $rootScope, $location, state, map_tools) => {
+app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', 'state', 'map_tools', 'configuration', ($scope, $rootScope, $location, state, map_tools, configuration) => {
 
   $scope.map_tools = map_tools
   $scope.planState = state
+  $scope.configuration = configuration
 
   // Sliders for testing different rendering modes
   $scope.minAggregatedValue = 0.0

@@ -77,7 +77,7 @@
                     <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
                       <i class="fa fa-trash"></i>
                     </button>
-                    <button ng-if="dataSource.isExpanded" class="btn btn-default" ng-click="$ctrl.saveAccessSettings()">
+                    <button ng-if="dataSource.isExpanded" class="btn btn-default" ng-click="$ctrl.saveAccessSettings(dataSource)">
                       <i class="fa fa-save"></i>&nbsp; Save
                     </button>
                     <button class="btn btn-default"
@@ -103,8 +103,8 @@
 
       <!-- For conic tile system, show a custom control -->
       <conic-tile-system-uploader ng-if="$ctrl.state.uploadDataSource.name === 'tile_system' && !$ctrl.isDataManagementView"
-                                  project-id="$ctrl.state.getProjectId()"
-                                  user-id="$ctrl.state.getUserId()"
+                                  project-id="$ctrl.state.loggedInUser.projectId"
+                                  user-id="$ctrl.state.loggedInUser.id"
                                   on-init-control="$ctrl.onInitConicUploader(api)"
                                   on-destroy-control="$ctrl.onDestroyConicUploader()">
       </conic-tile-system-uploader>

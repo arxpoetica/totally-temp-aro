@@ -40,7 +40,7 @@ class LocationEditorController {
     this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
-    this.$http.get(`/service/library/transaction?user_id=${this.state.getUserId()}`)
+    this.$http.get(`/service/library/transaction?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
         if (existingTransactions.length > 0) {
@@ -50,7 +50,7 @@ class LocationEditorController {
           // Create a new transaction and return it
           return this.$http.post('/service/library/transaction', {
             libraryId: selectedLibraryItem.identifier,
-            userId: this.state.getUserId()
+            userId: this.state.loggedInUser.id
           })
         }
       })
@@ -62,6 +62,8 @@ class LocationEditorController {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
+        // Put the iconUrl in the features list
+        result.data.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
         this.createMapObjects && this.createMapObjects(result.data)
@@ -102,6 +104,16 @@ class LocationEditorController {
         this.$timeout()
         console.error(err)
       })
+  }
+
+  getObjectIconUrl() {
+    // Hardcoded for now
+    return Promise.resolve('/images/map_icons/aro/households_modified.png')
+  }
+
+  getObjectSelectedIconUrl() {
+    // Hardcoded for now
+    return Promise.resolve('/images/map_icons/aro/households_selected.png')
   }
 
   discardTransaction() {
@@ -177,6 +189,7 @@ class LocationEditorController {
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties()
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
+    console.log(locationObject)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }
