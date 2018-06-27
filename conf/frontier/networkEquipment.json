@@ -43,8 +43,8 @@
     "distribution_fiber": {
       "iconUrl": "/images/map_icons/frontier/fiber_distribution.png",
       "drawingOptions": {
-	"opacity": 0.5,
-	"lineWidth": 5,
+      "opacity": 0.5,
+      "lineWidth": 5,
         "strokeStyle": "#000099"
       }
     },
@@ -57,5 +57,8 @@
     "copper": {
       "iconUrl": "/images/map_icons/frontier/copper.png"
     }
+  },
+  "visibility": {
+    "defaultShowExistingEquipment": true
   }
 }

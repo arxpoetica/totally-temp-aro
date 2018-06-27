@@ -10,7 +10,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     existing: false,
     planned: false
   }
-  $scope.layerTypeVisibility.existing = config.ARO_CLIENT === 'frontier' //enable existing for frontier by default
+  if (configuration.networkEquipment) {
+    $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
+  }
   $scope.mapZoom = 0//map.getZoom()
   
   var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
@@ -151,6 +153,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateMapLayers)
+
+  // If configuration is loaded again, update default visibility of "show existing equipment"
+  $rootScope.$on('configuration_loaded', () => {
+    $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
+  })
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
