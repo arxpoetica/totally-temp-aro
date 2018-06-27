@@ -912,6 +912,7 @@ module.exports = class NetworkPlan {
   static searchAddresses(planId, userId, text) {
 
     // First get the selected service layer(s) from the plan data selection
+    const textToSearch = text || ''
     const serviceLayerRequestParams = {
       method: 'GET',
       url: `${config.aro_service_url}/v1/plan/${planId}/configuration?user_id=${userId}`,
@@ -945,21 +946,21 @@ module.exports = class NetworkPlan {
           ORDER BY name ASC
           LIMIT 100
         `
-        var wirecenters = database.query(sql, [`%${text}%`, text.toLowerCase(), serviceLayerIds])
-        var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(text)
+        var wirecenters = database.query(sql, [`%${textToSearch}%`, textToSearch.toLowerCase(), serviceLayerIds])
+        var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(textToSearch)
         url = process.env.GOOGLE_MAPS_API_IP_KEY ? url + `&key=${process.env.GOOGLE_MAPS_API_IP_KEY}` : url
-        var addresses = text.length > 0
+        var addresses = textToSearch.length > 0
                         ? request({ url: url, json: true })
                         : Promise.resolve(null)
         return Promise.all([wirecenters, addresses])
 
       })
       .then((results) => {
-        var latlngSearch = text && text.split(',')
-        var searchText
+        var latlngSearch = textToSearch && textToSearch.split(',')
+        var latLngText
         if (this.inrange(-90,latlngSearch[0],90) && this.inrange(-180,latlngSearch[1],180)) {
-          searchText = {
-            name: text,
+          latLngText = {
+            name: textToSearch,
             type: 'latlng',
             centroid: {
               type: 'Point',
@@ -984,7 +985,7 @@ module.exports = class NetworkPlan {
             ]}
           }
         })
-        return searchText ? addresses.concat(wirecenters).concat(searchText) : addresses.concat(wirecenters)
+        return latLngText ? addresses.concat(wirecenters).concat(latLngText) : addresses.concat(wirecenters)
       })
   }
 
