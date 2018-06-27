@@ -32,14 +32,25 @@ class EditorInterfaceTreeController {
     return true
   }
   
-  getSummeryCount(props){
+  isList(){
+    //console.log( ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.format) )
+    return ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.format)
+  }
+  
+  getSummeryCount(propVal){
     var summeryCount = 0
-    for (var i=0; i<props.length; i++){
-      if (props[i].hasOwnProperty('levelOfDetail') && "1" == props[i].levelOfDetail){
-        summeryCount++
+    
+    //ng-if="$ctrl.hasChildren(propVal)
+    //propVal.getDisplayProperties()
+    if ("function" == typeof propVal.getDisplayProperties){
+      var props = propVal.getDisplayProperties()
+      for (var i=0; i<props.length; i++){
+        if (props[i].hasOwnProperty('levelOfDetail') && "1" == props[i].levelOfDetail){
+          summeryCount++
+        }
       }
     }
-    
+    //console.log(summeryCount)
     return summeryCount
   }
   
@@ -47,7 +58,7 @@ class EditorInterfaceTreeController {
     if ('undefined' == typeof data || null == data) return false
     return ('function' == typeof data.getDisplayProperties)
   }
-  
+  /*
   makeList(prop){
     var listVals = []
     if ("tree" == prop.format){
@@ -57,15 +68,21 @@ class EditorInterfaceTreeController {
     }
     return listVals
   }
+  */
   
-  deleteItem(parent, index){
+  addItem(propVal, prop){
+    console.log(prop)
+    //var newItem = this.getNewItem(prop.propertyName)
+    //if ('undefined' != typeof newItem) propVal.push( newItem )
+  }
+  
+  deleteItem(parent, index, metaData){
     if (!this.isEdit) return
     //console.log(parent)
     //console.log(listVals)
     //console.log(index)
     //console.log(this.objectToView)
-    
-    var itemName = parent.propertyName +' '+ index
+    var itemName = metaData.displayName +' '+ index
     
     swal({
       title: 'Delete '+itemName+'?',
@@ -80,7 +97,7 @@ class EditorInterfaceTreeController {
       if (deleteTransaction) {
         // The user has confirmed that the transaction should be deleted
         //listVals.splice(index, 1)
-        this.objectToView[parent.propertyName].splice(index, 1)
+        parent.splice(index, 1)
         this.onChange()
       }
     })
@@ -108,6 +125,7 @@ let editorInterfaceTree = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-tree.html',
   bindings: {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
+    objectMetaData: '<', 
     onChange: '&', 
     getNewItem: '&', 
     isEdit: '<', 
