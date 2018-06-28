@@ -83,7 +83,7 @@ class EditorInterfaceTreeController {
     //console.log(listVals)
     //console.log(index)
     //console.log(this.objectToView)
-    var itemName = metaData.displayName +' '+ index
+    var itemName = metaData.displayName +' '+ (index+1)
     
     swal({
       title: 'Delete '+itemName+'?',

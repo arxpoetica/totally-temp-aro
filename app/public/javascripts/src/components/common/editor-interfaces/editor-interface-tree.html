@@ -22,7 +22,7 @@
 	      <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
 	        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
 	        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
-	        {{prop.displayName}} <span ng-if="'list' == prop.format">{{propVal.length}}</span>
+	        {{prop.displayName}} <span class="ei-header-info" ng-if="'list' == prop.format">{{propVal.length}} item<span ng-if="1 != propVal.length">s</span></span>
 	        
 	        
 	        <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">summary</div>
@@ -101,7 +101,7 @@
         <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
           <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
           <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
-          {{prop.displayName}} <span ng-if="'list' == prop.format">{{$index}}</span>
+          <span ng-if="'list' == prop.format">{{$index+1}}: </span>{{prop.displayName}} 
           
           
           <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">summary</div>
