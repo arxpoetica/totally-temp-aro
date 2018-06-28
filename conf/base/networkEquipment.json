@@ -160,7 +160,7 @@
       "equipmentType": "line",
       "zIndex": 5555,
       "drawingOptions": {
-	"lineWidth": 2,
+        "lineWidth": 2,
         "strokeStyle": "#0000ff",
         "showPolylineDirection": true
       },
@@ -177,7 +177,7 @@
       "equipmentType": "line",
       "zIndex": 5580,
       "drawingOptions": {
-	"lineWidth": 2,
+        "lineWidth": 2,
         "strokeStyle": "#ff0000",
         "showPolylineDirection": true
       },
@@ -194,7 +194,7 @@
       "equipmentType": "line",
       "zIndex": 5570,
       "drawingOptions": {
-	"lineWidth": 2,
+        "lineWidth": 2,
         "strokeStyle": "#000000",
         "showPolylineDirection": true
       },
@@ -211,7 +211,7 @@
       "equipmentType": "line",
       "zIndex": 5530,
       "drawingOptions": {
-	"lineWidth": 2,
+        "lineWidth": 2,
         "strokeStyle": "#808080",
         "showPolylineDirection": true
       },
@@ -228,7 +228,7 @@
       "equipmentType": "line",
       "zIndex": 5540,
       "drawingOptions": {
-	"lineWidth": 2,
+        "lineWidth": 2,
         "strokeStyle": "#b87333",
         "showPolylineDirection": true
       },
@@ -292,6 +292,7 @@
       "default": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal", "splice_point", "fiveg_coverage", "cell_5g", "loop extender", "network_anchor"]
     },
     "cables": {},
-    "boundaries": {}
+    "boundaries": {},
+    "defaultShowExistingEquipment": false
   }
 }
