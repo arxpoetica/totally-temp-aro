@@ -1,4 +1,3 @@
-<!-- note: this is UGLY, do it right Corr -->
 <!-- The top level div, this contains all the child items (key-value pairs) for the object to be edited -->
 <div class="ei-gen-level" ng-style="{ 'padding-left': $ctrl.indentationLevel > 0 ? $ctrl.pixelsPerIndentationLevel : 0 + 'px' }">
 
@@ -6,53 +5,53 @@
   <!-- 
   <div class="ei-items-contain" ng-repeat="prop in $ctrl.displayProps" ng-if="$ctrl.doShow(prop)">
   -->
-  <div class="ei-items-contain" ng-repeat="prop in $ctrl.objectToView.getDisplayProperties()" ng-if="$ctrl.doShow(prop)">
-    {{listVals=$ctrl.makeList(prop);""}}
-    <div ng-repeat="listVal in listVals">
-       {{foldoutIndex = $parent.$index +'_'+$index;""}}
+  
+  <div ng-if="!$ctrl.isList()">
+	  <div class="ei-items-contain" ng-repeat="prop in $ctrl.objectToView.getDisplayProperties()" ng-if="$ctrl.doShow(prop)">
+	    {{propVal = $ctrl.objectToView[prop.propertyName];""}}
+      {{foldoutIndex = $parent.$index +'_'+$index;""}}
        
     
 	    <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
 	         RECURSIVELY show the object editor for the sub-object -->
 	    <!-- 
-	    <div class="ei-foldout" ng-if="listVal.getDisplayProperties() && prop.children.length > 0 && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
+	    <div class="ei-foldout" ng-if="propVal.getDisplayProperties() && prop.children.length > 0 && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
 	    -->
-	    <div class="ei-foldout" ng-if="$ctrl.hasChildren(listVal) && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
-	      {{summeryCount = $ctrl.getSummeryCount(listVal.getDisplayProperties());""}}
+	    <div class="ei-foldout" ng-if="'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
+	      {{summeryCount = $ctrl.getSummeryCount(propVal);""}}
 	      <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
 	        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
 	        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
-	        {{prop.displayName}} <span ng-if="'list' == prop.format">{{$index}}</span>
+	        {{prop.displayName}} <span class="ei-header-info" ng-if="'list' == prop.format">{{propVal.length}} item<span ng-if="1 != propVal.length">s</span></span>
 	        
-	        <!-- 
-	        <div class="ei-foldout-btn" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && value.hasOwnProperty('summary')">[ + ]</div>
-	        <div class="ei-foldout-btn" ng-if="$ctrl.isKeyExpanded[foldoutIndex] && value.hasOwnProperty('summary')">[ - ]</div>
-	        -->
+	        
 	        <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">summary</div>
 	        <div class="ei-foldout-state-label" ng-if="$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">detail</div>
 	        
-	        <button class="btn btn-danger btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
-	                ng-click="$ctrl.deleteItem(prop, $index); $event.stopPropagation();"
+	        <button class="btn btn-primary btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
+	                ng-click="$ctrl.addItem(propVal, prop); $event.stopPropagation();"
 	                ng-if="$ctrl.isEdit && 'list' == prop.format"
-	                >delete</button>
+	                >add item</button>
 	        
 	      </div>
 	      
 	      <!-- summery items -->
-	      <div class="ei-gen-level ei-internal-level" ng-style="{ 'padding-left': ($ctrl.pixelsPerIndentationLevel+1) + 'px' }">
+	      <div class="ei-gen-level ei-internal-level" ng-if="summeryCount>0" ng-style="{ 'padding-left': ($ctrl.pixelsPerIndentationLevel+1) + 'px' }">
 	        <!-- Loop through all the summery props -->
-	        <div class="ei-items-contain" ng-repeat="childProp in listVal.getDisplayProperties()" ng-if=" '1' == childProp.levelOfDetail && $ctrl.doShow(childProp, listVal)">
+	        <div class="ei-items-contain" ng-repeat="childProp in propVal.getDisplayProperties()" ng-if=" '1' == childProp.levelOfDetail && $ctrl.doShow(childProp, propVal)">
 	          <div class="ei-property-item" ng-if="'tree' != childProp.format && 'list' != childProp.format" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
 				      <div style="flex: 1 1 50%;"><div>{{childProp.displayName}}</div></div>
-				      <editor-interface-value display-props="childProp" on-change="$ctrl.onChange()" model="listVal[childProp.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
+				      <editor-interface-value display-props="childProp" on-change="$ctrl.onChange()" model="propVal[childProp.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
 				    </div>
 	        </div>
 	      </div>
 	      
 	      <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
 	      <editor-interface-tree class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
-	                         object-to-view="listVal"
+	                         object-to-view="propVal"
+	                         object-meta-data="prop" 
 	                         on-change="$ctrl.onChange()" 
+	                         get-new-list-item="$ctrl.getNewListItem()"
 	                         is-edit="$ctrl.isEdit" 
 	                         indentation-level="$ctrl.indentationLevel + 1"
 	                         ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">
@@ -67,19 +66,101 @@
 	                      ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">[ - summary ]
 	      </div>
 	    </div>
-      
-    </div>
-    
-    <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
-    <div class="ei-property-item" ng-if="'tree' != prop.format && 'list' != prop.format && '1' != prop.levelOfDetail" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
-      <div style="flex: 1 1 50%;"><div>{{prop.displayName}}</div></div>
-      <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
-      <!-- ToDo replace below with editor-interface-table once we figure out the settings issue -->
-      <!-- 
-      <input ng-if="$ctrl.isEdit && prop.editable" type="text" ng-model="$ctrl.objectToView[prop.propertyName]" class="form-control input-sm ei-input-text" style="flex: 0 0 50%">
-      <div ng-if="!$ctrl.isEdit || !prop.editable" style="flex: 0 0 50%"><div>{{value}}</div></div>
-      -->
-      <editor-interface-value display-props="prop" on-change="$ctrl.onChange()" model="$ctrl.objectToView[prop.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
-    </div>
+	    
+	    
+	    <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
+	    <div class="ei-property-item" ng-if="'tree' != prop.format && 'list' != prop.format && '1' != prop.levelOfDetail" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
+	      <div style="flex: 1 1 50%;"><div>{{prop.displayName}}</div></div>
+	      <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
+	      <editor-interface-value display-props="prop" on-change="$ctrl.onChange()" model="$ctrl.objectToView[prop.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
+	    </div>
+	  </div>
   </div>
+  
+  
+  
+  <!-- BIG ToDo: Corr, clean this up, there is a LOT of repeat code. Though the repeat statements are so different, hmmm -->
+  
+  
+  
+  
+  <div ng-if="$ctrl.isList() && $ctrl.objectMetaData.visible">
+	  <!-- LIST array -->
+	  {{prop = $ctrl.objectMetaData;""}}
+	  
+	  <div class="ei-items-contain" ng-repeat="propVal in $ctrl.objectToView">
+	    {{foldoutIndex = $parent.$index +'_'+$index;""}}
+      
+      <!-- If this key-value pair is expandable, that means it is an object containing its own key-value pairs. 
+           RECURSIVELY show the object editor for the sub-object -->
+      <!-- 
+      <div class="ei-foldout" ng-if="propVal.getDisplayProperties() && prop.children.length > 0 && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
+      -->
+      <div class="ei-foldout" ng-if="$ctrl.hasChildren(propVal) && 'tree' == prop.format || 'list' == prop.format" style="width: 100%;">
+        {{summeryCount = $ctrl.getSummeryCount(propVal.getDisplayProperties());""}}
+        <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
+          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
+          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
+          <span ng-if="'list' == prop.format">{{$index+1}}: </span>{{prop.displayName}} 
+          
+          
+          <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">summary</div>
+          <div class="ei-foldout-state-label" ng-if="$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">detail</div>
+          
+          <button class="btn btn-danger btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
+                  ng-click="$ctrl.deleteItem($ctrl.objectToView, $index, prop); $event.stopPropagation();"
+                  ng-if="$ctrl.isEdit && 'list' == prop.format"
+                  >delete</button>
+          
+        </div>
+        
+        <!-- summery items -->
+        <div class="ei-gen-level ei-internal-level" ng-style="{ 'padding-left': ($ctrl.pixelsPerIndentationLevel+1) + 'px' }">
+          <!-- Loop through all the summery props -->
+          <div class="ei-items-contain" ng-repeat="childProp in propVal.getDisplayProperties()" ng-if=" '1' == childProp.levelOfDetail && $ctrl.doShow(childProp, propVal)">
+            <div class="ei-property-item" ng-if="'tree' != childProp.format && 'list' != childProp.format" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
+              <div style="flex: 1 1 50%;"><div>{{childProp.displayName}}</div></div>
+              <editor-interface-value display-props="childProp" on-change="$ctrl.onChange()" model="propVal[childProp.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
+            </div>
+          </div>
+        </div>
+        
+        <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
+        <editor-interface-tree class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
+                           object-to-view="propVal"
+                           on-change="$ctrl.onChange()" 
+                           get-new-list-item="$ctrl.getNewListItem()"
+                           is-edit="$ctrl.isEdit" 
+                           indentation-level="$ctrl.indentationLevel + 1"
+                           ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">
+        </editor-interface-tree>
+        
+        <div class="ei-foldout-state-label-bottom" 
+                        ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0" 
+                        ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">[ + detail ]
+        </div>
+        <div class="ei-foldout-state-label-bottom" 
+                        ng-if="$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0" 
+                        ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">[ - summary ]
+        </div>
+       
+	    </div>
+	    
+	    <!-- If this key-value pair is NOT expandable and has an editable value, show an input box to edit it -->
+	    <div class="ei-property-item" ng-if="'tree' != prop.format && 'list' != prop.format && '1' != prop.levelOfDetail" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
+	      <div style="flex: 1 1 50%;"><div>{{prop.displayName}}</div></div>
+	      <!-- Note that our ng-model is "$ctrl.objectToView[key]" and not "value" so the two way binding updates the actual object -->
+	      <editor-interface-value display-props="prop" on-change="$ctrl.onChange()" model="$ctrl.objectToView[prop.propertyName]" is-edit="$ctrl.isEdit"></editor-interface-value>
+	    </div>
+	  </div>
+  
+  </div><!-- end if list -->
+  
+  
+  
+  
+  
+  
+  
+  
 </div>

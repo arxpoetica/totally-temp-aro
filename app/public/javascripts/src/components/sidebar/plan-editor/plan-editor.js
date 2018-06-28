@@ -3,8 +3,10 @@ import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
+import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 
 
 class PlanEditorController {
@@ -138,18 +140,22 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
+          //console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
+          //console.log(feature)
+          //console.log( AroFeatureFactory.createObject(feature) )
+          
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
-                                                    attributes.selected_site_boundary_generation, distance,
-                                                    attributes.spatialEdgeType, attributes.directed)
+                                                    attributes.selected_site_boundary_generation, 
+                                                    attributes.spatialEdgeType, attributes.directed, attributes.network_node_type)
           this.objectIdToProperties[feature.objectId] = properties
-          
+          //console.log(properties)
         })
         // Save the equipment and boundary ID associations
         result.data.forEach((boundaryFeature) => {
@@ -228,17 +234,18 @@ class PlanEditorController {
         }
         // Construct a feature that we will pass to the map object editor, which will create the map object
         var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
-                                                        Math.round(optimizationBody.radius * this.configuration.units.meters_to_length_units),
-                                                        optimizationBody.spatialEdgeType, optimizationBody.directed)
+                                                        optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
+        // ToDo: this should use AroFeatureFactory
         var feature = {
           objectId: this.getUUID(),
+          networkNodeType: boundaryProperties.networkNodeType, 
           geometry: {
             type: 'Polygon',
             coordinates: result.data.polygon.coordinates
           },
           boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
           attributes: {
-            network_node_type: 'dslam',
+            network_node_type: boundaryProperties.networkNodeType,
             selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
             selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
             network_node_object_id: equipmentObjectId, // This is the Network Equipment that this boundary is associated with
@@ -548,8 +555,10 @@ class PlanEditorController {
     var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
     const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
+    // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
+      networkNodeType: siteNetworkNodeType, 
       geometry: {
         type: 'Polygon',
         coordinates: allPaths
@@ -611,6 +620,11 @@ class PlanEditorController {
     }
     var layers = this.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
+    
+    // ToDo: there are discrepancies in out naming, fix that
+    //if ('fiber_distribution_hub' == networkNodeType) networkNodeType = 'fdh' 
+    //if ('fiber_distribution_terminal' == networkNodeType) networkNodeType = 'fdt' 
+    //if ('cell_5g' == networkNodeType) networkNodeType = 'fiveg_site'
     return layers[networkNodeType]
   }
   
@@ -619,7 +633,7 @@ class PlanEditorController {
   }
   
   // ---
-  
+  /*
   addPlannedEquipment(){
     //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
     this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.plannedEquipment.push( new EquipmentComponent() )
@@ -630,6 +644,23 @@ class PlanEditorController {
     this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.existingEquipment.push( new TrackedEquipment() )
     //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
     //console.log(new TrackedEquipment())
+  }
+  */
+  getNewListItem(type){
+    console.log(type)
+    
+    if ('plannedEquipment' == type){
+      return new EquipmentComponent()
+    }
+    
+    if ('existingEquipment' == type){
+      return new TrackedEquipment()
+    }
+    
+    if ('marketableEquipments' == type){
+      return new MarketableEquipment()
+    }
+    
   }
   
   // ---
@@ -651,7 +682,7 @@ class PlanEditorController {
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           })
           .then((result) => {
-            console.log(result)
+            //console.log(result)
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
@@ -703,7 +734,11 @@ class PlanEditorController {
         this.deleteBoundary(existingBoundaryId)
         existingBoundaryId = null
         
-        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 0)
+        // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
+        console.log(mapObject)
+        console.log(feature)
+        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance')
+        
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
@@ -729,6 +764,13 @@ class PlanEditorController {
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
     this.selectedMapObject = mapObject
+    
+    if (null != this.selectedMapObject){
+      console.log( this.selectedMapObject )
+      console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
+      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
+    }
+    
     this.$timeout()
   }
 
