@@ -17,7 +17,7 @@ machine:
 
     ARO_CLIENT: aro
   node:
-    version: 8.2.0
+    version: 6.11.4
 
 checkout:
   post:
