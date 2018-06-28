@@ -155,7 +155,13 @@
     },
     "toolbar": {
       "globalSettings":{
-        "show":true
+        "show":true,
+	"manageUsers":{
+	 "show":true,
+	 "registerUser":{
+	  "show":true
+	 }
+	}
       },
       "emphericalPlan":{
         "show": true
@@ -365,7 +371,13 @@
     },
     "toolbar": {
       "globalSettings":{
-        "show":true
+        "show":true,
+	"manageUsers":{
+	 "show":true,
+	 "registerUser":{
+	  "show":true
+	 }
+	}
       },
       "emphericalPlan":{
         "show": false
@@ -575,7 +587,13 @@
     },
     "toolbar": {
       "globalSettings":{
-        "show":true
+        "show":true,
+	"manageUsers":{
+	 "show":true,
+	 "registerUser":{
+	  "show":true
+	 }
+	}
       },
       "emphericalPlan":{
         "show": false
