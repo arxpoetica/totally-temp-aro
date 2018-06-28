@@ -124,7 +124,6 @@
           <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
             <td>
               <b><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></b>
-              <div><i>{{$ctrl.user.first_name}} {{$ctrl.user.last_name}}</i></div>
               <div class="tags">
                 <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                   class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">

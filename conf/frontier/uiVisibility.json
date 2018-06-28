@@ -1,0 +1,44 @@
+[
+  {
+    "name": "default",
+    "toolbar": {
+      "globalSettings":{
+        "show":true,
+	"manageUsers":{
+	 "show":true,
+	 "registerUser":{
+	  "show":false
+	 }
+	}
+      }
+    }
+  },
+  {
+    "name": "sales_engineer",
+    "toolbar": {
+      "globalSettings":{
+        "show":true,
+	"manageUsers":{
+	 "show":true,
+	 "registerUser":{
+	  "show":false
+	 }
+	}
+      }
+    }
+  },
+  {
+    "name": "account_exec",
+    "toolbar": {
+      "globalSettings":{
+        "show":true,
+	"manageUsers":{
+	 "show":true,
+	 "registerUser":{
+	  "show":false
+	 }
+	}
+      }
+    }
+  }
+]
