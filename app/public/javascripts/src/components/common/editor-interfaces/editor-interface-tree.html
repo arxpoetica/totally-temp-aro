@@ -51,6 +51,7 @@
 	                         object-to-view="propVal"
 	                         object-meta-data="prop" 
 	                         on-change="$ctrl.onChange()" 
+	                         get-new-list-item="$ctrl.getNewListItem()"
 	                         is-edit="$ctrl.isEdit" 
 	                         indentation-level="$ctrl.indentationLevel + 1"
 	                         ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">
@@ -128,6 +129,7 @@
         <editor-interface-tree class="ei-internal-gen" ng-if="$ctrl.indentationLevel <= 200"
                            object-to-view="propVal"
                            on-change="$ctrl.onChange()" 
+                           get-new-list-item="$ctrl.getNewListItem()"
                            is-edit="$ctrl.isEdit" 
                            indentation-level="$ctrl.indentationLevel + 1"
                            ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">

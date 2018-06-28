@@ -71,9 +71,10 @@ class EditorInterfaceTreeController {
   */
   
   addItem(propVal, prop){
-    console.log(prop)
-    //var newItem = this.getNewItem(prop.propertyName)
-    //if ('undefined' != typeof newItem) propVal.push( newItem )
+    // the weird extra () down there is because of the way angular stores function references 
+    // this.getNewListItem() actualy returns the function signature then the following (prop.propertyName) calls it with our parameter 
+    var newItem = this.getNewListItem()(prop.propertyName) 
+    if ('undefined' != typeof newItem) propVal.push( newItem )
   }
   
   deleteItem(parent, index, metaData){
@@ -127,7 +128,7 @@ let editorInterfaceTree = {
     objectToView: '=',      // Two Way binding, we will directly edit object values for now!
     objectMetaData: '<', 
     onChange: '&', 
-    getNewItem: '&', 
+    getNewListItem: '&', 
     isEdit: '<', 
     indentationLevel: '<'
   },

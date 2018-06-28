@@ -178,16 +178,13 @@
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
           </div>
           
-          <div style="padding: 10px">
-            <button class="btn btn-sm btn-primary" ng-click="$ctrl.addExistingEquipment()">add existing equipment</button>
-            <button class="btn btn-sm btn-primary" ng-click="$ctrl.addPlannedEquipment()">add planned equipment</button>
-          </div>
-          
           <!-- A table containing the editable properties of the selected object -->
           <editor-interface-tree 
                               on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
                               object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" 
-                              is-edit="true"></editor-interface-tree>
+                              is-edit="true"
+                              get-new-list-item="$ctrl.getNewListItem"
+                              ></editor-interface-tree>
 
           <button ng-class="{ 'btn btn-sm pull-right': true,
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,

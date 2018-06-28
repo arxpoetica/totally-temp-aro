@@ -6,6 +6,7 @@ import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
+import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 
 
 class PlanEditorController {
@@ -632,7 +633,7 @@ class PlanEditorController {
   }
   
   // ---
-  
+  /*
   addPlannedEquipment(){
     //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
     this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.plannedEquipment.push( new EquipmentComponent() )
@@ -643,6 +644,23 @@ class PlanEditorController {
     this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.existingEquipment.push( new TrackedEquipment() )
     //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
     //console.log(new TrackedEquipment())
+  }
+  */
+  getNewListItem(type){
+    console.log(type)
+    
+    if ('plannedEquipment' == type){
+      return new EquipmentComponent()
+    }
+    
+    if ('existingEquipment' == type){
+      return new TrackedEquipment()
+    }
+    
+    if ('marketableEquipments' == type){
+      return new MarketableEquipment()
+    }
+    
   }
   
   // ---
