@@ -175,15 +175,10 @@ class MapTileRenderer {
   redrawCachedTiles(tiles) {
     tiles.forEach((tile) => {
       var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
-      var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null, isDirty = false
       var cachedTile = this.tileDataService.tileHtmlCache[tileId]
       if (cachedTile) {
-        div = cachedTile.div
-        frontBufferCanvas = cachedTile.frontBufferCanvas
-        backBufferCanvas = cachedTile.backBufferCanvas
-        heatmapCanvas = cachedTile.heatmapCanvas
         var coord = { x: tile.x, y: tile.y }
-        this.renderTile(tile.zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas)
+        this.renderTile(tile.zoom, coord, true, cachedTile)
       }
     })
   }
@@ -330,6 +325,7 @@ class MapTileRenderer {
           }
         }
       })
+      .catch((err) => console.error(err))
   }
 
   // Renders a single layer on a tile
@@ -869,6 +865,7 @@ class MapTileRenderer {
           // We have a list of features that are 'hit', i.e. under the specified point. Return them.
           resolve(hitFeatures)
         })
+        .catch((err) => console.error(err))
     })
   }
 
@@ -1315,6 +1312,7 @@ class TileComponentController {
               return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{ return {lat: a.lat() , lng: a.lng()} })}).getPath())
             }
           })
+          .catch((err) => console.error(err))
       })
 
     $document.ready(() => {
@@ -1420,6 +1418,7 @@ class TileComponentController {
               censusFeatures: censusFeatures
             })
           })
+          .catch((err) => console.error(err))
       })
     })
   }
