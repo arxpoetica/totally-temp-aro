@@ -203,14 +203,13 @@ class MapTileRenderer {
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
     var tileId = this.getTileId(zoom, coord.x, coord.y)
-    var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null, isDirty = false
+    var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null
     var htmlCache = this.tileDataService.tileHtmlCache[tileId]
     if (htmlCache) {
       div = htmlCache.div
       frontBufferCanvas = htmlCache.frontBufferCanvas
       backBufferCanvas = htmlCache.backBufferCanvas
       heatmapCanvas = htmlCache.heatmapCanvas
-      isDirty = htmlCache.isDirty
     } else {
       div = ownerDocument.createElement('div')
       div.id = tileId
@@ -225,13 +224,12 @@ class MapTileRenderer {
       frontBufferCanvas.style.top = `-${this.drawMargins + borderWidth}px`
       backBufferCanvas = this.createTileCanvas(ownerDocument)
       heatmapCanvas = this.createTileCanvas(ownerDocument)
-      isDirty = true  // Tile hasn't been rendered yet, so is dirty
       this.tileDataService.tileHtmlCache[tileId] = {
         div: div,
         frontBufferCanvas: frontBufferCanvas,
         backBufferCanvas: backBufferCanvas,
         heatmapCanvas: heatmapCanvas,
-        isDirty: isDirty
+        isDirty: true
       }
     }
 
@@ -245,13 +243,16 @@ class MapTileRenderer {
     // flag on the tile will be reset by the app render. But if the app does not render tiles, then
     // the tiles will still be rendered, although with a delay (specified in setTimeout())
     var RENDER_TIMEOUT_MILLISECONDS = 100
-    setTimeout(() => this.renderTile(zoom, coord, true, frontBufferCanvas, backBufferCanvas, heatmapCanvas), RENDER_TIMEOUT_MILLISECONDS)
+    // Store the HTML cache object. The object referred to by this.tileDataService.tileHtmlCache[tileId] can
+    // change between now and when the full tile is rendered. We do not want to set the dirty flag on a different object.
+    var htmlCache = this.tileDataService.tileHtmlCache[tileId]
+    setTimeout(() => this.renderTile(zoom, coord, true, htmlCache), RENDER_TIMEOUT_MILLISECONDS)
     return div
   }
 
   // Renders all data for this tile
-  renderTile(zoom, coord, useNeighbouringTileData, frontBufferCanvas, backBufferCanvas, heatmapCanvas) {
-	var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+  renderTile(zoom, coord, useNeighbouringTileData, htmlCache) {
+    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
     	this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
@@ -296,36 +297,35 @@ class MapTileRenderer {
           var dataIndex = globalIndexToIndex[index]
           renderingData[mapLayerKey].data[dataIndex] = singleTileResult
         })
-        var tileId = this.getTileId(zoom, coord.x, coord.y)
         // We have all the data. Now check the dirty flag. The next call (where we render features)
         // MUST be synchronous for this to work correctly
-        var htmlCache = this.tileDataService.tileHtmlCache[tileId]  // This may be undefined, we are in a async call
         if (htmlCache && htmlCache.isDirty) {
           if (!useNeighbouringTileData) {
             // This is a single tile render. Render only if we do not have neighbouring data yet
             if (!this.tileDataService.hasNeighbouringData(this.mapLayers, zoom, coord.x, coord.y)) {
-              backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
-              heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
-              this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+              htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
+              htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
+              this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
     
               // Copy the back buffer image onto the front buffer
-              var ctx = frontBufferCanvas.getContext('2d')
-              ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
-              ctx.drawImage(backBufferCanvas, 0, 0)
+              var ctx = htmlCache.frontBufferCanvas.getContext('2d')
+              ctx.clearRect(0, 0, htmlCache.frontBufferCanvas.width, htmlCache.frontBufferCanvas.height)
+              ctx.drawImage(htmlCache.backBufferCanvas, 0, 0)
             }
           } else {
             if (htmlCache && htmlCache.isDirty) {
-              backBufferCanvas.getContext('2d').clearRect(0, 0, backBufferCanvas.width, backBufferCanvas.height)
-              heatmapCanvas.getContext('2d').clearRect(0, 0, heatmapCanvas.width, heatmapCanvas.height)
-              this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, backBufferCanvas, heatmapCanvas)
+              htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
+              htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
+              this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
               // Copy the back buffer image onto the front buffer
-              var ctx = frontBufferCanvas.getContext('2d')
-              ctx.clearRect(0, 0, frontBufferCanvas.width, frontBufferCanvas.height)
-              ctx.drawImage(backBufferCanvas, 0, 0)
+              var ctx = htmlCache.frontBufferCanvas.getContext('2d')
+              ctx.clearRect(0, 0, htmlCache.frontBufferCanvas.width, htmlCache.frontBufferCanvas.height)
+              ctx.drawImage(htmlCache.backBufferCanvas, 0, 0)
               // All rendering has been done. Mark the cached HTML tile as not-dirty
               // Mark as "not dirty" only if neighbouring tile data has been rendered
-              this.tileDataService.tileHtmlCache[tileId].isDirty = !useNeighbouringTileData
+              // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
+              htmlCache.isDirty = !useNeighbouringTileData
             }
           }
         }
