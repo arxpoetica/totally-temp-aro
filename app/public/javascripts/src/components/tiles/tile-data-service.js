@@ -1,4 +1,4 @@
-app.service('tileDataService', ['$http', ($http) => {
+app.service('tileDataService', ['$rootScope', 'configuration', ($rootScope, configuration) => {
 
   // IMPORTANT: The vector-tile and pbf bundles must have been included before this point
   var VectorTile = require('vector-tile').VectorTile
@@ -11,6 +11,13 @@ app.service('tileDataService', ['$http', ($http) => {
   tileDataService.entityImageCache = {}
   tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
   tileDataService.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
+
+  tileDataService.LOCK_ICON_KEY = 'LOCK_ICON'
+  if (configuration.locationCategories && configuration.locationCategories.entityLockIcon) {
+    tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, configuration.locationCategories.entityLockIcon)
+  }
+  // If we get a 'configuration_loaded' event then we should definitely have the entityLockIcon
+  $rootScope.$on('configuration_loaded', () => tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, configuration.locationCategories.entityLockIcon))
 
   tileDataService.getTileCacheKey = (url) => {
     return url  // Perhaps this should be hashed and shortened? Urls are long
