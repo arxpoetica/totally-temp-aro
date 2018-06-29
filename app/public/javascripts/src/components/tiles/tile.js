@@ -529,7 +529,6 @@ class MapTileRenderer {
           }
             
         }
-        
       })
     }
   }
