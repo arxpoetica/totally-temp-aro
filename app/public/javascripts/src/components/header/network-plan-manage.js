@@ -161,7 +161,7 @@ class NetworkPlanModalController {
         this.loadPlans()
         this.state.getOrCreateEphemeralPlan()
         .then((ephemeralPlan) => {
-          this.state.setPlan(ephemeralPlan)
+          this.state.setPlan(ephemeralPlan.data)
         })
       })
     })
