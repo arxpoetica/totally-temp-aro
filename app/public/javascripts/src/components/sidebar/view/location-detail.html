@@ -35,9 +35,9 @@
 <div class="mb-5 mt-2">
   <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO" 
     object-name="location"
-    search-list="$ctrl.state.entityTypeList.HouseholdObjectEntity" 
+    search-list="$ctrl.state.entityTypeList.LocationObjectEntity" 
     selected="$ctrl.selectedLocation" 
-    refresh-tag-list="$ctrl.state.loadEntityList('HouseholdObjectEntity',searchObj,'id,objectId','objectId')"
+    refresh-tag-list="$ctrl.state.loadEntityList('LocationObjectEntity',searchObj,'id,objectId','objectId')"
     on-selection-changed="$ctrl.viewSelectedLocation(selectedObj)">
   </aro-search>
 </div>

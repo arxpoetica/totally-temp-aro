@@ -1424,7 +1424,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
 
   service.entityTypeList = {
-    HouseholdObjectEntity: [],
+    LocationObjectEntity: [],
     NetworkEquipmentEntity: [],
     ServiceAreaView: [],
     CensusBlocksEntity: [],
@@ -1457,7 +1457,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
 
     var filter = ''
-    if(entityType === 'HouseholdObjectEntity') {
+    if(entityType === 'LocationObjectEntity') {
       //for UUID odata doesn't support substring
       var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
       if(pattern.test(filterObj)) {
@@ -1470,7 +1470,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
 
     var libraryItems = []
-    if(entityType === 'HouseholdObjectEntity') {
+    if(entityType === 'LocationObjectEntity') {
       var selectedLocationLibraries = service.dataItems && service.dataItems.location && service.dataItems.location.selectedLibraryItems
       if(selectedLocationLibraries) libraryItems = selectedLocationLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
       if(libraryItems.length > 0) {

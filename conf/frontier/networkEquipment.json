@@ -59,6 +59,7 @@
     }
   },
   "visibility": {
-    "defaultShowExistingEquipment": true
+    "defaultShowExistingEquipment": true,
+    "defaultShowPlannedEquipment": true
   }
 }

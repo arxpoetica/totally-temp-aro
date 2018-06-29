@@ -1,8 +1,9 @@
 class PlanSummaryController {
   
-  constructor(state,configuration,$http,$timeout) {
+  constructor(state,configuration,Utils,$http,$timeout) {
     this.state = state
     this.configuration = configuration
+    this.Utils = Utils
     this.$http = $http
     this.$timeout = $timeout
     this.currentTransaction = null
@@ -26,7 +27,10 @@ class PlanSummaryController {
     this.equipmentOrder = []
     this.fiberOrder = []
     
-    state.plan.subscribe((plan) => this.plan = plan)
+    state.plan.subscribe((plan) => { 
+      this.plan = plan 
+      this.downloadLink = `/reports/planSummary/${this.plan.id}`
+    })
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
   }
 
@@ -153,6 +157,12 @@ class PlanSummaryController {
     this.isKeyExpanded[type] = !this.isKeyExpanded[type]
   }
 
+  downloadPlanSummary() {
+    this.$http.get(`/reports/planSummary/${this.plan.id}`).then((response) => {
+      this.Utils.downloadCSV(response.data,"planSummary.csv")
+    })
+  }
+
   $doCheck() {
     // Selected boundary type has changed
     if(this.selectedBoundaryType.id !== this.state.selectedBoundaryType.id) {
@@ -167,7 +177,7 @@ class PlanSummaryController {
   }
 }
   
-PlanSummaryController.$inject = ['state','configuration','$http','$timeout']
+PlanSummaryController.$inject = ['state','configuration','Utils','$http','$timeout']
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',

@@ -180,6 +180,9 @@
         },
         styles: styles,
       });
+      
+      mapTypeId === 'SATELLITE' && map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+
       var splitterInitialized = false
       map.ready = function(callback) {
 
@@ -222,6 +225,7 @@
     var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
     var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
     var globalExistingFiberSourceNames = <%- JSON.stringify(existingFiberSourceNames) %>;
+    var mapTypeId = <%- JSON.stringify(mapType) %>;
 
     $(document).ready(initialize);
   </script>

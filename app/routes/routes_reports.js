@@ -208,4 +208,88 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
+  api.get("/reports/planSummary/:plan_id" , function (request, response, next) {
+    var plan_id = request.params.plan_id
+    var planQ = `
+      --equipment summary
+      WITH inputs AS (
+      SELECT ${plan_id} AS plan_id
+      ),
+      
+      existing_config AS (
+      SELECT config_id
+      FROM client.plan p
+      JOIN inputs i ON p.id = i.plan_id AND is_deleted = FALSE
+      ),
+      
+      existing_data_source AS (
+      SELECT data_type_id, data_source_id
+      FROM existing_config p
+      JOIN aro_core.type_definition t ON t.data_config_id = p.config_id
+      ),
+      
+      plan_config AS (
+      SELECT p.config_id AS config_id
+      FROM inputs i
+      JOIN client.plan p ON p.parent_plan_id = i.plan_id AND is_deleted = FALSE
+      ),
+      
+      plan_data_source AS (
+      SELECT data_type_id, data_source_id
+      FROM plan_config p
+      JOIN aro_core.type_definition t ON t.data_config_id = p.config_id
+      ),
+      
+      plan_service_areas AS (
+      SELECT sas.value::text::int AS id
+      FROM   client.plan p, jsonb_array_elements(p.tag_mapping->'linkTags'->'serviceAreaIds') sas, inputs i
+      WHERE p.id = i.plan_id
+      ),
+      
+      existing_equipment AS (
+      SELECT DISTINCT ON (object_id) n.id, n.node_type_id, n.object_id
+      FROM client.service_area s
+      JOIN plan_service_areas p ON s.id = p.id
+      JOIN client.network_nodes n ON ST_Contains(s.geom,n.geom)
+      JOIN existing_data_source d ON n.data_source_id = d.data_source_id
+      ORDER BY object_id
+      ),
+      
+      planned_equipment AS (
+      SELECT DISTINCT ON (object_id) v.id, v.data_source_id, node_type_id, attributes, object_id
+      FROM client.network_nodes v
+      JOIN plan_data_source p ON v.data_source_id = p.data_source_id
+      ORDER BY object_id DESC
+      ),
+      
+      existing_planned_equipment AS (
+      SELECT COALESCE(e.id, p.id) AS node_id, COALESCE(e.object_id, p.object_id) AS object_id, COALESCE(e.node_type_id, p.node_type_id) AS node_type_id, CASE WHEN e.id IS NULL THEN 'planned'::text ELSE 'existing'::text END AS type
+      FROM existing_equipment e
+      FULL OUTER JOIN planned_equipment p ON e.id = p.id
+      )      
+      
+      SELECT
+      p.type AS Status,
+      n.description AS Equipment_Type,
+      ST_Y(nn.geom) AS Latitude,
+      ST_X(nn.geom) AS Longitude,
+      network_equipment->'siteInfo'->'siteClli' AS Site_CLLI,
+      network_equipment->'siteInfo'->'siteName' AS Site_Name
+      FROM existing_planned_equipment p
+      JOIN client.network_node_types n ON p.node_type_id = n.id
+      JOIN client.network_nodes nn ON p.node_id = nn.id
+      WHERE n.description <> 'Junction Splitter'
+      ORDER BY p.type
+      
+    `;
+
+       database.query(planQ).then(function (results) {
+         var json2csv = require("json2csv");
+         //var header = ['Status','Equipment Type','Latitude','Longitude','Site CLLI','Site Name']
+         response.attachment('planSummary.csv')
+         response.send(json2csv({data:results}))
+       })
+
+  });
+
 }
