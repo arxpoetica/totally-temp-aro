@@ -257,9 +257,11 @@ exports.configure = (api, middleware) => {
       
       planned_equipment AS (
       SELECT DISTINCT ON (object_id) v.id, v.data_source_id, node_type_id, attributes, object_id
-      FROM client.network_nodes v
-      JOIN plan_data_source p ON v.data_source_id = p.data_source_id
-      ORDER BY object_id DESC
+      -- FROM client.dh_versioned_network_node v
+      FROM client.versioned_network_node v
+      JOIN plan_data_source p ON v.data_source_id = p.data_source_id AND is_branch_data = TRUE
+      ORDER BY object_id, version_number DESC
+      -- ORDER BY object_id DESC
       ),
       
       existing_planned_equipment AS (
