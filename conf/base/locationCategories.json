@@ -1,5 +1,6 @@
 {
   "mapIconFolder": "/images/map_icons/aro/",
+  "entityLockIcon": "/images/map_icons/aro/lock_overlay.png",
   "business": {
     "user_upload": {
       "active": true,
@@ -42,7 +43,7 @@
       "selected": false,
       "group": 1
     },
-    "medium_businesses":{
+    "medium_businesses": {
       "show": true,
       "label": "Medium Businesses",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/medium/${tilePointTransform}/entity/",
@@ -55,7 +56,7 @@
       "selected": false,
       "group": 1
     },
-    "large_businesses":   {
+    "large_businesses": {
       "show": true,
       "label": "Large Businesses",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/large/${tilePointTransform}/entity/",
@@ -81,7 +82,7 @@
       "selected": false,
       "group": 1
     },
-    "celltower":{
+    "celltower": {
       "show": true,
       "label": "Cell Sites",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
@@ -95,70 +96,69 @@
       "group": 1
     },
     "ethernet_lit_building": {
-            "show": true,
-            "label": "Ethernet Lit Buildings",
-            "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/ethernet_lit_building/",
-            "aggregateZoomThreshold": "15",
-            "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
-            "zIndex": 6680,
-            "categoryKey": "ethernet_lit_building",
-            "plannerKey": "ethernet_lit_building",
-            "key": "ethernet_lit_building",
-            "selected": false,
-            "group": 2
+      "show": true,
+      "label": "Ethernet Lit Buildings",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/ethernet_lit_building/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
+      "zIndex": 6680,
+      "categoryKey": "ethernet_lit_building",
+      "plannerKey": "ethernet_lit_building",
+      "key": "ethernet_lit_building",
+      "selected": false,
+      "group": 2
     },
-    "lit_building":{
-          "show": true,
-          "label": "Fiber Lit Building",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/lit_building/",
-          "aggregateZoomThreshold": "15",
-          "iconUrl":  "/images/map_icons/aro/lit_building.png",
-          "zIndex": 6770,
-          "categoryKey": "lit_building",
-          "plannerKey": "lit_building",
-          "key": "lit_building",
-          "selected": false,
-          "group": 2
-        },
-    "tier_1":{
-          "show": true,
-          "label": "DNB Tier 1 (<1,000 ft from splice point)",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_1/",
-          "aggregateZoomThreshold": "15",
-          "iconUrl":  "/images/map_icons/aro/tier_1.png",
-          "zIndex": 6860,
-          "categoryKey": "tier_1",
-          "plannerKey": "tier_1",
-          "key": "tier_1",
-          "selected": false,
-          "group": 3
+    "lit_building": {
+      "show": true,
+      "label": "Fiber Lit Building",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/lit_building/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/lit_building.png",
+      "zIndex": 6770,
+      "categoryKey": "lit_building",
+      "plannerKey": "lit_building",
+      "key": "lit_building",
+      "selected": false,
+      "group": 2
     },
-    "tier_2":{
-          "show": true,
-          "label": "DNB Tier 2 (1,000-3,000 ft)",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_2/",
-          "aggregateZoomThreshold": "15",
-          "iconUrl":  "/images/map_icons/aro/tier_2.png",
-          "zIndex": 6950,
-          "categoryKey": "tier_2",
-          "plannerKey": "tier_2",
-          "key": "tier_2",
-          "selected": false,
-          "group": 3
-
+    "tier_1": {
+      "show": true,
+      "label": "DNB Tier 1 (<1,000 ft from splice point)",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_1/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/tier_1.png",
+      "zIndex": 6860,
+      "categoryKey": "tier_1",
+      "plannerKey": "tier_1",
+      "key": "tier_1",
+      "selected": false,
+      "group": 3
     },
-    "tier_3":{
-          "show": true,
-          "label": "DNB Tier 3 (>3,000 ft)",
-          "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_3/",
-          "aggregateZoomThreshold": "15",
-          "iconUrl":  "/images/map_icons/aro/tier_3.png",
-          "zIndex": 7040,
-          "categoryKey": "tier_3",
-          "plannerKey": "tier_3",
-          "key": "tier_3",
-          "selected": false,
-          "group": 3
+    "tier_2": {
+      "show": true,
+      "label": "DNB Tier 2 (1,000-3,000 ft)",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_2/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/tier_2.png",
+      "zIndex": 6950,
+      "categoryKey": "tier_2",
+      "plannerKey": "tier_2",
+      "key": "tier_2",
+      "selected": false,
+      "group": 3
+    },
+    "tier_3": {
+      "show": true,
+      "label": "DNB Tier 3 (>3,000 ft)",
+      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_3/",
+      "aggregateZoomThreshold": "15",
+      "iconUrl": "/images/map_icons/aro/tier_3.png",
+      "zIndex": 7040,
+      "categoryKey": "tier_3",
+      "plannerKey": "tier_3",
+      "key": "tier_3",
+      "selected": false,
+      "group": 3
     }
   },
   "env_is_test": false

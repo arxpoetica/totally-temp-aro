@@ -1,12 +1,13 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService) {
+  constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
     this.$document = $document
     this.$timeout = $timeout
+    this.configuration = configuration
     this.state = state
     this.tileDataService = tileDataService
     this.mapRef = null
@@ -265,10 +266,23 @@ class MapObjectEditorController {
         color: "#000000",
         fontSize: "46px"
       }, 
-      draggable: true,
+      draggable: !feature.is_locked, // Allow dragging only if feature is not locked
+      clickable: !feature.is_locked, // Allow clicking (including right click) only if feature is not locked
       map: this.mapRef
     })
     
+    if (feature.is_locked) {
+      var lockIconOverlay = new google.maps.Marker({
+        icon: {
+          url: this.configuration.locationCategories.entityLockIcon,
+          anchor: new google.maps.Point(12, 24)
+        },
+        clickable: false,
+        map: this.mapRef
+      })
+      lockIconOverlay.bindTo('position', mapMarker, 'position')
+      this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
+    }
     // this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
     return mapMarker
   }
@@ -377,6 +391,7 @@ class MapObjectEditorController {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
       },
+      is_locked: false,
       isExistingObject: false
     }
 
@@ -386,6 +401,7 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
+      feature.is_locked = event.locations[0].is_locked
       featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
@@ -606,7 +622,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'configuration', 'state', 'tileDataService']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',

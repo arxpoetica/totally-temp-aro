@@ -1,8 +1,9 @@
 class LocationProperties {
-  constructor() {
+  constructor(isLocked) {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
     this.numberOfLocations = 1
+    this.isLocked = isLocked
     this.isDirty = false
   }
 }
@@ -185,11 +186,10 @@ class LocationEditorController {
     return featureObj
   }
 
-  handleObjectCreated(mapObject) {
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties()
+  handleObjectCreated(mapObject, usingMapClick, feature) {
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.is_locked)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
-    console.log(locationObject)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }
