@@ -265,7 +265,7 @@ class MapObjectEditorController {
         color: "#000000",
         fontSize: "46px"
       }, 
-      draggable: true,
+      draggable: feature.allowModification,
       map: this.mapRef
     })
     
@@ -377,6 +377,7 @@ class MapObjectEditorController {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
       },
+      allowModification: false,
       isExistingObject: false
     }
 

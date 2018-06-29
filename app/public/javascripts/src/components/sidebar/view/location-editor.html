@@ -17,7 +17,7 @@
                      get-object-selected-icon-url="$ctrl.getObjectSelectedIconUrl({objectKey, objectValue})"
                      create-object-on-click="true"
                      allow-boundary-creation="false"
-                     on-create-object="$ctrl.handleObjectCreated(mapObject)"
+                     on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
                      on-modify-object="$ctrl.handleObjectModified(mapObject)"
                      on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                      on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
@@ -41,7 +41,7 @@
       </div>
     </div>
     <br>
-    <div ng-if="$ctrl.selectedMapObject">
+    <div ng-if="$ctrl.selectedMapObject" style="position: relative;">
       <table id="tblLocationProperties" class="table table-condensed table-striped" style="margin-bottom: 10px">
         <tr>
           <td>Location type:</td>
@@ -73,6 +73,13 @@
       <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
         <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
       </button>
+
+      <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+      <div class="disable-sibling-controls"
+           ng-hide="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].allowModification">
+        <i class="fa fa-5x fa-lock" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
+      </div>
+
     </div>
     <br>
     Number of changes in transaction: {{$ctrl.getFeaturesCount()}}
