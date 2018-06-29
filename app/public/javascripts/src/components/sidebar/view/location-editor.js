@@ -190,7 +190,6 @@ class LocationEditorController {
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.isLocked)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
-    console.log(locationObject)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }

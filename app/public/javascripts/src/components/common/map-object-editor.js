@@ -1,12 +1,13 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService) {
+  constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
     this.$document = $document
     this.$timeout = $timeout
+    this.configuration = configuration
     this.state = state
     this.tileDataService = tileDataService
     this.mapRef = null
@@ -269,6 +270,18 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     
+    if (feature.isLocked) {
+      var lockIconOverlay = new google.maps.Marker({
+        icon: {
+          url: this.configuration.locationCategories.entityLockIcon,
+          anchor: new google.maps.Point(12, 24)
+        },
+        clickable: false,
+        map: this.mapRef
+      })
+      lockIconOverlay.bindTo('position', mapMarker, 'position')
+      this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
+    }
     // this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
     return mapMarker
   }
@@ -608,7 +621,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'configuration', 'state', 'tileDataService']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
