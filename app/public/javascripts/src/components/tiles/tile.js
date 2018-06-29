@@ -482,7 +482,7 @@ class MapTileRenderer {
             this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
             // Draw lock overlay if required
-            if (feature.properties.isLocked) {
+            if (feature.properties.is_locked) {
               ctx.drawImage(lockOverlayImage[0], x - 4, y - 4)
             }
   	      } else {

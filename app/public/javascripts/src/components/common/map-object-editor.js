@@ -266,11 +266,11 @@ class MapObjectEditorController {
         color: "#000000",
         fontSize: "46px"
       }, 
-      draggable: !feature.isLocked, // Allow dragging only if feature is not locked
+      draggable: !feature.is_locked, // Allow dragging only if feature is not locked
       map: this.mapRef
     })
     
-    if (feature.isLocked) {
+    if (feature.is_locked) {
       var lockIconOverlay = new google.maps.Marker({
         icon: {
           url: this.configuration.locationCategories.entityLockIcon,
@@ -390,7 +390,7 @@ class MapObjectEditorController {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
       },
-      isLocked: false,
+      is_locked: false,
       isExistingObject: false
     }
 
@@ -400,7 +400,7 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
-      feature.isLocked = event.locations[0].isLocked
+      feature.is_locked = event.locations[0].is_locked
       featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
