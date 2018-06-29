@@ -12,6 +12,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   if (configuration.networkEquipment) {
     $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
+    $scope.layerTypeVisibility.planned = configuration.networkEquipment.visibility.defaultShowPlannedEquipment
   }
   $scope.mapZoom = 0//map.getZoom()
   
@@ -157,6 +158,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // If configuration is loaded again, update default visibility of "show existing equipment"
   $rootScope.$on('configuration_loaded', () => {
     $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
+    $scope.layerTypeVisibility.planned = configuration.networkEquipment.visibility.defaultShowPlannedEquipment
     updateMapLayers()
     $timeout()
   })
