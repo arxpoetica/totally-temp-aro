@@ -265,7 +265,7 @@ class MapObjectEditorController {
         color: "#000000",
         fontSize: "46px"
       }, 
-      draggable: feature.allowModification,
+      draggable: !feature.isLocked, // Allow dragging only if feature is not locked
       map: this.mapRef
     })
     
@@ -377,7 +377,7 @@ class MapObjectEditorController {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()]
       },
-      allowModification: false,
+      isLocked: false,
       isExistingObject: false
     }
 
@@ -387,6 +387,7 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
+      feature.isLocked = event.locations[0].isLocked
       featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor

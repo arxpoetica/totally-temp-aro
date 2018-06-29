@@ -482,7 +482,9 @@ class MapTileRenderer {
             this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
             // Draw lock overlay if required
-            // ctx.drawImage(lockOverlayImage[0], x - 4, y - 4)
+            if (feature.properties.isLocked) {
+              ctx.drawImage(lockOverlayImage[0], x - 4, y - 4)
+            }
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight

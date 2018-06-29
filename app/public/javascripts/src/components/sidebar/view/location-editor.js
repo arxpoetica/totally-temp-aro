@@ -1,9 +1,9 @@
 class LocationProperties {
-  constructor(allowModification) {
+  constructor(isLocked) {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
     this.numberOfLocations = 1
-    this.allowModification = allowModification
+    this.isLocked = isLocked
     this.isDirty = false
   }
 }
@@ -187,7 +187,7 @@ class LocationEditorController {
   }
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.allowModification)
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.isLocked)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     console.log(locationObject)
