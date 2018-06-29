@@ -267,6 +267,7 @@ class MapObjectEditorController {
         fontSize: "46px"
       }, 
       draggable: !feature.is_locked, // Allow dragging only if feature is not locked
+      clickable: !feature.is_locked, // Allow clicking (including right click) only if feature is not locked
       map: this.mapRef
     })
     
