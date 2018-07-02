@@ -19,7 +19,7 @@
       "iconUrl": "/images/map_icons/aro/splice_point.png"
     },
     "cell_5g": {
-      "iconUrl": "/images/map_icons/aro/all_cell_5g.png"
+      "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png"
     },
     "loop_extender": {
       "iconUrl": "/images/map_icons/aro/loop_extender.png"
