@@ -6,11 +6,15 @@ class DisplayModeButtonsController {
     this.currentUser = state.loggedInUser
     $scope.configuration = configuration
     
-    console.log(configuration)
-    console.log(state.loggedInUser)
-    
     // Data flow from state to component
     this.selectedDisplayModeSubject.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)
+  
+    // ToDo: this will be replaced by reading directly from configuration, 
+    //  once configuration is added to state and updated dynamically on state changes
+    this.plan = null
+    state.plan.subscribe((newValue) => {
+      this.plan = newValue;
+    })
   }
 
   // Data flow from component to state

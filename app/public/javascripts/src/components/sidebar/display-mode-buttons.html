@@ -33,7 +33,8 @@
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
-          ng-if="$ctrl.currentUser.rol !== 'sales'">
+          ng-if="$ctrl.currentUser.rol !== 'sales'" 
+          ng-disabled=" !($ctrl.currentUser.rol === 'admin' || ($ctrl.plan && !$ctrl.plan.ephemeral)) ">
             <div class="fa fa-2x fa-pencil"
                 data-toggle="tooltip"
                 data-placement="bottom"
