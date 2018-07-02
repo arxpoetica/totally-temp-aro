@@ -45,7 +45,7 @@ class BoundariesController {
         aggregateZoomThreshold: 10
       }
       
-      //wirecenter_layer.visible_check = config.ARO_CLIENT === 'frontier' //enable wirecenter for frontier by default
+      wirecenter_layer.visible_check = config.ARO_CLIENT === 'frontier' //enable wirecenter for frontier by default
       this.state.boundaries.tileLayers.push(wirecenter_layer)
     })
     
@@ -282,9 +282,9 @@ class BoundariesController {
       })
 
       //enable wirecenter for frontier by default
-      // this.state.boundaries.tileLayers.forEach((tileLayers) => {
-      //   tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
-      // })
+      this.state.boundaries.tileLayers.forEach((tileLayers) => {
+        tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
+      })
     })
   }
 

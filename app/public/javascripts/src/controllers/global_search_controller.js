@@ -10,14 +10,12 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
 
   // Update the search control every time that the plan changes.
   state.plan.skip(1).subscribe((plan) => {
-    map.setCenter({ lat: plan.latitude, lng: plan.longitude })
     if (!planId) {
-      // Initialize select2 only the first time
-      planId = plan.id
+      // Initialize select2 and search address only the first time
       initializeSelect()
+      $timeout(() => searchAddress(plan.areaName), 10)
     }
     planInfo = plan    
-    $timeout(() => searchAddress(plan.areaName), 10)
     planId = plan.id
   })
 
