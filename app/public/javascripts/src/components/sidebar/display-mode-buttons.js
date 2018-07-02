@@ -5,7 +5,10 @@ class DisplayModeButtonsController {
     this.displayModes = state.displayModes
     this.currentUser = state.loggedInUser
     $scope.configuration = configuration
-
+    
+    console.log(configuration)
+    console.log(state.loggedInUser)
+    
     // Data flow from state to component
     this.selectedDisplayModeSubject.subscribe((selectedDisplayMode) => this.selectedDisplayMode = selectedDisplayMode)
   }
