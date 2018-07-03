@@ -14,7 +14,13 @@ class WorkingNotificationController {
     this.noteQueue = this.uiNotificationService.channelsData[this.channel]
     this.uiNotificationService.channels[this.channel].subscribe((noteQueue) => {
       this.noteQueue = noteQueue
-      this.$scope.$apply()
+      //console.log(this.$scope.$$phase)
+      try{
+        if(!this.$scope.$$phase) this.$scope.$digest()
+      }catch(error){
+        // we can silent fail this
+      }
+      
     })
   }
 }
