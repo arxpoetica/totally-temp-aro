@@ -7,10 +7,12 @@ class WorkingNotificationController {
   
   $onInit() {
     this.uiNotificationService.initChannel(this.channel)
+    
+    //this.uiNotificationService.addNotification('main', 'this is a test message 1')
+    //this.uiNotificationService.addNotification('main', 'and this is another test message 22')
+    
     this.noteQueue = this.uiNotificationService.channelsData[this.channel]
     this.uiNotificationService.channels[this.channel].subscribe((noteQueue) => {
-      //console.log('update')
-      //console.log(noteQueue)
       this.noteQueue = noteQueue
       this.$scope.$apply()
     })
