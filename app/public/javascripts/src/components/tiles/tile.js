@@ -337,7 +337,7 @@ class MapTileRenderer {
       })
       .catch((err) => {
         console.error(err)
-        //this.uiNotificationService.removeNotification('main', 'rendering tiles')
+        this.uiNotificationService.removeNotification('main', 'rendering tiles')
       })
       .then(() => {
         this.uiNotificationService.removeNotification('main', 'rendering tiles')
