@@ -18,7 +18,7 @@ class WorkingNotificationController {
       try{
         if(!this.$scope.$$phase) this.$scope.$digest()
       }catch(error){
-        // we can silent fail this
+        // we can silent fail this 
       }
       
     })

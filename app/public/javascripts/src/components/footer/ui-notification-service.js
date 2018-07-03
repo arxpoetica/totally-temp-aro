@@ -17,13 +17,14 @@ app.service('uiNotificationService', ['$rootScope', '$timeout', ($rootScope, $ti
   
   service.addNotification = (channel, noteText) => {
     service.initChannel(channel)
-    
+    var doUpdate = false
     if (!service.channelsData[channel].queue.hasOwnProperty(noteText)){
       service.channelsData[channel].queue[noteText] = 0
+      doUpdate = true
     }
     service.channelsData[channel].queue[noteText]++
     service.channelsData[channel].queueLen++
-    service.channels[channel].next(service.channelsData[channel])
+    if (doUpdate) service.channels[channel].next(service.channelsData[channel])
     //console.log(service.channelsData[channel].queue[noteText] +' '+ channel+', '+noteText)
   }
   
@@ -37,14 +38,18 @@ app.service('uiNotificationService', ['$rootScope', '$timeout', ($rootScope, $ti
     //    but would never show up with out this delay
     
     setTimeout(() => {  
+      var doUpdate = false
       service.channelsData[channel].queue[noteText]--
-      if (service.channelsData[channel].queue[noteText] <= 0) delete service.channelsData[channel].queue[noteText]
+      if (service.channelsData[channel].queue[noteText] <= 0){
+        delete service.channelsData[channel].queue[noteText]
+        doUpdate = true
+      }
       service.channelsData[channel].queueLen--
       if (service.channelsData[channel].queueLen < 0) service.channelsData[channel].queueLen = 0  
       
       //console.log('Done: '+service.channelsData[channel].queue[noteText]+' '+channel+', '+noteText)
       
-      service.channels[channel].next(service.channelsData[channel])
+      if (doUpdate) service.channels[channel].next(service.channelsData[channel])
     }, 100)
   }
   
