@@ -33,8 +33,8 @@ class EditorInterfaceTreeController {
   }
   
   isList(){
-    //console.log( ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.displayType) )
-    return ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.displayType)
+    //console.log( ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.displayDataType) )
+    return ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.displayDataType)
   }
   
   getSummeryCount(propVal){
@@ -61,9 +61,9 @@ class EditorInterfaceTreeController {
   /*
   makeList(prop){
     var listVals = []
-    if ("tree" == prop.displayType){
+    if ("tree" == prop.displayDataType){
       listVals = [this.objectToView[prop.propertyName]] // note the array wrapper 
-    }else if("list" == prop.displayType){
+    }else if("list" == prop.displayDataType){
       listVals = this.objectToView[prop.propertyName]
     }
     return listVals

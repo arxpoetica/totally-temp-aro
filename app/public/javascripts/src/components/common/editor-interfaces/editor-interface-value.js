@@ -6,12 +6,12 @@ class EditorInterfaceValueController {
   }
 
   $onInit() {
-    // I think its better to get an error so we know a displayType is wrong
-    //if ("number" == this.displayProps.displayType){
+    // I think its better to get an error so we know a displayDataType is wrong
+    //if ("number" == this.displayProps.displayDataType){
     //  this.model = parseFloat(this.model)
     //}
     
-    if ("date" == this.displayProps.displayType || "datetime" == this.displayProps.displayType){
+    if ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType){
       this.dateVal = new Date(this.model)
     }
     

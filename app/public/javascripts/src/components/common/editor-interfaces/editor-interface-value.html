@@ -1,5 +1,5 @@
 
-<div ng-if="$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayType">
+<div ng-if="$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayDataType">
   
   <input ng-switch-when="string" type="text" ng-model="$ctrl.model" ng-change="$ctrl.onChange()" class="form-control input-sm ei-input-text">
   <input ng-switch-when="number" type="number" ng-model="$ctrl.model" ng-change="$ctrl.onChange()" class="form-control input-sm ei-input-number">
@@ -24,7 +24,7 @@
   
 </div>
 
-<div ng-if="!$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayType">
+<div ng-if="!$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayDataType">
   <div ng-switch-when="date">
     {{ $ctrl.dateVal.toGMTString() }}
   </div>

@@ -5,7 +5,7 @@
       {
         "propertyName": "daysFrom",
         "levelOfDetail": 0,
-        "displayType": "date",
+        "displayDataType": "date",
         "displayName": "Days From",
         "visible": true,
         "editable": true
@@ -13,7 +13,7 @@
       {
         "propertyName": "daysTo",
         "levelOfDetail": 0,
-        "displayType": "date",
+        "displayDataType": "date",
         "displayName": "Days To",
         "visible": true,
         "editable": true
@@ -21,7 +21,7 @@
       {
         "propertyName": "equipmentId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Equipment Id",
         "visible": true,
         "editable": true
@@ -34,7 +34,7 @@
       {
         "propertyName": "dataType",
         "levelOfDetail": 2,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
         "visible": true,
@@ -43,7 +43,7 @@
       {
         "propertyName": "name",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Name",
         "visible": true,
         "editable": true
@@ -51,7 +51,7 @@
       {
         "propertyName": "geometry",
         "levelOfDetail": 2,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Geometry",
         "enumEntityName": "",
         "visible": false,
@@ -60,7 +60,7 @@
       {
         "propertyName": "attributes",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Attributes",
         "visible": true,
         "editable": true
@@ -68,7 +68,7 @@
       {
         "propertyName": "source_id",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Source Id",
         "visible": true,
         "editable": true
@@ -76,7 +76,7 @@
       {
         "propertyName": "objectId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Object Id",
         "visible": true,
         "editable": true
@@ -89,7 +89,7 @@
       {
         "propertyName": "notes",
         "levelOfDetail": 0,
-        "displayType": "text",
+        "displayDataType": "text",
         "displayName": "Notes",
         "visible": true,
         "editable": true
@@ -97,7 +97,7 @@
       {
         "propertyName": "existingEquipment",
         "levelOfDetail": 0,
-        "displayType": "list",
+        "displayDataType": "list",
         "displayName": "Existing Equipment",
         "visible": true,
         "editable": true
@@ -105,7 +105,7 @@
       {
         "propertyName": "plannedEquipment",
         "levelOfDetail": 0,
-        "displayType": "list",
+        "displayDataType": "list",
         "displayName": "Planned Equipment",
         "visible": true,
         "editable": true
@@ -113,7 +113,7 @@
       {
         "propertyName": "siteInfo",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Site Info",
         "visible": true,
         "editable": true
@@ -126,7 +126,7 @@
       {
         "propertyName": "locationCategory",
         "levelOfDetail": 0,
-        "displayType": "select",
+        "displayDataType": "select",
         "displayName": "Location Category",
         "visible": true,
         "editable": true
@@ -134,7 +134,7 @@
       {
         "propertyName": "dataType",
         "levelOfDetail": 2,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
         "visible": true,
@@ -143,7 +143,7 @@
       {
         "propertyName": "geometry",
         "levelOfDetail": 2,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Geometry",
         "enumEntityName": "",
         "visible": false,
@@ -152,7 +152,7 @@
       {
         "propertyName": "attributes",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Attributes",
         "visible": true,
         "editable": true
@@ -160,7 +160,7 @@
       {
         "propertyName": "objectId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Object Id",
         "visible": true,
         "editable": true
@@ -173,7 +173,7 @@
       {
         "propertyName": "boundary",
         "levelOfDetail": 0,
-        "displayType": "list",
+        "displayDataType": "list",
         "displayName": "Boundary",
         "visible": true,
         "editable": true
@@ -181,7 +181,7 @@
       {
         "propertyName": "networkNodeType",
         "levelOfDetail": 2,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Equipment Type",
         "enumEntityName": "",
         "visible": true,
@@ -190,7 +190,7 @@
       {
         "propertyName": "dataType",
         "levelOfDetail": 2,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
         "visible": true,
@@ -199,7 +199,7 @@
       {
         "propertyName": "networkNodeEquipment",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Network Node Equipment",
         "visible": true,
         "editable": true
@@ -207,7 +207,7 @@
       {
         "propertyName": "geometry",
         "levelOfDetail": 2,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Geometry",
         "enumEntityName": "",
         "visible": false,
@@ -216,7 +216,7 @@
       {
         "propertyName": "attributes",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Attributes",
         "visible": true,
         "editable": true
@@ -224,7 +224,7 @@
       {
         "propertyName": "objectId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Object Id",
         "visible": true,
         "editable": true
@@ -237,7 +237,7 @@
       {
         "propertyName": "networkNodeType",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Network Node Type",
         "visible": true,
         "editable": true
@@ -245,7 +245,7 @@
       {
         "propertyName": "dataType",
         "levelOfDetail": 2,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Data Type",
         "enumEntityName": "DataTypeEntity",
         "visible": true,
@@ -254,7 +254,7 @@
       {
         "propertyName": "boundaryTypeId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Boundary Type Id",
         "visible": true,
         "editable": true
@@ -262,7 +262,7 @@
       {
         "propertyName": "geometry",
         "levelOfDetail": 2,
-        "displayType": "list",
+        "displayDataType": "list",
         "displayName": "Geometry",
         "enumEntityName": "",
         "visible": false,
@@ -271,7 +271,7 @@
       {
         "propertyName": "attributes",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Attributes",
         "visible": true,
         "editable": true
@@ -279,7 +279,7 @@
       {
         "propertyName": "networkObjectId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Network Object Id",
         "visible": true,
         "editable": true
@@ -287,7 +287,7 @@
       {
         "propertyName": "objectId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Object Id",
         "visible": true,
         "editable": true
@@ -300,7 +300,7 @@
       {
         "propertyName": "fiberAvailable",
         "levelOfDetail": 0,
-        "displayType": "check",
+        "displayDataType": "check",
         "displayName": "Fiber Available",
         "visible": true,
         "editable": true
@@ -308,7 +308,7 @@
       {
         "propertyName": "address",
         "levelOfDetail": 0,
-        "displayType": "text",
+        "displayDataType": "text",
         "displayName": "Address",
         "visible": true,
         "editable": true
@@ -316,7 +316,7 @@
       {
         "propertyName": "siteName",
         "levelOfDetail": 1,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Site Name",
         "enumEntityName": "",
         "visible": true,
@@ -325,7 +325,7 @@
       {
         "propertyName": "siteClli",
         "levelOfDetail": 1,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Site Clli",
         "enumEntityName": "",
         "visible": true,
@@ -334,7 +334,7 @@
       {
         "propertyName": "dpiEnvironment",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Dpi Environment",
         "visible": true,
         "editable": true
@@ -342,7 +342,7 @@
       {
         "propertyName": "physicallyLinked",
         "levelOfDetail": 0,
-        "displayType": "check",
+        "displayDataType": "check",
         "displayName": "Physically Linked",
         "visible": true,
         "editable": true
@@ -350,7 +350,7 @@
       {
         "propertyName": "t1",
         "levelOfDetail": 0,
-        "displayType": "check",
+        "displayDataType": "check",
         "displayName": "T 1",
         "visible": true,
         "editable": true
@@ -358,7 +358,7 @@
       {
         "propertyName": "hsiOfficeCode",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Hsi Office Code",
         "visible": true,
         "editable": true
@@ -371,7 +371,7 @@
       {
         "propertyName": "quantity",
         "levelOfDetail": 0,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Quantity",
         "visible": true,
         "editable": true
@@ -379,7 +379,7 @@
       {
         "propertyName": "code",
         "levelOfDetail": 1,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Code",
         "enumEntityName": "",
         "visible": true,
@@ -388,7 +388,7 @@
       {
         "propertyName": "installCost",
         "levelOfDetail": 0,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Install Cost",
         "visible": true,
         "editable": true
@@ -396,7 +396,7 @@
       {
         "propertyName": "oneTimeCost",
         "levelOfDetail": 0,
-        "displayType": "check",
+        "displayDataType": "check",
         "displayName": "One Time Cost",
         "visible": true,
         "editable": true
@@ -404,7 +404,7 @@
       {
         "propertyName": "rank",
         "levelOfDetail": 0,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Rank",
         "visible": true,
         "editable": true
@@ -412,7 +412,7 @@
       {
         "propertyName": "subComponents",
         "levelOfDetail": 0,
-        "displayType": "list",
+        "displayDataType": "list",
         "displayName": "Sub Components",
         "visible": true,
         "editable": true
@@ -420,7 +420,7 @@
       {
         "propertyName": "equipmentName",
         "levelOfDetail": 1,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Name",
         "enumEntityName": "",
         "visible": true,
@@ -429,7 +429,7 @@
       {
         "propertyName": "equipmentItemId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Equipment Item Id",
         "visible": true,
         "editable": true
@@ -437,7 +437,7 @@
       {
         "propertyName": "extendedAttributes",
         "levelOfDetail": 0,
-        "displayType": "tree",
+        "displayDataType": "tree",
         "displayName": "Extended Attributes",
         "visible": true,
         "editable": true
@@ -445,7 +445,7 @@
       {
         "propertyName": "constructionCost",
         "levelOfDetail": 1,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Cost",
         "enumEntityName": "",
         "visible": true,
@@ -459,7 +459,7 @@
       {
         "propertyName": "code",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Code",
         "visible": true,
         "editable": true
@@ -467,7 +467,7 @@
       {
         "propertyName": "serialNumber",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Serial Number",
         "visible": true,
         "editable": true
@@ -475,7 +475,7 @@
       {
         "propertyName": "switchType",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Switch Type",
         "visible": true,
         "editable": true
@@ -483,7 +483,7 @@
       {
         "propertyName": "latency",
         "levelOfDetail": 0,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Latency",
         "visible": true,
         "editable": true
@@ -491,7 +491,7 @@
       {
         "propertyName": "maxSpeed",
         "levelOfDetail": 0,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Max Speed",
         "visible": true,
         "editable": true
@@ -499,7 +499,7 @@
       {
         "propertyName": "manufacturer",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Manufacturer",
         "visible": true,
         "editable": true
@@ -507,7 +507,7 @@
       {
         "propertyName": "marketableEquipments",
         "levelOfDetail": 0,
-        "displayType": "list",
+        "displayDataType": "list",
         "displayName": "Marketable Equipments",
         "visible": true,
         "editable": true
@@ -515,7 +515,7 @@
       {
         "propertyName": "deploymentDate",
         "levelOfDetail": 1,
-        "displayType": "date",
+        "displayDataType": "date",
         "displayName": "Deployment Date",
         "enumEntityName": "",
         "visible": true,
@@ -524,7 +524,7 @@
       {
         "propertyName": "uplinkSpeed",
         "levelOfDetail": 0,
-        "displayType": "number",
+        "displayDataType": "number",
         "displayName": "Uplink Speed",
         "visible": true,
         "editable": true
@@ -532,7 +532,7 @@
       {
         "propertyName": "equipmentName",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Equipment Name",
         "visible": true,
         "editable": true
@@ -540,7 +540,7 @@
       {
         "propertyName": "modelNumber",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Model Number",
         "visible": true,
         "editable": true
@@ -548,7 +548,7 @@
       {
         "propertyName": "clliCode",
         "levelOfDetail": 1,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Clli Code",
         "enumEntityName": "",
         "visible": true,
@@ -557,7 +557,7 @@
       {
         "propertyName": "equipmentItemId",
         "levelOfDetail": 0,
-        "displayType": "string",
+        "displayDataType": "string",
         "displayName": "Equipment Item Id",
         "visible": true,
         "editable": true
