@@ -35,7 +35,8 @@ app.service('uiNotificationService', ['$rootScope', '$timeout', ($rootScope, $ti
     // we want a minimum time for the message to be on screen, 
     //    there may be a serries that are popping on and off right after eachother for a while 
     //    but would never show up with out this delay
-    $timeout(() => {
+    
+    setTimeout(() => {  
       service.channelsData[channel].queue[noteText]--
       if (service.channelsData[channel].queue[noteText] <= 0) delete service.channelsData[channel].queue[noteText]
       service.channelsData[channel].queueLen--
