@@ -10,8 +10,8 @@ var pointInPolygon = require('point-in-polygon')
 class MapTileRenderer {
 
   constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea,
-              selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,
-              selectedDisplayMode, analysisSelectionMode, displayModes, configuration, getPixelCoordinatesWithinTile, mapLayers = []) {
+              selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
+              selectedDisplayMode, analysisSelectionMode, displayModes, configuration, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -30,6 +30,7 @@ class MapTileRenderer {
     
     this.displayModes = displayModes
     this.configuration = configuration
+    this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.renderBatches = []
     this.isRendering = false
@@ -285,6 +286,9 @@ class MapTileRenderer {
     // Get all the data for this tile
     Promise.all(singleTilePromises)
       .then((singleTileResults) => {
+        
+        this.uiNotificationService.addNotification('main', 'rendering tiles')
+        
         var lockOverlayImage = singleTileResults.splice(singleTileResults.length - 1)
         var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
 
@@ -326,8 +330,14 @@ class MapTileRenderer {
             }
           }
         }
+        
+        this.uiNotificationService.removeNotification('main', 'rendering tiles')
+        
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        this.uiNotificationService.removeNotification('main', 'rendering tiles')
+      })
   }
 
   // Renders a single layer on a tile
@@ -1088,7 +1098,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, state, tileDataService, configuration) {
+  constructor($document, state, tileDataService, configuration, uiNotificationService) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
@@ -1338,6 +1348,7 @@ class TileComponentController {
                                                            this.state.optimizationOptions.analysisSelectionMode,
                                                            this.state.displayModes,
                                                            this.configuration,
+                                                           uiNotificationService, 
                                                            this.getPixelCoordinatesWithinTile.bind(this)
                                                           ))
       this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
@@ -1539,7 +1550,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'configuration']
+TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'configuration', 'uiNotificationService']
 
 let tile = {
   template: '',
