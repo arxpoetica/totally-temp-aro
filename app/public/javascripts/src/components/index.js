@@ -50,6 +50,9 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
+
+import uiNotification from './footer/ui-notification'
+
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import manageGroups from './global-settings/manage-groups'
@@ -126,6 +129,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('planInputsModal', planInputsModal)   
    .component('networkPlanManage', networkPlanManage)
    .component('networkPlan', networkPlan)
+   .component('uiNotification', uiNotification)
    .component('userAccountSettings', userAccountSettings)
    .component('manageUsers', manageUsers)
    .component('manageGroups', manageGroups)
