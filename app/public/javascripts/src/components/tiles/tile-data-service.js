@@ -1,4 +1,4 @@
-app.service('tileDataService', ['$rootScope', 'configuration', ($rootScope, configuration) => {
+app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationService', ($rootScope, configuration, uiNotificationService) => {
 
   // IMPORTANT: The vector-tile and pbf bundles must have been included before this point
   var VectorTile = require('vector-tile').VectorTile
@@ -95,6 +95,13 @@ app.service('tileDataService', ['$rootScope', 'configuration', ($rootScope, conf
         oReq.onerror = function(error) { reject(error) }
         oReq.onabort = function() { reject('XMLHttpRequest abort') }
         oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
+        
+        oReq.addEventListener("loadend", function() {
+          uiNotificationService.removeNotification('main', 'getting tile data')
+        });
+        
+        uiNotificationService.addNotification('main', 'getting tile data')
+        
         oReq.send()
       })
     }
