@@ -1,14 +1,11 @@
 class MapToggleController {
   constructor($document){
-    this.buttonIcon = 'fa-road'
     this.map = map;
-
-    this.isToggled = false
+    this.buttonIcon = this.map.mapTypeId === 'satellite' ? 'fa-globe' : 'fa-road'
   }
 
   toggle(){
-    this.isToggled = !this.isToggled
-    this.isToggled ? this.toStatellite() : this.toStreets()
+    this.map.mapTypeId === 'satellite' ? this.toStreets() : this.toStatellite()
   }
 
   toStatellite() {

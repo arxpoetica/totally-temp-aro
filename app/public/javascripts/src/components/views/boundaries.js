@@ -37,7 +37,7 @@ class BoundariesController {
       if (!serviceLayer.show_in_boundaries) return
       var wirecenter_layer = {
         name: serviceLayer.description, //serviceLayer.description, // Service Areas 
-        type: serviceLayer.name,
+        type: 'wirecenter',
         api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
         layerId: serviceLayer.id,
         visible: false,
