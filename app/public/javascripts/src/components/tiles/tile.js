@@ -282,12 +282,13 @@ class MapTileRenderer {
     })
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.LOCK_ICON_KEY))
-
+    
+    this.uiNotificationService.addNotification('main', 'rendering tiles')
     // Get all the data for this tile
     Promise.all(singleTilePromises)
       .then((singleTileResults) => {
         
-        this.uiNotificationService.addNotification('main', 'rendering tiles')
+        //this.uiNotificationService.addNotification('main', 'rendering tiles')
         
         var lockOverlayImage = singleTileResults.splice(singleTileResults.length - 1)
         var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
@@ -331,11 +332,14 @@ class MapTileRenderer {
           }
         }
         
-        this.uiNotificationService.removeNotification('main', 'rendering tiles')
+        //this.uiNotificationService.removeNotification('main', 'rendering tiles')
         
       })
       .catch((err) => {
         console.error(err)
+        //this.uiNotificationService.removeNotification('main', 'rendering tiles')
+      })
+      .then(() => {
         this.uiNotificationService.removeNotification('main', 'rendering tiles')
       })
   }
