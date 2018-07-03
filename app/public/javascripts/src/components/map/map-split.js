@@ -199,7 +199,7 @@ let mapSplit = {
       </div>
     </div>
   </div>
-  <ui-notification style="pointer-events: none; position: absolute; left: 25px; bottom: 25px;"></working-notification>
+  <ui-notification style="pointer-events: none; position: absolute; left: 25px; bottom: 25px;" channel="'main'"></working-notification>
   <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="showFooter"></div>
   `,
   bindings: { },

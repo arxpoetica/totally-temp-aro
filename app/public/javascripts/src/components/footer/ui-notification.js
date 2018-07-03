@@ -1,23 +1,29 @@
 class WorkingNotificationController {
-  constructor(){
-    this.noteCount = 0
-  }
-  /*
-  addNotification(noteText){
-    console.log(noteText + " " + this.noteCount)
-    this.noteCount ++
+  constructor($scope, uiNotificationService){
+    this.$scope = $scope
+    this.uiNotificationService = uiNotificationService
+    this.noteQueue = {}
   }
   
-  removeNotification(noteText){
-    console.log("DONE: "+noteText + " " + this.noteCount)
-    this.noteCount ++
+  $onInit() {
+    this.uiNotificationService.initChannel(this.channel)
+    this.noteQueue = this.uiNotificationService.channelsData[this.channel]
+    this.uiNotificationService.channels[this.channel].subscribe((noteQueue) => {
+      //console.log('update')
+      //console.log(noteQueue)
+      this.noteQueue = noteQueue
+      this.$scope.$apply()
+    })
   }
-  */
 }
 
+WorkingNotificationController.$inject = ['$scope', 'uiNotificationService']
+
 let workingNotification = {
-  templateUrl: '/components/footer/working-notification.html',
-  bindings: {},
+  templateUrl: '/components/footer/ui-notification.html',
+  bindings: {
+    channel: '<'
+  },
   controller: WorkingNotificationController
 }
 

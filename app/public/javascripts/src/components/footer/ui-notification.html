@@ -1,3 +1,27 @@
-<div>
-  <span class="fa fa-spinner fa-spin"></span> Note list here {{$ctrl.noteCount}}
+<style>
+  .ui-note{
+    /*
+    color: #ffffff;
+    text-shadow: #000000 -2px 2px;
+    */
+  }
+  .ui-note-notes-contain{
+    /*
+    color: #000000;
+    */
+    text-shadow: #ffffff -1px 1px;
+    position: absolute;
+    left: 25px;
+    bottom: 0px;
+    overflow: visible;
+  }
+  .ui-note-noteline{
+    white-space: nowrap;
+  }
+</style>
+<div class="ui-note" ng-if="$ctrl.noteQueue.queueLen > 0">
+  <span class="fa fa-spinner fa-spin"></span>
+  <div class="ui-note-notes-contain">
+    <div class="ui-note-noteline" ng-repeat="(key, value) in $ctrl.noteQueue.queue">{{key}}: {{val}}</div>
+  </div>
 </div>

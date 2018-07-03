@@ -1,21 +1,43 @@
 app.service('uiNotificationService', ['$rootScope', ($rootScope) => {
   
-  var uiNotificationService = {}
+  //Important: RxJS must have been included using browserify before this point
+  var Rx = require('rxjs')
   
+  var service = {}
   
+  service.channels = {}
+  service.channelsData = {}
   
-  var noteCount = 0
-  
-  
-  uiNotificationService.addNotification = (channel, noteText) => {
-    console.log(noteText + " " + noteCount)
-    noteCount ++
+  service.initChannel = (channel) => {
+    if (!service.channels.hasOwnProperty(channel)){
+      service.channelsData[channel] = {'queue':{}, 'queueLen':0}
+      service.channels[channel] = new Rx.Subject()
+    }
   }
   
-  uiNotificationService.removeNotification = (channel, noteText) => {
-    console.log("DONE: "+noteText + " " + noteCount)
-    noteCount ++
+  service.addNotification = (channel, noteText) => {
+    service.initChannel(channel)
+    //console.log(channel+', '+noteText)
+    if (!service.channelsData[channel].queue.hasOwnProperty(noteText)){
+      service.channelsData[channel].queue[noteText] = 0
+    }
+    service.channelsData[channel].queue[noteText]++
+    service.channelsData[channel].queueLen++
+    service.channels[channel].next(service.channelsData[channel])
   }
   
-  return uiNotificationService
+  service.removeNotification = (channel, noteText) => {
+    service.initChannel(channel)
+    //console.log('Done: '+channel+', '+noteText)
+    if (!service.channelsData[channel].queue.hasOwnProperty(noteText)) return
+    
+    service.channelsData[channel].queue[noteText]--
+    if (service.channelsData[channel].queue[noteText] >= 0) delete service.channelsData[channel].queue[noteText]
+    service.channelsData[channel].queueLen--
+    if (service.channelsData[channel].queueLen > 0) service.channelsData[channel].queueLen = 0  
+    
+    service.channels[channel].next(service.channelsData[channel])
+  }
+  
+  return service
 }])
