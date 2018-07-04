@@ -68,7 +68,7 @@ class PlanSummaryController {
 
   getPlanSummary() {
     if (null == this.currentTransaction) {
-      this.state.resumeTransaction()
+      this.state.resumeOrCreateTransaction()
         .then((result) => {
           this.currentTransaction = result.data
           this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {

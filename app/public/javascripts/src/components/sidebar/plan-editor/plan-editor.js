@@ -765,12 +765,6 @@ class PlanEditorController {
     if (null == this.currentTransaction) return
     this.selectedMapObject = mapObject
     
-    if (null != this.selectedMapObject){
-      console.log( this.selectedMapObject )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
-    }
-    
     this.$timeout()
   }
 

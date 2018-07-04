@@ -1544,34 +1544,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
-  service.resumeTransaction = () => {
-    return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
-    .then((result) => {
-      if (result.data.length > 0) {
-        // At least one transaction exists. Return it
-        return Promise.resolve({
-          data: result.data[0]
-        })
-      }
-    })    
-  }
-
-  service.createTransaction = () => {
-    return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
-      .then((result) => {
-        return Promise.resolve(result)
-      })
-  }
 
   service.resumeOrCreateTransaction = () => {
-    return service.resumeTransaction()
-      .then((result) => {
-        if (!result) {
-          return service.createTransaction().then((result) => Promise.resolve(result))
-        } else {
-          return Promise.resolve(result)
-        }
-      })
+    // Try to get an existing transaction (if any)
+    return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
+    .then((result) => {
+      const planId = service.plan.getValue().id
+      const transactionsForPlan = result.data.filter((item) => item.planId === planId)
+      if (transactionsForPlan.length > 0) {
+        // A transaction exists for this plan and logged in user id. Return it.
+        return Promise.resolve({ data: transactionsForPlan[0] })
+      } else {
+        // A transaction does not exist. Create it.
+        return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: planId })
+      }
+    })
+    .catch((err) => console.error(err))
   }
 
   return service
