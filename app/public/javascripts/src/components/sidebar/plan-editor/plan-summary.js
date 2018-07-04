@@ -76,6 +76,11 @@ class PlanSummaryController {
             this.formatSummary(this.cachedRawSummary)
           })
         })
+        .catch((err) => {
+          this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+          this.$timeout()
+          console.warn(err)
+        })
     } else {
       this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
         this.cachedRawSummary = response.data

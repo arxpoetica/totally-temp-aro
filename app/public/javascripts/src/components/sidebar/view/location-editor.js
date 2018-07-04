@@ -76,9 +76,9 @@ class LocationEditorController {
         })
       })
       .catch((err) => {
-        console.error(err)
-        this.isInErrorState = true
+        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
         this.$timeout()
+        console.warn(err)
       })
   }
 

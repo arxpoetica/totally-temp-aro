@@ -1545,21 +1545,67 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
 
+  // Ask the user if they want to "steal" and existing transaction from another user.
+  // If yes, steal it. If not, throw a rejection
+  service.stealOrRejectTransaction = (transaction) => {
+    // Get the name of the current owner of the transaction
+    return $http.get(`/service/odata/userentity?$select=firstName,lastName&id eq ${transaction.userId}`)
+      .then((result) => {
+        const user = result.data[0]
+        return new Promise((resolve, reject) => {
+          swal({
+            title: 'Overwrite transaction?',
+            text: `User ${user.firstName} ${user.lastName} already has a transaction open for this plan. Do you want to overwrite this transaction?`,
+            type: 'warning',
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes, overwrite',
+            cancelButtonText: 'No',
+            showCancelButton: true,
+            closeOnConfirm: true
+          }, (stealTransaction) => {
+            resolve(stealTransaction)
+          })
+        })
+      })
+      .then((stealTransaction) => {
+        if (stealTransaction) {
+          return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+        } else {
+          return Promise.reject('User does not want to steal the transaction')
+        }
+      })
+  }
+
   service.resumeOrCreateTransaction = () => {
-    // Try to get an existing transaction (if any)
-    return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
-    .then((result) => {
-      const planId = service.plan.getValue().id
-      const transactionsForPlan = result.data.filter((item) => item.planId === planId)
-      if (transactionsForPlan.length > 0) {
-        // A transaction exists for this plan and logged in user id. Return it.
-        return Promise.resolve({ data: transactionsForPlan[0] })
-      } else {
-        // A transaction does not exist. Create it.
-        return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: planId })
-      }
-    })
-    .catch((err) => console.error(err))
+
+    // Workflow:
+    // 1. If we don't have any transaction for this plan, create one
+    // 2. If we have a transaction for this plan BUT not for the current user
+    //    a. Ask if we want to steal the transaction. If yes, steal it. If not, show error message
+    // 3. If we have a transaction for this plan and for this user, resume it
+
+    // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
+    return $http.get(`/service/plan-transaction`)
+      .then((result) => {
+        const currentPlanId = service.plan.getValue().id
+        const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
+        const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
+        if (transactionsForPlan.length === 0) {
+          // A transaction does not exist. Create it.
+          return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
+        } else if (transactionsForUserAndPlan.length === 1) {
+          // We have one open transaction for this user and plan combo. Resume it.
+          return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
+        } else if (transactionsForPlan.length === 1) {
+          // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
+          return service.stealOrRejectTransaction(transactionsForPlan[0])
+        }
+      })
+      .catch((err) => {
+        // For transaction resume errors, log it and rethrow the exception
+        console.warn(err)
+        return Promise.reject(err)
+      })
   }
 
   return service

@@ -168,7 +168,12 @@ class PlanEditorController {
         // We have a list of equipment boundaries. Populate them in the map object
         this.createMapObjects && this.createMapObjects(result.data)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        // Log the error, then get out of "plan edit" mode.
+        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+        this.$timeout()
+        console.warn(err)
+      })
   }
 
   getFeaturesCount() {
