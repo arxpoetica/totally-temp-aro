@@ -1555,7 +1555,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         return new Promise((resolve, reject) => {
           swal({
             title: 'Overwrite transaction?',
-            text: `User ${user.firstName} ${user.lastName} already has a transaction open for this plan. Do you want to overwrite this transaction?`,
+            text: `${user.firstName} ${user.lastName} already has a transaction open for this plan. Do you want to overwrite this transaction?`,
             type: 'warning',
             confirmButtonColor: '#DD6B55',
             confirmButtonText: 'Yes, overwrite',
