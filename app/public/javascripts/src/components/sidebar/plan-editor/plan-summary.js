@@ -6,7 +6,6 @@ class PlanSummaryController {
     this.Utils = Utils
     this.$http = $http
     this.$timeout = $timeout
-    this.currentTransaction = null
     this.config = config
     this.isKeyExpanded = {
       Equipment: false,
@@ -52,8 +51,6 @@ class PlanSummaryController {
     //fetching location order from locationCategories.json
     var coverageOrderKey = 'plannerKey'
     this.coverageOrder = this.orderSummaryByCategory(this.configuration.locationCategories.categories,coverageOrderKey)
-
-    this.$timeout(() => this.getPlanSummary(),1000)
   }
 
   orderSummaryByCategory(obj,key) {
@@ -67,25 +64,14 @@ class PlanSummaryController {
   }
 
   getPlanSummary() {
-    if (null == this.currentTransaction) {
-      this.state.resumeOrCreateTransaction()
-        .then((result) => {
-          this.currentTransaction = result.data
-          this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
-            this.cachedRawSummary = response.data
-            this.formatSummary(this.cachedRawSummary)
-          })
-        })
-        .catch((err) => {
-          this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.cachedRawSummary = null
+    if (this.currentTransaction) {
+      this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`)
+        .then((response) => {
+          this.cachedRawSummary = response.data
+          this.formatSummary(this.cachedRawSummary)
           this.$timeout()
-          console.warn(err)
         })
-    } else {
-      this.$http.get(`/service/plan-transaction/${this.currentTransaction.id}/plan_summary/`).then((response) => {
-        this.cachedRawSummary = response.data
-        this.formatSummary(this.cachedRawSummary)
-      })
     }
   }
 
@@ -168,6 +154,13 @@ class PlanSummaryController {
     })
   }
 
+  $onChanges(changesObj) {
+    if (changesObj.currentTransaction) {
+      // Current transaction has changed. Recalculate plan summary.
+      this.getPlanSummary()
+    }
+  }
+
   $doCheck() {
     // Selected boundary type has changed
     if(this.selectedBoundaryType.id !== this.state.selectedBoundaryType.id) {
@@ -186,6 +179,9 @@ PlanSummaryController.$inject = ['state','configuration','Utils','$http','$timeo
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',
+  bindings: {
+    currentTransaction: '<'
+  },
   controller: PlanSummaryController
 }
 
