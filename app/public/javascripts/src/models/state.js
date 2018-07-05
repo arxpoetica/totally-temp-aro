@@ -103,6 +103,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
 
+  // The selected panel when in the edit plan mode
+  service.EditPlanPanels = Object.freeze({
+    EDIT_PLAN: 'EDIT_PLAN',
+    PLAN_SUMMARY: 'PLAN_SUMMARY'
+  })
+  service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
+
   service.allowViewModeClickAction = () => {
     return service.selectedDisplayMode.getValue() === service.displayModes.VIEW && 
     service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
@@ -1440,13 +1447,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.entityTypeBoundaryList = []
   }
 
+  service.selectedBoundaryTypeforSearch = null
   service.loadBoundaryEntityList = (filterObj) => {
     if(filterObj == '') return
-    if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
-      var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
+    if (service.selectedBoundaryTypeforSearch) {
+      var visibleBoundaryLayer = service.selectedBoundaryTypeforSearch
 
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj.toUpperCase(),'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code,name')
       visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
@@ -1467,7 +1475,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         return //157501341: Location search should not reach out to endpoint without supplying a valid object id
       }
     } else {
-      filter = filterObj ? searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `substringof(${searchColumn},'${filterObj}')` : filter
+      if(filterObj) {
+        var columns = searchColumn.split(',')
+        if(columns.length === 1 ){
+          filter = searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `substringof(${searchColumn},'${filterObj}')`
+        }
+        else {
+          var colFilter = columns.map(col => `substringof(${col},'${filterObj}')`).join(" or ")
+          filter = `(${colFilter})`
+        }
+      }
     }
 
     var libraryItems = []

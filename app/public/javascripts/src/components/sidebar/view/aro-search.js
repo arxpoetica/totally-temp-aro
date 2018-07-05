@@ -11,6 +11,7 @@ class AroSearchController {
     templateUrl: '/components/sidebar/view/aro-search.html',
     bindings: {
       objectName : '@',
+      labelId : '@',
       searchList : '=',
       selected: '=',
       refreshTagList: '&',
