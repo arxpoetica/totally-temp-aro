@@ -103,6 +103,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
 
+  // The selected panel when in the edit plan mode
+  service.EditPlanPanels = Object.freeze({
+    EDIT_PLAN: 'EDIT_PLAN',
+    PLAN_SUMMARY: 'PLAN_SUMMARY'
+  })
+  service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
+
   service.allowViewModeClickAction = () => {
     return service.selectedDisplayMode.getValue() === service.displayModes.VIEW && 
     service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action

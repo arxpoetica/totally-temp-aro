@@ -41,9 +41,9 @@
 </style>
 
 <div class="edit-plan-container">
-  <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="'EDIT_PLAN'">
-    <accordion-panel-title title="'Edit Plan'" panel-id="'EDIT_PLAN'"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'EDIT_PLAN'">
+  <accordion style="position: relative; flex: 1 1 auto;" toggle-expanded-panel="$ctrl.state.activeEditPlanPanel">
+    <accordion-panel-title title="'Edit Plan'" panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN"></accordion-panel-title>
+    <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN">
 
       <!-- Add a component to handle map editing -->
       <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
@@ -294,9 +294,9 @@
       </div>
     </accordion-panel-contents>
     <!-- Plan Summary -->
-    <accordion-panel-title title="'Plan Summary'" panel-id="'PLAN_SUMMARY'"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'PLAN_SUMMARY'">
-      <plan-summary current-transaction="$ctrl.currentTransaction"></plan-summary>
+    <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.EditPlanPanels.PLAN_SUMMARY"></accordion-panel-title>
+    <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.PLAN_SUMMARY">
+      <plan-summary current-transaction="$ctrl.currentTransaction" ng-if="$ctrl.state.activeEditPlanPanel === $ctrl.state.EditPlanPanels.PLAN_SUMMARY"></plan-summary>
     </accordion-panel-contents>
   </accordion>
 </div>

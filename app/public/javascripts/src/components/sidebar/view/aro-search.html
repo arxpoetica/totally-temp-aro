@@ -1,7 +1,6 @@
 <ui-select theme="bootstrap" ng-model="$ctrl.selected" close-on-select="true"
   on-select="$ctrl.onSelectionChanged({selectedObj:$select.selected})">
   <ui-select-match placeholder="Select or search a {{$ctrl.objectName}} in the list...">
-    <!-- {{$select.selected.clli || $select.selected.code || $select.selected.tabblockId || $select.selected.objectId}} -->
     {{ $select.selected[$ctrl.labelId] || $select.selected.tabblockId}}
   </ui-select-match>
   <ui-select-choices class="ui-select-width-300" 
@@ -9,8 +8,7 @@
     refresh="$ctrl.refreshTagList({searchObj:$select.search})"
     refresh-delay="100">
     <div>
-      <!-- {{item.clli || item.code || item.tabblockId || item.objectId}} -->
-      {{item.code || item[$ctrl.labelId] || item.tabblockId}}
+      {{item[$ctrl.labelId] || item.tabblockId}}
       <span ng-if="item.name != null && item.code != null"> 
         {{ item.name }}
       </span>

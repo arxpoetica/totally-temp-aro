@@ -110,7 +110,6 @@ class BoundaryDetailController {
   }
 
   viewSelectedBoundary(selectedBoundary) {
-    //var visibleBoundaryLayer = _.find(this.state.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
     var visibleBoundaryLayer = this.state.selectedBoundaryTypeforSearch
     if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
       this.state.reloadSelectedCensusBlockId(selectedBoundary.id)

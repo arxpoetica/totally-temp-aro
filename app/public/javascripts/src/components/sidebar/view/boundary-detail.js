@@ -12,10 +12,10 @@ let boundaryDetail = {
     </style>
     <div class="mb-5 mt-2">
       <div class="form-group" style="display:table;width:100%">
-        <div class="col" style="display:table-cell">
+        <div class="col" style="display:table-cell;vertical-align:bottom">
           <label for="nameField">Boundary Search:</label>
         </div>  
-        <div class="col" style="display:table-cell">
+        <div class="col" style="display:table-cell;vertical-align:middle">
           <select class="form-control"
             ng-model="$ctrl.state.selectedBoundaryTypeforSearch"
             ng-change="$ctrl.onChangeBoundaryTypeforSearch()"
