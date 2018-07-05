@@ -1206,6 +1206,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var optimizationBody = service.getOptimizationBody()
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
+    apiUrl += `?userId=${service.loggedInUser.id}`
     $http.post(apiUrl, optimizationBody)
       .then((response) => {
         //console.log(response)
