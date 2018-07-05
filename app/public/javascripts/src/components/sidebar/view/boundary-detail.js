@@ -11,8 +11,22 @@ let boundaryDetail = {
       }
     </style>
     <div class="mb-5 mt-2">
+      <div class="form-group" style="display:table;width:100%">
+        <div class="col" style="display:table-cell;vertical-align:bottom">
+          <label for="nameField">Boundary Search:</label>
+        </div>  
+        <div class="col" style="display:table-cell;vertical-align:middle">
+          <select class="form-control"
+            ng-model="$ctrl.state.selectedBoundaryTypeforSearch"
+            ng-change="$ctrl.onChangeBoundaryTypeforSearch()"
+            ng-options="item as item.name for item in $ctrl.state.boundaries.tileLayers | filter:{visible_check:true}">
+            <option value="" selected="selected" hidden>Select a boundary type for search</option>
+          </select>
+        </div>
+      </div>
       <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO"
         object-name="Boundary Layer"
+        label-id="code"
         search-list="$ctrl.state.entityTypeBoundaryList"
         selected="$ctrl.selectedBoundary"
         refresh-tag-list="$ctrl.state.loadBoundaryEntityList(searchObj)"

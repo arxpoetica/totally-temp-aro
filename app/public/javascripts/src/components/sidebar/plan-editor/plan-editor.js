@@ -140,15 +140,11 @@ class PlanEditorController {
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
                                                      feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
           this.objectIdToProperties[feature.objectId] = properties
-          //console.log(properties)
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
       }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((feature) => {
-          //console.log(feature)
-          //console.log( AroFeatureFactory.createObject(feature) )
-          
           const attributes = feature.attributes
           const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
@@ -168,7 +164,12 @@ class PlanEditorController {
         // We have a list of equipment boundaries. Populate them in the map object
         this.createMapObjects && this.createMapObjects(result.data)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        // Log the error, then get out of "plan edit" mode.
+        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+        this.$timeout()
+        console.warn(err)
+      })
   }
 
   getFeaturesCount() {
@@ -764,12 +765,6 @@ class PlanEditorController {
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
     this.selectedMapObject = mapObject
-    
-    if (null != this.selectedMapObject){
-      console.log( this.selectedMapObject )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
-    }
     
     this.$timeout()
   }

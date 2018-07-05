@@ -110,18 +110,18 @@ class BoundaryDetailController {
   }
 
   viewSelectedBoundary(selectedBoundary) {
-    var visibleBoundaryLayer = _.find(this.state.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
-    if(visibleBoundaryLayer.type === 'census_blocks') {
+    var visibleBoundaryLayer = this.state.selectedBoundaryTypeforSearch
+    if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
       this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
       this.viewCensusBlockInfo(selectedBoundary.id)
       .then(() => {
         map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
       })
-    } else if(visibleBoundaryLayer.type === 'wirecenter') {
+    } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
       this.state.reloadSelectedServiceArea(selectedBoundary.id)
       this.viewServiceAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
-    } else if(visibleBoundaryLayer.type === 'analysis_layer') {
+    } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {
       this.state.reloadSelectedAnalysisArea(selectedBoundary.id)
       this.viewAnalysisAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
@@ -138,17 +138,23 @@ class BoundaryDetailController {
     this.selectedAnalysisAreaInfo = null
   }
 
+  clearBoundariesDetails() {
+    this.state.clearEntityTypeBoundaryList() //clear boundaries search list
+    this.selectedBoundary = null
+    this.clearBoundariesInfo()
+  }
+
+  onChangeBoundaryTypeforSearch() {
+    this.clearBoundariesDetails()
+  }
+
   $onInit() {
     this.clearViewModeObserver = this.state.clearViewMode.subscribe((clear) => {
       clear && this.clearBoundariesInfo()  
     })
 
     this.resetSearchObserver = this.state.resetBoundarySearch.skip(1).subscribe((reset) => {
-      if(reset) {
-        this.state.clearEntityTypeBoundaryList() //clear boundaries search list
-        this.selectedBoundary = null
-        this.clearBoundariesInfo()
-      }
+      reset && this.clearBoundariesDetails()
     })
   }
 

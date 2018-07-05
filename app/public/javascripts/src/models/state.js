@@ -103,6 +103,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
 
+  // The selected panel when in the edit plan mode
+  service.EditPlanPanels = Object.freeze({
+    EDIT_PLAN: 'EDIT_PLAN',
+    PLAN_SUMMARY: 'PLAN_SUMMARY'
+  })
+  service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
+
   service.allowViewModeClickAction = () => {
     return service.selectedDisplayMode.getValue() === service.displayModes.VIEW && 
     service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
@@ -1206,6 +1213,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     var optimizationBody = service.getOptimizationBody()
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
+    apiUrl += `?userId=${service.loggedInUser.id}`
     $http.post(apiUrl, optimizationBody)
       .then((response) => {
         //console.log(response)
@@ -1439,13 +1447,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.entityTypeBoundaryList = []
   }
 
+  service.selectedBoundaryTypeforSearch = null
   service.loadBoundaryEntityList = (filterObj) => {
     if(filterObj == '') return
-    if (service.activeboundaryLayerMode === service.boundaryLayerMode.SEARCH) {
-      var visibleBoundaryLayer = _.find(service.boundaries.tileLayers,(boundaryLayer) => boundaryLayer.visible)
+    if (service.selectedBoundaryTypeforSearch) {
+      var visibleBoundaryLayer = service.selectedBoundaryTypeforSearch
 
       visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj.toUpperCase(),'id,code,name,centroid','code')
+      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code,name')
       visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
     }
   }
@@ -1466,7 +1475,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         return //157501341: Location search should not reach out to endpoint without supplying a valid object id
       }
     } else {
-      filter = filterObj ? searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `substringof(${searchColumn},'${filterObj}')` : filter
+      if(filterObj) {
+        var columns = searchColumn.split(',')
+        if(columns.length === 1 ){
+          filter = searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `substringof(${searchColumn},'${filterObj}')`
+        }
+        else {
+          var colFilter = columns.map(col => `substringof(${col},'${filterObj}')`).join(" or ")
+          filter = `(${colFilter})`
+        }
+      }
     }
 
     var libraryItems = []
@@ -1544,33 +1562,67 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
-  service.resumeTransaction = () => {
-    return $http.get(`/service/plan-transaction?user_id=${service.loggedInUser.id}`)
-    .then((result) => {
-      if (result.data.length > 0) {
-        // At least one transaction exists. Return it
-        return Promise.resolve({
-          data: result.data[0]
-        })
-      }
-    })    
-  }
 
-  service.createTransaction = () => {
-    return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+  // Ask the user if they want to "steal" and existing transaction from another user.
+  // If yes, steal it. If not, throw a rejection
+  service.stealOrRejectTransaction = (transaction) => {
+    // Get the name of the current owner of the transaction
+    return $http.get(`/service/odata/userentity?$select=firstName,lastName&id eq ${transaction.userId}`)
       .then((result) => {
-        return Promise.resolve(result)
+        const user = result.data[0]
+        return new Promise((resolve, reject) => {
+          swal({
+            title: 'Overwrite transaction?',
+            text: `${user.firstName} ${user.lastName} already has a transaction open for this plan. Do you want to overwrite this transaction?`,
+            type: 'warning',
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes, overwrite',
+            cancelButtonText: 'No',
+            showCancelButton: true,
+            closeOnConfirm: true
+          }, (stealTransaction) => {
+            resolve(stealTransaction)
+          })
+        })
+      })
+      .then((stealTransaction) => {
+        if (stealTransaction) {
+          return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
+        } else {
+          return Promise.reject('User does not want to steal the transaction')
+        }
       })
   }
 
   service.resumeOrCreateTransaction = () => {
-    return service.resumeTransaction()
+
+    // Workflow:
+    // 1. If we don't have any transaction for this plan, create one
+    // 2. If we have a transaction for this plan BUT not for the current user
+    //    a. Ask if we want to steal the transaction. If yes, steal it. If not, show error message
+    // 3. If we have a transaction for this plan and for this user, resume it
+
+    // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
+    return $http.get(`/service/plan-transaction`)
       .then((result) => {
-        if (!result) {
-          return service.createTransaction().then((result) => Promise.resolve(result))
-        } else {
-          return Promise.resolve(result)
+        const currentPlanId = service.plan.getValue().id
+        const transactionsForPlan = result.data.filter((item) => item.planId === currentPlanId)
+        const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
+        if (transactionsForPlan.length === 0) {
+          // A transaction does not exist. Create it.
+          return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
+        } else if (transactionsForUserAndPlan.length === 1) {
+          // We have one open transaction for this user and plan combo. Resume it.
+          return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
+        } else if (transactionsForPlan.length === 1) {
+          // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
+          return service.stealOrRejectTransaction(transactionsForPlan[0])
         }
+      })
+      .catch((err) => {
+        // For transaction resume errors, log it and rethrow the exception
+        console.warn(err)
+        return Promise.reject(err)
       })
   }
 
