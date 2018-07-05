@@ -40,7 +40,7 @@ let viewMode = {
 
       <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO].show"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO].show">
-        <boundary-detail ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.BOUNDARIES_INFO"></boundary-detail>
+        <boundary-detail></boundary-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Road Segment Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO].show"></accordion-panel-title>
