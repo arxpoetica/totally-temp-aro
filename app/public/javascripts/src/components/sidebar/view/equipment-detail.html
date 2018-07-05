@@ -29,7 +29,8 @@
   <div class="ei-panel">
 	  <div class="mb-5 mt-2">
 	    <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
-	      object-name="Equipment"
+				object-name="Equipment"
+				label-id="clli"
 	      search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
 	      selected="$ctrl.selectedEquipment"
 	      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli')"

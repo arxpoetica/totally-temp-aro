@@ -82,9 +82,9 @@ class BoundariesController {
   // for layers drawn on vector tiles
   tilesToggleVisibility(layer) {
     layer.visible = layer.visible_check;
-    this.disableOtherLayers()
+    //this.disableOtherLayers()
     this.updateMapLayers()
-    this.state.resetBoundarySearch.next(true)
+    //this.state.resetBoundarySearch.next(true)
   }
   
   layerView(mode) {
