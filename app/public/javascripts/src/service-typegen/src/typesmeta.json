@@ -1,566 +1,946 @@
 [
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:tags:TagMapping",
+    "displayProperties":[
       {
-        "propertyName": "daysFrom",
-        "levelOfDetail": 0,
-        "displayDataType": "date",
-        "displayName": "Days From",
-        "visible": true,
-        "editable": true
+        "propertyName":"global",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Global",
+        "enumTypeURL":"",
+        "displayDataType":"array[integer]",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "daysTo",
-        "levelOfDetail": 0,
-        "displayDataType": "date",
-        "displayName": "Days To",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "equipmentId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Equipment Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"linkTags",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Link Tags",
+        "enumTypeURL":"",
+        "displayDataType":"object{urn:jsonschema:com:altvil:aro:service:tags:GeogTags}",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:ServiceAreaFeature",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:tags:GeogTags",
+    "displayProperties":[
       {
-        "propertyName": "dataType",
-        "levelOfDetail": 2,
-        "displayDataType": "string",
-        "displayName": "Data Type",
-        "enumEntityName": "DataTypeEntity",
-        "visible": true,
-        "editable": true
+        "propertyName":"serviceAreaIds",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Service Area Ids",
+        "enumTypeURL":"",
+        "displayDataType":"array[integer]",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "name",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Name",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "geometry",
-        "levelOfDetail": 2,
-        "displayDataType": "tree",
-        "displayName": "Geometry",
-        "enumEntityName": "",
-        "visible": false,
-        "editable": true
-      },
-      {
-        "propertyName": "attributes",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Attributes",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "source_id",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Source Id",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "objectId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Object Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"geographyTag",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Geography Tag",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment",
+    "displayProperties":[
       {
-        "propertyName": "notes",
-        "levelOfDetail": 0,
-        "displayDataType": "text",
-        "displayName": "Notes",
-        "visible": true,
-        "editable": true
+        "propertyName":"daysFrom",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Days From",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "existingEquipment",
-        "levelOfDetail": 0,
-        "displayDataType": "list",
-        "displayName": "Existing Equipment",
-        "visible": true,
-        "editable": true
+        "propertyName":"daysTo",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Days To",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "plannedEquipment",
-        "levelOfDetail": 0,
-        "displayDataType": "list",
-        "displayName": "Planned Equipment",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "siteInfo",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Site Info",
-        "visible": true,
-        "editable": true
+        "propertyName":"equipmentId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Equipment Id",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:LocationFeature",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:feature:model:ServiceAreaFeature",
+    "displayProperties":[
       {
-        "propertyName": "locationCategory",
-        "levelOfDetail": 0,
-        "displayDataType": "select",
-        "displayName": "Location Category",
-        "visible": true,
-        "editable": true
+        "propertyName":"code",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Code",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "dataType",
-        "levelOfDetail": 2,
-        "displayDataType": "string",
-        "displayName": "Data Type",
-        "enumEntityName": "DataTypeEntity",
-        "visible": true,
-        "editable": true
+        "propertyName":"dataType",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Data Type",
+        "enumEntityName":"DataTypeEntity",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "geometry",
-        "levelOfDetail": 2,
-        "displayDataType": "tree",
-        "displayName": "Geometry",
-        "enumEntityName": "",
-        "visible": false,
-        "editable": true
+        "propertyName":"name",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Name",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "attributes",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Attributes",
-        "visible": true,
-        "editable": true
+        "propertyName":"geometry",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Geometry",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"Geometry",
+        "visible":false,
+        "editable":true
       },
       {
-        "propertyName": "objectId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Object Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"attributes",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Attributes",
+        "enumTypeURL":"",
+        "displayDataType":"object{null}",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"source_id",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Source Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"objectId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Object Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentFeature",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment",
+    "displayProperties":[
       {
-        "propertyName": "boundary",
-        "levelOfDetail": 0,
-        "displayDataType": "list",
-        "displayName": "Boundary",
-        "visible": true,
-        "editable": true
+        "propertyName":"notes",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Notes",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "networkNodeType",
-        "levelOfDetail": 2,
-        "displayDataType": "string",
-        "displayName": "Equipment Type",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": false
+        "propertyName":"existingEquipment",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Existing Equipment",
+        "enumTypeURL":"",
+        "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment}]",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "dataType",
-        "levelOfDetail": 2,
-        "displayDataType": "string",
-        "displayName": "Data Type",
-        "enumEntityName": "DataTypeEntity",
-        "visible": true,
-        "editable": true
+        "propertyName":"plannedEquipment",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Planned Equipment",
+        "enumTypeURL":"",
+        "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent}]",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "networkNodeEquipment",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Network Node Equipment",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "geometry",
-        "levelOfDetail": 2,
-        "displayDataType": "tree",
-        "displayName": "Geometry",
-        "enumEntityName": "",
-        "visible": false,
-        "editable": true
-      },
-      {
-        "propertyName": "attributes",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Attributes",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "objectId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Object Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"siteInfo",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Site Info",
+        "enumTypeURL":"",
+        "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:node:SiteInfo}",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentBoundaryFeature",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:feature:model:LocationFeature",
+    "displayProperties":[
       {
-        "propertyName": "networkNodeType",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Network Node Type",
-        "visible": true,
-        "editable": true
+        "propertyName":"locationCategory",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Location Category",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "dataType",
-        "levelOfDetail": 2,
-        "displayDataType": "string",
-        "displayName": "Data Type",
-        "enumEntityName": "DataTypeEntity",
-        "visible": true,
-        "editable": true
+        "propertyName":"dataType",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Data Type",
+        "enumEntityName":"DataTypeEntity",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "boundaryTypeId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Boundary Type Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"tagMapping",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Tag Mapping",
+        "enumTypeURL":"",
+        "displayDataType":"object{urn:jsonschema:com:altvil:aro:service:tags:TagMapping}",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "geometry",
-        "levelOfDetail": 2,
-        "displayDataType": "list",
-        "displayName": "Geometry",
-        "enumEntityName": "",
-        "visible": false,
-        "editable": true
+        "propertyName":"geometry",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Geometry",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"Geometry",
+        "visible":false,
+        "editable":true
       },
       {
-        "propertyName": "attributes",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Attributes",
-        "visible": true,
-        "editable": true
+        "propertyName":"attributes",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Attributes",
+        "enumTypeURL":"",
+        "displayDataType":"object{null}",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "networkObjectId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Network Object Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"locked",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Locked",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "objectId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Object Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"objectId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Object Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:model:SpeedEntity",
+    "displayProperties":[
       {
-        "propertyName": "fiberAvailable",
-        "levelOfDetail": 0,
-        "displayDataType": "check",
-        "displayName": "Fiber Available",
-        "visible": true,
-        "editable": true
+        "propertyName":"strength",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Strength",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "address",
-        "levelOfDetail": 0,
-        "displayDataType": "text",
-        "displayName": "Address",
-        "visible": true,
-        "editable": true
+        "propertyName":"minDown",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Min Down",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "siteName",
-        "levelOfDetail": 1,
-        "displayDataType": "string",
-        "displayName": "Site Name",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"name",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Name",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "siteClli",
-        "levelOfDetail": 1,
-        "displayDataType": "string",
-        "displayName": "Site Clli",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"description",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Description",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "dpiEnvironment",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Dpi Environment",
-        "visible": true,
-        "editable": true
+        "propertyName":"id",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Id",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "physicallyLinked",
-        "levelOfDetail": 0,
-        "displayDataType": "check",
-        "displayName": "Physically Linked",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "t1",
-        "levelOfDetail": 0,
-        "displayDataType": "check",
-        "displayName": "T 1",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "hsiOfficeCode",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Hsi Office Code",
-        "visible": true,
-        "editable": true
+        "propertyName":"maxDown",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Max Down",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentFeature",
+    "displayProperties":[
       {
-        "propertyName": "quantity",
-        "levelOfDetail": 0,
-        "displayDataType": "number",
-        "displayName": "Quantity",
-        "visible": true,
-        "editable": true
+        "propertyName":"subnetId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Subnet Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "code",
-        "levelOfDetail": 1,
-        "displayDataType": "string",
-        "displayName": "Code",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"boundary",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Boundary",
+        "enumTypeURL":"",
+        "displayDataType":"any",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "installCost",
-        "levelOfDetail": 0,
-        "displayDataType": "number",
-        "displayName": "Install Cost",
-        "visible": true,
-        "editable": true
+        "propertyName":"deploymentType",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Deployment Type",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "oneTimeCost",
-        "levelOfDetail": 0,
-        "displayDataType": "check",
-        "displayName": "One Time Cost",
-        "visible": true,
-        "editable": true
+        "propertyName":"networkNodeType",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Equipment Type",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":false
       },
       {
-        "propertyName": "rank",
-        "levelOfDetail": 0,
-        "displayDataType": "number",
-        "displayName": "Rank",
-        "visible": true,
-        "editable": true
+        "propertyName":"dataType",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Data Type",
+        "enumEntityName":"DataTypeEntity",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "subComponents",
-        "levelOfDetail": 0,
-        "displayDataType": "list",
-        "displayName": "Sub Components",
-        "visible": true,
-        "editable": true
+        "propertyName":"networkNodeEquipment",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Network Node Equipment",
+        "enumTypeURL":"",
+        "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment}",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "equipmentName",
-        "levelOfDetail": 1,
-        "displayDataType": "string",
-        "displayName": "Name",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"geometry",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Geometry",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"Geometry",
+        "visible":false,
+        "editable":true
       },
       {
-        "propertyName": "equipmentItemId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Equipment Item Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"attributes",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Attributes",
+        "enumTypeURL":"",
+        "displayDataType":"object{null}",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "extendedAttributes",
-        "levelOfDetail": 0,
-        "displayDataType": "tree",
-        "displayName": "Extended Attributes",
-        "visible": true,
-        "editable": true
-      },
-      {
-        "propertyName": "constructionCost",
-        "levelOfDetail": 1,
-        "displayDataType": "number",
-        "displayName": "Cost",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"objectId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Object Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       }
     ]
   },
   {
-    "schemaReference": "urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
-    "displayProperties": [
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:feature:model:EquipmentBoundaryFeature",
+    "displayProperties":[
       {
-        "propertyName": "code",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Code",
-        "visible": true,
-        "editable": true
+        "propertyName":"deploymentType",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Deployment Type",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "serialNumber",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Serial Number",
-        "visible": true,
-        "editable": true
+        "propertyName":"product",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Product",
+        "enumTypeURL":"",
+        "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:NetworkProductEntity}",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "switchType",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Switch Type",
-        "visible": true,
-        "editable": true
+        "propertyName":"networkNodeType",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Network Node Type",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "latency",
-        "levelOfDetail": 0,
-        "displayDataType": "number",
-        "displayName": "Latency",
-        "visible": true,
-        "editable": true
+        "propertyName":"dataType",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Data Type",
+        "enumEntityName":"DataTypeEntity",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "maxSpeed",
-        "levelOfDetail": 0,
-        "displayDataType": "number",
-        "displayName": "Max Speed",
-        "visible": true,
-        "editable": true
+        "propertyName":"boundaryTypeId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Boundary Type Id",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "manufacturer",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Manufacturer",
-        "visible": true,
-        "editable": true
+        "propertyName":"geometry",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Geometry",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"Geometry",
+        "visible":false,
+        "editable":true
       },
       {
-        "propertyName": "marketableEquipments",
-        "levelOfDetail": 0,
-        "displayDataType": "list",
-        "displayName": "Marketable Equipments",
-        "visible": true,
-        "editable": true
+        "propertyName":"attributes",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Attributes",
+        "enumTypeURL":"",
+        "displayDataType":"object{null}",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "deploymentDate",
-        "levelOfDetail": 1,
-        "displayDataType": "date",
-        "displayName": "Deployment Date",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"networkObjectId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Network Object Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "uplinkSpeed",
-        "levelOfDetail": 0,
-        "displayDataType": "number",
-        "displayName": "Uplink Speed",
-        "visible": true,
-        "editable": true
+        "propertyName":"objectId",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Object Id",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      }
+    ]
+  },
+  {
+    "schemaReference":"urn:jsonschema:com:altvil:aro:model:NetworkProductEntity",
+    "displayProperties":[
+      {
+        "propertyName":"name",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Name",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "equipmentName",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Equipment Name",
-        "visible": true,
-        "editable": true
+        "propertyName":"id",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Id",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "modelNumber",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Model Number",
-        "visible": true,
-        "editable": true
+        "propertyName":"productType",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Product Type",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "clliCode",
-        "levelOfDetail": 1,
-        "displayDataType": "string",
-        "displayName": "Clli Code",
-        "enumEntityName": "",
-        "visible": true,
-        "editable": true
+        "propertyName":"speed",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Speed",
+        "enumTypeURL":"",
+        "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:SpeedEntity}",
+        "visible":true,
+        "editable":true
+      }
+    ]
+  },
+  {
+    "schemaReference":"urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
+    "displayProperties":[
+      {
+        "propertyName":"fiberAvailable",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Fiber Available",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "visible":true,
+        "editable":true
       },
       {
-        "propertyName": "equipmentItemId",
-        "levelOfDetail": 0,
-        "displayDataType": "string",
-        "displayName": "Equipment Item Id",
-        "visible": true,
-        "editable": true
+        "propertyName":"address",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Address",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"siteName",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Site Name",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"siteClli",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Site Clli",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"dpiEnvironment",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Dpi Environment",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"physicallyLinked",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Physically Linked",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"t1",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"T 1",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"hsiOfficeCode",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Hsi Office Code",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      }
+    ]
+  },
+  {
+    "schemaReference":"urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
+    "displayProperties":[
+      {
+        "propertyName":"quantity",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Quantity",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"code",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Code",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"installCost",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Install Cost",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"oneTimeCost",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"One Time Cost",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"equipmentTypeCategoryId",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Equipment Type Category Id",
+        "enumEntityName":"",
+        "enumTypeURL":"equipment_category",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"rank",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Rank",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"subComponents",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Sub Components",
+        "enumTypeURL":"",
+        "displayDataType":"array[object]",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"equipmentName",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Name",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"equipmentItemId",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Equipment Item Id",
+        "enumEntityName":"",
+        "enumTypeURL":"equipment?p1=${/networkNodeType}&p2=${equipmentTypeCategoryId}",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"extendedAttributes",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Extended Attributes",
+        "enumTypeURL":"",
+        "displayDataType":"object{null}",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"constructionCost",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Cost",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
+      }
+    ]
+  },
+  {
+    "schemaReference":"urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
+    "displayProperties":[
+      {
+        "propertyName":"code",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Code",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"serialNumber",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Serial Number",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"switchType",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Switch Type",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"equipmentCategoryId",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Equipment Category Id",
+        "enumEntityName":"",
+        "enumTypeURL":"equipment_category",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"latency",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Latency",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"maxSpeed",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Max Speed",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"manufacturer",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Manufacturer",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"marketableEquipments",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Marketable Equipments",
+        "enumTypeURL":"",
+        "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment}]",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"deploymentDate",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Deployment Date",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"uplinkSpeed",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Uplink Speed",
+        "enumTypeURL":"",
+        "displayDataType":"number",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"equipmentName",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Equipment Name",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"modelNumber",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Model Number",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"clliCode",
+        "levelOfDetail":1,
+        "format":"",
+        "displayName":"Clli Code",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"string",
+        "visible":true,
+        "editable":true
+      },
+      {
+        "propertyName":"equipmentItemId",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Equipment Item Id",
+        "enumEntityName":"",
+        "enumTypeURL":"equipment?p1=${/networkNodeType}&p2=${equipmentTypeCategoryId}",
+        "displayDataType":"integer",
+        "visible":true,
+        "editable":true
       }
     ]
   }

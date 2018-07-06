@@ -21,11 +21,10 @@ class EditorInterfaceTreeController {
   }
   
   doShow(prop, data){
-    //console.log(data)
-    //console.log(this.objectToView)
     if ('undefined' == typeof data || null == data) data = this.objectToView
     if ('undefined' == typeof data || null == data) return false
-    
+    console.log(prop)
+    console.log(data)
     if (!prop.visible) return false
     if (!data.hasOwnProperty(prop.propertyName)) return false
     
@@ -33,8 +32,9 @@ class EditorInterfaceTreeController {
   }
   
   isList(){
-    //console.log( ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.displayDataType) )
-    return ('undefined' != typeof this.objectMetaData && 'list' == this.objectMetaData.displayDataType)
+    //console.log(this.objectMetaData)
+    //console.log( ('undefined' != typeof this.objectMetaData && this.objectMetaData.displayDataType.startsWith('array') ) )
+    return ('undefined' != typeof this.objectMetaData && this.objectMetaData.displayDataType.startsWith('array') )
   }
   
   getSummeryCount(propVal){
