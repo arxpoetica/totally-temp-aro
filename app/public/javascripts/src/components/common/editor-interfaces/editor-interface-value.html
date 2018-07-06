@@ -17,7 +17,7 @@
   <select ng-switch-when="enum" class="form-control ei-input-select" 
       ng-model="$ctrl.model"
       ng-change="$ctrl.onChangeDebug()"
-      ng-options="item.id as item.description for item in $ctrl.enumSet track by item.id">
+      ng-options="item.id as item.description for item in $ctrl.enumSet">
   </select>
   
   <div ng-switch-default>

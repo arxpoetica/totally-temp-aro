@@ -46,7 +46,7 @@
 				                              model="propVal[childProp.propertyName]" 
 				                              is-edit="$ctrl.isEdit"
 				                              parent-obj="propVal"
-				                              root-obj="$ctrl.rootObj">
+				                              root-meta-data="$ctrl.rootMetaData">
 				      </editor-interface-value>
 				    </div>
 	        </div>
@@ -60,7 +60,7 @@
 	                         get-new-list-item="$ctrl.getNewListItem()"
 	                         is-edit="$ctrl.isEdit" 
 	                         parent-obj="$ctrl.objectToView"
-	                         root-obj="$ctrl.rootObj"
+	                         root-meta-data="$ctrl.rootMetaData"
 	                         indentation-level="$ctrl.indentationLevel + 1"
 	                         ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">
 	      </editor-interface-tree>
@@ -85,7 +85,7 @@
 	                              model="$ctrl.objectToView[prop.propertyName]" 
 	                              is-edit="$ctrl.isEdit"
 	                              parent-obj="$ctrl.objectToView"
-	                              root-obj="$ctrl.rootObj">
+	                              root-meta-data="$ctrl.rootMetaData">
 	      </editor-interface-value>
 	    </div>
 	  </div>
@@ -139,7 +139,7 @@
                                       model="propVal[childProp.propertyName]" 
                                       is-edit="$ctrl.isEdit"
                                       parent-obj="propVal"
-                                      root-obj="$ctrl.rootObj">
+                                      root-meta-data="$ctrl.rootMetaData">
               </editor-interface-value>
             </div>
           </div>
@@ -152,7 +152,7 @@
                            get-new-list-item="$ctrl.getNewListItem()"
                            is-edit="$ctrl.isEdit" 
                            parent-obj="$ctrl.objectToView"
-                           root-obj="$ctrl.rootObj"
+                           root-meta-data="$ctrl.rootMetaData"
                            indentation-level="$ctrl.indentationLevel + 1"
                            ng-style="{ display: $ctrl.isKeyExpanded[foldoutIndex] ? 'inline' : 'none' }">
         </editor-interface-tree>
@@ -177,7 +177,7 @@
 	                              model="$ctrl.objectToView[prop.propertyName]" 
 	                              is-edit="$ctrl.isEdit"
 	                              parent-obj="$ctrl.objectToView"
-	                              root-obj="$ctrl.rootObj">
+	                              root-meta-data="$ctrl.rootMetaData">
 	      </editor-interface-value>
 	    </div>
 	  </div>

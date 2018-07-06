@@ -14,7 +14,6 @@ class EditorInterfaceTreeController {
 
   $onInit() {
     this.indentationLevel = this.indentationLevel || 0
-    this.rootObj = this.rootObj || this.objectToView
   }
   
   toggleIsKeyExpanded(index) {
@@ -131,8 +130,8 @@ let editorInterfaceTree = {
     onChange: '&', 
     getNewListItem: '&', 
     isEdit: '<', 
-    parentObj: '<', 
-    rootObj: '<', 
+    parentObj: '=', 
+    rootMetaData: '<', 
     indentationLevel: '<' 
   },
   controller: EditorInterfaceTreeController

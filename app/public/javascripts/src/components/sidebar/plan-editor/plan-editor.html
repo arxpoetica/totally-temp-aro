@@ -183,6 +183,7 @@
                               on-change="$ctrl.markSelectedEquipmentPropertiesDirty()"
                               object-to-view="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].networkNodeEquipment" 
                               is-edit="true"
+                              root-meta-data="{'networkNodeType':$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteNetworkNodeType}"
                               get-new-list-item="$ctrl.getNewListItem"
                               ></editor-interface-tree>
 
