@@ -1417,7 +1417,7 @@ class TileComponentController {
                           && 'census_block' == result.layerType
                           && state.selectedDisplayMode.getValue() === state.displayModes.VIEW){
             	    censusFeatures.push(result)
-              } else if (result.id) {
+              } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
                 equipmentFeatures = equipmentFeatures.concat(result)
               }
             })
