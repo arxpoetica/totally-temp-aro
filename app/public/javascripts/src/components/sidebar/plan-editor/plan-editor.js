@@ -108,7 +108,7 @@ class PlanEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-
+    
     // Select the first transaction in the list
     this.resumeOrCreateTransaction()
   }
@@ -647,10 +647,12 @@ class PlanEditorController {
     //console.log(new TrackedEquipment())
   }
   */
+  
+  // ToDo: change this out for a dynamic version 
   getNewListItem(type){
     console.log(type)
     
-    if ('plannedEquipment' == type){
+    if ('plannedEquipment' == type || 'subComponents' == type){
       return new EquipmentComponent()
     }
     
@@ -736,8 +738,8 @@ class PlanEditorController {
         existingBoundaryId = null
         
         // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
-        console.log(mapObject)
-        console.log(feature)
+        //console.log(mapObject)
+        //console.log(feature)
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance')
         
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
@@ -765,6 +767,13 @@ class PlanEditorController {
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
     this.selectedMapObject = mapObject
+    
+    // debug 
+    //if (null != this.selectedMapObject){
+      //console.log( this.selectedMapObject )
+      //console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
+      //console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
+    //}
     
     this.$timeout()
   }
