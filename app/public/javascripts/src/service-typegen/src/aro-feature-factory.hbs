@@ -78,8 +78,27 @@ class AroFeatureFactory {
     })
   }
   
-  static getEnumSet(feature, propPath){
-    console.log('getEnumSet')
+  // we currently only handel object paths that are siblings or at the root
+  static getEnumSet(feature, parent, urn){
+    var pairs = urn.split('}')
+    if (pairs.length == 1) return this.getEnumSetByURN(urn)
+    
+    var evaluateVal = (name) => {
+      if ('undefined' == typeof name) return ""
+      if ('/' == name.charAt(0)){
+        return feature[ name.substring(1) ]
+      }else{
+        return parent[name]
+      }
+    }
+    
+    var builtURN = ""
+    for (let pairI=0; pairI<pairs.length; pairI++){
+      let pair = pairs[pairI].split('${')
+      console.log(pair[1])
+      builtURN += pair[0] + evaluateVal(pair[1])
+    }
+    return this.getEnumSetByURN(builtURN)
   }
   
 }
