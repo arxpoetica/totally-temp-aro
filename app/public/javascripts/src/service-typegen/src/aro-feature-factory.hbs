@@ -55,8 +55,6 @@ class AroFeatureFactory {
       this.initializeUrnToEnumSet()
     }
     return new Promise((resolve, reject) => {
-      console.log(urn)
-      
       if (!this.urnToEnumSet[urn]) {
         // call API
         let request = new XMLHttpRequest()
@@ -79,14 +77,14 @@ class AroFeatureFactory {
   }
   
   // we currently only handel object paths that are siblings or at the root
-  static getEnumSet(feature, parent, urn){
+  static getEnumSet(rootMetaData, parent, urn){
     var pairs = urn.split('}')
     if (pairs.length == 1) return this.getEnumSetByURN(urn)
     
     var evaluateVal = (name) => {
       if ('undefined' == typeof name) return ""
       if ('/' == name.charAt(0)){
-        return feature[ name.substring(1) ]
+        return rootMetaData[ name.substring(1) ]
       }else{
         return parent[name]
       }
@@ -95,7 +93,6 @@ class AroFeatureFactory {
     var builtURN = ""
     for (let pairI=0; pairI<pairs.length; pairI++){
       let pair = pairs[pairI].split('${')
-      console.log(pair[1])
       builtURN += pair[0] + evaluateVal(pair[1])
     }
     return this.getEnumSetByURN(builtURN)

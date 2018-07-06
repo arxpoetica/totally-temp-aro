@@ -647,10 +647,12 @@ class PlanEditorController {
     //console.log(new TrackedEquipment())
   }
   */
+  
+  // ToDo: change this out for a dynamic version 
   getNewListItem(type){
     console.log(type)
     
-    if ('plannedEquipment' == type){
+    if ('plannedEquipment' == type || 'subComponents' == type){
       return new EquipmentComponent()
     }
     
@@ -767,11 +769,11 @@ class PlanEditorController {
     this.selectedMapObject = mapObject
     
     // debug 
-    if (null != this.selectedMapObject){
-      console.log( this.selectedMapObject )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
-    }
+    //if (null != this.selectedMapObject){
+      //console.log( this.selectedMapObject )
+      //console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
+      //console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
+    //}
     
     this.$timeout()
   }

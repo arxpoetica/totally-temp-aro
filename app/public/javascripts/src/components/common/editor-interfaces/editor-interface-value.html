@@ -13,10 +13,10 @@
   
   <textarea ng-switch-when="text" ng-model="$ctrl.model" ng-change="$ctrl.onChange()" class="form-control" rows="3"></textarea>
   
-  
+  {{$ctrl.getEnumSet();""}}
   <select ng-switch-when="enum" class="form-control ei-input-select" 
       ng-model="$ctrl.model"
-      ng-change="$ctrl.onChangeDebug()"
+      ng-change="$ctrl.onChange()"
       ng-options="item.id as item.description for item in $ctrl.enumSet">
   </select>
   

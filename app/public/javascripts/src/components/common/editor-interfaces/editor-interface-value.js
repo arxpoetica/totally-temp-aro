@@ -16,26 +16,14 @@ class EditorInterfaceValueController {
       this.dateVal = new Date(this.model)
     }
     
+  }
+  
+  getEnumSet(){
     if ("enum" == this.displayProps.displayDataType && this.displayProps.enumTypeURL){
-      /*
-      AroFeatureFactory.getEnumSetByURN('/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
-        console.log('SUCCESS!')
-        console.log(enumSet)
-        this.enumSet = enumSet
-      })
-      */
       AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
-        console.log('SUCCESS!')
-        console.log(enumSet)
         this.enumSet = enumSet
       })
     }
-    
-  }
-  
-  onChangeDebug(){
-    console.log(this.model)
-    this.onChange()
   }
   
   setDate(){
