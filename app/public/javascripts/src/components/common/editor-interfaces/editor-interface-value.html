@@ -14,10 +14,10 @@
   <textarea ng-switch-when="text" ng-model="$ctrl.model" ng-change="$ctrl.onChange()" class="form-control" rows="3"></textarea>
   
   
-  <select ng-switch-when="select" class="form-control ei-input-select" 
+  <select ng-switch-when="enum" class="form-control ei-input-select" 
       ng-model="$ctrl.model"
-      ng-change="$ctrl.onChange()"
-      ng-options="item for item in $ctrl.displayProps.editorData">
+      ng-change="$ctrl.onChangeDebug()"
+      ng-options="item.id as item.description for item in $ctrl.enumSet track by item.id">
   </select>
   
   <div ng-switch-default>
@@ -28,7 +28,7 @@
 
 <div ng-if="!$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayDataType">
   <div ng-switch-when="date">
-    {{ $ctrl.dateVal.toUTCString() }}
+    {{ $ctrl.dateVal.toDateString() }}
   </div>
   <div ng-switch-when="datetime">
     {{ $ctrl.dateVal.toUTCString() }}

@@ -108,7 +108,7 @@ class PlanEditorController {
       return
     }
     this.mapRef = window[this.mapGlobalObjectName]
-
+    
     // Select the first transaction in the list
     this.resumeOrCreateTransaction()
   }

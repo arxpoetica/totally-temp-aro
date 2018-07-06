@@ -1,3 +1,4 @@
+import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 // === editable value === //
 
 class EditorInterfaceValueController {
@@ -15,9 +16,20 @@ class EditorInterfaceValueController {
       this.dateVal = new Date(this.model)
     }
     
+    if ("enum" == this.displayProps.displayDataType && this.displayProps.enumTypeURL){
+      AroFeatureFactory.getEnumSetByURN('/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
+        console.log('SUCCESS!')
+        console.log(enumSet)
+        this.enumSet = enumSet
+      })
+    }
+    
   }
   
-  
+  onChangeDebug(){
+    console.log(this.model)
+    this.onChange()
+  }
   
   setDate(){
     if (!this.isEdit 

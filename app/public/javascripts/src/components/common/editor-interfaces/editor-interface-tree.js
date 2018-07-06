@@ -23,8 +23,8 @@ class EditorInterfaceTreeController {
   doShow(prop, data){
     if ('undefined' == typeof data || null == data) data = this.objectToView
     if ('undefined' == typeof data || null == data) return false
-    console.log(prop)
-    console.log(data)
+    //console.log(prop)
+    //console.log(data)
     if (!prop.visible) return false
     if (!data.hasOwnProperty(prop.propertyName)) return false
     
