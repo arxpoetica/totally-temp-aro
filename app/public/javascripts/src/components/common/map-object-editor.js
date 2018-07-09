@@ -274,8 +274,8 @@ class MapObjectEditorController {
     if (feature.is_locked) {
       var lockIconOverlay = new google.maps.Marker({
         icon: {
-          url: this.configuration.locationCategories.entityLockIcon,
-          anchor: new google.maps.Point(12, 24)
+          url: this.configuration.locationCategories.entityLockIcon//,
+          //anchor: new google.maps.Point(12, 24)
         },
         clickable: false,
         map: this.mapRef
@@ -377,6 +377,7 @@ class MapObjectEditorController {
   }
 
   handleMapEntitySelected(event) {
+    console.log(event)
     if (!event || !event.latLng) {
       return
     }
@@ -389,7 +390,7 @@ class MapObjectEditorController {
     var feature = {
       geometry: {
         type: 'Point',
-        coordinates: [event.latLng.lng(), event.latLng.lat()]
+        coordinates: [event.latLng.lng(), event.latLng.lat()] // <----------------------------- change this to object lat long NOT click lat long -----<<<
       },
       is_locked: false,
       isExistingObject: false
@@ -444,6 +445,8 @@ class MapObjectEditorController {
       .then((result) => {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
+        //console.log(featureToUse)
+        
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
       .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true))
