@@ -25,12 +25,17 @@ class PlanSummaryController {
 
     this.equipmentOrder = []
     this.fiberOrder = []
+    this.locTagCoverage = []
     
     state.plan.subscribe((plan) => { 
       this.plan = plan 
       this.downloadLink = `/reports/planSummary/${this.plan.id}`
     })
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
+    this.censusTagCategories = this.state.censusCategories.getValue()
+    this.censusTagCategoriesObserver = this.state.censusCategories.subscribe((newValue) => {
+      this.censusTagCategories = newValue
+    })
   }
 
   $onInit() {
@@ -51,6 +56,10 @@ class PlanSummaryController {
     //fetching location order from locationCategories.json
     var coverageOrderKey = 'plannerKey'
     this.coverageOrder = this.orderSummaryByCategory(this.configuration.locationCategories.categories,coverageOrderKey)
+    this.isLocKeyExpanded = this.coverageOrder.reduce(function(result, item, index, array) {
+      result[item] = false;
+      return result;
+    }, {})
   }
 
   orderSummaryByCategory(obj,key) {
@@ -154,6 +163,40 @@ class PlanSummaryController {
     })
   }
 
+  togglelocationTagCoverage(selectedCoverageLoc) {
+    this.isLocKeyExpanded[selectedCoverageLoc] = !this.isLocKeyExpanded[selectedCoverageLoc] 
+    //creating dummy install data 
+    //this.summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc]['INSTALLED'] = [{"deploymentType":"INSTALLED","nodeType":"dslam","locationEntityType":"small","boundaryTypeId":1,"tagSetCounts":[{"tagSet":[16],"count":1},{"tagSet":[13],"count":1}],"count":2}]
+
+    var installedId = this.summaryInstallationTypes['INSTALLED'].id
+    var plannedId = this.summaryInstallationTypes['PLANNED'].id
+    var totalId = this.summaryInstallationTypes['Total'].id
+
+    //get a location specific tagSetCounts per deploymentType
+    var existing = this.summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId] && 
+      this.summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][installedId][0].tagSetCounts
+    //differentiate tagSetCounts based on deploymentType which is used to display
+    existing && existing.map(tag => tag.deploymentType = installedId)
+
+    var planned = this.summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId] &&
+      this.summaryCategoryTypes['Coverage']['summaryData'][selectedCoverageLoc][plannedId][0].tagSetCounts
+    planned && planned.map(tag => tag.deploymentType = plannedId)    
+
+    var tempTagSetCountsData = []
+    existing && existing.map((arr) => tempTagSetCountsData.push(arr))
+    planned && planned.map((arr) => tempTagSetCountsData.push(arr))
+
+    var groupByTag = _.groupBy(tempTagSetCountsData,'tagSet')
+
+    var groupByTagDeploymentType = {}
+    Object.keys(groupByTag).forEach((tag) => {
+      groupByTagDeploymentType[tag] = _.groupBy(groupByTag[tag],'deploymentType')
+      groupByTagDeploymentType[tag][totalId]  = [{'count':_.reduce(_.map(groupByTag[tag],(obj) => obj['count']), (memo, num) => memo + num, 0)}]
+    })
+
+    this.locTagCoverage[selectedCoverageLoc]  = groupByTagDeploymentType
+  }
+
   $onChanges(changesObj) {
     if (changesObj.currentTransaction) {
       // Current transaction has changed. Recalculate plan summary.
@@ -172,6 +215,8 @@ class PlanSummaryController {
 
   $onDestroy() {
     this.planEditorChangedObserver.unsubscribe()
+    this.censusTagCategoriesObserver.unsubscribe()
+    this.locTagCoverage = []
   }
 }
   
