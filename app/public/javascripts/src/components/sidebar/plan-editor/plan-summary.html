@@ -1,6 +1,9 @@
 <div>
   <style scoped>
     .indent-1 {
+      padding-left: 20px !important;
+    }
+    .indent-2 {
       padding-left: 30px !important;
     }
     #pointer {
@@ -17,7 +20,7 @@
       </tr>
     </thead>  
     <!-- Display plan summary  -->
-    <tbody ng-repeat="(categoryType, categoryinfo) in $ctrl.summaryCategoryTypes">
+    <tbody ng-repeat="(categoryType, categoryinfo) in $ctrl.summaryCategoryTypes" ng-if="categoryType !== 'Coverage'">
       <!-- Display total summary of a category -->
       <tr>
         <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded(categoryType)">
@@ -63,84 +66,52 @@
     </tbody>
 
     <!-- Display Coverage summary -->
-    <!-- <tbody> -->
+    <tbody>
       <!-- coverage total summary -->
-      <!-- <tr>
+      <tr>
         <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded('Coverage')">
           <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Coverage']"></i>
           <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Coverage']"></i>
           Coverage
         </th>
-        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
-        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
-        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
-      </tr> -->
+        <td>{{ $ctrl.summaryCategoryTypes['Coverage']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Coverage']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
+        <td>{{ $ctrl.summaryCategoryTypes['Coverage']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
+      </tr>
 
       <!-- coverage detail summary -->
-      <!-- <tr ng-if="$ctrl.isKeyExpanded['Coverage']">
+      <tr ng-if="$ctrl.isKeyExpanded['Coverage']">
         <td colspan="4" class="indent-1">
           {{ $ctrl.state.selectedBoundaryType.description }}
         </td>  
       </tr>
 
-      <tr ng-if="$ctrl.isKeyExpanded['Coverage']" ng-repeat="(locationEntityType, info) in $ctrl.transformedCoverageSummary">
-        <td class="indent-1">{{locationEntityType}}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].tagSetCounts || 0 }}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].tagSetCounts || 0}}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].tagSetCounts || 0}}</td>
-      </tr>
-
-    </tbody>   -->
-  </table>
-  <!-- <table id="tblPlanSummary" class="table table-condensed table-striped">
-    <thead>
-      <tr>
-        <th></th>
-        <td ng-repeat="(installationType,info) in $ctrl.summaryInstallationTypes">
-          {{info.Label}}
-        </td>
-      </tr>
-    </thead>  
-    <tbody>
-
-      <tr>
-        <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded('Equipment')">
-          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Equipment']"></i>
-          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Equipment']"></i>
-          Equipment
-        </th>
-        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
-        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
-        <td>{{ $ctrl.summaryCategoryTypes['Equipment']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
-      </tr>
-
-      <tr ng-if="$ctrl.isKeyExpanded['Equipment']" ng-repeat="(equipmentType, info) in $ctrl.summaryCategoryTypes['Equipment']['summaryData']">
-        <th class="indent-1">{{$ctrl.state.networkNodeTypesEntity[equipmentType]}}</th>
-        <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count }}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].count }}</td>
-      </tr>
-
-      <tr>
-        <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded('Fiber')">
-          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Fiber']"></i>
-          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Fiber']"></i>
-          Fiber
-        </th>
-        <td>{{ $ctrl.summaryCategoryTypes['Fiber']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].lengthMeters | number : 2}}</td>
-        <td>{{ $ctrl.summaryCategoryTypes['Fiber']['totalSummary'][$ctrl.summaryInstallationTypes['PLANNED'].id][0].lengthMeters | number : 2}}</td>
-        <td>{{ $ctrl.summaryCategoryTypes['Fiber']['totalSummary'][$ctrl.summaryInstallationTypes['Total'].id][0].lengthMeters | number : 2}}</td>
-      </tr>
-
-      <tr ng-if="$ctrl.isKeyExpanded['Fiber']" ng-repeat="(fiberType, info) in $ctrl.summaryCategoryTypes['Fiber']['summaryData']">
-        <th class="indent-1">{{fiberType}}</th>
-        <td>{{ info[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].lengthMeters | number : 2}}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['PLANNED'].id][0].lengthMeters | number : 2}}</td>
-        <td>{{ info[$ctrl.summaryInstallationTypes['Total'].id][0].lengthMeters | number : 2}}</td>
-      </tr>
-
     </tbody>
-  </table>     -->
+    <tbody ng-if="$ctrl.isKeyExpanded['Coverage']" ng-repeat="(locationEntityType, coverageinfo) in $ctrl.summaryCategoryTypes['Coverage']['summaryData']">
+      <tr>
+        <td id="pointer" class="indent-1" ng-click="$ctrl.togglelocationTagCoverage(locationEntityType)">
+          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isLocKeyExpanded[locationEntityType]"></i>
+          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isLocKeyExpanded[locationEntityType]"></i>
+          {{locationEntityType}}
+        </td>
+        <!-- <td ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
+          {{ coverageinfo[type][0][count] || 0}}
+        </td> -->
+        <td>{{ coverageinfo[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count || 0 }}</td>
+        <td>{{ coverageinfo[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count || 0}}</td>
+        <td>{{ coverageinfo[$ctrl.summaryInstallationTypes['Total'].id][0].count || 0}}</td>
+      </tr>
+      <tr ng-if="$ctrl.isLocKeyExpanded[locationEntityType]" ng-repeat="(tag,taginfo) in $ctrl.locTagCoverage[locationEntityType]">
+        <td class="indent-2"> {{ $ctrl.censusTagCategories[tag].description }}</td>
+          <!-- <td ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
+            {{ taginfo[type][0][count] || 0}}
+          </td> -->
+          <td>{{ taginfo[$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count || 0 }}</td>
+          <td>{{ taginfo[$ctrl.summaryInstallationTypes['PLANNED'].id][0].count || 0}}</td>
+          <td>{{ taginfo[$ctrl.summaryInstallationTypes['Total'].id][0].count || 0}}</td>
+      </tr>
+    </tbody>  
+  </table>
 
   <!-- <button class="btn btn-primary pull-right" ng-click="$ctrl.downloadPlanSummary()">Download Summary</button> -->
   <a class="pull-right btn btn-default btn-sm" ng-href="{{$ctrl.downloadLink}}">
