@@ -173,12 +173,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.optimizationOptions.technologies['FiveG'].label = 'Fixed Wireless'
 
   //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
+  //158954857: disabling some optimization types
   service.optimizationOptions.uiAlgorithms = [
     service.OPTIMIZATION_TYPES.UNCONSTRAINED,
-    service.OPTIMIZATION_TYPES.MAX_IRR,
+    //service.OPTIMIZATION_TYPES.MAX_IRR,
     service.OPTIMIZATION_TYPES.BUDGET,
-    service.OPTIMIZATION_TYPES.IRR_TARGET,
-    service.OPTIMIZATION_TYPES.IRR_THRESH,
+    //service.OPTIMIZATION_TYPES.IRR_TARGET,
+    //service.OPTIMIZATION_TYPES.IRR_THRESH,
     service.OPTIMIZATION_TYPES.COVERAGE
   ]
 

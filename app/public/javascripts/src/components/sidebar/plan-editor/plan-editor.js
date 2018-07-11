@@ -560,6 +560,7 @@ class PlanEditorController {
     var serviceFeature = {
       objectId: objectId,
       networkNodeType: siteNetworkNodeType, 
+      networkObjectId: this.boundaryIdToEquipmentId[objectId],
       geometry: {
         type: 'Polygon',
         coordinates: allPaths
