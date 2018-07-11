@@ -32,7 +32,7 @@
     }
   },
   "cables": {
-    "feeder_fiber": {
+    "FEEDER": {
       "iconUrl": "/images/map_icons/frontier/fiber_feeder.png",
       "drawingOptions": {
 	"opacity": 0.5,
@@ -40,7 +40,7 @@
         "strokeStyle": "#63210d"
       }
     },
-    "distribution_fiber": {
+    "DISTRIBUTION": {
       "iconUrl": "/images/map_icons/frontier/fiber_distribution.png",
       "drawingOptions": {
       "opacity": 0.5,
@@ -48,13 +48,13 @@
         "strokeStyle": "#000099"
       }
     },
-    "iof_fiber": {
+    "IOF": {
       "iconUrl": "/images/map_icons/frontier/fiber_backhaul.png"
     },
-    "unknown_fiber": {
+    "UNKNOWN": {
       "iconUrl": "/images/map_icons/frontier/fiber_unknown.png"
     },
-    "copper": {
+    "COPPER": {
       "iconUrl": "/images/map_icons/frontier/copper.png"
     }
   },

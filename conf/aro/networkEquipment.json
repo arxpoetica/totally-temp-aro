@@ -29,19 +29,19 @@
     }
   },
   "cables": {
-    "feeder_fiber": {
+    "FEEDER": {
       "iconUrl": "/images/map_icons/aro/fiber_feeder.png"
     },
-    "distribution_fiber": {
+    "DISTRIBUTION": {
       "iconUrl": "/images/map_icons/aro/fiber_distribution.png"
     },
-    "iof_fiber": {
+    "IOF": {
       "iconUrl": "/images/map_icons/aro/fiber_backhaul.png"
     },
-    "unknown_fiber": {
+    "UNKNOWN": {
       "iconUrl": "/images/map_icons/aro/fiber_unknown.png"
     },
-    "copper": {
+    "COPPER": {
       "iconUrl": "/images/map_icons/aro/copper.png"
     }
   }

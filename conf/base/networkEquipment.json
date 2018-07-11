@@ -1,18 +1,36 @@
 {
   "tileDefinitions": {
-    "planned": {
-      "dataId": "v1.plan.{rootPlanId}.tiles.summary.{networkNodeType}.point.{pointTransform}",
-      "vtlType": "EquipmentPointLayer",
-      "rootPlanId": "{rootPlanId}",
-      "networkNodeType": "{networkNodeType}",
-      "pointTransform": "{pointTransform}"
+    "equipment": {
+      "planned": {
+        "dataId": "v1.plan.{rootPlanId}.tiles.summary.{networkNodeType}.point.{pointTransform}",
+        "vtlType": "EquipmentPointLayer",
+        "rootPlanId": "{rootPlanId}",
+        "networkNodeType": "{networkNodeType}",
+        "pointTransform": "{pointTransform}"
+      },
+      "existing": {
+        "dataId": "v1.tiles.summary.{libraryId}.{networkNodeType}.point.{pointTransform}.entity",
+        "vtlType": "LibraryEquipmentPointLayer",
+        "libraryId": "{libraryId}",
+        "networkNodeType": "{networkNodeType}",
+        "pointTransform": "{pointTransform}"
+      }
     },
-    "existing": {
-      "dataId": "v1.tiles.summary.{libraryId}.{networkNodeType}.point.{pointTransform}.entity",
-      "vtlType": "LibraryEquipmentPointLayer",
-      "libraryId": "{libraryId}",
-      "networkNodeType": "{networkNodeType}",
-      "pointTransform": "{pointTransform}"
+    "cable": {
+      "planned": {
+        "dataId": "v1.plan.{rootPlanId}.tiles.fiber.{fiberType}.{lineTransform}",
+        "vtlType": "PlannedFiberLayer",
+        "rootPlanId": "{rootPlanId}",
+        "fiberType": "{fiberType}",
+        "lineTransform": "{lineTransform}"
+      },
+      "existing": {
+        "dataId": "v1.tiles.summary.{libraryId}.{networkNodeType}.point.{pointTransform}.entity",
+        "vtlType": "LibraryEquipmentPointLayer",
+        "libraryId": "{libraryId}",
+        "networkNodeType": "{networkNodeType}",
+        "pointTransform": "{pointTransform}"
+      }
     }
   },
   "equipments": {
@@ -165,7 +183,7 @@
     }
   },
   "cables": {
-    "feeder_fiber": {
+    "FEEDER": {
       "label": "Feeder Fiber",
       "existingTileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/FEEDER/{lineTransform}/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/FEEDER/{lineTransform}/",
@@ -182,7 +200,7 @@
       },
       "isequipment": false
     },
-    "distribution_fiber": {
+    "DISTRIBUTION": {
       "label": "Distribution Fiber",
       "existingTileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/DISTRIBUTION/{lineTransform}/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/DISTRIBUTION/{lineTransform}/",
@@ -199,7 +217,7 @@
       },
       "isequipment": false
     },
-    "iof_fiber": {
+    "IOF": {
       "label": "IOF Fiber",
       "existingTileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/IOF/{lineTransform}/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/IOF/{lineTransform}/",
@@ -216,7 +234,7 @@
       },
       "isequipment": false
     },
-    "unknown_fiber": {
+    "UNKNOWN": {
       "label": "Unknown Fiber",
       "existingTileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/UNKNOWN/{lineTransform}/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/UNKNOWN/{lineTransform}/",
@@ -233,7 +251,7 @@
       },
       "isequipment": false
     },
-    "copper": {
+    "COPPER": {
       "label": "Copper Cable",
       "existingTileUrl": "/tile/v1/cable/existing/tiles/{libraryId}/COPPER/{lineTransform}/",
       "plannedTileUrl": "/tile/v1/plan/{rootPlanId}/fiber/tiles/COPPER/{lineTransform}/",

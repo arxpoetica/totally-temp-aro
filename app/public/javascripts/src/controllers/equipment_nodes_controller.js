@@ -53,10 +53,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   // Creates a single map layer by substituting tileUrl parameters
-  var createSingleMapLayer = (equipmentKey, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
+  var createSingleMapLayer = (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
 
-    var tileDefinition = angular.copy($scope.configuration.networkEquipment.tileDefinitions[existingOrPlanned])
-    objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentKey)
+    var tileDefinition = angular.copy($scope.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
+    objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentOrFiberKey)
+    objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
     objectKeyReplace(tileDefinition, '{boundaryTypeId}', state.selectedBoundaryType.id)
@@ -69,7 +70,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       objectKeyReplace(tileDefinition, '{lineTransform}', lineTransform)
     } else if (networkEquipment.equipmentType === 'polygon') {
       var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      objectKeyReplace(tileDefinition, '{lineTransform}', lineTransform)
+      objectKeyReplace(tileDefinition, '{polygonTransform}', polygonTransform)
     }
     return {
       tileDefinitions: [tileDefinition],
@@ -86,7 +87,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   // Creates map layers for a specified category (e.g. "equipment")
-  var createMapLayersForCategory = (categoryItems, mapLayers, createdMapLayerKeys) => {
+  var createMapLayersForCategory = (categoryItems, categoryType, mapLayers, createdMapLayerKeys) => {
     // First loop through all the equipment types (e.g. central_office)
     $scope.mapZoom = map.getZoom()
     Object.keys(categoryItems).forEach((categoryItemKey) => {
@@ -101,7 +102,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           state.dataItems && state.dataItems[networkEquipment.dataItemKey] 
             && state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
             var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
-            mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
+            mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
             createdMapLayerKeys.add(mapLayerKey)
           })
         }
@@ -110,7 +111,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         if ($scope.layerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
-          mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'planned', null, planId)
+          mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
@@ -134,8 +135,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // Create layers for network equipment nodes and cables
     createdMapLayerKeys.clear()
-    createMapLayersForCategory($scope.configuration.networkEquipment.equipments, oldMapLayers, createdMapLayerKeys);
-    createMapLayersForCategory($scope.configuration.networkEquipment.cables, oldMapLayers, createdMapLayerKeys);
+    createMapLayersForCategory($scope.configuration.networkEquipment.equipments, 'equipment', oldMapLayers, createdMapLayerKeys);
+    createMapLayersForCategory($scope.configuration.networkEquipment.cables, 'cable', oldMapLayers, createdMapLayerKeys);
     // Hack to check/uncheck site boundaries based on view settings
     Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
       var selectedBoundaryName
