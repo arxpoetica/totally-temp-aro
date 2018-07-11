@@ -127,6 +127,7 @@ class BoundariesController {
   }
   
   updateMapLayers() {
+    return // TODO: Parag
     // ToDo: this function could stand to be cleaned up
     
     // ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  

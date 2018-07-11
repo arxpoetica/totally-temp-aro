@@ -37,6 +37,7 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
+    return; // TODO - Parag. Shorted out while we are moving to tiles V2.0
 
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())

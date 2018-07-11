@@ -109,7 +109,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
-
+    return; // TODO - Parag. Shorted out while we are moving to tiles V2.0
     if (!$scope.configuration || !$scope.configuration.networkEquipment) {
       return
     }

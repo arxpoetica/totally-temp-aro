@@ -9,13 +9,20 @@ var request = require('request')
 
 module.exports = class Tiles {
 
-  static getTileData(tileUrl) {
+  static getTileData(tileUrl, requestBody) {
 
     // Construct the tile URL to get data from a server
     // Note that we use "encoding: null" as we are getting binary data from aro-service
+    requestBody.forEach((item, index) => {
+      delete requestBody[index].dataId
+    })
     var tileRequest = {
-      method: 'GET',
+      method: 'POST',
       url: `${config.aro_service_url}/${tileUrl}`,
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(requestBody),
       encoding: null
     }
 

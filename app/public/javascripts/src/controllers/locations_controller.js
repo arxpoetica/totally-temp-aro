@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', '$timeout','configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, $location, $timeout, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', '$timeout','configuration', 'map_tools', 'optimization', 'state', ($scope, $rootScope, $http, $location, $timeout, configuration, map_tools, optimization, state) => {
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
@@ -17,6 +17,14 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     return transform
   }
 
+  // Replaces any occurrences of searchText by replaceText in the keys of an object
+  var objectKeyReplace = (obj, searchText, replaceText) => {
+    Object.keys(obj).forEach((key) => {
+      if (typeof obj[key] === 'string') {
+        obj[key] = obj[key].replace(searchText, replaceText)
+      }
+    })
+  }
   $scope.locationFilters = state.locationFilters;
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
   // Creates map layers based on selection in the UI
@@ -34,9 +42,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     createdMapLayerKeys.clear()
 
     // Hold a list of layers that we want merged
-    var mergedLayerUrls = []
-
-    //var isSelectedLoc = state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS ? state.optimizationOptions.analysisSelectionMode == "SELECTED_LOCATIONS" : true
+    var mergedLayerDefinitions = []
 
     // Add map layers based on the selection
     var selectedLocationLibraries = state.dataItems && state.dataItems.location && state.dataItems.location.selectedLibraryItems
@@ -49,8 +55,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             && map && map.getZoom() >= 10) {
             $scope.disablelocations = false
             $timeout()
-
-
 
             if (configuration.perspective.hasLocationFilters) {
               var hasFiltersSelected = $scope.locationFilters.filter((f)=>{return f.checked}).length > 0
@@ -65,16 +69,17 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
               // Location type is visible
               var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
               var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
-              var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
-              url = url.replace('${libraryId}', selectedLocationLibrary.identifier)
+              var tileDefinition = angular.copy(locationType.tileDefinition)
+              objectKeyReplace(tileDefinition, '${tilePointTransform}', pointTransform)
+              objectKeyReplace(tileDefinition, '${libraryId}', selectedLocationLibrary.identifier)
 
               if (pointTransform === 'aggregate') {
                 // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-                mergedLayerUrls.push(url)
+                mergedLayerDefinitions.push(tileDefinition)
               } else {
                 // We want to create an individual layer
                 oldMapLayers[mapLayerKey] = {
-                  dataUrls: [url],
+                  tileDefinitions: [tileDefinition],
                   iconUrl: `${baseUrl}${locationType.iconUrl}`,
                   renderMode: 'PRIMITIVE_FEATURES',
                   zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
@@ -97,7 +102,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
                   if (pointTransform === 'aggregate') {
                     // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-                    mergedLayerUrls.push(url)
+                    mergedLayerDefinitions.push(url)
                   } else {
                     // We want to create an individual layer
                     oldMapLayers[mapLayerKey] = {
@@ -125,13 +130,13 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
       })
     }
 
-    if (mergedLayerUrls.length > 0) {
+    if (mergedLayerDefinitions.length > 0) {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
       var firstLocation = state.locationTypes.getValue()[0]
       var mapLayerKey = 'aggregated_locations'
       oldMapLayers[mapLayerKey] = {
-        dataUrls: mergedLayerUrls,
+        tileDefinitions: mergedLayerDefinitions,
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
         zIndex: 6500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
@@ -192,94 +197,10 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   state.selectedDisplayMode.subscribe((newValue) => updateMapLayers())
 
   $scope.map_tools = map_tools
-  $scope.selected_tool = null
-  $scope.available_tools = [
-    {
-      key: 'commercial',
-      name: 'Commercial'
-    },
-    {
-      key: 'residential',
-      name: 'Residential'
-    },
-    {
-      key: 'combo',
-      name: 'Combo'
-    }
-  ]
-  $scope.overlay = 'none'
-
-  $scope.available_tools = _.reject($scope.available_tools, (tool) => {
-    return config.ui.map_tools.locations.build.indexOf(tool.key) === -1
-  })
 
   // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
   $scope.configuration = configuration
-
-  $scope.new_location_data = null
-
-  // $('#create-location').on('shown.bs.modal', () => {
-  //   $('#create-location select').val('').trigger('change')
-  // })
-
-  // $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
-  //   if (tool === 'locations') {
-  //     if (!map_tools.is_visible('locations')) {
-  //       $scope.selected_tool = null
-  //       map.setOptions({ draggableCursor: null })
-  //     }
-  //   }
-  // })
-
-  // $scope.create_location = () => {
-  //   $http.post('/locations/create', $scope.new_location_data)
-  //     .then((response) => {
-  //       $('#create-location').modal('hide')
-  //       $scope.new_location_data = {}
-  //       locationsLayer.data_layer.addGeoJson(response.data)
-  //     })
-  // }
-
-  // $scope.select_tool = (tool) => {
-  //   if ($scope.selected_tool === tool) {
-  //     $scope.selected_tool = null
-  //   } else {
-  //     $scope.selected_tool = tool
-  //   }
-  //   map.setOptions({ draggableCursor: $scope.selected_tool === null ? null : 'crosshair' })
-  // }
-
-  // $rootScope.$on('map_click', (e, event) => {
-  //   if (!map_tools.is_visible('locations') || !$scope.selected_tool) return
-  //   var lat = event.latLng.lat()
-  //   var lng = event.latLng.lng()
-  //   var address = encodeURIComponent(lat + ',' + lng)
-  //   $scope.new_location_data = {
-  //     type: $scope.selected_tool,
-  //     lat: lat,
-  //     lon: lng
-  //   }
-  //   $('#create-location').modal('show')
-  //   $http.get('https://maps.googleapis.com/maps/api/geocode/json?address=' + address)
-  //     .then((response) => {
-  //       var results = response.data.results
-  //       var result = results[0]
-  //       if (!result) return
-  //       $scope.new_location_data.address = result.formatted_address
-  //       var components = result.address_components
-  //       components.forEach((component) => {
-  //         var types = component.types
-  //         if (types.indexOf('postal_code') >= 0) {
-  //           $scope.new_location_data.zipcode = component.long_name
-  //         } else if (types.indexOf('locality') >= 0) {
-  //           $scope.new_location_data.city = component.long_name.toUpperCase()
-  //         } else if (types.indexOf('administrative_area_level_1') >= 0) {
-  //           $scope.new_location_data.state = component.short_name.toUpperCase()
-  //         }
-  //       })
-  //     })
-  // })
 
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan

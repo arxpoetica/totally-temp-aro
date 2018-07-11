@@ -24,6 +24,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
 
   tileDataService.hasNeighbouringData = (mapLayers, zoom, tileX, tileY) => {
+    return true // TODO - Parag. Fix this for the new tile definitions
     var hasAllNeighbouringData = true
     for (var dx = -1; dx <= 1; ++dx) {
       for (var dy = -1; dy <= 1; ++dy) {
@@ -44,7 +45,6 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
 
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
-    //console.log(mapLayer) 
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
       // We have one or multiple URLs where data is coming from, and we want a simple union of the results
       return tileDataService.getTileDataFlatten(mapLayer, zoom, tileX, tileY)
@@ -56,57 +56,173 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     }
   }
 
-  var getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
-    url += `${zoom}/${tileX}/${tileY}.mvt`
-    var tileCacheKey = tileDataService.getTileCacheKey(url)
-    if (!tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)) {
-      // Tile data does not exist in cache. Get it from a server
-      tileDataService.tileDataCache[tileCacheKey] = new Promise((resolve, reject) => {
-
-        // Getting binary data from the server. Directly use XMLHttpRequest()
-        var oReq = new XMLHttpRequest()
-        oReq.open("GET", url, true);
-        oReq.responseType = "arraybuffer";
-
-        oReq.onload = function(oEvent) {
-          var arrayBuffer = oReq.response
-          // De-serialize the binary data into a VectorTile object
-          var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
-          // Save the features in a per-layer object
-          var layerToFeatures = {}
-          Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
-            var layer = mapboxVectorTile.layers[layerKey]
-            var features = []
-            for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-            	  let feature = layer.feature(iFeature)
-            	  //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
-            	  if (layerKey.startsWith('v1.tiles.census_block.')){
-            		  formatCensusBlockData( feature )
-            	  }
-              features.push(feature)
-            }
-            layerToFeatures[layerKey] = features
-          })
-          tileDataService.tileDataCache[tileCacheKey] = {
-            layerToFeatures: layerToFeatures
-          }
-          resolve(tileDataService.tileDataCache[tileCacheKey])
-        }
-        oReq.onerror = function(error) { reject(error) }
-        oReq.onabort = function() { reject('XMLHttpRequest abort') }
-        oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
-        
-        oReq.addEventListener("loadend", function() {
-          uiNotificationService.removeNotification('main', 'getting tile data')
-        });
-        
-        uiNotificationService.addNotification('main', 'getting tile data')
-        
-        oReq.send()
-      })
-    }
-    return tileDataService.tileDataCache[tileCacheKey]
+  // Sets the current list of map layers
+  tileDataService.mapLayers = {}
+  tileDataService.setMapLayers = (mapLayers) => {
+    tileDataService.mapLayers = mapLayers
   }
+
+  tileDataService.getMapData = (layerDefinitions, zoom, tileX, tileY) => {
+    return new Promise((resolve, reject) => {
+      // Getting binary data from the server. Directly use XMLHttpRequest()
+      var oReq = new XMLHttpRequest()
+      oReq.open('POST', `/tile/v1/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, true)
+      oReq.setRequestHeader('Content-Type', 'application/json')
+      oReq.responseType = "arraybuffer";
+
+      oReq.onload = function(oEvent) {
+        var arrayBuffer = oReq.response
+        // De-serialize the binary data into a VectorTile object
+        var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
+        // Save the features in a per-layer object
+        var layerToFeatures = {}
+        Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+          var layer = mapboxVectorTile.layers[layerKey]
+          var features = []
+          for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+              let feature = layer.feature(iFeature)
+              //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+              // if (layerKey.startsWith('v1.tiles.census_block.')){
+              //   formatCensusBlockData( feature )
+              // }
+            features.push(feature)
+          }
+          layerToFeatures[layerKey] = features
+        })
+        // If there is no data, we won't get a layer in the vector tile. Make sure we set it to an empty array of features.
+        layerDefinitions.forEach((layerDefinition) => {
+          if (!layerToFeatures.hasOwnProperty(layerDefinition.dataId)) {
+            layerToFeatures[layerDefinition.dataId] = []
+          }
+        })
+        resolve(layerToFeatures)
+      }
+      oReq.onerror = function(error) { reject(error) }
+      oReq.onabort = function() { reject('XMLHttpRequest abort') }
+      oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
+      oReq.send(JSON.stringify(layerDefinitions))
+    })
+  }
+
+  // Returns a promise that will (once it is resolved) deliver the tile data for this tile.
+  tileDataService.tileProviderCache = {}
+  var getTileDataProviderCache = (tileDefinition, zoom, tileX, tileY) => {
+    const tileId = `${zoom}-${tileX}-${tileY}`
+    if (!tileDataService.tileProviderCache.hasOwnProperty(tileId)) {
+      tileDataService.tileProviderCache[tileId] = {}
+    }
+
+    var tileProviderCache = tileDataService.tileProviderCache[tileId]
+    if (tileProviderCache.hasOwnProperty(tileDefinition.dataId)) {
+      // We already have a data provider for this tile definition. Return it.
+      return tileProviderCache[tileDefinition.dataId]
+    } else {
+      // We need to create a data provider for this tile definition. Make sure we download all the map layers
+      // that we do not have in a single call.
+      // First, add the current tile definition. Doing it this way so that even if the maplayers have changed
+      // by the time we get here, we still always guarantee that we will provide data for the requested tile definition.
+      var postBody = [tileDefinition]
+      // Next, add everything from the map layers that has not already been downloaded.
+      Object.keys(tileDataService.mapLayers).forEach((mapLayerKey) => {
+        const mapLayer = tileDataService.mapLayers[mapLayerKey]
+        mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
+          if (!tileProviderCache.hasOwnProperty(mapLayerTileDef.dataId) && (mapLayerTileDef.dataId !== tileDefinition.dataId)) {
+            postBody.push(mapLayerTileDef)
+          }
+        })
+      })
+      // Wrap a promise that will make the request
+      const mapLayers = tileDataService.mapLayers // Save them in case they change while the promise is resolving.
+      return tileDataService.getMapData(postBody, zoom, tileX, tileY)
+        .then((layerToFeatures) => {
+          Object.keys(mapLayers).forEach((mapLayerKey) => {
+            const mapLayer = tileDataService.mapLayers[mapLayerKey]
+            mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
+              tileDataService.tileProviderCache[tileId][mapLayerTileDef.dataId] = Promise.resolve(layerToFeatures)
+            })
+          })
+          return tileDataService.tileProviderCache[tileId][tileDefinition.dataId]
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+
+  var getTileDataSingleDefinition = (tileDefinition, zoom, tileX, tileY) => {
+    const tileId = `${zoom}-${tileX}-${tileY}`
+    if (!tileDataService.tileDataCache.hasOwnProperty(tileId)) {
+      // There is no data object for this tile. Create an empty one.
+      tileDataService.tileDataCache[tileId] = {}
+    }
+    const thisTileDataCache = tileDataService.tileDataCache[tileId]
+    if (thisTileDataCache.hasOwnProperty(tileDefinition.dataId)) {
+      // We have the required data stored as a promise. Return it.
+      return thisTileDataCache[tileDefinition.dataId]
+    } else {
+      // We don't have any data for this tile. Get it from the server.
+      return getTileDataProviderCache(tileDefinition, zoom, tileX, tileY)
+        .then((result) => {
+          // Save the results of just this tile definition. The server may return other definitions, they will
+          // be saved by the corresponding calls for those definitions.
+          var layerResult = {}
+          layerResult[tileDefinition.dataId] = result[tileDefinition.dataId]
+          thisTileDataCache[tileDefinition.dataId] = Promise.resolve(layerResult)
+          return thisTileDataCache[tileDefinition.dataId]
+        })
+        .catch((err) => console.error(err))
+    }
+  }
+
+  // var getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
+  //   url += `${zoom}/${tileX}/${tileY}.mvt`
+  //   var tileCacheKey = tileDataService.getTileCacheKey(url)
+  //   if (!tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)) {
+  //     // Tile data does not exist in cache. Get it from a server
+  //     tileDataService.tileDataCache[tileCacheKey] = new Promise((resolve, reject) => {
+
+  //       // Getting binary data from the server. Directly use XMLHttpRequest()
+  //       var oReq = new XMLHttpRequest()
+  //       oReq.open("GET", url, true);
+  //       oReq.responseType = "arraybuffer";
+
+  //       oReq.onload = function(oEvent) {
+  //         var arrayBuffer = oReq.response
+  //         // De-serialize the binary data into a VectorTile object
+  //         var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
+  //         // Save the features in a per-layer object
+  //         var layerToFeatures = {}
+  //         Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+  //           var layer = mapboxVectorTile.layers[layerKey]
+  //           var features = []
+  //           for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+  //           	  let feature = layer.feature(iFeature)
+  //           	  //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+  //           	  if (layerKey.startsWith('v1.tiles.census_block.')){
+  //           		  formatCensusBlockData( feature )
+  //           	  }
+  //             features.push(feature)
+  //           }
+  //           layerToFeatures[layerKey] = features
+  //         })
+  //         tileDataService.tileDataCache[tileCacheKey] = {
+  //           layerToFeatures: layerToFeatures
+  //         }
+  //         resolve(tileDataService.tileDataCache[tileCacheKey])
+  //       }
+  //       oReq.onerror = function(error) { reject(error) }
+  //       oReq.onabort = function() { reject('XMLHttpRequest abort') }
+  //       oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
+        
+  //       oReq.addEventListener("loadend", function() {
+  //         uiNotificationService.removeNotification('main', 'getting tile data')
+  //       });
+        
+  //       uiNotificationService.addNotification('main', 'getting tile data')
+        
+  //       oReq.send()
+  //     })
+  //   }
+  //   return tileDataService.tileDataCache[tileCacheKey]
+  // }
   
   var formatCensusBlockData = function(cBlock){
 	let sepA = ';'
@@ -127,7 +243,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     // We have multiple URLs where data is coming from, and we want a simple union of the results
     return new Promise((resolve, reject) => {
       var promises = []
-      mapLayer.dataUrls.forEach((tileUrl) => promises.push(getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+      mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
       var hasIcon = mapLayer.hasOwnProperty('iconUrl')
       if (hasIcon) {
         promises.push(new Promise((resolve, reject) => {
@@ -159,7 +275,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           
           for (var iResult = 0; iResult < numDataResults; ++iResult) {
             var result = results[iResult]
-            var layerToFeatures = result.layerToFeatures
+            var layerToFeatures = result
             Object.keys(layerToFeatures).forEach((layerKey) => {
               allFeatures = allFeatures.concat(layerToFeatures[layerKey])
             })
@@ -187,7 +303,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     // We have multiple URLs where data is coming from. Return the aggregated result
     return new Promise((resolve, reject) => {
       var promises = []
-      mapLayer.dataUrls.forEach((tileUrl) => promises.push(getTileDataSingleUrl(tileUrl, zoom, tileX, tileY)))
+      mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
       Promise.all(promises)
         .then((results) => {
           // We have data from all urls. First, we create an object that will map the objects
@@ -205,7 +321,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           var entityData = {}
           // Loop through each tile result
           results.forEach((result) => {
-            var layerToFeatures = result.layerToFeatures
+            var layerToFeatures = result
             // Each tile can have multiple layers per the MVT specification. Loop through them
             Object.keys(layerToFeatures).forEach((layerKey) => {
               // Loop through all the features in this layer
