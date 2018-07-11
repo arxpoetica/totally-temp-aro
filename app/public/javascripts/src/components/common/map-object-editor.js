@@ -377,8 +377,7 @@ class MapObjectEditorController {
   }
 
   handleMapEntitySelected(event) {
-    console.log(event)
-    if (!event || !event.latLng) {
+    if (!event || !event.latLng) {// <-------------------- won't need lat long -----<<<
       return
     }
     var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -387,6 +386,23 @@ class MapObjectEditorController {
       // This means that the context menu is being displayed. Do not create an object.
       return
     }
+    
+    // filter out equipment already in the list
+    // ToDo: should we do this for all types of features?
+    if (event.equipmentFeatures){
+      var filteredEquipment = []
+      for (let i=0; i<event.equipmentFeatures.length; i++){
+        let equipment = event.equipmentFeatures[i]
+        if (!equipment.object_id || !this.createdMapObjects.hasOwnProperty(equipment.object_id) ){
+          filteredEquipment.push(equipment)
+        }
+      }
+      event.equipmentFeatures = filteredEquipment
+    }
+    // ---
+    
+    console.log(event)
+    
     var feature = {
       geometry: {
         type: 'Point',
@@ -407,7 +423,8 @@ class MapObjectEditorController {
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       const clickedObject = event.equipmentFeatures[0]
-      feature.objectId = clickedObject.object_id
+      console.log(clickedObject)
+      feature.objectId = clickedObject.object_id // <------------------- make sure feature isn't already in our edit list ---------<<<
       feature.isExistingObject = true
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
