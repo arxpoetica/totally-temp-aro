@@ -274,21 +274,22 @@ class MapObjectEditorController {
         fontSize: "46px"
       }, 
       draggable: !feature.is_locked, // Allow dragging only if feature is not locked
-      clickable: !feature.is_locked, // Allow clicking (including right click) only if feature is not locked
+      //clickable: !feature.is_locked, // Allow clicking (including right click) only if feature is not locked
+      clickable: true, // if it's an icon we can select it then the panel will tell us it's locked
       map: this.mapRef
     })
     
     if (feature.is_locked) {
       var lockIconOverlay = new google.maps.Marker({
         icon: {
-          url: this.configuration.locationCategories.entityLockIcon//,
-          //anchor: new google.maps.Point(12, 24)
+          url: this.configuration.locationCategories.entityLockIcon, //,
+          anchor: new google.maps.Point(12, 24)
         },
         clickable: false,
         map: this.mapRef
       })
       lockIconOverlay.bindTo('position', mapMarker, 'position')
-      this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
+      this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay 
     }
     // this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
     return mapMarker
@@ -394,9 +395,21 @@ class MapObjectEditorController {
       return
     }
     
-    // filter out equipment already in the list
+    // filter out equipment and locations already in the list
     // ToDo: should we do this for all types of features?
+    var filterArrayByObjectId = (featureList) => {
+      let filteredList = []
+      for (let i=0; i<featureList.length; i++){
+        let feature = featureList[i]
+        if (!feature.object_id || (!this.createdMapObjects.hasOwnProperty(feature.object_id) && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay')) ){
+          filteredList.push(feature)
+        }
+      }
+      return filteredList
+    }
+    
     if (event.equipmentFeatures){
+      /*
       var filteredEquipment = []
       for (let i=0; i<event.equipmentFeatures.length; i++){
         let equipment = event.equipmentFeatures[i]
@@ -404,8 +417,14 @@ class MapObjectEditorController {
           filteredEquipment.push(equipment)
         }
       }
-      event.equipmentFeatures = filteredEquipment
+      */
+      event.equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
     }
+    
+    if (event.locations){
+      event.locations = filterArrayByObjectId(event.locations)
+    }
+    
     // ---
     
     var feature = {
@@ -424,7 +443,16 @@ class MapObjectEditorController {
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
       feature.is_locked = event.locations[0].is_locked
-      featurePromise = Promise.resolve(feature)
+      
+      featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/location/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+      .then((result) => {
+        var serviceFeature = result.data
+        // ise featire's coord NOT the event's coords
+        feature.geometry.coordinates = serviceFeature.geometry.coordinates
+        return Promise.resolve(feature)
+      })
+      
+      //featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = event.equipmentFeatures[0]
