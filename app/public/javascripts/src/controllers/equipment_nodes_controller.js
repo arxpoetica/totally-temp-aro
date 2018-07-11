@@ -43,25 +43,36 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
 
   var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
-  
+  // Replaces any occurrences of searchText by replaceText in the keys of an object
+  var objectKeyReplace = (obj, searchText, replaceText) => {
+    Object.keys(obj).forEach((key) => {
+      if (typeof obj[key] === 'string') {
+        obj[key] = obj[key].replace(searchText, replaceText)
+      }
+    })
+  }
+
   // Creates a single map layer by substituting tileUrl parameters
-  var createSingleMapLayer = (equipmentKey, networkEquipment, tileUrlType, libraryId, rootPlanId) => {
-    var tileUrl = networkEquipment[tileUrlType]
-    tileUrl = tileUrl.replace('{libraryId}', libraryId)
-    tileUrl = tileUrl.replace('{rootPlanId}', rootPlanId)
-    tileUrl = tileUrl.replace('{boundaryTypeId}', state.selectedBoundaryType.id)
+  var createSingleMapLayer = (equipmentKey, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
+
+    var tileDefinition = angular.copy($scope.configuration.networkEquipment.tileDefinitions[existingOrPlanned])
+    objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentKey)
+    objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
+    objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
+    objectKeyReplace(tileDefinition, '{boundaryTypeId}', state.selectedBoundaryType.id)
+
     if (networkEquipment.equipmentType === 'point') {
       var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      tileUrl = tileUrl.replace('{pointTransform}', pointTransform)
+      objectKeyReplace(tileDefinition, '{pointTransform}', pointTransform)
     } else if (networkEquipment.equipmentType === 'line') {
       var lineTransform = getLineTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      tileUrl = tileUrl.replace('{lineTransform}', lineTransform)
+      objectKeyReplace(tileDefinition, '{lineTransform}', lineTransform)
     } else if (networkEquipment.equipmentType === 'polygon') {
       var polygonTransform = getPolygonTransformForLayer(+networkEquipment.aggregateZoomThreshold)
-      tileUrl = tileUrl.replace('{polyTransform}', polygonTransform)
+      objectKeyReplace(tileDefinition, '{lineTransform}', lineTransform)
     }
     return {
-      dataUrls: [tileUrl],
+      tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl, 
       renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
@@ -81,16 +92,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
       
-      if ('point' !== networkEquipment.equipmentType 
+      if ('point' !== networkEquipment.equipmentType
           || usePointAggregate
-          || $scope.mapZoom > networkEquipment.aggregateZoomThreshold){
+          || $scope.mapZoom > networkEquipment.aggregateZoomThreshold) {
         
         if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           state.dataItems && state.dataItems[networkEquipment.dataItemKey] 
             && state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
             var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
-            mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existingTileUrl', selectedLibraryItem.identifier, null)
+            mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
             createdMapLayerKeys.add(mapLayerKey)
           })
         }
@@ -99,7 +110,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         if ($scope.layerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
-          mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'plannedTileUrl', null, planId)
+          mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, networkEquipment, 'planned', null, planId)
           createdMapLayerKeys.add(mapLayerKey)
         }
       }
@@ -109,7 +120,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
-    return; // TODO - Parag. Shorted out while we are moving to tiles V2.0
     if (!$scope.configuration || !$scope.configuration.networkEquipment) {
       return
     }
@@ -136,18 +146,18 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName
           && $scope.configuration.networkEquipment.equipments['cell_5g'].checked)
       }
-      
     })
-    // Hack to show copper in toolbar ruler options
-    Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
-      if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
-        state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
-      } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
-        var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
-        index !== -1 && state.rulerActions.splice(index, 1)
-      }
-    })
-    createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)
+
+    // // Hack to show copper in toolbar ruler options
+    // Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
+    //   if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
+    //     state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
+    //   } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
+    //     var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
+    //     index !== -1 && state.rulerActions.splice(index, 1)
+    //   }
+    // })
+    // createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)

@@ -133,7 +133,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       })
       // Wrap a promise that will make the request
       const mapLayers = tileDataService.mapLayers // Save them in case they change while the promise is resolving.
-      return tileDataService.getMapData(postBody, zoom, tileX, tileY)
+      var dataPromise = tileDataService.getMapData(postBody, zoom, tileX, tileY)
         .then((layerToFeatures) => {
           Object.keys(mapLayers).forEach((mapLayerKey) => {
             const mapLayer = tileDataService.mapLayers[mapLayerKey]
@@ -144,7 +144,14 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           return tileDataService.tileProviderCache[tileId][tileDefinition.dataId]
         })
         .catch((err) => console.error(err))
-    }
+        Object.keys(tileDataService.mapLayers).forEach((mapLayerKey) => {
+          const mapLayer = tileDataService.mapLayers[mapLayerKey]
+          mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
+            tileDataService.tileProviderCache[tileId][mapLayerTileDef.dataId] = dataPromise
+          })
+        })
+        return dataPromise
+      }
   }
 
   var getTileDataSingleDefinition = (tileDefinition, zoom, tileX, tileY) => {

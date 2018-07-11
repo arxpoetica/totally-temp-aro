@@ -38,7 +38,13 @@ class BoundariesController {
       var wirecenter_layer = {
         name: serviceLayer.description, //serviceLayer.description, // Service Areas 
         type: 'wirecenter',
-        api_endpoint: "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
+        api_endpoint: '/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/',
+        tileDefinition: {
+          dataId: 'v1.tiles.service_area_by_library.{libraryId}.{transform}',
+          vtlType: 'ServiceAreaLayerByLibrary',
+          libraryId: '{libraryId}',
+          transform: '{transform}'
+        },
         layerId: serviceLayer.id,
         visible: false,
         disabled: false,
@@ -125,9 +131,17 @@ class BoundariesController {
       }
     }  
   }
+
+  // Replaces any occurrences of searchText by replaceText in the keys of an object
+  objectKeyReplace(obj, searchText, replaceText) {
+    Object.keys(obj).forEach((key) => {
+      if (typeof obj[key] === 'string') {
+        obj[key] = obj[key].replace(searchText, replaceText)
+      }
+    })
+  }
   
   updateMapLayers() {
-    return // TODO: Parag
     // ToDo: this function could stand to be cleaned up
     
     // ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  
@@ -248,7 +262,11 @@ class BoundariesController {
 
             if (!layerSettings.hasOwnProperty(settingsKey)) { settingsKey = 'default' }
             oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-            oldMapLayers[mapLayerKey].dataUrls = [url]
+            // oldMapLayers[mapLayerKey].dataUrls = [url]
+            var tileDefinition = angular.copy(layer.tileDefinition)
+            this.objectKeyReplace(tileDefinition, '{transform}', pointTransform)
+            this.objectKeyReplace(tileDefinition, '{libraryId}', selectedServiceAreaLibrary.identifier)
+            oldMapLayers[mapLayerKey].tileDefinitions = [tileDefinition]
             this.createdMapLayerKeys.add(mapLayerKey)
           }
         })
