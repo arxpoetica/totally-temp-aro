@@ -46,7 +46,8 @@ class MapTileRenderer {
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
     // be such that the largest rendered feature (or heatmap) does not get clipped.
-    this.drawMargins = 10
+    //this.drawMargins = 10
+    this.drawMargins = 20
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
