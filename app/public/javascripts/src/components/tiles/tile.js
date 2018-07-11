@@ -46,7 +46,8 @@ class MapTileRenderer {
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
     // be such that the largest rendered feature (or heatmap) does not get clipped.
-    this.drawMargins = 10
+    //this.drawMargins = 10
+    this.drawMargins = 20
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
@@ -453,7 +454,7 @@ class MapTileRenderer {
         if (1 == shape.length) {
   	      // This is a point
   	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
-  	      var y = this.drawMargins + shape[0].y + geometryOffset.y - imageHeightBy2
+  	      var y = this.drawMargins + shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
           
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
@@ -1037,8 +1038,11 @@ class MapTileRenderer {
         if (shape.length === 1) {
           if (xWithinTile >= shape[0].x - imageWidthBy2
               && xWithinTile <= shape[0].x + imageWidthBy2
-              && yWithinTile >= shape[0].y - imageHeightBy2
-              && yWithinTile <= shape[0].y + imageHeightBy2) {
+              //&& yWithinTile >= shape[0].y - imageHeightBy2 // for location in center of icon
+              //&& yWithinTile <= shape[0].y + imageHeightBy2
+              && yWithinTile >= shape[0].y - icon.height     // for location at bottom center of icon
+              && yWithinTile <= shape[0].y
+              ) {
                 // The clicked point is inside the bounding box of the features icon
                 selectFeature = true
               }

@@ -129,7 +129,14 @@ class MapObjectEditorController {
         return
       }      
       // Convert pixels to latlng
-      var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
+      var grabOffsetX = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_X)
+      var grabOffsetY = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_Y)
+      var grabImageW = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_ICON_W)
+      var grabImageH = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_ICON_H)
+      var offsetX = (grabImageW * 0.5) - grabOffsetX // center
+      var offsetY = grabImageH - grabOffsetY // bottom
+      
+        var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
       // ToDo feature should probably be a class
       var feature = {
         objectId: this.getUUID(),
@@ -274,8 +281,8 @@ class MapObjectEditorController {
     if (feature.is_locked) {
       var lockIconOverlay = new google.maps.Marker({
         icon: {
-          url: this.configuration.locationCategories.entityLockIcon,
-          anchor: new google.maps.Point(12, 24)
+          url: this.configuration.locationCategories.entityLockIcon//,
+          //anchor: new google.maps.Point(12, 24)
         },
         clickable: false,
         map: this.mapRef
@@ -386,10 +393,25 @@ class MapObjectEditorController {
       // This means that the context menu is being displayed. Do not create an object.
       return
     }
+    
+    // filter out equipment already in the list
+    // ToDo: should we do this for all types of features?
+    if (event.equipmentFeatures){
+      var filteredEquipment = []
+      for (let i=0; i<event.equipmentFeatures.length; i++){
+        let equipment = event.equipmentFeatures[i]
+        if (!equipment.object_id || !this.createdMapObjects.hasOwnProperty(equipment.object_id) ){
+          filteredEquipment.push(equipment)
+        }
+      }
+      event.equipmentFeatures = filteredEquipment
+    }
+    // ---
+    
     var feature = {
       geometry: {
         type: 'Point',
-        coordinates: [event.latLng.lng(), event.latLng.lat()]
+        coordinates: [event.latLng.lng(), event.latLng.lat()] 
       },
       is_locked: false,
       isExistingObject: false
@@ -404,25 +426,31 @@ class MapObjectEditorController {
       feature.is_locked = event.locations[0].is_locked
       featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
-      // The map was clicked on, and there was a location under the cursor
+      // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = event.equipmentFeatures[0]
-      feature.objectId = clickedObject.object_id
+      feature.objectId = clickedObject.object_id 
       feature.isExistingObject = true
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
         // Get the boundary geometry from aro-service
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-                           .then((result) => {
-                             var serviceFeature = result.data
-                             serviceFeature.attributes = {
-                               network_node_object_id: serviceFeature.networkObjectId,
-                               networkNodeType: serviceFeature.networkNodeType
-                             }
-                             serviceFeature.isExistingObject = true
-                             return Promise.resolve(serviceFeature)
-                           })
+        .then((result) => {
+          var serviceFeature = result.data
+          serviceFeature.attributes = {
+            network_node_object_id: serviceFeature.networkObjectId,
+            networkNodeType: serviceFeature.networkNodeType
+          }
+          serviceFeature.isExistingObject = true
+          return Promise.resolve(serviceFeature)
+        })
       } else {
-        featurePromise = Promise.resolve(feature)
+        featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          var serviceFeature = result.data
+          // ise featire's coord NOT the event's coords
+          feature.geometry.coordinates = serviceFeature.geometry.coordinates
+          return Promise.resolve(feature)
+        })
       }
     } else {
       // The map was clicked on, but there was no location under the cursor.
@@ -444,6 +472,8 @@ class MapObjectEditorController {
       .then((result) => {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
+        //console.log(featureToUse)
+        
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
       .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true))
