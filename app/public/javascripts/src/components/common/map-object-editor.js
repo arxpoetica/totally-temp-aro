@@ -129,7 +129,14 @@ class MapObjectEditorController {
         return
       }      
       // Convert pixels to latlng
-      var dropLatLng = this.pixelToLatlng(event.clientX, event.clientY)
+      var grabOffsetX = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_X)
+      var grabOffsetY = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_Y)
+      var grabImageW = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_ICON_W)
+      var grabImageH = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_ICON_H)
+      var offsetX = (grabImageW * 0.5) - grabOffsetX // center
+      var offsetY = grabImageH - grabOffsetY // bottom
+      
+        var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
       // ToDo feature should probably be a class
       var feature = {
         objectId: this.getUUID(),
