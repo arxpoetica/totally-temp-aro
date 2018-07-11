@@ -377,7 +377,7 @@ class MapObjectEditorController {
   }
 
   handleMapEntitySelected(event) {
-    if (!event || !event.latLng) {// <-------------------- won't need lat long -----<<<
+    if (!event || !event.latLng) {
       return
     }
     var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
@@ -401,12 +401,10 @@ class MapObjectEditorController {
     }
     // ---
     
-    console.log(event)
-    
     var feature = {
       geometry: {
         type: 'Point',
-        coordinates: [event.latLng.lng(), event.latLng.lat()] // <----------------------------- change this to object lat long NOT click lat long -----<<<
+        coordinates: [event.latLng.lng(), event.latLng.lat()] 
       },
       is_locked: false,
       isExistingObject: false
@@ -421,26 +419,31 @@ class MapObjectEditorController {
       feature.is_locked = event.locations[0].is_locked
       featurePromise = Promise.resolve(feature)
     } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
-      // The map was clicked on, and there was a location under the cursor
+      // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = event.equipmentFeatures[0]
-      console.log(clickedObject)
-      feature.objectId = clickedObject.object_id // <------------------- make sure feature isn't already in our edit list ---------<<<
+      feature.objectId = clickedObject.object_id 
       feature.isExistingObject = true
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
         // Get the boundary geometry from aro-service
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-                           .then((result) => {
-                             var serviceFeature = result.data
-                             serviceFeature.attributes = {
-                               network_node_object_id: serviceFeature.networkObjectId,
-                               networkNodeType: serviceFeature.networkNodeType
-                             }
-                             serviceFeature.isExistingObject = true
-                             return Promise.resolve(serviceFeature)
-                           })
+        .then((result) => {
+          var serviceFeature = result.data
+          serviceFeature.attributes = {
+            network_node_object_id: serviceFeature.networkObjectId,
+            networkNodeType: serviceFeature.networkNodeType
+          }
+          serviceFeature.isExistingObject = true
+          return Promise.resolve(serviceFeature)
+        })
       } else {
-        featurePromise = Promise.resolve(feature)
+        featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          var serviceFeature = result.data
+          // ise featire's coord NOT the event's coords
+          feature.geometry.coordinates = serviceFeature.geometry.coordinates
+          return Promise.resolve(feature)
+        })
       }
     } else {
       // The map was clicked on, but there was no location under the cursor.
