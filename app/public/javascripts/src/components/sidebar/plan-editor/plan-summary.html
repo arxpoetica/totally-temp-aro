@@ -6,6 +6,10 @@
     .indent-2 {
       padding-left: 30px !important;
     }
+    .button-export {
+      margin-bottom: 10px !important;
+      border-radius: 10px !important;
+    }
     #pointer {
       cursor: pointer;
     }
@@ -114,7 +118,12 @@
   </table>
 
   <!-- <button class="btn btn-primary pull-right" ng-click="$ctrl.downloadPlanSummary()">Download Summary</button> -->
-  <a class="pull-right btn btn-default btn-sm" ng-href="{{$ctrl.downloadLink}}">
-    <span style="color:#4d99e5" class="fa fa-download"></span>
-  </a>
+  <div class="btn-group-vertical">
+    <a class="pull-left btn btn-primary btn-sm button-export" ng-href="{{$ctrl.downloadEquipment}}">
+      <span>Export Equipment</span>
+    </a>
+    <a class="pull-left btn btn-primary btn-sm button-export" ng-href="{{$ctrl.downloadLocations}}">
+      <span>Export Locations</span>
+    </a>
+  </div>
 </div>  
