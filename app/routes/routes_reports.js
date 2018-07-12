@@ -3,6 +3,7 @@ var models = require('../models')
 var config = helpers.config
 var database = helpers.database
 var parse = require('csv-parse')
+var json2csv = require("json2csv");
 
 function listTABC (plan_id) {
   var names = ['T', 'A', 'B', 'C']
@@ -286,10 +287,116 @@ exports.configure = (api, middleware) => {
     `;
 
        database.query(planQ).then(function (results) {
-         var json2csv = require("json2csv");
          //var header = ['Status','Equipment Type','Latitude','Longitude','Site CLLI','Site Name']
          response.attachment('planSummary.csv')
-         response.send(json2csv({data:results}))
+         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
+       })
+
+  });
+
+  api.get("/reports/planSummary/:plan_id/:site_boundary" , function (request, response, next) {
+    var plan_id = request.params.plan_id
+    var site_boundary = request.params.site_boundary
+    var planQ = `
+      --location summary
+      WITH inputs AS (
+        SELECT ${plan_id} AS plan_id,
+        '${site_boundary}' AS site_boundary_type
+      ),
+      
+      plan_config AS (
+      SELECT p.config_id AS config_id 
+      FROM inputs i 
+      JOIN client.plan p ON p.parent_plan_id = i.plan_id AND is_deleted = FALSE
+      ),
+      
+      plan_data_source AS (
+      SELECT data_type_id, data_source_id
+      FROM plan_config p
+      JOIN aro_core.type_definition t ON t.data_config_id = p.config_id
+      ) ,
+      
+      plan_service_areas AS (
+      SELECT jsonb_array_elements(p.tag_mapping->'linkTags'->'serviceAreaIds')::text::int AS id
+      FROM   client.plan p 
+      JOIN inputs i ON p.id = i.plan_id
+      ),
+      
+      planned_equipment AS (
+      SELECT DISTINCT ON (v.object_id) v.id, v.data_source_id, v.node_type_id, v.attributes, v.object_id, v.is_branch_data
+      FROM client.versioned_network_node v
+      JOIN plan_data_source p ON v.data_source_id = p.data_source_id 
+      JOIN client.network_nodes n ON v.id = n.id
+      WHERE is_branch_data IS TRUE
+      ORDER BY object_id, version_number DESC
+      ),
+      
+      /*existing_equipment AS (
+      SELECT DISTINCT ON (v.object_id) v.id, v.data_source_id, v.node_type_id, v.attributes, v.object_id, v.is_branch_data
+      FROM client.versioned_network_node v
+      JOIN plan_data_source p ON v.data_source_id = p.data_source_id AND 
+      JOIN client.network_nodes n ON v.id = n.id
+      JOIN client.service_area s ON ST_Contains(s.geom, n.geom)
+      JOIN plan_service_areas a ON s.id = a.id
+      ORDER BY object_id, version_number DESC
+      )
+      */
+      
+      polygon_locations AS (
+      SELECT l.id, MAX(n.id) AS network_node_id, s.id AS service_area_id
+      FROM plan_data_source d 
+      JOIN aro_core.data_source ds ON d.data_source_id = ds.id
+      JOIN aro.location_entity l ON l.date_to = '294276-01-01 00:00:00'::date AND ((l.data_source_id = ANY (ds.parent_path)) OR l.data_source_id = ds.id)
+      JOIN client.site_boundary_smd m ON ST_Contains(m.geom,l.geom) AND m.network_node_object_id IN (SELECT object_id FROM planned_equipment)
+      JOIN client.network_nodes n ON m.network_node_object_id = n.object_id
+      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.service_layer_id = (SELECT DISTINCT service_layer_id FROM client.service_area s JOIN plan_service_areas p ON s.id = p.id)
+      GROUP BY l.id, s.id
+      ),
+      
+      service_area_locations AS (
+      SELECT l.id, network_node_id, s.id AS service_area_id
+      FROM plan_data_source d 
+      JOIN aro_core.data_source ds ON d.data_source_id = ds.id
+      JOIN aro.location_entity l ON l.date_to = '294276-01-01 00:00:00'::date AND ((l.data_source_id = ANY (ds.parent_path)) OR l.data_source_id = ds.id)
+      JOIN client.service_area s ON ST_Contains(s.geom, l.geom)
+      JOIN plan_service_areas a ON s.id = a.id
+      LEFT JOIN polygon_locations p ON l.id = p.id
+      ),
+      
+      relevant_locations AS (
+      SELECT * FROM polygon_locations 
+      UNION 
+      SELECT * FROM service_area_locations)
+      
+      SELECT 
+        l.object_id AS "Location Object ID", 
+        g.name AS "Data Source",
+        CASE WHEN l.location_category = 0 THEN 'Business' WHEN l.location_category = 1 THEN 'Household' ELSE 'Tower' END AS "Location Type",
+        ST_Y(l.geom) AS "Location Latitude",
+        ST_X(l.geom) AS "Location Longitude",  
+        CASE WHEN n.id IS NULL THEN NULL ELSE (SELECT site_boundary_type FROM inputs) END AS "Coverage Type",
+        n.network_equipment->'siteInfo'->'siteName' AS "Covered-By Site Name",
+        n.network_equipment->'siteInfo'->'siteClli' AS "Covered-By Site CLLI",
+        n.object_id AS "Covered-By Site Object ID",
+        s.name AS "Wirecenter Name",
+        s.code AS "Wirecenter CLLI",
+        c.tabblock_id AS "Census Block", 
+        (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part I')::text)::int)) AS "CAF Phase I Part I Tag",
+        (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part II')::text)::int)) AS "CAF Phase I Part II Tag",
+        (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase II')::text)::int)) AS "CAF Phase II Tag" 
+      FROM relevant_locations r
+      JOIN aro.location_entity l ON r.id = l.id
+      JOIN client.service_area s ON r.service_area_id = s.id
+      LEFT JOIN aro.states st ON ST_Intersects(s.geom, st.geom)
+      LEFT JOIN client.network_nodes n ON r.network_node_id = n.id
+      LEFT JOIN client.site_boundary_smd m ON m.network_node_object_id = n.object_id
+      LEFT JOIN aro_core.global_library g ON g.data_source_id = l.data_source_id 
+      JOIN aro.census_blocks c ON ST_Intersects(s.geom, c.geom) AND ST_Contains(c.geom, l.geom) AND st.statefp = c.statefp       
+    `;
+
+       database.query(planQ).then(function (results) {
+         response.attachment('locationSummary.csv')
+         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
        })
 
   });

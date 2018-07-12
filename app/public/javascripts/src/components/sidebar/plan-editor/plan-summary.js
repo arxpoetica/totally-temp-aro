@@ -29,7 +29,8 @@ class PlanSummaryController {
     
     state.plan.subscribe((plan) => { 
       this.plan = plan 
-      this.downloadLink = `/reports/planSummary/${this.plan.id}`
+      this.downloadEquipment = `/reports/planSummary/${this.plan.id}`
+      this.downloadLocations = `/reports/planSummary/${this.plan.id}/${this.state.selectedBoundaryType.name}`
     })
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
     this.censusTagCategories = this.state.censusCategories.getValue()
