@@ -60,7 +60,12 @@ class BoundariesController {
     	name: 'Census Blocks',
       type: 'census_blocks',
       api_endpoint: "/tile/v1/census_block/tiles/${tilePointTransform}/",
-      //layerId: serviceLayer.id,
+      tileDefinition: {
+        dataId: 'v1.tiles.census_block.{transform}',
+        vtlType: 'CensusBlockLayer',
+        transform: '{transform}'
+      },
+    //layerId: serviceLayer.id,
       visible: false,
       disabled: false,
       aggregateZoomThreshold: 10
@@ -166,7 +171,7 @@ class BoundariesController {
       dataUrls: [],
       renderMode: 'PRIMITIVE_FEATURES',
       selectable: true,
-      strokeStyle: '#333333',
+      strokeStyle: '#d3db43',
       lineWidth: 1,
       fillStyle: "transparent",
       opacity: 0.7,
@@ -266,6 +271,7 @@ class BoundariesController {
             var tileDefinition = angular.copy(layer.tileDefinition)
             this.objectKeyReplace(tileDefinition, '{transform}', pointTransform)
             this.objectKeyReplace(tileDefinition, '{libraryId}', selectedServiceAreaLibrary.identifier)
+            this.objectKeyReplace(tileDefinition, '{analysisLayerId}', layer.analysisLayerId)
             oldMapLayers[mapLayerKey].tileDefinitions = [tileDefinition]
             this.createdMapLayerKeys.add(mapLayerKey)
           }
@@ -293,6 +299,11 @@ class BoundariesController {
           name: analysisLayer.description,
           type: 'analysis_layer',
           api_endpoint: "/tile/v1/analysis_area/tiles/${analysisLayerId}/${tilePointTransform}/",
+          tileDefinition: {
+            dataId: 'v1.tiles.analysis_area.{analysisLayerId}',
+            vtlType: 'AnalysisAreaLayer',
+            analysisLayerId: '{analysisLayerId}'
+          },
           analysisLayerId: analysisLayer.id,
           visible: false,
           disabled: false,
