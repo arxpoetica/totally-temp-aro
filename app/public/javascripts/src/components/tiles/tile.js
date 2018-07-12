@@ -166,6 +166,8 @@ class MapTileRenderer {
     
     this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)
     
+    // Set the map layers in the data service too, so that we can download all layer data in a single call
+    this.tileDataService.setMapLayers(mapLayers)
   }
 
   // Gets the tile id for given zoom and coords. Useful for setting div ids and cache keys

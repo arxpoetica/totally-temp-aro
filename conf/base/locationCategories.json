@@ -34,6 +34,13 @@
       "show": true,
       "label": "Small Businesses",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/entity/",
+      "tileDefinition": {
+        "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
+        "vtlType": "LocationLayer",
+        "libraryId": "${libraryId}",
+        "locationEntityType": "small",
+        "transformType": "${tilePointTransform}"
+      },
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
       "zIndex": 6560,
@@ -47,6 +54,13 @@
       "show": true,
       "label": "Medium Businesses",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/medium/${tilePointTransform}/entity/",
+      "tileDefinition": {
+        "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
+        "vtlType": "LocationLayer",
+        "libraryId": "${libraryId}",
+        "locationEntityType": "medium",
+        "transformType": "${tilePointTransform}"
+      },
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
       "zIndex": 6570,
@@ -60,6 +74,13 @@
       "show": true,
       "label": "Large Businesses",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/large/${tilePointTransform}/entity/",
+      "tileDefinition": {
+        "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
+        "vtlType": "LocationLayer",
+        "libraryId": "${libraryId}",
+        "locationEntityType": "large",
+        "transformType": "${tilePointTransform}"
+      },
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/businesses_large_default.png",
       "zIndex": 6580,
@@ -73,6 +94,13 @@
       "show": true,
       "label": "Residential",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/household/${tilePointTransform}/entity/",
+      "tileDefinition": {
+        "dataId": "v1.tiles.locations.${libraryId}.household.${tilePointTransform}.entity",
+        "vtlType": "LocationLayer",
+        "libraryId": "${libraryId}",
+        "locationEntityType": "household",
+        "transformType": "${tilePointTransform}"
+      },
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/households_default.png",
       "zIndex": 6500,
@@ -86,6 +114,13 @@
       "show": true,
       "label": "Cell Sites",
       "tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
+      "tileDefinition": {
+        "dataId": "v1.tiles.locations.${libraryId}.celltower.${tilePointTransform}.entity",
+        "vtlType": "LocationLayer",
+        "libraryId": "${libraryId}",
+        "locationEntityType": "celltower",
+        "transformType": "${tilePointTransform}"
+      },
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tower.png",
       "zIndex": 6590,
