@@ -20,27 +20,6 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // If we get a 'configuration_loaded' event then we should definitely have the entityLockIcon
   $rootScope.$on('configuration_loaded', () => tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, configuration.locationCategories.entityLockIcon))
 
-  tileDataService.hasNeighbouringData = (mapLayers, zoom, tileX, tileY) => {
-    return true // TODO - Parag. Fix this for the new tile definitions
-    var hasAllNeighbouringData = true
-    for (var dx = -1; dx <= 1; ++dx) {
-      for (var dy = -1; dy <= 1; ++dy) {
-        var x = tileX + dx
-        var y = tileY + dy
-        Object.keys(mapLayers).forEach((mapLayerKey) => {
-          var mapLayer = mapLayers[mapLayerKey]
-          mapLayer.dataUrls.forEach((url) => {
-            var urlKey = url + `${zoom}/${x}/${y}.mvt`
-            var tileCacheKey = tileDataService.getTileCacheKey(urlKey)
-            var hasData = tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)
-            hasAllNeighbouringData = hasAllNeighbouringData && hasData
-          })
-        })
-      }
-    }
-    return hasAllNeighbouringData
-  }
-
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
       // We have one or multiple URLs where data is coming from, and we want a simple union of the results
