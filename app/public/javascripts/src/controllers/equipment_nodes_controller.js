@@ -52,7 +52,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
   }
 
-  // Creates a single map layer by substituting tileUrl parameters
+  // Creates a single map layer by substituting tileDefinition parameters
   var createSingleMapLayer = (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
 
     var tileDefinition = angular.copy($scope.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
