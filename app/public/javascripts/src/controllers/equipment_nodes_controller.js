@@ -75,6 +75,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     return {
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl, 
+      greyOutIconUrl: networkEquipment.greyOutIconUrl,
       renderMode: 'PRIMITIVE_FEATURES',   // Always render equipment nodes as primitives
       strokeStyle: networkEquipment.drawingOptions.strokeStyle,
       lineWidth: networkEquipment.drawingOptions.lineWidth || 2,

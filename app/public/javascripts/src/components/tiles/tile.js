@@ -421,7 +421,7 @@ class MapTileRenderer {
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     var entityImage = featureData.icon
-    
+
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
@@ -444,6 +444,10 @@ class MapTileRenderer {
           selectedListId = feature.properties.location_id
         }else if ( feature.properties.hasOwnProperty('id') ){
           selectedListId = feature.properties.id
+          //greyout an RT with hsiEanbled true 
+          if(feature.properties._data_type === 'equipment.dslam' && JSON.parse(feature.properties.hsiEnabled)) {
+            entityImage = featureData.greyOutIcon
+          }
         } 
       }
       
