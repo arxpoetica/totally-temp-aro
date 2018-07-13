@@ -9,8 +9,8 @@
         "displayName":"Global",
         "enumTypeURL":"",
         "displayDataType":"array[integer]",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"linkTags",
@@ -19,8 +19,8 @@
         "displayName":"Link Tags",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:service:tags:GeogTags}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -34,8 +34,8 @@
         "displayName":"Service Area Ids",
         "enumTypeURL":"",
         "displayDataType":"array[integer]",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"geographyTag",
@@ -44,8 +44,8 @@
         "displayName":"Geography Tag",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -59,8 +59,8 @@
         "displayName":"Days From",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"daysTo",
@@ -69,8 +69,8 @@
         "displayName":"Days To",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"equipmentId",
@@ -79,8 +79,8 @@
         "displayName":"Equipment Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -94,8 +94,8 @@
         "displayName":"Code",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"dataType",
@@ -105,8 +105,8 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"name",
@@ -115,8 +115,8 @@
         "displayName":"Name",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"geometry",
@@ -126,8 +126,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
-        "visible":false,
-        "editable":true
+        "editable":true,
+        "visible":false
       },
       {
         "propertyName":"attributes",
@@ -136,8 +136,8 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"source_id",
@@ -146,8 +146,8 @@
         "displayName":"Source Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"objectId",
@@ -156,8 +156,8 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -171,8 +171,8 @@
         "displayName":"Notes",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"existingEquipment",
@@ -181,8 +181,8 @@
         "displayName":"Existing Equipment",
         "enumTypeURL":"",
         "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment}]",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"plannedEquipment",
@@ -191,8 +191,8 @@
         "displayName":"Planned Equipment",
         "enumTypeURL":"",
         "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent}]",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"siteInfo",
@@ -201,8 +201,8 @@
         "displayName":"Site Info",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:node:SiteInfo}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -210,14 +210,25 @@
     "schemaReference":"urn:jsonschema:com:altvil:aro:service:feature:model:LocationFeature",
     "displayProperties":[
       {
+        "propertyName":"censusBlockId",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Census Block Id",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"integer",
+        "editable":false,
+        "visible":true
+      },
+      {
         "propertyName":"locationCategory",
         "levelOfDetail":0,
         "format":"",
         "displayName":"Location Category",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"dataType",
@@ -227,8 +238,8 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"tagMapping",
@@ -237,8 +248,8 @@
         "displayName":"Tag Mapping",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:service:tags:TagMapping}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"geometry",
@@ -248,8 +259,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
-        "visible":false,
-        "editable":true
+        "editable":true,
+        "visible":false
       },
       {
         "propertyName":"attributes",
@@ -258,8 +269,8 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"locked",
@@ -268,8 +279,8 @@
         "displayName":"Locked",
         "enumTypeURL":"",
         "displayDataType":"boolean",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"objectId",
@@ -278,8 +289,8 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -293,8 +304,8 @@
         "displayName":"Strength",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"minDown",
@@ -303,8 +314,8 @@
         "displayName":"Min Down",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"name",
@@ -313,8 +324,8 @@
         "displayName":"Name",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"description",
@@ -323,8 +334,8 @@
         "displayName":"Description",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"id",
@@ -333,8 +344,8 @@
         "displayName":"Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"maxDown",
@@ -343,8 +354,8 @@
         "displayName":"Max Down",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -358,8 +369,8 @@
         "displayName":"Subnet Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"boundary",
@@ -368,8 +379,8 @@
         "displayName":"Boundary",
         "enumTypeURL":"",
         "displayDataType":"any",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"deploymentType",
@@ -378,8 +389,8 @@
         "displayName":"Deployment Type",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"networkNodeType",
@@ -389,8 +400,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":false
+        "editable":false,
+        "visible":true
       },
       {
         "propertyName":"dataType",
@@ -400,8 +411,8 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"networkNodeEquipment",
@@ -410,8 +421,8 @@
         "displayName":"Network Node Equipment",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"geometry",
@@ -421,8 +432,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
-        "visible":false,
-        "editable":true
+        "editable":true,
+        "visible":false
       },
       {
         "propertyName":"attributes",
@@ -431,8 +442,8 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"objectId",
@@ -441,8 +452,8 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -456,8 +467,8 @@
         "displayName":"Deployment Type",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"product",
@@ -466,8 +477,8 @@
         "displayName":"Product",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:NetworkProductEntity}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"networkNodeType",
@@ -476,8 +487,8 @@
         "displayName":"Network Node Type",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"dataType",
@@ -487,8 +498,8 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"boundaryTypeId",
@@ -497,8 +508,8 @@
         "displayName":"Boundary Type Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"geometry",
@@ -508,8 +519,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
-        "visible":false,
-        "editable":true
+        "editable":true,
+        "visible":false
       },
       {
         "propertyName":"attributes",
@@ -518,8 +529,8 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"networkObjectId",
@@ -528,8 +539,8 @@
         "displayName":"Network Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"objectId",
@@ -538,8 +549,8 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -553,8 +564,8 @@
         "displayName":"Name",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"id",
@@ -563,8 +574,8 @@
         "displayName":"Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"productType",
@@ -573,8 +584,8 @@
         "displayName":"Product Type",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"speed",
@@ -583,8 +594,8 @@
         "displayName":"Speed",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:SpeedEntity}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -598,8 +609,8 @@
         "displayName":"Fiber Available",
         "enumTypeURL":"",
         "displayDataType":"boolean",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"address",
@@ -608,8 +619,29 @@
         "displayName":"Address",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
+      },
+      {
+        "propertyName":"hsiEnabled",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Hsi Enabled",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "editable":true,
+        "visible":true
+      },
+      {
+        "propertyName":"deploymentDate",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Deployment Date",
+        "enumEntityName":"",
+        "enumTypeURL":"",
+        "displayDataType":"date",
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"siteName",
@@ -619,8 +651,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"siteClli",
@@ -630,8 +662,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"dpiEnvironment",
@@ -640,8 +672,8 @@
         "displayName":"Dpi Environment",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"physicallyLinked",
@@ -650,8 +682,8 @@
         "displayName":"Physically Linked",
         "enumTypeURL":"",
         "displayDataType":"boolean",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"t1",
@@ -660,8 +692,8 @@
         "displayName":"T 1",
         "enumTypeURL":"",
         "displayDataType":"boolean",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"hsiOfficeCode",
@@ -670,8 +702,8 @@
         "displayName":"Hsi Office Code",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -685,19 +717,19 @@
         "displayName":"Quantity",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"code",
         "levelOfDetail":1,
         "format":"",
-        "displayName":"Code",
+        "displayName":"Provisional Equipment CLLI",
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"installCost",
@@ -706,8 +738,8 @@
         "displayName":"Install Cost",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"oneTimeCost",
@@ -716,29 +748,30 @@
         "displayName":"One Time Cost",
         "enumTypeURL":"",
         "displayDataType":"boolean",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"equipmentTypeCategoryId",
         "levelOfDetail":2,
         "format":"",
-        "displayName":"Equipment Type Category Id",
+        "displayName":"Equipment Type",
         "enumEntityName":"",
         "enumTypeURL":"equipment_category",
         "displayDataType":"enum",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"rank",
-        "levelOfDetail":0,
+        "levelOfDetail":2,
         "format":"",
         "displayName":"Rank",
+        "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"integer",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":false
       },
       {
         "propertyName":"subComponents",
@@ -747,8 +780,8 @@
         "displayName":"Sub Components",
         "enumTypeURL":"",
         "displayDataType":"array[object]",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"equipmentName",
@@ -758,19 +791,19 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"equipmentItemId",
         "levelOfDetail":2,
         "format":"",
-        "displayName":"Equipment Item Id",
+        "displayName":"Equipment Item",
         "enumEntityName":"",
         "enumTypeURL":"equipment?p1=${/networkNodeType}&p2=${equipmentTypeCategoryId}",
         "displayDataType":"enum",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"extendedAttributes",
@@ -779,8 +812,8 @@
         "displayName":"Extended Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"constructionCost",
@@ -790,8 +823,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   },
@@ -800,13 +833,14 @@
     "displayProperties":[
       {
         "propertyName":"code",
-        "levelOfDetail":0,
+        "levelOfDetail":2,
         "format":"",
-        "displayName":"Code",
+        "displayName":"Provisional Equipment CLLI",
+        "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"serialNumber",
@@ -815,8 +849,8 @@
         "displayName":"Serial Number",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"switchType",
@@ -825,19 +859,8 @@
         "displayName":"Switch Type",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
-      },
-      {
-        "propertyName":"equipmentCategoryId",
-        "levelOfDetail":2,
-        "format":"",
-        "displayName":"Equipment Category Id",
-        "enumEntityName":"",
-        "enumTypeURL":"equipment_category",
-        "displayDataType":"enum",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"latency",
@@ -846,8 +869,19 @@
         "displayName":"Latency",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
+      },
+      {
+        "propertyName":"equipmentTypeCategoryId",
+        "levelOfDetail":2,
+        "format":"",
+        "displayName":"Equipment Type",
+        "enumEntityName":"",
+        "enumTypeURL":"equipment_category",
+        "displayDataType":"enum",
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"maxSpeed",
@@ -856,8 +890,8 @@
         "displayName":"Max Speed",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"manufacturer",
@@ -866,8 +900,8 @@
         "displayName":"Manufacturer",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"marketableEquipments",
@@ -876,8 +910,8 @@
         "displayName":"Marketable Equipments",
         "enumTypeURL":"",
         "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment}]",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"deploymentDate",
@@ -887,8 +921,8 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"date",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"uplinkSpeed",
@@ -897,8 +931,8 @@
         "displayName":"Uplink Speed",
         "enumTypeURL":"",
         "displayDataType":"number",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"equipmentName",
@@ -907,8 +941,8 @@
         "displayName":"Equipment Name",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"modelNumber",
@@ -917,8 +951,8 @@
         "displayName":"Model Number",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"clliCode",
@@ -928,19 +962,19 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       },
       {
         "propertyName":"equipmentItemId",
         "levelOfDetail":2,
         "format":"",
-        "displayName":"Equipment Item Id",
+        "displayName":"Equipment Item",
         "enumEntityName":"",
         "enumTypeURL":"equipment?p1=${/networkNodeType}&p2=${equipmentTypeCategoryId}",
         "displayDataType":"enum",
-        "visible":true,
-        "editable":true
+        "editable":true,
+        "visible":true
       }
     ]
   }
