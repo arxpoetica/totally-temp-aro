@@ -6,6 +6,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
 
   var tileDataService = {}
   tileDataService.tileDataCache = {}
+  tileDataService.tileProviderCache = {}
   tileDataService.tileHtmlCache = {}  // A cache of HTML elements created. Used to prevent flicker.
   // Hold a map of layer keys to image urls (and image data once it is loaded)
   tileDataService.entityImageCache = {}
@@ -101,7 +102,6 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
 
   // Returns a promise that will (once it is resolved) deliver the tile data for this tile.
-  tileDataService.tileProviderCache = {}
   var getTileDataProviderCache = (tileDefinition, zoom, tileX, tileY) => {
     const tileId = `${zoom}-${tileX}-${tileY}`
     if (!tileDataService.tileProviderCache.hasOwnProperty(tileId)) {
@@ -363,6 +363,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
+    tileDataService.tileProviderCache = {}
     tileDataService.featuresToExclude = new Set()
     tileDataService.modifiedFeatures = {}
   }
