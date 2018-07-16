@@ -478,6 +478,7 @@ class MapObjectEditorController {
           var serviceFeature = result.data
           // ise featire's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
+          feature.deploymentType = serviceFeature.deploymentType
           return Promise.resolve(feature)
         })
       }
