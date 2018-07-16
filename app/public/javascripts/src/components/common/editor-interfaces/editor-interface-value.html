@@ -33,6 +33,10 @@
   <div ng-switch-when="datetime">
     {{ $ctrl.dateVal.toUTCString() }}
   </div>
+  <div ng-switch-when="enum">
+    {{$ctrl.getEnumSet();""}}
+    {{ $ctrl.enumVal }}
+  </div>
   <div ng-switch-default>
     {{ $ctrl.model }}
   </div>

@@ -11,6 +11,7 @@ class EditorInterfaceValueController {
     //if ("number" == this.displayProps.displayDataType){
     //  this.model = parseFloat(this.model)
     //}
+    this.enumVal = ""
     
     if ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType){
       this.dateVal = new Date(this.model)
@@ -22,6 +23,19 @@ class EditorInterfaceValueController {
     if ("enum" == this.displayProps.displayDataType && this.displayProps.enumTypeURL){
       AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
         this.enumSet = enumSet
+        //if (!this.model && this.enumSet.length > 0){
+        //  this.model = this.enumSet[0].id
+        //  this.onChange()
+        //}
+        for (let i=0; i<this.enumSet.length; i++){
+          if (this.enumSet[i].id == this.model){
+            this.enumVal = this.enumSet[i].description
+            break
+          }
+        }
+      }, (errorText) => {
+        console.log(errorText)
+        this.enumSet = []
       })
     }
   }

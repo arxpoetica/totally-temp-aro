@@ -770,11 +770,11 @@ class PlanEditorController {
     this.selectedMapObject = mapObject
     
     // debug 
-    //if (null != this.selectedMapObject){
-      //console.log( this.selectedMapObject )
-      //console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-      //console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
-    //}
+    if (null != this.selectedMapObject){
+      console.log( this.selectedMapObject )
+      console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
+      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
+    }
     
     this.$timeout()
   }

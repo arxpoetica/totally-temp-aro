@@ -33,7 +33,6 @@
     "small_businesses": {
       "show": true,
       "label": "Small Businesses",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/entity/",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -53,7 +52,6 @@
     "medium_businesses": {
       "show": true,
       "label": "Medium Businesses",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/medium/${tilePointTransform}/entity/",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -73,7 +71,6 @@
     "large_businesses": {
       "show": true,
       "label": "Large Businesses",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/large/${tilePointTransform}/entity/",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -93,7 +90,6 @@
     "household": {
       "show": true,
       "label": "Residential",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/household/${tilePointTransform}/entity/",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.household.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -113,7 +109,6 @@
     "celltower": {
       "show": true,
       "label": "Cell Sites",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/celltower/${tilePointTransform}/entity/",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.celltower.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -133,7 +128,6 @@
     "ethernet_lit_building": {
       "show": true,
       "label": "Ethernet Lit Buildings",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/ethernet_lit_building/",
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
       "zIndex": 6680,
@@ -146,7 +140,6 @@
     "lit_building": {
       "show": true,
       "label": "Fiber Lit Building",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/lit_building/",
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/lit_building.png",
       "zIndex": 6770,
@@ -159,7 +152,6 @@
     "tier_1": {
       "show": true,
       "label": "DNB Tier 1 (<1,000 ft from splice point)",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_1/",
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_1.png",
       "zIndex": 6860,
@@ -172,7 +164,6 @@
     "tier_2": {
       "show": true,
       "label": "DNB Tier 2 (1,000-3,000 ft)",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_2/",
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_2.png",
       "zIndex": 6950,
@@ -185,7 +176,6 @@
     "tier_3": {
       "show": true,
       "label": "DNB Tier 3 (>3,000 ft)",
-      "tileUrl": "/tile/v1/locations/tiles/${libraryId}/small/${tilePointTransform}/sales-entity/${locationType}/tier_3/",
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_3.png",
       "zIndex": 7040,

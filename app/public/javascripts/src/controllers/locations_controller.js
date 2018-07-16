@@ -96,17 +96,18 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                   // Location type is visible
                   var mapLayerKey = `${locationType.key}_${filter.name}_${selectedLocationLibrary.identifier}`
                   var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
-                  var url = locationType.tileUrl.replace('${tilePointTransform}', pointTransform)
-                  url = url.replace('${libraryId}', selectedLocationLibrary.identifier)
-                  url = url.replace('${locationType}', filter.name)
+                  var tileDefinition = angular.copy(locationType.tileDefinition)
+                  objectKeyReplace(tileDefinition, '${tilePointTransform}', pointTransform)
+                  objectKeyReplace(tileDefinition, '${libraryId}', selectedLocationLibrary.identifier)
+                  objectKeyReplace(tileDefinition, '${locationType}', filter.name)
 
                   if (pointTransform === 'aggregate') {
                     // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-                    mergedLayerDefinitions.push(url)
+                    mergedLayerDefinitions.push(tileDefinition)
                   } else {
                     // We want to create an individual layer
                     oldMapLayers[mapLayerKey] = {
-                      dataUrls: [url],
+                      tileDefinitions: [tileDefinition],
                       iconUrl: `${baseUrl}${filter.icon}`,
                       renderMode: 'PRIMITIVE_FEATURES',
                       zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<

@@ -6,6 +6,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
 
   var tileDataService = {}
   tileDataService.tileDataCache = {}
+  tileDataService.tileProviderCache = {}
   tileDataService.tileHtmlCache = {}  // A cache of HTML elements created. Used to prevent flicker.
   // Hold a map of layer keys to image urls (and image data once it is loaded)
   tileDataService.entityImageCache = {}
@@ -18,31 +19,6 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
   // If we get a 'configuration_loaded' event then we should definitely have the entityLockIcon
   $rootScope.$on('configuration_loaded', () => tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, configuration.locationCategories.entityLockIcon))
-
-  tileDataService.getTileCacheKey = (url) => {
-    return url  // Perhaps this should be hashed and shortened? Urls are long
-  }
-
-  tileDataService.hasNeighbouringData = (mapLayers, zoom, tileX, tileY) => {
-    return true // TODO - Parag. Fix this for the new tile definitions
-    var hasAllNeighbouringData = true
-    for (var dx = -1; dx <= 1; ++dx) {
-      for (var dy = -1; dy <= 1; ++dy) {
-        var x = tileX + dx
-        var y = tileY + dy
-        Object.keys(mapLayers).forEach((mapLayerKey) => {
-          var mapLayer = mapLayers[mapLayerKey]
-          mapLayer.dataUrls.forEach((url) => {
-            var urlKey = url + `${zoom}/${x}/${y}.mvt`
-            var tileCacheKey = tileDataService.getTileCacheKey(urlKey)
-            var hasData = tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)
-            hasAllNeighbouringData = hasAllNeighbouringData && hasData
-          })
-        })
-      }
-    }
-    return hasAllNeighbouringData
-  }
 
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
@@ -81,10 +57,10 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           var features = []
           for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
               let feature = layer.feature(iFeature)
-              //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
-              // if (layerKey.startsWith('v1.tiles.census_block.')){
-              //   formatCensusBlockData( feature )
-              // }
+              // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+              if (layerKey.startsWith('v1.tiles.census_block.')){
+                formatCensusBlockData( feature )
+              }
             features.push(feature)
           }
           layerToFeatures[layerKey] = features
@@ -105,7 +81,6 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
 
   // Returns a promise that will (once it is resolved) deliver the tile data for this tile.
-  tileDataService.tileProviderCache = {}
   var getTileDataProviderCache = (tileDefinition, zoom, tileX, tileY) => {
     const tileId = `${zoom}-${tileX}-${tileY}`
     if (!tileDataService.tileProviderCache.hasOwnProperty(tileId)) {
@@ -136,7 +111,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       var dataPromise = tileDataService.getMapData(postBody, zoom, tileX, tileY)
         .then((layerToFeatures) => {
           Object.keys(mapLayers).forEach((mapLayerKey) => {
-            const mapLayer = tileDataService.mapLayers[mapLayerKey]
+            const mapLayer = mapLayers[mapLayerKey]
             mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
               tileDataService.tileProviderCache[tileId][mapLayerTileDef.dataId] = Promise.resolve(layerToFeatures)
             })
@@ -144,8 +119,8 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           return tileDataService.tileProviderCache[tileId][tileDefinition.dataId]
         })
         .catch((err) => console.error(err))
-        Object.keys(tileDataService.mapLayers).forEach((mapLayerKey) => {
-          const mapLayer = tileDataService.mapLayers[mapLayerKey]
+        Object.keys(mapLayers).forEach((mapLayerKey) => {
+          const mapLayer = mapLayers[mapLayerKey]
           mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
             tileDataService.tileProviderCache[tileId][mapLayerTileDef.dataId] = dataPromise
           })
@@ -179,58 +154,6 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     }
   }
 
-  // var getTileDataSingleUrl = (url, zoom, tileX, tileY) => {
-  //   url += `${zoom}/${tileX}/${tileY}.mvt`
-  //   var tileCacheKey = tileDataService.getTileCacheKey(url)
-  //   if (!tileDataService.tileDataCache.hasOwnProperty(tileCacheKey)) {
-  //     // Tile data does not exist in cache. Get it from a server
-  //     tileDataService.tileDataCache[tileCacheKey] = new Promise((resolve, reject) => {
-
-  //       // Getting binary data from the server. Directly use XMLHttpRequest()
-  //       var oReq = new XMLHttpRequest()
-  //       oReq.open("GET", url, true);
-  //       oReq.responseType = "arraybuffer";
-
-  //       oReq.onload = function(oEvent) {
-  //         var arrayBuffer = oReq.response
-  //         // De-serialize the binary data into a VectorTile object
-  //         var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
-  //         // Save the features in a per-layer object
-  //         var layerToFeatures = {}
-  //         Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
-  //           var layer = mapboxVectorTile.layers[layerKey]
-  //           var features = []
-  //           for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-  //           	  let feature = layer.feature(iFeature)
-  //           	  //ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
-  //           	  if (layerKey.startsWith('v1.tiles.census_block.')){
-  //           		  formatCensusBlockData( feature )
-  //           	  }
-  //             features.push(feature)
-  //           }
-  //           layerToFeatures[layerKey] = features
-  //         })
-  //         tileDataService.tileDataCache[tileCacheKey] = {
-  //           layerToFeatures: layerToFeatures
-  //         }
-  //         resolve(tileDataService.tileDataCache[tileCacheKey])
-  //       }
-  //       oReq.onerror = function(error) { reject(error) }
-  //       oReq.onabort = function() { reject('XMLHttpRequest abort') }
-  //       oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
-        
-  //       oReq.addEventListener("loadend", function() {
-  //         uiNotificationService.removeNotification('main', 'getting tile data')
-  //       });
-        
-  //       uiNotificationService.addNotification('main', 'getting tile data')
-        
-  //       oReq.send()
-  //     })
-  //   }
-  //   return tileDataService.tileDataCache[tileCacheKey]
-  // }
-  
   var formatCensusBlockData = function(cBlock){
 	let sepA = ';'
 	let sepB = ':'
@@ -433,18 +356,38 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
+    tileDataService.tileProviderCache = {}
     tileDataService.featuresToExclude = new Set()
     tileDataService.modifiedFeatures = {}
   }
 
   // Clear only those entries in the tile data cache containing the specified keywords
   tileDataService.clearDataCacheContaining = (keywords) => {
-    Object.keys(tileDataService.tileDataCache).forEach((cacheKey) => {
-      var shouldDelete = false
-      keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
-      if (shouldDelete) {
-        delete tileDataService.tileDataCache[cacheKey]
-      }
+    // Clear data from the data cache
+    Object.keys(tileDataService.tileDataCache).forEach((tileId) => {
+      var singleTileCache = tileDataService.tileDataCache[tileId]
+      Object.keys(singleTileCache).forEach((cacheKey) => {
+        var shouldDelete = false
+        keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
+        if (shouldDelete) {
+          delete tileDataService.tileDataCache[tileId][cacheKey]
+        }
+      })
+    })
+
+    // Clear data from the data provider cache
+    Object.keys(tileDataService.tileProviderCache).forEach((tileId) => {
+      var singleTileProvider = tileDataService.tileProviderCache[tileId]
+      Object.keys(singleTileProvider).forEach((cacheKey) => {
+        var shouldDelete = false
+        keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
+        if (shouldDelete) {
+          // Delete the pointer to the promise. This kind of leaves a "dangling" set of data, since the
+          // promise will contain the data for this and for other layers. However, since we deleted
+          // the pointer to the promise, our code will never access that dangling data.
+          delete tileDataService.tileProviderCache[tileId][cacheKey]
+        }
+      })
     })
   }
 
