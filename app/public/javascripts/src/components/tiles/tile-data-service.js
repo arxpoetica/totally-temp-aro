@@ -197,12 +197,24 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           }
         }))
       }
+
+      var hasGreyedOutIcon = mapLayer.hasOwnProperty('greyOutIconUrl') && mapLayer.greyOutIconUrl !== undefined
+      if (hasGreyedOutIcon) {
+        promises.push(new Promise((resolve, reject) => {
+          var img = new Image()
+          img.src = mapLayer.greyOutIconUrl
+          img.onload = () => {
+            // Image has been loaded
+            resolve(img)
+          }
+        }))
+      }
       
       Promise.all(promises)
         .then((results) => {
           var allFeatures = []
-          var numDataResults = results.length - (hasIcon + hasSelectedIcon) // booleans are 0 or 1 so True + True = 2
-          
+          var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon) // booleans are 0 or 1 so True + True = 2
+
           for (var iResult = 0; iResult < numDataResults; ++iResult) {
             var result = results[iResult]
             var layerToFeatures = result
@@ -217,12 +229,14 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
           }
           
           if (hasIcon) {
-            tileData.icon = results[results.length - (hasIcon + hasSelectedIcon)]
+            tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon)]
           }
           if (hasSelectedIcon) {
-            tileData.selectedIcon = results[results.length - 1]
+            tileData.selectedIcon = results[results.length - ((hasIcon + hasGreyedOutIcon))]
           }
-          //console.log(tileData)
+          if (hasGreyedOutIcon) {
+            tileData.greyOutIcon = results[results.length - 1]
+          }
           resolve(tileData)
         })
     })
