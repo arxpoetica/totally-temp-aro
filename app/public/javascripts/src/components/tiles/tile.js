@@ -424,7 +424,9 @@ class MapTileRenderer {
         }else if ( feature.properties.hasOwnProperty('id') ){
           selectedListId = feature.properties.id
           //greyout an RT with hsiEanbled true for frontier client
-          if(config.ARO_CLIENT === 'frontier' && feature.properties._data_type === 'equipment.dslam' && JSON.parse(feature.properties.hsiEnabled)) {
+          if(config.ARO_CLIENT === 'frontier' && 
+            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam' )
+            && !JSON.parse(feature.properties.hsiEnabled)) {
             entityImage = featureData.greyOutIcon
           }
         } 

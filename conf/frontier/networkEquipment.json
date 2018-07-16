@@ -2,6 +2,7 @@
   "equipments": {
     "central_office": {
       "iconUrl": "/images/map_icons/frontier/central_office.png",
+      "greyOutIconUrl": "/images/map_icons/frontier/central_office_grey.png",
       "checked": true
     },
     "dslam": {
