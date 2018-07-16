@@ -444,11 +444,12 @@ class MapObjectEditorController {
       feature.isExistingObject = true
       feature.is_locked = event.locations[0].is_locked
       
-      featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/location/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+      featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
       .then((result) => {
         var serviceFeature = result.data
         // ise featire's coord NOT the event's coords
         feature.geometry.coordinates = serviceFeature.geometry.coordinates
+        feature.attributes = serviceFeature.attributes
         return Promise.resolve(feature)
       })
       
@@ -477,6 +478,7 @@ class MapObjectEditorController {
           var serviceFeature = result.data
           // ise featire's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
+          feature.deploymentType = serviceFeature.deploymentType
           return Promise.resolve(feature)
         })
       }
@@ -689,6 +691,7 @@ let mapObjectEditor = {
     mapContainerId: '@',  // The HTML element that contains the map
     getObjectIconUrl: '&',
     getObjectSelectedIconUrl: '&',
+    modifyingLibraryId: '<',  // Can be null, valid only if we are modifying locations
     deleteMode: '<',
     createObjectOnClick: '<',
     allowBoundaryCreation: '<',

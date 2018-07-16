@@ -137,8 +137,8 @@ class PlanEditorController {
         result.data.forEach((feature) => {
           const attributes = feature.attributes
           var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
-          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName,
-                                                     feature.networkNodeType, attributes.selectedEquipmentType, networkNodeEquipment)
+          const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
+                                                     attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
           this.objectIdToProperties[feature.objectId] = properties
         })
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
@@ -535,7 +535,7 @@ class PlanEditorController {
       },
       dataType: 'equipment', 
       networkNodeEquipment: objectProperties.networkNodeEquipment,
-      deploymentType: 'PLANNED'
+      deploymentType: objectProperties.deploymentType
     }
     return serviceFeature
   }
@@ -691,7 +691,7 @@ class PlanEditorController {
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
             this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
-                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment)
+                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
@@ -713,7 +713,7 @@ class PlanEditorController {
       } else {
         // nope it's new
         var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
-        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment)
+        this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
         this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
           .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
@@ -773,7 +773,7 @@ class PlanEditorController {
     if (null != this.selectedMapObject){
       console.log( this.selectedMapObject )
       console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
+      // console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
     }
     
     this.$timeout()

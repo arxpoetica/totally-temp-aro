@@ -1,5 +1,5 @@
 class EquipmentProperties {
-  constructor(siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment) {
+  constructor(siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment, deploymentType) {
     this.siteIdentifier = siteIdentifier || ''
     this.siteName = siteName || ''
     this.siteNetworkNodeType = siteNetworkNodeType
@@ -14,6 +14,7 @@ class EquipmentProperties {
     ]
     this.selectedEquipmentType = selectedEquipmentType || this.equipmentTypes[0]
     this.networkNodeEquipment = networkNodeEquipment || null
+    this.deploymentType = deploymentType || 'PLANNED'
     this.isDirty = false
   }
 }

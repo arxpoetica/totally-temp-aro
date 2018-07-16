@@ -25,11 +25,11 @@
         "lineTransform": "{lineTransform}"
       },
       "existing": {
-        "dataId": "v1.tiles.summary.{libraryId}.{networkNodeType}.point.{pointTransform}.entity",
-        "vtlType": "LibraryEquipmentPointLayer",
+        "dataId": "v1.tiles.fiber.competitive.{libraryId}.{lineTransform}.{fiberType}",
+        "vtlType": "ExistingFiberLayer",
         "libraryId": "{libraryId}",
-        "networkNodeType": "{networkNodeType}",
-        "pointTransform": "{pointTransform}"
+        "fiberType": "{fiberType}",
+        "lineTransform": "{lineTransform}"
       }
     }
   },
