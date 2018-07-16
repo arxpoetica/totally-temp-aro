@@ -48,6 +48,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     Object.keys(obj).forEach((key) => {
       if (typeof obj[key] === 'string') {
         obj[key] = obj[key].replace(searchText, replaceText)
+        obj[key] = obj[key].replace(searchText, replaceText)  // TODO: Parag - Do replaceAll correctly
       }
     })
   }
@@ -60,7 +61,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
-    objectKeyReplace(tileDefinition, '{boundaryTypeId}', state.selectedBoundaryType.id)
+    objectKeyReplace(tileDefinition, '{boundaryType}', state.selectedBoundaryType.id)
 
     if (networkEquipment.equipmentType === 'point') {
       var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
@@ -149,16 +150,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       }
     })
 
-    // // Hack to show copper in toolbar ruler options
-    // Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
-    //   if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
-    //     state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
-    //   } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
-    //     var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
-    //     index !== -1 && state.rulerActions.splice(index, 1)
-    //   }
-    // })
-    // createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, oldMapLayers, createdMapLayerKeys)
+    // Hack to show copper in toolbar ruler options
+    Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
+      if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
+        state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
+      } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
+        var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
+        index !== -1 && state.rulerActions.splice(index, 1)
+      }
+    })
+    createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, 'boundaries', oldMapLayers, createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)

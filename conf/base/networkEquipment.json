@@ -31,6 +31,22 @@
         "fiberType": "{fiberType}",
         "lineTransform": "{lineTransform}"
       }
+    },
+    "boundaries": {
+      "planned": {
+        "dataId": "v1.plan.{rootPlanId}.tiles.boundary.{boundaryType}.point.{polygonTransform}.{polygonTransform}",
+        "vtlType": "BoundaryPointLayer",
+        "rootPlanId": "{rootPlanId}",
+        "boundaryType": "{boundaryType}",
+        "pointTransform": "{polygonTransform}"
+      },
+      "existing": {
+        "dataId": "v1.library.{libraryId}.tiles.boundary.{boundaryType}.point.{polygonTransform}.{polygonTransform}",
+        "vtlType": "ExistingBoundaryPointLayer",
+        "pointTransform": "{polygonTransform}",
+        "boundaryType": "{boundaryType}",
+        "libraryId": "{libraryId}"
+      }
     }
   },
   "equipments": {
@@ -258,7 +274,7 @@
         "opacity": 0.15
       }
   },
-   "fiveg_coverage": {
+  "fiveg_coverage": {
       "label": "5G Coverage",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
@@ -273,7 +289,7 @@
       "isequipment": true,
       "can_view": ["admin"]
     }
-},
+  },
   "tileCacheKeywords": [
     "central_office",
     "fiber_distribution_hub",
