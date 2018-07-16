@@ -1,8 +1,8 @@
 class LocationProperties {
-  constructor(isLocked) {
+  constructor(isLocked, numberOfLocations = 1) {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
-    this.numberOfLocations = 1
+    this.numberOfLocations = numberOfLocations
     this.isLocked = isLocked
     this.isDirty = false
   }
@@ -17,6 +17,7 @@ class LocationEditorController {
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.currentTransaction = null
+    this.lastUsedNumberOfLocations = 1
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
   }
 
@@ -146,6 +147,12 @@ class LocationEditorController {
     })
   }
 
+  // Sets the last-used number-of-locations property so we can use it for new locations
+  setLastUsedNumberOfLocations(newValue) {
+    console.log(newValue)
+    this.lastUsedNumberOfLocations = newValue
+  }
+
   // Marks the properties of the selected location as dirty (changed).
   markSelectedLocationPropertiesDirty() {
     if (this.selectedMapObject) {
@@ -187,7 +194,11 @@ class LocationEditorController {
   }
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.is_locked)
+    var numberOfLocations = this.lastUsedNumberOfLocations
+    if (feature.attributes && feature.attributes.number_of_households) {
+      numberOfLocations = +feature.attributes.number_of_households
+    }
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.is_locked, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
