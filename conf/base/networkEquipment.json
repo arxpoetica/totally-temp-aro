@@ -53,7 +53,6 @@
       "networkNodeType": "dslam",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
-      "greyOutIconUrl": "/images/map_icons/aro/service_layer_wirecenter.png",
       "selectedIconUrl": "/images/map_icons/aro/remote_terminal.png",
       "aggregateZoomThreshold": "10",
       "equipmentType": "point",

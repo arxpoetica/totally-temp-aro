@@ -6,6 +6,7 @@
     },
     "dslam": {
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
+      "greyOutIconUrl": "/images/map_icons/aro/remote_terminal_grey.png",
       "checked": true
     },
     "fiber_distribution_hub": {
