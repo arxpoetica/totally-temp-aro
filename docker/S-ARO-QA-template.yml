@@ -97,6 +97,9 @@ Parameters:
   GoogleMapsApiKey:
     Type: String
     Default: ""
+  GoogleMapsIpKey:
+    Type: String
+    Default: ""
   GithubSshKey:
     Type: String
   RdsFlag:

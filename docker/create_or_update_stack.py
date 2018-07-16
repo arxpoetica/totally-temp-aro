@@ -65,6 +65,8 @@ db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
 db_database = os.environ.get('ARO_APP_DB_DATABASE') or 'aro'
 docker_pass = os.environ.get('DOCKER_PASS')
+google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
+google_maps_ip_key = os.environ.get('GOOGLE_MAPS_IP_KEY')
 github_ssh_key = os.environ['ARO_APP_OPSWORKS_SSH_KEY']
 aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
 ecr_uri_root = os.environ.get('ECR_URI_ROOT')
@@ -202,6 +204,8 @@ def _set_environment():
             { 'Key': 'aro_client', 'Value': str(aro_client), 'Secure': False },
             { 'Key': 'APP_BASE_URL', 'Value': str(app_base_url), 'Secure': False },
             { 'Key': 'AWS_REGION', 'Value': "us-east-1", 'Secure': False },
+            { 'Key': 'GOOGLE_MAPS_API_KEY', 'Value': str(google_maps_api_key), 'Secure': True },
+            { 'Key': 'GOOGLE_MAPS_IP_KEY', 'Value': str(google_maps_ip_key), 'Secure': True },
             { 'Key': 'ecr_uri_root', 'Value': str(ecr_uri_root), 'Secure': False } ]
 
 
