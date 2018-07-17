@@ -55,7 +55,10 @@
 	    <!-- 
 	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" display-props="$ctrl.selectedEquipmentInfoDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
 	    -->
-	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" is-edit="false"></editor-interface-tree>
+	    <editor-interface-tree 
+	      object-to-view="$ctrl.selectedEquipmentInfo" 
+	      root-meta-data="{'networkNodeType':$ctrl.networkNodeType}"
+	      is-edit="false"></editor-interface-tree>
       
 	  </div>
 	</div>

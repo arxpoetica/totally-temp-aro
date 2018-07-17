@@ -651,7 +651,7 @@ class PlanEditorController {
   
   // ToDo: change this out for a dynamic version 
   getNewListItem(type){
-    console.log(type)
+    //console.log(type)
     
     if ('plannedEquipment' == type || 'subComponents' == type){
       return new EquipmentComponent()
@@ -773,7 +773,7 @@ class PlanEditorController {
     if (null != this.selectedMapObject){
       console.log( this.selectedMapObject )
       console.log( this.objectIdToProperties[this.selectedMapObject.objectId] )
-      // console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
+      console.log( this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.getDisplayProperties() )
     }
     
     this.$timeout()
