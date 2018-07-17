@@ -57,6 +57,10 @@
         "type":"object",
         "id":"urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
         "properties":{
+          "deploymentDate":{
+            "type":"integer",
+            "format":"utc-millisec"
+          },
           "siteClli":{
             "type":"string"
           },
@@ -72,10 +76,13 @@
           "hsiOfficeCode":{
             "type":"string"
           },
-          "fiberAvailable":{
+          "hsiEnabled":{
             "type":"boolean"
           },
           "t1":{
+            "type":"boolean"
+          },
+          "fiberAvailable":{
             "type":"boolean"
           },
           "physicallyLinked":{
@@ -89,7 +96,7 @@
           "type":"object",
           "id":"urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
           "properties":{
-            "equipmentCategoryId":{
+            "equipmentTypeCategoryId":{
               "type":"integer"
             },
             "equipmentItemId":{
@@ -301,6 +308,9 @@
           }
         }
       },
+      "censusBlockId":{
+        "type":"integer"
+      },
       "locked":{
         "type":"boolean"
       }
@@ -423,6 +433,10 @@
     "type":"object",
     "id":"urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
     "properties":{
+      "deploymentDate":{
+        "type":"integer",
+        "format":"utc-millisec"
+      },
       "siteClli":{
         "type":"string"
       },
@@ -438,10 +452,13 @@
       "hsiOfficeCode":{
         "type":"string"
       },
-      "fiberAvailable":{
+      "hsiEnabled":{
         "type":"boolean"
       },
       "t1":{
+        "type":"boolean"
+      },
+      "fiberAvailable":{
         "type":"boolean"
       },
       "physicallyLinked":{
@@ -660,6 +677,10 @@
             "type":"object",
             "id":"urn:jsonschema:com:altvil:aro:model:node:SiteInfo",
             "properties":{
+              "deploymentDate":{
+                "type":"integer",
+                "format":"utc-millisec"
+              },
               "siteClli":{
                 "type":"string"
               },
@@ -675,10 +696,13 @@
               "hsiOfficeCode":{
                 "type":"string"
               },
-              "fiberAvailable":{
+              "hsiEnabled":{
                 "type":"boolean"
               },
               "t1":{
+                "type":"boolean"
+              },
+              "fiberAvailable":{
                 "type":"boolean"
               },
               "physicallyLinked":{
@@ -692,7 +716,7 @@
               "type":"object",
               "id":"urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
               "properties":{
-                "equipmentCategoryId":{
+                "equipmentTypeCategoryId":{
                   "type":"integer"
                 },
                 "equipmentItemId":{
@@ -827,7 +851,7 @@
     "type":"object",
     "id":"urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment",
     "properties":{
-      "equipmentCategoryId":{
+      "equipmentTypeCategoryId":{
         "type":"integer"
       },
       "equipmentItemId":{
