@@ -21,9 +21,13 @@ class ClassGenerator {
     // Create a map of type URN to its display properties
     var classMetas = require('./typesmeta.json')
     var typeToDisplayProperties = {}
-    classMetas.forEach((classMeta) => typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties)
+    var typeToOrderedPropertyNames = {}
+    classMetas.forEach((classMeta) => {
+      typeToDisplayProperties[classMeta.schemaReference] = classMeta.displayProperties
+      typeToOrderedPropertyNames[classMeta.schemaReference] = classMeta.orderedPropertyNames
+    })
     var typeDefinitions = require('./types.json')
-    typeDefinitions.forEach((typeDefinition) => this.buildTypeSourceCode(typeDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties))
+    typeDefinitions.forEach((typeDefinition) => this.buildTypeSourceCode(typeDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties, typeToOrderedPropertyNames))
 
     var referencedTypes = new Set()
     typeDefinitions.forEach((typeDefinition) => this.getAllTypes(typeDefinition, referencedTypes))
@@ -62,6 +66,24 @@ class ClassGenerator {
       return primitives.indexOf(input) >= 0
     })
     Handlebars.registerHelper('toJSON', (input) => JSON.stringify(input, null, 2))
+    Handlebars.registerHelper('toJSONByOrder', (input, propOrder) => {
+      var prepend = []
+      for (var orderI=0; orderI<propOrder.length; orderI++){
+        var propName = propOrder[orderI]
+        var propIndex = -1
+        for (var inputI=0; inputI<input.length; inputI++){
+          if (propName == input[inputI].propertyName){
+            propIndex = inputI
+            break
+          }
+        }
+        if (propIndex > -1){
+          prepend.push( input.splice(propIndex, 1)[0] )
+        }
+      }
+      input = prepend.concat(input)
+      return JSON.stringify(input, null, 2)
+    })
     // Helper to detect if the object is a map (Java Map, or Javascript POJO)
     Handlebars.registerHelper('isMapObject', (input) => this.isMapObject(input))
     Handlebars.registerHelper('isAnyObject', (input) => input.type === 'any')
@@ -186,19 +208,20 @@ class ClassGenerator {
   }
 
   // Builds the source code for the specified type
-  static buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties) {
+  static buildTypeSourceCode(classDefinition, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties, typeToOrderedPropertyNames) {
 
     var typeContainer = this.getTypeContainer(classDefinition)
     if (typeContainer && typeContainer.hasOwnProperty('id') && !typeToSourceCode.hasOwnProperty(typeContainer.id)) {
       // Build the source for this class
       typeToSourceCode[typeContainer.id] = handlebarsCompiler({
         classDef: typeContainer,
-        display: typeToDisplayProperties[typeContainer.id]
+        display: typeToDisplayProperties[typeContainer.id], 
+        propOrder: typeToOrderedPropertyNames[typeContainer.id]
       })
       if (typeContainer.properties) {
         Object.keys(typeContainer.properties).forEach((propertyKey) => {
           const property = typeContainer.properties[propertyKey]
-          this.buildTypeSourceCode(property, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties)
+          this.buildTypeSourceCode(property, handlebarsCompiler, typeToSourceCode, typeToDisplayProperties, typeToOrderedPropertyNames)
         })
       }
     }

@@ -57,7 +57,7 @@ class {{classNameExtractor this.classDef}} {
   }
 
   static buildDisplayProperties() {
-    this.displayProperties = {{{toJSON display}}}
+    this.displayProperties = {{{toJSONByOrder display propOrder}}}
   }
 
   {{!-- A static function that will return details on how to display properties of this class --}}

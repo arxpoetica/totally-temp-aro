@@ -684,9 +684,9 @@
       "dpiEnvironment",
       "hsiOfficeCode",
       "hsiEnabled",
-      "physicallyLinked",
       "t1",
-      "fiberAvailable"
+      "fiberAvailable",
+      "physicallyLinked"
     ],
     "displayProperties":[
       {
@@ -763,16 +763,6 @@
         "visible":true
       },
       {
-        "propertyName":"physicallyLinked",
-        "levelOfDetail":0,
-        "format":"",
-        "displayName":"Physically Linked",
-        "enumTypeURL":"",
-        "displayDataType":"boolean",
-        "editable":true,
-        "visible":true
-      },
-      {
         "propertyName":"t1",
         "levelOfDetail":0,
         "format":"",
@@ -791,28 +781,38 @@
         "displayDataType":"boolean",
         "editable":true,
         "visible":true
+      },
+      {
+        "propertyName":"physicallyLinked",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Physically Linked",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "editable":true,
+        "visible":true
       }
     ]
   },
   {
     "schemaReference":"urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent",
     "orderedPropertyNames":[
+      "code",
+      "equipmentName",
+      "quantity",
       "equipmentTypeCategoryId",
       "equipmentItemId",
-      "quantity",
       "constructionCost",
       "installCost",
-      "rank",
-      "equipmentName",
-      "code",
-      "extendedAttributes",
+      "oneTimeCost",
       "subComponents",
-      "oneTimeCost"
+      "extendedAttributes",
+      "rank"
     ],
     "displayProperties":[
       {
         "propertyName":"equipmentTypeCategoryId",
-        "levelOfDetail":2,
+        "levelOfDetail":1,
         "format":"",
         "displayName":"Equipment Type",
         "enumEntityName":"",
@@ -823,7 +823,7 @@
       },
       {
         "propertyName":"equipmentItemId",
-        "levelOfDetail":2,
+        "levelOfDetail":1,
         "format":"",
         "displayName":"Equipment Item",
         "enumEntityName":"",
@@ -834,9 +834,10 @@
       },
       {
         "propertyName":"quantity",
-        "levelOfDetail":0,
+        "levelOfDetail":1,
         "format":"",
         "displayName":"Quantity",
+        "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"number",
         "editable":true,
@@ -844,7 +845,7 @@
       },
       {
         "propertyName":"constructionCost",
-        "levelOfDetail":1,
+        "levelOfDetail":2,
         "format":"",
         "displayName":"Cost",
         "enumEntityName":"",
