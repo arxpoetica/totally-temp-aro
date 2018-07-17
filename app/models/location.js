@@ -395,7 +395,7 @@ module.exports = class Location {
         locationInfo = _location
         locationSources = {} 
         var hhSources = `
-            SELECT array_agg(source_id) as source_ids FROM households
+            SELECT array_agg(object_id) as object_ids FROM households
             WHERE location_id=$1
         `
         var hhSourceIds = database.findOne(hhSources, [location_id])
@@ -404,7 +404,7 @@ module.exports = class Location {
           })
 
         var bizSources = `
-          SELECT array_remove(array_agg(source_id), null) as source_ids FROM businesses
+          SELECT array_remove(array_agg(object_id), null) as object_ids FROM businesses
           WHERE location_id=$1
         `
         var bizSourceIds = database.findOne(bizSources, [location_id])
@@ -413,7 +413,7 @@ module.exports = class Location {
           })
 
         var towerSources = `
-          SELECT array_agg(source_id) as source_ids FROM towers
+          SELECT array_agg(object_id) as object_ids FROM towers
           WHERE location_id=$1
         `
         var towerSourceIds = database.findOne(towerSources, [location_id])

@@ -29,7 +29,7 @@ let viewMode = {
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
         <location-detail ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                                && ($ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO)&&(configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO].show)">
+                                && (configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO].show)">
         </location-detail>
       </accordion-panel-contents>
 

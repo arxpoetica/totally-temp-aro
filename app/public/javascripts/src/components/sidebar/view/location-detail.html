@@ -16,7 +16,6 @@
   #show-source {
     overflow: auto;
     max-height: 80px;
-    padding-left: 30px !important;
   }
 
   #seperator {
@@ -29,6 +28,10 @@
 
   .loc_attributes_container table {
     font-size: 10px;
+  }
+
+  .indent-1 {
+    padding-left: 20px !important;
   }
 </style>
 
@@ -82,14 +85,14 @@
         </td>
       </tr>
 
-      <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.source_ids && $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.source_ids.length > 0">
-        <td></td>
+      <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids.length > 0">
+        <td class="indent-1">objectIds</td>
         <td>
           <span>
                 <div id="show-source">
                   <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
                     <li class="item"
-                        ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.source_ids track by $index">
+                        ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids track by $index">
                       {{ target }}
                     </li>
                   </ul>
@@ -105,12 +108,12 @@
         </td>
       </tr>
 
-      <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids && $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids.length > 0">
-        <td>{{$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids.length}}</td>
+      <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids.length > 0">
+        <td class="indent-1">objectIds</td>
         <td>
           <div id="show-source">
             <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
-              <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.source_ids track by $index">
+              <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids track by $index">
                 {{ target }}
               </li>
             </ul>
@@ -124,13 +127,12 @@
           {{$ctrl.selectedLocationInfo.number_of_towers}}
         </td>
       </tr>
-      <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.source_ids && $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.source_ids.length > 0"
-        style="list-style-type:none; padding:0; margin-bottom: 0px;">
-        <td></td>
+      <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids.length > 0">
+        <td class="indent-1">objectIds</td>
         <td>
           <div id="show-source">
-            <ul>
-              <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.source_ids track by $index">
+            <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
+              <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids track by $index">
                 {{ target }}
               </li>
             </ul>
