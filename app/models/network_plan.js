@@ -909,89 +909,37 @@ module.exports = class NetworkPlan {
     return database.query(sql, [text.toLowerCase()])
   }
 
-  static searchAddresses(planId, userId, text) {
-
-    // First get the selected service layer(s) from the plan data selection
-    const textToSearch = text || ''
-    const serviceLayerRequestParams = {
-      method: 'GET',
-      url: `${config.aro_service_url}/v1/plan/${planId}/configuration?user_id=${userId}`,
-      json: true
+  static searchAddresses(text) {
+    if (!text || (typeof text !== 'string')) {
+      console.warn(`Search requested for empty or invalid text - ${text}`)
+      return Promise.resolve([])
     }
-    return models.AROService.request(serviceLayerRequestParams)
-      .then((result) => {
-        var serviceLayerIds = []
-        const serviceLayerGroup = result.configurationItems.filter((item) => item.dataType === 'service_layer')[0]
-        serviceLayerGroup.libraryItems.forEach((item) => serviceLayerIds.push(item.identifier))
-        var sql = `
-          SELECT
-            code AS name,
-            ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
-            ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
-          FROM client.service_area
-          WHERE service_layer_id = (
-            SELECT id FROM client.service_layer WHERE id IN ($3)
-          )
-          AND lower(unaccent(code)) LIKE lower(unaccent($1))
-    
-          UNION ALL
-    
-          SELECT
-            name,
-            ST_AsGeoJSON(ST_centroid(geom))::json AS centroid,
-            ST_AsGeoJSON(ST_envelope(geom))::json AS bounds
-          FROM aro.businesses
-          WHERE to_tsvector('english', name) @@ plainto_tsquery($2)
-    
-          ORDER BY name ASC
-          LIMIT 100
-        `
-        var wirecenters = database.query(sql, [`%${textToSearch}%`, textToSearch.toLowerCase(), serviceLayerIds])
-        var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(textToSearch)
-        url = process.env.GOOGLE_MAPS_API_IP_KEY ? url + `&key=${process.env.GOOGLE_MAPS_API_IP_KEY}` : url
-        console.log('*** Debugging google maps keys ***')
-        console.log(process.env.GOOGLE_MAPS_API_KEY)
-        console.log(process.env.GOOGLE_MAPS_API_IP_KEY)
-        console.log(process.env.GOOGLE_MAPS_IP_KEY)
-        console.log(`Google maps url: ${url}`)
-        var addresses = textToSearch.length > 0
-                        ? request({ url: url, json: true })
-                        : Promise.resolve(null)
-        return Promise.all([wirecenters, addresses])
 
-      })
-      .then((results) => {
-        var latlngSearch = textToSearch && textToSearch.split(',')
-        var latLngText
-        if (this.inrange(-90,latlngSearch[0],90) && this.inrange(-180,latlngSearch[1],180)) {
-          latLngText = {
-            name: textToSearch,
-            type: 'latlng',
-            centroid: {
-              type: 'Point',
-              coordinates: [+latlngSearch[1], +latlngSearch[0]]
-            }
-          }
-        }
-        var wirecenters = results[0]
-        if (!results[1]) return wirecenters
-        var addresses = results[1][1].results.map((item) => {
-          var ne = item.geometry.viewport.northeast
-          var sw = item.geometry.viewport.southwest
-          return {
-            name: item.formatted_address,
-            centroid: {
-              type: 'Point',
-              coordinates: [item.geometry.location.lng, item.geometry.location.lat]
-            },
-            bounds: {
-              type: 'Polygon',
-              coordinates: [[[ne.lng, ne.lat], [ne.lng, sw.lat], [sw.lng, sw.lat], [sw.lng, ne.lat], [ne.lng, ne.lat]]
-            ]}
-          }
+    // Regex for checking if the search expression is a valid "latitude, longitude". From https://stackoverflow.com/a/18690202
+    if (text.indexOf(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/) >= 0) {
+      // This is a valid latitude/longitude search expression
+      return [{
+        type: 'latlng',
+        displayText: text,
+        value: text
+      }]
+    } else {
+      // Ask google to predict what the responses may be
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${process.env.GOOGLE_MAPS_API_IP_KEY}`
+      console.log(`Getting autocomplete results from ${url}`)
+      return request({url: url, json: true})
+        .then((result) => {
+          var compressedResults = []
+          result[1].predictions.forEach((item) => {
+            compressedResults.push({
+              type: 'placeId',
+              value: item.place_id,
+              displayText: item.description
+            })
+          })
+          return compressedResults
         })
-        return latLngText ? addresses.concat(wirecenters).concat(latLngText) : addresses.concat(wirecenters)
-      })
+    }
   }
 
   static _callService (req) {
