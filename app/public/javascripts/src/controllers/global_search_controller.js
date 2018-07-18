@@ -25,9 +25,6 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     searchControl = $('#global-search-toolbutton .select2')
     searchControl.select2({
       placeholder: 'Search an address, city, or state', // config.ui.default_form_values.create_plan.select_area_text,
-      // initSelection : function (select, callback) {
-      //   callback($scope.firstLocation)
-      // },
       ajax: {
         url: `/search/addresses`,
         dataType: 'json',
