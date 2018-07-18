@@ -136,10 +136,9 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/search/addresses/:planId', (request, response, next) => {
+  api.get('/search/addresses', (request, response, next) => {
     var text = request.query.text
-    const planId = request.params.planId
-    models.NetworkPlan.searchAddresses(planId, request.user.id, text)
+    models.NetworkPlan.searchAddresses(text)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -1557,7 +1557,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((result) => {
-      service.setPlan(result.data)
+      const plan = result.data
+      service.setPlan(plan)
+      service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
+      service.requestSetMapZoom.next(plan.zoomIndex)
     })
     .catch((err) => console.error(err))
   }
