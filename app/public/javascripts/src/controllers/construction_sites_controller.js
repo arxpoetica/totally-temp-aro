@@ -39,7 +39,12 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
     libraryId: 2,
     aggregateZoomThreshold: 15,
     visible: false,
-    api_endpoint: '/tile/v1/edge/tiles/${libraryId}/${lineTransform}/',
+    tileDefinition: {
+      dataId: 'v1.tiles.edge.{libraryId}.{transform}',
+      vtlType: 'EdgeLayer',
+      libraryId: '{libraryId}',
+      transform: '{transform}'
+    },
     threshold: 12,
     reload: 'always'
   }
@@ -51,28 +56,36 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
   }
 
   // When the map zoom changes, map layers can change
-  $rootScope.$on('map_zoom_changed', updateRoadMapLayers)
+  $rootScope.$on('map_zoom_changed', updateMapLayers)
   
   $scope.toggleRoadLayer = () => {
-    updateRoadMapLayers()
+    updateMapLayers()
   }
 
+  // Replaces any occurrences of searchText by replaceText in the keys of an object
+  var objectKeyReplace = (obj, searchText, replaceText) => {
+    Object.keys(obj).forEach((key) => {
+      if (typeof obj[key] === 'string') {
+        obj[key] = obj[key].replace(searchText, replaceText)
+      }
+    })
+  }
+  
   // Creates map layers based on selection in the UI
-  var createdRoadMapLayerKeys = new Set()
-  var updateRoadMapLayers = () => {
+  var createdMapLayerKeys = new Set()
+  var updateMapLayers = () => {
 
     // Make a copy of the state mapLayers. We will update this
-    var oldRoadMapLayers = angular.copy(state.mapLayers.getValue())
+    var oldMapLayers = angular.copy(state.mapLayers.getValue())
 
     // Remove all the map layers previously created by this controller
-    createdRoadMapLayerKeys.forEach((createdRoadMapLayerKey) => {
-      delete oldRoadMapLayers[createdRoadMapLayerKey]
+    createdMapLayerKeys.forEach((createdRoadMapLayerKey) => {
+      delete oldMapLayers[createdRoadMapLayerKey]
     })
 
-    createdRoadMapLayerKeys.clear()
+    createdMapLayerKeys.clear()
 
     // Hold a list of layers that we want merged
-    var mergedLayerUrls = []
     var layer = $scope.roadLayer;
     var selectedEdgeLibraries = state.dataItems && state.dataItems.edge && state.dataItems.edge.selectedLibraryItems
     
@@ -83,60 +96,33 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
         var pointTransform = (mapZoom > layer.aggregateZoomThreshold) ? 'select' : 'smooth_relative'
         var mapLayerKey = `${pointTransform}_${layer.type}_${selectedEdgeLibrary.identifier}`
 
-        var url = layer.api_endpoint.replace('${lineTransform}', pointTransform)
-        url = url.replace('${libraryId}', selectedEdgeLibrary.identifier)
+        var tileDefinition = angular.copy(layer.tileDefinition)
+        objectKeyReplace(tileDefinition, '{libraryId}', selectedEdgeLibrary.identifier)
+        objectKeyReplace(tileDefinition, '{transform}', pointTransform)
 
-        if (pointTransform === 'smooth_relative') {
-          // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-          mergedLayerUrls.push(url)
-        } else {
-          // We want to create an individual layer
-          oldRoadMapLayers[mapLayerKey] = {
-            dataUrls: [url],
-            renderMode: 'PRIMITIVE_FEATURES',
-            selectable: true,
-            strokeStyle: layer.style_options.normal.strokeColor,
-            lineWidth: layer.style_options.normal.strokeWeight,
-            highlightStyle: {
-              lineWidth: layer.style_options.highlight.strokeWeight,
-              strokeStyle: layer.style_options.highlight.strokeColor
-            },
-            fillStyle: "transparent",
-            zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-            opacity: 0.7
-          }
-          createdRoadMapLayerKeys.add(mapLayerKey)
+        oldMapLayers[mapLayerKey] = {
+          tileDefinitions: [tileDefinition],
+          renderMode: 'PRIMITIVE_FEATURES',
+          selectable: true,
+          strokeStyle: layer.style_options.normal.strokeColor,
+          lineWidth: layer.style_options.normal.strokeWeight,
+          highlightStyle: {
+            lineWidth: layer.style_options.highlight.strokeWeight,
+            strokeStyle: layer.style_options.highlight.strokeColor
+          },
+          fillStyle: "transparent",
+          zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+          opacity: 0.7
         }
-
-        if (mergedLayerUrls.length > 0) {
-          // We have some business layers that need to be merged into one
-          // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
-          oldRoadMapLayers[mapLayerKey] = {
-            dataUrls: mergedLayerUrls,
-            renderMode: 'HEATMAP',
-            selectable: true,
-            aggregateMode: 'FLATTEN',
-            strokeStyle: layer.style_options.normal.strokeColor,
-            lineWidth: layer.style_options.normal.strokeWeight,
-            highlightStyle: {
-              lineWidth: layer.style_options.highlight.strokeWeight,
-              strokeStyle: layer.style_options.highlight.strokeColor
-            },
-            fillStyle: "transparent",
-            zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-            opacity: 0.7
-          }
-          createdRoadMapLayerKeys.add(mapLayerKey)
-        }
+        createdMapLayerKeys.add(mapLayerKey)
       })
     }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
-    state.mapLayers.next(oldRoadMapLayers)
+    state.mapLayers.next(oldMapLayers)
   }
 
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
-  .subscribe((newValue) => updateRoadMapLayers())
-
+    .subscribe((newValue) => updateMapLayers())
 }])
