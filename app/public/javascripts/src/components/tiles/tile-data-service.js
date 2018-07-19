@@ -3,7 +3,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
   var VectorTile = require('vector-tile').VectorTile
   var Protobuf = require('pbf')
-  var queueDefinition = require('async').queue
+  var AsyncQueue = require('async').queue
 
   var tileDataService = {}
   tileDataService.tileDataCache = {}
@@ -19,7 +19,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // and the app appears unresponsive until all vector tiles are loaded. To get around this, we are going to limit the
   // number of concurrent vector tiles requests, so as to keep at least 1 "slot" open for other quick  aro-service requests.
   const MAX_CONCURRENT_VECTOR_TILE_REQUESTS = 5
-  tileDataService.httpThrottle = new queueDefinition((task, callback) => {
+  tileDataService.httpThrottle = new AsyncQueue((task, callback) => {
     // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
     task()
       .then((result) => callback({ status: 'success', data: result }))
