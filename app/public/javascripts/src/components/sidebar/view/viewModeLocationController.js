@@ -18,6 +18,8 @@ class ViewModeLocationController {
       //In ruler mode click should not perform any view action's
       if(this.state.selectedDisplayMode.getValue() === state.displayModes.VIEW && 
         this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.SINGLE_PLAN_TARGET &&
+        //Don't open location view mode when in location edit view
+        this.state.activeViewModePanel != this.state.viewModePanels.EDIT_LOCATIONS &&
         !this.state.isRulerEnabled) {
       var locationsList = []
       if (options.hasOwnProperty('locations')) locationsList = options.locations
