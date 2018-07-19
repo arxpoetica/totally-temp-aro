@@ -1,8 +1,9 @@
 app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationService', ($rootScope, configuration, uiNotificationService) => {
 
-  // IMPORTANT: The vector-tile and pbf bundles must have been included before this point
+  // IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
   var VectorTile = require('vector-tile').VectorTile
   var Protobuf = require('pbf')
+  var AsyncQueue = require('async').queue
 
   var tileDataService = {}
   tileDataService.tileDataCache = {}
@@ -12,6 +13,18 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   tileDataService.entityImageCache = {}
   tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
   tileDataService.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
+
+  // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
+  // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
+  // and the app appears unresponsive until all vector tiles are loaded. To get around this, we are going to limit the
+  // number of concurrent vector tiles requests, so as to keep at least 1 "slot" open for other quick  aro-service requests.
+  const MAX_CONCURRENT_VECTOR_TILE_REQUESTS = 5
+  tileDataService.httpThrottle = new AsyncQueue((task, callback) => {
+    // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
+    task()
+      .then((result) => callback({ status: 'success', data: result }))
+      .catch((err) => callback({ status: 'failure', data: err }))
+  }, MAX_CONCURRENT_VECTOR_TILE_REQUESTS)
 
   tileDataService.LOCK_ICON_KEY = 'LOCK_ICON'
   if (configuration.locationCategories && configuration.locationCategories.entityLockIcon) {
@@ -38,7 +51,23 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     tileDataService.mapLayers = mapLayers
   }
 
+  // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
   tileDataService.getMapData = (layerDefinitions, zoom, tileX, tileY) => {
+    return new Promise((resolve, reject) => {
+      // Remember to throttle all vector tile http requests.
+      tileDataService.httpThrottle.push(() => tileDataService.getMapDataInternal(layerDefinitions, zoom, tileX, tileY), (result) => {
+        if (result.status === 'success') {
+          resolve(result.data)
+        } else {
+          reject(result.data)
+        }
+      })
+    })
+  }
+
+  // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
+  // IMPORTANT: This will immediately fire a HTTP request, so do not use this method directly. Use getMapData().
+  tileDataService.getMapDataInternal = (layerDefinitions, zoom, tileX, tileY) => {
     return new Promise((resolve, reject) => {
       // Getting binary data from the server. Directly use XMLHttpRequest()
       var oReq = new XMLHttpRequest()
