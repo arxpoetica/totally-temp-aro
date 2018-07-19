@@ -79,14 +79,14 @@
         <td>{{v.value}}</td>
       </tr>
       <tr>
-        <td>HouseHolds</td>
+        <td>HouseHold Count</td>
         <td>
           {{$ctrl.selectedLocationInfo.number_of_households}}
         </td>
       </tr>
 
       <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids.length > 0">
-        <td class="indent-1">objectIds</td>
+        <td class="indent-1">HouseHold IDs</td>
         <td>
           <span>
                 <div id="show-source">
@@ -102,14 +102,14 @@
       </tr>
 
       <tr>
-        <td>Businesses</td>
+        <td>Business Count</td>
         <td>
           {{$ctrl.selectedLocationInfo.number_of_businesses}}
         </td>
       </tr>
 
       <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids.length > 0">
-        <td class="indent-1">objectIds</td>
+        <td class="indent-1">Business IDs</td>
         <td>
           <div id="show-source">
             <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
@@ -122,13 +122,13 @@
       </tr>
 
       <tr>
-        <td>Towers</td>
+        <td>Tower Count</td>
         <td>
           {{$ctrl.selectedLocationInfo.number_of_towers}}
         </td>
       </tr>
       <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids.length > 0">
-        <td class="indent-1">objectIds</td>
+        <td class="indent-1">Tower IDs</td>
         <td>
           <div id="show-source">
             <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">

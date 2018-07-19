@@ -317,6 +317,16 @@ class MapObjectEditorController {
     return polygon
   }
 
+  // Return true if the given path is a closed path
+  isClosedPath(path) {
+    const firstPoint = path.getAt(0)
+    const lastPoint = path.getAt(path.length - 1)
+    const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
+    const deltaLng = Math.abs(firstPoint.lng() - lastPoint.lng())
+    const TOLERANCE = 0.0001
+    return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
+  }
+
   createMapObject(feature, iconUrl, usingMapClick) {
     var mapObject = null
     if (feature.geometry.type === 'Point') {
@@ -343,7 +353,21 @@ class MapObjectEditorController {
           self.onModifyObject && self.onModifyObject({mapObject})
         });
         google.maps.event.addListener(path, 'set_at', function(){
-          self.onModifyObject && self.onModifyObject({mapObject})
+          if (!self.isClosedPath(path)) {
+            // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
+            if (index === 0) {
+              // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
+              path.setAt(path.length, path.getAt(0))
+              //path.forEach((item) => console.log(`${item.lat()}, ${item.lng()}`))
+              self.onModifyObject && self.onModifyObject({mapObject})
+            } else if (index === path.length - 1) {
+              // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
+              path.setAt(0, path.getAt(path.length - 1))
+              self.onModifyObject && self.onModifyObject({mapObject})
+            }
+          } else {
+            self.onModifyObject && self.onModifyObject({mapObject})
+          }
         });
       });
       google.maps.event.addListener(mapObject, 'dragend', function(){
