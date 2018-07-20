@@ -7,24 +7,29 @@ class UserSettingsController {
 
     this.userConfiguration = {}
     $http.get(`/service/auth/users/${state.loggedInUser.id}/configuration`)
-      .then((result) => this.userConfiguration = result.data)
+      .then((result) => {
+        this.userConfiguration = result.data
+        this.initSearchBox()
+      })
       .catch((err) => console.error(err))
 
     this.allProjectTemplates = []
     $http.get(`/service/v1/project-template?user_id=${state.loggedInUser.id}`)
       .then((result) => this.allProjectTemplates = result.data)
       .catch((err) => console.error(err))
+  }
 
-    var default_location = this.globalSettingsService.user.default_location
+  initSearchBox() {
     var ids = 0
     var search = $('#set-default-location .select2')
+    var self = this
     search.select2({
       placeholder: 'Set an address, city, state or CLLI code',
       initSelection: function (select, callback) {
-        callback({"id": 0, "text":default_location})
+        callback({"id": 0, "text": self.userConfiguration.defaultLocation})
       },
       ajax: {
-        url: `/search/addresses/${state.plan.getValue().id}?userId=${state.loggedInUser.id}`, // Fine since we will have loaded a plan by now
+        url: '/search/addresses',
         dataType: 'json',
         delay: 250,
         data: (term) => ({ text: term }),
@@ -32,12 +37,18 @@ class UserSettingsController {
           var items = data.map((location) => {
             return {
               id: 'id-' + (++ids),
-              text: location.name,
-              bounds: location.bounds,
-              centroid: location.centroid
+              text: location.displayText,
+              type: location.type,
+              value: location.value
             }
           })
-          this.search_results = items
+          if (items.length === 0) {
+            items.push({
+              id: 'id-' + (++ids),
+              text: 'Search an address, city, or state',
+              type: 'placeholder'
+            })
+          }
           return {
             results: items,
             pagination: {
@@ -50,15 +61,13 @@ class UserSettingsController {
     }).on('change', (e) => {
       var selected = e.added
       if (selected) {
-        this.globalSettingsService.user.default_location = selected.text
+        this.userConfiguration.defaultLocation = selected.text
       }
     })
-
-    search.select2("val", default_location, true)
+    search.select2("val", this.userConfiguration.defaultLocation, true)
   }
 
   saveSettings() {
-    this.globalSettingsService.saveLocation()
     this.$http.post(`/service/auth/users/${this.state.loggedInUser.id}/configuration`, this.userConfiguration)
   }
 }

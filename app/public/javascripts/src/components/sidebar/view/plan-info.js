@@ -75,7 +75,7 @@ class PlanInfoController {
           callback({"id": 0, "text":default_location})
         },
         ajax: {
-          url: `/search/addresses/${this.state.plan.getValue().id}?userId=${this.state.loggedInUser.id}`,  // Fine since we will have loaded a plan by now
+          url: `/search/addresses`,
           dataType: 'json',
           delay: 250,
           data: (term) => ({ text: term }),

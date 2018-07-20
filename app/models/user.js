@@ -232,7 +232,7 @@ module.exports = class User {
 
   static find_by_id (id) {
     return database.findOne(`
-        SELECT id, first_name, last_name, email, rol, company_name, default_location
+        SELECT id, first_name, last_name, email, rol, company_name
         FROM auth.users WHERE id=$1
       `, [id])
   }
@@ -376,15 +376,4 @@ module.exports = class User {
         })
       ))
   }
-
-  static setDefaultLocation(location, userId) {
-
-    var sql = `
-    UPDATE auth.users 
-    SET default_location = $1
-    WHERE id = $2
-  `
-    return database.findOne(sql, [location, userId])
-  }
-
 }

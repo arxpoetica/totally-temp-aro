@@ -1559,10 +1559,42 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((result) => {
       const plan = result.data
       service.setPlan(plan)
-      service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
-      service.requestSetMapZoom.next(plan.zoomIndex)
+      // Get the default location for this user
+      return $http.get(`/service/auth/users/${user.id}/configuration`)
     })
-    .catch((err) => console.error(err))
+    .then((result) => {
+      return $http.get(`/search/addresses?text=${result.data.defaultLocation}`)
+    })
+    .then((result) => {
+      if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
+        var geocoder = new google.maps.Geocoder;
+        geocoder.geocode({'placeId': result.data[0].value}, function(geocodeResults, status) {
+          if (status !== 'OK') {
+            console.error('Geocoder failed: ' + status)
+            console.error('Setting map coordinates to default')
+            service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
+            service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+            return
+          }
+          service.requestSetMapCenter.next({
+            latitude: geocodeResults[0].geometry.location.lat(),
+            longitude: geocodeResults[0].geometry.location.lng()
+          })
+          const ZOOM_FOR_OPEN_PLAN = 14
+          service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
+        })
+      } else {
+        // Set it to the default so that the map gets initialized
+        service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
+        service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+      // Set it to the default so that the map gets initialized
+      service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
+      service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+    })
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
