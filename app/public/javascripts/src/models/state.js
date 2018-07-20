@@ -1500,12 +1500,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     }
 
     if(entityType === 'NetworkEquipmentEntity') {
-      var selectedEquipmentLibraries = service.dataItems && service.dataItems.equipment && service.dataItems.equipment.selectedLibraryItems
-      if(selectedEquipmentLibraries) libraryItems = selectedEquipmentLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
-      if(libraryItems.length > 0) {
-        var libfilter = libraryItems.map(id => `libraryId eq ${id}`).join(" or ")
-        filter = filter ? filter.concat(` and (${libfilter})`) : `${libfilter}`
-      }
+      //Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
+      filter = filter ? filter.concat(` and (planId eq ${service.plan.getValue().id})`) : filter
     }
 
     if(entityType === 'ServiceAreaView') {
