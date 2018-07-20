@@ -75,11 +75,6 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
     }).catch((response) => {
       state.showGlobalSettings.next(false)
     })
-
-  }
-
-  globalSettings.saveLocation = () => {
-    $http.put(`/user/default_location/${globalSettings.user.default_location}`)
   }
 
   globalSettings.TagManagerViews = Object.freeze({

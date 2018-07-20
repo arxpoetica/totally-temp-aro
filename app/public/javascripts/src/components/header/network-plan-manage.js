@@ -213,7 +213,7 @@ class NetworkPlanModalController {
   }
 
   fetchLocation(location) {
-    return this.$http.get(`/search/addresses/${this.state.plan.getValue().id}?userId=${this.state.loggedInUser.id}`, { params: { text: location.message } })
+    return this.$http.get(`/search/addresses`, { params: { text: location.message } })
       .then(function (results) {
 
         var location = results.data[0];
