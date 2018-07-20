@@ -12,9 +12,16 @@ class EditorInterfaceValueController {
     //  this.model = parseFloat(this.model)
     //}
     this.enumVal = ""
-    
+    this.isValid = true
+    this.needsValidation = false
     if ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType){
       this.dateVal = new Date(this.model)
+    }
+    
+    // change this out for proper dynamic constraint checking
+    if ('siteClli' == this.displayProps.propertyName || 'siteName' == this.displayProps.propertyName){
+      this.isValid = this.checkConstraint()
+      this.needsValidation = true
     }
     
   }
@@ -46,6 +53,23 @@ class EditorInterfaceValueController {
         || (null === this.dateVal && 'object' == typeof this.dateVal)) return
     this.model = this.dateVal.getTime()
     this.onChange()
+  }
+  
+  checkConstraint(){
+    return ("" !== this.model)
+  }
+  
+  onInput(){
+    if (this.needsValidation){
+      if (!this.checkConstraint()){
+        this.isValid = false
+      }else{
+        this.isValid = true
+        this.onChange()
+      }
+    }else{
+      this.onChange()
+    }
   }
   
 }

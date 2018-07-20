@@ -148,6 +148,17 @@
 	
 }
 
+.ei-invalid-message{
+	text-align: right;
+  color: #990000;
+  font-size: 12px;
+}
+
+.ei-invalid-highlight{
+	border: solid 2px #990000;
+	border-radius: 6px;
+}
+
 
 /* === object editor === */
  aro-object-editor .ei-internal-gen > .ei-gen-level{
