@@ -13,6 +13,7 @@
         "displayName":"Global",
         "enumTypeURL":"",
         "displayDataType":"array[integer]",
+        "defaultValue":"[]",
         "editable":true,
         "visible":true
       },
@@ -23,6 +24,7 @@
         "displayName":"Link Tags",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:service:tags:GeogTags}",
+        "defaultValue":"${ctx.createClass(object{urn:jsonschema:com:altvil:aro:service:tags:GeogTags})}",
         "editable":true,
         "visible":true
       }
@@ -42,6 +44,7 @@
         "displayName":"Geography Tag",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -52,6 +55,7 @@
         "displayName":"Service Area Ids",
         "enumTypeURL":"",
         "displayDataType":"array[integer]",
+        "defaultValue":"[]",
         "editable":true,
         "visible":true
       }
@@ -72,6 +76,7 @@
         "displayName":"Equipment Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -82,6 +87,7 @@
         "displayName":"Days From",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -92,6 +98,7 @@
         "displayName":"Days To",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       }
@@ -117,6 +124,7 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -127,6 +135,7 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -138,6 +147,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
+        "defaultValue":"",
         "editable":true,
         "visible":false
       },
@@ -148,6 +158,7 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
+        "defaultValue":"${ctx.createClass(object{null})}",
         "editable":true,
         "visible":true
       },
@@ -158,6 +169,7 @@
         "displayName":"Name",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -168,6 +180,7 @@
         "displayName":"Code",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -178,6 +191,7 @@
         "displayName":"Source Id",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       }
@@ -199,6 +213,7 @@
         "displayName":"Site Info",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:node:SiteInfo}",
+        "defaultValue":"${ctx.createClass(object{urn:jsonschema:com:altvil:aro:model:node:SiteInfo})}",
         "editable":true,
         "visible":true
       },
@@ -209,6 +224,7 @@
         "displayName":"Existing Equipment",
         "enumTypeURL":"",
         "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:model:node:TrackedEquipment}]",
+        "defaultValue":"[]",
         "editable":true,
         "visible":true
       },
@@ -219,6 +235,7 @@
         "displayName":"Planned Equipment",
         "enumTypeURL":"",
         "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent}]",
+        "defaultValue":"[]",
         "editable":true,
         "visible":true
       },
@@ -230,6 +247,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"text",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       }
@@ -256,6 +274,7 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -266,6 +285,7 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -277,6 +297,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
+        "defaultValue":"",
         "editable":true,
         "visible":false
       },
@@ -287,6 +308,7 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
+        "defaultValue":"${ctx.createClass(object{null})}",
         "editable":true,
         "visible":true
       },
@@ -297,6 +319,7 @@
         "displayName":"Location Category",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -307,6 +330,7 @@
         "displayName":"Tag Mapping",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:service:tags:TagMapping}",
+        "defaultValue":"${ctx.createClass(object{urn:jsonschema:com:altvil:aro:service:tags:TagMapping})}",
         "editable":true,
         "visible":true
       },
@@ -318,6 +342,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":false,
         "visible":true
       },
@@ -328,6 +353,7 @@
         "displayName":"Locked",
         "enumTypeURL":"",
         "displayDataType":"boolean",
+        "defaultValue":"false",
         "editable":true,
         "visible":true
       }
@@ -351,6 +377,7 @@
         "displayName":"Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -361,6 +388,7 @@
         "displayName":"Name",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -371,6 +399,7 @@
         "displayName":"Description",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -381,6 +410,7 @@
         "displayName":"Min Down",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -391,6 +421,7 @@
         "displayName":"Max Down",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -401,6 +432,7 @@
         "displayName":"Strength",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       }
@@ -416,7 +448,6 @@
       "networkNodeType",
       "networkNodeEquipment",
       "subnetId",
-      "boundary",
       "deploymentType"
     ],
     "displayProperties":[
@@ -428,6 +459,7 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -438,6 +470,7 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -449,6 +482,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
+        "defaultValue":"",
         "editable":true,
         "visible":false
       },
@@ -459,6 +493,7 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
+        "defaultValue":"${ctx.createClass(object{null})}",
         "editable":true,
         "visible":true
       },
@@ -470,6 +505,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":false,
         "visible":true
       },
@@ -480,6 +516,7 @@
         "displayName":"Network Node Equipment",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment}",
+        "defaultValue":"${ctx.createClass(object{urn:jsonschema:com:altvil:aro:model:node:NetworkNodeEquipment})}",
         "editable":true,
         "visible":true
       },
@@ -490,16 +527,7 @@
         "displayName":"Subnet Id",
         "enumTypeURL":"",
         "displayDataType":"string",
-        "editable":true,
-        "visible":true
-      },
-      {
-        "propertyName":"boundary",
-        "levelOfDetail":0,
-        "format":"",
-        "displayName":"Boundary",
-        "enumTypeURL":"",
-        "displayDataType":"any",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -510,6 +538,7 @@
         "displayName":"Deployment Type",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       }
@@ -537,6 +566,7 @@
         "enumEntityName":"DataTypeEntity",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -547,6 +577,7 @@
         "displayName":"Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -558,6 +589,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"Geometry",
+        "defaultValue":"",
         "editable":true,
         "visible":false
       },
@@ -568,6 +600,7 @@
         "displayName":"Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
+        "defaultValue":"${ctx.createClass(object{null})}",
         "editable":true,
         "visible":true
       },
@@ -578,6 +611,7 @@
         "displayName":"Boundary Type Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -588,6 +622,7 @@
         "displayName":"Network Node Type",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -598,6 +633,7 @@
         "displayName":"Network Object Id",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -608,6 +644,7 @@
         "displayName":"Deployment Type",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -618,6 +655,7 @@
         "displayName":"Product",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:NetworkProductEntity}",
+        "defaultValue":"${ctx.createClass(object{urn:jsonschema:com:altvil:aro:model:NetworkProductEntity})}",
         "editable":true,
         "visible":true
       }
@@ -639,6 +677,7 @@
         "displayName":"Id",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -649,6 +688,7 @@
         "displayName":"Product Type",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -659,6 +699,7 @@
         "displayName":"Name",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -669,6 +710,7 @@
         "displayName":"Speed",
         "enumTypeURL":"",
         "displayDataType":"object{urn:jsonschema:com:altvil:aro:model:SpeedEntity}",
+        "defaultValue":"${ctx.createClass(object{urn:jsonschema:com:altvil:aro:model:SpeedEntity})}",
         "editable":true,
         "visible":true
       }
@@ -697,6 +739,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"date",
+        "defaultValue":"${ctx.today()}",
         "editable":true,
         "visible":true
       },
@@ -708,6 +751,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -719,6 +763,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -729,6 +774,7 @@
         "displayName":"Address",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -739,6 +785,7 @@
         "displayName":"Dpi Environment",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -749,36 +796,19 @@
         "displayName":"Hsi Office Code",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
       {
         "propertyName":"hsiEnabled",
-        "levelOfDetail":0,
+        "levelOfDetail":2,
         "format":"",
         "displayName":"Hsi Enabled",
+        "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"boolean",
-        "editable":true,
-        "visible":true
-      },
-      {
-        "propertyName":"t1",
-        "levelOfDetail":0,
-        "format":"",
-        "displayName":"T 1",
-        "enumTypeURL":"",
-        "displayDataType":"boolean",
-        "editable":true,
-        "visible":true
-      },
-      {
-        "propertyName":"fiberAvailable",
-        "levelOfDetail":0,
-        "format":"",
-        "displayName":"Fiber Available",
-        "enumTypeURL":"",
-        "displayDataType":"boolean",
+        "defaultValue":"true",
         "editable":true,
         "visible":true
       },
@@ -789,6 +819,29 @@
         "displayName":"Physically Linked",
         "enumTypeURL":"",
         "displayDataType":"boolean",
+        "defaultValue":"false",
+        "editable":true,
+        "visible":true
+      },
+      {
+        "propertyName":"fiberAvailable",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"Fiber Available",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "defaultValue":"false",
+        "editable":true,
+        "visible":true
+      },
+      {
+        "propertyName":"t1",
+        "levelOfDetail":0,
+        "format":"",
+        "displayName":"T 1",
+        "enumTypeURL":"",
+        "displayDataType":"boolean",
+        "defaultValue":"false",
         "editable":true,
         "visible":true
       }
@@ -818,6 +871,7 @@
         "enumEntityName":"",
         "enumTypeURL":"equipment_category",
         "displayDataType":"enum",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -829,6 +883,7 @@
         "enumEntityName":"",
         "enumTypeURL":"equipment?p1=${/networkNodeType}&p2=${equipmentTypeCategoryId}",
         "displayDataType":"enum",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -840,6 +895,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -851,6 +907,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -861,6 +918,7 @@
         "displayName":"Install Cost",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -872,6 +930,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"integer",
+        "defaultValue":"0",
         "editable":true,
         "visible":false
       },
@@ -883,6 +942,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -894,6 +954,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -904,6 +965,7 @@
         "displayName":"Extended Attributes",
         "enumTypeURL":"",
         "displayDataType":"object{null}",
+        "defaultValue":"${ctx.createClass(object{null})}",
         "editable":true,
         "visible":true
       },
@@ -914,6 +976,7 @@
         "displayName":"Sub Components",
         "enumTypeURL":"",
         "displayDataType":"array[object]",
+        "defaultValue":"[]",
         "editable":true,
         "visible":true
       },
@@ -924,6 +987,7 @@
         "displayName":"One Time Cost",
         "enumTypeURL":"",
         "displayDataType":"boolean",
+        "defaultValue":"false",
         "editable":true,
         "visible":true
       }
@@ -956,6 +1020,7 @@
         "enumEntityName":"",
         "enumTypeURL":"equipment_category",
         "displayDataType":"enum",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -967,6 +1032,7 @@
         "enumEntityName":"",
         "enumTypeURL":"equipment?p1=${/networkNodeType}&p2=${equipmentTypeCategoryId}",
         "displayDataType":"enum",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -978,6 +1044,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -989,6 +1056,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"date",
+        "defaultValue":"${ctx.today()}",
         "editable":true,
         "visible":true
       },
@@ -1000,6 +1068,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -1011,6 +1080,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -1021,6 +1091,7 @@
         "displayName":"Serial Number",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -1032,6 +1103,7 @@
         "enumEntityName":"",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -1042,6 +1114,7 @@
         "displayName":"Manufacturer",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -1052,6 +1125,7 @@
         "displayName":"Switch Type",
         "enumTypeURL":"",
         "displayDataType":"string",
+        "defaultValue":"",
         "editable":true,
         "visible":true
       },
@@ -1062,6 +1136,7 @@
         "displayName":"Max Speed",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -1072,6 +1147,7 @@
         "displayName":"Latency",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -1082,6 +1158,7 @@
         "displayName":"Uplink Speed",
         "enumTypeURL":"",
         "displayDataType":"number",
+        "defaultValue":"0",
         "editable":true,
         "visible":true
       },
@@ -1092,6 +1169,7 @@
         "displayName":"Marketable Equipments",
         "enumTypeURL":"",
         "displayDataType":"array[object{urn:jsonschema:com:altvil:aro:model:node:MarketableEquipment}]",
+        "defaultValue":"[]",
         "editable":true,
         "visible":true
       }
