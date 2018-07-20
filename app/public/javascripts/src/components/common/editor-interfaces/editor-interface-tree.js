@@ -56,7 +56,10 @@ class EditorInterfaceTreeController {
     // the weird extra () down there is because of the way angular stores function references 
     // this.getNewListItem() actualy returns the function signature then the following (prop.propertyName) calls it with our parameter 
     var newItem = this.getNewListItem()(prop.propertyName) 
-    if ('undefined' != typeof newItem) propVal.push( newItem )
+    if ('undefined' != typeof newItem){
+      propVal.push( newItem )
+      this.onChange()
+    }
   }
   
   deleteItem(parent, index, metaData){

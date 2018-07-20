@@ -21,7 +21,7 @@ class {{classNameExtractor this.classDef}} {
   // Constructor
   constructor() {
     {{#each classDef.properties}}
-    {{memberDeclaration @key this}}  {{!-- Example output: "this.name = ''" --}}
+    {{memberDeclaration @key this ../display}}  {{!-- Example output: "this.name = ''" --}}
     {{/each}}
   }
 

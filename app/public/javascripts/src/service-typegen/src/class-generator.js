@@ -109,8 +109,9 @@ class ClassGenerator {
   // Register a Handlebars helper that generates the "this.xyz = new Abc()" statements
   // that are used in the constructor of our class
   static registerAssignmentHelper(Handlebars) {
-    Handlebars.registerHelper('memberDeclaration', (memberName, memberObj) => {
+    Handlebars.registerHelper('memberDeclaration', (memberName, memberObj, display) => {
       var result = `this.${memberName} = `
+      /*
       switch(memberObj.type) {
         case 'string':
           result += '\'\''
@@ -150,6 +151,60 @@ class ClassGenerator {
         default:
           // throw `Unsupported member type ${memberObj.id || memberObj['$ref']}`
           break
+      }
+      */
+      
+      if ('string' == memberObj.type
+        || 'number' == memberObj.type
+        || 'boolean' == memberObj.type
+        || 'integer' == memberObj.type)
+      {
+        var defaultVal = null
+        for (var displayI=0; displayI<display.length; displayI++){
+          if (memberName == display[displayI].propertyName){
+            if (-1 == display[displayI].defaultValue.indexOf('${')){// we're not set up to deal with expressions yet
+              defaultVal = display[displayI].defaultValue
+            }
+            break
+          }
+        }
+        
+        if (null == defaultVal || "" == defaultVal){ // null OR undefined 
+          switch(memberObj.type) {
+            case 'string':
+              defaultVal = '\'\''
+              break
+            
+            case 'number':
+              defaultVal = '0.0'
+              break
+  
+            case 'boolean':
+              defaultVal = 'false'
+              break
+  
+            case 'integer':
+              defaultVal = '0'
+              break
+          }
+        }
+        
+        result += defaultVal
+      }else if('any' == memberObj.type){
+        result += '{}'  
+      }else if('array' == memberObj.type){
+        result += '[]'
+      }else if('object' == memberObj.type){
+        const typeUrn = this.getUrnForType(memberObj)
+        if (typeUrn && (typeof typeUrn === 'string')) {
+          result += `new ${this.getClassName(typeUrn)}()`
+        } else if (this.isMapObject(memberObj)) {
+          result += `{}`  // This is a "map" object or a POJO object
+        } else {
+          result = `this.${memberName}_error${Math.round(Math.random() * 1000)} = 'This is an error'`
+        }
+      }else{
+        result += 'null'
       }
       return new Handlebars.SafeString(result)
     })
