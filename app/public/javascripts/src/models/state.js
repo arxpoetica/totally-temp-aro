@@ -245,7 +245,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.defaultPlanCoordinates = {
     zoom: 14,
     latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
-    longitude: -122.3321    // Seattle, WA by default. For no particular reason.
+    longitude: -122.3321,   // Seattle, WA by default. For no particular reason.
+    areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
   service.requestRecreateTiles = new Rx.BehaviorSubject({})
@@ -1563,7 +1564,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return $http.get(`/service/auth/users/${user.id}/configuration`)
     })
     .then((result) => {
-      return $http.get(`/search/addresses?text=${result.data.defaultLocation}`)
+      // Default location may not be set for this user. In this case, use a system default
+      const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
+      return $http.get(`/search/addresses?text=${searchLocation}`)
     })
     .then((result) => {
       if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {
