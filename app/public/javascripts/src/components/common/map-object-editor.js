@@ -652,7 +652,7 @@ class MapObjectEditorController {
         pathPoints.push(pathPoints[0])  // Close the polygon
         feature.geometry.coordinates.push(pathPoints)
       })
-      self.createMapObject(feature, true)
+      self.createMapObject(feature, null ,true)
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
       // Kill the drawing manager
