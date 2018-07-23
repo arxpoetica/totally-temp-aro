@@ -21,7 +21,7 @@ class SearchPlanFilterController {
   SearchPlanFilterController.$inject = ['$element', '$document', '$timeout', 'state']
   
   let searchPlanFilter = {
-    templateUrl: '/components/common/search-plan-filter.html',
+    templateUrl: '/components/common/plan/plan-search-filter.html',
     bindings: {
       objectName : '@',
       searchList : '<',
