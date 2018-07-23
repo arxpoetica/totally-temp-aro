@@ -2,6 +2,10 @@ class PlanInputsModalController {
   constructor(state,$element) {
     this.state    = state
     this.$element = $element
+    this.initModalData()
+  }
+
+  initModalData() {
     this.planName = null
     this.parentPlan = null
     this.parentPlanSelectorExpanded = false
@@ -9,6 +13,7 @@ class PlanInputsModalController {
 
   close() {
     this.state.planInputsModal.next(false)
+    this.initModalData()
   }
 
   modalShown() {
@@ -17,6 +22,7 @@ class PlanInputsModalController {
 
   modalHide() {
     this.state.planInputsModal.next(false)
+    this.initModalData()
   }
 
   savePlanAs() {
@@ -41,6 +47,7 @@ class PlanInputsModalController {
         }
       }
     }
+    this.close()
   }
 
   onParentPlanSelected(plan) {
