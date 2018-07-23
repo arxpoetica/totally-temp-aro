@@ -1,5 +1,5 @@
 <div>
-  <div class="indent-1">
+  <div ng-if="$ctrl.showRefreshPlansOnMapMove" class="indent-1">
     <input type="checkbox" class="checkboxfill" 
       name="ctype-name" disabled> Refresh Plans on map move
   </div>
@@ -32,16 +32,16 @@
 
   <div class="indent-1 plan-info">
     <span style="align-self:center">Filter by:</span>
-    <search-plan-filter 
+    <plan-search-filter 
       object-name="Tag"
       search-list="$ctrl.state.listOfTags"
       apply-search="$ctrl.applyTagSearchFilter(selectedFilters)">
-    </search-plan-filter>
-    <search-plan-filter 
+    </plan-search-filter>
+    <plan-search-filter 
       object-name="Service Area"
       search-list="$ctrl.state.listOfServiceAreaTags"
       apply-search="$ctrl.applySaSearchFilter(selectedFilters)"
-      refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></search-plan-filter>
+      refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></plan-search-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
