@@ -12,6 +12,41 @@ class NetworkPlanModalController {
     this.currentView = this.views.Plan_Info
   }
 
+  loadPlan(plan) {
+    this.state.loadPlan(plan.id)
+    this.state.networkPlanModal.next(false)
+  }
+
+  deletePlan(plan) {
+    if (!plan) {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Are you sure?',
+        text: 'You will not be able to recover the deleted plan!',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes, delete it!',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, (deletePlan) => {
+        if (deletePlan) {
+          this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.state.loggedInUser.id}`)
+          .then((response) => {
+            resolve()
+            return this.state.getOrCreateEphemeralPlan()
+          })
+          .then((ephemeralPlan) => this.state.setPlan(ephemeralPlan.data))
+          .catch((err) => reject(err))
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+
   getTagCategories(currentPlanTags) {
     return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
@@ -30,29 +65,6 @@ class NetworkPlanModalController {
     
     return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`,updatePlan)
   }
-
-  deletePlan(plan) {
-    if (!plan) return
-
-    swal({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover the deleted plan!',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, delete it!',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, () => {
-      this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.state.loggedInUser.id}`).then((response) => {
-        this.loadPlans()
-        this.state.getOrCreateEphemeralPlan()
-        .then((ephemeralPlan) => {
-          this.state.setPlan(ephemeralPlan.data)
-        })
-      })
-    })
-  }
-
 }
 
 NetworkPlanModalController.$inject = ['$http', 'state']

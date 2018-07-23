@@ -78,10 +78,21 @@ class PlanSearchController {
     this.search_text = selectedFilters.join(' ')
   }
 
-  selectPlan(plan) {
-    this.plan = plan
-    this.state.loadPlan(plan.id)
-    this.state.networkPlanModal.next(false)
+  onPlanClicked(plan) {
+    this.onPlanSelected && this.onPlanSelected({ plan: plan })
+  }
+
+  onPlanDeleteClicked(plan) {
+    if (this.onPlanDeleteRequested) {
+      this.onPlanDeleteRequested({ plan: plan })
+        .then(() => {
+          this.loadPlans()
+        })
+        .catch((err) => {
+          console.error(err)
+          this.loadPlans()
+        })
+    }
   }
 
   getTagCategories(currentPlanTags) {
@@ -111,28 +122,6 @@ class PlanSearchController {
     this.searchText = _.uniq(this.searchText.concat(filters))
     this.searchList = _.uniq(this.searchList.concat(filters))
     this.loadPlans()
-  }
-
-  deletePlan(plan) {
-    if (!plan) return
-
-    swal({
-      title: 'Are you sure?',
-      text: 'You will not be able to recover the deleted plan!',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes, delete it!',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, () => {
-      this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.state.loggedInUser.id}`).then((response) => {
-        this.loadPlans()
-        this.state.getOrCreateEphemeralPlan()
-        .then((ephemeralPlan) => {
-          this.state.setPlan(ephemeralPlan.data)
-        })
-      })
-    })
   }
 
   sortBy(key, descending) {
@@ -218,6 +207,11 @@ PlanSearchController.$inject = ['$http', 'state']
 
 let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',
+  bindings: {
+    showPlanDeleteButton: '<',
+    onPlanSelected: '&',
+    onPlanDeleteRequested: '&'
+  },
   controller: PlanSearchController
 }
 

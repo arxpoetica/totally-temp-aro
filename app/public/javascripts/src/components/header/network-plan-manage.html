@@ -64,6 +64,11 @@
 
   <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
 
-  <plan-search ng-if="$ctrl.currentView == $ctrl.views.Search_plans"></plan-search>
+  <plan-search ng-if="$ctrl.currentView == $ctrl.views.Search_plans"
+               show-plan-delete-button="true"
+               on-plan-selected="$ctrl.loadPlan(plan)"
+               on-plan-delete-requested="$ctrl.deletePlan(plan)">
+
+  </plan-search>
 
 </div>

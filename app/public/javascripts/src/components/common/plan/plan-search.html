@@ -53,7 +53,7 @@
       <tbody>
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
-            <b><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></b>
+            <b><a href="javascript:void(0)" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</a></b>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
@@ -71,8 +71,7 @@
           </td>
           <td>
             <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
-            <!-- <a ng-if="!plan.progress" class="btn btn-sm btn-primary"><span class="fa fa-folder"></span></a> -->
-            <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a ng-if="!plan.progress && $ctrl.showPlanDeleteButton" class="btn btn-sm btn-danger" ng-click="$ctrl.onPlanDeleteClicked(plan)"><span class="glyphicon glyphicon-trash"></span></a>
           </td>
         </tr>
       </tbody>
