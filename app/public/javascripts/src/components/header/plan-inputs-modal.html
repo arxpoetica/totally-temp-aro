@@ -33,7 +33,10 @@
       </div>
     </div>
     <!-- Parent plan selector - expandable body -->
-    <div ng-style="{ 'margin-left': '30px', 'display': $ctrl.parentPlanSelectorExpanded ? 'block' : 'none', 'max-height': '300px' }">
+    <div ng-style="{ 'margin-left': '30px',
+                     'display': $ctrl.parentPlanSelectorExpanded ? 'block' : 'none',
+                     'max-height': '200px',
+                     'overflow-y': 'auto' }">
       <plan-search show-plan-delete-button="false"
                    show-refresh-plans-on-map-move="false"
                    on-plan-selected="$ctrl.onParentPlanSelected(plan)">
