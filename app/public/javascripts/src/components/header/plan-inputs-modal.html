@@ -2,6 +2,12 @@
   .with-margin {
     margin-bottom: 5px;
   }
+  .parent-plan-selector-body.ng-hide-remove {
+    animation: fadeIn 300ms;
+  }
+  .parent-plan-selector-body.ng-hide-add {
+    animation: fadeOut 300ms;
+  }
 </style>
 <modal id="plan_inputs_modal" visible="$ctrl.state.planInputsModal.value" backdrop="static" on-show="$ctrl.modalShown()"
   on-hide="$ctrl.modalHide()">
@@ -33,10 +39,9 @@
       </div>
     </div>
     <!-- Parent plan selector - expandable body -->
-    <div ng-style="{ 'margin-left': '30px',
-                     'display': $ctrl.parentPlanSelectorExpanded ? 'block' : 'none',
-                     'max-height': '200px',
-                     'overflow-y': 'auto' }">
+    <div class="parent-plan-selector-body"
+         ng-show="$ctrl.parentPlanSelectorExpanded"
+         style="margin-left: 30px; max-height: 200px; overflow-y: auto;">
       <plan-search show-plan-delete-button="false"
                    show-refresh-plans-on-map-move="false"
                    on-plan-selected="$ctrl.onParentPlanSelected(plan)">
