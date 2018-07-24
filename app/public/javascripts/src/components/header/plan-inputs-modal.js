@@ -8,15 +8,20 @@ class PlanInputsModalController {
   initModalData() {
     this.planName = null
     this.parentPlan = null
+    const currentPlan = this.state.plan.getValue()
+    if (currentPlan && !currentPlan.isEphemeral) {
+      // IF the current plan is not an ephemeral plan, then set it as the parent plan.
+      this.parentPlan = currentPlan
+    }
     this.parentPlanSelectorExpanded = false
   }
 
   close() {
     this.state.planInputsModal.next(false)
-    this.initModalData()
   }
 
   modalShown() {
+    this.initModalData()
     this.state.planInputsModal.next(true)
   }
 
@@ -61,6 +66,10 @@ class PlanInputsModalController {
     this.close()
   }
 
+  clearParentPlan() {
+    this.parentPlan = null
+  }
+
   $onInit() {
     this.$element.find('#plan_inputs_modal > .modal-dialog').css('width', '350')
   }
@@ -93,9 +102,10 @@ let planInputsModal = {
           refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
         <div ng-click="$ctrl.parentPlanSelectorExpanded = !$ctrl.parentPlanSelectorExpanded" style="margin-top: 10px; cursor: pointer;">
           Parent plan: {{$ctrl.parentPlan ? $ctrl.parentPlan.name : '(undefined)'}}
+          <button class="btn btn-xs btn-default" ng-click="$ctrl.clearParentPlan(); $event.stopPropagation();">Clear</button>
           <div class="pull-right"><i ng-class="{ 'fa': true, 'fa-plus': !$ctrl.parentPlanSelectorExpanded, 'fa-minus': $ctrl.parentPlanSelectorExpanded }"></i></div>
         </div>
-        <div ng-style="{ 'margin-left': '30px;', 'display': $ctrl.parentPlanSelectorExpanded ? 'block' : 'none' }">
+        <div ng-style="{ 'margin-left': '30px;', 'display': $ctrl.parentPlanSelectorExpanded ? 'block' : 'none', 'max-height': '300px;' }">
           <plan-search show-plan-delete-button="false"
                       show-refresh-plans-on-map-move="false"
                       on-plan-selected="$ctrl.onParentPlanSelected(plan)">
