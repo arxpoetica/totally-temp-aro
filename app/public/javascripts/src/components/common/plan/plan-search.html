@@ -5,7 +5,7 @@
 
   <div class="input-group">
     <div class="form-group has-feedback has-clear">
-      <ui-select tag-on-blur tagging tagging-label="false" tagging-tokens="SPACE|,|/" multiple ng-model="$ctrl.searchText"
+      <ui-select tag-on-blur tagging tagging-label="false" tagging-tokens=",|/" multiple ng-model="$ctrl.searchText"
         theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
