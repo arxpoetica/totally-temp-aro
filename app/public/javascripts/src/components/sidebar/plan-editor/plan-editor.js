@@ -121,54 +121,60 @@ class PlanEditorController {
     this.state.resumeOrCreateTransaction()
       .then((result) => {
         this.currentTransaction = result.data
-        return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+        return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment`)
       }).then((result) => {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
         this.equipmentIdToBoundaryId = {}
         this.boundaryIdToEquipmentId = {}
+        // Filter out all non-deleted features - we do not want to create map objects for deleted features.
+        var features = result.data
+                         .filter((item) => item.crudAction !== 'delete')
+                         .map((item) => item.feature)
         // Save the iconUrls in the list of objects returned from aro-service
-        result.data.forEach((item) => item.iconUrl = this.configuration.networkEquipment.equipments[item.networkNodeType].iconUrl)
+        features.forEach((feature) => feature.iconUrl = this.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
-        this.createMapObjects && this.createMapObjects(result.data)
+        this.createMapObjects && this.createMapObjects(features)
         // We now have objectIdToMapObject populated.
-        result.data.forEach((feature) => {
+        features.forEach((feature) => {
           const attributes = feature.attributes
           var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
                                                      attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
           this.objectIdToProperties[feature.objectId] = properties
         })
-        return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`)
+        return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment_boundary`)
       }).then((result) => {
         // Save the properties for the boundary
-        result.data.forEach((feature) => {
-          const attributes = feature.attributes
-          const distance = Math.round(attributes.distance * this.configuration.units.meters_to_length_units)
+        result.data.forEach((item) => {
+          const attributes = item.feature.attributes
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
                                                     attributes.selected_site_boundary_generation, 
                                                     attributes.spatialEdgeType, attributes.directed, attributes.network_node_type)
-          this.objectIdToProperties[feature.objectId] = properties
-          //console.log(properties)
+          this.objectIdToProperties[item.feature.objectId] = properties
         })
         // Save the equipment and boundary ID associations
-        result.data.forEach((boundaryFeature) => {
-          var equipmentId = boundaryFeature.attributes.network_node_object_id
-          var boundaryId = boundaryFeature.objectId
+        result.data.forEach((item) => {
+          var equipmentId = item.feature.attributes.network_node_object_id
+          var boundaryId = item.feature.objectId
           this.equipmentIdToBoundaryId[equipmentId] = boundaryId
           this.boundaryIdToEquipmentId[boundaryId] = equipmentId
         })
         this.updateObjectIdsToHide()
         // We have a list of equipment boundaries. Populate them in the map object
-        this.createMapObjects && this.createMapObjects(result.data)
+        // Filter out all non-deleted features - we do not want to create map objects for deleted features.
+        var features = result.data
+                         .filter((item) => item.crudAction !== 'delete')
+                         .map((item) => item.feature)
+        this.createMapObjects && this.createMapObjects(features)
       })
       .catch((err) => {
         // Log the error, then get out of "plan edit" mode.
         this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
         this.$timeout()
-        console.warn(err)
+        console.error(err)
       })
   }
 
