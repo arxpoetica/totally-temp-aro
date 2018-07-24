@@ -357,12 +357,12 @@ class MapObjectEditorController {
             // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
-              path.setAt(path.length, path.getAt(0))
+              path.setAt(0, path.getAt(path.length - 1))
               //path.forEach((item) => console.log(`${item.lat()}, ${item.lng()}`))
               self.onModifyObject && self.onModifyObject({mapObject})
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
-              path.setAt(0, path.getAt(path.length - 1))
+              path.setAt(path.length - 1, path.getAt(0))
               self.onModifyObject && self.onModifyObject({mapObject})
             }
           } else {
