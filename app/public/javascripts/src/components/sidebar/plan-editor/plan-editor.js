@@ -705,14 +705,24 @@ class PlanEditorController {
                 // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
                 // later turns on auto-recalculate, it will generate the entire subnet.
                 var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
-                return this.assignSubnetParent(currentEquipmentWithSubnetId)
+                if (this.networkNodeTypeCanHaveSubnet(equipmentFeature.networkNodeType)) {
+                  return this.assignSubnetParent(currentEquipmentWithSubnetId)
+                } else {
+                  return Promise.reject({ softReject: true, message: `Network node type ${equipmentFeature.networkNodeType} does not support subnet calculation.` })
+                }
               })
               .then(() => {
                 if (this.autoRecalculateSubnet) {
                   this.recalculateSubnetForEquipmentChange(feature)
                 }
               })
-              .catch((err) => console.error(err))
+              .catch((err) => {
+                if (err.softReject) {
+                  console.info(err.message)
+                } else {
+                  console.error(err)
+                }
+              })
             this.$timeout()
           })
           .catch((err) => console.error(err))
@@ -727,14 +737,24 @@ class PlanEditorController {
             // Always assign subnet parent on object creation, even if we are not creating a route. This way, if the user
             // later turns on auto-recalculate, it will generate the entire subnet.
             var currentEquipmentWithSubnetId = result.data.filter((item) => item.objectId === equipmentObject.objectId)[0]
-            return this.assignSubnetParent(currentEquipmentWithSubnetId)
+            if (this.networkNodeTypeCanHaveSubnet(feature.networkNodeType)) {
+              return this.assignSubnetParent(currentEquipmentWithSubnetId)
+            } else {
+              return Promise.reject({ softReject: true, message: `Network node type ${feature.networkNodeType} does not support subnet calculation.` })
+            }
           })
           .then(() => {
             if (this.autoRecalculateSubnet) {
               this.recalculateSubnetForEquipmentChange(feature)
             }
           })
-          .catch((err) => console.error(err))
+          .catch((err) => {
+            if (err.softReject) {
+              console.info(err.message)
+            } else {
+              console.error(err)
+            }
+          })
       }
     } else if (!this.isMarker(mapObject)) {
       // If the user has drawn the boundary, we will have an associated object in the "feature" attributes. Save associations.
@@ -873,6 +893,11 @@ class PlanEditorController {
     //} 
   }
 
+  // Returns true if the specified network node type can have a subnet
+  networkNodeTypeCanHaveSubnet(networkNodeType) {
+    return (networkNodeType !== 'fiber_distribution_terminal') && (networkNodeType !== 'splice_point')
+  }
+
   assignSubnetParent(equipmentFeature) {
     const searchBody = {
       nodeType: equipmentFeature.networkNodeType,
@@ -905,7 +930,11 @@ class PlanEditorController {
           return Promise.resolve(currentEquipmentWithSubnetId.subnetId)
         } else {
           // Either we don't have a "Sticky" assignment, OR this is the first time we are calculating assignment
-          return this.assignSubnetParent(currentEquipmentWithSubnetId)
+          if (this.networkNodeTypeCanHaveSubnet(equipmentFeature.networkNodeType)) {
+            return this.assignSubnetParent(currentEquipmentWithSubnetId)
+          } else {
+            return Promise.reject({ softReject: true, message: `Network node type ${equipmentFeature.networkNodeType} does not support subnet calculation.`})
+          }
         }
       })
       .then((closestCO) => {
@@ -966,7 +995,13 @@ class PlanEditorController {
           })
         })
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        if (err.softReject) {
+          console.info(err.message)
+        } else {
+          console.error(err)
+        }
+      })
   }
 
   updateObjectIdsToHide() {
