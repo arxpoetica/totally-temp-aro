@@ -181,12 +181,12 @@ class BoundariesController {
       }
     }
     
-    layerSettings['analysis_layer'] = {
+    layerSettings['analysis_layer'] = layerSettings['aggregated_analysis_layer'] = {
       dataUrls: [],
       renderMode: 'PRIMITIVE_FEATURES',
       selectable: true,
-      strokeStyle: '#333333',
-      lineWidth: 1,
+      strokeStyle: '#ff0000',
+      lineWidth: 2,
       fillStyle: "transparent",
       opacity: 0.7,
       zIndex: 3530, // ToDo: MOVE THIS TO A SETTINGS FILE!
@@ -232,7 +232,6 @@ class BoundariesController {
       }
     }
       
-    layerSettings['aggregated_analysis_layer'] = layerSettings['aggregated_census_blocks']
     layerSettings['default'] = layerSettings['wirecenter']
     	  
     // Make a copy of the state mapLayers. We will update this
@@ -258,16 +257,11 @@ class BoundariesController {
             var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
 
-            var url = layer.api_endpoint.replace('${tilePointTransform}', pointTransform)
-            url = url.replace('${layerId}', selectedServiceAreaLibrary.identifier)
-            url = url.replace('${analysisLayerId}', layer.analysisLayerId)
-
             var settingsKey
             pointTransform === 'smooth' ? settingsKey = 'aggregated_' + layer.type : settingsKey = layer.type
 
             if (!layerSettings.hasOwnProperty(settingsKey)) { settingsKey = 'default' }
             oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-            // oldMapLayers[mapLayerKey].dataUrls = [url]
             var tileDefinition = angular.copy(layer.tileDefinition)
             this.objectKeyReplace(tileDefinition, '{transform}', pointTransform)
             this.objectKeyReplace(tileDefinition, '{libraryId}', selectedServiceAreaLibrary.identifier)
@@ -300,8 +294,9 @@ class BoundariesController {
           type: 'analysis_layer',
           api_endpoint: "/tile/v1/analysis_area/tiles/${analysisLayerId}/${tilePointTransform}/",
           tileDefinition: {
-            dataId: 'v1.tiles.analysis_area.{analysisLayerId}',
+            dataId: 'v1.tiles.analysis_area.{analysisLayerId}.{transform}',
             vtlType: 'AnalysisAreaLayer',
+            polyTransform: '{transform}',
             analysisLayerId: '{analysisLayerId}'
           },
           analysisLayerId: analysisLayer.id,
