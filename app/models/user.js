@@ -137,7 +137,7 @@ module.exports = class User {
   }
 
   static login (email, password) {
-    var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
+    var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE LOWER(email)=$1'
     var user
 
     return database.findOne(sql, [email.toLowerCase()])
@@ -290,7 +290,7 @@ module.exports = class User {
       .then(() => {
         var base_url = config.base_url
         var text = dedent`
-          You're receiving this email because a password reset was requested for your user account in the ${config.client_carrier_name} ARO platform
+          You're receiving this email because a password reset was requested for your user account in the ARO platform
 
           Follow the link below to reset your password
           ${base_url + '/reset_password?' + querystring.stringify({ code: code })}
