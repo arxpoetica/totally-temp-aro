@@ -195,6 +195,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     //console.log(zoomLevel)
     state.requestSetMapZoom.next(zoomLevel)
   }
+
+  $scope.getBackgroungColor = (layer) => {
+    return layer.drawingOptions.strokeStyle
+  }
   
   // Create a new set of map layers
   state.appReadyPromise.then(() => {
