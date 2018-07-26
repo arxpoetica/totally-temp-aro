@@ -397,12 +397,24 @@ class MapTileRenderer {
     }
   }
 
+  shouldRenderFeature(feature) {
+    // For now, just hide equipment features that are Planned and Deleted
+    return (!feature.properties.deployment_type
+            || (feature.properties.deployment_type === 1)
+            || (feature.properties.is_deleted !== 'true'))
+  }
+
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
+
+      if (!this.shouldRenderFeature(feature)) {
+        continue
+      }
+
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id  
