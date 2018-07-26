@@ -57,10 +57,7 @@ class PlanInfoController {
     updatePlan.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
 
 
-    this.$http.put(`/service/v1/plan?user_id=${this.currentUser.id}`, updatePlan)
-      .then((response) => {
-        this.loadPlans()
-      })
+    this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
   }
 
   setPlanLocation() {
@@ -128,12 +125,10 @@ PlanInfoController.$inject = ['$http', 'state', '$timeout']
 let planInfo = {
   templateUrl: '/components/sidebar/view/plan-info.html',
   bindings: {
-    currentUser: '<',
     getTagDetails: '&',
     getSaTagDetails: '&',
     updateTag: '&',
-    deletePlan: '&',
-    loadPlans: '&'
+    deletePlan: '&'
   },
   controller: PlanInfoController
 }
