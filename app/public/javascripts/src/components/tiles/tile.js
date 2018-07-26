@@ -425,7 +425,7 @@ class MapTileRenderer {
           //greyout an RT with hsiEanbled true for frontier client
           if(config.ARO_CLIENT === 'frontier' && 
             (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam' )
-            && !JSON.parse(feature.properties.hsiEnabled)) {
+            && (feature.properties.hsiEnabled !== 'true')) {
             entityImage = featureData.greyOutIcon
           }
         } 
