@@ -952,6 +952,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     newPlan.ephemeral = false
     newPlan.latitude = service.defaultPlanCoordinates.latitude
     newPlan.longitude = service.defaultPlanCoordinates.longitude
+    delete newPlan.optimizationId
     newPlan.tagMapping = {
       global:[],
       linkTags:{
