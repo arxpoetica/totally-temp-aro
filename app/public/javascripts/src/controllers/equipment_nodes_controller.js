@@ -153,9 +153,9 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // Hack to show copper in toolbar ruler options
     Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
-      if(cable === 'copper' && $scope.configuration.networkEquipment.cables['copper'].checked) {  
+      if(cable === 'COPPER' && $scope.configuration.networkEquipment.cables['COPPER'].checked) {  
         state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
-      } else if (cable === 'copper' && !$scope.configuration.networkEquipment.cables['copper'].checked){
+      } else if (cable === 'COPPER' && !$scope.configuration.networkEquipment.cables['COPPER'].checked){
         var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
         index !== -1 && state.rulerActions.splice(index, 1)
       }
@@ -194,6 +194,10 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     zoomLevel = Number(zoomLevel) + 1
     //console.log(zoomLevel)
     state.requestSetMapZoom.next(zoomLevel)
+  }
+
+  $scope.getBackgroungColor = (layer) => {
+    return layer.drawingOptions.strokeStyle
   }
   
   // Create a new set of map layers

@@ -16,6 +16,7 @@ class LocationEditorController {
     this.selectedMapObject = null
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
+    this.deletedFeatures = []
     this.currentTransaction = null
     this.lastUsedNumberOfLocations = 1
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
@@ -58,19 +59,24 @@ class LocationEditorController {
       })
       .then((result) => {
         this.currentTransaction = result.data
-        return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/features`)
+        return this.$http.get(`/service/library/transaction/${this.currentTransaction.id}/transaction_features`)
       })
       .then((result) => {
         // We have a list of features. Replace them in the objectIdToProperties map.
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
+        // Filter out all non-deleted features - we do not want to create map objects for deleted features.
+        var features = result.data
+                         .filter((item) => item.crudAction !== 'delete')
+                         .map((item) => item.feature)
+        this.deletedFeatures = result.data.filter((item) => item.crudAction === 'delete')
         // Put the iconUrl in the features list
-        result.data.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
+        features.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
-        this.createMapObjects && this.createMapObjects(result.data)
+        this.createMapObjects && this.createMapObjects(features)
         // We now have objectIdToMapObject populated.
-        result.data.forEach((feature) => {
+        features.forEach((feature) => {
           var locationProperties = new LocationProperties()
           locationProperties.numberOfLocations = feature.attributes.number_of_households
           this.objectIdToProperties[feature.objectId] = locationProperties
@@ -84,7 +90,8 @@ class LocationEditorController {
   }
 
   getFeaturesCount() {
-    return Object.keys(this.objectIdToProperties).length
+    // For this count we should show the deleted features too
+    return (Object.keys(this.objectIdToProperties).length + this.deletedFeatures.length)
   }
 
   commitTransaction() {

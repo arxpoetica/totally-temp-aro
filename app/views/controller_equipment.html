@@ -12,6 +12,13 @@
     float: right;
     cursor: pointer;
   }
+
+  .box{
+	  width:16px;
+	  height:16px;
+    margin-right: 15px;
+    float:left
+  }
   
 </style>
 <div id="equipment_nodes_controller">
@@ -58,7 +65,7 @@
           </tr>
           <tr><td colspan="2"><strong>Cable Plant</strong></td></tr>
           <tr ng-repeat="(layerKey, equipmentLayer) in configuration.networkEquipment.cables">
-            <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}</td>
+            <td><div class="box" ng-style="{ 'background-color': getBackgroungColor(equipmentLayer) }"></div>{{equipmentLayer.label}}</td>
             <td>
               <input type="checkbox" class="checkboxfill"
                      ng-checked="equipmentLayer.checked"

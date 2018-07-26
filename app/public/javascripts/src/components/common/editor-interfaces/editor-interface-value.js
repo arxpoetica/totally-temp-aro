@@ -29,16 +29,21 @@ class EditorInterfaceValueController {
   getEnumSet(){
     if ("enum" == this.displayProps.displayDataType && this.displayProps.enumTypeURL){
       AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
+        //console.log('get Enum: '+this.displayProps.enumTypeURL)
         this.enumSet = enumSet
-        //if (!this.model && this.enumSet.length > 0){
-        //  this.model = this.enumSet[0].id
-        //  this.onChange()
-        //}
+        
+        var isInSet = false
         for (let i=0; i<this.enumSet.length; i++){
           if (this.enumSet[i].id == this.model){
             this.enumVal = this.enumSet[i].description
+            isInSet = true
             break
           }
+        }
+        if (!isInSet && this.enumSet && this.enumSet.length > 0){
+          this.enumVal = this.enumSet[0].description
+          this.model = this.enumSet[0].id
+          this.onChange()
         }
       }, (errorText) => {
         console.log(errorText)
