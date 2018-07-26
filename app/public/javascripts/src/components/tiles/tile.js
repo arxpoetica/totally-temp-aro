@@ -399,8 +399,6 @@ class MapTileRenderer {
 
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
-    var entityImage = featureData.icon
-
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
@@ -416,6 +414,7 @@ class MapTileRenderer {
       
       var selectedListType = null 
       var selectedListId = null 
+      var entityImage = featureData.icon
       if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
         var fullDataType = feature.properties._data_type + '.'
         selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
