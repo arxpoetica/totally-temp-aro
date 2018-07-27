@@ -398,10 +398,15 @@ class MapTileRenderer {
   }
 
   shouldRenderFeature(feature) {
-    // For now, just hide equipment features that are Planned and Deleted
-    return (!feature.properties.deployment_type
-            || (feature.properties.deployment_type === 1)
-            || (feature.properties.is_deleted !== 'true'))
+    if (feature._data_type && feature._data_type.split('.')[0] === 'equipment') {
+      // For now, just hide equipment features that are Planned and Deleted
+      return (!feature.properties.deployment_type
+        || (feature.properties.deployment_type === 1)
+        || (feature.properties.is_deleted !== 'true'))
+    } else {
+      // For all other features, do not display if the is_deleted flag is true
+      return feature.properties.is_deleted !== 'true'
+    }
   }
 
   // Render a set of features on the map
