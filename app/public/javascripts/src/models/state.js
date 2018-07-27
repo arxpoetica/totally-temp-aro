@@ -111,7 +111,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
 
   service.allowViewModeClickAction = () => {
-    return service.selectedDisplayMode.getValue() === service.displayModes.VIEW && 
+    return (service.selectedDisplayMode.getValue() === service.displayModes.VIEW || service.selectedDisplayMode.getValue() === service.displayModes.EDIT_PLAN) && 
     service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
     !service.isRulerEnabled //ruler mode click should not enable other  view action
   }

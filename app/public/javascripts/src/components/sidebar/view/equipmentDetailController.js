@@ -19,226 +19,42 @@ class EquipmentDetailController {
     this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
     this.networkNodeLabel = ''
     
-    /*
-    this.debugFeature = {
-      "physicallyLinked":"true",
-      "site_info":{  
-         "siteName":"ROAD 7 & HWY 281",
-         "siteClli":"QNCYWADX",
-         "hsiOfficeCode":null,
-         "dpiEnvironment":null,
-         "address":"16968 Road 7 NW, QUINCY 98848"
-      },
-      "notes":null,
-      "t1":null,
-      "fiberAvailable":null,
-      "existingEquipment":[
-        {  
-         "latency":null,
-         "clliCode":"QNCYWADXH00",
-         "modelNumber":"ADTRAN TA 5004",
-         "switchType":null,
-         "deploymentDate":"2017-06-01",
-         "uplinkSpeed":null
-        }, 
-        {  
-          "latency":null,
-          "clliCode":"QNCYWADXH00",
-          "modelNumber":"ADTRAN TA 5004",
-          "switchType":null,
-          "deploymentDate":"2017-06-01",
-          "uplinkSpeed":null
-         }
-      ]
-    }
-    
-    // an example display property object 
-    this.dispProps = {}
-    this.dispProps['equipment'] = [
-      
-      {
-        'displayName': "Site Info", 
-        'editable': false, 
-        'format': "tree", 
-        'propertyName': "siteInfo", 
-        'visible': true, 
-        'children': [
-          {
-            'displayName': "Name", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "siteName", 
-            'levelOfDetail': "1", 
-            'visible': true
-          },
-          {
-            'displayName': "CLLI", 
-            'editable': false, 
-            'format': "", 
-            'propertyName': "siteClli", 
-            'levelOfDetail': "1", 
-            'visible': true
-          },
-          {
-            'displayName': "Address", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "address", 
-            'levelOfDetail': "2", 
-            'visible': true
-          },
-          {
-            'displayName': "DPI Environment", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "dpiEnvironment", 
-            'levelOfDetail': "2", 
-            'visible': true
-          },
-          {
-            'displayName': "HSI OfficeCode", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "hsiOfficeCode", 
-            'levelOfDetail': "2", 
-            'visible': true
-          }, 
-          {
-            'displayName': "Physically Linked", 
-            'editable': true, 
-            'format': "check", 
-            'propertyName': "physicallyLinked", 
-            'levelOfDetail': "2", 
-            'visible': true
-          }, 
-          {
-            'displayName': "Fiber Available", 
-            'editable': true, 
-            'format': "check", 
-            'propertyName': "fiberAvailable", 
-            'levelOfDetail': "2", 
-            'visible': true
-          }, 
-          {
-            'displayName': "T1", 
-            'editable': true, 
-            'format': "check", 
-            'propertyName': "t1", 
-            'levelOfDetail': "2", 
-            'visible': true
-          }, 
-        ]
-      }, 
-      {
-        'displayName': "Equipment", 
-        'editable': false, 
-        'format': "list", 
-        'propertyName': "existingEquipment", 
-        'visible': true, 
-        'children': [
-          {
-            'displayName': "CLLI", 
-            'editable': false, 
-            'format': "string", 
-            'propertyName': "clliCode", 
-            'levelOfDetail': "1", 
-            'visible': true
-          },
-          {
-            'displayName': "modelNumber", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "modelNumber", 
-            'levelOfDetail': "1", 
-            'visible': true
-          },
-          {
-            'displayName': "Latency", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "latency", 
-            'levelOfDetail': "1", 
-            'visible': true
-          },
-          {
-            'displayName': "Switch Type", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "switchType", 
-            'levelOfDetail': "2", 
-            'visible': true
-          },
-          {
-            'displayName': "Deployment Date", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "deploymentDate", 
-            'levelOfDetail': "2", 
-            'visible': true
-          },
-          {
-            'displayName': "Uplink Speed", 
-            'editable': true, 
-            'format': "string", 
-            'propertyName': "uplinkSpeed", 
-            'levelOfDetail': "2", 
-            'visible': true
-          }
-        ]
-      }, 
-      {
-        'displayName': "notes", 
-        'editable': true, 
-        'enumEntityName': "", 
-        'format': "text", 
-        'propertyName': "Notes", 
-        'visible': true
-      }
-      
-    ]
-    */
-    
-    // DEBUG ONLY 
-    //this.selectedEquipmentInfoChanges = this.debugFeature
-    //this.selectedEquipmentInfoDispProps = this.dispProps['equipment']
-    
-    
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this function is assuring the properties we need exist. 
       //In ruler mode click should not perform any view action's
-    if(this.state.allowViewModeClickAction()) {  
-      if (!options.hasOwnProperty('equipmentFeatures')) return
-      if (0 == options.equipmentFeatures.length) return
-      
-      var plan = state.plan.getValue()
-      if (!plan || !plan.hasOwnProperty('id')) return
-      
-      
-      var equipmentList = options.equipmentFeatures
-      var selectedFeature = null
-      var featureId = null
-      for (var featureI = 0; featureI < equipmentList.length; featureI++){
-        var feature = equipmentList[featureI]
-        if (feature.hasOwnProperty('object_id')){
+      if(this.state.allowViewModeClickAction()) {  
+        if (!options.hasOwnProperty('equipmentFeatures')) return
+        if (0 == options.equipmentFeatures.length) return
         
-          if ( feature.hasOwnProperty('id') ){
-            featureId = feature.id
-          }else if ( feature.hasOwnProperty('location_id') ){
-            featureId = feature.location_id
-          }
+        var plan = state.plan.getValue()
+        if (!plan || !plan.hasOwnProperty('id')) return
+        
+        
+        var equipmentList = options.equipmentFeatures
+        var selectedFeature = null
+        var featureId = null
+        for (var featureI = 0; featureI < equipmentList.length; featureI++){
+          var feature = equipmentList[featureI]
+          if (feature.hasOwnProperty('object_id')){
           
-          if (null != featureId){
-            selectedFeature = feature
-            break
+            if ( feature.hasOwnProperty('id') ){
+              featureId = feature.id
+            }else if ( feature.hasOwnProperty('location_id') ){
+              featureId = feature.location_id
+            }
+            
+            if (null != featureId){
+              selectedFeature = feature
+              break
+            }
           }
         }
-      }
-      
-      if (null != selectedFeature){
-        this.updateSelectedState(selectedFeature, featureId)
-        this.displayEquipment(plan.id, selectedFeature.object_id)
-      }
+        
+        if (null != selectedFeature){
+          this.updateSelectedState(selectedFeature, featureId)
+          this.displayEquipment(plan.id, selectedFeature.object_id)
+        }
       }
     })
     

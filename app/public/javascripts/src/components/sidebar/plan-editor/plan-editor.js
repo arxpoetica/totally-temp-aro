@@ -38,6 +38,8 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.coSearchType = 'SERVICE_AREA'
     this.getUUIDsFromServer()
+    this.viewFeature = {}
+    this.isEditFeatureProps = true
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     this.allEditableNetworkNodeTypes = [
       'central_office',
@@ -615,6 +617,7 @@ class PlanEditorController {
 
   // Returns the configuration of the currently selected network type
   getSelectedNetworkConfig() {
+    if (!this.selectedMapObject) return
     return this.getNetworkConfig(this.selectedMapObject.objectId)
   }
   
@@ -675,8 +678,38 @@ class PlanEditorController {
   
   // ---
   
+  updateSelectedState(selectedFeature, featureId){
+    // tell state
+    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+    selectedViewFeaturesByType.equipment = {}
+    if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
+      selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+    }
+    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+  }
+  
+  displayViewObject(feature, iconUrl){
+    var planId = this.state.plan.getValue().id
+    
+    this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+    .then((result) => {
+      try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
+        this.viewFeature = AroFeatureFactory.createObject(result.data)
+        this.isEditFeatureProps = false
+        //this.updateSelectedState(feature, feature.objectId)
+      }catch(error) {
+        console.error(error)
+      }
+      
+    })
+  }
+  
   handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
+    // need to include these in the select action too
+    //this.isEditFeatureProps = true
+    //this.updateSelectedState()
+    
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       var isNew = true
@@ -692,12 +725,15 @@ class PlanEditorController {
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           })
           .then((result) => {
-            //console.log(result)
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
-            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
-                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+            
+            var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+                                                              equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+            //this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+            //                                                                        equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+            this.objectIdToProperties[mapObject.objectId] = equipmentProperties
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
@@ -713,11 +749,13 @@ class PlanEditorController {
                 }
               })
               .catch((err) => console.error(err))
+            
             this.$timeout()
           })
           .catch((err) => console.error(err))
       } else {
         // nope it's new
+        
         var blankNetworkNodeEquipment = AroFeatureFactory.createObject({dataType:"equipment"}).networkNodeEquipment
         this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties('', '', feature.networkNodeType, this.lastSelectedEquipmentType, blankNetworkNodeEquipment, 'PLANNED')
         var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
@@ -773,6 +811,11 @@ class PlanEditorController {
   
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
+    if (null != mapObject){
+      this.updateSelectedState()
+      this.isEditFeatureProps = true
+    }
+    
     this.selectedMapObject = mapObject
     
     // debug 
