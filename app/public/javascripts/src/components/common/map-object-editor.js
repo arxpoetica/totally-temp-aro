@@ -45,7 +45,7 @@ class MapObjectEditorController {
       fillOpacity: 0.4,
     }
   }
-
+  
   // Get a list of UUIDs from the server
   getUUIDsFromServer() {
     const numUUIDsToFetch = 20
@@ -164,7 +164,15 @@ class MapObjectEditorController {
         this.selectMapObject(null) //deselects the selected equipment 
       }
     })
+    
+    this.comms.createMapObject = (feature, iconUrl) => {
+      this.createMapObject(feature, iconUrl, true, true)
+    }
   }
+  
+  //$onChanges(changes){
+  //  console.log(changes)
+  //}
   
   makeIconAnchor(iconUrl, callback){
     if ('undefined' == typeof callback) callback = {}
@@ -327,13 +335,14 @@ class MapObjectEditorController {
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
 
-  createMapObject(feature, iconUrl, usingMapClick) {
+  createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride) {
+    if ('undefined' == typeof existingObjectOverride) existingObjectOverride = false
     var mapObject = null
     if (feature.geometry.type === 'Point') {
       
       // if an existing object just show don't edit
-      if (feature.isExistingObject){
-        this.displayViewObject({feature:feature, iconUrl:iconUrl})
+      if (feature.isExistingObject && !existingObjectOverride){
+        this.displayViewObject({feature:feature})
         this.selectMapObject(null)
         return
       }
@@ -734,6 +743,7 @@ let mapObjectEditor = {
     onModifyObject: '&',
     onDeleteObject: '&',
     displayViewObject: '&', 
+    comms: '=', 
     onObjectDroppedOnMarker: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds

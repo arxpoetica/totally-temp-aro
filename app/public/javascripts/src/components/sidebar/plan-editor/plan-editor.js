@@ -38,8 +38,12 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.coSearchType = 'SERVICE_AREA'
     this.getUUIDsFromServer()
+    this.viewEventFeature = {}
     this.viewFeature = {}
+    this.viewIconUrl = ''
+    this.viewLabel = ''
     this.isEditFeatureProps = true
+    this.mapObjectEditorComms = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     this.allEditableNetworkNodeTypes = [
       'central_office',
@@ -689,12 +693,17 @@ class PlanEditorController {
   }
   
   displayViewObject(feature, iconUrl){
+    //this.viewIconUrl = iconUrl
     var planId = this.state.plan.getValue().id
     
     this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
       try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
+        this.viewEventFeature = feature
         this.viewFeature = AroFeatureFactory.createObject(result.data)
+        var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+        this.viewLabel = viewConfig.label
+        this.viewIconUrl = viewConfig.iconUrl
         this.isEditFeatureProps = false
         //this.updateSelectedState(feature, feature.objectId)
       }catch(error) {
@@ -702,6 +711,12 @@ class PlanEditorController {
       }
       
     })
+  }
+  
+  editViewObject(){
+    //this.sendNewFeature = {'feature': this.viewEventFeature, 'iconUrl': this.viewIconUrl}
+    //createMapObject(this.viewEventFeature, this.viewIconUrl, true, true)
+    this.mapObjectEditorComms.createMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
   handleObjectCreated(mapObject, usingMapClick, feature) {
