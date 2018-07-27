@@ -116,6 +116,7 @@ class PlanEditorController {
   resumeOrCreateTransaction() {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
+    var transactionFeatures = []
     // See if we have an existing transaction for the currently selected location library
     // Moved resume or create transaction to state so can get current transaction is accessed by other components
     this.state.resumeOrCreateTransaction()
@@ -129,16 +130,16 @@ class PlanEditorController {
         this.equipmentIdToBoundaryId = {}
         this.boundaryIdToEquipmentId = {}
         // Filter out all non-deleted features - we do not want to create map objects for deleted features.
-        var features = result.data
-                         .filter((item) => item.crudAction !== 'delete')
-                         .map((item) => item.feature)
+        transactionFeatures = result.data
+                                .filter((item) => item.crudAction !== 'delete')
+                                .map((item) => item.feature)
         // Save the iconUrls in the list of objects returned from aro-service
-        features.forEach((feature) => feature.iconUrl = this.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
+        transactionFeatures.forEach((feature) => feature.iconUrl = this.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
-        this.createMapObjects && this.createMapObjects(features)
+        this.createMapObjects && this.createMapObjects(transactionFeatures)
         // We now have objectIdToMapObject populated.
-        features.forEach((feature) => {
+        transactionFeatures.forEach((feature) => {
           const attributes = feature.attributes
           var networkNodeEquipment = AroFeatureFactory.createObject(feature).networkNodeEquipment
           const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
@@ -169,6 +170,12 @@ class PlanEditorController {
                          .filter((item) => item.crudAction !== 'delete')
                          .map((item) => item.feature)
         this.createMapObjects && this.createMapObjects(features)
+        // If we have at least one transaction feature, do a recalculate subnet on it. Pass in all connected COs in the transaction.
+        if (transactionFeatures.length > 0) {
+          var allCentralOfficeIds = new Set()
+          transactionFeatures.forEach((item) => allCentralOfficeIds.add(item.subnetId))
+          this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
+        }
       })
       .catch((err) => {
         // Log the error, then get out of "plan edit" mode.
@@ -713,7 +720,7 @@ class PlanEditorController {
               })
               .then(() => {
                 if (this.autoRecalculateSubnet) {
-                  this.recalculateSubnetForEquipmentChange(feature)
+                  this.recalculateSubnetForEquipmentChange(feature, Object.keys(this.subnetMapObjects))
                 }
               })
               .catch((err) => {
@@ -745,7 +752,7 @@ class PlanEditorController {
           })
           .then(() => {
             if (this.autoRecalculateSubnet) {
-              this.recalculateSubnetForEquipmentChange(feature)
+              this.recalculateSubnetForEquipmentChange(feature, Object.keys(this.subnetMapObjects))
             }
           })
           .catch((err) => {
@@ -824,7 +831,7 @@ class PlanEditorController {
                 coordinates: [mapObject.position.lng(), mapObject.position.lat()]
               }
             }
-            this.recalculateSubnetForEquipmentChange(equipmentToRecalculate)
+            this.recalculateSubnetForEquipmentChange(equipmentToRecalculate, Object.keys(this.subnetMapObjects))
           }
           this.$timeout()
         })
@@ -863,7 +870,7 @@ class PlanEditorController {
         .then((result) => {
           if (result && result.data.length > 0) {
             // There is at least one piece of equipment in the transaction. Use that for routing
-            this.recalculateSubnetForEquipmentChange(result.data[0])
+            this.recalculateSubnetForEquipmentChange(result.data[0], Object.keys(this.subnetMapObjects))
           } else {
             // There is no equipment left in the transaction. Just remove the subnet map objects
             this.clearAllSubnetMapObjects()
@@ -917,7 +924,7 @@ class PlanEditorController {
       .then(() => Promise.resolve(closestCentralOfficeId))
   }
 
-  recalculateSubnetForEquipmentChange(equipmentFeature) {
+  recalculateSubnetForEquipmentChange(equipmentFeature, subnetsToDelete) {
     var recalculatedSubnets = {}
     var setOfCOIds = new Set()
     var equipmentObject = this.formatEquipmentForService(equipmentFeature.objectId)
@@ -939,9 +946,9 @@ class PlanEditorController {
       })
       .then((closestCO) => {
         closestCentralOfficeId = closestCO
-        // Delete subnet features for all central offices
+        // Delete subnet features for all specified central offices.
         var lastResult = Promise.resolve()
-        Object.keys(this.subnetMapObjects).forEach((centralOfficeObjectId) => {
+        subnetsToDelete.forEach((centralOfficeObjectId) => {
           lastResult = lastResult.then(() => this.$http.delete(`/service/plan-transaction/${this.currentTransaction.id}/subnet-feature/${centralOfficeObjectId}`))
         })
         return lastResult
@@ -951,7 +958,7 @@ class PlanEditorController {
         const recalcBody = {
           subNets: []
         }
-        Object.keys(this.subnetMapObjects).forEach((centralOfficeObjectId) => setOfCOIds.add(centralOfficeObjectId))
+        subnetsToDelete.forEach((centralOfficeObjectId) => setOfCOIds.add(centralOfficeObjectId))
         setOfCOIds.add(closestCentralOfficeId)
         setOfCOIds.forEach((centralOfficeObjectId) => recalcBody.subNets.push({ objectId: centralOfficeObjectId }))
         return this.$http.post(`/service/plan-transaction/${this.currentTransaction.id}/subnets-recalc`, recalcBody)
