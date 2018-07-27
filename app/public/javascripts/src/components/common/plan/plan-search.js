@@ -5,6 +5,8 @@ class PlanSearchController {
     this.state = state
 
     this.search_text = ''
+    this.searchText = []
+    this.searchList = []
     this.allPlans  = false
     this.planOptions = {
       url: '/service/v1/plan',
@@ -73,7 +75,7 @@ class PlanSearchController {
     var selectedFilterPlans = _.filter(this.searchText,(plan) => {
       if(_.isString(plan)) return plan
     })
-    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name ? tag.name : tag.code).concat("\""))
+    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name || tag.code || tag.firstName).concat("\""))
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
     this.search_text = selectedFilters.join(' ')
   }
@@ -102,11 +104,20 @@ class PlanSearchController {
   getSATagCategories(currentPlanTags) {
     return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
+  
   applyOwnerSearchFilter(selectedFilters) {
     var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'owner'
+      tag.type = 'created_by'
       return tag
     })
+    this.applySearch(filters)
+  }
+
+  applyTagSearchFilter(selectedFilters) {
+    var filters = _.map(selectedFilters, (tag) => { 
+      tag.type = 'tag'
+      return tag
+    }) 
     this.applySearch(filters)
   }
 
