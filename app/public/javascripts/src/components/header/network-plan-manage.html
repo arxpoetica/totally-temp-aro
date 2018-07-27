@@ -57,113 +57,18 @@
   </ul>
 
   <plan-info ng-if="$ctrl.currentView == $ctrl.views.Plan_Info"
-    current-user="$ctrl.user"
     get-tag-details="$ctrl.getTagCategories(tagObject)"
     get-sa-tag-details="$ctrl.getSATagCategories(tagObject)"
     update-tag="$ctrl.updateTag(plan,removeTag)"
-    delete-plan="$ctrl.deletePlan(plan)"
-    load-plans="$ctrl.loadPlans()"></plan-info>
+    delete-plan="$ctrl.deletePlan(plan)"></plan-info>
+
   <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
 
-  <div ng-if="$ctrl.currentView == $ctrl.views.Search_plans">
-    <div class="indent-1">
-      <input type="checkbox" class="checkboxfill" 
-        name="ctype-name" disabled> Refresh Plans on map move
-    </div>
+  <plan-search ng-if="$ctrl.currentView == $ctrl.views.Search_plans"
+               show-refresh-plans-on-map-move="true"
+               show-plan-delete-button="true"
+               on-plan-selected="$ctrl.loadPlan(plan)"
+               on-plan-delete-requested="$ctrl.deletePlan(plan)">
+  </plan-search>
 
-    <div class="input-group">
-      <div class="form-group has-feedback has-clear">
-        <ui-select tag-on-blur tagging tagging-label="false" tagging-tokens="SPACE|,|/" multiple ng-model="$ctrl.searchText"
-          theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
-          <ui-select-match placeholder="Search for Plan Names">
-            <span class="tag" ng-if=$item.type>
-              {{$item.type}}:
-              <span class="label" ng-if="$item.type!='svc'" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name || $item.code}}</span>
-              <span class="label satags satag" ng-if="$item.type=='svc'">{{$item.code}}</span>
-            </span>
-            <span class="tag" ng-if=!$item.type>
-              {{$item}}
-            </span>
-          </ui-select-match>
-          <ui-select-choices class="ui-select-search" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
-            <div>
-              <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code}}
-            </div>
-          </ui-select-choices>
-        </ui-select>
-      </div>
-      <span class="input-group-addon" ng-click="$ctrl.loadPlans()" style="cursor:pointer">
-        <span class="glyphicon glyphicon-search"></span>
-      </span>
-    </div>
-
-    <div class="indent-1 plan-info">
-      <span style="align-self:center">Filter by:</span>
-      <search-plan-filter 
-        object-name="Tag"
-        search-list="$ctrl.state.listOfTags"
-        apply-search="$ctrl.applyTagSearchFilter(selectedFilters)">
-      </search-plan-filter>
-      <!-- <search-plan-filter object-name="Owner"
-      search-list="$ctrl.state.listOfTags"
-      apply-search="$ctrl.applyOwnerSearchFilter({selectedFilters:selectedFilters})"></search-plan-filter> -->
-      <search-plan-filter 
-        object-name="Service Area"
-        search-list="$ctrl.state.listOfServiceAreaTags"
-        apply-search="$ctrl.applySaSearchFilter(selectedFilters)"
-        refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></search-plan-filter>
-    </div>
-
-    <p ng-show="$ctrl.plans.length < 1" class="text-center">
-      No plans found
-    </p>
-
-    <div ng-show="$ctrl.plans.length > 0">
-      <table id="tblSelectPlans" class="table table-condensed table-striped">
-        <tbody>
-          <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
-            <td>
-              <b><a href="javascript:void(0)" ng-click="$ctrl.selectPlan(plan)">{{plan.name}}</a></b>
-              <div class="tags">
-                <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
-                  class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
-                <span class="label"> {{tag.name}} 
-                  <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
-                </span>
-              </div>
-              <div class="tags">
-                <div ng-repeat="tag in $ctrl.getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds) track by tag.id" 
-                  class="tag label satags">
-                <span class="label satag"> {{tag.code}} 
-                  <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
-                </span>
-              </div>
-            </td>
-            <td>
-              <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
-              <!-- <a ng-if="!plan.progress" class="btn btn-sm btn-primary"><span class="fa fa-folder"></span></a> -->
-              <a ng-if="!plan.progress" class="btn btn-sm btn-danger" ng-click="$ctrl.deletePlan(plan)"><span class="glyphicon glyphicon-trash"></span></a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <nav class="text-center" style="max-height: 35px">
-        <ul class="pagination" style="margin: 0px">
-          <li ng-class="{ disabled: $ctrl.currentPage === 1 }">
-            <a href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-          </li>
-          <li ng-repeat="page in $ctrl.pages" ng-class="{ active: page === $ctrl.currentPage }">
-            <a href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
-          </li>
-          <li ng-class="{ disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
-            <a href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </div>
 </div>

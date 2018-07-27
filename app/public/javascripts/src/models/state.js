@@ -897,14 +897,19 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       .catch((err) => console.error(err))
   }
 
-  service.createEphemeralPlan = () => {
+  service.createNewPlan = (isEphemeral, planName, parentPlan) => {
+    if (isEphemeral && parentPlan) {
+      return Promise.reject('ERROR: Ephemeral plans cannot have a parent plan')
+    }
+
     // Use reverse geocoding to get the address at the current center of the map
     var planOptions = {
       areaName: '',
       latitude: service.defaultPlanCoordinates.latitude,
       longitude: service.defaultPlanCoordinates.longitude,
       zoomIndex: service.defaultPlanCoordinates.zoom,
-      ephemeral: true
+      ephemeral: isEphemeral,
+      name: planName || 'Untitled'
     }
     return service.getAddressFor(planOptions.latitude, planOptions.longitude)
       .then((address) => {
@@ -914,7 +919,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
       .then((result) => {
         const userId = service.loggedInUser.id
-        const apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
+        var apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
+        if (!isEphemeral && parentPlan) {
+          // A parent plan is specified - append it to the POST url
+          apiEndpoint += `&branch_plan=${parentPlan.id}`
+        }
         return $http.post(apiEndpoint, planOptions)
       })
       .catch((err) => console.error(err))
@@ -932,7 +941,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           return Promise.resolve(result)
         } else {
           // We dont have an ephemeral plan. Create one and send it back
-          return service.createEphemeralPlan()
+          return service.createNewPlan(true)
         }
       })
   }
@@ -943,6 +952,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     newPlan.ephemeral = false
     newPlan.latitude = service.defaultPlanCoordinates.latitude
     newPlan.longitude = service.defaultPlanCoordinates.longitude
+    delete newPlan.optimizationId
     newPlan.tagMapping = {
       global:[],
       linkTags:{

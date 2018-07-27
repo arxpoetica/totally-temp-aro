@@ -397,14 +397,24 @@ class MapTileRenderer {
     }
   }
 
+  shouldRenderFeature(feature) {
+    // For now, just hide equipment features that are Planned and Deleted
+    return (!feature.properties.deployment_type
+            || (feature.properties.deployment_type === 1)
+            || (feature.properties.is_deleted !== 'true'))
+  }
+
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
-    var entityImage = featureData.icon
-
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
+
+      if (!this.shouldRenderFeature(feature)) {
+        continue
+      }
+
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id  
@@ -416,6 +426,7 @@ class MapTileRenderer {
       
       var selectedListType = null 
       var selectedListId = null 
+      var entityImage = featureData.icon
       if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
         var fullDataType = feature.properties._data_type + '.'
         selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
@@ -426,7 +437,7 @@ class MapTileRenderer {
           //greyout an RT with hsiEanbled true for frontier client
           if(config.ARO_CLIENT === 'frontier' && 
             (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam' )
-            && !JSON.parse(feature.properties.hsiEnabled)) {
+            && (feature.properties.hsiEnabled !== 'true')) {
             entityImage = featureData.greyOutIcon
           }
         } 

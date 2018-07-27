@@ -61,7 +61,8 @@ import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import mapObjectEditor from './common/map-object-editor'
 import dropTarget from './common/drop-target'
-import searchPlanFilter from './common/search-plan-filter'
+import planSearch from './common/plan/plan-search'
+import planSearchFilter from './common/plan/plan-search-filter'
 import resourcePermissionsEditor from './common/resource-permissions-editor'
 import accordion from './accordion/accordion'
 import accordionPanelContents from './accordion/accordion-panel-contents'
@@ -138,7 +139,8 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroMultiSelect', aroMultiSelect)
    .component('mapObjectEditor', mapObjectEditor)
    .component('dropTarget', dropTarget)
-   .component('searchPlanFilter', searchPlanFilter)
+   .component('planSearch', planSearch)
+   .component('planSearchFilter', planSearchFilter)
    .component('resourcePermissionsEditor', resourcePermissionsEditor)
    .component('accordion', accordion)
    .component('accordionPanelContents', accordionPanelContents)

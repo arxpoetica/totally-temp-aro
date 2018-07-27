@@ -2,7 +2,18 @@ class PlanInputsModalController {
   constructor(state,$element) {
     this.state    = state
     this.$element = $element
+    this.initModalData()
+  }
+
+  initModalData() {
     this.planName = null
+    this.parentPlan = null
+    const currentPlan = this.state.plan.getValue()
+    if (currentPlan && !currentPlan.isEphemeral) {
+      // IF the current plan is not an ephemeral plan, then set it as the parent plan.
+      this.parentPlan = currentPlan
+    }
+    this.parentPlanSelectorExpanded = false
   }
 
   close() {
@@ -10,26 +21,43 @@ class PlanInputsModalController {
   }
 
   modalShown() {
+    this.initModalData()
     this.state.planInputsModal.next(true)
   }
 
   modalHide() {
     this.state.planInputsModal.next(false)
+    this.initModalData()
   }
 
   savePlanAs() {
-    var currentPlan = this.state.plan.getValue()
-    if (currentPlan.ephemeral) {
-      if (this.planName) {
-        this.state.makeCurrentPlanNonEphemeral(this.planName)
-        this.resetPlanInputs()
-      }
+    if (this.parentPlan) {
+      // A parent plan is specified. Ignore the currently open plan, and just create a new one using
+      // the selected plan name and parent plan
+      this.state.createNewPlan(false, this.planName, this.parentPlan)
+        .then((result) => this.state.loadPlan(result.data.id))
+        .catch((err) => console.error(err))
     } else {
-      if (this.planName) {
-        this.state.copyCurrentPlanTo(this.planName)
-        this.resetPlanInputs()
+      // No parent plan specified
+      var currentPlan = this.state.plan.getValue()
+      if (currentPlan.ephemeral) {
+        if (this.planName) {
+          this.state.makeCurrentPlanNonEphemeral(this.planName)
+          this.resetPlanInputs()
+        }
+      } else {
+        if (this.planName) {
+          this.state.copyCurrentPlanTo(this.planName)
+          this.resetPlanInputs()
+        }
       }
     }
+    this.close()
+  }
+
+  onParentPlanSelected(plan) {
+    this.parentPlan = plan
+    this.parentPlanSelectorExpanded = false
   }
 
   resetPlanInputs() {
@@ -38,8 +66,12 @@ class PlanInputsModalController {
     this.close()
   }
 
+  clearParentPlan() {
+    this.parentPlan = null
+  }
+
   $onInit() {
-    this.$element.find('#plan_inputs_modal > .modal-dialog').css("width","300")
+    this.$element.find('#plan_inputs_modal > .modal-dialog').css('width', '350')
   }
 
 }
@@ -47,34 +79,7 @@ class PlanInputsModalController {
 PlanInputsModalController.$inject = ['state','$element']
 
 let planInputsModal = {
-  template: `
-  <style scoped>
-  .with-margin {
-    margin-bottom: 5px;
-  }
-  </style>
-  <modal id="plan_inputs_modal" visible="$ctrl.state.planInputsModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
-    <modal-header title="Plan Inputs"></modal-header>
-      <modal-body>
-        <input class="form-control with-margin" type="text" ng-model="$ctrl.planName" placeholder="Plan Name">
-        <div class="with-margin"> 
-        <edit-plan-tag
-          object-name="Tag"
-          search-list="$ctrl.state.listOfTags"
-          selected-list="$ctrl.state.currentPlanTags"></edit-plan-tag>
-        </div>
-        <edit-plan-tag
-          object-name="Service Area"
-          search-list="$ctrl.state.listOfServiceAreaTags"
-          selected-list="$ctrl.state.currentPlanServiceAreaTags"
-          refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
-      </modal-body>
-    <modal-footer>
-      <button class="btn btn-primary pull-left" ng-click="$ctrl.savePlanAs()">Create Plan</button>
-      <button class="btn btn-danger pull-right" ng-click="$ctrl.close()">Cancel</button>
-    </modal-footer>
-  </modal>
-  `,
+  templateUrl: '/components/header/plan-inputs-modal.html',
   bindings: {},
   controller: PlanInputsModalController
 }
