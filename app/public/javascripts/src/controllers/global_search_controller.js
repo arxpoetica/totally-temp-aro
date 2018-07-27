@@ -20,6 +20,14 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     $timeout(() => marker.setMap(null), 5000);
   }
 
+  // Gets a session token for use in searching (which is, in turn, passed by the server to the Google Autocomplete API).
+  // Per Googles docs, "A session consists of the activities required to resolve user input to a place".
+  // So once the user selects a place, the session token should be regenerated.
+  var searchSessionToken = Utils.getInsecureV4UUID()
+  var resetSearchSessionToken = () => {
+    searchSessionToken = Utils.getUUID()
+  }
+
   // Initialize the select control. We need a plan ID before doing this.
   var initializeSelect = () => {
     searchControl = $('#global-search-toolbutton .select2')
@@ -29,7 +37,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
         url: `/search/addresses`,
         dataType: 'json',
         delay: 250,
-        data: (searchTerm) => ({ text: searchTerm }),
+        data: (searchTerm) => ({ text: searchTerm, sessionToken: searchSessionToken }),
         results: (data, params) => {
           var items = data.map((location) => {
             return {
@@ -58,6 +66,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     }).on('change', (e) => {
       var selectedLocation = e.added
       if (selectedLocation) {
+        resetSearchSessionToken()
         if (selectedLocation.type === 'placeId') {
           // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
           var geocoder = new google.maps.Geocoder;

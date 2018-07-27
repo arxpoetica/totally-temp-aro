@@ -1,10 +1,9 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
-  var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
   service.MAX_EXPORTABLE_AREA = 25000000
@@ -1598,7 +1597,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((result) => {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
-      return $http.get(`/search/addresses?text=${searchLocation}`)
+      return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getUUID()}`)
     })
     .then((result) => {
       if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {

@@ -11,12 +11,13 @@ import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipme
 
 class PlanEditorController {
 
-  constructor($timeout, $http, $element, state, configuration) {
+  constructor($timeout, $http, $element, state, configuration, Utils) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
     this.state = state
     this.configuration = configuration
+    this.utils = Utils
     this.selectedMapObject = null
     //this.selectedEquipmentInfo = {}
     this.objectIdToProperties = {}
@@ -33,11 +34,9 @@ class PlanEditorController {
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isComponentDestroyed = false // Useful for cases where the user destroys the component while we are generating boundaries
     this.isWorkingOnCoverage = false
-    this.uuidStore = []
     this.autoRecalculateSubnet = true
     this.stickyAssignment = true
     this.coSearchType = 'SERVICE_AREA'
-    this.getUUIDsFromServer()
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     this.allEditableNetworkNodeTypes = [
       'central_office',
@@ -68,25 +67,6 @@ class PlanEditorController {
       this.censusCategories = newValue
     })
     
-  }
-
-  // Get a list of UUIDs from the server
-  getUUIDsFromServer() {
-    const numUUIDsToFetch = 20
-    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
-    .then((result) => {
-      this.uuidStore = this.uuidStore.concat(result.data)
-    })
-    .catch((err) => console.error(err))
-  }
-
-  // Get a UUID from the store
-  getUUID() {
-    if (this.uuidStore.length < 7) {
-      // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
-      this.getUUIDsFromServer()
-    }
-    return this.uuidStore.pop()
   }
 
   registerObjectDeleteCallback(deleteObjectWithIdCallback) {
@@ -251,7 +231,7 @@ class PlanEditorController {
                                                         optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
         // ToDo: this should use AroFeatureFactory
         var feature = {
-          objectId: this.getUUID(),
+          objectId: this.utils.getUUID(),
           networkNodeType: boundaryProperties.networkNodeType, 
           geometry: {
             type: 'Polygon',
@@ -1069,7 +1049,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration', 'Utils']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',

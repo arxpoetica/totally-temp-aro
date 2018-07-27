@@ -909,12 +909,11 @@ module.exports = class NetworkPlan {
     return database.query(sql, [text.toLowerCase()])
   }
 
-  static searchAddresses(text) {
+  static searchAddresses(text, sessionToken) {
     if (!text || (typeof text !== 'string')) {
       console.warn(`Search requested for empty or invalid text - ${text}`)
       return Promise.resolve([])
     }
-
     // Regex for checking if the search expression is a valid "latitude, longitude". From https://stackoverflow.com/a/18690202
     if (text.indexOf(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/) >= 0) {
       // This is a valid latitude/longitude search expression
@@ -925,9 +924,15 @@ module.exports = class NetworkPlan {
       }]
     } else {
       // Ask google to predict what the responses may be
-      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${process.env.GOOGLE_MAPS_API_IP_KEY}`
-      console.log(`Getting autocomplete results from ${url}`)
-      return request({url: url, json: true})
+      const queryParameters = {
+        input: text,
+        sessiontoken: sessionToken,
+        key: process.env.GOOGLE_MAPS_API_IP_KEY
+      }
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
+      console.log(`Getting autocomplete results from ${url} with query parameters:`)
+      console.log(queryParameters)
+      return request({url: url, qs: queryParameters, json: true})
         .then((result) => {
           var compressedResults = []
           result[1].predictions.forEach((item) => {

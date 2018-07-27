@@ -137,10 +137,16 @@ exports.configure = (api, middleware) => {
   })
 
   api.get('/search/addresses', (request, response, next) => {
-    var text = request.query.text
-    models.NetworkPlan.searchAddresses(text)
-      .then(jsonSuccess(response, next))
-      .catch(next)
+    const sessionToken = request.query.sessionToken
+    if (!sessionToken) {
+      Promise.reject('ERROR: You must specify a session token when performing an address search')
+        .catch(next)
+    } else {
+      const text = request.query.text
+      models.NetworkPlan.searchAddresses(text, sessionToken)
+        .then(jsonSuccess(response, next))
+        .catch(next)
+    }
   })
 
   api.get('/network_plan/:plan_id/child_plans', check_any_permission, middleware.viewport, (request, response, next) => {
