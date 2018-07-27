@@ -28,7 +28,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
       ajax: {
         url: `/search/addresses`,
         dataType: 'json',
-        delay: 250,
+        quietMillis: 250,     // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
         data: (searchTerm) => ({
           text: searchTerm,
           sessionToken: searchSessionToken,
