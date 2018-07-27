@@ -214,63 +214,53 @@ exports.configure = (api, middleware) => {
     var planQ = `
       --equipment summary
       WITH inputs AS (
-      SELECT ${plan_id} AS plan_id
-      ),
-      
-      existing_config AS (
-      SELECT config_id
-      FROM client.plan p
-      JOIN inputs i ON p.id = i.plan_id AND is_deleted = FALSE
-      ),
-      
-      existing_data_source AS (
-      SELECT data_type_id, data_source_id
-      FROM existing_config p
-      JOIN aro_core.type_definition t ON t.data_config_id = p.config_id
-      ),
-      
-      plan_config AS (
-      SELECT p.config_id AS config_id
-      FROM inputs i
-      JOIN client.plan p ON p.parent_plan_id = i.plan_id AND is_deleted = FALSE
+        SELECT ${plan_id} AS plan_id --this should be the root plan
       ),
       
       plan_data_source AS (
-      SELECT data_type_id, data_source_id
-      FROM plan_config p
-      JOIN aro_core.type_definition t ON t.data_config_id = p.config_id
+        SELECT data_type_id, data_source_id
+        FROM inputs i
+          JOIN client.plan p ON p.id = i.plan_id AND is_deleted = FALSE
+          JOIN aro_core.data_config d ON p.config_frame_id = d.config_frame_id AND config_type_id = 3
+        JOIN aro_core.type_definition t ON t.data_config_id = d.id 
       ),
-      
+          
+      existing_data_source AS (
+        SELECT data_type_id, data_source_id
+        FROM inputs i
+          JOIN client.plan p ON p.id = i.plan_id AND is_deleted = FALSE
+          JOIN aro_core.data_config d ON p.config_frame_id = d.config_frame_id AND config_type_id = 2
+        JOIN aro_core.type_definition t ON t.data_config_id = d.id AND data_type_id = 3
+      ),
+        
       plan_service_areas AS (
-      SELECT sas.value::text::int AS id
-      FROM   client.plan p, jsonb_array_elements(p.tag_mapping->'linkTags'->'serviceAreaIds') sas, inputs i
-      WHERE p.id = i.plan_id
+        SELECT jsonb_array_elements(p.tag_mapping->'linkTags'->'serviceAreaIds')::text::int AS id
+        FROM   client.plan p 
+        JOIN inputs i ON p.id = i.plan_id
       ),
-      
+            
       existing_equipment AS (
-      SELECT DISTINCT ON (object_id) n.id, n.node_type_id, n.object_id
-      FROM client.service_area s
-      JOIN plan_service_areas p ON s.id = p.id
-      JOIN client.network_nodes n ON ST_Contains(s.geom,n.geom)
-      JOIN existing_data_source d ON n.data_source_id = d.data_source_id
-      ORDER BY object_id
+        SELECT n.id, n.node_type_id, n.object_id
+        FROM client.service_area s
+        JOIN plan_service_areas p ON s.id = p.id
+        JOIN client.network_nodes n ON ST_Contains(s.geom,n.geom)
+        JOIN existing_data_source d ON n.data_source_id = d.data_source_id
+        ORDER BY object_id
       ),
-      
+        
       planned_equipment AS (
-      SELECT DISTINCT ON (object_id) v.id, v.data_source_id, node_type_id, attributes, object_id
-      -- FROM client.dh_versioned_network_node v
-      FROM client.versioned_network_node v
-      JOIN plan_data_source p ON v.data_source_id = p.data_source_id AND is_branch_data = TRUE
-      ORDER BY object_id, version_number DESC
-      -- ORDER BY object_id DESC
+        SELECT DISTINCT ON (object_id) v.id, v.data_source_id, node_type_id, attributes, object_id
+        FROM client.versioned_network_node v
+        JOIN plan_data_source p ON v.data_source_id = p.data_source_id AND is_branch_data = TRUE
+        ORDER BY object_id, version_number DESC
       ),
-      
+        
       existing_planned_equipment AS (
-      SELECT COALESCE(e.id, p.id) AS node_id, COALESCE(e.object_id, p.object_id) AS object_id, COALESCE(e.node_type_id, p.node_type_id) AS node_type_id, CASE WHEN e.id IS NULL THEN 'planned'::text ELSE 'existing'::text END AS type
-      FROM existing_equipment e
-      FULL OUTER JOIN planned_equipment p ON e.id = p.id
+        SELECT COALESCE(e.id, p.id) AS node_id, COALESCE(e.object_id, p.object_id) AS object_id, COALESCE(e.node_type_id, p.node_type_id) AS node_type_id, CASE WHEN e.id IS NULL THEN 'planned'::text ELSE 'existing'::text END AS type
+        FROM existing_equipment e
+        FULL OUTER JOIN planned_equipment p ON e.id = p.id
       )      
-      
+        
       SELECT
       p.type AS Status,
       n.description AS Equipment_Type,
@@ -283,14 +273,12 @@ exports.configure = (api, middleware) => {
       JOIN client.network_nodes nn ON p.node_id = nn.id
       WHERE n.description <> 'Junction Splitter'
       ORDER BY p.type
-      
     `;
 
-       database.query(planQ).then(function (results) {
-         //var header = ['Status','Equipment Type','Latitude','Longitude','Site CLLI','Site Name']
-         response.attachment('planSummary.csv')
-         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
-       })
+    database.query(planQ).then(function (results) {
+      response.attachment('planSummary.csv')
+      results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
+    })
 
   });
 
@@ -300,74 +288,60 @@ exports.configure = (api, middleware) => {
     var planQ = `
       --location summary
       WITH inputs AS (
-        SELECT ${plan_id} AS plan_id,
+        SELECT ${plan_id} AS plan_id, --this should be the root plan
         '${site_boundary}' AS site_boundary_type
       ),
       
-      plan_config AS (
-      SELECT p.config_id AS config_id 
-      FROM inputs i 
-      JOIN client.plan p ON p.parent_plan_id = i.plan_id AND is_deleted = FALSE
-      ),
-      
       plan_data_source AS (
-      SELECT data_type_id, data_source_id
-      FROM plan_config p
-      JOIN aro_core.type_definition t ON t.data_config_id = p.config_id
+        SELECT data_type_id, data_source_id
+        FROM inputs i
+          JOIN client.plan p ON p.id = i.plan_id AND is_deleted = FALSE
+          JOIN aro_core.data_config d ON p.config_frame_id = d.config_frame_id 
+        JOIN aro_core.type_definition t ON t.data_config_id = d.id
       ) ,
-      
+        
       plan_service_areas AS (
-      SELECT jsonb_array_elements(p.tag_mapping->'linkTags'->'serviceAreaIds')::text::int AS id
-      FROM   client.plan p 
-      JOIN inputs i ON p.id = i.plan_id
+        SELECT jsonb_array_elements(p.tag_mapping->'linkTags'->'serviceAreaIds')::text::int AS id
+        FROM   client.plan p 
+        JOIN inputs i ON p.id = i.plan_id
       ),
-      
+        
       planned_equipment AS (
-      SELECT DISTINCT ON (v.object_id) v.id, v.data_source_id, v.node_type_id, v.attributes, v.object_id, v.is_branch_data
-      FROM client.versioned_network_node v
-      JOIN plan_data_source p ON v.data_source_id = p.data_source_id 
-      JOIN client.network_nodes n ON v.id = n.id
-      WHERE is_branch_data IS TRUE
-      ORDER BY object_id, version_number DESC
+        SELECT DISTINCT ON (v.object_id) v.id, v.data_source_id, v.node_type_id, v.attributes, v.object_id, v.is_branch_data
+        FROM client.versioned_network_node v
+        JOIN plan_data_source p ON v.data_source_id = p.data_source_id 
+        JOIN client.network_nodes n ON v.id = n.id
+        WHERE is_branch_data IS TRUE AND n.node_type_id <>8
+        ORDER BY object_id, version_number DESC
       ),
-      
-      /*existing_equipment AS (
-      SELECT DISTINCT ON (v.object_id) v.id, v.data_source_id, v.node_type_id, v.attributes, v.object_id, v.is_branch_data
-      FROM client.versioned_network_node v
-      JOIN plan_data_source p ON v.data_source_id = p.data_source_id AND 
-      JOIN client.network_nodes n ON v.id = n.id
-      JOIN client.service_area s ON ST_Contains(s.geom, n.geom)
-      JOIN plan_service_areas a ON s.id = a.id
-      ORDER BY object_id, version_number DESC
-      )
-      */
-      
+          
       polygon_locations AS (
-      SELECT l.id, MAX(n.id) AS network_node_id, s.id AS service_area_id
-      FROM plan_data_source d 
-      JOIN aro_core.data_source ds ON d.data_source_id = ds.id
-      JOIN aro.location_entity l ON l.date_to = '294276-01-01 00:00:00'::date AND ((l.data_source_id = ANY (ds.parent_path)) OR l.data_source_id = ds.id)
-      JOIN client.site_boundary_smd m ON ST_Contains(m.geom,l.geom) AND m.network_node_object_id IN (SELECT object_id FROM planned_equipment)
-      JOIN client.network_nodes n ON m.network_node_object_id = n.object_id
-      JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.service_layer_id = (SELECT DISTINCT service_layer_id FROM client.service_area s JOIN plan_service_areas p ON s.id = p.id)
-      GROUP BY l.id, s.id
+        SELECT l.id, MAX(n.id) AS network_node_id, s.id AS service_area_id, l.data_source_id
+        FROM plan_data_source d 
+        JOIN aro_core.data_source ds ON d.data_source_id = ds.id
+        JOIN aro.location_entity l ON l.date_to = '294276-01-01 00:00:00'::date AND ((l.data_source_id = ANY (ds.parent_path)) OR l.data_source_id = ds.id)
+        JOIN client.site_boundary_smd m ON ST_Contains(m.geom,l.geom) AND m.network_node_object_id IN (SELECT object_id FROM planned_equipment)
+        JOIN client.network_nodes n ON m.network_node_object_id = n.object_id
+        JOIN client.service_area s ON ST_Contains(s.geom, l.geom) AND s.service_layer_id = (SELECT DISTINCT service_layer_id FROM client.service_area s JOIN plan_service_areas p ON s.id = p.id)
+        GROUP BY l.id, s.id, l.data_source_id
       ),
-      
+        
       service_area_locations AS (
-      SELECT l.id, network_node_id, s.id AS service_area_id
-      FROM plan_data_source d 
-      JOIN aro_core.data_source ds ON d.data_source_id = ds.id
-      JOIN aro.location_entity l ON l.date_to = '294276-01-01 00:00:00'::date AND ((l.data_source_id = ANY (ds.parent_path)) OR l.data_source_id = ds.id)
-      JOIN client.service_area s ON ST_Contains(s.geom, l.geom)
-      JOIN plan_service_areas a ON s.id = a.id
-      LEFT JOIN polygon_locations p ON l.id = p.id
+        SELECT l.id, network_node_id, s.id AS service_area_id, l.data_source_id
+        FROM plan_data_source d 
+        JOIN aro_core.data_source ds ON d.data_source_id = ds.id
+        JOIN aro.location_entity l ON l.date_to = '294276-01-01 00:00:00'::date AND ((l.data_source_id = ANY (ds.parent_path)) OR l.data_source_id = ds.id)
+        JOIN client.service_area s ON ST_Contains(s.geom, l.geom)
+        JOIN plan_service_areas a ON s.id = a.id
+        LEFT JOIN polygon_locations p ON l.id = p.id
       ),
-      
+        
       relevant_locations AS (
-      SELECT * FROM polygon_locations 
-      UNION 
-      SELECT * FROM service_area_locations)
-      
+        SELECT * FROM polygon_locations 
+        UNION 
+        SELECT * FROM service_area_locations
+      )
+        
       SELECT 
         l.object_id AS "Location Object ID", 
         g.name AS "Data Source",
@@ -384,21 +358,91 @@ exports.configure = (api, middleware) => {
         (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part I')::text)::int)) AS "CAF Phase I Part I Tag",
         (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part II')::text)::int)) AS "CAF Phase I Part II Tag",
         (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase II')::text)::int)) AS "CAF Phase II Tag" 
-      FROM relevant_locations r
-      JOIN aro.location_entity l ON r.id = l.id
-      JOIN client.service_area s ON r.service_area_id = s.id
-      LEFT JOIN aro.states st ON ST_Intersects(s.geom, st.geom)
-      LEFT JOIN client.network_nodes n ON r.network_node_id = n.id
-      LEFT JOIN client.site_boundary_smd m ON m.network_node_object_id = n.object_id
-      LEFT JOIN aro_core.global_library g ON g.data_source_id = l.data_source_id 
-      JOIN aro.census_blocks c ON ST_Intersects(s.geom, c.geom) AND ST_Contains(c.geom, l.geom) AND st.statefp = c.statefp       
+        FROM relevant_locations r
+        JOIN aro.location_entity l ON r.id = l.id 
+        JOIN client.service_area s ON r.service_area_id = s.id
+        LEFT JOIN client.network_nodes n ON r.network_node_id = n.id
+        LEFT JOIN aro_core.global_library g ON g.data_source_id = l.data_source_id 
+        JOIN aro.census_blocks c ON l.cb_gid = c.gid
+        
     `;
 
-       database.query(planQ).then(function (results) {
-         response.attachment('locationSummary.csv')
-         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
-       })
+    database.query(planQ).then(function (results) {
+      response.attachment('locationSummary.csv')
+      results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
+    })
 
+  });
+
+  api.get("/reports/planSummary/kml/:plan_id/:site_boundary", function (request, response, next) {
+    var plan_id = request.params.plan_id
+    var site_boundary = request.params.site_boundary
+    var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+    var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Document>
+        <name>Equipment Color</name>
+          <Style id="shapeColor">
+            <LineStyle>
+              <color>ff0000ff</color>
+              <width>4</width>
+            </LineStyle>
+            <PolyStyle>
+              <fill>0</fill>
+              <outline>1</outline>
+            </PolyStyle>
+          </Style>
+      `
+    return Promise.resolve()
+      .then(() => {
+        var planQ = `
+          --polygon export
+          WITH inputs AS (
+            SELECT ${plan_id} AS plan_id, --this should be the root plan
+            '${site_boundary}' AS site_boundary_type
+          ),
+
+          plan_data_source AS (
+            SELECT data_type_id, data_source_id
+            FROM inputs i
+            JOIN client.plan p ON p.id = i.plan_id AND is_deleted = FALSE
+            JOIN aro_core.data_config d ON p.config_frame_id = d.config_frame_id
+            JOIN aro_core.type_definition t ON t.data_config_id = d.id
+          ),
+            
+          planned_equipment AS (
+            SELECT DISTINCT ON (v.object_id) v.id, v.data_source_id, v.node_type_id, v.attributes, v.object_id, v.is_branch_data
+            FROM client.versioned_network_node v
+            JOIN plan_data_source p ON v.data_source_id = p.data_source_id
+            JOIN client.network_nodes n ON v.id = n.id
+            WHERE is_branch_data IS TRUE AND n.node_type_id <>8
+            ORDER BY object_id, version_number DESC
+          )
+            
+          SELECT 
+            n.network_equipment->'siteInfo'->'siteName' AS "Site Name",
+            n.network_equipment->'siteInfo'->'siteClli' AS "Site CLLI",
+            ST_AsKML(m.geom) As geom
+          FROM planned_equipment p
+          JOIN client.network_nodes n ON p.id = n.id
+          JOIN client.site_boundary_smd m ON m.network_node_object_id = n.object_id
+          JOIN client.site_boundary_type t ON m.boundary_type = t.id
+          JOIN inputs i ON i.site_boundary_type = t.description
+        `
+        return database.query(planQ)
+      })
+      .then((equipments) => {
+        kmlOutput += '<Folder><name>Equipments</name>'
+        equipments.forEach((equipment) => {
+          kmlOutput += `<Placemark><siteName>${escape(equipment['Site Name'])}</siteName><siteClli>${escape(equipment['Site CLLI'])}</siteClli>
+                <styleUrl>#shapeColor</styleUrl>${equipment.geom}</Placemark>\n`
+        })
+        kmlOutput += '</Folder>'
+        kmlOutput += '</Document></kml>'
+        return kmlOutput
+      })
+      .then((output) => response.send(output))
+      .catch(next)
   });
 
 }
