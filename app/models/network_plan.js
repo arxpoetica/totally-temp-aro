@@ -909,25 +909,37 @@ module.exports = class NetworkPlan {
     return database.query(sql, [text.toLowerCase()])
   }
 
-  static searchAddresses(text) {
+  static searchAddresses(text, sessionToken, biasLatitude, biasLongitude) {
     if (!text || (typeof text !== 'string')) {
       console.warn(`Search requested for empty or invalid text - ${text}`)
       return Promise.resolve([])
     }
-
     // Regex for checking if the search expression is a valid "latitude, longitude". From https://stackoverflow.com/a/18690202
-    if (text.indexOf(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/) >= 0) {
-      // This is a valid latitude/longitude search expression
-      return [{
+    if (text.match(/[+-]?([0-9]*[.])?[0-9]+.*,[+-]?([0-9]*[.])?[0-9]+/)) {
+      // This is a valid latitude/longitude search expression (technically it is of the form "[number],[number]")
+      var latLng = text.split(',').map((item) => item.trim(item)) // A better regex will return this in the match()
+      return Promise.resolve([{
         type: 'latlng',
-        displayText: text,
-        value: text
-      }]
+        displayText: `Latitude: ${latLng[0]}, Longitude: ${latLng[1]}`,
+        value: latLng
+      }])
     } else {
       // Ask google to predict what the responses may be
-      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${text}&key=${process.env.GOOGLE_MAPS_API_IP_KEY}`
-      console.log(`Getting autocomplete results from ${url}`)
-      return request({url: url, json: true})
+      const queryParameters = {
+        input: text,
+        sessiontoken: sessionToken,
+        key: process.env.GOOGLE_MAPS_API_IP_KEY
+      }
+      // If the user has provided a "bias" location, set it so that the results will be filtered according to this location.
+      if (biasLatitude && biasLongitude) {
+        const BIAS_RADIUS = 100000  // In meters. Why this specific number? No reason. "Seems ok"
+        queryParameters.location = `${biasLatitude},${biasLongitude}`
+        queryParameters.radius = BIAS_RADIUS
+      }
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
+      console.log(`Getting autocomplete results from ${url} with query parameters:`)
+      console.log(queryParameters)
+      return request({url: url, qs: queryParameters, json: true})
         .then((result) => {
           var compressedResults = []
           result[1].predictions.forEach((item) => {
@@ -937,7 +949,7 @@ module.exports = class NetworkPlan {
               displayText: item.description
             })
           })
-          return compressedResults
+          return Promise.resolve(compressedResults)
         })
     }
   }

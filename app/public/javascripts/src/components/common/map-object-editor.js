@@ -1,7 +1,7 @@
 import Constants from './constants'
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService) {
+  constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService, Utils) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -10,12 +10,11 @@ class MapObjectEditorController {
     this.configuration = configuration
     this.state = state
     this.tileDataService = tileDataService
+    this.utils = Utils
     this.mapRef = null
     this.createObjectOnClick = true
     this.createdMapObjects = {}
     this.selectedMapObject = null
-    this.uuidStore = []
-    this.getUUIDsFromServer()
     this.iconAnchors = {}
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
@@ -46,25 +45,6 @@ class MapObjectEditorController {
     }
   }
   
-  // Get a list of UUIDs from the server
-  getUUIDsFromServer() {
-    const numUUIDsToFetch = 20
-    this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
-    .then((result) => {
-      this.uuidStore = this.uuidStore.concat(result.data)
-    })
-    .catch((err) => console.error(err))
-  }
-
-  // Get a UUID from the store
-  getUUID() {
-    if (this.uuidStore.length < 7) {
-      // We are running low on UUIDs. Get some new ones from aro-service while returning one of the ones that we have
-      this.getUUIDsFromServer()
-    }
-    return this.uuidStore.pop()
-  }
-
   $onInit() {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
@@ -139,7 +119,7 @@ class MapObjectEditorController {
         var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
       // ToDo feature should probably be a class
       var feature = {
-        objectId: this.getUUID(),
+        objectId: this.utils.getUUID(),
         geometry: {
           type: 'Point',
           coordinates: [dropLatLng.lng(), dropLatLng.lat()]
@@ -169,10 +149,6 @@ class MapObjectEditorController {
       this.createMapObject(feature, iconUrl, true, true)
     }
   }
-  
-  //$onChanges(changes){
-  //  console.log(changes)
-  //}
   
   makeIconAnchor(iconUrl, callback){
     if ('undefined' == typeof callback) callback = {}
@@ -533,7 +509,7 @@ class MapObjectEditorController {
       if (!this.createObjectOnClick) {
         return    // We do not want to create the map object on click
       }
-      feature.objectId = this.getUUID()
+      feature.objectId = this.utils.getUUID()
       feature.isExistingObject = false
       featurePromise = Promise.resolve(feature)
     }
@@ -654,7 +630,7 @@ class MapObjectEditorController {
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
       var feature = {
-        objectId: self.getUUID(),
+        objectId: self.utils.getUUID(),
         geometry: {
           type: 'Polygon',
           coordinates: []
@@ -723,7 +699,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'configuration', 'state', 'tileDataService']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'configuration', 'state', 'tileDataService', 'Utils']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',

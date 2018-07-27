@@ -1,10 +1,9 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
-  var state = null
   var service = {}
   service.INVALID_PLAN_ID = -1
   service.MAX_EXPORTABLE_AREA = 25000000
@@ -1443,6 +1442,26 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     service.clearToolbarActions.next(true)
   })
 
+  service.flattenDeep = (arr) => {
+    return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(service.flattenDeep(val)) : acc.concat(val), []);
+  }
+
+  service.getSelectedEquipmentIds = () => {
+    var selectedEquipmentIds = []
+    var categoryItems = configuration.networkEquipment.equipments
+    Object.keys(categoryItems).forEach((categoryItemKey) => {
+      var networkEquipment = categoryItems[categoryItemKey]
+      //networkEquipment.checked && selectedEquipmentIds.push(service.networkNodeTypesEntity[networkEquipment.networkNodeType])
+      networkEquipment.checked && 
+        selectedEquipmentIds.push(service.networkNodeTypes
+          .filter(equipmentEntity => equipmentEntity.name === networkEquipment.networkNodeType)
+          .map(equ => equ.id)
+        )
+      
+    })
+    return service.flattenDeep(selectedEquipmentIds)
+  }
+
   service.entityTypeList = {
     LocationObjectEntity: [],
     NetworkEquipmentEntity: [],
@@ -1472,6 +1491,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
+    if(filterObj == '') return
     var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
     if(entityType !== 'AnalysisLayer') {
       entityListUrl = entityListUrl + "&$top=10"
@@ -1513,6 +1533,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     if(entityType === 'NetworkEquipmentEntity') {
       //Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
       filter = filter ? filter.concat(` and (planId eq ${service.plan.getValue().id})`) : filter
+      var selectedEquipments = service.getSelectedEquipmentIds().map(id => `networkNodeType eq ${id}`).join(" or ")
+      //Search for equipments that are selected in NetworkEquipment modal
+      if (selectedEquipments == '') return
+      filter = selectedEquipments ? filter.concat(` and (${selectedEquipments})`) : filter
     }
 
     if(entityType === 'ServiceAreaView') {
@@ -1546,6 +1570,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         return $http.get('/service/auth/users')
       })
       .then((result) => {
+        service.listOfCreatorTags = angular.copy(result.data)
         result.data.forEach((user) => {
           //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
           user.name = `<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}` 
@@ -1572,7 +1597,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((result) => {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
-      return $http.get(`/search/addresses?text=${searchLocation}`)
+      return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {
       if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {

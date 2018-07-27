@@ -6,11 +6,6 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
   // We now need a plan ID in the search address url
   var searchControl = null
 
-  // Update the search control every time that the plan changes.
-  // state.plan.skip(1).subscribe((plan) => {
-  //   searchControl.select2({placeholder: 'asdfasdf'})
-  // })
-
   var addBouncingMarker = (latitude, longitude) => {
     var marker = new google.maps.Marker({
       map: map,
@@ -20,6 +15,11 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     $timeout(() => marker.setMap(null), 5000);
   }
 
+  // Gets a session token for use in searching (which is, in turn, passed by the server to the Google Autocomplete API).
+  // Per Googles docs, "A session consists of the activities required to resolve user input to a place".
+  // So once the user selects a place, the session token should be regenerated.
+  var searchSessionToken = Utils.getInsecureV4UUID()
+
   // Initialize the select control. We need a plan ID before doing this.
   var initializeSelect = () => {
     searchControl = $('#global-search-toolbutton .select2')
@@ -28,8 +28,13 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
       ajax: {
         url: `/search/addresses`,
         dataType: 'json',
-        delay: 250,
-        data: (searchTerm) => ({ text: searchTerm }),
+        quietMillis: 250,     // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
+        data: (searchTerm) => ({
+          text: searchTerm,
+          sessionToken: searchSessionToken,
+          biasLatitude: state.defaultPlanCoordinates.latitude,
+          biasLongitude: state.defaultPlanCoordinates.longitude
+        }),
         results: (data, params) => {
           var items = data.map((location) => {
             return {
@@ -58,6 +63,8 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     }).on('change', (e) => {
       var selectedLocation = e.added
       if (selectedLocation) {
+        searchSessionToken = Utils.getInsecureV4UUID()
+        const ZOOM_FOR_LOCATION_SEARCH = 17
         if (selectedLocation.type === 'placeId') {
           // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
           var geocoder = new google.maps.Geocoder;
@@ -70,13 +77,16 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
               latitude: results[0].geometry.location.lat(),
               longitude: results[0].geometry.location.lng()
             })
-            const ZOOM_FOR_LOCATION_SEARCH = 17
             state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
             addBouncingMarker(results[0].geometry.location.lat(), results[0].geometry.location.lng())
           })
         } else if (selectedLocation.type === 'latlng') {
           // The user has searched for a latitude/longitude. Simply go to that position
-          throw 'TODO'
+          state.requestSetMapCenter.next({
+            latitude: +selectedLocation.value[0],
+            longitude: +selectedLocation.value[1]
+          })
+          state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
         }
       }
     })

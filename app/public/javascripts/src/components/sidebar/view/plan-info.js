@@ -1,8 +1,11 @@
 class PlanInfoController {
-  constructor($http, state, $timeout) {
+  constructor($http, state, $timeout, Utils) {
     this.$http = $http
     this.state = state
     this.$timeout = $timeout
+    this.utils = Utils
+    this.searchSessionToken = this.utils.getInsecureV4UUID()
+
     this.generalPlanTags = []
     this.saPlanTags = []
     this.isEditMode = false
@@ -55,14 +58,11 @@ class PlanInfoController {
     var updatePlan = this.currentPlanInfo
     updatePlan.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
     updatePlan.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
-
-
     this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
   }
 
   setPlanLocation() {
     if(!this.currentPlanInfo.ephemeral) {
-
       var default_location = this.currentPlanInfo.areaName
       var ids = 0
       var search = $('.plan-details-container .select2')
@@ -74,19 +74,29 @@ class PlanInfoController {
         ajax: {
           url: `/search/addresses`,
           dataType: 'json',
-          delay: 250,
-          data: (term) => ({ text: term }),
+          quietMillis: 250,     // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
+          data: (term) => ({
+            text: term,
+            sessionToken: this.searchSessionToken,
+            biasLatitude: this.state.defaultPlanCoordinates.latitude,
+            biasLongitude: this.state.defaultPlanCoordinates.longitude
+          }),
           results: (data, params) => {
             var items = data.map((location) => {
               return {
                 id: 'id-' + (++ids),
-                text: location.name,
-                bounds: location.bounds,
-                centroid: location.centroid
+                text: location.displayText,
+                type: location.type,
+                value: location.value
               }
             })
-            this.search_results = items
-            this.setLocation = true
+            if (items.length === 0) {
+              items.push({
+                id: 'id-' + (++ids),
+                text: 'Search an address, city, or state',
+                type: 'placeholder'
+              })
+            }
             return {
               results: items,
               pagination: {
@@ -97,13 +107,26 @@ class PlanInfoController {
           cache: true
         }
       }).on('change', (e) => {
-        var selected = e.added
-        if (selected && this.setLocation) {
-          this.currentPlanInfo.areaName = selected.text
-          this.currentPlanInfo.latitude = selected.centroid.coordinates[1]
-          this.currentPlanInfo.longitude = selected.centroid.coordinates[0]
-          this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, this.currentPlanInfo)
-          console.log(selected)
+        var selectedLocation = e.added
+        if (selectedLocation) {
+          this.searchSessionToken = this.utils.getInsecureV4UUID()
+          if (selectedLocation.type === 'placeId') {
+            // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
+            var geocoder = new google.maps.Geocoder;
+            var self = this
+            geocoder.geocode({'placeId': selectedLocation.value}, function(results, status) {
+              if (status !== 'OK') {
+                console.error('Geocoder failed: ' + status);
+                return
+              }
+              self.currentPlanInfo.areaName = selectedLocation.text
+              self.currentPlanInfo.latitude = results[0].geometry.location.lat()
+              self.currentPlanInfo.longitude = results[0].geometry.location.lng()
+              self.$http.put(`/service/v1/plan?user_id=${self.state.loggedInUser.id}`, self.currentPlanInfo)
+            })
+          } else {
+            console.error(`Unsupported search result type ${selectedLocation.type}`)
+          }
         }
       })
   
@@ -120,7 +143,7 @@ class PlanInfoController {
   }
 }
 
-PlanInfoController.$inject = ['$http', 'state', '$timeout']
+PlanInfoController.$inject = ['$http', 'state', '$timeout', 'Utils']
 
 let planInfo = {
   templateUrl: '/components/sidebar/view/plan-info.html',

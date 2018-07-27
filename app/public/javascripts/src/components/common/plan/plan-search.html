@@ -10,8 +10,8 @@
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
             {{$item.type}}:
-            <span class="label" ng-if="$item.type!='svc'" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name || $item.code}}</span>
-            <span class="label satags satag" ng-if="$item.type=='svc'">{{$item.code}}</span>
+            <span class="label" ng-if="$item.type!='svc' || $item.type!='created_by'" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name}}</span>
+            <span class="label satags satag" ng-if="$item.type=='svc' || $item.type=='created_by'">{{$item.code || $item.firstName}}</span>
           </span>
           <span class="tag" ng-if=!$item.type>
             {{$item}}
@@ -19,7 +19,7 @@
         </ui-select-match>
         <ui-select-choices class="ui-select-search" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
-            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code}}
+            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.firstName}}
           </div>
         </ui-select-choices>
       </ui-select>
@@ -41,6 +41,11 @@
       search-list="$ctrl.state.listOfServiceAreaTags"
       apply-search="$ctrl.applySaSearchFilter(selectedFilters)"
       refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></plan-search-filter>
+    <plan-search-filter style="flex: 0 1 auto;"
+      object-name="Creator"
+      search-list="$ctrl.state.listOfCreatorTags"
+      apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"></plan-search-filter>
+      <!-- refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"  -->
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
