@@ -1597,7 +1597,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((result) => {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
-      return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getUUID()}`)
+      return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {
       if (result.data && result.data.length > 0 && result.data[0].type === 'placeId') {

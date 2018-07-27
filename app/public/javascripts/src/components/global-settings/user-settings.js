@@ -1,9 +1,11 @@
 class UserSettingsController {
 
-  constructor($http, state, globalSettingsService) {
+  constructor($http, state, globalSettingsService, Utils) {
     this.$http = $http
     this.state = state
     this.globalSettingsService = globalSettingsService
+    this.utils = Utils
+    this.searchSessionToken = this.utils.getInsecureV4UUID()
 
     this.userConfiguration = {}
     $http.get(`/service/auth/users/${state.loggedInUser.id}/configuration`)
@@ -32,7 +34,7 @@ class UserSettingsController {
         url: '/search/addresses',
         dataType: 'json',
         delay: 250,
-        data: (term) => ({ text: term }),
+        data: (term) => ({ text: term, sessionToken: this.searchSessionToken }),
         results: (data, params) => {
           var items = data.map((location) => {
             return {
@@ -61,6 +63,7 @@ class UserSettingsController {
     }).on('change', (e) => {
       var selected = e.added
       if (selected) {
+        this.searchSessionToken = this.utils.getInsecureV4UUID()
         this.userConfiguration.defaultLocation = selected.text
       }
     })
@@ -72,7 +75,7 @@ class UserSettingsController {
   }
 }
 
-UserSettingsController.$inject = ['$http', 'state', 'globalSettingsService']
+UserSettingsController.$inject = ['$http', 'state', 'globalSettingsService', 'Utils']
 
 let userSettings = {
   templateUrl: '/components/global-settings/user-settings.html',

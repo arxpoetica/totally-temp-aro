@@ -16,9 +16,7 @@ class PlanSearchController {
   }
 
   $onInit() {
-    this.loadPlans(1, () => {
-      this.reloadCurrentLocation();
-    })
+    this.loadPlans(1)
   }
 
   loadPlans(page, callback) {
@@ -159,58 +157,11 @@ class PlanSearchController {
     })
   }
 
-  openReport(plan) {
+  openReport() {
     this.state.networkPlanModal.next(false)
     //This previous modal will show after close the report
     this.state.previousModal = this.state.networkPlanModal
     this.state.reportModal.next(true)
-  }
-
-  reloadCurrentLocation() {
-    var center = map.getCenter();
-    this.geoCode(center).then((address) => {
-      this.fetchLocation(address).then(function (location) {
-        this.customLoc = location
-        $(this.search[0]).select2('val', location, true);
-      })
-    })
-  }
-
-  geoCode(latlng) {
-    var promise = this.$q.defer()
-
-    var geocoder = new google.maps.Geocoder;
-    geocoder.geocode({ 'location': latlng }, function (results, status) {
-      if (status === 'OK') {
-        if (results[1]) {
-          promise.resolve({ message: results[0].formatted_address });
-        } else {
-          promise.reject({ error: 'No results found' });
-        }
-      } else {
-        promise.reject({ error: 'Geocoder failed due to: ' + status })
-      }
-    });
-
-    return promise.promise;
-  }
-
-  fetchLocation(location) {
-    return this.$http.get(`/search/addresses`, { params: { text: location.message } })
-      .then(function (results) {
-
-        var location = results.data[0];
-        var loc = {
-          id: 'id-' + (++this.ids),
-          text: location.name,
-          bounds: location.bounds,
-          centroid: location.centroid,
-          geocoded: true
-        };
-
-        return loc;
-
-      });
   }
 }
 

@@ -6,11 +6,6 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
   // We now need a plan ID in the search address url
   var searchControl = null
 
-  // Update the search control every time that the plan changes.
-  // state.plan.skip(1).subscribe((plan) => {
-  //   searchControl.select2({placeholder: 'asdfasdf'})
-  // })
-
   var addBouncingMarker = (latitude, longitude) => {
     var marker = new google.maps.Marker({
       map: map,
@@ -24,9 +19,6 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
   // Per Googles docs, "A session consists of the activities required to resolve user input to a place".
   // So once the user selects a place, the session token should be regenerated.
   var searchSessionToken = Utils.getInsecureV4UUID()
-  var resetSearchSessionToken = () => {
-    searchSessionToken = Utils.getUUID()
-  }
 
   // Initialize the select control. We need a plan ID before doing this.
   var initializeSelect = () => {
@@ -66,7 +58,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     }).on('change', (e) => {
       var selectedLocation = e.added
       if (selectedLocation) {
-        resetSearchSessionToken()
+        searchSessionToken = Utils.getInsecureV4UUID()
         if (selectedLocation.type === 'placeId') {
           // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
           var geocoder = new google.maps.Geocoder;
