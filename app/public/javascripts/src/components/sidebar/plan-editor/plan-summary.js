@@ -164,6 +164,12 @@ class PlanSummaryController {
     })
   }
 
+  exportKml() {
+    this.$http.get(`/reports/planSummary/kml/${this.plan.id}/${this.state.selectedBoundaryType.name}`).then((response) => {
+      this.Utils.downloadCSV(response.data, "planSummary_polygon.kml")
+    })
+  }
+
   togglelocationTagCoverage(selectedCoverageLoc) {
     this.isLocKeyExpanded[selectedCoverageLoc] = !this.isLocKeyExpanded[selectedCoverageLoc] 
     //creating dummy install data 

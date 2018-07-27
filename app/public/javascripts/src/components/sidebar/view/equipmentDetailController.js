@@ -12,6 +12,7 @@ class EquipmentDetailController {
     this.configuration = configuration
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
+    this.selectedEquipment = ''
     //this.selectedEquipmentInfoChanges = {}
     //this.selectedEquipmentInfoDispProps = []
     
@@ -214,7 +215,7 @@ class EquipmentDetailController {
       var plan = state.plan.getValue()
       if (!plan || !plan.hasOwnProperty('id')) return
       
-      
+      this.selectedEquipment = ''
       var equipmentList = options.equipmentFeatures
       var selectedFeature = null
       var featureId = null
