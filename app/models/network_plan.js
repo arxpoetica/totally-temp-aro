@@ -915,13 +915,14 @@ module.exports = class NetworkPlan {
       return Promise.resolve([])
     }
     // Regex for checking if the search expression is a valid "latitude, longitude". From https://stackoverflow.com/a/18690202
-    if (text.indexOf(/^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/) >= 0) {
-      // This is a valid latitude/longitude search expression
-      return [{
+    if (text.match(/[+-]?([0-9]*[.])?[0-9]+.*,[+-]?([0-9]*[.])?[0-9]+/)) {
+      // This is a valid latitude/longitude search expression (technically it is of the form "[number],[number]")
+      var latLng = text.split(',').map((item) => item.trim(item)) // A better regex will return this in the match()
+      return Promise.resolve([{
         type: 'latlng',
-        displayText: text,
-        value: text
-      }]
+        displayText: `Latitude: ${latLng[0]}, Longitude: ${latLng[1]}`,
+        value: latLng
+      }])
     } else {
       // Ask google to predict what the responses may be
       const queryParameters = {
@@ -942,7 +943,7 @@ module.exports = class NetworkPlan {
               displayText: item.description
             })
           })
-          return compressedResults
+          return Promise.resolve(compressedResults)
         })
     }
   }
