@@ -143,7 +143,9 @@ exports.configure = (api, middleware) => {
         .catch(next)
     } else {
       const text = request.query.text
-      models.NetworkPlan.searchAddresses(text, sessionToken)
+      const biasLatitude = request.query.biasLatitude   // Optional
+      const biasLongitude = request.query.biasLongitude // Optional
+      models.NetworkPlan.searchAddresses(text, sessionToken, biasLatitude, biasLongitude)
         .then(jsonSuccess(response, next))
         .catch(next)
     }

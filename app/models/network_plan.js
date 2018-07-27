@@ -909,7 +909,7 @@ module.exports = class NetworkPlan {
     return database.query(sql, [text.toLowerCase()])
   }
 
-  static searchAddresses(text, sessionToken) {
+  static searchAddresses(text, sessionToken, biasLatitude, biasLongitude) {
     if (!text || (typeof text !== 'string')) {
       console.warn(`Search requested for empty or invalid text - ${text}`)
       return Promise.resolve([])
@@ -929,6 +929,12 @@ module.exports = class NetworkPlan {
         input: text,
         sessiontoken: sessionToken,
         key: process.env.GOOGLE_MAPS_API_IP_KEY
+      }
+      // If the user has provided a "bias" location, set it so that the results will be filtered according to this location.
+      if (biasLatitude && biasLongitude) {
+        const BIAS_RADIUS = 100000  // In meters. Why this specific number? No reason. "Seems ok"
+        queryParameters.location = `${biasLatitude},${biasLongitude}`
+        queryParameters.radius = BIAS_RADIUS
       }
       const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json`
       console.log(`Getting autocomplete results from ${url} with query parameters:`)

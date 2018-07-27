@@ -34,7 +34,12 @@ class UserSettingsController {
         url: '/search/addresses',
         dataType: 'json',
         delay: 250,
-        data: (term) => ({ text: term, sessionToken: this.searchSessionToken }),
+        data: (term) => ({
+          text: term,
+          sessionToken: this.searchSessionToken,
+          biasLatitude: this.state.defaultPlanCoordinates.latitude,
+          biasLongitude: this.state.defaultPlanCoordinates.longitude
+        }),
         results: (data, params) => {
           var items = data.map((location) => {
             return {

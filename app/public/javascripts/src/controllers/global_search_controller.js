@@ -29,7 +29,12 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
         url: `/search/addresses`,
         dataType: 'json',
         delay: 250,
-        data: (searchTerm) => ({ text: searchTerm, sessionToken: searchSessionToken }),
+        data: (searchTerm) => ({
+          text: searchTerm,
+          sessionToken: searchSessionToken,
+          biasLatitude: state.defaultPlanCoordinates.latitude,
+          biasLongitude: state.defaultPlanCoordinates.longitude
+        }),
         results: (data, params) => {
           var items = data.map((location) => {
             return {
