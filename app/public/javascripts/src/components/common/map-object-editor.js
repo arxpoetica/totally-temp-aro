@@ -44,7 +44,7 @@ class MapObjectEditorController {
       fillOpacity: 0.4,
     }
   }
-
+  
   $onInit() {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
@@ -144,6 +144,10 @@ class MapObjectEditorController {
         this.selectMapObject(null) //deselects the selected equipment 
       }
     })
+    
+    this.comms.createMapObject = (feature, iconUrl) => {
+      this.createMapObject(feature, iconUrl, true, true)
+    }
   }
   
   makeIconAnchor(iconUrl, callback){
@@ -307,9 +311,18 @@ class MapObjectEditorController {
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
 
-  createMapObject(feature, iconUrl, usingMapClick) {
+  createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride) {
+    if ('undefined' == typeof existingObjectOverride) existingObjectOverride = false
     var mapObject = null
     if (feature.geometry.type === 'Point') {
+      
+      // if an existing object just show don't edit
+      if (feature.isExistingObject && !existingObjectOverride){
+        this.displayViewObject({feature:feature})
+        this.selectMapObject(null)
+        return
+      }
+      
       mapObject = this.createPointMapObject(feature, iconUrl)
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
@@ -480,7 +493,7 @@ class MapObjectEditorController {
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           var serviceFeature = result.data
-          // ise featire's coord NOT the event's coords
+          // use feature's coord NOT the event's coords
           feature.geometry.coordinates = serviceFeature.geometry.coordinates
           feature.deploymentType = serviceFeature.deploymentType
           return Promise.resolve(feature)
@@ -705,6 +718,8 @@ let mapObjectEditor = {
     onSelectObject: '&',
     onModifyObject: '&',
     onDeleteObject: '&',
+    displayViewObject: '&', 
+    comms: '=', 
     onObjectDroppedOnMarker: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds

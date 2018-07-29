@@ -37,6 +37,12 @@ class PlanEditorController {
     this.autoRecalculateSubnet = true
     this.stickyAssignment = true
     this.coSearchType = 'SERVICE_AREA'
+    this.viewEventFeature = {}
+    this.viewFeature = {}
+    this.viewIconUrl = ''
+    this.viewLabel = ''
+    this.isEditFeatureProps = true
+    this.mapObjectEditorComms = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     this.allEditableNetworkNodeTypes = [
       'central_office',
@@ -602,6 +608,7 @@ class PlanEditorController {
 
   // Returns the configuration of the currently selected network type
   getSelectedNetworkConfig() {
+    if (!this.selectedMapObject) return
     return this.getNetworkConfig(this.selectedMapObject.objectId)
   }
   
@@ -662,6 +669,43 @@ class PlanEditorController {
   
   // ---
   
+  updateSelectedState(selectedFeature, featureId){
+    // tell state
+    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+    selectedViewFeaturesByType.equipment = {}
+    if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
+      selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+    }
+    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+  }
+  
+  displayViewObject(feature, iconUrl){
+    //this.viewIconUrl = iconUrl
+    var planId = this.state.plan.getValue().id
+    
+    this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+    .then((result) => {
+      try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
+        this.viewEventFeature = feature
+        this.viewFeature = AroFeatureFactory.createObject(result.data)
+        var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+        this.viewLabel = viewConfig.label
+        this.viewIconUrl = viewConfig.iconUrl
+        this.isEditFeatureProps = false
+        //this.updateSelectedState(feature, feature.objectId)
+      }catch(error) {
+        console.error(error)
+      }
+      
+    })
+  }
+  
+  editViewObject(){
+    //this.sendNewFeature = {'feature': this.viewEventFeature, 'iconUrl': this.viewIconUrl}
+    //createMapObject(this.viewEventFeature, this.viewIconUrl, true, true)
+    this.mapObjectEditorComms.createMapObject(this.viewEventFeature, this.viewIconUrl)
+  }
+  
   handleObjectCreated(mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
@@ -679,12 +723,15 @@ class PlanEditorController {
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           })
           .then((result) => {
-            //console.log(result)
             var attributes = result.data.attributes
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
-            this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
-                                                                                    equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+            
+            var equipmentProperties = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+                                                              equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+            //this.objectIdToProperties[mapObject.objectId] = new EquipmentProperties(networkNodeEquipment.siteInfo.siteClli, networkNodeEquipment.siteInfo.siteName,
+            //                                                                        equipmentFeature.networkNodeType, null, networkNodeEquipment, result.data.deploymentType)
+            this.objectIdToProperties[mapObject.objectId] = equipmentProperties
             var equipmentObject = this.formatEquipmentForService(mapObject.objectId)
             this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
               .then(() => this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`))
@@ -780,6 +827,11 @@ class PlanEditorController {
   
   handleSelectedObjectChanged(mapObject) {
     if (null == this.currentTransaction) return
+    if (null != mapObject){
+      this.updateSelectedState()
+      this.isEditFeatureProps = true
+    }
+    
     this.selectedMapObject = mapObject
     
     // debug 

@@ -57,6 +57,8 @@
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
+                         display-view-object="$ctrl.displayViewObject(feature)"
+                         comms="$ctrl.mapObjectEditorComms"
                          on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
                          register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                          register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
@@ -169,9 +171,54 @@
             </tr>
           </tbody>
         </table>
-
+        
+        
+        
+        
+        
+        
+        
+        
         <!-- Section to show properties when the selected map object is an equipment node -->
-        <div class="clearfix" ng-if="$ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+        <div class="clearfix" ng-if="!$ctrl.isEditFeatureProps && $ctrl.viewFeature" style="margin-top: 10px">
+          <!-- Section header showing the type of the selected object -->
+          <div class="sidebar-table-header">
+              <img ng-src="{{$ctrl.viewIconUrl}}" style="vertical-align:middle; padding-right: 10px">
+              <span>{{$ctrl.viewLabel}}</span>
+              
+              <button class="btn btn-primary btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
+                  ng-click="$ctrl.editViewObject()"
+                  >edit</button>
+              
+          </div>
+          
+          <!-- A table containing the editable properties of the selected object -->
+          <editor-interface-tree 
+                              ng-if="!$ctrl.isEditFeatureProps"
+                              object-to-view="$ctrl.viewFeature.networkNodeEquipment" 
+                              is-edit="false"
+                              root-meta-data="{'networkNodeType':$ctrl.viewFeature.siteNetworkNodeType}"
+                              ></editor-interface-tree>
+          
+
+          <button ng-if="$ctrl.isEditFeatureProps"
+                  ng-class="{ 'btn btn-sm pull-right': true,
+                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
+                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+                  ng-click="$ctrl.saveSelectedEquipmentProperties()"
+                  style="margin-bottom: 10px">
+            <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
+          </button>
+        </div>
+        
+        
+        
+        
+        
+        
+        <!-- Section to show properties when the selected map object is an equipment node -->
+        <div class="clearfix" ng-if="$ctrl.isEditFeatureProps && $ctrl.selectedMapObject && $ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">

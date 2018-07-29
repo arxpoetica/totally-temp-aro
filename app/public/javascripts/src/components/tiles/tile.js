@@ -468,7 +468,7 @@ class MapTileRenderer {
   	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
   	          // Draw selected icon
   	          ctx.drawImage(selectedLocationImage[0], x, y)
-  	        }else if(this.selectedDisplayMode == this.displayModes.VIEW 
+  	        }else if((this.selectedDisplayMode == this.displayModes.VIEW || this.selectedDisplayMode == this.displayModes.EDIT_PLAN) // for edit mode view of existing 
   	                 && null != selectedListId 
   	                 && null != selectedListType
   	                 && this.selectedViewFeaturesByType.hasOwnProperty(selectedListType) 
