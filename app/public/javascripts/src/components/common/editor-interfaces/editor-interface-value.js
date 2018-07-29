@@ -41,8 +41,12 @@ class EditorInterfaceValueController {
           }
         }
         if (!isInSet && this.enumSet && this.enumSet.length > 0){
-          this.enumVal = this.enumSet[0].description
-          this.model = this.enumSet[0].id
+          if (this.isEdit){
+            this.enumVal = this.enumSet[0].description
+            this.model = this.enumSet[0].id
+          }else{
+            this.enumVal = this.model
+          }
           this.onChange()
         }
       }, (errorText) => {
