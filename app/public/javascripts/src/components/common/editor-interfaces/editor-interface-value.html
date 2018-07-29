@@ -1,4 +1,4 @@
-
+{{$ctrl.onRefresh();""}}
 <div ng-if="$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayDataType" ng-class="{'ei-invalid-highlight': !$ctrl.isValid }">
   
   <input ng-switch-when="string" type="text" ng-model="$ctrl.model" ng-change="$ctrl.onInput()" class="form-control input-sm ei-input-text">

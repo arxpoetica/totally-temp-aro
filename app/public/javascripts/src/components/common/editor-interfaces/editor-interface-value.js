@@ -5,25 +5,30 @@ class EditorInterfaceValueController {
   constructor() {
     //
   }
-
-  $onInit() {
-    // I think its better to get an error so we know a displayDataType is wrong
-    //if ("number" == this.displayProps.displayDataType){
-    //  this.model = parseFloat(this.model)
-    //}
+  
+  $onInit(){
     this.enumVal = ""
     this.isValid = true
     this.needsValidation = false
+    this.dateVal = new Date()
+  }
+  
+  onRefresh() {
     if ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType){
-      this.dateVal = new Date(this.model)
+      var newDateVal = new Date(this.model)
+      if (newDateVal.getTime() != this.dateVal.getTime()){ // interesting fact: new Date(0) != new Date(0)
+        this.dateVal = newDateVal
+      }
     }
     
     // change this out for proper dynamic constraint checking
     if ('siteClli' == this.displayProps.propertyName || 'siteName' == this.displayProps.propertyName){
       this.isValid = this.checkConstraint()
       this.needsValidation = true
+    }else{
+      this.isValid = true
+      this.needsValidation = false
     }
-    
   }
   
   getEnumSet(){
