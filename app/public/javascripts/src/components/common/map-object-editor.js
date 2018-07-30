@@ -53,6 +53,9 @@ class MapObjectEditorController {
     }
     this.mapRef = window[this.mapGlobalObjectName]
 
+    if (!this.featureType) {
+      console.warn('map-object-editor: featureType must be defined (currently either "location" or "equipment"')
+    }
     // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
@@ -457,7 +460,7 @@ class MapObjectEditorController {
 
     var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     var featurePromise = null
-    if (event.locations && event.locations.length > 0) {
+    if (this.featureType === 'location' && event.locations && event.locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = event.locations[0].object_id
       feature.isExistingObject = true
@@ -474,7 +477,7 @@ class MapObjectEditorController {
       })
       
       //featurePromise = Promise.resolve(feature)
-    } else if (event.equipmentFeatures && event.equipmentFeatures.length > 0) {
+    } else if (this.featureType === 'equipment' && event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = event.equipmentFeatures[0]
       feature.objectId = clickedObject.object_id 
@@ -716,6 +719,7 @@ let mapObjectEditor = {
     createObjectOnClick: '<',
     allowBoundaryCreation: '<',
     hideObjectIds: '<',    // A set of IDs that we will suppress visibility for
+    featureType: '@',
     onInit: '&',
     onCreateObject: '&',
     onSelectObject: '&',
