@@ -125,27 +125,24 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       // that we do not have in a single call.
       // First, add the current tile definition. Doing it this way so that even if the maplayers have changed
       // by the time we get here, we still always guarantee that we will provide data for the requested tile definition.
-      var postBody = [tileDefinition]
+      var tileDefinitionsToDownload = [tileDefinition]
       // Next, add everything from the map layers that has not already been downloaded.
       Object.keys(tileDataService.mapLayers).forEach((mapLayerKey) => {
         const mapLayer = tileDataService.mapLayers[mapLayerKey]
         mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
           if (!tileProviderCache.hasOwnProperty(mapLayerTileDef.dataId) && (mapLayerTileDef.dataId !== tileDefinition.dataId)) {
-            postBody.push(mapLayerTileDef)
+            tileDefinitionsToDownload.push(mapLayerTileDef)
           }
         })
       })
       // Wrap a promise that will make the request
-      const mapLayers = tileDataService.mapLayers // Save them in case they change while the promise is resolving.
-      var dataPromise = tileDataService.getMapData(postBody, zoom, tileX, tileY)
+      var dataPromise = tileDataService.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
                           .catch((err) => console.error(err))
-      Object.keys(mapLayers).forEach((mapLayerKey) => {
-        const mapLayer = mapLayers[mapLayerKey]
-        mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
-          if (!tileProviderCache.hasOwnProperty(mapLayerTileDef.dataId)) {
-            tileDataService.tileProviderCache[tileId][mapLayerTileDef.dataId] = dataPromise
-          }
-        })
+      // For all the tile definitions that we are going to download, this is the promise that we save.
+      // Note that some map layers may have been downloaded previously. We have to be careful not to overwrite those promises.
+      // Hence, using tileDefinitionsToDownload and not tileDataService.mapLayers
+      tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
+        tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId] = dataPromise
       })
       return dataPromise
     }
