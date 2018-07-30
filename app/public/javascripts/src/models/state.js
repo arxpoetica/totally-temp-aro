@@ -1388,6 +1388,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.loadListOfPlanTags()
 
   service.loadListOfSAPlanTags = (filterObj) => {
+    /*
     var filter = "layer/id eq 1"
     filter = filterObj ? filter.concat(` and substringof(code,'${filterObj}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
@@ -1395,7 +1396,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       .then((results) => {
         service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
       })  
-    }  
+    } 
+    */
+    service.loadAllPlanTags()
   }
 
   service.removeDuplicates = (myArr,prop) => {
@@ -1434,13 +1437,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     })  
     */
     
+    service.loadAllPlanTags()
+    
+  }
+  
+  service.loadAllPlanTags = () => {
     if (service.listOfServiceAreaTags && service.listOfServiceAreaTags.length > 0) return
     
     $http.get(`/service/odata/servicearea?$select=id%2C%20code`)
     .then((result) => {
       service.listOfServiceAreaTags = result.data
+      //console.log(service.listOfServiceAreaTags)
     })
-    
   }
 
   service.getTagColour = (tag) => {
