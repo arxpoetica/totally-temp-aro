@@ -74,7 +74,7 @@ class PlanSearchController {
       if(_.isString(plan)) return plan
     })
     var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name || tag.code || tag.firstName).concat("\""))
-    if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(selectedFilterPlans)
+    if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.search_text = selectedFilters.join(' ')
   }
 

@@ -60,6 +60,17 @@
       "iconUrl": "/images/map_icons/frontier/copper.png"
     }
   },
+  "boundaries": {
+    "siteBoundaries": {
+      "drawingOptions": {
+        "strokeStyle": "#e47de2",
+        "lineWidth": 4,
+        "lineOpacity": 0.9,
+        "fillStyle": "transparent",
+        "opacity": 0
+      }
+    }
+  },
   "visibility": {
     "defaultShowExistingEquipment": true,
     "defaultShowPlannedEquipment": true

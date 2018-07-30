@@ -180,7 +180,11 @@ class BoundariesController {
         lineWidth: 8
       }
     }
-    
+    if(config.ARO_CLIENT === 'frontier') {
+      layerSettings['census_blocks']['strokeStyle'] = '#000000'
+      layerSettings['census_blocks']['opacity'] = 0.5
+    }
+
     layerSettings['analysis_layer'] = layerSettings['aggregated_analysis_layer'] = {
       dataUrls: [],
       renderMode: 'PRIMITIVE_FEATURES',
