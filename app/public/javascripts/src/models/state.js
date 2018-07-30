@@ -1443,8 +1443,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   
   service.loadAllPlanTags = () => {
     if (service.listOfServiceAreaTags && service.listOfServiceAreaTags.length > 0) return
-    
-    $http.get(`/service/odata/servicearea?$select=id%2C%20code`)
+    var filter = "layer/id eq 1"
+    $http.get(`/service/odata/servicearea?$select=id%2C%20code&$filter=${filter}`)
     .then((result) => {
       service.listOfServiceAreaTags = result.data
       //console.log(service.listOfServiceAreaTags)
