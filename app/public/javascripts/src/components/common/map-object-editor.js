@@ -312,7 +312,9 @@ class MapObjectEditorController {
   }
 
   createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride) {
-    if ('undefined' == typeof existingObjectOverride) existingObjectOverride = false
+    if ('undefined' == typeof existingObjectOverride) {
+      existingObjectOverride = false
+    }
     var mapObject = null
     if (feature.geometry.type === 'Point') {
       
@@ -467,6 +469,7 @@ class MapObjectEditorController {
         // ise featire's coord NOT the event's coords
         feature.geometry.coordinates = serviceFeature.geometry.coordinates
         feature.attributes = serviceFeature.attributes
+        feature.directlyEditExistingFeature = true
         return Promise.resolve(feature)
       })
       
@@ -523,7 +526,7 @@ class MapObjectEditorController {
         
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
-      .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true))
+      .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true, featureToUse.directlyEditExistingFeature))
       .then(() => {
         // If we are editing an existing polygon object, make it editable
         if (feature.isExistingObject && iconKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY) {
