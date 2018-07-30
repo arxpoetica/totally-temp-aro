@@ -1659,7 +1659,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // If yes, steal it. If not, throw a rejection
   service.stealOrRejectTransaction = (transaction) => {
     // Get the name of the current owner of the transaction
-    return $http.get(`/service/odata/userentity?$select=firstName,lastName&id eq ${transaction.userId}`)
+    return $http.get(`/service/odata/userentity?$select=firstName,lastName&$filter=id eq ${transaction.userId}`)
       .then((result) => {
         const user = result.data[0]
         return new Promise((resolve, reject) => {
