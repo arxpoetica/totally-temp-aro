@@ -398,7 +398,9 @@ class MapTileRenderer {
   }
 
   shouldRenderFeature(feature) {
-    if (feature._data_type && feature._data_type.split('.')[0] === 'equipment') {
+    if (!feature.properties) {
+      return true
+    } else if (feature.properties._data_type && feature.properties._data_type.split('.')[0] === 'equipment') {
       // For now, just hide equipment features that are Planned and Deleted
       return (!feature.properties.deployment_type
         || (feature.properties.deployment_type === 1)
