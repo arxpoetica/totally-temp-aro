@@ -7,6 +7,11 @@
 var Rx = require('rxjs')
 var pointInPolygon = require('point-in-polygon')
 
+// Gets the tile id for given zoom and coords. Useful for setting div ids and cache keys
+const getTileId = (zoom, tileX, tileY) => {
+  return `mapTile_${zoom}_${tileX}_${tileY}`
+}
+
 class MapTileRenderer {
 
   constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea,
@@ -17,6 +22,7 @@ class MapTileRenderer {
     this.mapLayers = mapLayers
     this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
+    this.tileVersions = {}
     this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
     this.selectedServiceAreas = selectedServiceAreas 
     this.selectedAnalysisArea = selectedAnalysisArea
@@ -170,15 +176,10 @@ class MapTileRenderer {
     this.tileDataService.setMapLayers(mapLayers)
   }
 
-  // Gets the tile id for given zoom and coords. Useful for setting div ids and cache keys
-  getTileId(zoom, tileX, tileY) {
-    return `mapTile_${zoom}_${tileX}_${tileY}`
-  }
-
   // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
     tiles.forEach((tile) => {
-      var tileId = this.getTileId(tile.zoom, tile.x, tile.y)
+      var tileId = getTileId(tile.zoom, tile.x, tile.y)
       var cachedTile = this.tileDataService.tileHtmlCache[tileId]
       if (cachedTile) {
         var coord = { x: tile.x, y: tile.y }
@@ -201,7 +202,7 @@ class MapTileRenderer {
     // We create a div with a parent canvas. This is because the canvas needs to have its top-left
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
-    var tileId = this.getTileId(zoom, coord.x, coord.y)
+    var tileId = getTileId(zoom, coord.x, coord.y)
     var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null
     var htmlCache = this.tileDataService.tileHtmlCache[tileId]
     if (htmlCache) {
@@ -228,7 +229,9 @@ class MapTileRenderer {
         frontBufferCanvas: frontBufferCanvas,
         backBufferCanvas: backBufferCanvas,
         heatmapCanvas: heatmapCanvas,
-        isDirty: true
+        isDirty: true,
+        zoom: zoom,
+        coord: coord
       }
     }
 
@@ -251,6 +254,19 @@ class MapTileRenderer {
 
   // Renders all data for this tile
   renderTile(zoom, coord, htmlCache) {
+    const tileId = `${zoom}-${coord.x}-${coord.y}`
+
+    // This render for this tile will have a "version". This is because we can have multiple refreshes
+    // requested one after the other, and sometimes the data for an older tile comes in after the data
+    // for a newer tile, and the older data is rendered over the newer data. To get around this, at the
+    // point where we do the actual drawing (see below), we will check to see if the version we are
+    // rendering is the latest. If not, then we will skip rendering
+    if (!this.tileVersions.hasOwnProperty(tileId)) {
+      this.tileVersions[tileId] = 0
+    }
+    const currentTileVersion = this.tileVersions[tileId] + 1
+    this.tileVersions[tileId] = currentTileVersion
+
     var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
     	this.mapLayersByZ.forEach((mapLayerKey, index) => {
@@ -301,20 +317,19 @@ class MapTileRenderer {
         })
         // We have all the data. Now check the dirty flag. The next call (where we render features)
         // MUST be synchronous for this to work correctly
-        if (htmlCache && htmlCache.isDirty) {
-          if (htmlCache && htmlCache.isDirty) {
-            htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
-            htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
-            this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
+        const isLatestVersion = (this.tileVersions[tileId] === currentTileVersion)
+        if (htmlCache && htmlCache.isDirty && isLatestVersion) {
+          htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
+          htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
+          this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
-            // Copy the back buffer image onto the front buffer
-            var ctx = htmlCache.frontBufferCanvas.getContext('2d')
-            ctx.clearRect(0, 0, htmlCache.frontBufferCanvas.width, htmlCache.frontBufferCanvas.height)
-            ctx.drawImage(htmlCache.backBufferCanvas, 0, 0)
-            // All rendering has been done. Mark the cached HTML tile as not-dirty
-            // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
-            htmlCache.isDirty = false
-          }
+          // Copy the back buffer image onto the front buffer
+          var ctx = htmlCache.frontBufferCanvas.getContext('2d')
+          ctx.clearRect(0, 0, htmlCache.frontBufferCanvas.width, htmlCache.frontBufferCanvas.height)
+          ctx.drawImage(htmlCache.backBufferCanvas, 0, 0)
+          // All rendering has been done. Mark the cached HTML tile as not-dirty
+          // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
+          htmlCache.isDirty = false
         }
       })
       .catch((err) => {
@@ -1519,7 +1534,7 @@ class TileComponentController {
       return
     }
 
-    // First get a list of tiles that are visible on the screen. We will only redraw these ones
+    // First get a list of tiles that are visible on the screen.
     var visibleTiles = []
     var mapBounds = this.mapRef.getBounds()
     var neCorner = mapBounds.getNorthEast()
@@ -1539,9 +1554,23 @@ class TileComponentController {
       }
     }
 
-    // Redraw cached tiles
+    // First, redraw the visible tiles
     this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
       overlayMap.redrawCachedTiles(visibleTiles)
+    })
+
+    // Next, redraw the non-visible tiles. If we don't do this, these tiles will have stale data if the user pans/zooms.
+    var redrawnTiles = new Set()
+    visibleTiles.forEach((visibleTile) => redrawnTiles.add(getTileId(visibleTile.zoom, visibleTile.x, visibleTile.y)))
+    var tilesOutOfViewport = []
+    Object.keys(this.tileDataService.tileHtmlCache).forEach((tileKey) => {
+      var cachedTile = this.tileDataService.tileHtmlCache[tileKey]
+      if (!redrawnTiles.has(getTileId(cachedTile.zoom, cachedTile.coord.x, cachedTile.coord.y))) {
+        tilesOutOfViewport.push({ zoom: cachedTile.zoom, x: cachedTile.coord.x, y: cachedTile.coord.y })
+      }
+    })
+    this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+      overlayMap.redrawCachedTiles(tilesOutOfViewport)
     })
   }
 
