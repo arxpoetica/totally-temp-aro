@@ -1,4 +1,4 @@
-/* global app user_id config map _ google swal config $ globalServiceLayers globalExistingFiberSourceNames */
+/* global app user_id config map _ google swal config $ globalServiceLayers */
 // Equipment Nodes Controller
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'configuration', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state, configuration) => {
   // Controller instance variables
