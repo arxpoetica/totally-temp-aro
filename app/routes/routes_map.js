@@ -12,7 +12,6 @@ exports.configure = (api, middleware) => {
       config: public_config,
       serviceLayers: cache.serviceLayers,
       analysisLayers: cache.analysisLayers,
-      existingFiberSourceNames: cache.existingFiberSourceNames,
       mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP', 
       // For google maps licensing, specify one of the following:
       // 1. Nothing (no API_KEY, no CLIENT_ID, no CHANNEL)
