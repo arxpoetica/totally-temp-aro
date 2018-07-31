@@ -63,6 +63,7 @@ class PlanInputsModalController {
   resetPlanInputs() {
     this.planName = null
     this.state.currentPlanTags = []
+    this.state.currentPlanServiceAreaTags = []
     this.close()
   }
 

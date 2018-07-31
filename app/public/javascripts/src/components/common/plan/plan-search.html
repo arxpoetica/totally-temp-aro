@@ -45,7 +45,6 @@
       object-name="Creator"
       search-list="$ctrl.state.listOfCreatorTags"
       apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"></plan-search-filter>
-      <!-- refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"  -->
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
@@ -58,18 +57,19 @@
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
             <b><a href="javascript:void(0)" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</a></b>
+            <div><i>{{$ctrl.getPlanCreatorName(plan.createdBy)}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
               <span class="label"> {{tag.name}} 
-                <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
+                <i class="fa fa-times pointer" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
               </span>
             </div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds) track by tag.id" 
                 class="tag label satags">
               <span class="label satag"> {{tag.code}} 
-                <i class="fa fa-times pointer" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
+                <i class="fa fa-times pointer" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
               </span>
             </div>
           </td>
