@@ -13,10 +13,31 @@ class PlanSearchController {
       method: 'GET',
       params: {}
     }
+
+    this.isAdministrator = false
   }
 
   $onInit() {
     this.loadPlans(1)
+    this.getLoggedInUserRole()
+  }
+
+  getLoggedInUserRole() {
+    var userAdminPermissions = null
+    this.$http.get('/service/auth/permissions')
+      .then((result) => {
+        // Get the permissions for the name USER_ADMIN
+        userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
+        return this.$http.get(`/service/auth/acl/SYSTEM/1`)
+      })
+      .then((result) => {
+        // Get the acl entry corresponding to the currently logged in user
+        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === this.state.loggedInUser.id)[0]
+        // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
+        // the logged in user is an administrator.
+        this.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+      })
+      .catch((err) => console.error(err))
   }
 
   loadPlans(page, callback) {
@@ -162,6 +183,11 @@ class PlanSearchController {
     //This previous modal will show after close the report
     this.state.previousModal = this.state.networkPlanModal
     this.state.reportModal.next(true)
+  }
+
+  getPlanCreatorName(createdBy) {
+    var creator = this.state.listOfCreatorTags.filter((creator) => creator.id === createdBy)[0]
+    return creator.firstName + " " + creator.lastName
   }
 }
 

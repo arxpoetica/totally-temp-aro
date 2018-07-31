@@ -12,7 +12,7 @@ class PlanInfoController {
     this.addGeneralTags = false
     this.addSATags = false
 
-    state.plan
+    this.planObserver = state.plan
     .subscribe((plan) => {
       this.currentPlanInfo = plan
       this.getPlanTagDetails()
@@ -134,12 +134,18 @@ class PlanInfoController {
     }
   }
 
+  getPlanCreatorName(createdBy) {
+    var creator = this.state.listOfCreatorTags.filter((creator) => creator.id === createdBy)[0]
+    return creator.firstName + " " + creator.lastName
+  }
+  
   $onInit() {
     this.getPlanTagDetails()
   }
 
   $onDestroy() {
     this.commitUpdatestoPlan(true)
+    this.planObserver.unsubscribe()
   }
 }
 

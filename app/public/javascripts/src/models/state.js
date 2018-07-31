@@ -920,6 +920,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         const userId = service.loggedInUser.id
         var apiEndpoint = `/service/v1/plan?user_id=${userId}&project_template_id=${result.data.projectTemplateId}`
         if (!isEphemeral && parentPlan) {
+          //associate selected tags to child plan
+          planOptions.tagMapping = {
+            global: [],
+            linkTags: {
+              geographyTag: "service_area",
+              serviceAreaIds: []
+            }
+          }
+          planOptions.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
+          planOptions.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
           // A parent plan is specified - append it to the POST url
           apiEndpoint += `&branch_plan=${parentPlan.id}`
         }
@@ -1373,6 +1383,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.listOfTags = []
   service.currentPlanTags = []
   service.listOfServiceAreaTags = []
+  service.listOfCreatorTags = []
   service.currentPlanServiceAreaTags = []
   service.loadListOfPlanTags = () => {
     var promises = [
@@ -1386,6 +1397,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadListOfPlanTags()
+
+  service.loadListOfCreatorTags = (filterObj) => {
+    var filter = ""
+    filter = filterObj ? filter.concat(` substringof(firstName,'${filterObj}')`) : filter
+    $http.get(`/service/odata/UserEntity?$select=id,firstName,lastName&$filter=${filter}&$orderby=id&$top=999999999`)
+      .then((results) => {
+        service.listOfCreatorTags = results.data
+      })
+  }
+
+  service.loadListOfCreatorTags()
 
   service.loadListOfSAPlanTags = (filterObj) => {
     /*
@@ -1592,7 +1614,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         return $http.get('/service/auth/users')
       })
       .then((result) => {
-        service.listOfCreatorTags = angular.copy(result.data)
         result.data.forEach((user) => {
           //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
           user.name = `<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}` 
