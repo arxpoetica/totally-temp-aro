@@ -11,7 +11,7 @@
           <span class="tag" ng-if=$item.type>
             {{$item.type}}:
             <span class="label" ng-if="$item.type!='svc' || $item.type!='created_by'" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name}}</span>
-            <span class="label satags satag" ng-if="$item.type=='svc' || $item.type=='created_by'">{{$item.code || $item.firstName}}</span>
+            <span class="label satags satag" ng-if="$item.type=='svc' || $item.type=='created_by'">{{$item.code || $item.fullName}}</span>
           </span>
           <span class="tag" ng-if=!$item.type>
             {{$item}}
@@ -19,7 +19,7 @@
         </ui-select-match>
         <ui-select-choices class="ui-select-search" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
-            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.firstName}}
+            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.fullName}}
           </div>
         </ui-select-choices>
       </ui-select>
@@ -51,13 +51,13 @@
     No plans found
   </p>
 
-  <div ng-show="$ctrl.plans.length > 0">
+  <div ng-if="$ctrl.plans.length > 0">
     <table id="tblSelectPlans" class="table table-condensed table-striped">
       <tbody>
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
             <b><a href="javascript:void(0)" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</a></b>
-            <div><i>{{$ctrl.getPlanCreatorName(plan.createdBy)}}</i></div>
+            <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy)}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">

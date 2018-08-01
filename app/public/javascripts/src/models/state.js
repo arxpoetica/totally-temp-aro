@@ -1400,8 +1400,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.loadListOfCreatorTags = (filterObj) => {
     var filter = ""
-    filter = filterObj ? filter.concat(` substringof(firstName,'${filterObj}')`) : filter
-    $http.get(`/service/odata/UserEntity?$select=id,firstName,lastName&$filter=${filter}&$orderby=id&$top=999999999`)
+    filter = filterObj ? filter.concat(` substringof(fullName,'${filterObj}')`) : filter
+    $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=999999999`)
       .then((results) => {
         service.listOfCreatorTags = results.data
       })

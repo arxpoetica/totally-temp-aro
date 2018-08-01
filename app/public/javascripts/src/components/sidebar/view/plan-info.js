@@ -136,7 +136,7 @@ class PlanInfoController {
 
   getPlanCreatorName(createdBy) {
     var creator = this.state.listOfCreatorTags.filter((creator) => creator.id === createdBy)[0]
-    return creator.firstName + " " + creator.lastName
+    return creator && creator.fullName
   }
   
   $onInit() {
