@@ -198,13 +198,6 @@ class MapTileRenderer {
     })
   }
 
-  dropLowPriorityTileRenders() {
-    const numTilesStart = this.tileRenderThrottle.length()
-    this.tileRenderThrottle.remove((item) => item.priority > this.latestTileRenderPriority + 5)
-    const numTilesEnd = this.tileRenderThrottle.length()
-    console.log(`Dropping number of tiles from ${numTilesStart} to ${numTilesEnd}`)
-  }
-
   // Creates a tile canvas element
   createTileCanvas(ownerDocument) {
     var canvas = ownerDocument.createElement('canvas');
@@ -267,7 +260,6 @@ class MapTileRenderer {
     var htmlCache = this.tileDataService.tileHtmlCache[tileId]
     setTimeout(() => {
       this.tileRenderThrottle.push(() => this.renderTile(zoom, coord, htmlCache), --this.latestTileRenderPriority)
-      this.dropLowPriorityTileRenders()
     }, RENDER_TIMEOUT_MILLISECONDS)
     return div
   }
