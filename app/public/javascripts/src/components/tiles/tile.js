@@ -6,6 +6,7 @@
 // Browserify includes
 var Rx = require('rxjs')
 var pointInPolygon = require('point-in-polygon')
+var AsyncPriorityQueue = require('async').priorityQueue
 
 // Gets the tile id for given zoom and coords. Useful for setting div ids and cache keys
 const getTileId = (zoom, tileX, tileY) => {
@@ -40,6 +41,15 @@ class MapTileRenderer {
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.renderBatches = []
     this.isRendering = false
+
+    const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
+    this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
+      // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
+      task()
+        .then((result) => callback())
+        .catch((err) => callback())
+    }, MAX_CONCURRENT_VECTOR_TILE_RENDERS)
+    this.latestTileRenderPriority = Number.MAX_SAFE_INTEGER
 
     this.modificationTypes = Object.freeze({
       UNMODIFIED: 'UNMODIFIED',
@@ -183,9 +193,17 @@ class MapTileRenderer {
       var cachedTile = this.tileDataService.tileHtmlCache[tileId]
       if (cachedTile) {
         var coord = { x: tile.x, y: tile.y }
-        this.renderTile(tile.zoom, coord, cachedTile)
+        this.tileRenderThrottle.push(() => this.renderTile(tile.zoom, coord, cachedTile), --this.latestTileRenderPriority)
       }
     })
+    this.dropLowPriorityTileRenders()
+  }
+
+  dropLowPriorityTileRenders() {
+    const numTilesStart = this.tileRenderThrottle.length()
+    this.tileRenderThrottle.remove((item) => item.priority > this.latestTileRenderPriority + 5)
+    const numTilesEnd = this.tileRenderThrottle.length()
+    console.log(`Dropping number of tiles from ${numTilesStart} to ${numTilesEnd}`)
   }
 
   // Creates a tile canvas element
@@ -248,7 +266,10 @@ class MapTileRenderer {
     // Store the HTML cache object. The object referred to by this.tileDataService.tileHtmlCache[tileId] can
     // change between now and when the full tile is rendered. We do not want to set the dirty flag on a different object.
     var htmlCache = this.tileDataService.tileHtmlCache[tileId]
-    setTimeout(() => this.renderTile(zoom, coord, htmlCache), RENDER_TIMEOUT_MILLISECONDS)
+    setTimeout(() => {
+      this.tileRenderThrottle.push(() => this.renderTile(zoom, coord, htmlCache), --this.latestTileRenderPriority)
+      this.dropLowPriorityTileRenders()
+    }, RENDER_TIMEOUT_MILLISECONDS)
     return div
   }
 
@@ -304,7 +325,7 @@ class MapTileRenderer {
     
     this.uiNotificationService.addNotification('main', 'rendering tiles')
     // Get all the data for this tile
-    Promise.all(singleTilePromises)
+    return Promise.all(singleTilePromises)
       .then((singleTileResults) => {
         var lockOverlayImage = singleTileResults.splice(singleTileResults.length - 1)
         var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
@@ -331,6 +352,7 @@ class MapTileRenderer {
           // Do NOT use this.tileDataService.tileHtmlCache[tileId], that object reference may have changed
           htmlCache.isDirty = false
         }
+        return Promise.resolve()
       })
       .catch((err) => {
         console.error(err)
@@ -338,6 +360,7 @@ class MapTileRenderer {
       })
       .then(() => {
         this.uiNotificationService.removeNotification('main', 'rendering tiles')
+        return Promise.resolve()
       })
   }
 
@@ -1554,12 +1577,7 @@ class TileComponentController {
       }
     }
 
-    // First, redraw the visible tiles
-    this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
-      overlayMap.redrawCachedTiles(visibleTiles)
-    })
-
-    // Next, redraw the non-visible tiles. If we don't do this, these tiles will have stale data if the user pans/zooms.
+    // Redraw the non-visible tiles. If we don't do this, these tiles will have stale data if the user pans/zooms.
     var redrawnTiles = new Set()
     visibleTiles.forEach((visibleTile) => redrawnTiles.add(getTileId(visibleTile.zoom, visibleTile.x, visibleTile.y)))
     var tilesOutOfViewport = []
@@ -1569,8 +1587,13 @@ class TileComponentController {
         tilesOutOfViewport.push({ zoom: cachedTile.zoom, x: cachedTile.coord.x, y: cachedTile.coord.y })
       }
     })
-    this.mapRef.overlayMapTypes.forEach((overlayMap, index) => {
+    // First, redraw the tiles that are outside the viewport
+    this.mapRef.overlayMapTypes.forEach((overlayMap) => {
       overlayMap.redrawCachedTiles(tilesOutOfViewport)
+    })
+    // Next, redraw the visible tiles. This is because tiles that are redrawn most recently are given a higher priority.
+    this.mapRef.overlayMapTypes.forEach((overlayMap) => {
+      overlayMap.redrawCachedTiles(visibleTiles)
     })
   }
 
