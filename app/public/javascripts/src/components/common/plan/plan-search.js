@@ -94,7 +94,7 @@ class PlanSearchController {
     var selectedFilterPlans = _.filter(this.searchText,(plan) => {
       if(_.isString(plan)) return plan
     })
-    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name || tag.code || tag.firstName).concat("\""))
+    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name || tag.code || tag.fullName).concat("\""))
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.search_text = selectedFilters.join(' ')
   }
@@ -187,7 +187,7 @@ class PlanSearchController {
 
   getPlanCreatorName(createdBy) {
     var creator = this.state.listOfCreatorTags.filter((creator) => creator.id === createdBy)[0]
-    return creator.firstName + " " + creator.lastName
+    return creator && creator.fullName
   }
 }
 

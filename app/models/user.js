@@ -194,7 +194,8 @@ module.exports = class User {
     .then(() => database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`))
     .then((createdUser) => {
       createdUserId = createdUser[0].add_user
-      return database.query(`UPDATE auth.users SET company_name='${user.companyName}', rol='${user.rol}' WHERE id=${createdUserId};`)
+      var full_name = user.firstName + ' ' + user.lastName
+      return database.query(`UPDATE auth.users SET company_name='${user.companyName}', rol='${user.rol}', full_name='${full_name}' WHERE id=${createdUserId};`)
     })
     .then(() => this.resendLink(createdUserId))
     .catch((err) => {
