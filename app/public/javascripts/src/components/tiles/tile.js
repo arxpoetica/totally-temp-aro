@@ -196,7 +196,6 @@ class MapTileRenderer {
         this.tileRenderThrottle.push(() => this.renderTile(tile.zoom, coord, cachedTile), --this.latestTileRenderPriority)
       }
     })
-    this.dropLowPriorityTileRenders()
   }
 
   dropLowPriorityTileRenders() {
@@ -1583,15 +1582,24 @@ class TileComponentController {
     var tilesOutOfViewport = []
     Object.keys(this.tileDataService.tileHtmlCache).forEach((tileKey) => {
       var cachedTile = this.tileDataService.tileHtmlCache[tileKey]
-      if (!redrawnTiles.has(getTileId(cachedTile.zoom, cachedTile.coord.x, cachedTile.coord.y))) {
-        tilesOutOfViewport.push({ zoom: cachedTile.zoom, x: cachedTile.coord.x, y: cachedTile.coord.y })
+      if (cachedTile.zoom !== zoom) {
+        // For all tiles that are not at the current zoom level, simply mark them as dirty. When you change the zoom
+        // level, Google maps will call getTile() and we will be able to redraw the tiles
+        cachedTile.isDirty = true
+      } else {
+        // For all tiles at the current zoom level, we must redraw them. This is because Google maps does not call
+        // getTile() when the user pans. In this case, the tiles will show stale data if they are not redrawn.
+        const isTileVisible = redrawnTiles.has(getTileId(cachedTile.zoom, cachedTile.coord.x, cachedTile.coord.y))
+        if (!isTileVisible) {
+          tilesOutOfViewport.push({ zoom: cachedTile.zoom, x: cachedTile.coord.x, y: cachedTile.coord.y })
+        }
       }
     })
-    // First, redraw the tiles that are outside the viewport
+    // First, redraw the tiles that are outside the viewport AND at the current zoom level.
     this.mapRef.overlayMapTypes.forEach((overlayMap) => {
       overlayMap.redrawCachedTiles(tilesOutOfViewport)
     })
-    // Next, redraw the visible tiles. This is because tiles that are redrawn most recently are given a higher priority.
+    // Next, redraw the visible tiles. We do it this way because tiles that are redrawn most recently are given a higher priority.
     this.mapRef.overlayMapTypes.forEach((overlayMap) => {
       overlayMap.redrawCachedTiles(visibleTiles)
     })
