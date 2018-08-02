@@ -6,7 +6,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   var service = {}
   service.INVALID_PLAN_ID = -1
-  service.MAX_EXPORTABLE_AREA = 25000000
+  service.MAX_EXPORTABLE_AREA = 11000000000 //25000000
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
