@@ -26,6 +26,7 @@ class PlanEditorController {
     this.equipmentIdToBoundaryId = {}
     this.boundaryCoverageById = {}
     this.objectIdsToHide = new Set()
+    this.computedBoundaries = new Set()   // Object ids for boundaries that we have computed
     this.subnetMapObjects = {}
     this.currentTransaction = null
     this.lastSelectedEquipmentType = 'Generic ADSL'
@@ -256,6 +257,7 @@ class PlanEditorController {
         this.objectIdToProperties[feature.objectId] = boundaryProperties
         this.boundaryIdToEquipmentId[feature.objectId] = equipmentObjectId
         this.equipmentIdToBoundaryId[equipmentObjectId] = feature.objectId
+        this.computedBoundaries.add(feature.objectId)
         this.createMapObjects && this.createMapObjects([feature])
         
         this.digestBoundaryCoverage(feature.objectId, result.data)
@@ -799,17 +801,17 @@ class PlanEditorController {
         existingBoundaryId = null
         
         // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
-        //console.log(mapObject)
-        //console.log(feature)
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance')
-        
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
       const networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
-      this.state.requestRecreateTiles.next({})
-      this.state.requestMapLayerRefresh.next({})
+      if (!this.computedBoundaries.has(mapObject.objectId)) {
+        // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
+        this.state.requestRecreateTiles.next({})
+        this.state.requestMapLayerRefresh.next({})
+      }
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
