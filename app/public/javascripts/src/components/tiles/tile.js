@@ -368,6 +368,10 @@ class MapTileRenderer {
         renderingData[mapLayerKey].data.forEach((featureData, index) => {
           var features = []
           Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
+          // If a filtering function is provided for this layer, apply it to filter out features
+          if (mapLayer.featureFilter) {
+            features = features.filter(mapLayer.featureFilter)
+          }
           this.renderFeatures(ctx, zoom, coord, features, featureData, selectedLocationImage, lockOverlayImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
         })
       }
@@ -426,30 +430,12 @@ class MapTileRenderer {
     }
   }
 
-  shouldRenderFeature(feature) {
-    if (!feature.properties) {
-      return true
-    } else if (feature.properties._data_type && feature.properties._data_type.split('.')[0] === 'equipment') {
-      // For now, just hide equipment features that are Planned and Deleted
-      return (!feature.properties.deployment_type
-        || (feature.properties.deployment_type === 1)
-        || (feature.properties.is_deleted !== 'true'))
-    } else {
-      // For all other features, do not display if the is_deleted flag is true
-      return feature.properties.is_deleted !== 'true'
-    }
-  }
-
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
     for (var iFeature = 0; iFeature < features.length; ++iFeature) {
       // Parse the geometry out.
       var feature = features[iFeature]
-
-      if (!this.shouldRenderFeature(feature)) {
-        continue
-      }
 
       if (feature.properties) {
         // Try object_id first, else try location_id
