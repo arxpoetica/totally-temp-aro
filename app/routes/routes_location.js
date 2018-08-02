@@ -212,8 +212,9 @@ exports.configure = (api, middleware) => {
   })
 
   api.post('/locations/exportRegion', (request, response, next)=> {
-    let locations = request.body.locations
-    models.Location.exportAsCSV(locations).then((locations)=> {
+    let polygon = request.body.polygon
+    let planId = request.body.planId
+    models.Location.exportAsCSV(polygon, planId).then((locations)=> {
       response.setHeader('Content-disposition', 'attachment; filename=exported_locations.csv');
       response.set('Content-Type', 'text/csv');
       response.status(200).send(locations);
