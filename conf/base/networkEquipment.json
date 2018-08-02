@@ -37,12 +37,12 @@
         "dataId": "v1.plan.{rootPlanId}.tiles.boundary.point.{polygonTransform}.{polygonTransform}",
         "vtlType": "BoundaryPointLayer",
         "rootPlanId": "{rootPlanId}",
-        "pointTransform": "{polygonTransform}"
+        "transform": "{polygonTransform}"
       },
       "existing": {
         "dataId": "v1.library.{libraryId}.tiles.boundary.point.{polygonTransform}.{polygonTransform}",
         "vtlType": "ExistingBoundaryPointLayer",
-        "pointTransform": "{polygonTransform}",
+        "transform": "{polygonTransform}",
         "libraryId": "{libraryId}"
       }
     }
