@@ -720,7 +720,6 @@ class PlanEditorController {
         this.state.clearTileCachePlanOutputs()
         this.state.loadModifiedFeatures(planId)
           .then(() => {
-            this.state.requestRecreateTiles.next({})
             this.state.requestMapLayerRefresh.next({})
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           })
@@ -809,7 +808,6 @@ class PlanEditorController {
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
-        this.state.requestRecreateTiles.next({})
         this.state.requestMapLayerRefresh.next({})
       }
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
