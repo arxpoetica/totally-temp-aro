@@ -1297,80 +1297,77 @@ class TileComponentController {
     })
     this.TILE_SIZE = 256
 
-    this.state.requestPolygonSelect
-      .subscribe((args) => {
-        if (!this.mapRef || !args.coords) {
-          return
-        }
+    this.state.requestPolygonSelect.subscribe((args) => {
+      if (!this.mapRef || !args.coords) {
+        return
+      }
 
-        var mapBounds = this.mapRef.getBounds()
-        var neCorner = mapBounds.getNorthEast()
-        var swCorner = mapBounds.getSouthWest()
-        var zoom = this.mapRef.getZoom()
-        // Note the swap from NE/SW to NW/SE when finding tile coordinates
-        var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
-        var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+      var mapBounds = this.mapRef.getBounds()
+      var neCorner = mapBounds.getNorthEast()
+      var swCorner = mapBounds.getSouthWest()
+      var zoom = this.mapRef.getZoom()
+      // Note the swap from NE/SW to NW/SE when finding tile coordinates
+      var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+      var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
 
-        // Loop through all visible tiles
-        var pointInPolyPromises = []
-        for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
-          for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
+      // Loop through all visible tiles
+      var pointInPolyPromises = []
+      for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
+        for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
 
-            // Convert lat lng coordinates into pixel coordinates relative to this tile
-            var tileCoords = { x: xTile, y: yTile }
-            var convertedPixelCoords = []
-            args.coords.forEach((latLng) => {
-              var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
-              convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
-            })
-
-            // Get the locations from this tile that are in the polygon
-            this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-              pointInPolyPromises.push(mapOverlay.getPointsInPolygon(zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
-            })
-          }
-        }
-        Promise.all(pointInPolyPromises) 
-          .then((results) => {
-            var selectedLocations = new Set()
-            var selectedServiceAreas = new Set()
-            var selectedRoadSegments = new Set()
-            
-            results.forEach((result) => {
-              result.forEach((selectedObj) => {
-                if (selectedObj.location_id) {
-                  selectedLocations.add(selectedObj.location_id)
-                } else if(selectedObj.id) {
-                  selectedServiceAreas.add(selectedObj.id)
-                } else if (selectedObj.gid) {
-                  selectedRoadSegments.add(selectedObj);
-                }
-              })
-            })
-
-            var selectedLocationsIds = []
-            var selectedServiceAreaIds = []
-
-            selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
-            selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
-            
-            state.hackRaiseEvent(selectedLocationsIds)
-
-            //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            state.mapFeaturesSelectedEvent.next({
-              locations: selectedLocationsIds,
-              serviceAreas: selectedServiceAreaIds,
-              roadSegments: selectedRoadSegments,
-              area: processArea()
-            })
-
-
-            function processArea() {
-              return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{ return {lat: a.lat() , lng: a.lng()} })}).getPath())
-            }
+          // Convert lat lng coordinates into pixel coordinates relative to this tile
+          var tileCoords = { x: xTile, y: yTile }
+          var convertedPixelCoords = []
+          args.coords.forEach((latLng) => {
+            var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
+            convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
           })
-          .catch((err) => console.error(err))
-      })
+
+          // Get the locations from this tile that are in the polygon
+          this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+            pointInPolyPromises.push(mapOverlay.getPointsInPolygon(zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
+          })
+        }
+      }
+      Promise.all(pointInPolyPromises) 
+        .then((results) => {
+          var selectedLocations = new Set()
+          var selectedServiceAreas = new Set()
+          var selectedRoadSegments = new Set()
+          results.forEach((result) => {
+            result.forEach((selectedObj) => {
+              if (selectedObj.location_id) {
+                selectedLocations.add(selectedObj.location_id)
+              } else if(selectedObj.id) {
+                selectedServiceAreas.add(selectedObj.id)
+              } else if (selectedObj.gid) {
+                selectedRoadSegments.add(selectedObj);
+              }
+            })
+          })
+          
+          var selectedLocationsIds = []
+          var selectedServiceAreaIds = []
+
+          selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+          selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+          
+          state.hackRaiseEvent(selectedLocationsIds)
+
+          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          state.mapFeaturesSelectedEvent.next({
+            locations: selectedLocationsIds,
+            serviceAreas: selectedServiceAreaIds,
+            roadSegments: selectedRoadSegments,
+            area: processArea()
+          })
+
+          function processArea() {
+            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{ return {lat: a.lat() , lng: a.lng()} })}).getPath())
+          }
+        })
+        .catch((err) => console.error(err))
+    })
 
     $document.ready(() => {
       // We should have a map variable at this point

@@ -1,6 +1,6 @@
 class MapSelectorExportLocationsController {
   constructor($document, $http, state, Utils) {
-
+    
     this.mapRef = null
     this.drawingManager = null
 
@@ -11,12 +11,17 @@ class MapSelectorExportLocationsController {
       this.targetSelectionMode = this.state && this.state.selectedTargetSelectionMode
       this.updateDrawingManagerState()
     })
-    this.state = state
-    this.selectionModes = state.selectionModes
     this.document = $document
+    this.$http = $http
+    this.state = state
+    this.Utils = Utils
+    this.selectionModes = state.selectionModes
+    
 
     // Handle selection events from state
+    /*
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
+      console.log(event)
       if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
 
       if( angular.equals(event, {}) || event.locations.length  === 0 
@@ -49,7 +54,7 @@ class MapSelectorExportLocationsController {
         Utils.downloadCSV(r.data, "exported_locations.csv")
       })
     })
-
+    */
   }
 
   $onDestroy() {
@@ -77,7 +82,45 @@ class MapSelectorExportLocationsController {
     }
 
   }
+  
+  exportLocationsByPolygon(polygon){
+    if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
 
+    // need to figure area
+    var area = google.maps.geometry.spherical.computeArea(polygon)
+    
+    if(area > this.state.MAX_EXPORTABLE_AREA) {
+      return swal({
+        title: 'Error',
+        text: 'Polygon too big to export',
+        type: 'error'
+      })
+    }
+    
+    var planId = this.state.plan.getValue().id
+    var points = []
+    for (var polyI=0; polyI<polygon.length; polyI++){
+      var pt = polygon[polyI]
+      //points[polyI] = {'lat':pt.lat(), 'lng':pt.lng()}
+      points[polyI] = [pt.lng(), pt.lat()]
+    }
+    points.push(points[0])
+    
+    ///Run the export endpoint
+    this.$http.post("/locations/exportRegion", {'polygon': points, 'planId': planId}).then((r)=>{
+      if(r.data === ""){
+        return swal({
+          title: 'Error',
+          text: 'No data returned',
+          type: 'error'
+        })
+      }
+
+      this.Utils.downloadCSV(r.data, "exported_locations.csv")
+    })
+    
+  }
+  
   $onInit() {
     this.document.ready(()=>{
       this.doInit()
@@ -99,9 +142,15 @@ class MapSelectorExportLocationsController {
     })
 
     this.drawingManager.addListener('overlaycomplete', (e) => {
-      this.state.requestPolygonSelect.next({
-        coords: e.overlay.getPath().getArray()
-      })
+      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET){
+        this.exportLocationsByPolygon( e.overlay.getPath().getArray() )
+      }else{
+        // not sure if this is still used 
+        this.state.requestPolygonSelect.next({
+          coords: e.overlay.getPath().getArray()
+        })
+      }
+      
       setTimeout(() => e.overlay.setMap(null), 100)
     })
   }
