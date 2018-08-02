@@ -267,6 +267,7 @@ class MapObjectEditorController {
     })
     
     if (feature.is_locked) {
+      mapMarker.setOptions({clickable:false}); //Don't allow right click for locked markers
       var lockIconOverlay = new google.maps.Marker({
         icon: {
           url: this.configuration.locationCategories.entityLockIcon, //,
