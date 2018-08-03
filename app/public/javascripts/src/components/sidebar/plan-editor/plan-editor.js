@@ -557,6 +557,7 @@ class PlanEditorController {
     var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
     const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
+    
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
@@ -568,6 +569,7 @@ class PlanEditorController {
       },
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: {
+        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId, 
         network_node_type: siteNetworkNodeType,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -804,7 +806,8 @@ class PlanEditorController {
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
-      const networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      var networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      if ('undefined' == typeof networkNodeType) networkNodeType = feature && feature.networkNodeType
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary

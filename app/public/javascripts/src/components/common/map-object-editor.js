@@ -400,7 +400,6 @@ class MapObjectEditorController {
       this.selectMapObject(mapObject)
       this.$timeout()
     })
-    
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     
