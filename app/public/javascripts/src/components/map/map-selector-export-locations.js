@@ -100,7 +100,6 @@ class MapSelectorExportLocationsController {
     var points = []
     for (var polyI=0; polyI<polygon.length; polyI++){
       var pt = polygon[polyI]
-      //points[polyI] = {'lat':pt.lat(), 'lng':pt.lng()}
       points[polyI] = [pt.lng(), pt.lat()]
     }
     points.push(points[0])
