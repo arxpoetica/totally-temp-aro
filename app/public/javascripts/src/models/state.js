@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -1587,16 +1587,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
-          //group.name = `[G] ${group.name}`  // For now, text instead of icons
-          group.name = `<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`
+          // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+          group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
           service.systemActors.push(group)
         })
         return $http.get('/service/auth/users')
       })
       .then((result) => {
         result.data.forEach((user) => {
-          //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
-          user.name = `<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}` 
+          // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+          user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`) 
           service.systemActors.push(user)
         })
       })
