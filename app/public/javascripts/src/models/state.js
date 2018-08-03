@@ -1395,7 +1395,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         service.listOfTags = results[0].data
       }) 
   }
-
   service.loadListOfPlanTags()
 
   service.loadListOfCreatorTags = (filterObj) => {
@@ -1410,17 +1409,14 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.loadListOfCreatorTags()
 
   service.loadListOfSAPlanTags = (filterObj) => {
-    /*
     var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(code,'${filterObj}')`) : filter
+    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
       $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10`)
       .then((results) => {
         service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
       })  
     } 
-    */
-    service.loadAllPlanTags()
   }
 
   service.removeDuplicates = (myArr,prop) => {
@@ -1428,16 +1424,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos;
     });
   }
-  //service.loadListOfSAPlanTags()
 
   service.loadAllAssociatedSaPlanTags = (plans) => {
-    /*
     let promises = new Set()
-    var tempList = []
-    console.log(service.listOfServiceAreaTags)
-    
-    console.log(plans)
-    
+
     plans.forEach((plan) => {
       plan.tagMapping.linkTags.serviceAreaIds.forEach((tag) => {
         var filter = "layer/id eq 1"
@@ -1451,26 +1441,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
     Promise.all([...promises])
     .then((results) => {
+      var tempList = []
       results.forEach((result) => {
         tempList = tempList.concat(result.data)
       }) 
-      service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList),'id')
+      service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList), 'id')
       console.log(service.listOfServiceAreaTags)
     })  
-    */
-    
-    service.loadAllPlanTags()
-    
-  }
-  
-  service.loadAllPlanTags = () => {
-    if (service.listOfServiceAreaTags && service.listOfServiceAreaTags.length > 0) return
-    var filter = "layer/id eq 1"
-    $http.get(`/service/odata/servicearea?$select=id%2C%20code&$filter=${filter}&$top=999999999`)
-    .then((result) => {
-      service.listOfServiceAreaTags = result.data
-      //console.log(service.listOfServiceAreaTags)
-    })
   }
 
   service.getTagColour = (tag) => {
