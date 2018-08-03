@@ -1408,11 +1408,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.loadListOfCreatorTags()
 
+  const MAX_SERVICE_AREAS_FROM_ODATA = 10
   service.loadListOfSAPlanTags = (filterObj) => {
     var filter = "layer/id eq 1"
     filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10`)
+      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
       .then((results) => {
         service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
       })  
@@ -1426,7 +1427,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadAllAssociatedSaPlanTags = (plans) => {
-    let promises = new Set()
+    let promises = []
 
     plans.forEach((plan) => {
       plan.tagMapping.linkTags.serviceAreaIds.forEach((tag) => {
@@ -1434,18 +1435,21 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         filter = filter.concat(` and id eq ${tag}`)
         service.listOfServiceAreaTags
         if (!service.listOfServiceAreaTags.find(function (obj) { return obj.id === tag })){
-          promises.add($http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}`))
+          promises.push($http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}$top=${MAX_SERVICE_AREAS_FROM_ODATA}`))
         }  
       })
     })  
 
-    Promise.all([...promises])
+    Promise.all(promises)
     .then((results) => {
       var tempList = []
       results.forEach((result) => {
         tempList = tempList.concat(result.data)
       }) 
       service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList), 'id')
+      // Limit the number of service area tags we have. Too big of a number will strain the UI. Multiplying by
+      // 2 since we load MAX_SERVICE_AREAS_FROM_ODATA when we load all tags.
+      service.listOfServiceAreaTags = service.listOfServiceAreaTags.slice(0, 2 * MAX_SERVICE_AREAS_FROM_ODATA)
     })  
   }
 
