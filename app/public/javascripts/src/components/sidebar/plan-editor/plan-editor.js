@@ -112,6 +112,7 @@ class PlanEditorController {
         return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment`)
       }).then((result) => {
         // We have a list of features. Replace them in the objectIdToProperties map.
+        console.log(result)
         this.objectIdToProperties = {}
         this.objectIdToMapObject = {}
         this.equipmentIdToBoundaryId = {}
@@ -124,6 +125,7 @@ class PlanEditorController {
         transactionFeatures.forEach((feature) => feature.iconUrl = this.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
         // Important: Create the map objects first. The events raised by the map object editor will
         // populate the objectIdToMapObject object when the map objects are created
+        console.log(transactionFeatures)
         this.createMapObjects && this.createMapObjects(transactionFeatures)
         // We now have objectIdToMapObject populated.
         transactionFeatures.forEach((feature) => {
@@ -234,6 +236,7 @@ class PlanEditorController {
           return
         }
         // Construct a feature that we will pass to the map object editor, which will create the map object
+        console.log(this.state.selectedBoundaryType)
         var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
                                                         optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
         // ToDo: this should use AroFeatureFactory
@@ -557,6 +560,7 @@ class PlanEditorController {
     var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
     const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
+    console.log(boundaryProperties)
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
@@ -568,6 +572,7 @@ class PlanEditorController {
       },
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: {
+        boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId, 
         network_node_type: siteNetworkNodeType,
         selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
         selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
@@ -709,6 +714,10 @@ class PlanEditorController {
   }
   
   handleObjectCreated(mapObject, usingMapClick, feature) {
+    console.log('-handleObjectCreated-')
+    console.log(mapObject)
+    console.log(feature)
+    console.log(" - ")
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -800,16 +809,20 @@ class PlanEditorController {
         existingBoundaryId = null
         
         // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
+        console.log(this.state.selectedBoundaryType)
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance')
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
-      const networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      var networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
+      if ('undefined' == typeof networkNodeType) networkNodeType = feature && feature.networkNodeType
+      console.log(networkNodeType)
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
         this.state.requestMapLayerRefresh.next({})
       }
+      console.log(serviceFeature)
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
@@ -826,6 +839,7 @@ class PlanEditorController {
   }
   
   handleSelectedObjectChanged(mapObject) {
+    console.log(mapObject)
     if (null == this.currentTransaction) return
     if (null != mapObject){
       this.updateSelectedState()
@@ -887,6 +901,7 @@ class PlanEditorController {
       boundaryProperties.selectedSiteMoveUpdate = 'Don\'t update'
       this.$timeout()
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId)
+      console.log(serviceFeature)
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
     }
