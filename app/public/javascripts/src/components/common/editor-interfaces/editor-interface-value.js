@@ -8,19 +8,20 @@ class EditorInterfaceValueController {
   
   $onInit(){
     this.enumVal = ""
+    this.enumSet = []
     this.isValid = true
     this.needsValidation = false
     this.dateVal = new Date()
   }
   
   onRefresh() {
-    if ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType){
+    if ( ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType) && !isNaN(this.model)){
       var newDateVal = new Date(this.model)
       if (newDateVal.getTime() != this.dateVal.getTime()){ // interesting fact: new Date(0) != new Date(0)
         this.dateVal = newDateVal
       }
     }
-    
+    return
     // change this out for proper dynamic constraint checking
     if ('siteClli' == this.displayProps.propertyName || 'siteName' == this.displayProps.propertyName){
       this.isValid = this.checkConstraint()

@@ -86,9 +86,8 @@ class MapSelectorExportLocationsController {
   exportLocationsByPolygon(polygon){
     if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
 
-    // need to figure area
     var area = google.maps.geometry.spherical.computeArea(polygon)
-    
+    //console.log(area)
     if(area > this.state.MAX_EXPORTABLE_AREA) {
       return swal({
         title: 'Error',
@@ -101,7 +100,6 @@ class MapSelectorExportLocationsController {
     var points = []
     for (var polyI=0; polyI<polygon.length; polyI++){
       var pt = polygon[polyI]
-      //points[polyI] = {'lat':pt.lat(), 'lng':pt.lng()}
       points[polyI] = [pt.lng(), pt.lat()]
     }
     points.push(points[0])
