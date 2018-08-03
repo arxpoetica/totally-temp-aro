@@ -287,7 +287,6 @@ class MapObjectEditorController {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
-    console.log(feature)
     feature.geometry.coordinates[0].forEach((polygonVertex) => {
       polygonPath.push({
         lat: polygonVertex[1],  // Note array index
@@ -338,7 +337,6 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       })
     } else if (feature.geometry.type === 'Polygon') {
-      console.log(feature)
       mapObject = this.createPolygonMapObject(feature)
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
@@ -402,7 +400,6 @@ class MapObjectEditorController {
       this.selectMapObject(mapObject)
       this.$timeout()
     })
-    console.log(mapObject)
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     

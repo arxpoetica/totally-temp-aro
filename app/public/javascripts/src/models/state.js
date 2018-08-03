@@ -1034,6 +1034,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadPlan = (planId) => {
+    service.selectedDisplayMode.next(service.displayModes.VIEW)
     var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {

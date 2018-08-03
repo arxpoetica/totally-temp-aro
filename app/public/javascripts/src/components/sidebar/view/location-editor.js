@@ -37,7 +37,12 @@ class LocationEditorController {
   $onInit() {
     this.resumeOrCreateTransaction()
   }
-
+  
+  $onDestroy(){
+    // to bring bakc the hidden locations
+    this.state.requestMapLayerRefresh.next({})
+  }
+  
   resumeOrCreateTransaction() {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
@@ -156,7 +161,7 @@ class LocationEditorController {
 
   // Sets the last-used number-of-locations property so we can use it for new locations
   setLastUsedNumberOfLocations(newValue) {
-    console.log(newValue)
+    //console.log(newValue)
     this.lastUsedNumberOfLocations = newValue
   }
 

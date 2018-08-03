@@ -17,7 +17,7 @@ class MapTileRenderer {
 
   constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
-              selectedDisplayMode, analysisSelectionMode, displayModes, configuration, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+              selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, configuration, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -34,8 +34,8 @@ class MapTileRenderer {
     this.censusCategories = censusCategories
     this.selectedCensusCategoryId = selectedCensusCategoryId
     this.selectedViewFeaturesByType = selectedViewFeaturesByType
-    
     this.displayModes = displayModes
+    this.viewModePanels = viewModePanels
     this.configuration = configuration
     this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
@@ -57,7 +57,11 @@ class MapTileRenderer {
       MODIFIED: 'MODIFIED',
       DELETED: 'DELETED'
     })
-
+    
+    this.getActiveViewModePanel = () =>{
+      return state.activeViewModePanel
+    }
+    
     // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
@@ -130,7 +134,7 @@ class MapTileRenderer {
     this.selectedDisplayMode = selectedDisplayMode
     this.tileDataService.markHtmlCacheDirty()
   }
-
+  
   // Sets the selected analysis selection type
   setAnalysisSelectionMode(analysisSelectionMode) {
     this.analysisSelectionMode = analysisSelectionMode
@@ -454,8 +458,18 @@ class MapTileRenderer {
       if (feature.properties) {
         // Try object_id first, else try location_id
         var featureId = feature.properties.object_id || feature.properties.location_id  
-        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN && this.tileDataService.featuresToExclude.has(featureId)) {
+        
+        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
+            && this.tileDataService.featuresToExclude.has(featureId)
+            && !(feature.properties._data_type && feature.properties._data_type == "location") ) {
           // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
+          continue
+        }
+        if (this.selectedDisplayMode == this.displayModes.VIEW 
+            &&this.getActiveViewModePanel() == this.viewModePanels.EDIT_LOCATIONS
+            && this.tileDataService.featuresToExclude.has(featureId) 
+            && feature.properties._data_type && feature.properties._data_type == "location"){
+          // this is a location that is being edited
           continue
         }
       }
@@ -1256,7 +1270,7 @@ class TileComponentController {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
       }
     })
-
+    
     // If analysis selection Type change, set that in the tile data
     state.selectionTypeChanged.subscribe((analysisSelectionMode) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -1386,6 +1400,8 @@ class TileComponentController {
                                                            this.state.selectedDisplayMode.getValue(),
                                                            this.state.optimizationOptions.analysisSelectionMode,
                                                            this.state.displayModes,
+                                                           this.state.viewModePanels, 
+                                                           this.state, 
                                                            this.configuration,
                                                            uiNotificationService, 
                                                            this.getPixelCoordinatesWithinTile.bind(this)
