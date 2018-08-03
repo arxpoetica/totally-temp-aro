@@ -1446,7 +1446,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         tempList = tempList.concat(result.data)
       }) 
       service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList), 'id')
-      console.log(service.listOfServiceAreaTags)
     })  
   }
 
