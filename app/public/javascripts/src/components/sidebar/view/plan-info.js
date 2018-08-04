@@ -30,12 +30,12 @@ class PlanInfoController {
   }
 
   commitUpdatestoPlan(isDestroyingControl) {
-    this.updatePlanTags()
-    this.getPlanTagDetails()
     // This will call a function into the resource permissions editor that will do the actual save
     // DO NOT SAVE ON DESTROY. This may be causing all sorts of issues with threading on service.
     if (!isDestroyingControl) {
       this.saveResourceAccess && this.saveResourceAccess()
+      this.updatePlanTags()
+      this.getPlanTagDetails()
     }
     this.isEditMode = false
     this.addGeneralTags = false
@@ -55,10 +55,9 @@ class PlanInfoController {
   }
 
   updatePlanTags() {
-    var updatePlan = this.currentPlanInfo
-    updatePlan.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
-    updatePlan.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
-    this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
+    this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
+    this.currentPlanInfo.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
+    this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, this.currentPlanInfo)
   }
 
   setPlanLocation() {

@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -1396,7 +1396,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         service.listOfTags = results[0].data
       }) 
   }
-
   service.loadListOfPlanTags()
 
   service.loadListOfCreatorTags = (filterObj) => {
@@ -1410,18 +1409,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.loadListOfCreatorTags()
 
+  const MAX_SERVICE_AREAS_FROM_ODATA = 10
   service.loadListOfSAPlanTags = (filterObj) => {
-    /*
     var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(code,'${filterObj}')`) : filter
+    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10`)
+      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
       .then((results) => {
         service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
       })  
     } 
-    */
-    service.loadAllPlanTags()
   }
 
   service.removeDuplicates = (myArr,prop) => {
@@ -1429,49 +1426,32 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos;
     });
   }
-  //service.loadListOfSAPlanTags()
 
   service.loadAllAssociatedSaPlanTags = (plans) => {
-    /*
-    let promises = new Set()
-    var tempList = []
-    console.log(service.listOfServiceAreaTags)
-    
-    console.log(plans)
-    
-    plans.forEach((plan) => {
-      plan.tagMapping.linkTags.serviceAreaIds.forEach((tag) => {
-        var filter = "layer/id eq 1"
-        filter = filter.concat(` and id eq ${tag}`)
-        service.listOfServiceAreaTags
-        if (!service.listOfServiceAreaTags.find(function (obj) { return obj.id === tag })){
-          promises.add($http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}`))
-        }  
-      })
-    })  
 
-    Promise.all([...promises])
-    .then((results) => {
-      results.forEach((result) => {
-        tempList = tempList.concat(result.data)
-      }) 
-      service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList),'id')
-      console.log(service.listOfServiceAreaTags)
-    })  
-    */
-    
-    service.loadAllPlanTags()
-    
-  }
-  
-  service.loadAllPlanTags = () => {
-    if (service.listOfServiceAreaTags && service.listOfServiceAreaTags.length > 0) return
-    var filter = "layer/id eq 1"
-    $http.get(`/service/odata/servicearea?$select=id%2C%20code&$filter=${filter}&$top=999999999`)
-    .then((result) => {
-      service.listOfServiceAreaTags = result.data
-      //console.log(service.listOfServiceAreaTags)
+    var processedTags = new Set()
+    var idFilter = ''
+    plans.forEach((plan) => {
+      const serviceAreaIds = plan.tagMapping.linkTags.serviceAreaIds
+      serviceAreaIds.forEach((tag) => {
+        if (!processedTags.has(tag)) {
+          if (processedTags.size > 0) {
+            idFilter += ' or '
+          }
+          idFilter += `id eq ${tag}`
+        }
+        processedTags.add(tag)
+      })
     })
+    const filter = `(layer/id eq 1) and (${idFilter})`
+    $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
+      .then((result) => {
+        service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(result.data), 'id')
+        // Limit the number of service area tags we have. Too big of a number will strain the UI. Multiplying by
+        // 2 since we load MAX_SERVICE_AREAS_FROM_ODATA when we load all tags.
+        service.listOfServiceAreaTags = service.listOfServiceAreaTags.slice(0, 2 * MAX_SERVICE_AREAS_FROM_ODATA)
+      })  
+      .catch((err) => console.error(err))
   }
 
   service.getTagColour = (tag) => {
@@ -1608,16 +1588,16 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
-          //group.name = `[G] ${group.name}`  // For now, text instead of icons
-          group.name = `<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`
+          // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+          group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
           service.systemActors.push(group)
         })
         return $http.get('/service/auth/users')
       })
       .then((result) => {
         result.data.forEach((user) => {
-          //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
-          user.name = `<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}` 
+          // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+          user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`) 
           service.systemActors.push(user)
         })
       })

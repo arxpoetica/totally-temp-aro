@@ -4,8 +4,13 @@
       {{access.displayName}}
     </div>
     <div class="col-sm-10">
-      <aro-multi-select model="access.actors" all-items="$ctrl.systemActors" enable-search="true" enable-html="true">
+      <!-- Show the multi select only if this control is enabled. A quick fix until we are able to handle 1000+ users in the multiselect -->
+      <aro-multi-select ng-if="$ctrl.enabled" model="access.actors" all-items="$ctrl.systemActors" enable-search="true" enable-html="true">
       </aro-multi-select>
+      <!-- If not enabled, just show a list of the actors that have permissions -->
+      <div ng-if="!$ctrl.enabled">
+        <span ng-repeat="actor in access.actors" ng-bind-html="actor.name"></span>
+      </div>
     </div>
   </div>
 </div>

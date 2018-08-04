@@ -10,6 +10,9 @@ class ResourcePermissionsEditorController {
   }
 
   $onInit() {
+    if (typeof this.enabled === 'undefined') {
+      this.enabled = true   // If not defined, then make it true
+    }
     this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
@@ -79,6 +82,7 @@ let resourcePermissionsEditor = {
     resourceType: '@',
     resourceId: '@',
     systemActors: '<',
+    enabled: '<',
     registerSaveAccessCallback: '&' // To be called to register a callback, which will save the access list
   },
   controller: ResourcePermissionsEditorController
