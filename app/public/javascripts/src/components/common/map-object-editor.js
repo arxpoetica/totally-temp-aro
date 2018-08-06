@@ -431,24 +431,14 @@ class MapObjectEditorController {
     }
     
     if (event.equipmentFeatures){
-      /*
-      var filteredEquipment = []
-      for (let i=0; i<event.equipmentFeatures.length; i++){
-        let equipment = event.equipmentFeatures[i]
-        if (!equipment.object_id || !this.createdMapObjects.hasOwnProperty(equipment.object_id) ){
-          filteredEquipment.push(equipment)
-        }
-      }
-      */
+
       event.equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
     }
     
     if (event.locations){
       event.locations = filterArrayByObjectId(event.locations)
     }
-    
-    // ---
-    
+
     var feature = {
       geometry: {
         type: 'Point',
@@ -475,8 +465,6 @@ class MapObjectEditorController {
         feature.directlyEditExistingFeature = true
         return Promise.resolve(feature)
       })
-      
-      //featurePromise = Promise.resolve(feature)
     } else if (this.featureType === 'equipment' && event.equipmentFeatures && event.equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
       const clickedObject = event.equipmentFeatures[0]
@@ -496,14 +484,10 @@ class MapObjectEditorController {
           return Promise.resolve(serviceFeature)
         })
       } else {
-        featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-        .then((result) => {
-          var serviceFeature = result.data
-          // use feature's coord NOT the event's coords
-          feature.geometry.coordinates = serviceFeature.geometry.coordinates
-          feature.deploymentType = serviceFeature.deploymentType
-          return Promise.resolve(feature)
-        })
+        // Quickfix - Display the equipment and return, do not make multiple calls to aro-service
+        this.displayViewObject({feature:feature})
+        this.selectMapObject(null)
+        return
       }
     } else {
       // The map was clicked on, but there was no location under the cursor.
