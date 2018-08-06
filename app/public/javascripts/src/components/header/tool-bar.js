@@ -15,7 +15,7 @@ class ToolBarController {
     this.numPreviousCollapsedButtons = 0
     this.map_tools = map_tools
     this.showDropDown = false
-    this.heatMapOption = config.ARO_CLIENT !== 'frontier'
+    this.heatMapOption = this.state.mapTileOptions.getValue().selectedHeatmapOption.id === 'HEATMAP_ON'
     this.measuringStickEnabled = false
     this.isViewSettingsEnabled = false
     this.currentUser = state.loggedInUser
