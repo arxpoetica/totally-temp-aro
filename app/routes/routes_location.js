@@ -219,6 +219,7 @@ exports.configure = (api, middleware) => {
       response.set('Content-Type', 'text/csv');
       response.status(200).send(locations);
     })
+    .catch(next)
   });
 
   function saveMorphology (request, response, next) {
