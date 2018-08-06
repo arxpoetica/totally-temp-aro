@@ -75,7 +75,6 @@ class PlanSearchController {
             })
             this.allPlans = _.sortBy(response.data, 'name');
             this.plans = this.allPlans.slice(0, this.maxResults);
-            this.state.loadAllAssociatedSaPlanTags(this.plans)    // DO NOT SEND IN allPlans - that can cause us to load all service areas!
             this.pages = [];
             var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
             for (var i = 1; i <= pageSize; i++) {

@@ -1427,33 +1427,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     });
   }
 
-  service.loadAllAssociatedSaPlanTags = (plans) => {
-
-    var processedTags = new Set()
-    var idFilter = ''
-    plans.forEach((plan) => {
-      const serviceAreaIds = plan.tagMapping.linkTags.serviceAreaIds
-      serviceAreaIds.forEach((tag) => {
-        if (!processedTags.has(tag)) {
-          if (processedTags.size > 0) {
-            idFilter += ' or '
-          }
-          idFilter += `id eq ${tag}`
-        }
-        processedTags.add(tag)
-      })
-    })
-    const filter = `(layer/id eq 1) and (${idFilter})`
-    $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
-      .then((result) => {
-        service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(result.data), 'id')
-        // Limit the number of service area tags we have. Too big of a number will strain the UI. Multiplying by
-        // 2 since we load MAX_SERVICE_AREAS_FROM_ODATA when we load all tags.
-        service.listOfServiceAreaTags = service.listOfServiceAreaTags.slice(0, 2 * MAX_SERVICE_AREAS_FROM_ODATA)
-      })  
-      .catch((err) => console.error(err))
-  }
-
   service.getTagColour = (tag) => {
     return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
   }
