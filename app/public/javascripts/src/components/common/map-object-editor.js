@@ -484,9 +484,14 @@ class MapObjectEditorController {
           return Promise.resolve(serviceFeature)
         })
       } else {
-        // Quickfix - Display the equipment and return, do not make multiple calls to aro-service
+        // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
         this.displayViewObject({feature:feature})
         this.selectMapObject(null)
+        // Update selected feature in state so it is rendered correctly
+        var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+        selectedViewFeaturesByType.equipment = {}
+        selectedViewFeaturesByType.equipment[feature.objectId] = feature
+        this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
         return
       }
     } else {
