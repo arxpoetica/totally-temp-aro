@@ -1,7 +1,8 @@
 class PlanSearchController {
 
-  constructor($http, state) {
+  constructor($http, $timeout, state) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
 
     this.search_text = ''
@@ -13,7 +14,7 @@ class PlanSearchController {
       method: 'GET',
       params: {}
     }
-
+    this.idToServiceAreaCode = {}
     this.isAdministrator = false
   }
 
@@ -40,6 +41,41 @@ class PlanSearchController {
       .catch((err) => console.error(err))
   }
 
+
+  loadServiceAreaInfo(plans) {
+
+    // Load service area ids for all service areas referenced by the plans
+    // First determine which ids to fetch. We might already have a some or all of them
+    var serviceAreaIdsToFetch = new Set()
+    plans.forEach((plan) => {
+      plan.tagMapping.linkTags.serviceAreaIds.forEach((serviceAreaId) => {
+        if (!this.idToServiceAreaCode.hasOwnProperty(serviceAreaId)) {
+          serviceAreaIdsToFetch.add(serviceAreaId)
+        }
+      })
+    })
+    if (serviceAreaIdsToFetch.size === 0) {
+      return
+    }
+
+    // Get the ids from aro-service
+    var filter = ''
+    Array.from(serviceAreaIdsToFetch).forEach((serviceAreaId, index) => {
+      if (index > 0) {
+        filter += ' or '
+      }
+      filter += ` (id eq ${serviceAreaId})`
+    })
+
+    // Our $top is high, and should never be hit as we are getting service areas for a select few ids
+    return this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`)
+      .then((results) => {
+        results.data.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
+  }
+
   loadPlans(page, callback) {
     this.constructSearch()
     this.currentPage = page || 1
@@ -48,6 +84,7 @@ class PlanSearchController {
       var start = this.maxResults * (page - 1);
       var end = start + this.maxResults;
       this.plans = this.allPlans.slice(start, end);
+      this.loadServiceAreaInfo(this.plans)
       return;
     }
 
@@ -75,7 +112,7 @@ class PlanSearchController {
             })
             this.allPlans = _.sortBy(response.data, 'name');
             this.plans = this.allPlans.slice(0, this.maxResults);
-            this.state.loadAllAssociatedSaPlanTags(this.plans)    // DO NOT SEND IN allPlans - that can cause us to load all service areas!
+            this.loadServiceAreaInfo(this.plans)
             this.pages = [];
             var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
             for (var i = 1; i <= pageSize; i++) {
@@ -191,7 +228,7 @@ class PlanSearchController {
   }
 }
 
-PlanSearchController.$inject = ['$http', 'state']
+PlanSearchController.$inject = ['$http', '$timeout', 'state']
 
 let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',

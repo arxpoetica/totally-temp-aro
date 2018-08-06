@@ -367,6 +367,11 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     tileDataService.featuresToExclude.add(featureId)
   }
 
+  // Add a specified location ID to the set of features to be excluded from the render
+  tileDataService.removeFeatureToExclude = (featureId) => {
+    tileDataService.featuresToExclude.delete(featureId)
+  }
+
   // Add a modified feature to the set of modified features
   tileDataService.addModifiedFeature = (feature) => {
     tileDataService.modifiedFeatures[feature.objectId] = feature

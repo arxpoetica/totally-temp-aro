@@ -66,9 +66,10 @@
               </span>
             </div>
             <div class="tags">
-              <div ng-repeat="tag in $ctrl.getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds) track by tag.id" 
-                class="tag label satags">
-              <span class="label satag"> {{tag.code}} 
+              <div ng-repeat="serviceAreaId in plan.tagMapping.linkTags.serviceAreaIds" 
+                   class="tag label satags">
+                <span class="label satag">
+                  {{$ctrl.idToServiceAreaCode[serviceAreaId] || 'loading...'}} 
                 <i class="fa fa-times pointer" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
               </span>
             </div>

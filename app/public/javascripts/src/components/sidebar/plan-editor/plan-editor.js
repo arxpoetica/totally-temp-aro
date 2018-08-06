@@ -11,13 +11,14 @@ import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipme
 
 class PlanEditorController {
 
-  constructor($timeout, $http, $element, state, configuration, Utils) {
+  constructor($timeout, $http, $element, state, configuration, Utils, tileDataService) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
     this.state = state
     this.configuration = configuration
     this.utils = Utils
+    this.tileDataService = tileDataService
     this.selectedMapObject = null
     //this.selectedEquipmentInfo = {}
     this.objectIdToProperties = {}
@@ -178,7 +179,8 @@ class PlanEditorController {
 
   exitPlanEditMode() {
     this.currentTransaction = null
-    this.state.recreateTilesAndCache()
+    this.state.clearTileCachePlanOutputs()      // Clear the data cache for network equipment, so it will be re-downloaded
+    this.state.requestMapLayerRefresh.next({})  // Request a refresh of the map layers
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
@@ -465,6 +467,10 @@ class PlanEditorController {
 
     this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}`)
       .then((result) => {
+        // You should no longer hide any of the object ids that have been committed
+        Object.keys(this.objectIdToProperties).forEach((objectId) => {
+          this.tileDataService.removeFeatureToExclude(objectId)
+        })
         // Committing will close the transaction. To keep modifying, open a new transaction
         this.exitPlanEditMode()
       })
@@ -1106,7 +1112,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration', 'Utils']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration', 'Utils', 'tileDataService']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',

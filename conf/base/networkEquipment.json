@@ -291,15 +291,24 @@
     }
   },
   "tileCacheKeywords": [
-    "central_office",
-    "fiber_distribution_hub",
-    "fiber_distribution_terminal",
-    "bulk_distribution_terminal",
-    "splice_point",
-    "cell_5g",
-    "FEEDER",
-    "DISTRIBUTION",
-    "BACKBONE"
+    ".central_office.",
+    ".dslam.",
+    ".fiber_distribution_hub.",
+    ".fiber_distribution_terminal.",
+    ".bulk_distribution_hub.",
+    ".bulk_distribution_terminal.",
+    ".splice_point.",
+    ".cell_5g.",
+    ".junction_splitter.",
+    ".loop_extender.",
+    ".network_anchor.",
+    ".FEEDER.",
+    ".DISTRIBUTION.",
+    ".BACKBONE.",
+    ".ROOT.",
+    ".DROP.",
+    ".IOF.",
+    ".COPPER."
   ],
   "visibility": {
     "equipments": {
