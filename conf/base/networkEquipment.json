@@ -308,7 +308,8 @@
     ".ROOT.",
     ".DROP.",
     ".IOF.",
-    ".COPPER."
+    ".COPPER.",
+    ".tiles.boundary."
   ],
   "visibility": {
     "equipments": {
