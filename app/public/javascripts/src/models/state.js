@@ -231,7 +231,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
   service.mapLayers = new Rx.BehaviorSubject({})
-  service.mapTileOptions = new Rx.BehaviorSubject({
+  var heatmapOptions = {
     showTileExtents: false,
     heatMap: {
       useAbsoluteMax: false,
@@ -240,7 +240,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       worldMaxValue: 500000
     },
     selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
-  })
+  }
+  if (config.ARO_CLIENT === 'frontier') {
+    heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
+  }  
+  service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
+
   service.defaultPlanCoordinates = {
     zoom: 14,
     latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
