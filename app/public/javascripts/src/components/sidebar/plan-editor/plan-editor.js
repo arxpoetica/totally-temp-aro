@@ -178,6 +178,11 @@ class PlanEditorController {
   }
 
   exitPlanEditMode() {
+    // You should no longer hide any of the object ids that have been committed or discarded
+    Object.keys(this.objectIdToProperties).forEach((objectId) => {
+      this.tileDataService.removeFeatureToExclude(objectId)
+    })
+
     this.currentTransaction = null
     this.state.clearTileCachePlanOutputs()      // Clear the data cache for network equipment, so it will be re-downloaded
     this.state.requestMapLayerRefresh.next({})  // Request a refresh of the map layers
@@ -450,27 +455,19 @@ class PlanEditorController {
       options: options
     });
   }
-  
-  // --- //
-  
+
   objKeys(obj){
     if ('undefined' == typeof obj) obj = {}
     return Object.keys(obj)
   }
-  
-  // --- //
-  
+
   commitTransaction() {
     if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
 
     this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}`)
-      .then((result) => {
-        // You should no longer hide any of the object ids that have been committed
-        Object.keys(this.objectIdToProperties).forEach((objectId) => {
-          this.tileDataService.removeFeatureToExclude(objectId)
-        })
+      .then(() => {
         // Committing will close the transaction. To keep modifying, open a new transaction
         this.exitPlanEditMode()
       })
