@@ -518,17 +518,16 @@ exports.configure = (api, middleware) => {
 
     var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <Document>
-        <name>Equipment Color</name>
-          <Style id="shapeColor">
-            <LineStyle>
-              <color>ff0000ff</color>
-              <width>4</width>
-            </LineStyle>
-            <PolyStyle>
-              <fill>0</fill>
-              <outline>1</outline>
-            </PolyStyle>
-          </Style>
+        <Style id="shapeColor">
+          <LineStyle>
+            <color>ff0000ff</color>
+            <width>4</width>
+          </LineStyle>
+          <PolyStyle>
+            <fill>0</fill>
+            <outline>1</outline>
+          </PolyStyle>
+        </Style>
       `
     return Promise.resolve()
       .then(() => {
@@ -634,13 +633,13 @@ exports.configure = (api, middleware) => {
         `
         return database.query(planQ)
       })
-      .then((equipments) => {
-        kmlOutput += '<Folder><name>Equipments</name>'
-        equipments.forEach((equipment) => {
+      .then((siteBoundaries) => {
+        kmlOutput += '<Folder><name>Site Boundaries</name>'
+        siteBoundaries.forEach((siteBoundary) => {
           kmlOutput += `
           <Placemark>
-            <boundaryType>${escape(equipment['Boundary Type'])}</boundaryType>
-            <styleUrl>#shapeColor</styleUrl>${equipment.geom}
+            <boundaryType>${escape(siteBoundary['Boundary Type'])}</boundaryType>
+            <styleUrl>#shapeColor</styleUrl>${siteBoundary.geom}
           </Placemark>\n`
         })
         kmlOutput += '</Folder>'
