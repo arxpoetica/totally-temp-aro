@@ -508,6 +508,9 @@ class MapTileRenderer {
           
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
+  	      //console.log(this.selectedViewFeaturesByType)
+  	      //console.log(selectedListType)
+  	      //console.log(selectedListId)
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
   	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
   	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
