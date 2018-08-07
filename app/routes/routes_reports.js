@@ -504,7 +504,7 @@ exports.configure = (api, middleware) => {
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {  
       database.query(planQ).then(function (results) {
-        response.attachment(`Site boundaries-${plan.name}.csv`)
+        response.attachment(`Plan locations-${plan.name}.csv`)
         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
       })
     })
