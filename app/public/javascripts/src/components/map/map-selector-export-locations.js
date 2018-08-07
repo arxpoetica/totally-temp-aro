@@ -16,45 +16,6 @@ class MapSelectorExportLocationsController {
     this.state = state
     this.Utils = Utils
     this.selectionModes = state.selectionModes
-    
-
-    // Handle selection events from state
-    /*
-    this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
-      console.log(event)
-      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
-
-      if( angular.equals(event, {}) || event.locations.length  === 0 
-        || this.state.selectedTargetSelectionMode !== this.state.targetSelectionModes.POLYGON_EXPORT_TARGET){
-    	  return
-      }
-
-      if(event.area > state.MAX_EXPORTABLE_AREA) {
-        return swal({
-          title: 'Error',
-          text: 'Polygon too big to export',
-          type: 'error'
-        })
-      }
-
-      let locationIds = event.locations.map((l)=>{
-        return l.location_id
-      })
-
-      ///Run the export endpoint
-      $http.post("/locations/exportRegion", {'locations': locationIds}).then((r)=>{
-        if(r.data === ""){
-          return swal({
-            title: 'Error',
-            text: 'No data returned',
-            type: 'error'
-          })
-        }
-
-        Utils.downloadCSV(r.data, "exported_locations.csv")
-      })
-    })
-    */
   }
 
   $onDestroy() {
@@ -80,14 +41,12 @@ class MapSelectorExportLocationsController {
       this.drawingManager.setDrawingMode(null)
       this.drawingManager.setMap(null)
     }
-
   }
   
   exportLocationsByPolygon(polygon){
     if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
 
     var area = google.maps.geometry.spherical.computeArea(polygon)
-    //console.log(area)
     if(area > this.state.MAX_EXPORTABLE_AREA) {
       return swal({
         title: 'Error',
@@ -104,19 +63,20 @@ class MapSelectorExportLocationsController {
     }
     points.push(points[0])
     
-    ///Run the export endpoint
-    this.$http.post("/locations/exportRegion", {'polygon': points, 'planId': planId}).then((r)=>{
-      if(r.data === ""){
-        return swal({
-          title: 'Error',
-          text: 'No data returned',
-          type: 'error'
-        })
-      }
+    // Run the export endpoint
+    this.$http.post("/locations/exportRegion", {'polygon': points, 'planId': planId})
+      .then((r)=>{
+        if(r.data === ""){
+          return swal({
+            title: 'Error',
+            text: 'No data returned',
+            type: 'error'
+          })
+        }
 
-      this.Utils.downloadCSV(r.data, "exported_locations.csv")
-    })
-    
+        this.Utils.downloadCSV(r.data, "exported_locations.csv")
+      })
+      .catch((err) => console.error(err))
   }
   
   $onInit() {
