@@ -505,7 +505,7 @@ class MapTileRenderer {
   	      // This is a point
   	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
   	      var y = this.drawMargins + shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
-          
+          //if (feature.properties.is_deleted) console.log(feature)
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
   	      //console.log(this.selectedViewFeaturesByType)

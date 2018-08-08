@@ -88,7 +88,11 @@ class PlanEditorController {
   registerRemoveMapObjectsCallback(removeMapObjects) {
     this.removeMapObjects = removeMapObjects
   }
-
+  
+  registerCreateEditableExistingMapObject(createEditableExistingMapObject){
+    this.createEditableExistingMapObject = createEditableExistingMapObject
+  }
+  
   $onInit() {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
@@ -541,6 +545,7 @@ class PlanEditorController {
       networkNodeEquipment: objectProperties.networkNodeEquipment,
       deploymentType: objectProperties.deploymentType
     }
+    console.log(serviceFeature.geometry)
     return serviceFeature
   }
 
@@ -706,9 +711,8 @@ class PlanEditorController {
   }
   
   editViewObject(){
-    //this.sendNewFeature = {'feature': this.viewEventFeature, 'iconUrl': this.viewIconUrl}
-    //createMapObject(this.viewEventFeature, this.viewIconUrl, true, true)
-    this.mapObjectEditorComms.createMapObject(this.viewEventFeature, this.viewIconUrl)
+    console.log(this.viewEventFeature)
+    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
   handleObjectCreated(mapObject, usingMapClick, feature) {
@@ -728,6 +732,7 @@ class PlanEditorController {
           })
           .then((result) => {
             var attributes = result.data.attributes
+            console.log(result.data)
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
             

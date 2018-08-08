@@ -59,11 +59,11 @@
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
                          display-view-object="$ctrl.displayViewObject(feature)"
-                         comms="$ctrl.mapObjectEditorComms"
                          on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
                          register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                          register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
-                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
+                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
+                         register-create-editable-existing-map-object="$ctrl.registerCreateEditableExistingMapObject(createEditableExistingMapObject)">
       </map-object-editor>
 
       <div style="margin: 10px">
