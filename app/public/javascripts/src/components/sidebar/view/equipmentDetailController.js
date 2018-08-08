@@ -117,12 +117,7 @@ class EquipmentDetailController {
   
   viewSelectedEquipment(selectedEquipment) {
     var plan = this.state.plan.getValue()
-<<<<<<< HEAD
     this.updateSelectedState(selectedEquipment)
-=======
-    //console.log(selectedEquipment)
-    this.updateSelectedState(selectedEquipment, selectedEquipment.id)
->>>>>>> master
     this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){
         map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
