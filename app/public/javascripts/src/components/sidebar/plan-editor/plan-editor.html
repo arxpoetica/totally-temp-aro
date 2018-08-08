@@ -190,7 +190,10 @@
               <button class="btn btn-primary btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
                   ng-click="$ctrl.editViewObject()"
                   >edit</button>
-              
+              <div class="sidebar-header-subinfo">
+                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1]}}</div>
+                <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0]}}</div>
+              </div>
           </div>
           
           <!-- A table containing the editable properties of the selected object -->
@@ -224,6 +227,10 @@
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
+              <div class="sidebar-header-subinfo">
+                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedMapObject.position.lat()}}</div>
+                <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedMapObject.position.lng()}}</div>
+              </div>
           </div>
           
           <!-- A table containing the editable properties of the selected object -->

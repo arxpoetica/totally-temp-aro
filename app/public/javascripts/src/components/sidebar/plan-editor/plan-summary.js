@@ -166,7 +166,7 @@ class PlanSummaryController {
 
   exportKml() {
     this.$http.get(`/reports/planSummary/kml/${this.plan.id}/${this.state.selectedBoundaryType.name}`).then((response) => {
-      this.Utils.downloadCSV(response.data, "planSummary_polygon.kml")
+      this.Utils.downloadCSV(response.data, `Site boundaries-${this.state.selectedBoundaryType.name}-${this.plan.name}.kml`)
     })
   }
 

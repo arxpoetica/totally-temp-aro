@@ -687,29 +687,24 @@ class PlanEditorController {
   }
   
   displayViewObject(feature, iconUrl){
-    //this.viewIconUrl = iconUrl
     var planId = this.state.plan.getValue().id
     
     this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
-      try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
-        this.viewEventFeature = feature
-        this.viewFeature = AroFeatureFactory.createObject(result.data)
-        var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
-        this.viewLabel = viewConfig.label
-        this.viewIconUrl = viewConfig.iconUrl
-        this.isEditFeatureProps = false
-        //this.updateSelectedState(feature, feature.objectId)
-      }catch(error) {
-        console.error(error)
-      }
-      
+      this.viewEventFeature = feature
+      // use feature's coord NOT the event's coords
+      this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
+      this.viewFeature = AroFeatureFactory.createObject(result.data)
+      var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+      this.viewLabel = viewConfig.label
+      this.viewIconUrl = viewConfig.iconUrl
+      this.isEditFeatureProps = false
+    }).catch((err) => {
+      console.error(err)
     })
   }
   
   editViewObject(){
-    //this.sendNewFeature = {'feature': this.viewEventFeature, 'iconUrl': this.viewIconUrl}
-    //createMapObject(this.viewEventFeature, this.viewIconUrl, true, true)
     this.mapObjectEditorComms.createMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
@@ -841,6 +836,7 @@ class PlanEditorController {
     this.selectedMapObject = mapObject
     
     // debug
+    //console.log(this.selectedMapObject)
     /*
     if (null != this.selectedMapObject){
       console.log( this.selectedMapObject )
