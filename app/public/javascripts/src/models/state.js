@@ -1380,7 +1380,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     .then((result) => {
       service.boundaryTypes = result.data
       service.boundaryTypes.push({id: result.data.length + 1, name: "fiveg_coverage", description: "Undefined"})
-      service.selectedBoundaryType = result.data[0]
+      service.boundaryTypes.sort((a, b) => a.id-b.id)
+      service.selectedBoundaryType = service.boundaryTypes[0]
     })  
   }
 
