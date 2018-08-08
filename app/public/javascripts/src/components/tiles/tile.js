@@ -484,14 +484,14 @@ class MapTileRenderer {
           selectedListId = feature.properties.location_id
         } else if (feature.properties.hasOwnProperty('object_id')) {
           selectedListId = feature.properties.object_id
+          //greyout an RT with hsiEanbled true for frontier client
+          if (config.ARO_CLIENT === 'frontier' &&
+            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam')
+            && (feature.properties.hsiEnabled !== 'true')) {
+              entityImage = featureData.greyOutIcon
+          }
         } else if ( feature.properties.hasOwnProperty('id') ){
           selectedListId = feature.properties.id
-          //greyout an RT with hsiEanbled true for frontier client
-          if(config.ARO_CLIENT === 'frontier' && 
-            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam' )
-            && (feature.properties.hsiEnabled !== 'true')) {
-            entityImage = featureData.greyOutIcon
-          }
         } 
       }
       

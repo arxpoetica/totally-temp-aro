@@ -698,6 +698,8 @@ class PlanEditorController {
     this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
       this.viewEventFeature = feature
+      // use feature's coord NOT the event's coords
+      this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
       this.viewFeature = AroFeatureFactory.createObject(result.data)
       var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
       this.viewLabel = viewConfig.label
