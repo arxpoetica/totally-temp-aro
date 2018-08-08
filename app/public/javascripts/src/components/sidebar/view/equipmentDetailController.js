@@ -13,50 +13,51 @@ class EquipmentDetailController {
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     this.selectedEquipment = ''
-    //this.selectedEquipmentInfoChanges = {}
-    //this.selectedEquipmentInfoDispProps = []
     
-    //this.isEdit = false
-    this.headerIcon = '' //"/images/map_icons/aro/remote_terminal.png"
+    this.headerIcon = ''
     this.networkNodeLabel = ''
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     this.mapFeatureSelectedSubscriber = state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this function is assuring the properties we need exist. 
-      //In ruler mode click should not perform any view action's
-      if(this.state.allowViewModeClickAction()) {  
-        if (!options.hasOwnProperty('equipmentFeatures')) return
-        if (0 == options.equipmentFeatures.length) return
-        
-        var plan = state.plan.getValue()
-        if (!plan || !plan.hasOwnProperty('id')) return
-        
-        this.selectedEquipment = ''
-        var equipmentList = options.equipmentFeatures
-        var selectedFeature = null
-        var featureId = null
-        for (var featureI = 0; featureI < equipmentList.length; featureI++){
-          var feature = equipmentList[featureI]
-          if (feature.hasOwnProperty('object_id')){
-          
-            if ( feature.hasOwnProperty('id') ){
-              featureId = feature.id
-            }else if ( feature.hasOwnProperty('location_id') ){
-              featureId = feature.location_id
-            }
-            
-            if (null != featureId){
-              selectedFeature = feature
-              break
-            }
-          }
-        }
-        
-        if (null != selectedFeature){
-          this.updateSelectedState(selectedFeature, featureId)
-          this.displayEquipment(plan.id, selectedFeature.object_id)
-        }
+      // In ruler mode click should not perform any view action's
+      if (!this.state.allowViewModeClickAction()) return
+      if (!options.hasOwnProperty('equipmentFeatures')) return
+      if (0 == options.equipmentFeatures.length) return
+
+      this.selectedEquipment = ''
+      var equipmentList = options.equipmentFeatures
+      if (equipmentList.length > 0) {
+        const equipment = equipmentList[0]
+        this.updateSelectedState(equipment)
+        const plan = state.plan.getValue()
+        this.displayEquipment(plan.id, equipment.object_id)
       }
+
+      // TODO - Parag: Keeping this code here very temporarily. Delete it after getting confirmation on object ids.
+      //   var selectedFeature = null
+      //   var featureId = null
+      //   for (var featureI = 0; featureI < equipmentList.length; featureI++){
+      //     var feature = equipmentList[featureI]
+      //     if (feature.hasOwnProperty('object_id')){
+          
+      //       if ( feature.hasOwnProperty('id') ){
+      //         featureId = feature.id
+      //       }else if ( feature.hasOwnProperty('location_id') ){
+      //         featureId = feature.location_id
+      //       }
+            
+      //       if (null != featureId){
+      //         selectedFeature = feature
+      //         break
+      //       }
+      //     }
+      //   }
+        
+      //   if (null != selectedFeature){
+      //     this.updateSelectedState(selectedFeature, featureId)
+      //     this.displayEquipment(plan.id, selectedFeature.object_id)
+      //   }
     })
     
     
@@ -73,13 +74,11 @@ class EquipmentDetailController {
     this.updateSelectedState()
   }
  
-	updateSelectedState(selectedFeature, featureId){
+	updateSelectedState(selectedFeature){
 	  // tell state
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
-    if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
-      selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
-    }
+    selectedViewFeaturesByType.equipment[selectedFeature.object_id] = selectedFeature
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
 	}
 	
@@ -121,7 +120,7 @@ class EquipmentDetailController {
   
   viewSelectedEquipment(selectedEquipment) {
     var plan = this.state.plan.getValue()
-    this.updateSelectedState(selectedEquipment, selectedEquipment.id)
+    this.updateSelectedState(selectedEquipment)
     this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){
         map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
