@@ -687,27 +687,24 @@ class PlanEditorController {
   }
   
   displayViewObject(feature, iconUrl){
-    //this.viewIconUrl = iconUrl
     var planId = this.state.plan.getValue().id
     
     this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
       this.viewEventFeature = feature
+      // use feature's coord NOT the event's coords
+      this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
       this.viewFeature = AroFeatureFactory.createObject(result.data)
       var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
       this.viewLabel = viewConfig.label
       this.viewIconUrl = viewConfig.iconUrl
       this.isEditFeatureProps = false
-      //this.updateSelectedState(feature, feature.objectId)
-      
     }).catch((err) => {
       console.error(err)
     })
   }
   
   editViewObject(){
-    //this.sendNewFeature = {'feature': this.viewEventFeature, 'iconUrl': this.viewIconUrl}
-    //createMapObject(this.viewEventFeature, this.viewIconUrl, true, true)
     this.mapObjectEditorComms.createMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
