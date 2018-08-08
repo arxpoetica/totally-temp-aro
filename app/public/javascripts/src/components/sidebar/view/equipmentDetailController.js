@@ -78,6 +78,7 @@ class EquipmentDetailController {
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
     if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
+      //console.log(featureId)
       selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
     }
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
@@ -85,42 +86,40 @@ class EquipmentDetailController {
 	
 	displayEquipment(planId, objectId){
     return this.$http.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${this.state.loggedInUser.id}`)
-      .then((result) => {
-        const equipmentInfo = result.data
-        //console.log(equipmentInfo)
-        if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-          if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
-            this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
-            this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
-          }else{
-            // no icon
-            this.headerIcon = ''
-            this.networkNodeLabel = equipmentInfo.networkNodeType
-          }
-          
-          this.networkNodeType = equipmentInfo.networkNodeType
-          this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
-          
-          try{ // because ANYTHING that goes wrong in an RX subscription will fail silently (ugggh) 
-            this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
-          }catch(error) {
-            console.error(error) 
-            return
-          }
-          
-          this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
-          this.$timeout()
+    .then((result) => {
+      const equipmentInfo = result.data
+      //console.log(equipmentInfo)
+      if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
+        if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
+          this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
+          this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
         }else{
-          this.clearSelection()
+          // no icon
+          this.headerIcon = ''
+          this.networkNodeLabel = equipmentInfo.networkNodeType
         }
-        return equipmentInfo
-      })
+        
+        this.networkNodeType = equipmentInfo.networkNodeType
+        this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
+        
+        this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
+        
+        this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
+        this.$timeout()
+      }else{
+        this.clearSelection()
+      }
+      return equipmentInfo
+    }).catch((err) => {
+      console.error(err)
+    })
 	}
 	
   // ---
   
   viewSelectedEquipment(selectedEquipment) {
     var plan = this.state.plan.getValue()
+    //console.log(selectedEquipment)
     this.updateSelectedState(selectedEquipment, selectedEquipment.id)
     this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){
