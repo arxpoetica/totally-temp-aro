@@ -189,7 +189,7 @@ class PlanEditorController {
 
     this.currentTransaction = null
     this.state.clearTileCachePlanOutputs()      // Clear the data cache for network equipment, so it will be re-downloaded
-    this.state.requestMapLayerRefresh.next({})  // Request a refresh of the map layers
+    this.state.requestMapLayerRefresh.next(null)  // Request a refresh of the map layers
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
@@ -731,7 +731,7 @@ class PlanEditorController {
         this.state.clearTileCachePlanOutputs()
         this.state.loadModifiedFeatures(planId)
           .then(() => {
-            this.state.requestMapLayerRefresh.next({})
+            this.state.requestMapLayerRefresh.next(null)
             return this.$http.get(`/service/plan-feature/${planId}/equipment/${mapObject.objectId}?userId=${this.state.loggedInUser.id}`)
           })
           .then((result) => {
@@ -825,7 +825,7 @@ class PlanEditorController {
       //serviceFeature.deploymentType = feature.deploymentType
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
-        this.state.requestMapLayerRefresh.next({})
+        this.state.requestMapLayerRefresh.next(null)
       }
       this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary`, serviceFeature)
         .catch((err) => console.error(err))
