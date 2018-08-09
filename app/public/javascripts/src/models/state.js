@@ -1100,8 +1100,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   // Load the modified features for a given plan and save them in the tile data service
   service.loadModifiedFeatures = (planId) => {
+    //console.log(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
     return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
       .then((result) => {
+        //console.log(result)
         result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
       })
       .catch((err) => console.error(err))
@@ -1379,7 +1381,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     .then((result) => {
       service.boundaryTypes = result.data
       service.boundaryTypes.push({id: result.data.length + 1, name: "fiveg_coverage", description: "Undefined"})
-      service.selectedBoundaryType = result.data[0]
+      service.boundaryTypes.sort((a, b) => a.id-b.id)
+      service.selectedBoundaryType = service.boundaryTypes[0]
     })  
   }
 

@@ -191,6 +191,7 @@ class LocationEditorController {
   formatLocationForService(objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
+    
     var featureObj = {
       objectId: objectId,
       geometry: {
@@ -202,10 +203,12 @@ class LocationEditorController {
       },
       dataType: 'location'
     }
+    
     return featureObj
   }
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
+    //if (feature.is_locked) return
     var numberOfLocations = this.lastUsedNumberOfLocations
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
@@ -213,7 +216,7 @@ class LocationEditorController {
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.is_locked, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
-    this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+    if (!feature.is_locked) this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }
 
@@ -223,6 +226,8 @@ class LocationEditorController {
   }
 
   handleObjectModified(mapObject) {
+    console.log('modified')
+    console.log(mapObject)
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
       .then((result) => {

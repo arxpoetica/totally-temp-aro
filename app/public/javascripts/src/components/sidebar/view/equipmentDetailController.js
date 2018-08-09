@@ -49,10 +49,11 @@ class EquipmentDetailController {
   }
  
 	updateSelectedState(selectedFeature){
+	  //console.log(selectedFeature)
 	  // tell state
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
-    selectedViewFeaturesByType.equipment[selectedFeature.object_id] = selectedFeature
+	  if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.equipment[selectedFeature.object_id] = selectedFeature
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
 	}
 	
