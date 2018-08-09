@@ -32,7 +32,6 @@ class ViewModeLocationController {
         var locationId = null
         for (var featureI = 0; featureI < locationsList.length; featureI++){
           var feature = locationsList[featureI]
-          console.log(feature)
           if ( feature.hasOwnProperty('location_id') ){
             locationId = feature.location_id
           }else if ( feature.hasOwnProperty('id') ){

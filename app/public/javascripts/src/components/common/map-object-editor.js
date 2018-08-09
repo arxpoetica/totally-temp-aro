@@ -331,7 +331,7 @@ class MapObjectEditorController {
         this.selectMapObject(null)
         return
       }
-      console.log(feature)
+      //console.log(feature)
       mapObject = this.createPointMapObject(feature, iconUrl)
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))

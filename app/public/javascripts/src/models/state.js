@@ -1101,10 +1101,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   // Load the modified features for a given plan and save them in the tile data service
   service.loadModifiedFeatures = (planId) => {
-    console.log(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
+    //console.log(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
     return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
       .then((result) => {
-        console.log(result)
+        //console.log(result)
         result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
       })
       .catch((err) => console.error(err))

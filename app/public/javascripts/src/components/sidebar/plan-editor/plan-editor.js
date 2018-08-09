@@ -566,6 +566,10 @@ class PlanEditorController {
     const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
     
+    // deployment_type
+    //console.log(objectProperties)
+    //console.log(boundaryProperties)
+    
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
