@@ -560,6 +560,14 @@ class MapObjectEditorController {
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
       }
+    } else {
+      //when deselected object close drop down if open
+      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+      const isDropdownHidden = dropdownMenu.is(':hidden')
+      if (!isDropdownHidden) {
+        var toggleButton = this.$document.find('.map-object-editor-context-menu')
+        toggleButton.dropdown('toggle')
+      }
     }
     this.selectedMapObject = mapObject
     this.onSelectObject && this.onSelectObject({mapObject})

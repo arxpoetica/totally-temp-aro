@@ -44,7 +44,8 @@
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-list="$ctrl.state.listOfCreatorTags"
-      apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"></plan-search-filter>
+      apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"
+      refresh-tag-list="$ctrl.state.loadListOfCreatorTags(searchObj)"></plan-search-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
@@ -57,7 +58,7 @@
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
             <b><a href="javascript:void(0)" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</a></b>
-            <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy)}}</i></div>
+            <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
