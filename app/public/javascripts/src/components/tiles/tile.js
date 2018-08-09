@@ -491,6 +491,7 @@ class MapTileRenderer {
               entityImage = featureData.greyOutIcon
           }
         } else if ( feature.properties.hasOwnProperty('id') ){
+          //console.log(feature.properties)
           selectedListId = feature.properties.id
         } 
       }
@@ -576,6 +577,7 @@ class MapTileRenderer {
 
             // First draw a filled polygon with the fill color
             //show siteboundaries for the equipments that are selected
+            //console.log(feature)
             if((feature.properties && _.has(feature.properties,'network_node_type')
               && (_.indexOf(selectedEquipments,feature.properties.network_node_type) > -1)) 
               || (!_.has(feature.properties,'network_node_type')) ) {

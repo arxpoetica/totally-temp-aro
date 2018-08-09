@@ -451,7 +451,7 @@ class MapObjectEditorController {
       isExistingObject: false
     }
     
-    console.log(event)
+    //console.log(event)
     
     var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     var featurePromise = null

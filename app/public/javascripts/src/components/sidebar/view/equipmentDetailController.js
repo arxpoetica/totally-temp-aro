@@ -38,11 +38,11 @@ class EquipmentDetailController {
         for (var featureI = 0; featureI < equipmentList.length; featureI++){
           var feature = equipmentList[featureI]
           if (feature.hasOwnProperty('object_id')){
-          
-            if ( feature.hasOwnProperty('id') ){
-              featureId = feature.id
-            }else if ( feature.hasOwnProperty('location_id') ){
+            
+            if ( feature.hasOwnProperty('location_id') ){
               featureId = feature.location_id
+            }else{
+              featureId = feature.object_id
             }
             
             if (null != featureId){
@@ -119,8 +119,7 @@ class EquipmentDetailController {
   
   viewSelectedEquipment(selectedEquipment) {
     var plan = this.state.plan.getValue()
-    //console.log(selectedEquipment)
-    this.updateSelectedState(selectedEquipment, selectedEquipment.id)
+    this.updateSelectedState(selectedEquipment, selectedEquipment.objectId)
     this.displayEquipment(plan.id, selectedEquipment.objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){
         map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
