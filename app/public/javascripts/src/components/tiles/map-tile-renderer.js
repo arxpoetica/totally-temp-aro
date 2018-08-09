@@ -52,12 +52,6 @@ class MapTileRenderer {
     this.getActiveViewModePanel = () =>{
       return state.activeViewModePanel
     }
-    
-    // Define a drawing margin in pixels. If we draw a circle at (0, 0) with radius 10,
-    // part of it is going to get clipped. To overcome this, we add to our tile size.
-    // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
-    // be such that the largest rendered feature (or heatmap) does not get clipped.
-    this.drawMargins = 0
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
@@ -196,8 +190,8 @@ class MapTileRenderer {
   createTileCanvas(ownerDocument) {
     var canvas = ownerDocument.createElement('canvas');
     var borderWidth = 0
-    canvas.width = this.tileSize.width + this.drawMargins * 2;
-    canvas.height = this.tileSize.height + this.drawMargins * 2;
+    canvas.width = this.tileSize.width;
+    canvas.height = this.tileSize.height;
     return canvas
   }
 
@@ -224,8 +218,8 @@ class MapTileRenderer {
       if (this.mapTileOptions.showTileExtents) {
         borderWidth = 2
       }
-      frontBufferCanvas.style.left = `-${this.drawMargins + borderWidth}px`
-      frontBufferCanvas.style.top = `-${this.drawMargins + borderWidth}px`
+      frontBufferCanvas.style.left = `0 px`
+      frontBufferCanvas.style.top = `0 px`
       backBufferCanvas = this.createTileCanvas(ownerDocument)
       heatmapCanvas = this.createTileCanvas(ownerDocument)
       this.tileDataService.tileHtmlCache[tileId] = {
@@ -385,10 +379,6 @@ class MapTileRenderer {
       heatMapRenderer.max(maxValue)
       heatMapRenderer.radius(20, 20)
       heatMapRenderer.draw(0.0)
-      heatmapCtx.clearRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-      heatmapCtx.clearRect(0, this.tileSize.height + this.drawMargins, this.tileSize.width + this.drawMargins * 2, this.drawMargins)
-      heatmapCtx.clearRect(0, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
-      heatmapCtx.clearRect(this.tileSize.width + this.drawMargins, 0, this.drawMargins, this.tileSize.height + this.drawMargins * 2)
       // Draw the heatmap onto the main canvas
       ctx.drawImage(heatmapCanvas, 0, 0)
     }
@@ -403,11 +393,9 @@ class MapTileRenderer {
       // Draw a rectangle showing the tile margins
       ctx.strokeStyle = "#000000"
       ctx.lineWidth = 2
-      ctx.setLineDash([3, 3])
-      ctx.strokeRect(0, 0, this.tileSize.width + this.drawMargins * 2, this.tileSize.height + this.drawMargins * 2)
       // Draw a rectangle showing the tile (not the margins)
       ctx.setLineDash([])
-      ctx.strokeRect(this.drawMargins, this.drawMargins, this.tileSize.width, this.tileSize.height)
+      ctx.strokeRect(0, 0, this.tileSize.width, this.tileSize.height)
       // Show the tile coordinates that we pass to aro-service
       ctx.fillStyle = '#000000'
       ctx.strokeStyle = '#ffffff'
@@ -493,8 +481,8 @@ class MapTileRenderer {
         // Shape is an array of coordinates
         if (1 == shape.length) {
   	      // This is a point
-  	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
-  	      var y = this.drawMargins + shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
+  	      var x = shape[0].x + geometryOffset.x - imageWidthBy2
+  	      var y = shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
           
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
@@ -658,7 +646,7 @@ class MapTileRenderer {
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y
     ctx.beginPath()
-    ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+    ctx.moveTo(xPrev, yPrev)
     for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
       var xNext = shape[iCoord].x + geometryOffset.x
       var yNext = shape[iCoord].y + geometryOffset.y
@@ -675,11 +663,11 @@ class MapTileRenderer {
       if (shouldRenderLine) {
         // Segment is not along the tile extents. Draw it. We do this because polygons can be
         // clipped by the tile extents, and we don't want to draw segments along tile extents.
-        ctx.lineTo(this.drawMargins + xNext, this.drawMargins + yNext)
+        ctx.lineTo(xNext, yNext)
       }
       xPrev = xNext
       yPrev = yNext
-      ctx.moveTo(this.drawMargins + xPrev, this.drawMargins + yPrev)
+      ctx.moveTo(xPrev, yPrev)
     }
     ctx.stroke()
 
@@ -728,8 +716,8 @@ class MapTileRenderer {
       const fraction = remainingDistance / segmentLengths[currentSegment]
       const deltaX = shape[currentSegment + 1].x - shape[currentSegment].x
       const deltaY = shape[currentSegment + 1].y - shape[currentSegment].y
-      xCenter = this.drawMargins + shape[currentSegment].x + fraction * deltaX
-      yCenter = this.drawMargins + shape[currentSegment].y + fraction * deltaY
+      xCenter = shape[currentSegment].x + fraction * deltaX
+      yCenter = shape[currentSegment].y + fraction * deltaY
       centerSegment = currentSegment
       ++currentSegment
       break
@@ -824,13 +812,13 @@ class MapTileRenderer {
     ctx.globalAlpha = drawingStyles.opacity
 
     // Draw a filled polygon with the drawing styles computed for this feature
-    var x0 = this.drawMargins + geometryOffset.x + shape[0].x
-    var y0 = this.drawMargins + geometryOffset.y + shape[0].y
+    var x0 = geometryOffset.x + shape[0].x
+    var y0 = geometryOffset.y + shape[0].y
     ctx.beginPath()
     ctx.moveTo(x0, y0)
     for (var iCoord = 1; iCoord < shape.length; ++iCoord) {
-      var x1 = this.drawMargins + geometryOffset.x + shape[iCoord].x
-      var y1 = this.drawMargins + geometryOffset.y + shape[iCoord].y
+      var x1 = geometryOffset.x + shape[iCoord].x
+      var y1 = geometryOffset.y + shape[iCoord].y
       ctx.lineTo(x1, y1)
     }
     ctx.fill()
