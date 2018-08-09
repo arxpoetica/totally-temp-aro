@@ -183,12 +183,14 @@ class PlanEditorController {
 
   exitPlanEditMode() {
     // You should no longer hide any of the object ids that have been committed or discarded
+    var planId = this.state.plan.getValue().id
     Object.keys(this.objectIdToProperties).forEach((objectId) => {
       this.tileDataService.removeFeatureToExclude(objectId)
     })
 
     this.currentTransaction = null
     this.state.clearTileCachePlanOutputs()      // Clear the data cache for network equipment, so it will be re-downloaded
+    this.state.loadModifiedFeatures(planId)
     this.state.requestMapLayerRefresh.next(null)  // Request a refresh of the map layers
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
@@ -695,7 +697,6 @@ class PlanEditorController {
   displayViewObject(feature, iconUrl){
     //this.viewIconUrl = iconUrl
     var planId = this.state.plan.getValue().id
-    
     this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
       this.viewEventFeature = feature
@@ -714,7 +715,6 @@ class PlanEditorController {
   }
   
   editViewObject(){
-    //console.log(this.viewEventFeature)
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
@@ -820,9 +820,10 @@ class PlanEditorController {
       if ('undefined' == typeof networkNodeType) networkNodeType = feature && feature.networkNodeType
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       
+      //serviceFeature.deploymentType = feature.deploymentType
+      //if ("INSTALLED" == feature.deploymentType) serviceFeature.attributes.deployment_type = 1
       //console.log(serviceFeature)
       //console.log(feature)
-      //serviceFeature.deploymentType = feature.deploymentType
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
         this.state.requestMapLayerRefresh.next(null)
