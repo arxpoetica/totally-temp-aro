@@ -1,7 +1,6 @@
 
 import TileUtilities from './tile-utilities'
 // Browserify includes
-var Rx = require('rxjs')
 var pointInPolygon = require('point-in-polygon')
 var AsyncPriorityQueue = require('async').priorityQueue
 
@@ -58,8 +57,7 @@ class MapTileRenderer {
     // part of it is going to get clipped. To overcome this, we add to our tile size.
     // So a 256x256 tile with margin = 10, becomes a 276x276 tile. The draw margin should
     // be such that the largest rendered feature (or heatmap) does not get clipped.
-    //this.drawMargins = 10
-    this.drawMargins = 20
+    this.drawMargins = 0
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
@@ -280,7 +278,7 @@ class MapTileRenderer {
     	this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
-      var numNeighbors = (mapLayer.renderMode === 'HEATMAP') ? 1 : 0
+      var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,
         dataPromises: [],
@@ -476,15 +474,14 @@ class MapTileRenderer {
           selectedListId = feature.properties.location_id
         } else if (feature.properties.hasOwnProperty('object_id')) {
           selectedListId = feature.properties.object_id
-          //greyout an RT with hsiEanbled true for frontier client
-          if (config.ARO_CLIENT === 'frontier' &&
-            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam')
-            && (feature.properties.hsiEnabled !== 'true')) {
-              entityImage = featureData.greyOutIcon
-          }
         } else if ( feature.properties.hasOwnProperty('id') ){
-          //console.log(feature.properties)
           selectedListId = feature.properties.id
+          //greyout an RT with hsiEanbled true for frontier client
+          if(config.ARO_CLIENT === 'frontier' && 
+            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam' )
+            && (feature.properties.hsiEnabled !== 'true')) {
+            entityImage = featureData.greyOutIcon
+          }
         } 
       }
       
@@ -498,12 +495,9 @@ class MapTileRenderer {
   	      // This is a point
   	      var x = this.drawMargins + shape[0].x + geometryOffset.x - imageWidthBy2
   	      var y = this.drawMargins + shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
-          //if (feature.properties.is_deleted) console.log(feature)
+          
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
-  	      //console.log(this.selectedViewFeaturesByType)
-  	      //console.log(selectedListType)
-  	      //console.log(selectedListId)
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
   	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
   	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
@@ -569,7 +563,6 @@ class MapTileRenderer {
 
             // First draw a filled polygon with the fill color
             //show siteboundaries for the equipments that are selected
-            //console.log(feature)
             if((feature.properties && _.has(feature.properties,'network_node_type')
               && (_.indexOf(selectedEquipments,feature.properties.network_node_type) > -1)) 
               || (!_.has(feature.properties,'network_node_type')) ) {
@@ -904,7 +897,21 @@ class MapTileRenderer {
     Object.keys(this.mapLayers).forEach((mapLayerKey) => {
       var mapLayer = this.mapLayers[mapLayerKey]
       if (mapLayer.selectable) {
-        promises.push(this.tileDataService.getTileData(mapLayer, tileZoom, tileX, tileY))
+        const numNeighbors = 1
+        for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
+          for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
+            var res = Promise.all([
+              Promise.resolve({ deltaX: deltaX, deltaY: deltaY }),
+              this.tileDataService.getTileData(mapLayer, tileZoom, tileX + deltaX, tileY + deltaY)
+            ])
+            promises.push(res.then((results) => {
+                results[1].deltaXPx = results[0].deltaX * this.tileSize.width
+                results[1].deltaYPx = results[0].deltaY * this.tileSize.height
+                return Promise.resolve(results[1])
+              })
+            )
+          }
+        }
       }
     })
 
@@ -923,7 +930,7 @@ class MapTileRenderer {
               var features = layerToFeatures[layerKey]
               for (var iFeature = 0; iFeature < features.length; ++iFeature) {
                 var feature = features[iFeature]
-                if (shouldFeatureBeSelected(feature, result.icon)) {
+                if (shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
                   hitFeatures.push(feature.properties)
                 }
               }
@@ -1073,22 +1080,24 @@ class MapTileRenderer {
 
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
-    var shouldFeatureBeSelected = (feature, icon) => {
+    var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
       //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
       var geometry = feature.loadGeometry()
       // Geometry is an array of shapes
+      deltaX = deltaX || 0
+      deltaY = deltaY || 0
       geometry.forEach((shape) => {
         // Shape is an array of coordinates
         if (shape.length === 1) {
-          if (xWithinTile >= shape[0].x - imageWidthBy2
-              && xWithinTile <= shape[0].x + imageWidthBy2
-              //&& yWithinTile >= shape[0].y - imageHeightBy2 // for location in center of icon
-              //&& yWithinTile <= shape[0].y + imageHeightBy2
-              && yWithinTile >= shape[0].y - icon.height     // for location at bottom center of icon
-              && yWithinTile <= shape[0].y
+          if (xWithinTile >= shape[0].x + deltaX - imageWidthBy2
+              && xWithinTile <= shape[0].x + deltaX + imageWidthBy2
+              //&& yWithinTile >= shape[0].y + deltaY - imageHeightBy2 // for location in center of icon
+              //&& yWithinTile <= shape[0].y + deltaY + imageHeightBy2
+              && yWithinTile >= shape[0].y + deltaY - icon.height     // for location at bottom center of icon
+              && yWithinTile <= shape[0].y + deltaY 
               ) {
                 // The clicked point is inside the bounding box of the features icon
                 selectFeature = true
