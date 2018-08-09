@@ -33,33 +33,7 @@ class EquipmentDetailController {
         const plan = state.plan.getValue()
         this.displayEquipment(plan.id, equipment.object_id)
       }
-
-      // TODO - Parag: Keeping this code here very temporarily. Delete it after getting confirmation on object ids.
-      //   var selectedFeature = null
-      //   var featureId = null
-      //   for (var featureI = 0; featureI < equipmentList.length; featureI++){
-      //     var feature = equipmentList[featureI]
-      //     if (feature.hasOwnProperty('object_id')){
-          
-      //       if ( feature.hasOwnProperty('id') ){
-      //         featureId = feature.id
-      //       }else if ( feature.hasOwnProperty('location_id') ){
-      //         featureId = feature.location_id
-      //       }
-            
-      //       if (null != featureId){
-      //         selectedFeature = feature
-      //         break
-      //       }
-      //     }
-      //   }
-        
-      //   if (null != selectedFeature){
-      //     this.updateSelectedState(selectedFeature, featureId)
-      //     this.displayEquipment(plan.id, selectedFeature.object_id)
-      //   }
     })
-    
     
     this.clearViewModeSubscription = state.clearViewMode.subscribe((clear) => {
       if(clear){
@@ -112,9 +86,7 @@ class EquipmentDetailController {
       console.error(err)
     })
 	}
-	
-  // ---
-  
+
   viewSelectedEquipment(selectedEquipment) {
     var plan = this.state.plan.getValue()
     this.updateSelectedState(selectedEquipment)
@@ -130,7 +102,6 @@ class EquipmentDetailController {
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
   }
-
 }
 
 EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
