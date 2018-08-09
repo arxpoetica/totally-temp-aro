@@ -170,16 +170,6 @@ class TileComponentController {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
       }
     })
-    
-    // Force a re-creation of all map tiles
-    state.requestRecreateTiles.subscribe((newValue) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        // First clear our HTML cache. Tiles where the rendering is in progress will keep rendering to the old tiles.
-        tileDataService.deleteHtmlCache()
-        // Then re-set the overlayMapTypes, this will call getTile() on all visible tiles
-        this.mapRef.overlayMapTypes.setAt(this.OVERLAY_MAP_INDEX, this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX))
-      }
-    })
 
     tileDataService.addEntityImageForLayer('SELECTED_LOCATION', state.selectedLocationIcon)
 
