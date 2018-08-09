@@ -545,7 +545,7 @@ class PlanEditorController {
       networkNodeEquipment: objectProperties.networkNodeEquipment,
       deploymentType: objectProperties.deploymentType
     }
-    console.log(serviceFeature.geometry)
+    //console.log(serviceFeature.geometry)
     return serviceFeature
   }
 
@@ -566,10 +566,6 @@ class PlanEditorController {
     const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     const boundaryProperties = this.objectIdToProperties[objectId]
     
-    // deployment_type
-    //console.log(objectProperties)
-    //console.log(boundaryProperties)
-    
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
@@ -589,7 +585,8 @@ class PlanEditorController {
         spatialEdgeType: boundaryProperties.spatialEdgeType,
         directed: boundaryProperties.directed
       },
-      dataType: 'equipment_boundary'
+      dataType: 'equipment_boundary'//, 
+      //deploymentType: 'PLANNED'
     }
     return serviceFeature
   }
@@ -717,11 +714,12 @@ class PlanEditorController {
   }
   
   editViewObject(){
-    console.log(this.viewEventFeature)
+    //console.log(this.viewEventFeature)
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
   handleObjectCreated(mapObject, usingMapClick, feature) {
+    //console.log(feature)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -738,7 +736,7 @@ class PlanEditorController {
           })
           .then((result) => {
             var attributes = result.data.attributes
-            console.log(result.data)
+            //console.log(result.data)
             const equipmentFeature = AroFeatureFactory.createObject(result.data)
             var networkNodeEquipment = equipmentFeature.networkNodeEquipment
             
@@ -821,6 +819,10 @@ class PlanEditorController {
       var networkNodeType = feature && feature.attributes && feature.attributes.networkNodeType
       if ('undefined' == typeof networkNodeType) networkNodeType = feature && feature.networkNodeType
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
+      
+      //console.log(serviceFeature)
+      //console.log(feature)
+      //serviceFeature.deploymentType = feature.deploymentType
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
         this.state.requestMapLayerRefresh.next({})
