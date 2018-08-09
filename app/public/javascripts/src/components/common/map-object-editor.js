@@ -141,16 +141,15 @@ class MapObjectEditorController {
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
+    this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this)})
 
+    
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
         this.selectMapObject(null) //deselects the selected equipment 
       }
     })
     
-    this.comms.createMapObject = (feature, iconUrl) => {
-      this.createMapObject(feature, iconUrl, true, true)
-    }
   }
   
   makeIconAnchor(iconUrl, callback){
@@ -314,7 +313,11 @@ class MapObjectEditorController {
     const TOLERANCE = 0.0001
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
-
+  
+  createEditableExistingMapObject(feature, iconUrl){
+    this.createMapObject(feature, iconUrl, true, true)
+  }
+  
   createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride) {
     if ('undefined' == typeof existingObjectOverride) {
       existingObjectOverride = false
@@ -328,7 +331,7 @@ class MapObjectEditorController {
         this.selectMapObject(null)
         return
       }
-      
+      //console.log(feature)
       mapObject = this.createPointMapObject(feature, iconUrl)
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
@@ -447,7 +450,9 @@ class MapObjectEditorController {
       is_locked: false,
       isExistingObject: false
     }
-
+    
+    //console.log(event)
+    
     var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     var featurePromise = null
     if (this.featureType === 'location' && event.locations && event.locations.length > 0) {
@@ -459,7 +464,7 @@ class MapObjectEditorController {
       featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
       .then((result) => {
         var serviceFeature = result.data
-        // ise featire's coord NOT the event's coords
+        // use feature's coord NOT the event's coords
         feature.geometry.coordinates = serviceFeature.geometry.coordinates
         feature.attributes = serviceFeature.attributes
         feature.directlyEditExistingFeature = true
@@ -715,11 +720,11 @@ let mapObjectEditor = {
     onModifyObject: '&',
     onDeleteObject: '&',
     displayViewObject: '&', 
-    comms: '=', 
     onObjectDroppedOnMarker: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds
-    registerRemoveMapObjectsCallback: '&'   // To be called to register a callback, which will remove all created map objects
+    registerRemoveMapObjectsCallback: '&',   // To be called to register a callback, which will remove all created map objects
+    registerCreateEditableExistingMapObject: '&'  // To be called to register a callback, which will create a map object from and existing object
   },
   controller: MapObjectEditorController
 }
