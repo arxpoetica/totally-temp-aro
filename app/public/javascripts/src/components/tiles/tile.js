@@ -5,6 +5,7 @@
 
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
+import MapUtilities from '../common/plan/map-utilities';
 
 class TileComponentController {
 
@@ -73,9 +74,9 @@ class TileComponentController {
     })
 
     // Redraw map tiles when requestd
-    state.requestMapLayerRefresh.subscribe((newValue) => {
-      this.tileDataService.markHtmlCacheDirty()
-      this.refreshMapTiles()
+    state.requestMapLayerRefresh.subscribe((tilesToRefresh) => {
+      this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+      this.refreshMapTiles(tilesToRefresh)
     })
     
     // ToDo: It would seem the repeat code below could be generalized 
@@ -190,8 +191,8 @@ class TileComponentController {
       var swCorner = mapBounds.getSouthWest()
       var zoom = this.mapRef.getZoom()
       // Note the swap from NE/SW to NW/SE when finding tile coordinates
-      var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
-      var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+      var tileCoordsNW = MapUtilities.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+      var tileCoordsSE = MapUtilities.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
 
       // Loop through all visible tiles
       var pointInPolyPromises = []
@@ -286,7 +287,7 @@ class TileComponentController {
         var zoom = this.mapRef.getZoom()
 
         // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
-        var tileCoords = this.getTileCoordinates(zoom, lat, lng)
+        var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
 
         // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
         var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
@@ -378,21 +379,6 @@ class TileComponentController {
     }
   }
 
-  // Returns the tile coordinates (x, y) for a given lat/long and zoom level
-  getTileCoordinates(zoom, lat, lng) {
-    // Using Mercator projection.
-    // https://gis.stackexchange.com/questions/133205/wmts-convert-geolocation-lat-long-to-tile-index-at-a-given-zoom-level
-    var n = Math.pow(2.0, zoom)
-    var tileX = Math.floor((lng + 180.0) / 360.0 * n)
-    var latRad = lat * Math.PI / 180.0
-    var tileY = Math.floor((1.0 - Math.log(Math.tan(latRad) + (1 / Math.cos(latRad))) / Math.PI) / 2.0 * n)
-
-    return {
-      x: tileX,
-      y: tileY
-    }
-  }
-
   // Returns the latitiude and longitude of the northwest corner of a tile
   // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
   getNWTileCornerLatLng(tileZoom, tileX, tileY) {
@@ -425,8 +411,16 @@ class TileComponentController {
   }
 
   // Refresh map tiles
-  refreshMapTiles() {
+  refreshMapTiles(tilesToRefresh) {
     if (!this.mapRef || !this.mapRef.getBounds()) {
+      return
+    }
+
+    if (tilesToRefresh) {
+      // First, redraw the tiles that are outside the viewport AND at the current zoom level.
+      this.mapRef.overlayMapTypes.forEach((overlayMap) => {
+        overlayMap.redrawCachedTiles(tilesToRefresh)
+      })
       return
     }
 
@@ -437,8 +431,8 @@ class TileComponentController {
     var swCorner = mapBounds.getSouthWest()
     var zoom = this.mapRef.getZoom()
     // Note the swap from NE/SW to NW/SE when finding tile coordinates
-    var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
-    var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+    var tileCoordsNW = MapUtilities.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+    var tileCoordsSE = MapUtilities.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
 
     for (var x = tileCoordsNW.x; x <= tileCoordsSE.x; ++x) {
       for (var y = tileCoordsNW.y; y <= tileCoordsSE.y; ++y) {

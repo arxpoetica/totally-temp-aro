@@ -1,4 +1,5 @@
 import Constants from './constants'
+import MapUtilities from './plan/map-utilities';
 class MapObjectEditorController {
 
   constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService, Utils) {
@@ -230,7 +231,7 @@ class MapObjectEditorController {
       'border-radius': `${radius}px`,
       width: `${radius * 2}px`,
       height: `${radius * 2}px`,
-      'background-color': 'rgba(255, 255, 255, 0.5'
+      'background-color': 'rgba(255, 255, 255, 0.5)'
     }
     this.objectIdToDropCSS[mapObject.objectId] = dropTargetCSS
     return dropTargetCSS;
@@ -245,8 +246,6 @@ class MapObjectEditorController {
 
   createPointMapObject(feature, iconUrl) {
     // Create a "point" map object - a marker
-    this.tileDataService.addFeatureToExclude(feature.objectId)
-    this.state.requestMapLayerRefresh.next({})
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
@@ -279,7 +278,21 @@ class MapObjectEditorController {
       lockIconOverlay.bindTo('position', mapMarker, 'position')
       this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay 
     }
-    // this.setMapObjectIcon(mapMarker, this.getIconsByFeatureType(mapMarker.featureType).iconUrl)
+
+    // Refresh only the tile containing the object and its neighbours (in case the object overlaps onto another tile)
+    this.tileDataService.addFeatureToExclude(feature.objectId)
+    const zoom = this.mapRef.getZoom()
+    const affectedTile = MapUtilities.getTileCoordinates(zoom, feature.geometry.coordinates[1], feature.geometry.coordinates[0])
+    var tilesToRefresh = []
+    const numNeighbours = 1
+    for (var x = -numNeighbours; x <= numNeighbours; ++x) {
+      for (var y = -numNeighbours; y <= numNeighbours; ++y) {
+        tilesToRefresh.push({ zoom: zoom, x: affectedTile.x + x, y: affectedTile.y + y })
+      }
+    }
+    this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
+    this.state.requestMapLayerRefresh.next(tilesToRefresh)
+
     return mapMarker
   }
 

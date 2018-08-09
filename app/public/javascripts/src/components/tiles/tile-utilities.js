@@ -1,7 +1,7 @@
 class TileUtilities {
 
   static getTileId(zoom, tileX, tileY) {
-    return `mapTile_${zoom}_${tileX}_${tileY}`
+    return `${zoom}-${tileX}-${tileY}`
   }
 
 }

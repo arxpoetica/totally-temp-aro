@@ -297,13 +297,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.censusCategories = new Rx.BehaviorSubject()
   service.reloadCensusCategories = (censusCategories) => {
     service.censusCategories.next(censusCategories)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   service.selectedCensusCategoryId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusCategoryId = (catId) => {
     service.selectedCensusCategoryId.next(catId)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   // The display modes for the application
@@ -524,7 +524,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           var selectedLocationsSet = new Set()
           result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
           service.selectedLocations.next(selectedLocationsSet)
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
           return Promise.resolve()
         })
     } else {
@@ -541,7 +541,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           var selectedSASet = new Set()
           result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
           service.selectedServiceAreas.next(selectedSASet)
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
           if (forceMapRefresh) {
             tileDataService.clearDataCache()
             tileDataService.markHtmlCacheDirty()
@@ -557,32 +557,32 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.reloadSelectedServiceArea = (serviceAreaId) => {
     //Display only one Selected SA Details in viewMode at a time
     service.selectedServiceArea.next(serviceAreaId)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
 
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
   service.reloadSelectedAnalysisArea = (analysisArea) => {
     service.selectedAnalysisArea.next(analysisArea)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
 
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {
     service.selectedViewFeaturesByType.next(featuresByType)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   service.selectedCensusBlockId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusBlockId = (censusBlock) => {
     service.selectedCensusBlockId.next(censusBlock)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   
   service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedRoadSegments = (road) => {
     service.selectedRoadSegments.next(road)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
 
   // Plan - define once
@@ -1062,10 +1062,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // continue but will not be shown on our map.
   service.recreateTilesAndCache = () => {
     tileDataService.clearDataCache()
-    tileDataService.deleteHtmlCache()
+    tileDataService.markHtmlCacheDirty()
     return service.loadModifiedFeatures(service.plan.getValue().id)
       .then(() => {
-        service.requestMapLayerRefresh.next({})
+        service.requestMapLayerRefresh.next(null)
       })
       .catch((err) => console.error(err))
   }
@@ -1192,7 +1192,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
                 .then(() => {
                   tileDataService.clearDataCache()
                   tileDataService.markHtmlCacheDirty()
-                  service.requestMapLayerRefresh.next({})
+                  service.requestMapLayerRefresh.next(null)
                   return Promise.resolve()
                 })
               })
@@ -1233,7 +1233,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     
     service.clearTileCachePlanOutputs()
     tileDataService.markHtmlCacheDirty()
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
 
     // Get the optimization options that we will pass to the server
     var optimizationBody = service.getOptimizationBody()
@@ -1267,7 +1267,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           service.stopPolling()
           service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
           delete service.Optimizingplan.optimizationId
           service.loadPlanInputs(newPlan.id)
         }
@@ -1303,7 +1303,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           delete service.Optimizingplan.optimizationId
           service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
         }
       })
       .catch((err) => {
