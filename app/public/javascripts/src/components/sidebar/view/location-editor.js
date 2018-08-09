@@ -40,7 +40,7 @@ class LocationEditorController {
   
   $onDestroy(){
     // to bring bakc the hidden locations
-    this.state.requestMapLayerRefresh.next({})
+    this.state.requestMapLayerRefresh.next(null)
   }
   
   resumeOrCreateTransaction() {
