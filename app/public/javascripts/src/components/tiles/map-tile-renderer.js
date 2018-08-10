@@ -269,7 +269,7 @@ class MapTileRenderer {
 
     var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
-    	this.mapLayersByZ.forEach((mapLayerKey, index) => {
+    this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
       var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
@@ -807,7 +807,14 @@ class MapTileRenderer {
       //Highlight the selected SA in view mode
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
-
+    
+    /*
+    if (this.tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)){
+      // need to figure which one is the original 
+      console.log(feature)
+      drawingStyles.strokeStyle = '#dddddd'
+    }
+    */
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
 

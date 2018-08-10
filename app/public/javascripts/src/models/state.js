@@ -1100,13 +1100,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   // Load the modified features for a given plan and save them in the tile data service
   service.loadModifiedFeatures = (planId) => {
-    //console.log(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
-    return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
+    var promises = []
+    promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
       .then((result) => {
-        //console.log(result)
         result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
       })
       .catch((err) => console.error(err))
+    )
+    
+    promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment_boundary?userId=${service.loggedInUser.id}`)
+      .then((result) => {
+        result.data.forEach((feature) => tileDataService.addModifiedBoundary(feature))
+      })
+      .catch((err) => console.error(err))
+    )
+    
+    return Promise.all( promises )
   }
 
   service.locationInputSelected = (locationKey) => {
