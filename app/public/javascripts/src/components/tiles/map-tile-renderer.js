@@ -412,30 +412,15 @@ class MapTileRenderer {
     }
   }
 
-  shouldRenderFeature(feature) {
-    if (!feature.properties) {
-      return true
-    } else if (feature.properties._data_type && feature.properties._data_type.split('.')[0] === 'equipment') {
-      // For now, just hide equipment features that are Planned and Deleted
-      return (!feature.properties.deployment_type
-        || (feature.properties.deployment_type === 1)
-        || (feature.properties.is_deleted !== 'true'))
-    } else {
-      // For all other features, do not display if the is_deleted flag is true
-      return feature.properties.is_deleted !== 'true'
-    }
-  }
-
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
-    for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-      // Parse the geometry out.
-      var feature = features[iFeature]
+    // If a filtering function is provided for this layer, apply it to filter out features
+    const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
 
-      if (!this.shouldRenderFeature(feature)) {
-        continue
-      }
+    for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
+      // Parse the geometry out.
+      var feature = filteredFeatures[iFeature]
 
       if (feature.properties) {
         // Try object_id first, else try location_id
@@ -1021,21 +1006,22 @@ class MapTileRenderer {
     return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
   }
   
-  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance) {
+  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY) {
 
     var geometry = feature.loadGeometry()
     var distance
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
     var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
-
+    deltaX = deltaX || 0
+    deltaY = deltaY || 0
     //Some road segments has more points
     for (var i = 0; i < geometry[0].length - 1; i++) {
-      lineX1 = Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
-      lineY1 = Object.values(geometry[0])[i].y
+      lineX1 = deltaX + Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
+      lineY1 = deltaY + Object.values(geometry[0])[i].y
   
-      lineX2 = Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
-      lineY2 = Object.values(geometry[0])[i+1].y
+      lineX2 = deltaX + Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
+      lineY2 = deltaY + Object.values(geometry[0])[i+1].y
 
       pointX = xWithinTile  //pointX, pointY are the point of the reference point.
       pointY = yWithinTile
@@ -1115,7 +1101,7 @@ class MapTileRenderer {
       })
 
       if(feature.properties.gid) {
-        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance)
+        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY)
       }
 
       //Load the selected service area 
@@ -1126,8 +1112,8 @@ class MapTileRenderer {
 
           areaGeom.forEach(function (eachValue) {
             var eachPoint = []
-            eachPoint.push(eachValue.x)
-            eachPoint.push(eachValue.y)
+            eachPoint.push(eachValue.x + deltaX)
+            eachPoint.push(eachValue.y + deltaY)
             areaPolyCoordinates.push(eachPoint)
           })
 
