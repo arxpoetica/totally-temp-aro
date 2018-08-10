@@ -56,6 +56,14 @@ class MapTileRenderer {
     this.getMapLayers = () =>{
       return state.mapLayers.getValue()
     }
+    
+    // we should start holding the styles here so they can be adstracted, I'll start
+    this.styles = {
+      modifiedBoundary: {
+        strokeStyle: '#dddddd', 
+        lineOpacity: 0.5
+      }
+    }
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
@@ -477,8 +485,8 @@ class MapTileRenderer {
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
   	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
-  	        const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
-  	        
+  	        //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+  	        const modificationType = this.getModificationTypeForFeature(feature, mapLayer)
   	        // we dont show originals when planned view is on
   	        if (modificationType === this.modificationTypes.ORIGINAL && feature.properties.hasOwnProperty('_data_type')){
   	          var equipmentType = feature.properties._data_type.substring( feature.properties._data_type.lastIndexOf('.')+1 )
@@ -582,7 +590,8 @@ class MapTileRenderer {
   }
 
   // Gets the modification type for a given feature
-  getModificationTypeForFeature(zoom, tileCoords, shapeX, shapeY, feature) {
+  //getModificationTypeForFeature(zoom, tileCoords, shapeX, shapeY, feature) {
+  getModificationTypeForFeature(feature, mapLayer) {
     // If this feature is a "modified feature" then add an overlay. (Its all "object_id" now, no "location_id" anywhere)
     var modificationType = this.modificationTypes.UNMODIFIED
     if (this.tileDataService.modifiedFeatures.hasOwnProperty(feature.properties.object_id)) {
@@ -590,11 +599,18 @@ class MapTileRenderer {
       if (modifiedFeature.deleted) {
         modificationType = this.modificationTypes.DELETED
       } else {
+        /*
         modificationType = this.modificationTypes.ORIGINAL
         const modifiedFeatureCoord = modifiedFeature.geometry.coordinates
         var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, modifiedFeatureCoord[1], modifiedFeatureCoord[0])
         const pixelTolerance = 3
         if ((Math.abs(pixelCoords.x - shapeX) < pixelTolerance) && (Math.abs(pixelCoords.y - shapeY) < pixelTolerance)) {
+          modificationType = this.modificationTypes.MODIFIED
+        }
+        */
+        if ('LibraryEquipmentPointLayer' == mapLayer.tileDefinitions[0].vtlType){
+          modificationType = this.modificationTypes.ORIGINAL
+        }else{
           modificationType = this.modificationTypes.MODIFIED
         }
       }
@@ -807,13 +823,12 @@ class MapTileRenderer {
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
     
-    /*
-    if (this.tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)){
-      // need to figure which one is the original 
-      console.log(feature)
-      drawingStyles.strokeStyle = '#dddddd'
+    if (this.tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) 
+        && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType){
+      drawingStyles.strokeStyle = this.styles.modifiedBoundary.strokeStyle
+      drawingStyles.lineOpacity = this.styles.modifiedBoundary.lineOpacity
     }
-    */
+    
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
 
