@@ -60,7 +60,8 @@ class MapTileRenderer {
     // we should start holding the styles here so they can be adstracted, I'll start
     this.styles = {
       modifiedBoundary: {
-        strokeStyle: '#dddddd'
+        strokeStyle: '#dddddd', 
+        lineOpacity: 0.5
       }
     }
   }
@@ -825,6 +826,7 @@ class MapTileRenderer {
     if (this.tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) 
         && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType){
       drawingStyles.strokeStyle = this.styles.modifiedBoundary.strokeStyle
+      drawingStyles.lineOpacity = this.styles.modifiedBoundary.lineOpacity
     }
     
     ctx.fillStyle = drawingStyles.fillStyle
