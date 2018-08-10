@@ -573,7 +573,7 @@ class MapTileRenderer {
               }
               this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false)
             } else {
-              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, false)
+              this.renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, null, false)
             }
           }
             
@@ -633,15 +633,15 @@ class MapTileRenderer {
   
 
   // Renders a polyline feature onto the canvas
-  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, isPolygonBorder) {
+  renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyleOverrides, isPolygonBorder) {
 
     const oldOpacity = ctx.globalAlpha
-    if (drawingStyles.lineOpacity) {
-      ctx.globalAlpha = drawingStyles.lineOpacity
+    if (drawingStyleOverrides && drawingStyleOverrides.lineOpacity) {
+      ctx.globalAlpha = drawingStyleOverrides.lineOpacity
     }
 
-    ctx.strokeStyle = drawingStyles ? drawingStyles.strokeStyle : mapLayer.strokeStyle
-    ctx.lineWidth = drawingStyles ? drawingStyles.lineWidth : (mapLayer.lineWidth || 1)
+    ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.strokeStyle
+    ctx.lineWidth = drawingStyleOverrides ? drawingStyleOverrides.lineWidth : (mapLayer.lineWidth || 1)
 
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y
