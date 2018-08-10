@@ -915,9 +915,9 @@ module.exports = class NetworkPlan {
       return Promise.resolve([])
     }
     // Regex for checking if the search expression is a valid "latitude, longitude". From https://stackoverflow.com/a/18690202
-    if (text.match(/[+-]?([0-9]*[.])?[0-9]+.*,[+-]?([0-9]*[.])?[0-9]+/)) {
+    if (text.match(/[+-]?([0-9]*[.])?[0-9]+.[\s,]+[+-]?([0-9]*[.])?[0-9]+/)) {
       // This is a valid latitude/longitude search expression (technically it is of the form "[number],[number]")
-      var latLng = text.split(',').map((item) => item.trim(item)) // A better regex will return this in the match()
+      var latLng = text.split(/[\s,]+/).map((item) => item.trim(item)) 
       return Promise.resolve([{
         type: 'latlng',
         displayText: `Latitude: ${latLng[0]}, Longitude: ${latLng[1]}`,

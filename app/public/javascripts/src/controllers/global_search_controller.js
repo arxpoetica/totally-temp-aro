@@ -87,6 +87,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
             longitude: +selectedLocation.value[1]
           })
           state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
+          addBouncingMarker(+selectedLocation.value[0], +selectedLocation.value[1])
         }
       }
     })
