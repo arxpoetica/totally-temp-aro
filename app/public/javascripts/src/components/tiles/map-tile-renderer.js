@@ -985,21 +985,22 @@ class MapTileRenderer {
     return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
   }
   
-  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance) {
+  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY) {
 
     var geometry = feature.loadGeometry()
     var distance
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
     var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
-
+    deltaX = deltaX || 0
+    deltaY = deltaY || 0
     //Some road segments has more points
     for (var i = 0; i < geometry[0].length - 1; i++) {
-      lineX1 = Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
-      lineY1 = Object.values(geometry[0])[i].y
+      lineX1 = deltaX + Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
+      lineY1 = deltaY + Object.values(geometry[0])[i].y
   
-      lineX2 = Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
-      lineY2 = Object.values(geometry[0])[i+1].y
+      lineX2 = deltaX + Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
+      lineY2 = deltaY + Object.values(geometry[0])[i+1].y
 
       pointX = xWithinTile  //pointX, pointY are the point of the reference point.
       pointY = yWithinTile
@@ -1079,7 +1080,7 @@ class MapTileRenderer {
       })
 
       if(feature.properties.gid) {
-        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance)
+        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY)
       }
 
       //Load the selected service area 
@@ -1090,8 +1091,8 @@ class MapTileRenderer {
 
           areaGeom.forEach(function (eachValue) {
             var eachPoint = []
-            eachPoint.push(eachValue.x)
-            eachPoint.push(eachValue.y)
+            eachPoint.push(eachValue.x + deltaX)
+            eachPoint.push(eachValue.y + deltaY)
             areaPolyCoordinates.push(eachPoint)
           })
 
