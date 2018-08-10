@@ -52,6 +52,10 @@ class MapTileRenderer {
     this.getActiveViewModePanel = () =>{
       return state.activeViewModePanel
     }
+    
+    this.getMapLayers = () =>{
+      return state.mapLayers.getValue()
+    }
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
@@ -269,7 +273,7 @@ class MapTileRenderer {
 
     var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
-    	this.mapLayersByZ.forEach((mapLayerKey, index) => {
+    this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
       var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
@@ -488,6 +492,16 @@ class MapTileRenderer {
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
   	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
+  	        const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+  	        
+  	        // we dont show originals when planned view is on
+  	        if (modificationType === this.modificationTypes.ORIGINAL && feature.properties.hasOwnProperty('_data_type')){
+  	          var equipmentType = feature.properties._data_type.substring( feature.properties._data_type.lastIndexOf('.')+1 )
+              if (this.getMapLayers().hasOwnProperty(equipmentType+'_planned')){
+  	            return
+  	          }
+  	        }
+  	        
   	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
   	          //show selected location icon at analysis mode -> selection type is locations    
   	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
@@ -513,14 +527,14 @@ class MapTileRenderer {
   	          ctx.drawImage(entityImage, x, y) 
   	        } else {
               const originalAlpha = ctx.globalAlpha
-              const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+              //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
               if (modificationType === this.modificationTypes.ORIGINAL || modificationType === this.modificationTypes.DELETED) {
                 ctx.globalAlpha = 0.5
               }
               ctx.drawImage(entityImage, x, y)
               ctx.globalAlpha = originalAlpha
             }
-            const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+            //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
             const overlaySize = 12
             this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
@@ -807,7 +821,14 @@ class MapTileRenderer {
       //Highlight the selected SA in view mode
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
-
+    
+    /*
+    if (this.tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)){
+      // need to figure which one is the original 
+      console.log(feature)
+      drawingStyles.strokeStyle = '#dddddd'
+    }
+    */
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
 

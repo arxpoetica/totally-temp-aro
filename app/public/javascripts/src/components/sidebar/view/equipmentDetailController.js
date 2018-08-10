@@ -24,7 +24,7 @@ class EquipmentDetailController {
       if (!this.state.allowViewModeClickAction()) return
       if (!options.hasOwnProperty('equipmentFeatures')) return
       if (0 == options.equipmentFeatures.length) return
-
+      
       this.selectedEquipment = ''
       var equipmentList = options.equipmentFeatures
       if (equipmentList.length > 0) {
@@ -49,7 +49,6 @@ class EquipmentDetailController {
   }
  
 	updateSelectedState(selectedFeature){
-	  //console.log(selectedFeature)
 	  // tell state
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
@@ -58,10 +57,9 @@ class EquipmentDetailController {
 	}
 	
 	displayEquipment(planId, objectId){
-    return this.$http.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${this.state.loggedInUser.id}`)
+	  return this.$http.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
       const equipmentInfo = result.data
-      //console.log(equipmentInfo)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl

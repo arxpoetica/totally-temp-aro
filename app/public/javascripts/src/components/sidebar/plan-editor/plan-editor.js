@@ -142,10 +142,11 @@ class PlanEditorController {
       }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((item) => {
+          console.log(item)
           const attributes = item.feature.attributes
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
                                                     attributes.selected_site_boundary_generation, 
-                                                    attributes.spatialEdgeType, attributes.directed, attributes.network_node_type)
+                                                    attributes.spatialEdgeType, attributes.directed, attributes.network_node_type, item.feature.deploymentType)
           this.objectIdToProperties[item.feature.objectId] = properties
         })
         // Save the equipment and boundary ID associations
@@ -183,12 +184,14 @@ class PlanEditorController {
 
   exitPlanEditMode() {
     // You should no longer hide any of the object ids that have been committed or discarded
+    var planId = this.state.plan.getValue().id
     Object.keys(this.objectIdToProperties).forEach((objectId) => {
       this.tileDataService.removeFeatureToExclude(objectId)
     })
 
     this.currentTransaction = null
     this.state.clearTileCachePlanOutputs()      // Clear the data cache for network equipment, so it will be re-downloaded
+    this.state.loadModifiedFeatures(planId)
     this.state.requestMapLayerRefresh.next(null)  // Request a refresh of the map layers
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
@@ -585,9 +588,10 @@ class PlanEditorController {
         spatialEdgeType: boundaryProperties.spatialEdgeType,
         directed: boundaryProperties.directed
       },
-      dataType: 'equipment_boundary'//, 
-      //deploymentType: 'PLANNED'
+      dataType: 'equipment_boundary', 
+      deploymentType: boundaryProperties.deploymentType
     }
+    console.log(serviceFeature)
     return serviceFeature
   }
 
@@ -692,34 +696,45 @@ class PlanEditorController {
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
   }
   
+  clearViewSelection(){
+    this.viewEventFeature = {}
+    this.viewFeature = {}
+    this.viewIconUrl = ''
+    this.viewLabel = ''
+    this.isEditFeatureProps = true
+    this.updateSelectedState()
+  }
+  
   displayViewObject(feature, iconUrl){
     //this.viewIconUrl = iconUrl
     var planId = this.state.plan.getValue().id
-    
     this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
-      this.viewEventFeature = feature
-      // use feature's coord NOT the event's coords
-      this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
-      this.viewFeature = AroFeatureFactory.createObject(result.data)
-      var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
-      this.viewLabel = viewConfig.label
-      this.viewIconUrl = viewConfig.iconUrl
-      this.isEditFeatureProps = false
-      //this.updateSelectedState(feature, feature.objectId)
-      
+      if (result.data.hasOwnProperty('geometry')){
+        this.viewEventFeature = feature
+        // use feature's coord NOT the event's coords
+        this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
+        this.viewFeature = AroFeatureFactory.createObject(result.data)
+        var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+        this.viewLabel = viewConfig.label
+        this.viewIconUrl = viewConfig.iconUrl
+        this.isEditFeatureProps = false
+        //this.updateSelectedState(feature, feature.objectId)
+      }else{
+        // clear selection
+        this.clearViewSelection()
+      }
     }).catch((err) => {
       console.error(err)
     })
   }
   
   editViewObject(){
-    //console.log(this.viewEventFeature)
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
   handleObjectCreated(mapObject, usingMapClick, feature) {
-    //console.log(feature)
+    console.log(feature)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -812,7 +827,9 @@ class PlanEditorController {
         existingBoundaryId = null
         
         // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
-        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance')
+        this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 
+                                                                              null, null, feature.attributes.networkNodeType, feature.deploymentType)
+        //                                                                    spatialEdgeType, directed, networkNodeType, deploymentType
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
@@ -820,9 +837,10 @@ class PlanEditorController {
       if ('undefined' == typeof networkNodeType) networkNodeType = feature && feature.networkNodeType
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       
-      //console.log(serviceFeature)
-      //console.log(feature)
       //serviceFeature.deploymentType = feature.deploymentType
+      //if ("INSTALLED" == feature.deploymentType) serviceFeature.attributes.deployment_type = 1
+      console.log(serviceFeature)
+      console.log(feature)
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
         this.state.requestMapLayerRefresh.next(null)

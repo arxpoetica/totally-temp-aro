@@ -13,7 +13,8 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   tileDataService.entityImageCache = {}
   tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
   tileDataService.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
-
+  tileDataService.modifiedBoundaries = {}
+  
   // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
   // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
   // and the app appears unresponsive until all vector tiles are loaded. To get around this, we are going to limit the
@@ -376,13 +377,20 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   tileDataService.addModifiedFeature = (feature) => {
     tileDataService.modifiedFeatures[feature.objectId] = feature
   }
-
+  
+  //Add a modified boundary to the set of modified features
+  tileDataService.addModifiedBoundary = (feature) => {
+    tileDataService.modifiedBoundaries[feature.objectId] = feature
+  }
+  
+  
   // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
     tileDataService.tileProviderCache = {}
     tileDataService.featuresToExclude = new Set()
     tileDataService.modifiedFeatures = {}
+    tileDataService.modifiedBoundaries = {}
   }
 
   // Clear only those entries in the tile data cache containing the specified keywords
