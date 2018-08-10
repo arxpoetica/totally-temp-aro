@@ -253,6 +253,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
+  service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
+  service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
@@ -1038,6 +1040,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   }
 
   service.loadPlan = (planId) => {
+    service.requestDestroyMapOverlay.next(null)
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
@@ -1051,6 +1054,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       .then((address) => {
         var plan = service.plan.getValue()
         plan.areaName = address
+        service.requestCreateMapOverlay.next(null)
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
         return Promise.resolve()
