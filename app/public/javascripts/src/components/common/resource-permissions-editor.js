@@ -13,6 +13,7 @@ class ResourcePermissionsEditorController {
     if (typeof this.enabled === 'undefined') {
       this.enabled = true   // If not defined, then make it true
     }
+    this.subSystemActors = this.systemActors && this.systemActors.slice(0, 10)
     this.loadResourceAccess()
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
@@ -71,6 +72,12 @@ class ResourcePermissionsEditorController {
         return this.$http.put(`/service/auth/acl/${this.resourceType}/${this.resourceId}`, putBody)
       })
       .catch((err) => console.error(err))
+  }
+
+  searchActors(filterObj) {
+    if(filterObj !== '') {
+      this.subSystemActors = this.systemActors && this.systemActors.slice(0, 20)      
+    }
   }
 }
 
