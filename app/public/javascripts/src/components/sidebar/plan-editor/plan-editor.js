@@ -142,7 +142,6 @@ class PlanEditorController {
       }).then((result) => {
         // Save the properties for the boundary
         result.data.forEach((item) => {
-          console.log(item)
           const attributes = item.feature.attributes
           const properties = new BoundaryProperties(+attributes.boundary_type_id, attributes.selected_site_move_update,
                                                     attributes.selected_site_boundary_generation, 
@@ -591,7 +590,6 @@ class PlanEditorController {
       dataType: 'equipment_boundary', 
       deploymentType: boundaryProperties.deploymentType
     }
-    console.log(serviceFeature)
     return serviceFeature
   }
 
@@ -734,7 +732,6 @@ class PlanEditorController {
   }
   
   handleObjectCreated(mapObject, usingMapClick, feature) {
-    console.log(feature)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -837,10 +834,6 @@ class PlanEditorController {
       if ('undefined' == typeof networkNodeType) networkNodeType = feature && feature.networkNodeType
       var serviceFeature = this.formatBoundaryForService(mapObject.objectId, networkNodeType)
       
-      //serviceFeature.deploymentType = feature.deploymentType
-      //if ("INSTALLED" == feature.deploymentType) serviceFeature.attributes.deployment_type = 1
-      console.log(serviceFeature)
-      console.log(feature)
       if (!this.computedBoundaries.has(mapObject.objectId)) {
         // Refresh map tiles ONLY if this is not a boundary that we have computed. The other case is when the user clicks to edit an existing boundary
         this.state.requestMapLayerRefresh.next(null)
