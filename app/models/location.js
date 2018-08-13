@@ -879,28 +879,28 @@ module.exports = class Location {
             ${planId} AS root_plan_id
           ),
           output AS (
-            SELECT 
-              l.object_id AS "Location Object ID",
-              g.name AS "Data Source",
-              CASE WHEN l.location_category = 0 THEN 'Business' WHEN l.location_category = 1 THEN 'Household' ELSE 'Tower' END AS "Location Type",
-              l.number_of_households AS "Location Count",
-              ST_Y(l.geom) AS "Location Latitude",
-              ST_X(l.geom) AS "Location Longitude", 
-              ST_Y(l.geom) || '_' || ST_X(l.geom) AS "Lat Long Concat",                                                                                        
-              s.name AS "Wirecenter Name",
-              s.code AS "Wirecenter CLLI",
-              '="' || c.tabblock_id || '"' AS "Census Block",                                                                                                         
-              (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part I')::text)::int)) AS "CAF Phase I Part I Tag",
-              (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part II')::text)::int)) AS "CAF Phase I Part II Tag",
-              (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase II')::text)::int)) AS "CAF Phase II Tag" 
-            FROM inputs i 
+            SELECT
+            l.object_id AS "Location Object ID",
+            g.name AS "Data Source",
+            CASE WHEN l.location_category = 0 THEN 'Business' WHEN l.location_category = 1 THEN 'Household' ELSE 'Tower' END AS "Location Type",
+            l.number_of_households AS "Location Count",
+            ST_Y(l.geom) AS "Location Latitude",
+            ST_X(l.geom) AS "Location Longitude",
+            ST_Y(l.geom) || ' ' || ST_X(l.geom) AS "Lat Long Concat",
+            s.name AS "Wirecenter Name",
+            s.code AS "Wirecenter CLLI",
+            '="' || c.tabblock_id || '"' AS "Census Block",
+            (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part I')::text)::int)) AS "CAF Phase I Part I Tag",
+            (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part II')::text)::int)) AS "CAF Phase I Part II Tag",
+            (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase II')::text)::int)) AS "CAF Phase II Tag"
+            FROM inputs i
             JOIN aro.location_entity l ON ST_Contains(ST_SetSRID(ST_GeomFromGeoJSON(i.geojson),4326), l.geom) AND l.date_to = '294276-01-01 00:00:00'::date AND l.data_source_id = ${HARDCODED_DATA_SOURCE_FOR_FRONTIER_QUICKFIX}
-            JOIN client.service_area s ON ST_Intersects(s.geom,ST_SetSRID(ST_GeomFromGeoJSON(i.geojson),4326)) AND ST_Contains(s.geom,l.geom) AND s.service_layer_id = 1
-            JOIN aro_core.global_library g ON g.data_source_id = l.data_source_id 
+            LEFT JOIN client.service_area s ON ST_Intersects(s.geom,ST_SetSRID(ST_GeomFromGeoJSON(i.geojson),4326)) AND ST_Contains(s.geom,l.geom) AND s.service_layer_id = 1
+            JOIN aro_core.global_library g ON g.data_source_id = l.data_source_id
             JOIN aro.census_blocks c ON l.cb_gid = c.gid
-        )
-        SELECT *
-        FROM output
+          )
+          SELECT *
+          FROM output
       `
       
       return database.query(sql)

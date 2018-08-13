@@ -119,14 +119,23 @@
 
   <!-- <button class="btn btn-primary pull-right" ng-click="$ctrl.downloadPlanSummary()">Download Summary</button> -->
   <div class="btn-group-vertical">
-    <a class="pull-left btn btn-primary btn-sm button-export" ng-href="{{$ctrl.downloadEquipment}}">
+    <button class="pull-left btn btn-primary btn-sm button-export" 
+      ng-disabled="$ctrl.isDownlodingReport.equipment"
+      ng-click="$ctrl.downloadEquipmentSummary()">
       <span>Export Equipment</span>
-    </a>
-    <a class="pull-left btn btn-primary btn-sm button-export" ng-href="{{$ctrl.downloadLocations}}">
-      <span>Export Locations</span>
-    </a>
-    <button class="pull-left btn btn-primary btn-sm button-export" ng-click="$ctrl.exportKml()">
-      <span>Export Site Boundaries</span>
+      <span class="fa fa-refresh fa-spin" ng-if="$ctrl.isDownlodingReport.equipment"></span>
+    </button>
+    <button class="pull-left btn btn-primary btn-sm button-export" 
+      ng-disabled="$ctrl.isDownlodingReport.location"
+      ng-click="$ctrl.downloadLocationSummary()">
+        <span>Export Locations</span>
+        <span class="fa fa-refresh fa-spin" ng-if="$ctrl.isDownlodingReport.location"></span>
+    </button>
+    <button class="pull-left btn btn-primary btn-sm button-export" 
+      ng-disabled="$ctrl.isDownlodingReport.kml"
+      ng-click="$ctrl.exportKml()">
+        <span>Export Site Boundaries</span>
+        <span class="fa fa-refresh fa-spin" ng-if="$ctrl.isDownlodingReport.kml"></span>
     </button>
   </div>
 </div>  

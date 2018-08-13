@@ -1419,15 +1419,26 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.loadListOfPlanTags()
 
   service.loadListOfCreatorTags = (filterObj) => {
+    if(filterObj == '') return
     var filter = ""
     filter = filterObj ? filter.concat(` substringof(fullName,'${filterObj}')`) : filter
-    $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=999999999`)
-      .then((results) => {
-        service.listOfCreatorTags = results.data
-      })
+    if (filterObj || service.listOfCreatorTags.length == 0) {
+      $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=10`)
+        .then((results) => {
+          service.listOfCreatorTags = service.removeDuplicates(service.listOfCreatorTags.concat(results.data),'id')
+        })
+    }
   }
 
-  service.loadListOfCreatorTags()
+  service.loadListOfCreatorTagsById = (filterExp) => {
+    if (filterExp) {
+      // Our $top is high, and should never be hit as we are getting createdBy for plans that are visible in "search plans"
+      return $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filterExp}&$orderby=id&$top=10000`)
+        .then((results) => {
+          return service.listOfCreatorTags = service.removeDuplicates(service.listOfCreatorTags.concat(results.data),'id')
+        })
+    }
+  }
 
   const MAX_SERVICE_AREAS_FROM_ODATA = 10
   service.loadListOfSAPlanTags = (filterObj) => {
@@ -1581,6 +1592,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
+          group.originalName = group.name
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
           group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
           service.systemActors.push(group)
