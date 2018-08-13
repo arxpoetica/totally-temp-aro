@@ -288,7 +288,7 @@ class TileComponentController {
                                                          this.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-    this.mapRef.addListener('click', (event) => {
+    this.overlayClickListener = this.mapRef.addListener('click', (event) => {
 
       // Get latitiude and longitude
       var lat = event.latLng.lat()
@@ -376,6 +376,10 @@ class TileComponentController {
 
   // Removes the existing map overlay
   destoryMapOverlay() {
+    if (this.overlayClickListener) {
+      google.maps.event.removeListener(this.overlayClickListener)
+      this.overlayClickListener = null
+    }
     this.mapRef.overlayMapTypes.clear()
   }
 
