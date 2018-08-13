@@ -46,7 +46,8 @@
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN">
 
       <!-- Add a component to handle map editing -->
-      <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+      <map-object-editor ng-if="$ctrl.currentTransaction"
+                         map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                          map-container-id="map-canvas-container"
                          get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                          object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
@@ -263,7 +264,7 @@
             <div class="rect5"></div>
           </div>
         </div>
-        <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+        <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px; position: absolute;">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
               <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
@@ -347,12 +348,20 @@
             </div>
           </div>
         </div>
+        <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+        <div class="disable-sibling-controls"
+             ng-hide="$ctrl.currentTransaction">
+        </div>
       </div>
     </accordion-panel-contents>
     <!-- Plan Summary -->
     <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.EditPlanPanels.PLAN_SUMMARY"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.PLAN_SUMMARY">
       <plan-summary current-transaction="$ctrl.currentTransaction" ng-if="$ctrl.state.activeEditPlanPanel === $ctrl.state.EditPlanPanels.PLAN_SUMMARY"></plan-summary>
+      <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+      <div class="disable-sibling-controls"
+           ng-hide="$ctrl.currentTransaction">
+      </div>
     </accordion-panel-contents>
   </accordion>
 </div>
