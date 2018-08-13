@@ -16,7 +16,10 @@ module.exports = class AROService {
         if (err) return reject(err)
         if (res.statusCode && res.statusCode >= 400) {
           console.log('ARO-service responded with', res.statusCode, JSON.stringify(body, null, 2))
-          return reject(new Error(`ARO-service returned status code ${res.statusCode}`))
+          return reject({
+            status: res.statusCode,
+            body: res.body
+          })
         }
         console.log('ARO-service responded with', res.statusCode)
         return resolve(body)
