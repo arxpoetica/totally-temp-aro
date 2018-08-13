@@ -7,6 +7,11 @@ class PlanSummaryController {
     this.$http = $http
     this.$timeout = $timeout
     this.config = config
+    this.isDownlodingReport = {
+      equipment: false,
+      location: false,
+      kml: false
+    }
     this.isKeyExpanded = {
       Equipment: false,
       Fiber: false,
@@ -158,14 +163,26 @@ class PlanSummaryController {
     this.isKeyExpanded[type] = !this.isKeyExpanded[type]
   }
 
-  downloadPlanSummary() {
-    this.$http.get(`/reports/planSummary/${this.plan.id}`).then((response) => {
+  downloadEquipmentSummary() {
+    this.isDownlodingReport.equipment = true
+    this.$http.get(this.downloadEquipment).then((response) => {
+      this.isDownlodingReport.equipment = false
       this.Utils.downloadCSV(response.data,"planSummary.csv")
     })
   }
 
+  downloadLocationSummary() {
+    this.isDownlodingReport.location = true
+    this.$http.get(this.downloadLocations).then((response) => {
+      this.isDownlodingReport.location = false
+      this.Utils.downloadCSV(response.data,`Plan locations-${this.plan.name}.csv`)
+    })
+  }
+
   exportKml() {
+    this.isDownlodingReport.kml = true
     this.$http.get(`/reports/planSummary/kml/${this.plan.id}/${this.state.selectedBoundaryType.name}`).then((response) => {
+      this.isDownlodingReport.kml = false
       this.Utils.downloadCSV(response.data, `Site boundaries-${this.state.selectedBoundaryType.name}-${this.plan.name}.kml`)
     })
   }
