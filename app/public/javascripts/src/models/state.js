@@ -1592,6 +1592,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
+          group.originalName = group.name
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
           group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
           service.systemActors.push(group)

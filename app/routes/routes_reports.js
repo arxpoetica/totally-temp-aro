@@ -293,7 +293,9 @@ exports.configure = (api, middleware) => {
     `;
 
     database.query(planQ).then(function (results) {
-      response.attachment('planSummary.csv')
+      //response.attachment('planSummary.csv')
+      response.setHeader('Content-disposition', `attachment; filename=planSummary.csv`);
+      response.set('Content-Type', 'text/csv');
       results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
     })
 
@@ -540,7 +542,8 @@ exports.configure = (api, middleware) => {
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {  
       database.query(planQ).then(function (results) {
-        response.attachment(`Plan locations-${plan.name}.csv`)
+        response.setHeader('Content-disposition', `attachment; filename=Plan locations-${plan.name}.csv`);
+        response.set('Content-Type', 'text/csv');
         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
       })
     })

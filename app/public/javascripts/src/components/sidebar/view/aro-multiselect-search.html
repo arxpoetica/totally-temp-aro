@@ -3,10 +3,10 @@
 <ui-select-match placeholder="Select or search a {{$ctrl.objectName}} in the list...">
   <div ng-bind-html="$item[$ctrl.labelId]"></div>
 </ui-select-match>
-<ui-select-choices class="ui-select-width-300" 
+<ui-select-choices class="ui-select-width-250" 
   repeat="item in $ctrl.searchList | filter: $select.search" 
   refresh="$ctrl.refreshTagList({searchObj:$select.search})"
-  refresh-delay="250">
+  refresh-delay="250" position='up'>
     <div ng-bind-html="item[$ctrl.labelId]"></div>
 </ui-select-choices>
 </ui-select>
