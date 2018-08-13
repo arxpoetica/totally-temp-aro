@@ -39,6 +39,7 @@ class TileComponentController {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
+    this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
     this.configuration = configuration
     this.areControlsEnabled = true
@@ -65,6 +66,10 @@ class TileComponentController {
         this.areControlsEnabled = (plan.planState === 'START_STATE') || (plan.planState === 'INITIALIZED')
       }
     })
+
+    // Subscribe to events for creating and destroying the map overlay layer
+    this.createMapOverlaySubscription = state.requestCreateMapOverlay.skip(1).subscribe(() => this.createMapOverlay())
+    this.destroyMapOverlaySubscription = state.requestDestroyMapOverlay.skip(1).subscribe(() => this.destoryMapOverlay())
 
     // Subscribe to changes in the map tile options
     state.mapTileOptions.subscribe((mapTileOptions) => {
@@ -256,112 +261,122 @@ class TileComponentController {
     $document.ready(() => {
       // We should have a map variable at this point
       this.mapRef = window[this.mapGlobalObjectName]
-      this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
-                                                           this.tileDataService,
-                                                           this.state.mapTileOptions.getValue(),
-                                                           this.state.selectedLocations.getValue(),
-                                                           this.state.selectedServiceAreas.getValue(),
-                                                           this.state.selectedAnalysisArea.getValue(),
-                                                           this.state.selectedCensusBlockId.getValue(),
-                                                           this.state.censusCategories.getValue(),
-                                                           this.state.selectedCensusCategoryId.getValue(),
-                                                           this.state.selectedRoadSegments.getValue(),
-                                                           this.state.selectedViewFeaturesByType.getValue(),
-                                                           this.state.selectedDisplayMode.getValue(),
-                                                           this.state.optimizationOptions.analysisSelectionMode,
-                                                           this.state.displayModes,
-                                                           this.state.viewModePanels, 
-                                                           this.state, 
-                                                           this.configuration,
-                                                           uiNotificationService, 
-                                                           this.getPixelCoordinatesWithinTile.bind(this)
-                                                          ))
-      this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-      this.mapRef.addListener('click', (event) => {
-
-        // Get latitiude and longitude
-        var lat = event.latLng.lat()
-        var lng = event.latLng.lng()
-
-        // Get zoom
-        var zoom = this.mapRef.getZoom()
-
-        // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
-        var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
-
-        // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-        var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-
-        var hitPromises = []
-        this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        	  hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-        })
-        Promise.all(hitPromises)
-          .then((results) => {
-            var hitFeatures = []
-            var analysisAreaFeatures = []
-            var serviceAreaFeatures = []
-            var roadSegments = new Set()
-            var equipmentFeatures = []
-            var censusFeatures = []
-            
-            var canSelectLoc  = false
-            var canSelectSA   = false
-            
-            if(state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-              switch (this.state.optimizationOptions.analysisSelectionMode) {
-                case 'SELECTED_AREAS':
-                  canSelectSA = !canSelectSA
-                  break
-                case 'SELECTED_LOCATIONS':
-                  canSelectLoc = !canSelectLoc
-                  break
-              }
-            } else if (state.selectedDisplayMode.getValue() === state.displayModes.VIEW) {
-              canSelectSA = true
-            }  
-
-            results[0].forEach((result) => {
-            	  // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-              //console.log(result)
-              if(result.location_id && (canSelectLoc || 
-                  state.selectedDisplayMode.getValue() === state.displayModes.VIEW)) {
-                hitFeatures = hitFeatures.concat(result)
-              } else if ( result.hasOwnProperty('_data_type') && 
-                result.code && 'analysis_area' === result._data_type ) {
-                analysisAreaFeatures.push(result)
-              } else if (result.code && canSelectSA) {
-                serviceAreaFeatures = serviceAreaFeatures.concat(result)
-              } else if (result.gid) {
-                roadSegments.add(result)
-              } else if ( result.hasOwnProperty('layerType') 
-                          && 'census_block' == result.layerType
-                          && state.selectedDisplayMode.getValue() === state.displayModes.VIEW){
-            	    censusFeatures.push(result)
-              } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
-                equipmentFeatures = equipmentFeatures.concat(result)
-              }
-            })
-
-            if (hitFeatures.length > 0) {
-              state.hackRaiseEvent(hitFeatures)
-            }
-            
-            //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-            // ToDo: now that we have types these categories should to be dynamic
-            state.mapFeaturesSelectedEvent.next({ 
-              latLng: event.latLng,
-              locations: hitFeatures,
-              serviceAreas: serviceAreaFeatures,
-              analysisAreas: analysisAreaFeatures,
-              roadSegments: roadSegments,
-              equipmentFeatures: equipmentFeatures, 
-              censusFeatures: censusFeatures
-            })
-          })
-          .catch((err) => console.error(err))
-      })
+      this.createMapOverlay()
     })
+  }
+
+  // Creates the map overlay that will be used to display vector tile information
+  createMapOverlay() {
+    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
+                                                         this.tileDataService,
+                                                         this.state.mapTileOptions.getValue(),
+                                                         this.state.selectedLocations.getValue(),
+                                                         this.state.selectedServiceAreas.getValue(),
+                                                         this.state.selectedAnalysisArea.getValue(),
+                                                         this.state.selectedCensusBlockId.getValue(),
+                                                         this.state.censusCategories.getValue(),
+                                                         this.state.selectedCensusCategoryId.getValue(),
+                                                         this.state.selectedRoadSegments.getValue(),
+                                                         this.state.selectedViewFeaturesByType.getValue(),
+                                                         this.state.selectedDisplayMode.getValue(),
+                                                         this.state.optimizationOptions.analysisSelectionMode,
+                                                         this.state.displayModes,
+                                                         this.state.viewModePanels, 
+                                                         this.state, 
+                                                         this.configuration,
+                                                         this.uiNotificationService, 
+                                                         this.getPixelCoordinatesWithinTile.bind(this)
+                                                        ))
+    this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
+    this.mapRef.addListener('click', (event) => {
+
+      // Get latitiude and longitude
+      var lat = event.latLng.lat()
+      var lng = event.latLng.lng()
+
+      // Get zoom
+      var zoom = this.mapRef.getZoom()
+
+      // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+      var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
+
+      // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
+      var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+
+      var hitPromises = []
+      this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
+      })
+      Promise.all(hitPromises)
+        .then((results) => {
+          var hitFeatures = []
+          var analysisAreaFeatures = []
+          var serviceAreaFeatures = []
+          var roadSegments = new Set()
+          var equipmentFeatures = []
+          var censusFeatures = []
+          
+          var canSelectLoc  = false
+          var canSelectSA   = false
+          
+          if(this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+            switch (this.state.optimizationOptions.analysisSelectionMode) {
+              case 'SELECTED_AREAS':
+                canSelectSA = !canSelectSA
+                break
+              case 'SELECTED_LOCATIONS':
+                canSelectLoc = !canSelectLoc
+                break
+            }
+          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
+            canSelectSA = true
+          }  
+
+          results[0].forEach((result) => {
+              // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
+            //console.log(result)
+            if(result.location_id && (canSelectLoc || 
+                this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
+              hitFeatures = hitFeatures.concat(result)
+            } else if ( result.hasOwnProperty('_data_type') && 
+              result.code && 'analysis_area' === result._data_type ) {
+              analysisAreaFeatures.push(result)
+            } else if (result.code && canSelectSA) {
+              serviceAreaFeatures = serviceAreaFeatures.concat(result)
+            } else if (result.gid) {
+              roadSegments.add(result)
+            } else if ( result.hasOwnProperty('layerType') 
+                        && 'census_block' == result.layerType
+                        && this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW){
+                censusFeatures.push(result)
+            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
+              equipmentFeatures = equipmentFeatures.concat(result)
+            }
+          })
+
+          if (hitFeatures.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures)
+          }
+          
+          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next({ 
+            latLng: event.latLng,
+            locations: hitFeatures,
+            serviceAreas: serviceAreaFeatures,
+            analysisAreas: analysisAreaFeatures,
+            roadSegments: roadSegments,
+            equipmentFeatures: equipmentFeatures, 
+            censusFeatures: censusFeatures
+          })
+        })
+        .catch((err) => console.error(err))
+    })
+  }
+
+  // Removes the existing map overlay
+  destoryMapOverlay() {
+    this.mapRef.overlayMapTypes.clear()
   }
 
   // Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
@@ -488,6 +503,11 @@ class TileComponentController {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
+  }
+
+  $onDestroy() {
+    this.createMapOverlaySubscription()
+    this.destroyMapOverlaySubscription()    
   }
 }
 

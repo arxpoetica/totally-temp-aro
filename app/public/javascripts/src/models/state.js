@@ -253,6 +253,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
+  service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
+  service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
@@ -1038,6 +1040,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   }
 
   service.loadPlan = (planId) => {
+    service.requestDestroyMapOverlay.next(null)
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     var userId = service.loggedInUser.id
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
@@ -1051,6 +1054,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       .then((address) => {
         var plan = service.plan.getValue()
         plan.areaName = address
+        service.requestCreateMapOverlay.next(null)
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
         return Promise.resolve()
@@ -1100,13 +1104,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   // Load the modified features for a given plan and save them in the tile data service
   service.loadModifiedFeatures = (planId) => {
-    //console.log(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
-    return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
+    var promises = []
+    promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
       .then((result) => {
-        //console.log(result)
         result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
       })
       .catch((err) => console.error(err))
+    )
+    
+    promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment_boundary?userId=${service.loggedInUser.id}`)
+      .then((result) => {
+        result.data.forEach((feature) => tileDataService.addModifiedBoundary(feature))
+      })
+      .catch((err) => console.error(err))
+    )
+    
+    return Promise.all( promises )
   }
 
   service.locationInputSelected = (locationKey) => {

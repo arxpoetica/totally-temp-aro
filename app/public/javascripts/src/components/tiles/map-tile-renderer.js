@@ -52,6 +52,18 @@ class MapTileRenderer {
     this.getActiveViewModePanel = () =>{
       return state.activeViewModePanel
     }
+    
+    this.getMapLayers = () =>{
+      return state.mapLayers.getValue()
+    }
+    
+    // we should start holding the styles here so they can be adstracted, I'll start
+    this.styles = {
+      modifiedBoundary: {
+        strokeStyle: '#dddddd', 
+        lineOpacity: 0.5
+      }
+    }
   }
   
   // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
@@ -269,7 +281,7 @@ class MapTileRenderer {
 
     var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
-    	this.mapLayersByZ.forEach((mapLayerKey, index) => {
+    this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
       var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
@@ -408,30 +420,15 @@ class MapTileRenderer {
     }
   }
 
-  shouldRenderFeature(feature) {
-    if (!feature.properties) {
-      return true
-    } else if (feature.properties._data_type && feature.properties._data_type.split('.')[0] === 'equipment') {
-      // For now, just hide equipment features that are Planned and Deleted
-      return (!feature.properties.deployment_type
-        || (feature.properties.deployment_type === 1)
-        || (feature.properties.is_deleted !== 'true'))
-    } else {
-      // For all other features, do not display if the is_deleted flag is true
-      return feature.properties.is_deleted !== 'true'
-    }
-  }
-
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
-    for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-      // Parse the geometry out.
-      var feature = features[iFeature]
+    // If a filtering function is provided for this layer, apply it to filter out features
+    const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
 
-      if (!this.shouldRenderFeature(feature)) {
-        continue
-      }
+    for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
+      // Parse the geometry out.
+      var feature = filteredFeatures[iFeature]
 
       if (feature.properties) {
         // Try object_id first, else try location_id
@@ -488,6 +485,16 @@ class MapTileRenderer {
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
   	        // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
+  	        //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+  	        const modificationType = this.getModificationTypeForFeature(feature, mapLayer)
+  	        // we dont show originals when planned view is on
+  	        if (modificationType === this.modificationTypes.ORIGINAL && feature.properties.hasOwnProperty('_data_type')){
+  	          var equipmentType = feature.properties._data_type.substring( feature.properties._data_type.lastIndexOf('.')+1 )
+              if (this.getMapLayers().hasOwnProperty(equipmentType+'_planned')){
+  	            return
+  	          }
+  	        }
+  	        
   	        if (feature.properties.location_id && this.selectedLocations.has(+feature.properties.location_id)
   	          //show selected location icon at analysis mode -> selection type is locations    
   	            && this.selectedDisplayMode == this.displayModes.ANALYSIS && this.analysisSelectionMode == "SELECTED_LOCATIONS" ) {
@@ -513,14 +520,14 @@ class MapTileRenderer {
   	          ctx.drawImage(entityImage, x, y) 
   	        } else {
               const originalAlpha = ctx.globalAlpha
-              const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+              //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
               if (modificationType === this.modificationTypes.ORIGINAL || modificationType === this.modificationTypes.DELETED) {
                 ctx.globalAlpha = 0.5
               }
               ctx.drawImage(entityImage, x, y)
               ctx.globalAlpha = originalAlpha
             }
-            const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
+            //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
             const overlaySize = 12
             this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
@@ -583,7 +590,8 @@ class MapTileRenderer {
   }
 
   // Gets the modification type for a given feature
-  getModificationTypeForFeature(zoom, tileCoords, shapeX, shapeY, feature) {
+  //getModificationTypeForFeature(zoom, tileCoords, shapeX, shapeY, feature) {
+  getModificationTypeForFeature(feature, mapLayer) {
     // If this feature is a "modified feature" then add an overlay. (Its all "object_id" now, no "location_id" anywhere)
     var modificationType = this.modificationTypes.UNMODIFIED
     if (this.tileDataService.modifiedFeatures.hasOwnProperty(feature.properties.object_id)) {
@@ -591,11 +599,18 @@ class MapTileRenderer {
       if (modifiedFeature.deleted) {
         modificationType = this.modificationTypes.DELETED
       } else {
+        /*
         modificationType = this.modificationTypes.ORIGINAL
         const modifiedFeatureCoord = modifiedFeature.geometry.coordinates
         var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, modifiedFeatureCoord[1], modifiedFeatureCoord[0])
         const pixelTolerance = 3
         if ((Math.abs(pixelCoords.x - shapeX) < pixelTolerance) && (Math.abs(pixelCoords.y - shapeY) < pixelTolerance)) {
+          modificationType = this.modificationTypes.MODIFIED
+        }
+        */
+        if ('LibraryEquipmentPointLayer' == mapLayer.tileDefinitions[0].vtlType){
+          modificationType = this.modificationTypes.ORIGINAL
+        }else{
           modificationType = this.modificationTypes.MODIFIED
         }
       }
@@ -807,7 +822,13 @@ class MapTileRenderer {
       //Highlight the selected SA in view mode
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
-
+    
+    if (this.tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) 
+        && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType){
+      drawingStyles.strokeStyle = this.styles.modifiedBoundary.strokeStyle
+      drawingStyles.lineOpacity = this.styles.modifiedBoundary.lineOpacity
+    }
+    
     ctx.fillStyle = drawingStyles.fillStyle
     ctx.globalAlpha = drawingStyles.opacity
 
@@ -1000,21 +1021,22 @@ class MapTileRenderer {
     return this.selectFeatures(tileZoom, tileX, tileY, shouldFeatureBeSelected)
   }
   
-  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance) {
+  selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY) {
 
     var geometry = feature.loadGeometry()
     var distance
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
     var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
-
+    deltaX = deltaX || 0
+    deltaY = deltaY || 0
     //Some road segments has more points
     for (var i = 0; i < geometry[0].length - 1; i++) {
-      lineX1 = Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
-      lineY1 = Object.values(geometry[0])[i].y
+      lineX1 = deltaX + Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
+      lineY1 = deltaY + Object.values(geometry[0])[i].y
   
-      lineX2 = Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
-      lineY2 = Object.values(geometry[0])[i+1].y
+      lineX2 = deltaX + Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
+      lineY2 = deltaY + Object.values(geometry[0])[i+1].y
 
       pointX = xWithinTile  //pointX, pointY are the point of the reference point.
       pointY = yWithinTile
@@ -1094,7 +1116,7 @@ class MapTileRenderer {
       })
 
       if(feature.properties.gid) {
-        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance)
+        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY)
       }
 
       //Load the selected service area 
@@ -1105,8 +1127,8 @@ class MapTileRenderer {
 
           areaGeom.forEach(function (eachValue) {
             var eachPoint = []
-            eachPoint.push(eachValue.x)
-            eachPoint.push(eachValue.y)
+            eachPoint.push(eachValue.x + deltaX)
+            eachPoint.push(eachValue.y + deltaY)
             areaPolyCoordinates.push(eachPoint)
           })
 
