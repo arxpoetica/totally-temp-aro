@@ -86,7 +86,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
       threshold: 0,
       entity_type: $scope.entityType
     }
-    tracker.track('Market profile calculation', params)
     if (canceller) canceller.resolve()
     canceller = $q.defer()
     var args = {
@@ -127,7 +126,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
   $('#market-size .nav-tabs a').click((e) => {
     e.preventDefault()
     $(this).tab('show')
-    tracker.track('Market profile / ' + $(this).text())
   })
 
   $('#market-size .nav-tabs').on('shown.bs.tab', (e) => {
@@ -141,7 +139,6 @@ app.controller('market_size_controller', ['$q', '$scope', '$rootScope', '$http',
 
   $scope.export = () => {
     $('#market-size').modal('hide')
-    tracker.track('Market profile export')
     swal({
       title: 'File name',
       text: 'Note: generating the CSV file may take a few minutes.',
