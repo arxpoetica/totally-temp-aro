@@ -308,70 +308,77 @@ class TileComponentController {
           hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
       })
       Promise.all(hitPromises)
-        .then((results) => {
-          var hitFeatures = []
-          var analysisAreaFeatures = []
-          var serviceAreaFeatures = []
-          var roadSegments = new Set()
-          var equipmentFeatures = []
-          var censusFeatures = []
-          
-          var canSelectLoc  = false
-          var canSelectSA   = false
-          
-          if(this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
-            switch (this.state.optimizationOptions.analysisSelectionMode) {
-              case 'SELECTED_AREAS':
-                canSelectSA = !canSelectSA
-                break
-              case 'SELECTED_LOCATIONS':
-                canSelectLoc = !canSelectLoc
-                break
-            }
-          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
-            canSelectSA = true
-          }  
-
-          results[0].forEach((result) => {
-              // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-            //console.log(result)
-            if(result.location_id && (canSelectLoc || 
-                this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
-              hitFeatures = hitFeatures.concat(result)
-            } else if ( result.hasOwnProperty('_data_type') && 
-              result.code && 'analysis_area' === result._data_type ) {
-              analysisAreaFeatures.push(result)
-            } else if (result.code && canSelectSA) {
-              serviceAreaFeatures = serviceAreaFeatures.concat(result)
-            } else if (result.gid) {
-              roadSegments.add(result)
-            } else if ( result.hasOwnProperty('layerType') 
-                        && 'census_block' == result.layerType
-                        && this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW){
-                censusFeatures.push(result)
-            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
-              equipmentFeatures = equipmentFeatures.concat(result)
-            }
-          })
-
-          if (hitFeatures.length > 0) {
-            this.state.hackRaiseEvent(hitFeatures)
+      .then((results) => {
+        var locationFeatures = []
+        var analysisAreaFeatures = []
+        var serviceAreaFeatures = []
+        var roadSegments = new Set()
+        var equipmentFeatures = []
+        var censusFeatures = []
+        
+        var canSelectLoc  = false
+        var canSelectSA   = false
+        
+        if(this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+          switch (this.state.optimizationOptions.analysisSelectionMode) {
+            case 'SELECTED_AREAS':
+              canSelectSA = !canSelectSA
+              break
+            case 'SELECTED_LOCATIONS':
+              canSelectLoc = !canSelectLoc
+              break
           }
-          
-          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-          // ToDo: now that we have types these categories should to be dynamic
-          this.state.mapFeaturesSelectedEvent.next({ 
-            latLng: event.latLng,
-            locations: hitFeatures,
-            serviceAreas: serviceAreaFeatures,
-            analysisAreas: analysisAreaFeatures,
-            roadSegments: roadSegments,
-            equipmentFeatures: equipmentFeatures, 
-            censusFeatures: censusFeatures
-          })
+        } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
+          canSelectSA = true
+        }  
+
+        results[0].forEach((result) => {
+          // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
+          //console.log(result)
+          if(result.location_id && (canSelectLoc || 
+              this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
+            locationFeatures = locationFeatures.concat(result)
+          } else if ( result.hasOwnProperty('_data_type') && 
+            result.code && 'analysis_area' === result._data_type ) {
+            analysisAreaFeatures.push(result)
+          } else if (result.code && canSelectSA) {
+            serviceAreaFeatures = serviceAreaFeatures.concat(result)
+          } else if (result.gid) {
+            roadSegments.add(result)
+          } else if ( result.hasOwnProperty('layerType') 
+                      && 'census_block' == result.layerType
+                      && this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW){
+              censusFeatures.push(result)
+          } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
+            equipmentFeatures = equipmentFeatures.concat(result)
+          }
         })
-        .catch((err) => console.error(err))
+        
+        var hitFeatures = { 
+          latLng: event.latLng,
+          locations: locationFeatures,
+          serviceAreas: serviceAreaFeatures,
+          analysisAreas: analysisAreaFeatures,
+          roadSegments: roadSegments,
+          equipmentFeatures: equipmentFeatures, 
+          censusFeatures: censusFeatures
+        }
+        
+        //console.log(hitFeatures)
+        
+        if (locationFeatures.length > 0) {
+          this.state.hackRaiseEvent(locationFeatures)
+        }
+        
+        //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+        // ToDo: now that we have types these categories should to be dynamic
+        this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+      })
+      .catch((err) => console.error(err))
     })
+    
+    
+    
   }
 
   // Removes the existing map overlay

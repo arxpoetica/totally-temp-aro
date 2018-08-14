@@ -120,7 +120,7 @@ class MapObjectEditorController {
       var offsetX = (grabImageW * 0.5) - grabOffsetX // center
       var offsetY = grabImageH - grabOffsetY // bottom
       
-        var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
+      var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
       // ToDo feature should probably be a class
       var feature = {
         objectId: this.utils.getUUID(),
@@ -136,7 +136,11 @@ class MapObjectEditorController {
         .catch((err) => console.error(err))
       event.preventDefault();
     };
-
+    
+    //mapCanvas.addListener('rightclick', (event) => {
+    //  console.log('right click')
+    //})
+    
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
