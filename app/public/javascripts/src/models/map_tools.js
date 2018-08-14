@@ -60,7 +60,6 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootSc
     // --
     visible.push(name)
     $rootScope.$broadcast('map_tool_changed_visibility', name)
-    tracker.track('Show Layer', { layer: name })
   }
 
   tools.hide = (name) => {

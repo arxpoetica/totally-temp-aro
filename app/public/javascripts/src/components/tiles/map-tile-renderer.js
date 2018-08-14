@@ -956,20 +956,22 @@ class MapTileRenderer {
   getPointsInPolygon(tileZoom, tileX, tileY, polygonCoords) {
 
     // Define a function that will return true if a given feature should be selected
-    var shouldFeatureBeSelected = (feature, icon) => {
+    var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
       var selectFeature = false
+      deltaX = deltaX || 0
+      deltaY = deltaY || 0
       var geometry = feature.loadGeometry()
       geometry.forEach((shape) => {
         if (shape.length === 1) {
           // Only support points for now
-          var locationCoords = [shape[0].x, shape[0].y]
+          var locationCoords = [shape[0].x + deltaX, shape[0].y + deltaY]
           if (pointInPolygon(locationCoords, polygonCoords)) {
             selectFeature = true
           }
         } else if (feature.properties.gid) {
           var roadGeom = feature.loadGeometry()[0];
           for (var i = 0; i < roadGeom.length; i++) {
-            if (pointInPolygon([roadGeom[i].x, roadGeom[i].y], polygonCoords)) {
+            if (pointInPolygon([roadGeom[i].x + deltaX, roadGeom[i].y + deltaY], polygonCoords)) {
               selectFeature = true;
               break;
             }
@@ -983,8 +985,8 @@ class MapTileRenderer {
           feature.loadGeometry().forEach(function (areaGeom) {
             areaGeom.forEach(function (eachValue) {
               var eachPoint = []
-              eachPoint.push(eachValue.x)
-              eachPoint.push(eachValue.y)
+              eachPoint.push(eachValue.x + deltaX)
+              eachPoint.push(eachValue.y + deltaY)
 
               if (pointInPolygon(eachPoint, polygonCoords)) {
                 selectFeature = true
@@ -1001,8 +1003,8 @@ class MapTileRenderer {
 
               areaGeom.forEach(function (eachValue) {
                 var eachPoint = []
-                eachPoint.push(eachValue.x)
-                eachPoint.push(eachValue.y)
+                eachPoint.push(eachValue.x + deltaX)
+                eachPoint.push(eachValue.y + deltaY)
                 areaPolyCoordinates.push(eachPoint)
               })
 

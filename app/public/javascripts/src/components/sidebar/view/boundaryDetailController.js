@@ -172,6 +172,6 @@ class BoundaryDetailController {
  
 }
 
-BoundaryDetailController.$inject = ['$http','$timeout','state']
+BoundaryDetailController.$inject = ['$http', '$timeout', 'state']
 
 export default BoundaryDetailController

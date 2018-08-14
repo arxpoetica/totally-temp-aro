@@ -22,7 +22,8 @@ exports.configure = (api, middleware) => {
         API_KEY: process.env.GOOGLE_MAPS_API_KEY,
         CLIENT_ID: process.env.GOOGLE_MAPS_CLIENT_ID,
         CHANNEL: process.env.GOOGLE_MAPS_CHANNEL
-      }
+      },
+      analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY
     })
   })
 }
