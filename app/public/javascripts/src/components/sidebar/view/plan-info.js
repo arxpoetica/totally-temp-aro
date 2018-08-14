@@ -1,5 +1,5 @@
 class PlanInfoController {
-  constructor($http, state, $timeout, Utils, tracker) {
+  constructor($http, state, $timeout, Utils) {
     this.$http = $http
     this.state = state
     this.$timeout = $timeout
@@ -17,7 +17,6 @@ class PlanInfoController {
       this.currentPlanInfo = plan
       this.getPlanTagDetails()
     })
-    tracker.trackEvent(tracker.CATEGORIES.VIEW_PLAN_INFO, tracker.ACTIONS.CLICK)
   }
 
   registerSaveAccessCallback(saveResourceAccess) {
@@ -149,7 +148,7 @@ class PlanInfoController {
   }
 }
 
-PlanInfoController.$inject = ['$http', 'state', '$timeout', 'Utils', 'tracker']
+PlanInfoController.$inject = ['$http', 'state', '$timeout', 'Utils']
 
 let planInfo = {
   templateUrl: '/components/sidebar/view/plan-info.html',

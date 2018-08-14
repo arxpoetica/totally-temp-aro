@@ -1,6 +1,6 @@
 class ViewModeLocationController {
 
-  constructor($http, $timeout, state, configuration, tracker) {
+  constructor($http, $timeout, state, configuration) {
     this.$http = $http
     this.state = state
     this.configuration = configuration
@@ -50,7 +50,6 @@ class ViewModeLocationController {
           this.selectedLocationInfo = null
         }
       }
-      tracker.trackEvent(tracker.CATEGORIES.VIEW_LOCATION_INFO, tracker.ACTIONS.CLICK)
     })
     
     this.clearViewModeSubscription = state.clearViewMode.subscribe((clear) => {
@@ -119,6 +118,6 @@ class ViewModeLocationController {
   }
 }
 
-ViewModeLocationController.$inject = ['$http', '$timeout', 'state', 'configuration', 'tracker']
+ViewModeLocationController.$inject = ['$http', '$timeout', 'state', 'configuration']
 
 export default ViewModeLocationController

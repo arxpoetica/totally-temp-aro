@@ -4,7 +4,7 @@ import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 
 class EquipmentDetailController {
 
-	constructor($http, $timeout, state, configuration, tracker) {
+	constructor($http, $timeout, state, configuration) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
@@ -40,7 +40,6 @@ class EquipmentDetailController {
         this.clearSelection()
       }
     })
-    tracker.trackEvent(tracker.CATEGORIES.VIEW_EQUIPMENT_INFO, tracker.ACTIONS.CLICK)
   }
 
 	clearSelection(){
@@ -104,6 +103,6 @@ class EquipmentDetailController {
   }
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration', 'tracker']
+EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
 
 export default EquipmentDetailController

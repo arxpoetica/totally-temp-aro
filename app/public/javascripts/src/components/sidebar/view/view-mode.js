@@ -1,14 +1,13 @@
 class ViewModeController {
   
-  constructor($scope, state, configuration, tracker) {
+  constructor($scope, state, configuration) {
     this.state = state
     this.currentUser = state.loggedInUser
     $scope.configuration = configuration
-    tracker.trackEvent(tracker.CATEGORIES.ENTER_VIEW_MODE, tracker.ACTIONS.CLICK)
   }
 }
 
-ViewModeController.$inject = ['$scope', 'state', 'configuration', 'tracker']
+ViewModeController.$inject = ['$scope', 'state', 'configuration']
 
 let viewMode = {
   template: `
