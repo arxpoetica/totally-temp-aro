@@ -674,7 +674,8 @@ exports.configure = (api, middleware) => {
         FROM inputs i
         CROSS JOIN all_boundary_info b
         LEFT JOIN matched_equipment e
-          ON e.object_id = b.equipment_object_id ;
+          ON e.object_id = b.equipment_object_id 
+          WHERE e.geom  IS NOT NULL;
         `
         return database.query(planQ)
       })
