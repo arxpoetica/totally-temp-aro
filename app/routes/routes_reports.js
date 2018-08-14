@@ -668,7 +668,7 @@ exports.configure = (api, middleware) => {
         SELECT
          ST_AsKML(b.geom) AS site_boundary_geom,
          ST_AsKML(e.geom) AS node_location,
-         e.site_clli AS "Site CLLI Code"
+         COALESCE(e.site_clli, '') AS "Site CLLI Code"
         --  ,e.site_name AS "Site Name"
         --  i.description AS "Boundary Type"
         FROM inputs i
