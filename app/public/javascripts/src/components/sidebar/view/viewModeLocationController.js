@@ -1,6 +1,6 @@
 class ViewModeLocationController {
 
-  constructor($http, $timeout, state, configuration) {
+  constructor($http, $timeout, state, configuration, tracker) {
     this.$http = $http
     this.state = state
     this.configuration = configuration
@@ -21,35 +21,36 @@ class ViewModeLocationController {
         //Don't open location view mode when in location edit view
         this.state.activeViewModePanel != this.state.viewModePanels.EDIT_LOCATIONS &&
         !this.state.isRulerEnabled) {
-      var locationsList = []
-      if (options.hasOwnProperty('locations')) locationsList = options.locations
-      
-      
-      // Update state's selected location list 
-      if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
+        var locationsList = []
+        if (options.hasOwnProperty('locations')) locationsList = options.locations
         
-        var selectedFeature = null
-        var locationId = null
-        for (var featureI = 0; featureI < locationsList.length; featureI++){
-          var feature = locationsList[featureI]
-          if ( feature.hasOwnProperty('location_id') ){
-            locationId = feature.location_id
-          }else if ( feature.hasOwnProperty('id') ){
-            locationId = feature.id
+        
+        // Update state's selected location list 
+        if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
+          
+          var selectedFeature = null
+          var locationId = null
+          for (var featureI = 0; featureI < locationsList.length; featureI++){
+            var feature = locationsList[featureI]
+            if ( feature.hasOwnProperty('location_id') ){
+              locationId = feature.location_id
+            }else if ( feature.hasOwnProperty('id') ){
+              locationId = feature.id
+            }
+            
+            if (null != locationId){
+              selectedFeature = feature
+              break
+            }
           }
           
-          if (null != locationId){
-            selectedFeature = feature
-            break
-          }
+          this.updateSelectedState(feature, locationId)
+          this.getLocationInfo(this.plan.id,locationId).then(locationInfo => this.showStaticMap(locationInfo))
+        } else {
+          this.selectedLocationInfo = null
         }
-        
-        this.updateSelectedState(feature, locationId)
-        this.getLocationInfo(this.plan.id,locationId).then(locationInfo => this.showStaticMap(locationInfo))
-      } else {
-        this.selectedLocationInfo = null
       }
-      }
+      tracker.trackEvent(tracker.CATEGORIES.VIEW_LOCATION_INFO, tracker.ACTIONS.CLICK)
     })
     
     this.clearViewModeSubscription = state.clearViewMode.subscribe((clear) => {
@@ -118,6 +119,6 @@ class ViewModeLocationController {
   }
 }
 
-ViewModeLocationController.$inject = ['$http','$timeout','state','configuration']
+ViewModeLocationController.$inject = ['$http', '$timeout', 'state', 'configuration', 'tracker']
 
 export default ViewModeLocationController

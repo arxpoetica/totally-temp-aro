@@ -1,6 +1,6 @@
 class ViewModeRoadSegmentController {
   
-    constructor(state, $timeout, configuration) {
+    constructor(state, $timeout, tracker) {
       this.state = state
       this.$timeout = $timeout
       this.selectedEdgeInfo = null
@@ -20,6 +20,7 @@ class ViewModeRoadSegmentController {
       state.clearViewMode.subscribe((clear) => {
         if(clear) this.selectedEdgeInfo = null
       })
+      tracker.trackEvent(tracker.CATEGORIES.VIEW_ROAD_SEGMENT_INFO, tracker.ACTIONS.CLICK)
     }
   
     generateRoadSegmentsInfo(roadSegments) {
@@ -53,6 +54,6 @@ class ViewModeRoadSegmentController {
     }
   }
   
-  ViewModeRoadSegmentController.$inject = ['state', '$timeout', 'configuration']
+  ViewModeRoadSegmentController.$inject = ['state', '$timeout', 'tracker']
 
   export default ViewModeRoadSegmentController

@@ -1,6 +1,6 @@
 class BoundaryDetailController {
 
-  constructor($http, $timeout, state) {
+  constructor($http, $timeout, state, tracker) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -55,6 +55,7 @@ class BoundaryDetailController {
         return
       }
     })
+    tracker.trackEvent(tracker.CATEGORIES.VIEW_BOUNDARIES_INFO, tracker.ACTIONS.CLICK)
   }
 
   viewServiceAreaInfo(serviceArea) {
@@ -172,6 +173,6 @@ class BoundaryDetailController {
  
 }
 
-BoundaryDetailController.$inject = ['$http','$timeout','state']
+BoundaryDetailController.$inject = ['$http', '$timeout', 'state', 'tracker']
 
 export default BoundaryDetailController
