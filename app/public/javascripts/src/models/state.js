@@ -1443,7 +1443,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   const MAX_SERVICE_AREAS_FROM_ODATA = 10
   service.loadListOfSAPlanTags = (filterObj) => {
     var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj}')`) : filter
+    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj.toUpperCase()}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
       $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
       .then((results) => {
@@ -1724,6 +1724,26 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
         return Promise.reject(err)
       })
   }
+
+  service.getLoggedInUserRole = () => {
+    var userAdminPermissions = null
+    $http.get('/service/auth/permissions')
+      .then((result) => {
+        // Get the permissions for the name USER_ADMIN
+        userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
+        return $http.get(`/service/auth/acl/SYSTEM/1`)
+      })
+      .then((result) => {
+        // Get the acl entry corresponding to the currently logged in user
+        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+        // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
+        // the logged in user is an administrator.
+        service.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+      })
+      .catch((err) => console.error(err))
+  }
+
+  service.getLoggedInUserRole()
 
   return service
 }])
