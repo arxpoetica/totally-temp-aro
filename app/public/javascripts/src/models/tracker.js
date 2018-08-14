@@ -22,11 +22,19 @@ app.service('tracker', ['$rootScope', ($rootScope) => {
   })
 
   tracker.trackEvent = (category, action, label, value) => {
-    gtag('event', category, {
-      action: action,
-      label: label,
-      value: value
-    })
+    try {
+      // 'gtag' is a global variable defined in index.html if an analytics key is provided
+      if (window.gtag) {
+        gtag('event', category, {
+          action: action,
+          label: label,
+          value: value
+        })
+      }
+    } catch(err) {
+      // Yes, we are swallowing the exception. But the tracker should never interfere with the functioning of the app. Being extra cautious.
+      console.error(err)
+    }
   }
 
   return tracker

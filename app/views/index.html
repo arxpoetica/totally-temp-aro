@@ -36,14 +36,16 @@
     <!-- Include bundles with vendor scripts -->
     <script src="javascripts/vendors/vendor-bundle.min.js"></script>
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-123872194-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'UA-123872194-1');
-    </script>
+    <!-- Set up google analytics if the key is specified -->
+    <%if (analyticsTrackingKey) {%>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=<%- analyticsTrackingKey %>"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '<%- analyticsTrackingKey %>');
+      </script>
+    <%}%>
   </head>
   <body ng-controller="body_controller">
 
