@@ -1,6 +1,6 @@
 class ViewModeRoadSegmentController {
   
-    constructor(state, $timeout, configuration) {
+    constructor(state, $timeout) {
       this.state = state
       this.$timeout = $timeout
       this.selectedEdgeInfo = null
@@ -53,6 +53,6 @@ class ViewModeRoadSegmentController {
     }
   }
   
-  ViewModeRoadSegmentController.$inject = ['state', '$timeout', 'configuration']
+  ViewModeRoadSegmentController.$inject = ['state', '$timeout']
 
   export default ViewModeRoadSegmentController

@@ -367,7 +367,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
       drawingManager.setMap(map)
       drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
       map.setOptions({ draggable: false })
-      tracker.track('Boundaries / Build')
     } else {
       $scope.removeDrawingManager()
     }
@@ -435,10 +434,8 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     if (event.feature.getGeometry().getType() === 'MultiPolygon') {
       event.feature.toGeoJson((obj) => {
         if (false) { // TODO
-          tracker.track('Boundaries / Network planning')
           $scope.networkPlanningBoundary(obj.geometry)
         } else {
-          tracker.track('Boundaries / Market profile')
           $rootScope.$broadcast('boundary_selected', obj.geometry, name, 'market_size')
         }
       })
@@ -449,7 +446,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
     var overlay = boundary.overlay
 
     function edit_boundary () {
-      tracker.track('Boundaries / Edit')
       var data = {
         name: boundary.name,
         geom: JSON.stringify(toGeoJson(overlay))
@@ -565,7 +561,6 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.deleteBoundary = (boundary) => {
-    tracker.track('Boundaries / Delete')
     swal({
       title: 'Are you sure?',
       text: 'You will not be able to recover the deleted data!',
@@ -584,17 +579,14 @@ app.controller('boundaries_controller', ['$scope', '$rootScope', '$http', 'map_t
   }
 
   $scope.run_network_planning = (boundary) => {
-    tracker.track('Boundaries / Network planning')
     $scope.networkPlanningBoundary(toGeoJson(boundary.overlay, true))
   }
 
   $scope.show_market_size = (boundary) => {
-    tracker.track('Boundaries / Market profile')
     $rootScope.$broadcast('boundary_selected', toGeoJson(boundary.overlay, true), boundary.name, 'market_size')
   }
 
   $scope.show_customer_profile = (boundary) => {
-    tracker.track('Boundaries / Customer profile')
     $rootScope.$broadcast('boundary_selected', toGeoJson(boundary.overlay, true), boundary.name, 'customer_profile')
   }
 

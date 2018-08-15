@@ -20,27 +20,7 @@ class PlanSearchController {
 
   $onInit() {
     this.loadPlans(1)
-    this.getLoggedInUserRole()
   }
-
-  getLoggedInUserRole() {
-    var userAdminPermissions = null
-    this.$http.get('/service/auth/permissions')
-      .then((result) => {
-        // Get the permissions for the name USER_ADMIN
-        userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
-        return this.$http.get(`/service/auth/acl/SYSTEM/1`)
-      })
-      .then((result) => {
-        // Get the acl entry corresponding to the currently logged in user
-        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === this.state.loggedInUser.id)[0]
-        // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
-        // the logged in user is an administrator.
-        this.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
-      })
-      .catch((err) => console.error(err))
-  }
-
 
   loadServiceAreaInfo(plans) {
 
@@ -83,7 +63,7 @@ class PlanSearchController {
     var creatorIdsToFetch = new Set()
     plans.forEach((plan) => {
       if (!this.state.listOfCreatorTags.some((creatorTag) => creatorTag.id === plan.createdBy)) {
-        creatorIdsToFetch.add(plan.createdBy)
+        plan.createdBy && creatorIdsToFetch.add(plan.createdBy)
       }
     })
     if (creatorIdsToFetch.size === 0) {

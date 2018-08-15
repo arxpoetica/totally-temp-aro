@@ -45,7 +45,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
     if (options.length > 0 && options[0].location_id) {
       var id = options[0].location_id
       //openLocation(id) In project2.0 version on click of location in view mode -> more info w'll display the location detail modal
-      tracker.track('Location selected')
     }
   })
 
@@ -156,7 +155,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   $('#selected_location_controller .nav-pills a').click((e) => {
     e.preventDefault()
     $(this).tab('show')
-    tracker.track('Location selected / ' + $(this).text())
   })
 
   $http.get('/market_size/filters').then((response) => {
@@ -420,7 +418,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   }
 
   $scope.calculate_business_market_size = () => {
-    tracker.track('Location selected / Businesses / Business market profile')
     var params = {
       product: arr($scope.product)
     }

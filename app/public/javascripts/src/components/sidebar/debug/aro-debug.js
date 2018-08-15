@@ -1,9 +1,10 @@
 class AroDebugController {
-  constructor(state, $http, $timeout) {
+  constructor(state, $http, $timeout, tracker) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
     this.morphologyTileInfos = []
+    tracker.trackEvent(tracker.CATEGORIES.ENTER_DEBUGGING_MODE, tracker.ACTIONS.CLICK)
   }
 
   getMorphologyTileInfoForSelectedServiceAreas() {
@@ -38,7 +39,7 @@ class AroDebugController {
   }
 }
 
-AroDebugController.$inject = ['state', '$http', '$timeout']
+AroDebugController.$inject = ['state', '$http', '$timeout', 'tracker']
 
 let aroDebug = {
   templateUrl: '/components/sidebar/debug/aro-debug.html',

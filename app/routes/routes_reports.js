@@ -668,13 +668,14 @@ exports.configure = (api, middleware) => {
         SELECT
          ST_AsKML(b.geom) AS site_boundary_geom,
          ST_AsKML(e.geom) AS node_location,
-         e.site_clli AS "Site CLLI Code"
+         COALESCE(e.site_clli, '') AS "Site CLLI Code"
         --  ,e.site_name AS "Site Name"
         --  i.description AS "Boundary Type"
         FROM inputs i
         CROSS JOIN all_boundary_info b
         LEFT JOIN matched_equipment e
-          ON e.object_id = b.equipment_object_id ;
+          ON e.object_id = b.equipment_object_id 
+          WHERE e.geom  IS NOT NULL;
         `
         return database.query(planQ)
       })

@@ -1,5 +1,5 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
@@ -956,6 +956,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           return Promise.resolve(result)
         } else {
           // We dont have an ephemeral plan. Create one and send it back
+          tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN, tracker.ACTIONS.CLICK)
           return service.createNewPlan(true)
         }
       })
@@ -1040,6 +1041,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   }
 
   service.loadPlan = (planId) => {
+    tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
     service.requestDestroyMapOverlay.next(null)
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     var userId = service.loggedInUser.id
@@ -1443,7 +1445,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   const MAX_SERVICE_AREAS_FROM_ODATA = 10
   service.loadListOfSAPlanTags = (filterObj) => {
     var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj}')`) : filter
+    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj.toUpperCase()}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
       $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
       .then((results) => {
@@ -1613,6 +1615,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // The logged in user is currently set by using the AngularJS injector in index.html
   service.loggedInUser = null
   service.setLoggedInUser = (user) => {
+    tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
+
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
 
@@ -1686,6 +1690,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       })
       .then((stealTransaction) => {
         if (stealTransaction) {
+          tracker.trackEvent(tracker.CATEGORIES.STEAL_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
           return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
         } else {
           return Promise.reject('User does not want to steal the transaction')
@@ -1709,9 +1714,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
         const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
         if (transactionsForPlan.length === 0) {
           // A transaction does not exist. Create it.
+          tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
           return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
         } else if (transactionsForUserAndPlan.length === 1) {
           // We have one open transaction for this user and plan combo. Resume it.
+          tracker.trackEvent(tracker.CATEGORIES.RESUME_PLAN_TRANSACTION, tracker.ACTIONS.CLICK, 'TransactionID', transactionsForUserAndPlan[0].id)
           return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
         } else if (transactionsForPlan.length === 1) {
           // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
@@ -1724,6 +1731,26 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
         return Promise.reject(err)
       })
   }
+
+  service.getLoggedInUserRole = () => {
+    var userAdminPermissions = null
+    $http.get('/service/auth/permissions')
+      .then((result) => {
+        // Get the permissions for the name USER_ADMIN
+        userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
+        return $http.get(`/service/auth/acl/SYSTEM/1`)
+      })
+      .then((result) => {
+        // Get the acl entry corresponding to the currently logged in user
+        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+        // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
+        // the logged in user is an administrator.
+        service.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+      })
+      .catch((err) => console.error(err))
+  }
+
+  service.getLoggedInUserRole()
 
   return service
 }])

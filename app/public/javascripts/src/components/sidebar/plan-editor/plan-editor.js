@@ -11,7 +11,7 @@ import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipme
 
 class PlanEditorController {
 
-  constructor($timeout, $http, $element, state, configuration, Utils, tileDataService) {
+  constructor($timeout, $http, $element, state, configuration, Utils, tileDataService, tracker) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
@@ -19,6 +19,7 @@ class PlanEditorController {
     this.configuration = configuration
     this.utils = Utils
     this.tileDataService = tileDataService
+    this.tracker = tracker
     this.selectedMapObject = null
     //this.selectedEquipmentInfo = {}
     this.objectIdToProperties = {}
@@ -472,6 +473,7 @@ class PlanEditorController {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
 
+    this.tracker.trackEvent(this.tracker.CATEGORIES.COMMIT_PLAN_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
     this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}`)
     .then(() => {
       // Committing will close the transaction. To keep modifying, open a new transaction
@@ -496,6 +498,7 @@ class PlanEditorController {
     }, (deleteTransaction) => {
       if (deleteTransaction) {
         // The user has confirmed that the transaction should be deleted
+        this.tracker.trackEvent(this.tracker.CATEGORIES.DISCARD_PLAN_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
         this.$http.delete(`/service/plan-transactions/transaction/${this.currentTransaction.id}`)
         .then((result) => {
           this.exitPlanEditMode()
@@ -1132,7 +1135,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration', 'Utils', 'tileDataService']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration', 'Utils', 'tileDataService', 'tracker']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',
