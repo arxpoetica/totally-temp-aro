@@ -108,6 +108,8 @@ class ViewModeLocationController {
     .then(locationInfo => this.showStaticMap(locationInfo))
     .then(() => {
       map.setCenter({ lat: this.selectedLocationInfo.geog.coordinates[1], lng: this.selectedLocationInfo.geog.coordinates[0] })
+      const ZOOM_FOR_LOCATION_SEARCH = 17
+      this.state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
     })
   }
   
