@@ -57,8 +57,8 @@ class PlanSearchController {
     .then((results) => {
       results.forEach((result) => {
         result.data.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
-        this.$timeout()
       })
+      this.$timeout()
     })
     .catch((err) => console.error(err))
 
