@@ -65,7 +65,7 @@
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
               <span class="label"> {{tag.name}} 
-                <i class="fa fa-times pointer" ng-if="$ctrl.state.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
+                <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
               </span>
             </div>
             <div class="tags">
@@ -73,7 +73,7 @@
                    class="tag label satags">
                 <span class="label satag">
                   {{$ctrl.idToServiceAreaCode[serviceAreaId] || 'loading...'}} 
-                <i class="fa fa-times pointer" ng-if="$ctrl.state.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
+                <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
               </span>
             </div>
           </td>

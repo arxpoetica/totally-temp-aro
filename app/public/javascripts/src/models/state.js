@@ -1620,6 +1620,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
 
+    service.isUserAdministrator(service.loggedInUser.id)
+      .then((isAdministrator) => {
+        service.loggedInUser.isAdministrator = isAdministrator
+      })
+      .catch((err) => console.error(err))
+
     service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((result) => {
       const plan = result.data
@@ -1732,25 +1738,38 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       })
   }
 
-  service.getLoggedInUserRole = () => {
+  service.isUserAdministrator = (userId) => {
     var userAdminPermissions = null
-    $http.get('/service/auth/permissions')
+    var userIsAdministrator = false, userGroupIsAdministrator = false
+    var aclResult = null
+    return $http.get('/service/auth/permissions')
       .then((result) => {
         // Get the permissions for the name USER_ADMIN
         userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
         return $http.get(`/service/auth/acl/SYSTEM/1`)
       })
       .then((result) => {
+        aclResult = result.data
         // Get the acl entry corresponding to the currently logged in user
-        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === service.loggedInUser.id)[0]
+        var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === userId)[0]
         // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
         // the logged in user is an administrator.
-        service.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+        userIsAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+        return $http.get(`/service/auth/users/${userId}`)
+      })
+      .then((result) => {
+        // Also check if the groups that the user belongs to have administrator permissions
+        userGroupIsAdministrator = false
+        result.data.groupIds.forEach((groupId) => {
+          const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
+          const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & userAdminPermissions)) > 0
+          userGroupIsAdministrator |= thisGroupIsAdministrator
+        })
+        const isAdministrator = userIsAdministrator || userGroupIsAdministrator
+        return Promise.resolve(isAdministrator)
       })
       .catch((err) => console.error(err))
   }
-
-  service.getLoggedInUserRole()
 
   return service
 }])

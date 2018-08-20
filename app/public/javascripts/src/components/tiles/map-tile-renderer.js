@@ -37,10 +37,18 @@ class MapTileRenderer {
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
       // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
       task()
-        .then((result) => callback())
-        .catch((err) => callback())
+        .then((result) => {
+          callback(result)  // Callback so that the next tile can be processed
+        })
+        .catch((err) => {
+          callback(err)     // Callback even on error, so the next tile can be processed
+        })
     }, MAX_CONCURRENT_VECTOR_TILE_RENDERS)
     this.latestTileRenderPriority = Number.MAX_SAFE_INTEGER
+    this.tileRenderThrottle.error = (err) => {
+      console.error('Error from the tile rendering throttle:')
+      console.error(err)
+    }
 
     this.modificationTypes = Object.freeze({
       UNMODIFIED: 'UNMODIFIED',

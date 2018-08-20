@@ -16,15 +16,15 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  app.get('/admin/users/count', check_admin, (request, response, next) => {
+  app.get('/admin/users/count', (request, response, next) => {
     models.User.getUsersCount()
       .then(jsonSuccess(response, next))
       .catch(next)
   })
 
-  app.post('/admin/users/register', check_admin, (request, response, next) => {
+  app.post('/admin/users/registerWithoutPassword', check_admin, (request, response, next) => {
     var options = request.body
-    models.User.register(options)
+    models.User.registerWithoutPassword(options)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

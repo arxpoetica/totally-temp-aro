@@ -42,7 +42,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       // We want to aggregate by feature id
       return tileDataService.getTileDataAggregated(mapLayer, zoom, tileX, tileY)
     } else {
-      throw `Unknown aggregate mode: ${mapLayer.aggregateMode}`
+      return Promise.reject(`Unknown aggregate mode: ${mapLayer.aggregateMode}`)
     }
   }
 
@@ -106,6 +106,11 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       oReq.onerror = function(error) { reject(error) }
       oReq.onabort = function() { reject('XMLHttpRequest abort') }
       oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
+      oReq.onreadystatechange = function() {
+        if (oReq.readyState === 4 && oReq.status >= 400) {
+          reject(`ERROR: Tile data URL returned status code ${oReq.status}`)
+        }
+      }
       oReq.send(JSON.stringify(layerDefinitions))
     })
   }
@@ -138,7 +143,14 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       })
       // Wrap a promise that will make the request
       var dataPromise = tileDataService.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
-                          .catch((err) => console.error(err))
+                          .catch((err) => {
+                            console.error(err)
+                            // There was a server error when getting the data. Delete this promise from the tileProviderCache
+                            // so that the system will re-try downloading tile data if it is asked for again
+                            tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
+                              delete tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId]
+                            })
+                          })
       // For all the tile definitions that we are going to download, this is the promise that we save.
       // Note that some map layers may have been downloaded previously. We have to be careful not to overwrite those promises.
       // Hence, using tileDefinitionsToDownload and not tileDataService.mapLayers
@@ -191,147 +203,133 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // Flattens all URLs and returns tile data that is a simple union of all features
   tileDataService.getTileDataFlatten = (mapLayer, zoom, tileX, tileY) => {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
-    return new Promise((resolve, reject) => {
-      var promises = []
-      mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
-      var hasIcon = mapLayer.hasOwnProperty('iconUrl')
-      if (hasIcon) {
-        promises.push(new Promise((resolve, reject) => {
-          var img = new Image()
-          img.src = mapLayer.iconUrl
-          img.onload = () => {
-            // Image has been loaded
-            resolve(img)
-          }
-        }))
-      }
-      
-      var hasSelectedIcon = mapLayer.hasOwnProperty('selectedIconUrl')
-      if (hasSelectedIcon) {
-        promises.push(new Promise((resolve, reject) => {
-          var img = new Image()
-          img.src = mapLayer.selectedIconUrl
-          img.onload = () => {
-            // Image has been loaded
-            resolve(img)
-          }
-        }))
-      }
+    var promises = []
+    mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
 
-      var hasGreyedOutIcon = mapLayer.hasOwnProperty('greyOutIconUrl') && mapLayer.greyOutIconUrl !== undefined
-      if (hasGreyedOutIcon) {
-        promises.push(new Promise((resolve, reject) => {
-          var img = new Image()
-          img.src = mapLayer.greyOutIconUrl
-          img.onload = () => {
-            // Image has been loaded
-            resolve(img)
-          }
-        }))
+    // A promise that will return an Image from a URL
+    var imagePromise = (url) => new Promise((resolve, reject) => {
+      var img = new Image()
+      img.src = url
+      img.onload = () => {
+        // Image has been loaded
+        resolve(img)
       }
-      
-      Promise.all(promises)
-        .then((results) => {
-          var allFeatures = []
-          var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon) // booleans are 0 or 1 so True + True = 2
-
-          for (var iResult = 0; iResult < numDataResults; ++iResult) {
-            var result = results[iResult]
-            var layerToFeatures = result
-            Object.keys(layerToFeatures).forEach((layerKey) => {
-              allFeatures = allFeatures.concat(layerToFeatures[layerKey])
-            })
-          }
-          var tileData = {
-            layerToFeatures: {
-              FEATURES_FLATTENED: allFeatures
-            }
-          }
-          
-          if (hasIcon) {
-            tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon)]
-          }
-          if (hasSelectedIcon) {
-            tileData.selectedIcon = results[results.length - ((hasIcon + hasGreyedOutIcon))]
-          }
-          if (hasGreyedOutIcon) {
-            tileData.greyOutIcon = results[results.length - 1]
-          }
-          resolve(tileData)
-        })
     })
+
+    var hasIcon = mapLayer.hasOwnProperty('iconUrl')
+    if (hasIcon) {
+      promises.push(imagePromise(mapLayer.iconUrl))
+    }
+    
+    var hasSelectedIcon = mapLayer.hasOwnProperty('selectedIconUrl')
+    if (hasSelectedIcon) {
+      promises.push(imagePromise(mapLayer.selectedIconUrl))
+    }
+
+    var hasGreyedOutIcon = mapLayer.hasOwnProperty('greyOutIconUrl') && mapLayer.greyOutIconUrl !== undefined
+    if (hasGreyedOutIcon) {
+      promises.push(imagePromise(mapLayer.greyOutIconUrl))
+    }
+    
+    return Promise.all(promises)
+      .then((results) => {
+        var allFeatures = []
+        var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon) // booleans are 0 or 1 so True + True = 2
+
+        for (var iResult = 0; iResult < numDataResults; ++iResult) {
+          var result = results[iResult]
+          var layerToFeatures = result
+          Object.keys(layerToFeatures).forEach((layerKey) => {
+            allFeatures = allFeatures.concat(layerToFeatures[layerKey])
+          })
+        }
+        var tileData = {
+          layerToFeatures: {
+            FEATURES_FLATTENED: allFeatures
+          }
+        }
+        
+        if (hasIcon) {
+          tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon)]
+        }
+        if (hasSelectedIcon) {
+          tileData.selectedIcon = results[results.length - ((hasIcon + hasGreyedOutIcon))]
+        }
+        if (hasGreyedOutIcon) {
+          tileData.greyOutIcon = results[results.length - 1]
+        }
+        return Promise.resolve(tileData)
+      })
   }
 
   // Returns aggregated results for a tile
   tileDataService.getTileDataAggregated = (mapLayer, zoom, tileX, tileY) => {
     // We have multiple URLs where data is coming from. Return the aggregated result
-    return new Promise((resolve, reject) => {
-      var promises = []
-      mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
-      Promise.all(promises)
-        .then((results) => {
-          // We have data from all urls. First, we create an object that will map the objects
-          // of interest (e.g. census blocks) to their geometry and list of properties.
-          // For e.g. if we are aggregating download speeds for census blocks, we will have
-          // Input: mapLayer.aggregateById = 'gid', mapLayer.aggregateProperty = 'download_speed'
-          // Output:
-          // {
-          //   census_block_id_1: {
-          //     geometry: { geom object },
-          //     layers: [download_speed_1, download_speed2, ...]
-          //   },
-          //   census_block_id_2: { ... } ... etc
-          // }
-          var entityData = {}
-          // Loop through each tile result
-          results.forEach((result) => {
-            var layerToFeatures = result
-            // Each tile can have multiple layers per the MVT specification. Loop through them
-            Object.keys(layerToFeatures).forEach((layerKey) => {
-              // Loop through all the features in this layer
-              var features = layerToFeatures[layerKey]
-              features.forEach((feature) => {
-                // Store the geometry for the census block. This will be overwritten but should be fine since its the same geometry
-                var aggregateEntityGID = feature.properties[mapLayer.aggregateById]
-                if (!entityData[aggregateEntityGID]) {
-                  entityData[aggregateEntityGID] = {}
-                }
-                entityData[aggregateEntityGID].geometry = feature.loadGeometry()
-                // Store the value to be aggregated (e.g. download_speed) in this layer
-                if (!entityData[aggregateEntityGID].layers) {
-                  entityData[aggregateEntityGID].layers =[]
-                }
-                entityData[aggregateEntityGID].layers.push(feature.properties[mapLayer.aggregateProperty])
-              })
+    var promises = []
+    mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
+    return Promise.all(promises)
+      .then((results) => {
+        // We have data from all urls. First, we create an object that will map the objects
+        // of interest (e.g. census blocks) to their geometry and list of properties.
+        // For e.g. if we are aggregating download speeds for census blocks, we will have
+        // Input: mapLayer.aggregateById = 'gid', mapLayer.aggregateProperty = 'download_speed'
+        // Output:
+        // {
+        //   census_block_id_1: {
+        //     geometry: { geom object },
+        //     layers: [download_speed_1, download_speed2, ...]
+        //   },
+        //   census_block_id_2: { ... } ... etc
+        // }
+        var entityData = {}
+        // Loop through each tile result
+        results.forEach((result) => {
+          var layerToFeatures = result
+          // Each tile can have multiple layers per the MVT specification. Loop through them
+          Object.keys(layerToFeatures).forEach((layerKey) => {
+            // Loop through all the features in this layer
+            var features = layerToFeatures[layerKey]
+            features.forEach((feature) => {
+              // Store the geometry for the census block. This will be overwritten but should be fine since its the same geometry
+              var aggregateEntityGID = feature.properties[mapLayer.aggregateById]
+              if (!entityData[aggregateEntityGID]) {
+                entityData[aggregateEntityGID] = {}
+              }
+              entityData[aggregateEntityGID].geometry = feature.loadGeometry()
+              // Store the value to be aggregated (e.g. download_speed) in this layer
+              if (!entityData[aggregateEntityGID].layers) {
+                entityData[aggregateEntityGID].layers =[]
+              }
+              entityData[aggregateEntityGID].layers.push(feature.properties[mapLayer.aggregateProperty])
             })
-          })
-
-          // Now that we have everything per-aggregation-entity, find the aggregates and create the output geometries
-          var aggregateFeatures = []
-          Object.keys(entityData).forEach((aggregateEntityGID) => {
-            // Find the sum of the values to be aggregated across all layers
-            var sumValues = 0
-            entityData[aggregateEntityGID].layers.forEach((layer) => sumValues += layer)
-            // Find the speed intensity for this census block
-            const MY_SPEED = 7
-            const aggregateFinalValue = 1 - (MY_SPEED / (MY_SPEED + sumValues))
-            // Save it all out in a feature
-            var properties = {}
-            properties[mapLayer.aggregateProperty] = aggregateFinalValue
-            aggregateFeatures.push({
-              properties: properties,
-              loadGeometry: () => entityData[aggregateEntityGID].geometry // Hack because thats how we get the geometry later
-            })
-          })
-
-          // Save it all out and return
-          resolve({
-            layerToFeatures: {
-              AGGREGATE_LAYER: aggregateFeatures
-            }
           })
         })
-    })
+
+        // Now that we have everything per-aggregation-entity, find the aggregates and create the output geometries
+        var aggregateFeatures = []
+        Object.keys(entityData).forEach((aggregateEntityGID) => {
+          // Find the sum of the values to be aggregated across all layers
+          var sumValues = 0
+          entityData[aggregateEntityGID].layers.forEach((layer) => sumValues += layer)
+          // Find the speed intensity for this census block
+          const MY_SPEED = 7
+          const aggregateFinalValue = 1 - (MY_SPEED / (MY_SPEED + sumValues))
+          // Save it all out in a feature
+          var properties = {}
+          properties[mapLayer.aggregateProperty] = aggregateFinalValue
+          aggregateFeatures.push({
+            properties: properties,
+            loadGeometry: () => entityData[aggregateEntityGID].geometry // Hack because thats how we get the geometry later
+          })
+        })
+
+        // Save it all out and return
+        return Promise.resolve({
+          layerToFeatures: {
+            AGGREGATE_LAYER: aggregateFeatures
+          }
+        })
+      })
   }
 
   // Adds a layer key and url to the tile data service

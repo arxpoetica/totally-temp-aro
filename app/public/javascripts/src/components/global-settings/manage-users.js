@@ -249,7 +249,7 @@ class ManageUsersController {
     this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
 
 
-    this.$http.post('/admin/users/register', this.newUser)
+    this.$http.post('/admin/users/registerWithoutPassword', this.newUser)
       .then((response) => {
         this.loadUsers()
         swal({ title: 'User registered', type: 'success' })
