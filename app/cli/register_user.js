@@ -22,8 +22,10 @@ var models = require('../models')
 models.User.registerWithPassword(argv, argv.password)
   .then((userId) => {
     console.log('User registered successfully with id =', userId)
-    return (argv.rol === 'admin') ? models.User.makeAdministrator(argv.email) : Promise.resolve()
+    // Add the user to the SuperUsers groups
+    return models.User.addUserToGroup(argv.email, 'SuperUsers')
   })
+  .then(() => models.User.addUserToGroup(argv.email, 'Administrators')) // Add the users to the Administrators group
   .then(() => {
     process.exit(0)
   })

@@ -16,6 +16,7 @@ var pync = require('pync')
 const ldap = require('ldapjs')
 const UIConfiguration = require('./ui_configuration')
 const authenticationConfig = (new UIConfiguration()).getConfigurationSet('authentication')
+var models = require('../models')
 
 module.exports = class User {
 
@@ -241,28 +242,37 @@ module.exports = class User {
   }
 
   // Used to set administrator permissions for a user in the new permissions schema
-  static makeAdministrator(email) {
+  static addUserToGroup(email, groupName) {
 
-    return database.query(`
-      -- Set admin permissions for the user
-      INSERT INTO auth.global_actor_permission
-      SELECT u.id, (SELECT permissions FROM auth.role WHERE name='ADMINISTRATOR')
-      FROM auth.users u
-      WHERE u.email=$1;
-    `, [email])
-    .then(() =>
-      database.query(`
-      -- Add the user to the default Administrators group
-      INSERT INTO auth.user_auth_group
-      SELECT u.id, (SELECT id FROM auth.auth_group WHERE name='Administrators')
-      FROM auth.users u
-      WHERE u.email=$1;
-    `, [email])
-    )
-    .catch((err) => {
-      console.error(err);
-      return Promise.reject(err);
-    })
+    var userId = null, groupId = null
+    return Promise.all([
+      database.query(`SELECT id FROM auth.users WHERE email='${email}'`),
+      database.query(`SELECT id FROM auth.auth_group WHERE name='${groupName}'`)
+    ])
+      .then((results) => {
+        userId = results[0][0].id
+        groupId = results[1][0].id
+        // Get the user details from aro-service
+        var getUserDetails = {
+          method: 'GET',
+          url: `${config.aro_service_url}/auth/users/${userId}`
+        }
+        return models.AROService.request(getUserDetails)
+      })
+      .then((result) => {
+        var serviceUser = JSON.parse(result)
+        // Add the group id to the user, and save it back to aro-service
+        if (serviceUser.groupIds.indexOf(groupId) < 0) {
+          serviceUser.groupIds.push(groupId)
+        }
+        var putUserDetails = {
+          method: 'PUT',
+          url: `${config.aro_service_url}/auth/users`,
+          body: serviceUser,
+          json: true
+        }
+        return models.AROService.request(putUserDetails)
+      })
   }
 
   static find_by_id (id) {
