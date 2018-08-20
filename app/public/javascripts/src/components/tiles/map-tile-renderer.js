@@ -524,7 +524,12 @@ class MapTileRenderer {
               if (modificationType === this.modificationTypes.ORIGINAL || modificationType === this.modificationTypes.DELETED) {
                 ctx.globalAlpha = 0.5
               }
-              ctx.drawImage(entityImage, x, y)
+              // Increase the size of household icon if entity_count > 1
+              if (feature.properties.entity_count && feature.properties.entity_count > 1 ) {
+                ctx.drawImage(entityImage, x, y, entityImage.width*1.3, entityImage.height*1.3)
+              } else {
+                ctx.drawImage(entityImage, x, y)
+              }
               ctx.globalAlpha = originalAlpha
             }
             //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
