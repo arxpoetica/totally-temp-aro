@@ -15,7 +15,6 @@ class PlanSearchController {
       params: {}
     }
     this.idToServiceAreaCode = {}
-    this.isAdministrator = false
   }
 
   $onInit() {
@@ -39,21 +38,29 @@ class PlanSearchController {
     }
 
     // Get the ids from aro-service
-    var filter = ''
-    Array.from(serviceAreaIdsToFetch).forEach((serviceAreaId, index) => {
-      if (index > 0) {
-        filter += ' or '
-      }
-      filter += ` (id eq ${serviceAreaId})`
-    })
-
-    // Our $top is high, and should never be hit as we are getting service areas for a select few ids
-    return this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`)
-      .then((results) => {
-        results.data.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
-        this.$timeout()
+    let serviceAreaIds = [...serviceAreaIdsToFetch];
+    var promises = []
+    while(serviceAreaIds.length) {
+      var filter = ''
+      serviceAreaIds.splice(0,100).forEach((serviceAreaId, index) => {
+        if (index > 0) {
+          filter += ' or '
+        }
+        filter += ` (id eq ${serviceAreaId})`
       })
-      .catch((err) => console.error(err))
+
+      promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
+    }
+
+    return Promise.all(promises)
+    .then((results) => {
+      results.forEach((result) => {
+        result.data.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
+      })
+      this.$timeout()
+    })
+    .catch((err) => console.error(err))
+
   }
 
   loadCreatorsInfo(plans) {

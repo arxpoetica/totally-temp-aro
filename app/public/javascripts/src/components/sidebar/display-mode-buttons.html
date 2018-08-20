@@ -43,7 +43,7 @@
 </div>
 <div class="btn-group pull-right">
   <button type="button"
-          ng-if="configuration.perspective.displayModeButtons['DEBUG'].show && $ctrl.state.isAdministrator"
+          ng-if="configuration.perspective.displayModeButtons['DEBUG'].show && $ctrl.state.loggedInUser.isAdministrator"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.DEBUG }"

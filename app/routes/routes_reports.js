@@ -578,11 +578,11 @@ exports.configure = (api, middleware) => {
         --boundary summary
         WITH inputs AS (
         SELECT
-         p.id AS plan_id,
-         bt.id as boundary_type,
-         bt.name,
-         bt.description,
-         ARRAY(SELECT jsonb_array_elements_text(p.tag_mapping -> 'linkTags' -> 'serviceAreaIds'))::int[]  AS service_area_ids
+          p.id AS plan_id,
+          bt.id as boundary_type,
+          bt.name,
+          bt.description,
+          ARRAY(SELECT jsonb_array_elements_text(p.tag_mapping -> 'linkTags' -> 'serviceAreaIds'))::int[]  AS service_area_ids
         FROM client.plan p
         CROSS JOIN client.site_boundary_type bt
         WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id}
@@ -590,92 +590,91 @@ exports.configure = (api, middleware) => {
         
         selected_service_layer AS (
         SELECT
-            *
+             *
         FROM inputs i
         JOIN reports.plan_service_layer psl
         ON psl.root_plan_id = i.plan_id
         ),
         
         modified_boundaries AS (
-         SELECT
-           nb.*
-         FROM  inputs i
-         JOIN  reports.network_boundary nb
-           ON nb.root_plan_id = i.plan_id
-           AND nb.is_branch_data
-           AND nb.boundary_type = i.boundary_type
+          SELECT 
+            nb.*
+          FROM  inputs i
+          JOIN  reports.network_boundary nb
+            ON nb.root_plan_id = i.plan_id
+            AND nb.is_branch_data
+            AND nb.boundary_type = i.boundary_type
             AND nb.date_from <> '294276-01-01 00:00:00'::timestamp
         ),
         
         existing_boundaries AS (
-         SELECT
-           pbsa.id,
-           pbsa.object_id,
-           STRING_AGG(pbsa.service_area_code, ',') AS code,
-           STRING_AGG(pbsa.service_area_name, ',') AS name
-         FROM inputs i
-         JOIN reports.plan_boundary_service_area pbsa
-           ON pbsa.root_plan_id = i.plan_id
-           AND pbsa.boundary_type = i.boundary_type
-           AND pbsa.service_area_id = ANY(i.service_area_ids)
-         GROUP BY 1, 2
+          SELECT
+            pbsa.id,
+            pbsa.object_id,
+            STRING_AGG(pbsa.service_area_code, ',') AS code,
+            STRING_AGG(pbsa.service_area_name, ',') AS name
+          FROM inputs i
+          JOIN reports.plan_boundary_service_area pbsa
+            ON pbsa.root_plan_id = i.plan_id
+            AND pbsa.boundary_type = i.boundary_type
+            AND pbsa.service_area_id = ANY(i.service_area_ids)
+          GROUP BY 1, 2 
         ),
         
         all_boundaries AS (
-         SELECT *
-         FROM modified_boundaries
-         /*SELECT
-           COALESCE(mb.id, xb.id) AS id,
-           COALESCE(mb.object_id, xb.object_id) AS object_id,
+          SELECT *
+          FROM modified_boundaries
+          /*SELECT
+            COALESCE(mb.id, xb.id) AS id,
+            COALESCE(mb.object_id, xb.object_id) AS object_id, 
             mb.network_node_object_id AS network_node_object_id
-           FROM existing_boundaries xb
-           FULL OUTER JOIN modified_boundaries mb
-             ON mb.object_id = xb.object_id
-         */
+            FROM existing_boundaries xb
+            FULL OUTER JOIN modified_boundaries mb
+              ON mb.object_id = xb.object_id
+          */
         ),
         
         matched_equipment AS (
-         SELECT
-           ne.*
-         FROM  inputs i
-         CROSS JOIN all_boundaries b
-         JOIN  reports.network_equipment ne
-             ON ne.root_plan_id = i.plan_id
-             AND ne.is_branch_data
-             AND ne.object_id = b.network_node_object_id
-             AND ne.node_type_id <> 8
-         
+          SELECT 
+            ne.*
+          FROM  inputs i
+          CROSS JOIN all_boundaries b
+          JOIN  reports.network_equipment ne
+              ON ne.root_plan_id = i.plan_id
+              AND ne.is_branch_data
+              AND ne.object_id = b.network_node_object_id
+              AND ne.node_type_id <> 8
         ),
         
         all_boundary_info AS (
         SELECT
-         xb.geom,
-         xb.id,
-         xb.object_id,
-         xb.network_node_object_id AS equipment_object_id,
-         String_Agg(sa.name, ',') AS service_area_name,
-         String_Agg(sa.code, ',') AS service_area_code
+          xb.geom,
+          xb.id,
+          xb.object_id,
+          xb.network_node_object_id AS equipment_object_id,
+          String_Agg(sa.name, ',') AS service_area_name,
+          String_Agg(sa.code, ',') AS service_area_code
         FROM selected_service_layer sl
         CROSS JOIN all_boundaries b
         JOIN client.extended_boundary xb
-         ON xb.id = b.id
+          ON xb.id = b.id 
         JOIN client.service_area sa  
-         ON sa.service_layer_id = sl.id
-         AND ST_Intersects(sa.geom, xb.geom)
+          ON sa.service_layer_id = sl.id
+          AND ST_Intersects(sa.geom, xb.geom) 
         GROUP BY 1, 2, 3,4
         )
         
-        SELECT
-         ST_AsKML(b.geom) AS site_boundary_geom,
-         ST_AsKML(e.geom) AS node_location,
-         COALESCE(e.site_clli, '') AS "Site CLLI Code"
+        SELECT DISTINCT
+          ST_AsKML(b.geom) AS site_boundary_geom,
+          ST_AsKML(e.geom) AS node_location,
+          COALESCE(e.site_clli, '') AS "Site CLLI Code"
         --  ,e.site_name AS "Site Name"
-        --  i.description AS "Boundary Type"
+        --  i.description AS "Boundary Type" 
         FROM inputs i
         CROSS JOIN all_boundary_info b
         LEFT JOIN matched_equipment e
-          ON e.object_id = b.equipment_object_id 
-          WHERE e.geom  IS NOT NULL;
+           ON e.object_id = b.equipment_object_id 
+        WHERE e.geom  IS NOT NULL;        
         `
         return database.query(planQ)
       })

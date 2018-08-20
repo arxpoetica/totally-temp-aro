@@ -16,6 +16,7 @@ var pync = require('pync')
 const ldap = require('ldapjs')
 const UIConfiguration = require('./ui_configuration')
 const authenticationConfig = (new UIConfiguration()).getConfigurationSet('authentication')
+var models = require('../models')
 
 module.exports = class User {
 
@@ -88,6 +89,7 @@ module.exports = class User {
   static findOrCreateUser(firstName, lastName, email) {
     // We have a PSQL function to create users, that will throw an error if the user exists.
     return database.query(`SELECT auth.add_user('${firstName}', '${lastName}', '${email}');`)
+      .then(() => this.addUserToGroup(email, 'Public'))
       .catch((err) => {
         // Error means that the user exists. Return a resolved promise. Kindof a poor mans UPSERT.
         return Promise.resolve()
@@ -182,7 +184,21 @@ module.exports = class User {
     return database.execute('UPDATE auth.users SET rol=$2 WHERE id=$1', [user_id, rol])
   }
 
-  static register (user) {
+  // Registers a user with a password
+  static registerWithPassword(user, addToPublicGroup, clearTextPassword) {
+    if (!clearTextPassword || clearTextPassword == '') {
+      return Promise.reject('You must specify a password for registering the user')
+    }
+    return this.hashPassword(clearTextPassword)
+      .then((hashedPassword) => this.register(user, addToPublicGroup, hashedPassword))
+  }
+
+  // Registers a user without a password
+  static registerWithoutPassword(user) {
+    return this.register(user, true, null)
+  }
+    
+  static register(user, addToPublicGroup, hashedPassword) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -195,9 +211,22 @@ module.exports = class User {
     .then((createdUser) => {
       createdUserId = createdUser[0].add_user
       var full_name = user.firstName + ' ' + user.lastName
-      return database.query(`UPDATE auth.users SET company_name='${user.companyName}', rol='${user.rol}', full_name='${full_name}' WHERE id=${createdUserId};`)
+      var setString = `company_name='${user.companyName}', rol='${user.rol}', full_name='${full_name}'`
+      if (hashedPassword) {
+        setString += `, password='${hashedPassword}'` // Set the password only if it is specified
+      }
+      return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
     })
-    .then(() => this.resendLink(createdUserId))
+    .then(() => {
+      // If password has been set, no need to send a reset email
+      return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
+    })
+    .then(() => {
+      // Note that addToPublicGroup can be false, if we are calling this from an ETL script (in which case we do not
+      // have access to aro-service at that point)
+      return addToPublicGroup ? this.addUserToGroup(user.email, 'Public') : Promise.resolve()
+    })
+    .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
@@ -207,28 +236,37 @@ module.exports = class User {
   }
 
   // Used to set administrator permissions for a user in the new permissions schema
-  static makeAdministrator(email) {
+  static addUserToGroup(email, groupName) {
 
-    return database.query(`
-      -- Set admin permissions for the user
-      INSERT INTO auth.global_actor_permission
-      SELECT u.id, (SELECT permissions FROM auth.role WHERE name='ADMINISTRATOR')
-      FROM auth.users u
-      WHERE u.email=$1;
-    `, [email])
-    .then(() =>
-      database.query(`
-      -- Add the user to the default Administrators group
-      INSERT INTO auth.user_auth_group
-      SELECT u.id, (SELECT id FROM auth.auth_group WHERE name='Administrators')
-      FROM auth.users u
-      WHERE u.email=$1;
-    `, [email])
-    )
-    .catch((err) => {
-      console.error(err);
-      return Promise.reject(err);
-    })
+    var userId = null, groupId = null
+    return Promise.all([
+      database.query(`SELECT id FROM auth.users WHERE email='${email}'`),
+      database.query(`SELECT id FROM auth.auth_group WHERE name='${groupName}'`)
+    ])
+      .then((results) => {
+        userId = results[0][0].id
+        groupId = results[1][0].id
+        // Get the user details from aro-service
+        var getUserDetails = {
+          method: 'GET',
+          url: `${config.aro_service_url}/auth/users/${userId}`
+        }
+        return models.AROService.request(getUserDetails)
+      })
+      .then((result) => {
+        var serviceUser = JSON.parse(result)
+        // Add the group id to the user, and save it back to aro-service
+        if (serviceUser.groupIds.indexOf(groupId) < 0) {
+          serviceUser.groupIds.push(groupId)
+        }
+        var putUserDetails = {
+          method: 'PUT',
+          url: `${config.aro_service_url}/auth/users`,
+          body: serviceUser,
+          json: true
+        }
+        return models.AROService.request(putUserDetails)
+      })
   }
 
   static find_by_id (id) {
