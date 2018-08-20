@@ -207,23 +207,16 @@
         }
       }
 
-      var thePanorama = map.getStreetView();
-      // change view
-      google.maps.event.addListener(thePanorama, 'visible_changed', function () {
-        // Display your street view visible UI
-        if (thePanorama.getVisible()) {
-
-          panorama = new google.maps.StreetViewPanorama(
-            document.getElementById('map-canvas'), {
-              addressControlOptions: {
-                position: google.maps.ControlPosition.BOTTOM_CENTER, // <- change position
-              },
-              enableCloseButton: true
-            });
-          // rewrite default options  
-          map.setStreetView(panorama);
-        }
-      });
+      var panorama = new google.maps.StreetViewPanorama(
+        document.getElementById('map-canvas'), {
+          addressControlOptions: {
+            position: google.maps.ControlPosition.BOTTOM_CENTER, // <- change position
+          },
+          enableCloseButton: true,
+          visible: false
+        });
+      // rewrite default options  
+      map.setStreetView(panorama);
 
       // At this point, our angular app and the document is initialized. Take the "logged in user" that we have on the
       // server side, use EJS to expand it and then set that in our "state" service. This is done so that we don't
