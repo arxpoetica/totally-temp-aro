@@ -21,12 +21,12 @@
         <br>My Account
       </button>
 
-      <button class="btn settings-btn" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.toggleManageUsersMode()">
+      <button class="btn settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.toggleManageUsersMode()">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Users
       </button>
 
-      <button class="btn settings-btn" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.toggleManageGroupsMode()">
+      <button class="btn settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.toggleManageGroupsMode()">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Groups
       </button>

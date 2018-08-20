@@ -15,7 +15,6 @@ class PlanSearchController {
       params: {}
     }
     this.idToServiceAreaCode = {}
-    this.isAdministrator = false
   }
 
   $onInit() {
