@@ -16,7 +16,7 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  app.get('/admin/users/count', check_admin, (request, response, next) => {
+  app.get('/admin/users/count', (request, response, next) => {
     models.User.getUsersCount()
       .then(jsonSuccess(response, next))
       .catch(next)

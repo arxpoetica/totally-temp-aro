@@ -36,7 +36,7 @@
         <br>User Settings
       </button>
 
-      <button class="btn settings-btn" ng-if="$ctrl.currentUser.rol === 'admin' || $ctrl.currentUser.rol === 'sales'" ng-click="$ctrl.currentView = $ctrl.views.TAG_MANAGER">
+      <button class="btn settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.TAG_MANAGER">
         <i class="fa fa-2x fa-tags"></i>
         <br>Tag Manager
       </button>
