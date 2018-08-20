@@ -89,6 +89,7 @@ module.exports = class User {
   static findOrCreateUser(firstName, lastName, email) {
     // We have a PSQL function to create users, that will throw an error if the user exists.
     return database.query(`SELECT auth.add_user('${firstName}', '${lastName}', '${email}');`)
+      .then(() => this.addUserToGroup(email, 'Public'))
       .catch((err) => {
         // Error means that the user exists. Return a resolved promise. Kindof a poor mans UPSERT.
         return Promise.resolve()
