@@ -22,9 +22,9 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  app.post('/admin/users/register', check_admin, (request, response, next) => {
+  app.post('/admin/users/registerWithoutPassword', check_admin, (request, response, next) => {
     var options = request.body
-    models.User.register(options)
+    models.User.registerWithoutPassword(options)
       .then(jsonSuccess(response, next))
       .catch(next)
   })

@@ -39,7 +39,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
         type: 'error'
       })
     }
-    $http.post('/admin/users/register', globalSettings.new_user)
+    $http.post('/admin/users/registerWithoutPassword', globalSettings.new_user)
       .then((response) => {
         globalSettings.new_user = {}
         swal({ title: 'User registered', type: 'success' })

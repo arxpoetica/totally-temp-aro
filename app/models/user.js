@@ -182,7 +182,21 @@ module.exports = class User {
     return database.execute('UPDATE auth.users SET rol=$2 WHERE id=$1', [user_id, rol])
   }
 
-  static register (user) {
+  // Registers a user with a password
+  static registerWithPassword(user, clearTextPassword) {
+    if (!clearTextPassword || clearTextPassword == '') {
+      return Promise.reject('You must specify a password for registering the user')
+    }
+    return this.hashPassword(clearTextPassword)
+      .then((hashedPassword) => this.register(user, hashedPassword))
+  }
+
+  // Registers a user without a password
+  static registerWithoutPassword(user) {
+    return this.register(user, null)
+  }
+    
+  static register(user, hashedPassword) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -195,9 +209,29 @@ module.exports = class User {
     .then((createdUser) => {
       createdUserId = createdUser[0].add_user
       var full_name = user.firstName + ' ' + user.lastName
-      return database.query(`UPDATE auth.users SET company_name='${user.companyName}', rol='${user.rol}', full_name='${full_name}' WHERE id=${createdUserId};`)
+      var setString = `company_name='${user.companyName}', rol='${user.rol}', full_name='${full_name}'`
+      if (hashedPassword) {
+        setString += `, password='${hashedPassword}'` // Set the password only if it is specified
+      }
+      return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
     })
-    .then(() => this.resendLink(createdUserId))
+    .then(() => {
+      return this.resendLink(createdUserId)
+      // If password has been set, no need to send a reset email
+      return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
+    })
+    .then(() => {
+      // Add any created user to the 'Public' user group
+      const sqlAddToPublicGroup = `
+        INSERT INTO auth.user_auth_group(user_id, auth_group_id)
+        VALUES(
+          (SELECT id FROM auth.users WHERE email='${user.email}'),
+          (SELECT id FROM auth.auth_group WHERE name='Public')
+        );
+      `
+      return database.query(sqlAddToPublicGroup)
+    })
+    .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))

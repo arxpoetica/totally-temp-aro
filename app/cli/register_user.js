@@ -19,9 +19,9 @@ var argv = require('yargs')
 
 var models = require('../models')
 
-models.User.register(argv)
-  .then((user) => {
-    console.log('User registered successfully with id =', user.id)
+models.User.registerWithPassword(argv, argv.password)
+  .then((userId) => {
+    console.log('User registered successfully with id =', userId)
     return (argv.rol === 'admin') ? models.User.makeAdministrator(argv.email) : Promise.resolve()
   })
   .then(() => {
