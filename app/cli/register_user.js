@@ -18,14 +18,30 @@ var argv = require('yargs')
   .argv
 
 var models = require('../models')
+var helpers = require('../helpers')
+var database = helpers.database
 
-models.User.registerWithPassword(argv, argv.password)
+// Code to add user to a group. We cannot use aro-service for ETL
+var addUserToGroup = (email, groupName) => {
+  const sqlAddUserToGroup = `
+    INSERT INTO auth.user_auth_group(user_id, auth_group_id)
+    VALUES(
+      (SELECT id FROM auth.users WHERE email='${email}'),
+      (SELECT id FROM auth.auth_group WHERE name='${groupName}')
+    );
+  `
+  return database.query(sqlAddUserToGroup)
+}
+
+// Do not add to Public group via aro-service as we do not have access to it
+models.User.registerWithPassword(argv, false, argv.password)
   .then((userId) => {
     console.log('User registered successfully with id =', userId)
-    // Add the user to the SuperUsers groups
-    return models.User.addUserToGroup(argv.email, 'SuperUsers')
+    // Add the user to the Public group
+    return addUserToGroup(argv.email, 'Public')
   })
-  .then(() => models.User.addUserToGroup(argv.email, 'Administrators')) // Add the users to the Administrators group
+  .then(() => addUserToGroup(argv.email, 'Administrators')) // Add the users to the Administrators group
+  .then(() => addUserToGroup(argv.email, 'SuperUsers')) // Add the users to the SuperUsers group
   .then(() => {
     process.exit(0)
   })

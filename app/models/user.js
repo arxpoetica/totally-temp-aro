@@ -185,20 +185,20 @@ module.exports = class User {
   }
 
   // Registers a user with a password
-  static registerWithPassword(user, clearTextPassword) {
+  static registerWithPassword(user, addToPublicGroup, clearTextPassword) {
     if (!clearTextPassword || clearTextPassword == '') {
       return Promise.reject('You must specify a password for registering the user')
     }
     return this.hashPassword(clearTextPassword)
-      .then((hashedPassword) => this.register(user, hashedPassword))
+      .then((hashedPassword) => this.register(user, addToPublicGroup, hashedPassword))
   }
 
   // Registers a user without a password
   static registerWithoutPassword(user) {
-    return this.register(user, null)
+    return this.register(user, true, null)
   }
     
-  static register(user, hashedPassword) {
+  static register(user, addToPublicGroup, hashedPassword) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -218,11 +218,14 @@ module.exports = class User {
       return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
     })
     .then(() => {
-      return this.resendLink(createdUserId)
       // If password has been set, no need to send a reset email
       return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
     })
-    .then(() => this.addUserToGroup(user.email, 'Public'))
+    .then(() => {
+      // Note that addToPublicGroup can be false, if we are calling this from an ETL script (in which case we do not
+      // have access to aro-service at that point)
+      return addToPublicGroup ? this.addUserToGroup(user.email, 'Public') : Promise.resolve()
+    })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
       if (err.message.indexOf('duplicate key') >= 0) {
