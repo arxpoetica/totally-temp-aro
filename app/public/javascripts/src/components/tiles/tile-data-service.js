@@ -143,7 +143,14 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
       })
       // Wrap a promise that will make the request
       var dataPromise = tileDataService.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
-                          .catch((err) => console.error(err))
+                          .catch((err) => {
+                            console.error(err)
+                            // There was a server error when getting the data. Delete this promise from the tileProviderCache
+                            // so that the system will re-try downloading tile data if it is asked for again
+                            tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
+                              delete tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId]
+                            })
+                          })
       // For all the tile definitions that we are going to download, this is the promise that we save.
       // Note that some map layers may have been downloaded previously. We have to be careful not to overwrite those promises.
       // Hence, using tileDefinitionsToDownload and not tileDataService.mapLayers
