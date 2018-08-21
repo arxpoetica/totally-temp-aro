@@ -1629,10 +1629,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       })
       .catch((err) => console.error(err))
 
+    var plan = null
     service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((result) => {
-      const plan = result.data
-      service.setPlan(plan)
+      plan = result.data
       // Get the default location for this user
       return $http.get(`/service/auth/users/${user.id}/configuration`)
     })
@@ -1650,6 +1650,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
             console.error('Setting map coordinates to default')
             service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
             service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+            service.setPlan(plan)
             return
           }
           service.requestSetMapCenter.next({
@@ -1658,11 +1659,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           })
           const ZOOM_FOR_OPEN_PLAN = 14
           service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
+          service.setPlan(plan)
         })
       } else {
         // Set it to the default so that the map gets initialized
         service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
         service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+        service.setPlan(plan)
       }
     })
     .catch((err) => {
@@ -1670,6 +1673,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       // Set it to the default so that the map gets initialized
       service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
       service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+      service.setPlan(plan)
     })
   }
 
