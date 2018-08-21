@@ -1629,6 +1629,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       })
       .catch((err) => console.error(err))
 
+    var initializeToDefaultCoords = (plan) => {
+      service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
+      service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+      service.setPlan(plan)
+    }
     var plan = null
     service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((result) => {
@@ -1648,9 +1653,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
           if (status !== 'OK') {
             console.error('Geocoder failed: ' + status)
             console.error('Setting map coordinates to default')
-            service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
-            service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
-            service.setPlan(plan)
+            initializeToDefaultCoords(plan)
             return
           }
           service.requestSetMapCenter.next({
@@ -1663,17 +1666,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
         })
       } else {
         // Set it to the default so that the map gets initialized
-        service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
-        service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
-        service.setPlan(plan)
+        initializeToDefaultCoords(plan)
       }
     })
     .catch((err) => {
       console.error(err)
       // Set it to the default so that the map gets initialized
-      service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
-      service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
-      service.setPlan(plan)
+      initializeToDefaultCoords(plan)
     })
   }
 
