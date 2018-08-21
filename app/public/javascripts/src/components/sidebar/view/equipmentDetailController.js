@@ -1,17 +1,20 @@
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
-
+import MapUtilities from '../../common/plan/map-utilities';
+import TileUtilities from '../../tiles/tile-utilities'
 
 class EquipmentDetailController {
 
-	constructor($http, $timeout, state, configuration) {
+	constructor($http, $timeout, state, configuration, tileDataService) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.configuration = configuration
+    this.tileDataService = tileDataService
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
+    this.idToequipmentInfo = {}
     this.selectedEquipment = ''
     
     this.headerIcon = ''
@@ -96,13 +99,144 @@ class EquipmentDetailController {
     })
   }
 
+  getVisibleEquipmentIds() {
+    this.getVisibleTileIds()
+  }
+
+  getVisibleTileIds() {
+    // Use the code in tile to fetch visible tile id's, redendunt for now
+    this.mapRef = window["map"]    
+    if (!this.mapRef || !this.mapRef.getBounds()) {
+      return
+    }
+    var visibleTiles = []
+    visibleTiles = MapUtilities.getVisibleTiles(this.mapRef)    
+
+    visibleTiles.forEach((tile) => {
+      var tileId = TileUtilities.getTileId(tile.zoom, tile.x, tile.y)
+      var cachedTile = this.tileDataService.tileHtmlCache[tileId]
+      if (cachedTile) {
+        var coord = { x: tile.x, y: tile.y }
+        //fetch tile data
+        this.getVisibleTileData(tile.zoom, coord, cachedTile)
+      }
+    })
+  }
+
+  getVisibleTileData(zoom, coord, htmlCache) {
+    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+    var singleTilePromises = []
+    var mapLayers = TileUtilities.getOrderedKeys(this.tileDataService.mapLayers, 'zIndex', 0)
+    mapLayers.forEach((mapLayerKey, index) => {
+      // Initialize rendering data for this layer
+      var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
+      var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
+      renderingData[mapLayerKey] = {
+      //   numNeighbors: numNeighbors,
+         dataPromises: [],
+         data: [],
+      //   entityImages: [],
+      //   dataOffsets: []
+      }
+
+      for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
+        for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
+          // renderingData[mapLayerKey].dataOffsets.push({
+          //   x: deltaX * this.tileSize.width,
+          //   y: deltaY * this.tileSize.height
+          // })
+          var xTile = coord.x + deltaX
+          var yTile = coord.y + deltaY
+          var singleTilePromise = this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile)
+          singleTilePromises.push(singleTilePromise)
+          renderingData[mapLayerKey].dataPromises.push(singleTilePromise)
+          var globalIndex = singleTilePromises.length - 1
+          var localIndex = renderingData[mapLayerKey].dataPromises.length - 1
+          globalIndexToIndex[globalIndex] = localIndex
+          globalIndexToLayer[globalIndex] = mapLayerKey
+        }
+      }
+    })
+
+    return Promise.all(singleTilePromises)
+    .then((singleTileResults) => {
+      var singleTile_visibleEqu = new Set()
+      singleTileResults.forEach((singleTileResult, index) => {
+        var mapLayerKey = globalIndexToLayer[index]
+        var dataIndex = globalIndexToIndex[index]
+        renderingData[mapLayerKey].data[dataIndex] = singleTileResult
+      })
+      //console.log(renderingData)
+
+      // all features
+      Object.keys(renderingData).forEach((mapLayerKey) => {
+        var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
+        if (mapLayer) { // Its possible that this.mapLayers has changed until we reach this point
+          renderingData[mapLayerKey].data.forEach((featureData, index) => {
+            var features = []
+            Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
+            //console.log(features)
+            
+            const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
+
+            for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
+              // Parse the geometry out.
+              var feature = filteredFeatures[iFeature]
+
+              if (feature.properties && feature.properties.object_id) {
+                this.singleTile_visibleEqu.add(feature.properties.object_id)
+              }
+            } 
+
+          })
+        }
+      })
+
+      //console.log(this.singleTile_visibleEqu)
+      this.getVisibleEquipmentDetails(singleTile_visibleEqu)
+    })
+  }
+
+  getVisibleEquipmentDetails(visibleEquipmentsInTile) {
+    
+    let visibleEquipmentObjectIdsInTile = [...visibleEquipmentsInTile];
+    var promises = []
+    while(visibleEquipmentObjectIdsInTile.length) {
+      var filter = ''
+      visibleEquipmentObjectIdsInTile.splice(0,50).forEach((visibleEquipmentObjectIdInTile, index) => {
+        if (index > 0) {
+          filter += ' or '
+        }
+        filter += ` (object_id eq ${visibleEquipmentObjectIdInTile})`
+      })
+
+      promises.push(this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,clli,networkNodeType&$filter=${filter}&$top=100`))
+    }
+
+    return Promise.all(promises)
+    .then((results) => {
+      results.forEach((result) => {
+        result.data.forEach((equipmentInfo) => this.idToequipmentInfo[equipmentInfo.id] = equipmentInfo.clli)
+        console.log(this.idToequipmentInfo)
+      })
+      this.$timeout()
+    })
+
+  }
+
+  $onInit() {
+    this.getVisibleEquipmentIds()
+    this.visibleEquipmentIds = new Set()
+  }
+
   $onDestroy() {
     // Cleanup subscriptions
+    this.visibleEquipmentIds = new Set()
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
   }
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
+EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration', 'tileDataService']
 
 export default EquipmentDetailController

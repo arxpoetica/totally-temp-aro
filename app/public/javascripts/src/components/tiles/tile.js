@@ -443,29 +443,15 @@ class TileComponentController {
       return
     }
 
-    // First get a list of tiles that are visible on the screen.
+    // // First get a list of tiles that are visible on the screen.
     var visibleTiles = []
-    var mapBounds = this.mapRef.getBounds()
-    var neCorner = mapBounds.getNorthEast()
-    var swCorner = mapBounds.getSouthWest()
     var zoom = this.mapRef.getZoom()
-    // Note the swap from NE/SW to NW/SE when finding tile coordinates
-    var tileCoordsNW = MapUtilities.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
-    var tileCoordsSE = MapUtilities.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
-
-    for (var x = tileCoordsNW.x; x <= tileCoordsSE.x; ++x) {
-      for (var y = tileCoordsNW.y; y <= tileCoordsSE.y; ++y) {
-        visibleTiles.push({
-          zoom: zoom,
-          x: x,
-          y: y
-        })
-      }
-    }
+    visibleTiles = MapUtilities.getVisibleTiles(this.mapRef)
 
     // Redraw the non-visible tiles. If we don't do this, these tiles will have stale data if the user pans/zooms.
     var redrawnTiles = new Set()
     visibleTiles.forEach((visibleTile) => redrawnTiles.add(TileUtilities.getTileId(visibleTile.zoom, visibleTile.x, visibleTile.y)))
+   
     var tilesOutOfViewport = []
     Object.keys(this.tileDataService.tileHtmlCache).forEach((tileKey) => {
       var cachedTile = this.tileDataService.tileHtmlCache[tileKey]

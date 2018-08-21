@@ -14,6 +14,33 @@ class MapUtilities {
       y: tileY
     }
   }
+
+  static getVisibleTiles(mapRef) {
+    if (!mapRef || !mapRef.getBounds()) {
+      return
+    }
+    // get a list of tiles that are visible on the screen.
+    var visibleTiles = []
+    var mapBounds = mapRef.getBounds()
+    var neCorner = mapBounds.getNorthEast()
+    var swCorner = mapBounds.getSouthWest()
+    var zoom = mapRef.getZoom()
+    // Note the swap from NE/SW to NW/SE when finding tile coordinates
+    var tileCoordsNW = this.getTileCoordinates(zoom, neCorner.lat(), swCorner.lng())
+    var tileCoordsSE = this.getTileCoordinates(zoom, swCorner.lat(), neCorner.lng())
+
+    for (var x = tileCoordsNW.x; x <= tileCoordsSE.x; ++x) {
+      for (var y = tileCoordsNW.y; y <= tileCoordsSE.y; ++y) {
+        visibleTiles.push({
+          zoom: zoom,
+          x: x,
+          y: y
+        })
+      }
+    }
+
+    return visibleTiles
+  }
 }
 
 export default MapUtilities

@@ -35,7 +35,7 @@ let viewMode = {
 
       <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO].show"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO].show">
-        <equipment-detail></equipment-detail>
+        <equipment-detail ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"></equipment-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO].show"></accordion-panel-title>
