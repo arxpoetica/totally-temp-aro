@@ -142,7 +142,8 @@ class MapObjectEditorController {
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
       var lat = event.latLng.lat()
       var lng = event.latLng.lng()
-      this.updateContextMenu(lat, lng)
+      var eventXY = this.getXYFromEvent(event)
+      this.updateContextMenu(lat, lng, eventXY.x, eventXY.y)
     })
     
     
@@ -165,9 +166,48 @@ class MapObjectEditorController {
   
   
   
+  // ----- rightclick menu ----- //
+
+  getXYFromEvent(event){
+    var mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+        mouseEvent = event[eventKey]
+      }
+    })
+    var x = mouseEvent.clientX
+    var y = mouseEvent.clientY
+    return {'x':x, 'y':y}
+  }
   
+  closeContextMenu(){
+    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+    const isDropdownHidden = dropdownMenu.is(':hidden')
+    if (!isDropdownHidden) {
+      var toggleButton = this.$document.find('.map-object-editor-context-menu')
+      toggleButton.dropdown('toggle')
+    }
+  }
   
-  updateContextMenu(lat, lng){
+  openContextMenu(x, y){
+    if ('undefined' != typeof x) this.contextMenuCss.left = `${x}px`
+    if ('undefined' != typeof y) this.contextMenuCss.top = `${y}px`
+    
+    // Display the context menu and select the clicked marker
+    this.contextMenuCss.display = 'block'
+    
+    // Show the dropdown menu
+    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+    const isDropdownHidden = dropdownMenu.is(':hidden')
+    if (isDropdownHidden) {
+      var toggleButton = this.$document.find('.map-object-editor-context-menu')
+      toggleButton.dropdown('toggle')
+    }
+    //this.selectMapObject(mapObject)
+    this.$timeout()
+  }
+  
+  updateContextMenu(lat, lng, x, y){
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       this.getFeaturesAtPoint(lat, lng)
       .then((results) => {
@@ -218,8 +258,15 @@ class MapObjectEditorController {
           }
         })
         console.log(menuItems)
-        
+        if (menuItems.length <= 0){
+          this.closeContextMenu()
+        }else{
+          this.openContextMenu(x, y)
+        }
       })
+    }else if('location' == this.featureType){
+      
+      this.openContextMenu(x, y)
     }
   }
   
@@ -556,18 +603,9 @@ class MapObjectEditorController {
       console.log(event)
       var lat = event.latLng.lat()
       var lng = event.latLng.lng()
-      this.updateContextMenu(lat, lng)
-      
-      
-      var mouseEvent = null
-      Object.keys(event).forEach((eventKey) => {
-        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
-          mouseEvent = event[eventKey]
-        }
-      })
-      this.contextMenuCss.left = `${mouseEvent.clientX}px`
-      this.contextMenuCss.top = `${mouseEvent.clientY}px`
-      
+      var eventXY = this.getXYFromEvent(event)
+      this.updateContextMenu(lat, lng, eventXY.x, eventXY.y)
+      /*
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
       
@@ -578,18 +616,18 @@ class MapObjectEditorController {
         var toggleButton = this.$document.find('.map-object-editor-context-menu')
         toggleButton.dropdown('toggle')
       }
-      this.selectMapObject(mapObject)
+      //this.selectMapObject(mapObject)
       this.$timeout()
+      */
     })
-    
-    
     
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     
     if (usingMapClick) this.selectMapObject(mapObject)
   }
-
+  
+  
   handleMapEntitySelected(event) {
     if (!event || !event.latLng) {
       return
@@ -748,12 +786,7 @@ class MapObjectEditorController {
       }
     } else {
       //when deselected object close drop down if open
-      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-      const isDropdownHidden = dropdownMenu.is(':hidden')
-      if (!isDropdownHidden) {
-        var toggleButton = this.$document.find('.map-object-editor-context-menu')
-        toggleButton.dropdown('toggle')
-      }
+      this.closeContextMenu()
     }
     this.selectedMapObject = mapObject
     this.onSelectObject && this.onSelectObject({mapObject})
