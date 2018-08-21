@@ -430,7 +430,7 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
 
   // Completely erase the entire cache of HTML elements associated with tiles
-  tileDataService.deleteHtmlCache = () => {
+  tileDataService.clearHtmlCache = () => {
     tileDataService.tileHtmlCache = {}
   }
 

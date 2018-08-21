@@ -1042,24 +1042,24 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   service.loadPlan = (planId) => {
     tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
-    service.requestDestroyMapOverlay.next(null)
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     var userId = service.loggedInUser.id
+    var plan = null
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
-        return service.setPlan(result.data)
-      })
-      .then(() => {
-        var plan = service.plan.getValue()
+        plan = result.data
         return service.getAddressFor(plan.latitude, plan.longitude)
       })
       .then((address) => {
         var plan = service.plan.getValue()
         plan.areaName = address
-        service.requestCreateMapOverlay.next(null)
+        service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
         return Promise.resolve()
+      })
+      .then(() => {
+        return service.setPlan(plan)  // This will also create overlay, tiles, etc.
       })
   }
 
@@ -1068,10 +1068,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // continue but will not be shown on our map.
   service.recreateTilesAndCache = () => {
     tileDataService.clearDataCache()
-    tileDataService.markHtmlCacheDirty()
+    tileDataService.clearHtmlCache()
     return service.loadModifiedFeatures(service.plan.getValue().id)
       .then(() => {
-        service.requestMapLayerRefresh.next(null)
+        service.requestDestroyMapOverlay.next(null) // Destroy the old map overlay (may not exist if we have just loaded a plan)
+        service.requestCreateMapOverlay.next(null)  // Create a new one
+        service.mapLayers.next(service.mapLayers.getValue())  // Reset map layers so that the new overlay picks them up
+        service.requestMapLayerRefresh.next(null)   // Redraw map layers
       })
       .catch((err) => console.error(err))
   }
