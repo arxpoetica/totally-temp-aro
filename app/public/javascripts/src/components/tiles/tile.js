@@ -267,6 +267,11 @@ class TileComponentController {
 
   // Creates the map overlay that will be used to display vector tile information
   createMapOverlay() {
+    if (this.mapRef.overlayMapTypes.length > 0) {
+      console.error('ERROR: Creating a map overlay, but we already have overlays defined')
+      console.error(this.mapRef.overlayMapTypes)
+      return
+    }
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
