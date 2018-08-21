@@ -429,6 +429,17 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
     })
   }
 
+  // Remove the specified HTML element from the cache and from the document
+  tileDataService.removeHtmlCacheNode = (zoom, x, y) => {
+    const cacheId = `${zoom}-${x}-${y}`
+    if (tileDataService.tileHtmlCache.hasOwnProperty(cacheId)) {
+      // We have the specified node in our cache
+      var htmlTileNode = tileDataService.tileHtmlCache[cacheId].div
+      htmlTileNode.parentNode.removeChild(htmlTileNode) // Remove the HTML node from the document
+      delete tileDataService.tileHtmlCache[cacheId]     // Remove the reference to the (now non-existent) HTML element
+    }
+  }
+
   // Completely erase the entire cache of HTML elements associated with tiles
   tileDataService.clearHtmlCache = () => {
     tileDataService.tileHtmlCache = {}
