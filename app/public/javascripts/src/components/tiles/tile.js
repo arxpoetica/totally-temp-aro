@@ -288,6 +288,18 @@ class TileComponentController {
                                                          this.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
+    
+    // for test
+    /*
+    this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
+      console.log(event)
+      var lat = event.latLng.lat()
+      var lng = event.latLng.lng()
+      this.getFeaturesAtPoint(lat, lng)
+      
+    })
+    */
+    
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
 
       // Get latitiude and longitude
@@ -296,7 +308,7 @@ class TileComponentController {
 
       // Get zoom
       var zoom = this.mapRef.getZoom()
-
+      console.log(this.mapRef)
       // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
       var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
 
@@ -377,16 +389,57 @@ class TileComponentController {
       .catch((err) => console.error(err))
     })
     
-    
-    
   }
-
+  
+  
+  
+  /*
+  getFeaturesAtPoint(lat, lng){
+    // Get zoom
+    var zoom = this.mapRef.getZoom()
+    // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+    var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
+    
+    // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
+    var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+    console.log(clickedPointPixels)
+    console.log(this.mapRef)
+    var hitPromises = []
+    
+    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
+    })
+    console.log(hitPromises)
+    Promise.all(hitPromises)
+    .then((results) => {
+      console.log(results)
+      //results[0].forEach((result) => {
+      //  console.log(result)
+      //})
+    })
+  }
+  */
+  
+  
+  
+  
+  
+  
+  
+  
   // Removes the existing map overlay
   destoryMapOverlay() {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
     }
+    /*
+    if (this.overlayRightClickListener) {
+      google.maps.event.removeListener(this.overlayRightClickListener)
+      this.overlayRightClickListener = null
+    }
+    */
+    console.log('clear')
     this.mapRef.overlayMapTypes.clear()
   }
 

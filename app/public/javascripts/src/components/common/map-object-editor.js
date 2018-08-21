@@ -13,6 +13,7 @@ class MapObjectEditorController {
     this.tileDataService = tileDataService
     this.utils = Utils
     this.mapRef = null
+    this.overlayRightClickListener = null
     this.createObjectOnClick = true
     this.createdMapObjects = {}
     this.selectedMapObject = null
@@ -132,14 +133,19 @@ class MapObjectEditorController {
       }
       
       this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
-        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
-        .catch((err) => console.error(err))
+      .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+      .catch((err) => console.error(err))
       event.preventDefault();
     };
     
-    //mapCanvas.addListener('rightclick', (event) => {
-    //  console.log('right click')
-    //})
+    
+    this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
+      var lat = event.latLng.lat()
+      var lng = event.latLng.lng()
+      this.updateContextMenu(lat, lng)
+    })
+    
+    
     
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
@@ -156,6 +162,108 @@ class MapObjectEditorController {
     })
     
   }
+  
+  
+  
+  
+  
+  updateContextMenu(lat, lng){
+    this.getFeaturesAtPoint(lat, lng)
+    .then((results) => {
+      console.log(results)
+      //results[0].forEach((result) => {
+        //console.log(result)
+        //populate context menu aray here
+        //update ma-object-editor.html > map-object-editor-context-menu-dropdown to read dynamically from this object
+        // we may need different behavour for different controllers using this
+      //})
+    })
+  }
+  
+  getFeaturesAtPoint(lat, lng){
+    // Get zoom
+    var zoom = this.mapRef.getZoom()
+    // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+    var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
+    
+    // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
+    var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+    console.log(clickedPointPixels)
+    //console.log(this.mapRef)
+    var hitPromises = []
+    console.log(this.mapRef.overlayMapTypes)
+    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
+    })
+    
+    return Promise.all(hitPromises)
+    /*
+    Promise.all(hitPromises)
+    .then((results) => {
+      console.log(results)
+      //results[0].forEach((result) => {
+      //  console.log(result)
+      //})
+    })
+    */
+  }
+  
+  
+  // ----- FOR TEST - will be moved to util file to be shared with tile.js ------------------- //
+  
+//Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
+  getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
+    // 1. Get the top left coordinates of the tile in lat lngs
+    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
+    // 2. Convert to pixels
+    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
+    // 3. Convert the clicked lat lng to pixels
+    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+
+    return {
+      x: clickedPointPixels.x - nwCornerPixels.x,
+      y: clickedPointPixels.y - nwCornerPixels.y
+    }
+  }
+
+  // Returns the latitiude and longitude of the northwest corner of a tile
+  // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
+  getNWTileCornerLatLng(tileZoom, tileX, tileY) {
+    var n = Math.pow(2.0, tileZoom)
+    var lon_deg = tileX / n * 360.0 - 180.0
+    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
+    var lat_deg = lat_rad * 180.0 / Math.PI
+    return {
+      lat: lat_deg,
+      lng: lon_deg
+    }
+  }
+
+  // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
+  // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
+  getPixelCoordinatesFromLatLng(latLng, zoom) {
+    var siny = Math.sin(latLng.lat * Math.PI / 180);
+    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+    // about a third of a tile past the edge of the world tile.
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+    this.TILE_SIZE = 256
+    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
+    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+
+    var scale = Math.pow(2.0, zoom)
+    return {
+      x: Math.floor(xUnscaled * scale),
+      y: Math.floor(yUnscaled * scale)
+    }
+  }
+  
+  
+  // --------------------------------
+  
+  
+  
+  
+  
   
   makeIconAnchor(iconUrl, callback){
     if ('undefined' == typeof callback) callback = {}
@@ -395,12 +503,19 @@ class MapObjectEditorController {
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
-
+    
+    
     mapObject.addListener('rightclick', (event) => {
-      // Display the context menu and select the clicked marker
-      this.contextMenuCss.display = 'block'
+      
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
+      console.log(this.featureType)
+      console.log(event)
+      var lat = event.latLng.lat()
+      var lng = event.latLng.lng()
+      this.updateContextMenu(lat, lng)
+      
+      
       var mouseEvent = null
       Object.keys(event).forEach((eventKey) => {
         if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
@@ -409,7 +524,10 @@ class MapObjectEditorController {
       })
       this.contextMenuCss.left = `${mouseEvent.clientX}px`
       this.contextMenuCss.top = `${mouseEvent.clientY}px`
-
+      
+      // Display the context menu and select the clicked marker
+      this.contextMenuCss.display = 'block'
+      
       // Show the dropdown menu
       var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
       const isDropdownHidden = dropdownMenu.is(':hidden')
@@ -420,6 +538,9 @@ class MapObjectEditorController {
       this.selectMapObject(mapObject)
       this.$timeout()
     })
+    
+    
+    
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     
@@ -697,6 +818,13 @@ class MapObjectEditorController {
   }
 
   $onDestroy() {
+    console.log('destroy')
+    
+    if (this.overlayRightClickListener) {
+      google.maps.event.removeListener(this.overlayRightClickListener)
+      this.overlayRightClickListener = null
+    }
+    
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
     this.removeCreatedMapObjects()
