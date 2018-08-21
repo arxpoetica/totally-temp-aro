@@ -168,16 +168,59 @@ class MapObjectEditorController {
   
   
   updateContextMenu(lat, lng){
-    this.getFeaturesAtPoint(lat, lng)
-    .then((results) => {
-      console.log(results)
-      //results[0].forEach((result) => {
-        //console.log(result)
-        //populate context menu aray here
-        //update ma-object-editor.html > map-object-editor-context-menu-dropdown to read dynamically from this object
-        // we may need different behavour for different controllers using this
-      //})
-    })
+    if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
+      this.getFeaturesAtPoint(lat, lng)
+      .then((results) => {
+        console.log(results)
+        var menuItems = []
+        var menuItemsById = {}
+        
+        results[0].forEach((result) => {
+          //console.log(result)
+          //populate context menu aray here
+          //update ma-object-editor.html > map-object-editor-context-menu-dropdown to read dynamically from this object
+          // we may need different behavour for different controllers using this
+          
+          // if this.createdMapObjects[objectId]
+          var options = []
+          var dataTypeList = result._data_type.split('.')
+          if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
+              && (!result.is_deleted || 'false' == result.is_deleted)
+              && !menuItemsById.hasOwnProperty( result.object_id) ){
+            
+            if (this.createdMapObjects.hasOwnProperty( result.object_id) ){
+              // it's on the edit layer / in the transaction
+              
+              options.push('select')// select 
+              if ('equipment' == dataTypeList[0]){
+                options.push('add boundary')// need to filter for: if not boundary 
+              }
+              options.push('delete')
+            }else{
+              options.push('edit')
+            }
+            
+            var name = ''
+            if ('equipment_boundary' == dataTypeList[0]){
+              name = 'boundary'
+            }else{
+              name = dataTypeList[1]
+            }
+              
+            menuItemsById[result.object_id] = options
+            menuItems.push({
+              'objectId': result.object_id, 
+              'options': options, 
+              'dataTypeList': dataTypeList, 
+              'name': name
+            })
+            
+          }
+        })
+        console.log(menuItems)
+        
+      })
+    }
   }
   
   getFeaturesAtPoint(lat, lng){
