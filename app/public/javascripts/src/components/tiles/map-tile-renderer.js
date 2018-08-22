@@ -272,6 +272,16 @@ class MapTileRenderer {
     return div
   }
 
+  // This method is called by the Google Maps API.
+  releaseTile(node) {
+    // Remove this tiles node (DIV element) from our cache. This will include the HTML element, children canvases, etc.
+    // Without this we will hold on to a lot of tiles and will keep repainting even offscreen tiles.
+    // Note that releaseTile() is not called the very moment that a tile goes offscreen. It seems to hold onto
+    // tiles until the user pans a little bit more.
+    const tileCoords = node.id.split('-') // The ID is of the form zoom-x-y
+    this.tileDataService.removeHtmlCacheNode(tileCoords[0], tileCoords[1], tileCoords[2])
+  }
+
   // Renders all data for this tile
   renderTile(zoom, coord, htmlCache) {
     const tileId = `${zoom}-${coord.x}-${coord.y}`
