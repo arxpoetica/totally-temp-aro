@@ -20,6 +20,12 @@ class EquipmentDetailController {
     
     this.headerIcon = ''
     this.networkNodeLabel = ''
+
+    this.EquipmentDetailView = Object.freeze({
+      List: 0,
+      Detail: 1
+    })
+    this.currentEquipmentDetailView = this.EquipmentDetailView.List
     
     // Skip the first event as it will be the existing value of mapFeaturesSelectedEvent
     this.mapFeatureSelectedSubscriber = state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
@@ -50,6 +56,7 @@ class EquipmentDetailController {
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     this.updateSelectedState()
+    this.currentEquipmentDetailView = this.EquipmentDetailView.List
   }
  
 	updateSelectedState(selectedFeature){
@@ -78,6 +85,7 @@ class EquipmentDetailController {
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         
         this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
+        this.currentEquipmentDetailView = this.EquipmentDetailView.Detail
         
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
         this.$timeout()
@@ -106,7 +114,6 @@ class EquipmentDetailController {
 
   getVisibleTileIds() {
     // Use the code in tile to fetch visible tile id's, redendunt for now
-    this.mapRef = window["map"]    
     if (!this.mapRef || !this.mapRef.getBounds()) {
       return
     }
@@ -220,18 +227,43 @@ class EquipmentDetailController {
       results.forEach((result) => {
         result.data.forEach((equipmentInfo) => {
           if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= 100) {
-            this.clliToequipmentInfo[equipmentInfo.clli] = equipmentInfo.networkNodeType
+            this.clliToequipmentInfo[equipmentInfo.objectId] = equipmentInfo
           }
         })
         //console.log(this.clliToequipmentInfo)
       })
       this.$timeout()
     })
+  }
 
+  addMapListeners() {
+    if (this.mapRef) {
+      this.mapRef.addListener('center_changed', () => {
+        //refresh only in equipment list view
+        if(this.currentEquipmentDetailView === this.EquipmentDetailView.List) {
+          this.clliToequipmentInfo = {}
+          this.getVisibleEquipmentIds()
+        } 
+      })
+      this.mapRef.addListener('zoom_changed', () => {
+        //refresh only in equipment list view
+        if(this.currentEquipmentDetailView === this.EquipmentDetailView.List) {
+          this.clliToequipmentInfo = {}
+          this.getVisibleEquipmentIds()
+        }
+      })
+    }
+  }
+
+  removeMapListeners() {
+    //google.maps.event.clearListeners(this.mapRef, 'center_changed');
+    //google.maps.event.clearListeners(this.mapRef, 'zoom_changed');    
   }
 
   $onInit() {
+    this.mapRef = window["map"]
     this.getVisibleEquipmentIds()
+    this.addMapListeners()
     this.visibleEquipmentIds = new Set()
   }
 
@@ -240,6 +272,7 @@ class EquipmentDetailController {
     this.visibleEquipmentIds = new Set()
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
+    this.removeMapListeners()
   }
 }
 

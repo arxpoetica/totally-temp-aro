@@ -38,7 +38,7 @@
 	    </aro-search>
 	  </div>
 	  
-	  <div class="ei-panel-header clearfix" ng-if="!$ctrl.angular.equals({}, $ctrl.selectedEquipmentInfo)">
+		<div class="ei-panel-header clearfix" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
 	    
 	    <img class="ei-panel-header-icon" ng-if=" '' != $ctrl.headerIcon" ng-src="{{$ctrl.headerIcon}}">
 	    
@@ -66,15 +66,15 @@
 			</editor-interface-tree>
 		</div>
 		
-		<table ng-if="$ctrl.angular.equals({}, $ctrl.selectedEquipmentInfo)" class="table table-condensed table-striped">
+		<table ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List" class="table table-condensed table-striped">
 			<thead>
 				<th>Site Clli</th>
 				<th>Type</th>
 			</thead>
 			<tbody>
-				<tr ng-repeat="(clli, networkNodeType) in $ctrl.clliToequipmentInfo">
-					<td>{{clli}}</td>
-					<td>{{$ctrl.state.networkNodeTypesEntity[networkNodeType]}}</td>
+				<tr style="cursor: pointer" ng-repeat="(objectId, equipmentInfo) in $ctrl.clliToequipmentInfo" ng-click="$ctrl.viewSelectedEquipment(equipmentInfo)">
+					<td>{{equipmentInfo.clli}}</td>
+					<td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td>
 				</tr>
 				<!-- <tr ng-if="Object.keys($ctrl.clliToequipmentInfo).length >= 3"> -->
 				<tr ng-if="$ctrl.Utils.getObjectSize($ctrl.clliToequipmentInfo) >= 100">		
