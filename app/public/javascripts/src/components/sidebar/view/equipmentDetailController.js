@@ -4,7 +4,7 @@ import MapUtilities from '../../common/plan/map-utilities';
 import TileUtilities from '../../tiles/tile-utilities'
 
 class EquipmentDetailController {
-
+  
 	constructor($http, $timeout, state, configuration, tileDataService, Utils) {
     this.angular = angular
     this.$http = $http
@@ -17,6 +17,7 @@ class EquipmentDetailController {
     this.selectedEquipmentInfo = {}
     this.clliToequipmentInfo = {}
     this.selectedEquipment = ''
+    this.MAX_Equipment_List = 100
     
     this.headerIcon = ''
     this.networkNodeLabel = ''
@@ -132,38 +133,22 @@ class EquipmentDetailController {
   }
 
   getVisibleTileData(zoom, coord) {
-    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+    var renderingData = {}, globalIndexToLayer = {}
     var singleTilePromises = []
     var mapLayers = TileUtilities.getOrderedKeys(this.tileDataService.mapLayers, 'zIndex', 0)
+
     mapLayers.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
-      var numNeighbors = 1
       renderingData[mapLayerKey] = {
-      //   numNeighbors: numNeighbors,
-         dataPromises: [],
-         data: [],
-      //   entityImages: [],
-      //   dataOffsets: []
+         data: []
       }
-
-      for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
-        for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
-          // renderingData[mapLayerKey].dataOffsets.push({
-          //   x: deltaX * this.tileSize.width,
-          //   y: deltaY * this.tileSize.height
-          // })
-          var xTile = coord.x + deltaX
-          var yTile = coord.y + deltaY
-          var singleTilePromise = this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile)
-          singleTilePromises.push(singleTilePromise)
-          renderingData[mapLayerKey].dataPromises.push(singleTilePromise)
-          var globalIndex = singleTilePromises.length - 1
-          var localIndex = renderingData[mapLayerKey].dataPromises.length - 1
-          globalIndexToIndex[globalIndex] = localIndex
-          globalIndexToLayer[globalIndex] = mapLayerKey
-        }
-      }
+      var xTile = coord.x 
+      var yTile = coord.y
+      var singleTilePromise = this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile)
+      singleTilePromises.push(singleTilePromise)
+      var globalIndex = singleTilePromises.length - 1
+      globalIndexToLayer[globalIndex] = mapLayerKey
     })
 
     return Promise.all(singleTilePromises)
@@ -171,9 +156,9 @@ class EquipmentDetailController {
       var singleTile_visibleEqu = new Set()
       singleTileResults.forEach((singleTileResult, index) => {
         var mapLayerKey = globalIndexToLayer[index]
-        var dataIndex = globalIndexToIndex[index]
-        renderingData[mapLayerKey].data[dataIndex] = singleTileResult
+        renderingData[mapLayerKey].data[index] = singleTileResult
       })
+      //console.log(renderingData)      
 
       // all features
       Object.keys(renderingData).forEach((mapLayerKey) => {
@@ -217,7 +202,7 @@ class EquipmentDetailController {
 
       filter += `)`
       //Dont request if UI is displaying 100 equipments
-      if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= 100) {
+      if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
         promises.push(this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,clli,objectId,networkNodeType&$filter=${filter}&$top=100`))
       }
     }
@@ -226,7 +211,7 @@ class EquipmentDetailController {
     .then((results) => {
       results.forEach((result) => {
         result.data.forEach((equipmentInfo) => {
-          if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= 100) {
+          if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
             this.clliToequipmentInfo[equipmentInfo.objectId] = equipmentInfo
           }
         })

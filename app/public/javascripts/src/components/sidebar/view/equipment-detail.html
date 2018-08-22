@@ -76,9 +76,9 @@
 					<td>{{equipmentInfo.clli}}</td>
 					<td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td>
 				</tr>
-				<!-- <tr ng-if="Object.keys($ctrl.clliToequipmentInfo).length >= 3"> -->
-				<tr ng-if="$ctrl.Utils.getObjectSize($ctrl.clliToequipmentInfo) >= 100">		
-					<td colspan="2">List limited to 100 sites</td>
+
+				<tr ng-if="$ctrl.Utils.getObjectSize($ctrl.clliToequipmentInfo) >= $ctrl.MAX_Equipment_List">		
+					<td colspan="2">List limited to {{$ctrl.MAX_Equipment_List}} sites</td>
 				</tr>
 			</tbody>
 		</table>		
