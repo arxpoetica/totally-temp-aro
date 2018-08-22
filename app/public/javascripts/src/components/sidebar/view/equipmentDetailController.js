@@ -63,7 +63,7 @@ class EquipmentDetailController {
 	  // tell state
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
-	  if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.equipment[selectedFeature.object_id] = selectedFeature
+	  if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
     this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
 	}
 	
@@ -126,19 +126,19 @@ class EquipmentDetailController {
       if (cachedTile) {
         var coord = { x: tile.x, y: tile.y }
         //fetch tile data
-        this.getVisibleTileData(tile.zoom, coord, cachedTile)
+        this.getVisibleTileData(tile.zoom, coord)
       }
     })
   }
 
-  getVisibleTileData(zoom, coord, htmlCache) {
+  getVisibleTileData(zoom, coord) {
     var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
     var singleTilePromises = []
     var mapLayers = TileUtilities.getOrderedKeys(this.tileDataService.mapLayers, 'zIndex', 0)
     mapLayers.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
-      var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
+      var numNeighbors = 1
       renderingData[mapLayerKey] = {
       //   numNeighbors: numNeighbors,
          dataPromises: [],
