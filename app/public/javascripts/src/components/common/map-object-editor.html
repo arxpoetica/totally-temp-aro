@@ -22,23 +22,73 @@
       Dropdown
       <span class="caret"></span>
     </button>
+    
+    <!-- 
     <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
-      <!-- Menu item to delete object -->
       <li><a href="#" ng-click="$ctrl.deleteSelectedObject()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</a></li>
-      <!-- Menu item to start/stop editing polygon objects -->
       <li ng-if="!$ctrl.isMarker($ctrl.selectedMapObject)">
         <a href="#" ng-click="$ctrl.toggleEditSelectedPolygon()">
-          <!-- If the selected polygon is editable, display "Stop Editing" -->
           <i ng-if="$ctrl.selectedMapObject.getEditable()" class="fa fa-stop"></i>
           <i ng-if="!$ctrl.selectedMapObject.getEditable()" class="fa fa-pencil"></i>
           &nbsp;&nbsp;{{$ctrl.selectedMapObject.getEditable() ? 'Stop Editing' : 'Edit boundary'}}
         </a>
       </li>
-      <!-- Menu item to add a boundary to a site -->
       <li ng-if="$ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.allowBoundaryCreation">
         <a href="#" ng-click="$ctrl.startDrawingBoundaryFor($ctrl.selectedMapObject)"><i class="fa fa-plus"></i> Add boundary</a>
       </li>
     </ul>
+    -->
+    
+    
+    
+    <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
+      <!-- Menu item to delete object -->
+      <div ng-repeat="item in $ctrl.menuItems">
+        <li>
+          {{item.name}}
+        </li>
+        <li ng-repeat="option in item.options">
+          <a ng-if=" 'select' == option "
+             href="#" ng-click="$ctrl.selectProposedFeature(item.objectId)">
+            &nbsp;&nbsp;<i class="fa fa-pencil"></i>
+            Select
+          </a>
+          <a ng-if=" 'edit existing' == option "
+             href="#" ng-click="$ctrl.editExistingFeature(item.objectId)">
+            &nbsp;&nbsp;<i class="fa fa-pencil"></i>
+            Edit
+          </a>
+          <a ng-if=" 'add boundary' == option "
+             href="#" ng-click="$ctrl.startDrawingBoundaryForId(item.objectId)">
+            &nbsp;&nbsp;<i class="fa fa-plus"></i>
+            Add Boundary
+          </a>
+          <a ng-if=" 'delete' == option "
+             href="#" ng-click="$ctrl.deleteObjectWithId(item.objectId)">
+            &nbsp;&nbsp;<i class="fa fa-trash"></i>
+            Delete
+          </a>
+        </li>
+      </div>
+      
+      
+      <!-- 
+      <li><a href="#" ng-click="$ctrl.deleteSelectedObject()"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</a></li>
+      <li ng-if="!$ctrl.isMarker($ctrl.selectedMapObject)">
+        <a href="#" ng-click="$ctrl.toggleEditSelectedPolygon()">
+          <i ng-if="$ctrl.selectedMapObject.getEditable()" class="fa fa-stop"></i>
+          <i ng-if="!$ctrl.selectedMapObject.getEditable()" class="fa fa-pencil"></i>
+          &nbsp;&nbsp;{{$ctrl.selectedMapObject.getEditable() ? 'Stop Editing' : 'Edit boundary'}}
+        </a>
+      </li>
+      <li ng-if="$ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.allowBoundaryCreation">
+        <a href="#" ng-click="$ctrl.startDrawingBoundaryFor($ctrl.selectedMapObject)"><i class="fa fa-plus"></i> Add boundary</a>
+      </li>
+      -->
+    </ul>
+    
+    
+    
   </div>
 </div>
 <!-- A div containing the drop targets, used when dropping boundaries onto equipments. Do NOT set

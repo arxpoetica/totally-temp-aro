@@ -18,6 +18,7 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.iconAnchors = {}
+    this.menuItems = []
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
     this.contextMenuCss = {
@@ -140,10 +141,13 @@ class MapObjectEditorController {
     
     
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
-      var lat = event.latLng.lat()
-      var lng = event.latLng.lng()
-      var eventXY = this.getXYFromEvent(event)
-      this.updateContextMenu(lat, lng, eventXY.x, eventXY.y)
+      // ToDo: this should be in plan-editor 
+      if ('equipment' == this.featureType){
+        var lat = event.latLng.lat()
+        var lng = event.latLng.lng()
+        var eventXY = this.getXYFromEvent(event)
+        this.updateContextMenu(lat, lng, eventXY.x, eventXY.y)
+      }
     })
     
     
@@ -207,8 +211,24 @@ class MapObjectEditorController {
     this.$timeout()
   }
   
+  editExistingFeature(objectId){
+    console.log('select existing '+objectId)
+  }
+  
+  selectProposedFeature(objectId){
+    this.selectMapObject(this.createdMapObjects[objectId])
+  }
+  
+  startDrawingBoundaryForId(objectId){
+    this.startDrawingBoundaryFor(this.createdMapObjects[objectId])
+  }
+  
+  // deleteObjectWithId
+  
   updateContextMenu(lat, lng, x, y){
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
+      
+      // NEED TO GET NEW FEATURES AS WELL
       this.getFeaturesAtPoint(lat, lng)
       .then((results) => {
         console.log(results)
@@ -237,7 +257,7 @@ class MapObjectEditorController {
               }
               options.push('delete')
             }else{
-              options.push('edit')
+              options.push('edit existing')
             }
             
             var name = ''
@@ -258,6 +278,7 @@ class MapObjectEditorController {
           }
         })
         console.log(menuItems)
+        this.menuItems = menuItems
         if (menuItems.length <= 0){
           this.closeContextMenu()
         }else{
@@ -265,6 +286,15 @@ class MapObjectEditorController {
         }
       })
     }else if('location' == this.featureType){
+      // add delete option
+      console.log(this.selectedMapObject)
+      
+      this.menuItems = [{
+        'objectId': this.selectedMapObject.objectId, 
+        'options': ['delete'], 
+        'dataTypeList': ['location'], 
+        'name': 'location'
+      }]
       
       this.openContextMenu(x, y)
     }
@@ -601,6 +631,11 @@ class MapObjectEditorController {
       // changes with google maps implementations. So iterate over the keys to find the right object.
       console.log(this.featureType)
       console.log(event)
+      
+      // ToDo: this kind of thing needs to be in the controller
+      if ('location' == this.featureType){
+        this.selectMapObject(mapObject)
+      }
       var lat = event.latLng.lat()
       var lng = event.latLng.lng()
       var eventXY = this.getXYFromEvent(event)
