@@ -5,16 +5,17 @@ import TileUtilities from '../../tiles/tile-utilities'
 
 class EquipmentDetailController {
 
-	constructor($http, $timeout, state, configuration, tileDataService) {
+	constructor($http, $timeout, state, configuration, tileDataService, Utils) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.configuration = configuration
     this.tileDataService = tileDataService
+    this.Utils = Utils
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
-    this.idToequipmentInfo = {}
+    this.clliToequipmentInfo = {}
     this.selectedEquipment = ''
     
     this.headerIcon = ''
@@ -166,16 +167,14 @@ class EquipmentDetailController {
         var dataIndex = globalIndexToIndex[index]
         renderingData[mapLayerKey].data[dataIndex] = singleTileResult
       })
-      //console.log(renderingData)
 
       // all features
       Object.keys(renderingData).forEach((mapLayerKey) => {
         var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
-        if (mapLayer) { // Its possible that this.mapLayers has changed until we reach this point
+        if (mapLayer) {
           renderingData[mapLayerKey].data.forEach((featureData, index) => {
             var features = []
             Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-            //console.log(features)
             
             const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
 
@@ -184,7 +183,7 @@ class EquipmentDetailController {
               var feature = filteredFeatures[iFeature]
 
               if (feature.properties && feature.properties.object_id) {
-                this.singleTile_visibleEqu.add(feature.properties.object_id)
+                singleTile_visibleEqu.add(feature.properties.object_id)
               }
             } 
 
@@ -192,7 +191,6 @@ class EquipmentDetailController {
         }
       })
 
-      //console.log(this.singleTile_visibleEqu)
       this.getVisibleEquipmentDetails(singleTile_visibleEqu)
     })
   }
@@ -202,22 +200,30 @@ class EquipmentDetailController {
     let visibleEquipmentObjectIdsInTile = [...visibleEquipmentsInTile];
     var promises = []
     while(visibleEquipmentObjectIdsInTile.length) {
-      var filter = ''
+      var filter = `(planId eq ${this.state.plan.getValue().id}) and (`
       visibleEquipmentObjectIdsInTile.splice(0,50).forEach((visibleEquipmentObjectIdInTile, index) => {
         if (index > 0) {
           filter += ' or '
         }
-        filter += ` (object_id eq ${visibleEquipmentObjectIdInTile})`
+        filter += ` (objectId eq guid'${visibleEquipmentObjectIdInTile}')`
       })
 
-      promises.push(this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,clli,networkNodeType&$filter=${filter}&$top=100`))
+      filter += `)`
+      //Dont request if UI is displaying 100 equipments
+      if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= 100) {
+        promises.push(this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,clli,objectId,networkNodeType&$filter=${filter}&$top=100`))
+      }
     }
 
     return Promise.all(promises)
     .then((results) => {
       results.forEach((result) => {
-        result.data.forEach((equipmentInfo) => this.idToequipmentInfo[equipmentInfo.id] = equipmentInfo.clli)
-        console.log(this.idToequipmentInfo)
+        result.data.forEach((equipmentInfo) => {
+          if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= 100) {
+            this.clliToequipmentInfo[equipmentInfo.clli] = equipmentInfo.networkNodeType
+          }
+        })
+        //console.log(this.clliToequipmentInfo)
       })
       this.$timeout()
     })
@@ -237,6 +243,6 @@ class EquipmentDetailController {
   }
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration', 'tileDataService']
+EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration', 'tileDataService', 'Utils']
 
 export default EquipmentDetailController
