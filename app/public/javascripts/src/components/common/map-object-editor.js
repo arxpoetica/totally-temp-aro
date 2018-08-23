@@ -13,10 +13,12 @@ class MapObjectEditorController {
     this.tileDataService = tileDataService
     this.utils = Utils
     this.mapRef = null
+    this.overlayRightClickListener = null
     this.createObjectOnClick = true
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.iconAnchors = {}
+    this.menuItems = []
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
     this.contextMenuCss = {
@@ -120,7 +122,7 @@ class MapObjectEditorController {
       var offsetX = (grabImageW * 0.5) - grabOffsetX // center
       var offsetY = grabImageH - grabOffsetY // bottom
       
-        var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
+      var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
       // ToDo feature should probably be a class
       var feature = {
         objectId: this.utils.getUUID(),
@@ -132,11 +134,22 @@ class MapObjectEditorController {
       }
       
       this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
-        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
-        .catch((err) => console.error(err))
+      .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+      .catch((err) => console.error(err))
       event.preventDefault();
     };
-
+    
+    
+    this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
+      // ToDo: this should be in plan-editor 
+      if ('equipment' == this.featureType){
+        var eventXY = this.getXYFromEvent(event)
+        this.updateContextMenu(event.latLng, eventXY.x, eventXY.y)
+      }
+    })
+    
+    
+    
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
@@ -152,6 +165,241 @@ class MapObjectEditorController {
     })
     
   }
+  
+  
+  
+  // ----- rightclick menu ----- //
+
+  getXYFromEvent(event){
+    var mouseEvent = null
+    Object.keys(event).forEach((eventKey) => {
+      if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+        mouseEvent = event[eventKey]
+      }
+    })
+    var x = mouseEvent.clientX
+    var y = mouseEvent.clientY
+    return {'x':x, 'y':y}
+  }
+  
+  closeContextMenu(){
+    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+    const isDropdownHidden = dropdownMenu.is(':hidden')
+    if (!isDropdownHidden) {
+      var toggleButton = this.$document.find('.map-object-editor-context-menu')
+      toggleButton.dropdown('toggle')
+    }
+  }
+  
+  openContextMenu(x, y){
+    if ('undefined' != typeof x) this.contextMenuCss.left = `${x}px`
+    if ('undefined' != typeof y) this.contextMenuCss.top = `${y}px`
+    
+    // Display the context menu and select the clicked marker
+    this.contextMenuCss.display = 'block'
+    
+    // Show the dropdown menu
+    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
+    const isDropdownHidden = dropdownMenu.is(':hidden')
+    if (isDropdownHidden) {
+      var toggleButton = this.$document.find('.map-object-editor-context-menu')
+      toggleButton.dropdown('toggle')
+    }
+    this.$timeout()
+  }
+  
+  editExistingFeature(feature, latLng){
+    var hitFeatures = {}
+    hitFeatures['latLng'] = latLng
+    if ('location' == this.featureType) hitFeatures['locations'] = [feature]
+    if ('equipment' == this.featureType) hitFeatures['equipmentFeatures'] = [feature]
+    
+    this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+  }
+  
+  selectProposedFeature(objectId){
+    this.selectMapObject(this.createdMapObjects[objectId])
+  }
+  
+  startDrawingBoundaryForId(objectId){
+    this.startDrawingBoundaryFor(this.createdMapObjects[objectId])
+  }
+  
+  // deleteObjectWithId
+  //createEditableExistingMapObject(feature, iconUrl)
+  
+  updateContextMenu(latLng, x, y){
+    if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
+      
+      // NEED TO GET NEW FEATURES AS WELL
+      var lat = latLng.lat()
+      var lng = latLng.lng()
+      this.getFeaturesAtPoint(latLng)
+      .then((results) => {
+        var menuItems = []
+        var menuItemsById = {}
+        
+        results.forEach((resultList) => {
+          resultList.forEach((result) => {
+            //populate context menu aray here
+            // we may need different behavour for different controllers using this
+            
+            // if this.createdMapObjects[objectId]
+            var options = []
+            // ToDo: sometimes it's _data_type other times it's dataType
+            // regulate this using actual classes! 
+            var dataTypeList = ['']
+            if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
+            if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
+            if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
+                && (!result.is_deleted || 'false' == result.is_deleted)
+                && !menuItemsById.hasOwnProperty( result.object_id) ){
+              
+              // ToDo: MORE discrepancies, we NEED to fix this
+              if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
+              
+              var feature = result
+              if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
+                // it's on the edit layer / in the transaction
+                feature = this.createdMapObjects[result.objectId].feature
+                options.push('select')// select 
+                if ('equipment' == dataTypeList[0]){
+                  options.push('add boundary')// need to filter for: if not boundary 
+                }
+                options.push('delete')
+              }else{
+                options.push('edit existing')
+              }
+              
+              var name = ''
+              if ('equipment_boundary' == dataTypeList[0]){
+                name = 'boundary'
+              }else if(feature.hasOwnProperty('networkNodeType')){
+                name = feature.networkNodeType
+              }else{
+                name = dataTypeList[1]
+              }
+              
+              menuItemsById[result.objectId] = options
+              menuItems.push({
+                'objectId': result.objectId, 
+                'options': options, 
+                'dataTypeList': dataTypeList, 
+                'name': name, 
+                'feature': feature, 
+                'latLng': latLng
+              })
+              
+            }
+          })
+        })
+        
+        this.menuItems = menuItems
+        if (menuItems.length <= 0){
+          this.closeContextMenu()
+        }else{
+          this.openContextMenu(x, y)
+        }
+      })
+    }else if('location' == this.featureType){
+      this.menuItems = [{
+        'objectId': this.selectedMapObject.objectId, 
+        'options': ['delete'], 
+        'dataTypeList': ['location'], 
+        'name': 'location', 
+        'feature': this.selectedMapObject, 
+        'latLng': latLng
+      }]
+      
+      this.openContextMenu(x, y)
+    }
+  }
+  
+  getFeaturesAtPoint(latLng){
+    var lat = latLng.lat()
+    var lng = latLng.lng()
+    
+    // Get zoom
+    var zoom = this.mapRef.getZoom()
+    var hitPromises = []
+    hitPromises.push( new Promise((resolve, reject) => {
+      var hits = []
+      Object.getOwnPropertyNames(this.createdMapObjects).forEach((objectId) => {
+        var mapObject = this.createdMapObjects[objectId]
+        if ( mapObject.hitTest(latLng) ){
+          hits.push(mapObject.feature)
+        }
+      })
+      resolve(hits)
+    }))
+    // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
+    var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
+    
+    // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
+    var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
+        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
+    })
+    
+    return Promise.all(hitPromises)
+  }
+  
+  
+  // ----- FOR TEST - will be moved to util file to be shared with tile.js ------------------- //
+  
+//Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
+  getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
+    // 1. Get the top left coordinates of the tile in lat lngs
+    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
+    // 2. Convert to pixels
+    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
+    // 3. Convert the clicked lat lng to pixels
+    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+
+    return {
+      x: clickedPointPixels.x - nwCornerPixels.x,
+      y: clickedPointPixels.y - nwCornerPixels.y
+    }
+  }
+
+  // Returns the latitiude and longitude of the northwest corner of a tile
+  // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
+  getNWTileCornerLatLng(tileZoom, tileX, tileY) {
+    var n = Math.pow(2.0, tileZoom)
+    var lon_deg = tileX / n * 360.0 - 180.0
+    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
+    var lat_deg = lat_rad * 180.0 / Math.PI
+    return {
+      lat: lat_deg,
+      lng: lon_deg
+    }
+  }
+
+  // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
+  // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
+  getPixelCoordinatesFromLatLng(latLng, zoom) {
+    var siny = Math.sin(latLng.lat * Math.PI / 180);
+    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+    // about a third of a tile past the edge of the world tile.
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+    this.TILE_SIZE = 256
+    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
+    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+    var scale = Math.pow(2.0, zoom)
+    
+    return {
+      x: Math.floor(xUnscaled * scale),
+      y: Math.floor(yUnscaled * scale)
+    }
+  }
+  
+  
+  // --------------------------------
+  
+  
+  
+  
+  
   
   makeIconAnchor(iconUrl, callback){
     if ('undefined' == typeof callback) callback = {}
@@ -291,7 +539,22 @@ class MapObjectEditorController {
     }
     this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
     this.state.requestMapLayerRefresh.next(tilesToRefresh)
-
+    mapMarker.feature = feature
+    mapMarker.hitTest = (latLng) => {
+      var scale = 1 << this.mapRef.getZoom()
+      var w = mapMarker.icon.size.width / scale
+      var h = mapMarker.icon.size.height / scale
+      var lat = latLng.lat()
+      var lng = latLng.lng()
+      var markerLat = mapMarker.position.lat()
+      var markerLng = mapMarker.position.lng()
+      var east = mapMarker.position.lng() - w
+      var west = mapMarker.position.lng() + w
+      
+      return (markerLng+w >= lng && lng >= markerLng-w 
+          && markerLat+h >= lat && lat >= markerLat-h)
+    }
+    
     return mapMarker
   }
 
@@ -314,6 +577,13 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     polygon.setOptions(this.polygonOptions)
+    
+    polygon.feature = feature
+    
+    polygon.hitTest = (latLng) => {
+      if (!this.state.showSiteBoundary) return false
+      return google.maps.geometry.poly.containsLocation(latLng, polygon)
+    }
     return polygon
   }
 
@@ -344,7 +614,6 @@ class MapObjectEditorController {
         this.selectMapObject(null)
         return
       }
-      //console.log(feature)
       mapObject = this.createPointMapObject(feature, iconUrl)
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
@@ -391,45 +660,30 @@ class MapObjectEditorController {
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
-
+    
+    
     mapObject.addListener('rightclick', (event) => {
-      // Display the context menu and select the clicked marker
-      this.contextMenuCss.display = 'block'
+      
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
-      var mouseEvent = null
-      Object.keys(event).forEach((eventKey) => {
-        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
-          mouseEvent = event[eventKey]
-        }
-      })
-      this.contextMenuCss.left = `${mouseEvent.clientX}px`
-      this.contextMenuCss.top = `${mouseEvent.clientY}px`
-
-      // Show the dropdown menu
-      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-      const isDropdownHidden = dropdownMenu.is(':hidden')
-      if (isDropdownHidden) {
-        var toggleButton = this.$document.find('.map-object-editor-context-menu')
-        toggleButton.dropdown('toggle')
+      
+      // ToDo: this kind of thing needs to be in the controller
+      if ('location' == this.featureType){
+        this.selectMapObject(mapObject)
       }
-      this.selectMapObject(mapObject)
-      this.$timeout()
+      var eventXY = this.getXYFromEvent(event)
+      this.updateContextMenu(event.latLng, eventXY.x, eventXY.y)
     })
+    
     this.createdMapObjects[mapObject.objectId] = mapObject
     this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
     
     if (usingMapClick) this.selectMapObject(mapObject)
   }
-
+  
+  
   handleMapEntitySelected(event) {
     if (!event || !event.latLng) {
-      return
-    }
-    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-    const isDropdownHidden = dropdownMenu.is(':hidden')
-    if (!isDropdownHidden) {
-      // This means that the context menu is being displayed. Do not create an object.
       return
     }
     
@@ -447,7 +701,6 @@ class MapObjectEditorController {
     }
     
     if (event.equipmentFeatures){
-
       event.equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
     }
     
@@ -463,8 +716,6 @@ class MapObjectEditorController {
       is_locked: false,
       isExistingObject: false
     }
-    
-    //console.log(event)
     
     var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     var featurePromise = null
@@ -532,7 +783,6 @@ class MapObjectEditorController {
       .then((result) => {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
-        //console.log(featureToUse)
         
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
@@ -552,7 +802,6 @@ class MapObjectEditorController {
 
   selectMapObject(mapObject) {
     // First de-select the currently selected map object (if any)
-    //console.log(mapObject)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {
         //this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
@@ -580,12 +829,7 @@ class MapObjectEditorController {
       }
     } else {
       //when deselected object close drop down if open
-      var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-      const isDropdownHidden = dropdownMenu.is(':hidden')
-      if (!isDropdownHidden) {
-        var toggleButton = this.$document.find('.map-object-editor-context-menu')
-        toggleButton.dropdown('toggle')
-      }
+      this.closeContextMenu()
     }
     this.selectedMapObject = mapObject
     this.onSelectObject && this.onSelectObject({mapObject})
@@ -693,6 +937,11 @@ class MapObjectEditorController {
   }
 
   $onDestroy() {
+    if (this.overlayRightClickListener) {
+      google.maps.event.removeListener(this.overlayRightClickListener)
+      this.overlayRightClickListener = null
+    }
+    
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
     this.removeCreatedMapObjects()
