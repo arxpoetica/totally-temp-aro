@@ -80,6 +80,8 @@ class MapObjectEditorController {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
+      console.log('on select')
+      console.log(event)
       this.handleMapEntitySelected(event)
     })
 
@@ -143,10 +145,10 @@ class MapObjectEditorController {
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
       // ToDo: this should be in plan-editor 
       if ('equipment' == this.featureType){
-        var lat = event.latLng.lat()
-        var lng = event.latLng.lng()
+        //var lat = event.latLng.lat()
+        //var lng = event.latLng.lng()
         var eventXY = this.getXYFromEvent(event)
-        this.updateContextMenu(lat, lng, eventXY.x, eventXY.y)
+        this.updateContextMenu(event.latLng, eventXY.x, eventXY.y)
       }
     })
     
@@ -211,8 +213,26 @@ class MapObjectEditorController {
     this.$timeout()
   }
   
-  editExistingFeature(objectId){
-    console.log('select existing '+objectId)
+  editExistingFeature(feature, latLng){
+    console.log('select existing')
+    console.log(feature)
+    /*
+    var hitFeatures = { 
+      latLng: latLng,
+      locations: [],
+      serviceAreas: [],
+      analysisAreas: [],
+      roadSegments: new Set(),
+      equipmentFeatures: [], 
+      censusFeatures: []
+    }
+    */
+    var hitFeatures = {}
+    hitFeatures['latLng'] = latLng
+    if ('location' == this.featureType) hitFeatures['locations'] = [feature]
+    if ('equipment' == this.featureType) hitFeatures['equipmentFeatures'] = [feature]
+    
+    this.state.mapFeaturesSelectedEvent.next(hitFeatures)
   }
   
   selectProposedFeature(objectId){
@@ -224,11 +244,14 @@ class MapObjectEditorController {
   }
   
   // deleteObjectWithId
+  //createEditableExistingMapObject(feature, iconUrl)
   
-  updateContextMenu(lat, lng, x, y){
+  updateContextMenu(latLng, x, y){
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       
       // NEED TO GET NEW FEATURES AS WELL
+      var lat = latLng.lat()
+      var lng = latLng.lng()
       this.getFeaturesAtPoint(lat, lng)
       .then((results) => {
         console.log(results)
@@ -272,7 +295,9 @@ class MapObjectEditorController {
               'objectId': result.object_id, 
               'options': options, 
               'dataTypeList': dataTypeList, 
-              'name': name
+              'name': name, 
+              'feature': result, 
+              'latLng': latLng
             })
             
           }
@@ -293,7 +318,9 @@ class MapObjectEditorController {
         'objectId': this.selectedMapObject.objectId, 
         'options': ['delete'], 
         'dataTypeList': ['location'], 
-        'name': 'location'
+        'name': 'location', 
+        'feature': this.selectedMapObject, 
+        'latLng': latLng
       }]
       
       this.openContextMenu(x, y)
@@ -308,14 +335,14 @@ class MapObjectEditorController {
     
     // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
     var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-    console.log(clickedPointPixels)
+    //console.log(clickedPointPixels)
     //console.log(this.mapRef)
     var hitPromises = []
-    console.log(this.mapRef.overlayMapTypes)
+    //console.log(this.mapRef.overlayMapTypes)
     this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
         hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
     })
-    
+    console.log(this.createdMapObjects)
     return Promise.all(hitPromises)
     /*
     Promise.all(hitPromises)
@@ -636,10 +663,10 @@ class MapObjectEditorController {
       if ('location' == this.featureType){
         this.selectMapObject(mapObject)
       }
-      var lat = event.latLng.lat()
-      var lng = event.latLng.lng()
+      //var lat = event.latLng.lat()
+      //var lng = event.latLng.lng()
       var eventXY = this.getXYFromEvent(event)
-      this.updateContextMenu(lat, lng, eventXY.x, eventXY.y)
+      this.updateContextMenu(event.latLng, eventXY.x, eventXY.y)
       /*
       // Display the context menu and select the clicked marker
       this.contextMenuCss.display = 'block'
@@ -667,13 +694,15 @@ class MapObjectEditorController {
     if (!event || !event.latLng) {
       return
     }
+    /*
     var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
     const isDropdownHidden = dropdownMenu.is(':hidden')
     if (!isDropdownHidden) {
       // This means that the context menu is being displayed. Do not create an object.
+      console.log('is this why')
       return
     }
-    
+    */
     // filter out equipment and locations already in the list
     // ToDo: should we do this for all types of features?
     var filterArrayByObjectId = (featureList) => {

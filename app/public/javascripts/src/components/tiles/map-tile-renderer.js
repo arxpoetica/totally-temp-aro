@@ -1146,7 +1146,7 @@ class MapTileRenderer {
 
       //Load the selected service area 
       //if(feature.properties.code) { // ToDo: use featureType when implimented 
-    	  if(feature.properties.id) {
+    	if(feature.properties.id) {
         feature.loadGeometry().forEach(function (areaGeom) {
           var areaPolyCoordinates = []
 
