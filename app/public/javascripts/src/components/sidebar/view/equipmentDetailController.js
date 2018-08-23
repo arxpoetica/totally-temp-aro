@@ -52,7 +52,7 @@ class EquipmentDetailController {
       }
     })
 
-    this.requestLoadEquipmentListSubscription = state.requestLoadEquipmentList.subscribe((reload) => {
+    this.requestLoadEquipmentListSubscription = state.requestLoadEquipmentList.debounceTime(120).subscribe((reload) => {
       reload && this.refreshEquipmentList()
     })
   }
@@ -134,11 +134,11 @@ class EquipmentDetailController {
   getVisibleTileData(zoom, coord) {
     var renderingData = {}, globalIndexToLayer = {}
     var singleTilePromises = []
-    var mapLayers = TileUtilities.getOrderedKeys(this.tileDataService.mapLayers, 'zIndex', 0)
+    var mapLayers = Object.keys(this.state.mapLayers.getValue())
 
     mapLayers.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
-      var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
+      var mapLayer = this.state.mapLayers.getValue()[mapLayerKey]
       renderingData[mapLayerKey] = {
          data: []
       }
@@ -232,7 +232,7 @@ class EquipmentDetailController {
     if(this.state.activeViewModePanel === this.state.viewModePanels.EQUIPMENT_INFO 
         && this.currentEquipmentDetailView === this.EquipmentDetailView.List) {
       this.clliToequipmentInfo = {}
-      this.$timeout(this.getVisibleEquipmentIds(),200)
+      this.$timeout(this.getVisibleEquipmentIds(),500)
     }
   }
 

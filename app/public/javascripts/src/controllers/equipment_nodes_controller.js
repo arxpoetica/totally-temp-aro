@@ -184,6 +184,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
+    state.requestLoadEquipmentList.next(true)
   }
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateMapLayers)
@@ -201,7 +202,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.changeLayerVisibility = (layerObj, isVisible) => {
     // "visibilityType" allows us to distinguish between planned and existing layers
     layerObj.checked = isVisible
-    state.requestLoadEquipmentList.next(true)
     updateMapLayers()
   }
 
