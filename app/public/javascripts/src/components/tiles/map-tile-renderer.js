@@ -184,7 +184,7 @@ class MapTileRenderer {
     if (layersChanged) {
       this.tileDataService.markHtmlCacheDirty()
       // order by zIndex for drawing in proper stacking order 
-      this.mapLayersByZ = this.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
+      this.mapLayersByZ = TileUtilities.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
     }
     
     this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)

@@ -62,6 +62,10 @@ class Utilities {
       return v.toString(16);
     });
   }
+
+  getObjectSize(object) {
+    return Object.keys(object).length;
+  }
 }
 
 Utilities.$inject =['$document', '$http'];
