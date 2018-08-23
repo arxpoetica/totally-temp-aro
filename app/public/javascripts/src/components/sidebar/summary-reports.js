@@ -15,7 +15,7 @@ class SummaryReportsController {
       location: {
         caption: 'Export Locations',
         url: '/reports/planSummary/{PLAN_ID}/{SELECTED_BOUNDARY_NAME}',
-        fileName: 'Plan locations - {PLAN_NAME}.kml',
+        fileName: 'Plan locations - {PLAN_NAME}.csv',
         isDownloading: false
       },
       kml: {
