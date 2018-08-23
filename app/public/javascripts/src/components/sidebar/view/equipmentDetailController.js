@@ -51,6 +51,10 @@ class EquipmentDetailController {
         this.clearSelection()
       }
     })
+
+    this.requestLoadEquipmentListSubscription = state.requestLoadEquipmentList.subscribe((reload) => {
+      reload && this.refreshEquipmentList()
+    })
   }
 
 	clearSelection(){
@@ -119,16 +123,11 @@ class EquipmentDetailController {
       return
     }
     var visibleTiles = []
-    visibleTiles = MapUtilities.getVisibleTiles(this.mapRef)    
-
+    visibleTiles = MapUtilities.getVisibleTiles(this.mapRef)
     visibleTiles.forEach((tile) => {
-      var tileId = TileUtilities.getTileId(tile.zoom, tile.x, tile.y)
-      var cachedTile = this.tileDataService.tileHtmlCache[tileId]
-      if (cachedTile) {
-        var coord = { x: tile.x, y: tile.y }
-        //fetch tile data
-        this.getVisibleTileData(tile.zoom, coord)
-      }
+      var coord = { x: tile.x, y: tile.y }
+      //fetch tile data
+      this.getVisibleTileData(tile.zoom, coord)
     })
   }
 
@@ -223,20 +222,17 @@ class EquipmentDetailController {
 
   addMapListeners() {
     if (this.mapRef) {
-      this.mapRef.addListener('center_changed', () => {
-        //refresh only in equipment list view
-        if(this.currentEquipmentDetailView === this.EquipmentDetailView.List) {
-          this.clliToequipmentInfo = {}
-          this.getVisibleEquipmentIds()
-        } 
-      })
-      this.mapRef.addListener('zoom_changed', () => {
-        //refresh only in equipment list view
-        if(this.currentEquipmentDetailView === this.EquipmentDetailView.List) {
-          this.clliToequipmentInfo = {}
-          this.getVisibleEquipmentIds()
-        }
-      })
+      this.mapRef.addListener('center_changed', () => this.refreshEquipmentList())
+      this.mapRef.addListener('zoom_changed', () => this.refreshEquipmentList())
+    }
+  }
+
+  refreshEquipmentList() {
+    //refresh only in equipment list view
+    if(this.state.activeViewModePanel === this.state.viewModePanels.EQUIPMENT_INFO 
+        && this.currentEquipmentDetailView === this.EquipmentDetailView.List) {
+      this.clliToequipmentInfo = {}
+      this.$timeout(this.getVisibleEquipmentIds(),200)
     }
   }
 
@@ -257,6 +253,7 @@ class EquipmentDetailController {
     this.visibleEquipmentIds = new Set()
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
+    this.requestLoadEquipmentListSubscription.unsubscribe()
     this.removeMapListeners()
   }
 }

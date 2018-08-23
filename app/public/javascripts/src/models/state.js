@@ -272,6 +272,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
+  service.requestLoadEquipmentList =  new Rx.BehaviorSubject(false)
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
@@ -1525,9 +1526,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
     if(filterObj == '') return
-    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}`
     if(entityType !== 'AnalysisLayer') {
-      entityListUrl = entityListUrl + "&$top=10"
+      entityListUrl = entityListUrl + "&$top=20"
     }
 
     var filter = ''

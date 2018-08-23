@@ -201,6 +201,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.changeLayerVisibility = (layerObj, isVisible) => {
     // "visibilityType" allows us to distinguish between planned and existing layers
     layerObj.checked = isVisible
+    state.requestLoadEquipmentList.next(true)
     updateMapLayers()
   }
 
