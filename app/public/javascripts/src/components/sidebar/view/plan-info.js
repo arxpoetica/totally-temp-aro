@@ -12,11 +12,48 @@ class PlanInfoController {
     this.addGeneralTags = false
     this.addSATags = false
 
+    this.currentUserCanEdit = false
     this.planObserver = state.plan
-    .subscribe((plan) => {
-      this.currentPlanInfo = plan
-      this.getPlanTagDetails()
+      .subscribe((plan) => {
+        this.currentPlanInfo = plan
+        this.getPlanTagDetails()
+        this.updateEditableStatus()
+      })
+
+    // Save the permission bits for resource read, write and admin
+    this.accessTypes = Object.freeze({
+      RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
+      RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
+      RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null, actors: [] }
     })
+  }
+
+  updateEditableStatus() {
+    this.currentUserCanEdit = false
+    this.$http.get('/service/auth/permissions')
+      .then((result) => {
+        result.data.forEach((authPermissionEntity) => {
+          if (this.accessTypes.hasOwnProperty(authPermissionEntity.name)) {
+            this.accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
+          }
+        })
+        // Get the actors that have access for this resource
+        return this.$http.get(`/service/auth/acl/PLAN/${this.state.plan.getValue().id}`)
+      })
+      .then((result) => {
+        var currentUserCanWrite = false, currentUserIsAdmin = false
+        result.data.resourcePermissions.forEach((access) => {
+          if (access.systemActorId === this.state.loggedInUser.id) {
+            const permission = access.rolePermissions
+            currentUserCanWrite = ((permission & this.accessTypes.RESOURCE_WRITE.permissionBits) != 0)
+            currentUserIsAdmin = ((permission & this.accessTypes.RESOURCE_ADMIN.permissionBits) != 0)
+          }
+        })
+        this.currentUserCanEdit = currentUserCanWrite || currentUserIsAdmin
+        console.log(this.currentUserCanEdit)
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
   registerSaveAccessCallback(saveResourceAccess) {
