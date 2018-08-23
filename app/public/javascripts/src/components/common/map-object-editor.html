@@ -2,16 +2,20 @@
      must be unique as all this HTML is going to be attached to the $document -->
 <style>
   .map-object-editor-context-menu-container {
-    line-height: 30px; /* Any property will do */
+    line-height: 22px; /* Any property will do */
   }
   .map-object-editor-context-menu {
-    line-height: 30px; /* Any property will do */
+    line-height: 22px; /* Any property will do */
   }
   .map-object-editor-context-menu-dropdown {
-    line-height: 30px; /* Any property will do */
+    line-height: 22px; /* Any property will do */
+    padding: 5px;
   }
   .map-object-drop-targets-container {
-    line-height: 30px; /* Any property will do */
+    line-height: 22px; /* Any property will do */
+  }
+  .map-object-editor-context-menu-dropdown-section{
+    margin-bottom: 6px;
   }
 </style>
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
@@ -43,7 +47,7 @@
     
     <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
       <!-- Menu item to delete object -->
-      <div ng-repeat="item in $ctrl.menuItems">
+      <div class="map-object-editor-context-menu-dropdown-section" ng-repeat="item in $ctrl.menuItems">
         <li>
           {{item.name}}
         </li>

@@ -313,7 +313,6 @@ class TileComponentController {
 
       // Get zoom
       var zoom = this.mapRef.getZoom()
-      console.log(this.mapRef)
       // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
       var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
 
@@ -444,7 +443,7 @@ class TileComponentController {
       this.overlayRightClickListener = null
     }
     */
-    console.log('clear')
+    
     this.mapRef.overlayMapTypes.clear()
   }
 
