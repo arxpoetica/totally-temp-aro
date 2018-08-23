@@ -1051,7 +1051,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
         return service.getAddressFor(plan.latitude, plan.longitude)
       })
       .then((address) => {
-        var plan = service.plan.getValue()
         plan.areaName = address
         service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })

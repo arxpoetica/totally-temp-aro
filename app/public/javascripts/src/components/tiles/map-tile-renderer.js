@@ -30,8 +30,7 @@ class MapTileRenderer {
     this.configuration = configuration
     this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
-    this.renderBatches = []
-    this.isRendering = false
+    this.latestTileUniqueId = 0
 
     const MAX_CONCURRENT_VECTOR_TILE_RENDERS = 5
     this.tileRenderThrottle = new AsyncPriorityQueue((task, callback) => {
@@ -197,19 +196,21 @@ class MapTileRenderer {
   // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
     tiles.forEach((tile) => {
+      // There *can* be multiple cached tiles for a given zoom-x-y
       var tileId = TileUtilities.getTileId(tile.zoom, tile.x, tile.y)
-      var cachedTile = this.tileDataService.tileHtmlCache[tileId]
-      if (cachedTile) {
-        var coord = { x: tile.x, y: tile.y }
-        this.tileRenderThrottle.push(() => this.renderTile(tile.zoom, coord, cachedTile), --this.latestTileRenderPriority)
-      }
+      Object.keys(this.tileDataService.tileHtmlCache).forEach((cacheKey) => {
+        if (cacheKey.indexOf(tileId) === 0) {
+          const cachedTile = this.tileDataService.tileHtmlCache[cacheKey]
+          var coord = { x: tile.x, y: tile.y }
+          this.tileRenderThrottle.push(() => this.renderTile(tile.zoom, coord, cachedTile), --this.latestTileRenderPriority)
+        }
+      })
     })
   }
 
   // Creates a tile canvas element
   createTileCanvas(ownerDocument) {
     var canvas = ownerDocument.createElement('canvas');
-    var borderWidth = 0
     canvas.width = this.tileSize.width;
     canvas.height = this.tileSize.height;
     return canvas
@@ -217,40 +218,39 @@ class MapTileRenderer {
 
   // This method is called by Google Maps. Render a canvas tile and send it back.
   getTile(coord, zoom, ownerDocument) {
+
+    // Initially, we were using just the `zoom-x-y` as the tile cache key. At certain latitudes on the map,
+    // e.g. at '14-3950-5917', as you pan around, Google Maps will rebuild the map overlay. In the process,
+    // it will call getTile() for '14-3950-5917' and then call releaseTile() on the OLD overlays tile DOM element.
+    // If we just use `zoom-x-y` then we will have only one tile DOM element and the tile will disappear when
+    // we remove the DOM element in releaseTile(). We are appending a unique ID so that releaseTile() removes
+    // the old tile DOM element.
+    // Also, we now ALWAYS create a new tile DOM element in getTile() and don't reuse existing elements.
+    // Also important to note - the reason we have a HTML cache is so that we can re-render tiles when
+    // the user selects a new layer to show/hide.
+    var numberedTileId = `${TileUtilities.getTileId(zoom, coord.x, coord.y)}-ID${++this.latestTileUniqueId}`
+    var htmlCache = this.tileDataService.tileHtmlCache[numberedTileId]
+
     // We create a div with a parent canvas. This is because the canvas needs to have its top-left
     // corner offset by the margin. If we just use canvas, google maps sets the top-left to (0, 0)
     // regardless of what we give in the style.left/style.top properties
-    var tileId = TileUtilities.getTileId(zoom, coord.x, coord.y)
-    var div = null, frontBufferCanvas = null, backBufferCanvas = null, heatmapCanvas = null
-    var htmlCache = this.tileDataService.tileHtmlCache[tileId]
-    if (htmlCache) {
-      div = htmlCache.div
-      frontBufferCanvas = htmlCache.frontBufferCanvas
-      backBufferCanvas = htmlCache.backBufferCanvas
-      heatmapCanvas = htmlCache.heatmapCanvas
-    } else {
-      div = ownerDocument.createElement('div')
-      div.id = tileId
-      var frontBufferCanvas = this.createTileCanvas(ownerDocument)
-      div.appendChild(frontBufferCanvas)
-      frontBufferCanvas.style.position = 'absolute'
-      var borderWidth = 0
-      if (this.mapTileOptions.showTileExtents) {
-        borderWidth = 2
-      }
-      frontBufferCanvas.style.left = `0 px`
-      frontBufferCanvas.style.top = `0 px`
-      backBufferCanvas = this.createTileCanvas(ownerDocument)
-      heatmapCanvas = this.createTileCanvas(ownerDocument)
-      this.tileDataService.tileHtmlCache[tileId] = {
-        div: div,
-        frontBufferCanvas: frontBufferCanvas,
-        backBufferCanvas: backBufferCanvas,
-        heatmapCanvas: heatmapCanvas,
-        isDirty: true,
-        zoom: zoom,
-        coord: coord
-      }
+    var div = ownerDocument.createElement('div')
+    div.id = numberedTileId
+    var frontBufferCanvas = this.createTileCanvas(ownerDocument)
+    div.appendChild(frontBufferCanvas)
+    frontBufferCanvas.style.position = 'absolute'
+    frontBufferCanvas.style.left = `0 px`
+    frontBufferCanvas.style.top = `0 px`
+    var backBufferCanvas = this.createTileCanvas(ownerDocument)
+    var heatmapCanvas = this.createTileCanvas(ownerDocument)
+    this.tileDataService.tileHtmlCache[numberedTileId] = {
+      div: div,
+      frontBufferCanvas: frontBufferCanvas,
+      backBufferCanvas: backBufferCanvas,
+      heatmapCanvas: heatmapCanvas,
+      isDirty: true,
+      zoom: zoom,
+      coord: coord
     }
 
     // Why use a timeout? This function (getTile()) is called by the Google Maps API on zoom or pan.
@@ -265,7 +265,7 @@ class MapTileRenderer {
     var RENDER_TIMEOUT_MILLISECONDS = 100
     // Store the HTML cache object. The object referred to by this.tileDataService.tileHtmlCache[tileId] can
     // change between now and when the full tile is rendered. We do not want to set the dirty flag on a different object.
-    var htmlCache = this.tileDataService.tileHtmlCache[tileId]
+    var htmlCache = this.tileDataService.tileHtmlCache[numberedTileId]
     setTimeout(() => {
       this.tileRenderThrottle.push(() => this.renderTile(zoom, coord, htmlCache), --this.latestTileRenderPriority)
     }, RENDER_TIMEOUT_MILLISECONDS)
@@ -276,10 +276,9 @@ class MapTileRenderer {
   releaseTile(node) {
     // Remove this tiles node (DIV element) from our cache. This will include the HTML element, children canvases, etc.
     // Without this we will hold on to a lot of tiles and will keep repainting even offscreen tiles.
-    // Note that releaseTile() is not called the very moment that a tile goes offscreen. It seems to hold onto
-    // tiles until the user pans a little bit more.
-    const tileCoords = node.id.split('-') // The ID is of the form zoom-x-y
-    this.tileDataService.removeHtmlCacheNode(tileCoords[0], tileCoords[1], tileCoords[2])
+    // Note that releaseTile() is not called the very moment that a tile goes offscreen. Google Maps API seems
+    // to hold onto tiles until the user pans a little bit more.
+    this.tileDataService.removeHtmlCacheNode(node.id)
   }
 
   // Renders all data for this tile
