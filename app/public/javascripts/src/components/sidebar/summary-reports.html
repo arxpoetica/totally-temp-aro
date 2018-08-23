@@ -1,4 +1,10 @@
-<div class="btn-group-vertical btn-block">
+<style scoped>
+  .button-export {
+    margin-bottom: 10px;
+  }
+</style>
+
+<div class="btn-group-vertical btn-block" style="margin-top: 10px;">
   <!-- One button to download each type of report -->
   <button ng-repeat="(downloadKey, download) in $ctrl.downloads"
           class="pull-left btn btn-primary btn-sm button-export"
