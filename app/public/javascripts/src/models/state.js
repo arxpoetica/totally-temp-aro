@@ -96,6 +96,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     EQUIPMENT_INFO: 'EQUIPMENT_INFO',
     BOUNDARIES_INFO: 'BOUNDARIES_INFO',
     ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
+    PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
     COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
     EDIT_LOCATIONS: 'EDIT_LOCATIONS',
     PLAN_INFO: 'PLAN_INFO'
@@ -272,6 +273,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
+  service.requestLoadEquipmentList =  new Rx.BehaviorSubject(false)
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
@@ -1051,7 +1053,6 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
         return service.getAddressFor(plan.latitude, plan.longitude)
       })
       .then((address) => {
-        var plan = service.plan.getValue()
         plan.areaName = address
         service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
@@ -1526,9 +1527,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
 
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
     if(filterObj == '') return
-    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}`
     if(entityType !== 'AnalysisLayer') {
-      entityListUrl = entityListUrl + "&$top=10"
+      entityListUrl = entityListUrl + "&$top=20"
     }
 
     var filter = ''
@@ -1627,6 +1628,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       .then((isAdministrator) => {
         service.loggedInUser.isAdministrator = isAdministrator
       })
+      .catch((err) => console.error(err))
+
+    // Populate the group ids that this user is a part of
+    service.loggedInUser.groupIds = []
+    $http.get(`/service/auth/users/${service.loggedInUser.id}`)
+      .then((result) => service.loggedInUser.groupIds = result.data.groupIds)
       .catch((err) => console.error(err))
 
     var initializeToDefaultCoords = (plan) => {

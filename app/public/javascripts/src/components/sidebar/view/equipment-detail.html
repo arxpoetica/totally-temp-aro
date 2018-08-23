@@ -26,7 +26,7 @@
   </div>
   -->
   
-  <div class="ei-panel">
+	<div class="ei-panel" style="overflow:hidden">
 	  <div class="mb-5 mt-2">
 	    <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
 				object-name="Equipment"
@@ -38,7 +38,7 @@
 	    </aro-search>
 	  </div>
 	  
-	  <div class="ei-panel-header clearfix" ng-if="!$ctrl.angular.equals({}, $ctrl.selectedEquipmentInfo)">
+		<div class="ei-panel-header clearfix" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
 	    
 	    <img class="ei-panel-header-icon" ng-if=" '' != $ctrl.headerIcon" ng-src="{{$ctrl.headerIcon}}">
 	    
@@ -55,14 +55,33 @@
         <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedEquipmentGeog[0]}}</div>
       </div>
 	  </div>
-	  <div class="equipment-detail ei-panel-content">
+	  <div class="equipment-detail ei-panel-content" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
 	    <!-- 
 	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" display-props="$ctrl.selectedEquipmentInfoDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
 	    -->
 	    <editor-interface-tree 
 	      object-to-view="$ctrl.selectedEquipmentInfo" 
 	      root-meta-data="{'networkNodeType':$ctrl.networkNodeType}"
-	      is-edit="false"></editor-interface-tree>
-      
-	  </div>
+				is-edit="false">
+			</editor-interface-tree>
+		</div>
+		
+		<div style="overflow-y:auto">			
+			<table ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List" class="table table-condensed table-striped">
+				<thead>
+					<th>Site Clli</th>
+					<th>Type</th>
+				</thead>
+				<tbody>
+					<tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToequipmentInfo | orderObjectBy:'clli'" ng-click="$ctrl.viewSelectedEquipment(equipmentInfo)">
+						<td>{{equipmentInfo.clli}}</td>
+						<td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td>
+					</tr>
+
+					<tr ng-if="$ctrl.Utils.getObjectSize($ctrl.clliToequipmentInfo) >= $ctrl.MAX_Equipment_List">		
+						<td colspan="2">List limited to {{$ctrl.MAX_Equipment_List}} sites</td>
+					</tr>
+				</tbody>
+			</table>	
+		</div>	
 	</div>
