@@ -15,7 +15,9 @@ class EquipmentDetailController {
     this.Utils = Utils
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
+    this.clliToequipmentInfoCache = {}
     this.clliToequipmentInfo = {}
+    this.totalPromisesForViewPort = 0
     this.selectedEquipment = ''
     this.MAX_Equipment_List = 100
     
@@ -52,8 +54,9 @@ class EquipmentDetailController {
       }
     })
 
-    this.requestLoadEquipmentListSubscription = state.requestLoadEquipmentList.debounceTime(120).subscribe((reload) => {
-      reload && this.refreshEquipmentList()
+    //Handles zoom or equipment layer selection
+    this.requestLoadEquipmentListSubscription = state.requestLoadEquipmentList.skip(1).debounceTime(120).subscribe((reload) => {
+      reload && this.refreshEquipmentList() 
     })
   }
 
@@ -123,6 +126,7 @@ class EquipmentDetailController {
       return
     }
     var visibleTiles = []
+    this.totalPromisesForViewPort = 0
     visibleTiles = MapUtilities.getVisibleTiles(this.mapRef)
     visibleTiles.forEach((tile) => {
       var coord = { x: tile.x, y: tile.y }
@@ -182,49 +186,60 @@ class EquipmentDetailController {
         }
       })
 
-      this.getVisibleEquipmentDetails(singleTile_visibleEqu)
+      this.getEquipmentDetails(singleTile_visibleEqu)
     })
   }
 
-  getVisibleEquipmentDetails(visibleEquipmentsInTile) {
+  getEquipmentDetails(equipmentsInTile) {
     
-    let visibleEquipmentObjectIdsInTile = [...visibleEquipmentsInTile];
-    var promises = []
-    while(visibleEquipmentObjectIdsInTile.length) {
+    let equipmentObjectIds = [...equipmentsInTile];
+    var promises = new Set()
+    var cacheEquipments = Object.keys(this.clliToequipmentInfoCache)
+    var equDetailsToGet = equipmentObjectIds.filter(equId => cacheEquipments.indexOf(equId) == -1)
+    var equDetailsInCache = cacheEquipments.filter(equId => equipmentObjectIds.includes(equId))
+    //Get the details from cache
+    if(equDetailsInCache.length > 0) {
+      equDetailsInCache.forEach((equId) => {
+        this.clliToequipmentInfo[equId] = this.clliToequipmentInfoCache[equId]
+      })
+    }
+
+    while(equDetailsToGet.length) {
       var filter = `(planId eq ${this.state.plan.getValue().id}) and (`
-      visibleEquipmentObjectIdsInTile.splice(0,50).forEach((visibleEquipmentObjectIdInTile, index) => {
+      equDetailsToGet.splice(0,50).forEach((equipmentObjectId, index) => {
         if (index > 0) {
           filter += ' or '
         }
-        filter += ` (objectId eq guid'${visibleEquipmentObjectIdInTile}')`
+        filter += ` (objectId eq guid'${equipmentObjectId}')`
       })
 
       filter += `)`
       //Dont request if UI is displaying 100 equipments
-      if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
-        promises.push(this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,clli,objectId,networkNodeType&$filter=${filter}&$top=100`))
+      if ((this.Utils.getObjectSize(this.clliToequipmentInfo) + this.totalPromisesForViewPort ) <= this.MAX_Equipment_List) {
+        this.totalPromisesForViewPort += 1
+        promises.add(this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,clli,objectId,networkNodeType&$filter=${filter}&$top=100`))
       }
     }
 
-    return Promise.all(promises)
+    return Promise.all([...promises])
     .then((results) => {
       results.forEach((result) => {
         result.data.forEach((equipmentInfo) => {
           if (this.Utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
+            this.clliToequipmentInfoCache[equipmentInfo.objectId] = equipmentInfo
             this.clliToequipmentInfo[equipmentInfo.objectId] = equipmentInfo
           }
         })
-        //console.log(this.clliToequipmentInfo)
       })
       this.$timeout()
     })
   }
 
   addMapListeners() {
-    if (this.mapRef) {
-      this.mapRef.addListener('center_changed', () => this.refreshEquipmentList())
-      this.mapRef.addListener('zoom_changed', () => this.refreshEquipmentList())
-    }
+     if (this.mapRef) {
+       this.mapRef.addListener('tilesloaded', () => this.refreshEquipmentList())
+       //this.mapRef.addListener('zoom_changed', () => this.refreshEquipmentList())
+     }
   }
 
   refreshEquipmentList() {
@@ -237,7 +252,7 @@ class EquipmentDetailController {
   }
 
   removeMapListeners() {
-    //google.maps.event.clearListeners(this.mapRef, 'center_changed');
+    google.maps.event.clearListeners(this.mapRef, 'tilesloaded');
     //google.maps.event.clearListeners(this.mapRef, 'zoom_changed');    
   }
 
@@ -251,6 +266,8 @@ class EquipmentDetailController {
   $onDestroy() {
     // Cleanup subscriptions
     this.visibleEquipmentIds = new Set()
+    this.clliToequipmentInfo = {}
+    this.clliToequipmentInfoCache = {}
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
     this.requestLoadEquipmentListSubscription.unsubscribe()

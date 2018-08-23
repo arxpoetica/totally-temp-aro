@@ -73,7 +73,7 @@
 					<th>Type</th>
 				</thead>
 				<tbody>
-					<tr style="cursor: pointer" ng-repeat="(objectId, equipmentInfo) in $ctrl.clliToequipmentInfo" ng-click="$ctrl.viewSelectedEquipment(equipmentInfo)">
+					<tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToequipmentInfo | orderObjectBy:'clli'" ng-click="$ctrl.viewSelectedEquipment(equipmentInfo)">
 						<td>{{equipmentInfo.clli}}</td>
 						<td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td>
 					</tr>
