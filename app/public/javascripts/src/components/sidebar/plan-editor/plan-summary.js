@@ -7,11 +7,6 @@ class PlanSummaryController {
     this.$http = $http
     this.$timeout = $timeout
     this.config = config
-    this.isDownlodingReport = {
-      equipment: false,
-      location: false,
-      kml: false
-    }
     this.isKeyExpanded = {
       Equipment: false,
       Fiber: false,
@@ -31,12 +26,6 @@ class PlanSummaryController {
     this.equipmentOrder = []
     this.fiberOrder = []
     this.locTagCoverage = []
-    
-    state.plan.subscribe((plan) => { 
-      this.plan = plan 
-      this.downloadEquipment = `/reports/planSummary/${this.plan.id}`
-      this.downloadLocations = `/reports/planSummary/${this.plan.id}/${this.state.selectedBoundaryType.name}`
-    })
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
     this.censusTagCategories = this.state.censusCategories.getValue()
     this.censusTagCategoriesObserver = this.state.censusCategories.subscribe((newValue) => {
@@ -45,19 +34,12 @@ class PlanSummaryController {
   }
 
   $onInit() {
-    // this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
-    //   this.formatSummary(response.data)
-    // })
-
     this.selectedBoundaryType = this.state.selectedBoundaryType
 
     //fetching equipment order from networkEquipment.json
     var equipmentOrderKey = this.summaryCategoryTypes['Equipment']['groupBy']
     this.equipmentOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.equipments,equipmentOrderKey)
     this.equipmentOrder.push('junction_splitter')
-    
-    // var fiberOrderKey = this.summaryCategoryTypes['Fiber']['groupBy']
-    // this.fiberOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.cables,fiberOrderKey)
 
     //fetching location order from locationCategories.json
     var coverageOrderKey = 'plannerKey'
@@ -161,30 +143,6 @@ class PlanSummaryController {
 
   toggleIsKeyExpanded(type) {
     this.isKeyExpanded[type] = !this.isKeyExpanded[type]
-  }
-
-  downloadEquipmentSummary() {
-    this.isDownlodingReport.equipment = true
-    this.$http.get(this.downloadEquipment).then((response) => {
-      this.isDownlodingReport.equipment = false
-      this.Utils.downloadCSV(response.data,"planSummary.csv")
-    })
-  }
-
-  downloadLocationSummary() {
-    this.isDownlodingReport.location = true
-    this.$http.get(this.downloadLocations).then((response) => {
-      this.isDownlodingReport.location = false
-      this.Utils.downloadCSV(response.data,`Plan locations-${this.plan.name}.csv`)
-    })
-  }
-
-  exportKml() {
-    this.isDownlodingReport.kml = true
-    this.$http.get(`/reports/planSummary/kml/${this.plan.id}/${this.state.selectedBoundaryType.name}`).then((response) => {
-      this.isDownlodingReport.kml = false
-      this.Utils.downloadCSV(response.data, `Site boundaries-${this.state.selectedBoundaryType.name}-${this.plan.name}.kml`)
-    })
   }
 
   togglelocationTagCoverage(selectedCoverageLoc) {

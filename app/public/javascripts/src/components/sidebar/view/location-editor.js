@@ -19,7 +19,6 @@ class LocationEditorController {
     this.objectIdToMapObject = {}
     this.deletedFeatures = []
     this.currentTransaction = null
-    this.lastUsedNumberOfLocations = 1
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
   }
 
@@ -164,12 +163,6 @@ class LocationEditorController {
     })
   }
 
-  // Sets the last-used number-of-locations property so we can use it for new locations
-  setLastUsedNumberOfLocations(newValue) {
-    //console.log(newValue)
-    this.lastUsedNumberOfLocations = newValue
-  }
-
   // Marks the properties of the selected location as dirty (changed).
   markSelectedLocationPropertiesDirty() {
     if (this.selectedMapObject) {
@@ -214,7 +207,7 @@ class LocationEditorController {
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
     //if (feature.is_locked) return
-    var numberOfLocations = this.lastUsedNumberOfLocations
+    var numberOfLocations = 1   // Default number of locations should always be 1. #159981791
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
