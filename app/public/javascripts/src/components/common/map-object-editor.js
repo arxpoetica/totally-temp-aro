@@ -252,7 +252,7 @@ class MapObjectEditorController {
       // NEED TO GET NEW FEATURES AS WELL
       var lat = latLng.lat()
       var lng = latLng.lng()
-      this.getFeaturesAtPoint(lat, lng)
+      this.getFeaturesAtPoint(latLng)
       .then((results) => {
         console.log(results)
         var menuItems = []
@@ -327,9 +327,18 @@ class MapObjectEditorController {
     }
   }
   
-  getFeaturesAtPoint(lat, lng){
+  getFeaturesAtPoint(latLng){
+    
+    console.log(this.createdMapObjects)
+    var lat = latLng.lat()
+    var lng = latLng.lng()
+    
     // Get zoom
     var zoom = this.mapRef.getZoom()
+    Object.getOwnPropertyNames(this.createdMapObjects).forEach((objectId) => {
+      var mapObject = this.createdMapObjects[objectId]
+      console.log(mapObject.hitTest(latLng))
+    })
     // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
     var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
     
@@ -342,7 +351,7 @@ class MapObjectEditorController {
     this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
         hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
     })
-    console.log(this.createdMapObjects)
+    
     return Promise.all(hitPromises)
     /*
     Promise.all(hitPromises)
@@ -550,7 +559,13 @@ class MapObjectEditorController {
     }
     this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
     this.state.requestMapLayerRefresh.next(tilesToRefresh)
-
+    
+    mapMarker.hitTest = (latLng) => {
+      console.log(mapMarker.icon.size.width)
+      var zoom = this.mapRef.getZoom()
+      console.log(zoom)
+    }
+    
     return mapMarker
   }
 
@@ -573,6 +588,11 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     polygon.setOptions(this.polygonOptions)
+    
+    polygon.hitTest = (latLng) => {
+      if (!this.state.showSiteBoundary) return false
+      return google.maps.geometry.poly.containsLocation(latLng, polygon)
+    }
     return polygon
   }
 
@@ -605,6 +625,7 @@ class MapObjectEditorController {
       }
       //console.log(feature)
       mapObject = this.createPointMapObject(feature, iconUrl)
+      //mapObject.hitTest
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
       mapObject.addListener('click', (event) => {
