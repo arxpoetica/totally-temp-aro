@@ -258,50 +258,69 @@ class MapObjectEditorController {
         var menuItems = []
         var menuItemsById = {}
         
-        results[0].forEach((result) => {
-          //console.log(result)
-          //populate context menu aray here
-          //update ma-object-editor.html > map-object-editor-context-menu-dropdown to read dynamically from this object
-          // we may need different behavour for different controllers using this
-          
-          // if this.createdMapObjects[objectId]
-          var options = []
-          var dataTypeList = result._data_type.split('.')
-          if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
-              && (!result.is_deleted || 'false' == result.is_deleted)
-              && !menuItemsById.hasOwnProperty( result.object_id) ){
+        //results.forEach((resultList) => {
+        //  resultList.forEach((result) => {
+        //    
+        //  })
+        //})
+        
+        results.forEach((resultList) => {
+          resultList.forEach((result) => {
+            console.log(result)
+            //populate context menu aray here
+            //update ma-object-editor.html > map-object-editor-context-menu-dropdown to read dynamically from this object
+            // we may need different behavour for different controllers using this
             
-            if (this.createdMapObjects.hasOwnProperty( result.object_id) ){
-              // it's on the edit layer / in the transaction
+            // if this.createdMapObjects[objectId]
+            var options = []
+            // ToDo: sometimes it's _data_type other times it's dataType
+            // regulate this using actual classes! 
+            var dataTypeList = ['']
+            if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
+            if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
+            if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
+                && (!result.is_deleted || 'false' == result.is_deleted)
+                && !menuItemsById.hasOwnProperty( result.object_id) ){
               
-              options.push('select')// select 
-              if ('equipment' == dataTypeList[0]){
-                options.push('add boundary')// need to filter for: if not boundary 
+              // ToDo: MORE discrepancies, we NEED to fix this
+              if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
+              
+              var feature = result
+              if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
+                // it's on the edit layer / in the transaction
+                feature = this.createdMapObjects[result.objectId].feature
+                options.push('select')// select 
+                if ('equipment' == dataTypeList[0]){
+                  options.push('add boundary')// need to filter for: if not boundary 
+                }
+                options.push('delete')
+              }else{
+                options.push('edit existing')
               }
-              options.push('delete')
-            }else{
-              options.push('edit existing')
-            }
-            
-            var name = ''
-            if ('equipment_boundary' == dataTypeList[0]){
-              name = 'boundary'
-            }else{
-              name = dataTypeList[1]
-            }
               
-            menuItemsById[result.object_id] = options
-            menuItems.push({
-              'objectId': result.object_id, 
-              'options': options, 
-              'dataTypeList': dataTypeList, 
-              'name': name, 
-              'feature': result, 
-              'latLng': latLng
-            })
-            
-          }
+              var name = ''
+              if ('equipment_boundary' == dataTypeList[0]){
+                name = 'boundary'
+              }else if(feature.hasOwnProperty('networkNodeType')){
+                name = feature.networkNodeType
+              }else{
+                name = dataTypeList[1]
+              }
+              console.log(name)
+              menuItemsById[result.objectId] = options
+              menuItems.push({
+                'objectId': result.objectId, 
+                'options': options, 
+                'dataTypeList': dataTypeList, 
+                'name': name, 
+                'feature': feature, 
+                'latLng': latLng
+              })
+              
+            }
+          })
         })
+        
         console.log(menuItems)
         this.menuItems = menuItems
         if (menuItems.length <= 0){
@@ -335,10 +354,17 @@ class MapObjectEditorController {
     
     // Get zoom
     var zoom = this.mapRef.getZoom()
-    Object.getOwnPropertyNames(this.createdMapObjects).forEach((objectId) => {
-      var mapObject = this.createdMapObjects[objectId]
-      console.log(mapObject.hitTest(latLng))
-    })
+    var hitPromises = []
+    hitPromises.push( new Promise((resolve, reject) => {
+      var hits = []
+      Object.getOwnPropertyNames(this.createdMapObjects).forEach((objectId) => {
+        var mapObject = this.createdMapObjects[objectId]
+        if ( mapObject.hitTest(latLng) ){
+          hits.push(mapObject.feature)
+        }
+      })
+      resolve(hits)
+    }))
     // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
     var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
     
@@ -346,7 +372,7 @@ class MapObjectEditorController {
     var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
     //console.log(clickedPointPixels)
     //console.log(this.mapRef)
-    var hitPromises = []
+    
     //console.log(this.mapRef.overlayMapTypes)
     this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
         hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
@@ -559,7 +585,7 @@ class MapObjectEditorController {
     }
     this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
     this.state.requestMapLayerRefresh.next(tilesToRefresh)
-    
+    mapMarker.feature = feature
     mapMarker.hitTest = (latLng) => {
       //console.log(mapMarker.icon.size.width)
       //var zoom = this.mapRef.getZoom()
@@ -604,6 +630,8 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     polygon.setOptions(this.polygonOptions)
+    
+    polygon.feature = feature
     
     polygon.hitTest = (latLng) => {
       if (!this.state.showSiteBoundary) return false
