@@ -405,8 +405,8 @@ class MapObjectEditorController {
     this.TILE_SIZE = 256
     var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
     var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
-
     var scale = Math.pow(2.0, zoom)
+    
     return {
       x: Math.floor(xUnscaled * scale),
       y: Math.floor(yUnscaled * scale)
@@ -561,9 +561,25 @@ class MapObjectEditorController {
     this.state.requestMapLayerRefresh.next(tilesToRefresh)
     
     mapMarker.hitTest = (latLng) => {
-      console.log(mapMarker.icon.size.width)
-      var zoom = this.mapRef.getZoom()
-      console.log(zoom)
+      //console.log(mapMarker.icon.size.width)
+      //var zoom = this.mapRef.getZoom()
+      //console.log(zoom)
+      //console.log(mapMarker.position.lng())
+      //console.log(latLng.lng())
+      //latLngToPixel()
+      var scale = 1 << this.mapRef.getZoom()
+      var w = mapMarker.icon.size.width / scale
+      var h = mapMarker.icon.size.height / scale
+      var lat = latLng.lat()
+      var lng = latLng.lng()
+      var markerLat = mapMarker.position.lat()
+      var markerLng = mapMarker.position.lng()
+      var east = mapMarker.position.lng() - w
+      var west = mapMarker.position.lng() + w
+      //console.log(latLng.lat())
+      //return (markerLat+h >= lat && lat >= markerLat)
+      return (markerLng+w >= lng && lng >= markerLng-w 
+          && markerLat+h >= lat && lat >= markerLat-h)
     }
     
     return mapMarker
@@ -625,7 +641,6 @@ class MapObjectEditorController {
       }
       //console.log(feature)
       mapObject = this.createPointMapObject(feature, iconUrl)
-      //mapObject.hitTest
       // Set up listeners on the map object
       mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
       mapObject.addListener('click', (event) => {
@@ -677,7 +692,6 @@ class MapObjectEditorController {
       
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
-      console.log(this.featureType)
       console.log(event)
       
       // ToDo: this kind of thing needs to be in the controller
