@@ -1628,6 +1628,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       })
       .catch((err) => console.error(err))
 
+    // Populate the group ids that this user is a part of
+    service.loggedInUser.groupIds = []
+    $http.get(`/service/auth/users/${service.loggedInUser.id}`)
+      .then((result) => service.loggedInUser.groupIds = result.data.groupIds)
+      .catch((err) => console.error(err))
+
     var initializeToDefaultCoords = (plan) => {
       service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
       service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)

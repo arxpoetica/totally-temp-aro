@@ -43,13 +43,15 @@ class PlanInfoController {
       .then((result) => {
         var currentUserCanWrite = false, currentUserIsAdmin = false
         result.data.resourcePermissions.forEach((access) => {
-          if (access.systemActorId === this.state.loggedInUser.id) {
+          // We are checking if the logged in user or any of the users groups have permission to write.
+          if ((this.state.loggedInUser.id === access.systemActorId)
+              || (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const permission = access.rolePermissions
             currentUserCanWrite = ((permission & this.accessTypes.RESOURCE_WRITE.permissionBits) != 0)
             currentUserIsAdmin = ((permission & this.accessTypes.RESOURCE_ADMIN.permissionBits) != 0)
+            this.currentUserCanEdit = this.currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
           }
         })
-        this.currentUserCanEdit = currentUserCanWrite || currentUserIsAdmin
         console.log(this.currentUserCanEdit)
         this.$timeout()
       })
