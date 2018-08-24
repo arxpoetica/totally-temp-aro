@@ -21,7 +21,9 @@
   }
 </style>
 <div class="ui-note" ng-if="$ctrl.noteQueue.queueLen > 0">
-  <span class="fa fa-spinner fa-spin"></span>
+  <!-- There used to be a "spinner" icon here, which has been removed. On profiling, we found that the
+       spinning animation caused the tile rendering to be two times slower (e.g. 200ms with spinner vs 100 ms without)
+       Do NOT add any kind of animated element in this control unless you suppress it when tiles are rendering -->
   <div class="ui-note-notes-contain">
     <div class="ui-note-noteline" ng-repeat="(key, value) in $ctrl.noteQueue.queue">{{key}}</div>
   </div>
