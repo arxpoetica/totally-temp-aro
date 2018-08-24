@@ -362,9 +362,8 @@ class ToolBarController {
   }
 
   toggleSiteBoundary() {
-    //if(this.state.showSiteBoundary && this.selectedBoundaryType) {
-      this.state.viewSettingsChanged.next()
-    //} 
+    this.state.viewSettingsChanged.next()
+    this.state.requestMapLayerRefresh.next(null)
   }
 
   showCableDirection() {
