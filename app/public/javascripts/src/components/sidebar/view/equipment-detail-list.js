@@ -18,7 +18,6 @@ class EquipmentDetailListController {
   }
 
   getVisibleEquipmentIds() {
-    // Use the code in tile to fetch visible tile id's, redendunt for now
     if (!this.mapRef || !this.mapRef.getBounds()) {
       return
     }
@@ -31,57 +30,35 @@ class EquipmentDetailListController {
   }
 
   getVisibleTileData(zoom, coord) {
-    var renderingData = {}, globalIndexToLayer = {}
     var singleTilePromises = []
     var mapLayers = Object.keys(this.state.mapLayers.getValue())
 
     mapLayers.forEach((mapLayerKey, index) => {
-      // Initialize rendering data for this layer
       var mapLayer = this.state.mapLayers.getValue()[mapLayerKey]
-      renderingData[mapLayerKey] = {
-         data: []
-      }
-      var xTile = coord.x 
+      var xTile = coord.x
       var yTile = coord.y
       var singleTilePromise = this.tileDataService.getTileData(mapLayer, zoom, xTile, yTile)
       singleTilePromises.push(singleTilePromise)
-      var globalIndex = singleTilePromises.length - 1
-      globalIndexToLayer[globalIndex] = mapLayerKey
     })
 
     return Promise.all(singleTilePromises)
-    .then((singleTileResults) => {
-      singleTileResults.forEach((singleTileResult, index) => {
-        var mapLayerKey = globalIndexToLayer[index]
-        renderingData[mapLayerKey].data[index] = singleTileResult
-      })
-      //console.log(renderingData)      
-
-      // all features
-      Object.keys(renderingData).forEach((mapLayerKey) => {
-        var mapLayer = this.tileDataService.mapLayers[mapLayerKey]
-        if (mapLayer) {
-          renderingData[mapLayerKey].data.forEach((featureData, index) => {
-            var features = []
-            Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-            
-            const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
-
-            for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
-              // Parse the geometry out.
-              var feature = filteredFeatures[iFeature]
-
-              if (feature.properties &&
-                feature.properties.object_id &&
-                this.utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
-                this.clliToequipmentInfo[feature.properties.object_id] = feature.properties
-              }
+      .then((singleTileResults) => {
+        singleTileResults.forEach((featureData, index) => {
+          var features = []
+          Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
+          //console.log(this.tileDataService.modifiedFeatures)
+          for (var iFeature = 0; iFeature < features.length; ++iFeature) {
+            // Parse the geometry out.
+            var feature = features[iFeature]
+            if (feature.properties &&
+              feature.properties.object_id &&
+              this.utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
+              this.clliToequipmentInfo[feature.properties.object_id] = feature.properties
             }
-          })
-        }
+          }
+        })
+        this.$timeout()
       })
-      this.$timeout()
-    })
   }
 
   refreshEquipmentList() {

@@ -16,8 +16,7 @@
       <tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToequipmentInfo | orderObjectBy:'siteClli'" 
         ng-click="$ctrl.viewSelectedDetails({selectedEquipment:equipmentInfo})">
         <td>{{equipmentInfo.siteClli}}</td>
-        <td>{{equipmentInfo._data_type}}</td>
-        <!-- <td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td> -->
+        <td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo._data_type.split('.')[1]]}}</td>
       </tr>
       <tr ng-if="$ctrl.utils.getObjectSize($ctrl.clliToequipmentInfo) >= $ctrl.MAX_Equipment_List">
         <td colspan="2">List limited to {{$ctrl.MAX_Equipment_List}} sites</td>
