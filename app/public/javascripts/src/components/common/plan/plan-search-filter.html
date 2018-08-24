@@ -21,7 +21,7 @@
       </ui-select-match>
       <ui-select-choices class="ui-select-choices-style" repeat="item in $ctrl.searchList | filter: $select.search"
         refresh="$ctrl.refreshTagList({searchObj:$select.search})"
-        refresh-delay="100">
+        refresh-delay="250">
         <div>
           <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.fullName}}
         </div>

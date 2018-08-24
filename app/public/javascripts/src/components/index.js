@@ -10,8 +10,10 @@ import planInfo from './sidebar/view/plan-info'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import editPlanTag from './sidebar/view/edit-plan-tag'
 import aroSearch from './sidebar/view/aro-search'
+import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
+import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 import showTargets from './sidebar/analysis/show-targets'
@@ -91,8 +93,10 @@ app.component('boundaryDetail', boundaryDetail)
    .component('planInfoRecent', planInfoRecent)
    .component('editPlanTag', editPlanTag)
    .component('aroSearch', aroSearch)
+   .component('aroMultiselectSearch', aroMultiselectSearch)
    .component('displayModeButtons', displayModeButtons)
    .component('optimizeButton', optimizeButton)
+   .component('summaryReports', summaryReports)
    .component('analysisExpertMode', analysisExpertMode)
    .component('analysisMode', analysisMode)
    .component('showTargets', showTargets)

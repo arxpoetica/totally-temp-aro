@@ -46,7 +46,8 @@
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.EDIT_PLAN">
 
       <!-- Add a component to handle map editing -->
-      <map-object-editor map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+      <map-object-editor ng-if="$ctrl.currentTransaction"
+                         map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                          map-container-id="map-canvas-container"
                          get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                          object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
@@ -59,11 +60,11 @@
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
                          display-view-object="$ctrl.displayViewObject(feature)"
-                         comms="$ctrl.mapObjectEditorComms"
                          on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
                          register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                          register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
-                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
+                         register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
+                         register-create-editable-existing-map-object="$ctrl.registerCreateEditableExistingMapObject(createEditableExistingMapObject)">
       </map-object-editor>
 
       <div style="margin: 10px">
@@ -190,7 +191,10 @@
               <button class="btn btn-primary btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
                   ng-click="$ctrl.editViewObject()"
                   >edit</button>
-              
+              <div class="sidebar-header-subinfo">
+                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1]}}</div>
+                <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0]}}</div>
+              </div>
           </div>
           
           <!-- A table containing the editable properties of the selected object -->
@@ -224,6 +228,10 @@
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedNetworkConfig()">
               <img ng-src="{{$ctrl.getSelectedNetworkConfig().iconUrl}}" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.getSelectedNetworkConfig().label}}</span>
+              <div class="sidebar-header-subinfo">
+                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedMapObject.position.lat()}}</div>
+                <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedMapObject.position.lng()}}</div>
+              </div>
           </div>
           
           <!-- A table containing the editable properties of the selected object -->
@@ -256,7 +264,7 @@
             <div class="rect5"></div>
           </div>
         </div>
-        <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px">
+        <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px; position: absolute;">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
               <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
@@ -340,12 +348,20 @@
             </div>
           </div>
         </div>
+        <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+        <div class="disable-sibling-controls"
+             ng-hide="$ctrl.currentTransaction">
+        </div>
       </div>
     </accordion-panel-contents>
     <!-- Plan Summary -->
     <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.EditPlanPanels.PLAN_SUMMARY"></accordion-panel-title>
     <accordion-panel-contents panel-id="$ctrl.state.EditPlanPanels.PLAN_SUMMARY">
       <plan-summary current-transaction="$ctrl.currentTransaction" ng-if="$ctrl.state.activeEditPlanPanel === $ctrl.state.EditPlanPanels.PLAN_SUMMARY"></plan-summary>
+      <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
+      <div class="disable-sibling-controls"
+           ng-hide="$ctrl.currentTransaction">
+      </div>
     </accordion-panel-contents>
   </accordion>
 </div>

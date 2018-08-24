@@ -141,7 +141,7 @@
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
       "selectedIconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
-      "aggregateZoomThreshold": "11",
+      "aggregateZoomThreshold": "8",
       "equipmentType": "point",
       "zIndex": 7530, 
       "drawingOptions": {
@@ -289,15 +289,9 @@
     }
   },
   "tileCacheKeywords": [
-    "central_office",
-    "fiber_distribution_hub",
-    "fiber_distribution_terminal",
-    "bulk_distribution_terminal",
-    "splice_point",
-    "cell_5g",
-    "FEEDER",
-    "DISTRIBUTION",
-    "BACKBONE"
+    ".tiles.summary.",
+    ".tiles.fiber.",
+    ".tiles.boundary."
   ],
   "visibility": {
     "equipments": {

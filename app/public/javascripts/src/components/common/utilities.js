@@ -1,20 +1,23 @@
 class Utilities {
 
   constructor($document, $http){
-    this.document = $document[0]
+    this.$document = $document
     this.$http = $http
     this.uuidStore = []
     this.getUUIDsFromServer()
   }
 
-  downloadCSV(data, fileName){
-    let csvContent = "data:text/csv;charset=utf-8," + data.toString();
-    let a = this.document.createElement('a');
-    a.href = csvContent
-    a.setAttribute('download', fileName);
-    this.document.body.appendChild(a);
+  downloadCSV(data, fileName) {
+    // Blob is not supported in older browsers, but we need it for downloading larger files in Chrome.
+    // Without this, we get a generic "Failed - network error" in Chrome only.
+    let a = this.$document[0].createElement('a');
+    this.$document[0].body.appendChild(a);
+    var file = new Blob([data], {type: 'text/csv'});
+    var fileURL = window.URL.createObjectURL(file);
+    a.href = fileURL;
+    a.download = fileName;
     a.click();
-    this.document.body.removeChild(a);
+    this.$document[0].body.removeChild(a);
   }
 
   blinkMarker(){
@@ -58,6 +61,10 @@ class Utilities {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
+  }
+
+  getObjectSize(object) {
+    return Object.keys(object).length;
   }
 }
 

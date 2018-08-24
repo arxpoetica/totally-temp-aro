@@ -1,7 +1,8 @@
 class PlanSearchController {
 
-  constructor($http, state) {
+  constructor($http, $timeout, state) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
 
     this.search_text = ''
@@ -13,33 +14,87 @@ class PlanSearchController {
       method: 'GET',
       params: {}
     }
-
-    this.isAdministrator = false
+    this.idToServiceAreaCode = {}
   }
 
   $onInit() {
     this.loadPlans(1)
-    this.getLoggedInUserRole()
   }
 
-  getLoggedInUserRole() {
-    var userAdminPermissions = null
-    this.$http.get('/service/auth/permissions')
-      .then((result) => {
-        // Get the permissions for the name USER_ADMIN
-        userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
-        return this.$http.get(`/service/auth/acl/SYSTEM/1`)
+  loadServiceAreaInfo(plans) {
+
+    // Load service area ids for all service areas referenced by the plans
+    // First determine which ids to fetch. We might already have a some or all of them
+    var serviceAreaIdsToFetch = new Set()
+    plans.forEach((plan) => {
+      plan.tagMapping.linkTags.serviceAreaIds.forEach((serviceAreaId) => {
+        if (!this.idToServiceAreaCode.hasOwnProperty(serviceAreaId)) {
+          serviceAreaIdsToFetch.add(serviceAreaId)
+        }
       })
-      .then((result) => {
-        // Get the acl entry corresponding to the currently logged in user
-        var userAcl = result.data.resourcePermissions.filter((item) => item.systemActorId === this.state.loggedInUser.id)[0]
-        // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
-        // the logged in user is an administrator.
-        this.isAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+    })
+    if (serviceAreaIdsToFetch.size === 0) {
+      return
+    }
+
+    // Get the ids from aro-service
+    let serviceAreaIds = [...serviceAreaIdsToFetch];
+    var promises = []
+    while(serviceAreaIds.length) {
+      var filter = ''
+      serviceAreaIds.splice(0,100).forEach((serviceAreaId, index) => {
+        if (index > 0) {
+          filter += ' or '
+        }
+        filter += ` (id eq ${serviceAreaId})`
+      })
+
+      promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
+    }
+
+    return Promise.all(promises)
+    .then((results) => {
+      results.forEach((result) => {
+        result.data.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
+      })
+      this.$timeout()
+    })
+    .catch((err) => console.error(err))
+
+  }
+
+  loadCreatorsInfo(plans) {
+
+    // Load creator ids for all creatorss referenced by the plans
+    // First determine which ids to fetch. We might already have a some or all of them
+    var creatorIdsToFetch = new Set()
+    plans.forEach((plan) => {
+      if (!this.state.listOfCreatorTags.some((creatorTag) => creatorTag.id === plan.createdBy)) {
+        plan.createdBy && creatorIdsToFetch.add(plan.createdBy)
+      }
+    })
+    if (creatorIdsToFetch.size === 0) {
+      return
+    }
+
+    // Get the ids from aro-service
+    var filter = ''
+    Array.from(creatorIdsToFetch).forEach((createdById, index) => {
+      if (index > 0) {
+        filter += ' or '
+      }
+      filter += ` (id eq ${createdById})`
+    })
+
+    // Our $top is high, and should never be hit as we are getting createdBy for a select few ids
+    return this.state.loadListOfCreatorTagsById(filter)
+      .then((results) => {
+        this.$timeout()
       })
       .catch((err) => console.error(err))
   }
 
+      
   loadPlans(page, callback) {
     this.constructSearch()
     this.currentPage = page || 1
@@ -48,6 +103,8 @@ class PlanSearchController {
       var start = this.maxResults * (page - 1);
       var end = start + this.maxResults;
       this.plans = this.allPlans.slice(start, end);
+      this.loadServiceAreaInfo(this.plans)
+      this.loadCreatorsInfo(this.plans)
       return;
     }
 
@@ -74,8 +131,9 @@ class PlanSearchController {
               }
             })
             this.allPlans = _.sortBy(response.data, 'name');
-            this.state.loadAllAssociatedSaPlanTags(this.allPlans)
             this.plans = this.allPlans.slice(0, this.maxResults);
+            this.loadServiceAreaInfo(this.plans)
+            this.loadCreatorsInfo(this.plans)
             this.pages = [];
             var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
             for (var i = 1; i <= pageSize; i++) {
@@ -191,7 +249,7 @@ class PlanSearchController {
   }
 }
 
-PlanSearchController.$inject = ['$http', 'state']
+PlanSearchController.$inject = ['$http', '$timeout', 'state']
 
 let planSearch = {
   templateUrl: '/components/common/plan/plan-search.html',

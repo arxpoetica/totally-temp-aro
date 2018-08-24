@@ -12,11 +12,50 @@ class PlanInfoController {
     this.addGeneralTags = false
     this.addSATags = false
 
+    this.currentUserCanEdit = false
     this.planObserver = state.plan
-    .subscribe((plan) => {
-      this.currentPlanInfo = plan
-      this.getPlanTagDetails()
+      .subscribe((plan) => {
+        this.currentPlanInfo = plan
+        this.getPlanTagDetails()
+        this.updateEditableStatus()
+      })
+
+    // Save the permission bits for resource read, write and admin
+    this.accessTypes = Object.freeze({
+      RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
+      RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
+      RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null, actors: [] }
     })
+  }
+
+  updateEditableStatus() {
+    this.currentUserCanEdit = false
+    this.$http.get('/service/auth/permissions')
+      .then((result) => {
+        result.data.forEach((authPermissionEntity) => {
+          if (this.accessTypes.hasOwnProperty(authPermissionEntity.name)) {
+            this.accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
+          }
+        })
+        // Get the actors that have access for this resource
+        return this.$http.get(`/service/auth/acl/PLAN/${this.state.plan.getValue().id}`)
+      })
+      .then((result) => {
+        var currentUserCanWrite = false, currentUserIsAdmin = false
+        result.data.resourcePermissions.forEach((access) => {
+          // We are checking if the logged in user or any of the users groups have permission to write.
+          if ((this.state.loggedInUser.id === access.systemActorId)
+              || (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
+            const permission = access.rolePermissions
+            currentUserCanWrite = ((permission & this.accessTypes.RESOURCE_WRITE.permissionBits) != 0)
+            currentUserIsAdmin = ((permission & this.accessTypes.RESOURCE_ADMIN.permissionBits) != 0)
+            this.currentUserCanEdit = this.currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
+          }
+        })
+        console.log(this.currentUserCanEdit)
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
   registerSaveAccessCallback(saveResourceAccess) {
@@ -30,12 +69,12 @@ class PlanInfoController {
   }
 
   commitUpdatestoPlan(isDestroyingControl) {
-    this.updatePlanTags()
-    this.getPlanTagDetails()
     // This will call a function into the resource permissions editor that will do the actual save
     // DO NOT SAVE ON DESTROY. This may be causing all sorts of issues with threading on service.
     if (!isDestroyingControl) {
       this.saveResourceAccess && this.saveResourceAccess()
+      this.updatePlanTags()
+      this.getPlanTagDetails()
     }
     this.isEditMode = false
     this.addGeneralTags = false
@@ -55,10 +94,9 @@ class PlanInfoController {
   }
 
   updatePlanTags() {
-    var updatePlan = this.currentPlanInfo
-    updatePlan.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
-    updatePlan.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
-    this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
+    this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
+    this.currentPlanInfo.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
+    this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, this.currentPlanInfo)
   }
 
   setPlanLocation() {

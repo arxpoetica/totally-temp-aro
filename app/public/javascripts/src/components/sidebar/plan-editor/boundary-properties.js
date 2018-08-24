@@ -1,5 +1,5 @@
 class BoundaryProperties {
-  constructor(selectedSiteBoundaryTypeId, selectedSiteMoveUpdate, selectedSiteBoundaryGeneration, spatialEdgeType, directed, networkNodeType) {
+  constructor(selectedSiteBoundaryTypeId, selectedSiteMoveUpdate, selectedSiteBoundaryGeneration, spatialEdgeType, directed, networkNodeType, deploymentType) {
     this.selectedSiteBoundaryTypeId = selectedSiteBoundaryTypeId  // List of all types is in state.js
     this.siteMoveUpdates = [
       'Auto-redraw',
@@ -14,6 +14,8 @@ class BoundaryProperties {
     this.directed = directed
     this.networkNodeType = networkNodeType
     this.isDirty = false
+    this.deploymentType = "PLANNED"
+    if ("undefined" != typeof deploymentType) this.deploymentType = deploymentType
   }
 }
 

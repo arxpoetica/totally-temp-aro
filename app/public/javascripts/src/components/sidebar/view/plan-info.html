@@ -89,7 +89,8 @@
             <resource-permissions-editor resource-type="PLAN"
                                          resource-id="{{$ctrl.state.plan.getValue().id}}"
                                          system-actors="$ctrl.state.systemActors"
-                                         register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)">
+                                         register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
+                                         enabled="$ctrl.isEditMode">
             </resource-permissions-editor>
           </td>
         </tr>
@@ -102,9 +103,15 @@
   </div>
 
   <div class="plan-actions">
-    <button class="btn btn-primary" ng-if="!$ctrl.isEditMode" ng-click="$ctrl.editCurrentPlan()"><i class="fa fa-pencil"></i>&nbsp;&nbsp;Edit Plan Details</button>
-    <button class="btn btn-primary" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatestoPlan(false)"><i class="fa fa-save"></i>&nbsp;&nbsp;Save Changes</button>
-    <button class="btn btn-danger" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete Plan</button>
+    <button class="btn btn-primary" ng-disabled="!$ctrl.currentUserCanEdit" ng-if="!$ctrl.isEditMode" ng-click="$ctrl.editCurrentPlan()">
+      <i class="fa fa-pencil"></i>&nbsp;&nbsp;Edit Plan Details
+    </button>
+    <button class="btn btn-primary" ng-disabled="!$ctrl.currentUserCanEdit" ng-if="$ctrl.isEditMode" ng-click="$ctrl.commitUpdatestoPlan(false)">
+      <i class="fa fa-save"></i>&nbsp;&nbsp;Save Changes
+    </button>
+    <button class="btn btn-danger" ng-disabled="!$ctrl.currentUserCanEdit" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})">
+      <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete Plan
+    </button>
   </div>
 
 </div>  

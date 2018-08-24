@@ -1,12 +1,12 @@
 /* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', ($rootScope, $http, $document, $timeout, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils) => {
+app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
   var service = {}
   service.INVALID_PLAN_ID = -1
-  service.MAX_EXPORTABLE_AREA = 25000000
+  service.MAX_EXPORTABLE_AREA = 11000000000 //25000000
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
@@ -96,6 +96,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     EQUIPMENT_INFO: 'EQUIPMENT_INFO',
     BOUNDARIES_INFO: 'BOUNDARIES_INFO',
     ROAD_SEGMENT_INFO: 'ROAD_SEGMENT_INFO',
+    PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
     COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
     EDIT_LOCATIONS: 'EDIT_LOCATIONS',
     PLAN_INFO: 'PLAN_INFO'
@@ -232,7 +233,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Map layers data - define once. Details on map layer objects are available in the TileComponentController class in tile-component.js
   service.mapLayers = new Rx.BehaviorSubject({})
-  service.mapTileOptions = new Rx.BehaviorSubject({
+  var heatmapOptions = {
     showTileExtents: false,
     heatMap: {
       useAbsoluteMax: false,
@@ -241,7 +242,12 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       worldMaxValue: 500000
     },
     selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
-  })
+  }
+  if (config.ARO_CLIENT === 'frontier') {
+    heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
+  }  
+  service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
+
   service.defaultPlanCoordinates = {
     zoom: 14,
     latitude: 47.6062,      // Seattle, WA by default. For no particular reason.
@@ -249,7 +255,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     areaName: 'Seattle, WA' // Seattle, WA by default. For no particular reason.
   }
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
-  service.requestRecreateTiles = new Rx.BehaviorSubject({})
+  service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
+  service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
   service.showGlobalSettings = new Rx.BehaviorSubject(false)
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
@@ -267,6 +274,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
+  service.requestLoadEquipmentList =  new Rx.BehaviorSubject(false)
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
@@ -294,13 +302,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.censusCategories = new Rx.BehaviorSubject()
   service.reloadCensusCategories = (censusCategories) => {
     service.censusCategories.next(censusCategories)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   service.selectedCensusCategoryId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusCategoryId = (catId) => {
     service.selectedCensusCategoryId.next(catId)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   // The display modes for the application
@@ -521,7 +529,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           var selectedLocationsSet = new Set()
           result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
           service.selectedLocations.next(selectedLocationsSet)
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
           return Promise.resolve()
         })
     } else {
@@ -538,7 +546,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           var selectedSASet = new Set()
           result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
           service.selectedServiceAreas.next(selectedSASet)
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
           if (forceMapRefresh) {
             tileDataService.clearDataCache()
             tileDataService.markHtmlCacheDirty()
@@ -554,32 +562,32 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   service.reloadSelectedServiceArea = (serviceAreaId) => {
     //Display only one Selected SA Details in viewMode at a time
     service.selectedServiceArea.next(serviceAreaId)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
 
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
   service.reloadSelectedAnalysisArea = (analysisArea) => {
     service.selectedAnalysisArea.next(analysisArea)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
 
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.reloadSelectedViewFeaturesByType = (featuresByType) => {
     service.selectedViewFeaturesByType.next(featuresByType)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   service.selectedCensusBlockId = new Rx.BehaviorSubject()
   service.reloadSelectedCensusBlockId = (censusBlock) => {
     service.selectedCensusBlockId.next(censusBlock)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
   
   
   service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedRoadSegments = (road) => {
     service.selectedRoadSegments.next(road)
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
   }
 
   // Plan - define once
@@ -951,6 +959,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           return Promise.resolve(result)
         } else {
           // We dont have an ephemeral plan. Create one and send it back
+          tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN, tracker.ACTIONS.CLICK)
           return service.createNewPlan(true)
         }
       })
@@ -1035,21 +1044,24 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   }
 
   service.loadPlan = (planId) => {
+    tracker.trackEvent(tracker.CATEGORIES.LOAD_PLAN, tracker.ACTIONS.CLICK, 'PlanID', planId)
+    service.selectedDisplayMode.next(service.displayModes.VIEW)
     var userId = service.loggedInUser.id
+    var plan = null
     return $http.get(`/service/v1/plan/${planId}?user_id=${userId}`)
       .then((result) => {
-        return service.setPlan(result.data)
-      })
-      .then(() => {
-        var plan = service.plan.getValue()
+        plan = result.data
         return service.getAddressFor(plan.latitude, plan.longitude)
       })
       .then((address) => {
-        var plan = service.plan.getValue()
         plan.areaName = address
+        service.requestDestroyMapOverlay.next(null) // Make sure to destroy the map overlay before panning/zooming
         service.requestSetMapCenter.next({ latitude: plan.latitude, longitude: plan.longitude })
         service.requestSetMapZoom.next(plan.zoomIndex)
         return Promise.resolve()
+      })
+      .then(() => {
+        return service.setPlan(plan)  // This will also create overlay, tiles, etc.
       })
   }
 
@@ -1058,10 +1070,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // continue but will not be shown on our map.
   service.recreateTilesAndCache = () => {
     tileDataService.clearDataCache()
+    tileDataService.clearHtmlCache()
     return service.loadModifiedFeatures(service.plan.getValue().id)
       .then(() => {
-        service.requestRecreateTiles.next({})
-        service.requestMapLayerRefresh.next({})
+        service.requestDestroyMapOverlay.next(null) // Destroy the old map overlay (may not exist if we have just loaded a plan)
+        service.requestCreateMapOverlay.next(null)  // Create a new one
+        service.mapLayers.next(service.mapLayers.getValue())  // Reset map layers so that the new overlay picks them up
+        service.requestMapLayerRefresh.next(null)   // Redraw map layers
       })
       .catch((err) => console.error(err))
   }
@@ -1096,11 +1111,22 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   // Load the modified features for a given plan and save them in the tile data service
   service.loadModifiedFeatures = (planId) => {
-    return $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
+    var promises = []
+    promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment?userId=${service.loggedInUser.id}`)
       .then((result) => {
         result.data.forEach((feature) => tileDataService.addModifiedFeature(feature))
       })
       .catch((err) => console.error(err))
+    )
+    
+    promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment_boundary?userId=${service.loggedInUser.id}`)
+      .then((result) => {
+        result.data.forEach((feature) => tileDataService.addModifiedBoundary(feature))
+      })
+      .catch((err) => console.error(err))
+    )
+    
+    return Promise.all( promises )
   }
 
   service.locationInputSelected = (locationKey) => {
@@ -1188,7 +1214,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
                 .then(() => {
                   tileDataService.clearDataCache()
                   tileDataService.markHtmlCacheDirty()
-                  service.requestMapLayerRefresh.next({})
+                  service.requestMapLayerRefresh.next(null)
                   return Promise.resolve()
                 })
               })
@@ -1229,7 +1255,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     
     service.clearTileCachePlanOutputs()
     tileDataService.markHtmlCacheDirty()
-    service.requestMapLayerRefresh.next({})
+    service.requestMapLayerRefresh.next(null)
 
     // Get the optimization options that we will pass to the server
     var optimizationBody = service.getOptimizationBody()
@@ -1263,7 +1289,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           service.stopPolling()
           service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
           delete service.Optimizingplan.optimizationId
           service.loadPlanInputs(newPlan.id)
         }
@@ -1299,7 +1325,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           delete service.Optimizingplan.optimizationId
           service.clearTileCachePlanOutputs()
           tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next({})
+          service.requestMapLayerRefresh.next(null)
         }
       })
       .catch((err) => {
@@ -1375,7 +1401,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     .then((result) => {
       service.boundaryTypes = result.data
       service.boundaryTypes.push({id: result.data.length + 1, name: "fiveg_coverage", description: "Undefined"})
-      service.selectedBoundaryType = result.data[0]
+      service.boundaryTypes.sort((a, b) => a.id-b.id)
+      service.selectedBoundaryType = service.boundaryTypes[0]
     })  
   }
 
@@ -1396,82 +1423,46 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         service.listOfTags = results[0].data
       }) 
   }
-
   service.loadListOfPlanTags()
 
   service.loadListOfCreatorTags = (filterObj) => {
+    if(filterObj == '') return
     var filter = ""
     filter = filterObj ? filter.concat(` substringof(fullName,'${filterObj}')`) : filter
-    $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=999999999`)
-      .then((results) => {
-        service.listOfCreatorTags = results.data
-      })
+    if (filterObj || service.listOfCreatorTags.length == 0) {
+      $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=10`)
+        .then((results) => {
+          service.listOfCreatorTags = service.removeDuplicates(service.listOfCreatorTags.concat(results.data),'id')
+        })
+    }
   }
 
-  service.loadListOfCreatorTags()
+  service.loadListOfCreatorTagsById = (filterExp) => {
+    if (filterExp) {
+      // Our $top is high, and should never be hit as we are getting createdBy for plans that are visible in "search plans"
+      return $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filterExp}&$orderby=id&$top=10000`)
+        .then((results) => {
+          return service.listOfCreatorTags = service.removeDuplicates(service.listOfCreatorTags.concat(results.data),'id')
+        })
+    }
+  }
 
+  const MAX_SERVICE_AREAS_FROM_ODATA = 10
   service.loadListOfSAPlanTags = (filterObj) => {
-    /*
     var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(code,'${filterObj}')`) : filter
+    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj.toUpperCase()}')`) : filter
     if(filterObj || service.listOfServiceAreaTags.length == 0) {
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10`)
+      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
       .then((results) => {
         service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
       })  
     } 
-    */
-    service.loadAllPlanTags()
   }
 
   service.removeDuplicates = (myArr,prop) => {
     return myArr.filter((obj, pos, arr) => {
       return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos;
     });
-  }
-  //service.loadListOfSAPlanTags()
-
-  service.loadAllAssociatedSaPlanTags = (plans) => {
-    /*
-    let promises = new Set()
-    var tempList = []
-    console.log(service.listOfServiceAreaTags)
-    
-    console.log(plans)
-    
-    plans.forEach((plan) => {
-      plan.tagMapping.linkTags.serviceAreaIds.forEach((tag) => {
-        var filter = "layer/id eq 1"
-        filter = filter.concat(` and id eq ${tag}`)
-        service.listOfServiceAreaTags
-        if (!service.listOfServiceAreaTags.find(function (obj) { return obj.id === tag })){
-          promises.add($http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}`))
-        }  
-      })
-    })  
-
-    Promise.all([...promises])
-    .then((results) => {
-      results.forEach((result) => {
-        tempList = tempList.concat(result.data)
-      }) 
-      service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(tempList),'id')
-      console.log(service.listOfServiceAreaTags)
-    })  
-    */
-    
-    service.loadAllPlanTags()
-    
-  }
-  
-  service.loadAllPlanTags = () => {
-    if (service.listOfServiceAreaTags && service.listOfServiceAreaTags.length > 0) return
-    var filter = "layer/id eq 1"
-    $http.get(`/service/odata/servicearea?$select=id%2C%20code&$filter=${filter}&$top=999999999`)
-    .then((result) => {
-      service.listOfServiceAreaTags = result.data
-      //console.log(service.listOfServiceAreaTags)
-    })
   }
 
   service.getTagColour = (tag) => {
@@ -1537,9 +1528,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
 
   service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
     if(filterObj == '') return
-    var entityListUrl = `/service/odata/${entityType}?$select=${select}&$orderby=id`
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}`
     if(entityType !== 'AnalysisLayer') {
-      entityListUrl = entityListUrl + "&$top=10"
+      entityListUrl = entityListUrl + "&$top=20"
     }
 
     var filter = ''
@@ -1608,16 +1599,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
-          //group.name = `[G] ${group.name}`  // For now, text instead of icons
-          group.name = `<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`
+          group.originalName = group.name
+          // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+          group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
           service.systemActors.push(group)
         })
         return $http.get('/service/auth/users')
       })
       .then((result) => {
         result.data.forEach((user) => {
-          //user.name = `[U] ${user.firstName} ${user.lastName}`  // So that it is easier to bind to a common property
-          user.name = `<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}` 
+          // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
+          user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`) 
           service.systemActors.push(user)
         })
       })
@@ -1628,13 +1620,32 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
   // The logged in user is currently set by using the AngularJS injector in index.html
   service.loggedInUser = null
   service.setLoggedInUser = (user) => {
+    tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
+
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
 
+    service.isUserAdministrator(service.loggedInUser.id)
+      .then((isAdministrator) => {
+        service.loggedInUser.isAdministrator = isAdministrator
+      })
+      .catch((err) => console.error(err))
+
+    // Populate the group ids that this user is a part of
+    service.loggedInUser.groupIds = []
+    $http.get(`/service/auth/users/${service.loggedInUser.id}`)
+      .then((result) => service.loggedInUser.groupIds = result.data.groupIds)
+      .catch((err) => console.error(err))
+
+    var initializeToDefaultCoords = (plan) => {
+      service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
+      service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+      service.setPlan(plan)
+    }
+    var plan = null
     service.getOrCreateEphemeralPlan() // Will be called once when the page loads, since state.js is a service
     .then((result) => {
-      const plan = result.data
-      service.setPlan(plan)
+      plan = result.data
       // Get the default location for this user
       return $http.get(`/service/auth/users/${user.id}/configuration`)
     })
@@ -1650,8 +1661,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           if (status !== 'OK') {
             console.error('Geocoder failed: ' + status)
             console.error('Setting map coordinates to default')
-            service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
-            service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+            initializeToDefaultCoords(plan)
             return
           }
           service.requestSetMapCenter.next({
@@ -1660,18 +1670,17 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
           })
           const ZOOM_FOR_OPEN_PLAN = 14
           service.requestSetMapZoom.next(ZOOM_FOR_OPEN_PLAN)
+          service.setPlan(plan)
         })
       } else {
         // Set it to the default so that the map gets initialized
-        service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
-        service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+        initializeToDefaultCoords(plan)
       }
     })
     .catch((err) => {
       console.error(err)
       // Set it to the default so that the map gets initialized
-      service.requestSetMapCenter.next({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
-      service.requestSetMapZoom.next(service.defaultPlanCoordinates.zoom)
+      initializeToDefaultCoords(plan)
     })
   }
 
@@ -1701,6 +1710,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
       })
       .then((stealTransaction) => {
         if (stealTransaction) {
+          tracker.trackEvent(tracker.CATEGORIES.STEAL_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
           return $http.post(`/service/plan-transactions?force=true`, { userId: service.loggedInUser.id, planId: service.plan.getValue().id })
         } else {
           return Promise.reject('User does not want to steal the transaction')
@@ -1724,9 +1734,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         const transactionsForUserAndPlan = transactionsForPlan.filter((item) => item.userId === service.loggedInUser.id)
         if (transactionsForPlan.length === 0) {
           // A transaction does not exist. Create it.
+          tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
           return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
         } else if (transactionsForUserAndPlan.length === 1) {
           // We have one open transaction for this user and plan combo. Resume it.
+          tracker.trackEvent(tracker.CATEGORIES.RESUME_PLAN_TRANSACTION, tracker.ACTIONS.CLICK, 'TransactionID', transactionsForUserAndPlan[0].id)
           return Promise.resolve({ data: transactionsForUserAndPlan[0] }) // Using {data:} so that the signature is consistent
         } else if (transactionsForPlan.length === 1) {
           // We have one open transaction for this plan, but it was not started by this user. Ask the user what to do.
@@ -1738,6 +1750,39 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', 'map_layer
         console.warn(err)
         return Promise.reject(err)
       })
+  }
+
+  service.isUserAdministrator = (userId) => {
+    var userAdminPermissions = null
+    var userIsAdministrator = false, userGroupIsAdministrator = false
+    var aclResult = null
+    return $http.get('/service/auth/permissions')
+      .then((result) => {
+        // Get the permissions for the name USER_ADMIN
+        userAdminPermissions = result.data.filter((item) => item.name === 'USER_ADMIN')[0].id
+        return $http.get(`/service/auth/acl/SYSTEM/1`)
+      })
+      .then((result) => {
+        aclResult = result.data
+        // Get the acl entry corresponding to the currently logged in user
+        var userAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === userId)[0]
+        // The userAcl.rolePermissions is a bit field. If it contains the bit for "userAdminPermissions" then
+        // the logged in user is an administrator.
+        userIsAdministrator = (userAcl && (userAcl.rolePermissions & userAdminPermissions)) > 0
+        return $http.get(`/service/auth/users/${userId}`)
+      })
+      .then((result) => {
+        // Also check if the groups that the user belongs to have administrator permissions
+        userGroupIsAdministrator = false
+        result.data.groupIds.forEach((groupId) => {
+          const userGroupAcl = aclResult.resourcePermissions.filter((item) => item.systemActorId === groupId)[0]
+          const thisGroupIsAdministrator = (userGroupAcl && (userGroupAcl.rolePermissions & userAdminPermissions)) > 0
+          userGroupIsAdministrator |= thisGroupIsAdministrator
+        })
+        const isAdministrator = userIsAdministrator || userGroupIsAdministrator
+        return Promise.resolve(isAdministrator)
+      })
+      .catch((err) => console.error(err))
   }
 
   return service

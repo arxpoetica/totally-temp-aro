@@ -5,7 +5,9 @@
 
   <div class="input-group">
     <div class="form-group has-feedback has-clear">
-      <ui-select tag-on-blur tagging tagging-label="false" tagging-tokens=",|/" multiple ng-model="$ctrl.searchText"
+      <!-- (tagging) paste not working if tagging-label="false" and tagging-tokens are set -->
+      <!-- http://plnkr.co/edit/kauNS7YjckRfi616k4PT?p=preview -->
+      <ui-select tag-on-blur tagging tagging-label="" tagging-tokens=",|/" multiple ng-model="$ctrl.searchText"
         theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
@@ -17,7 +19,7 @@
             {{$item}}
           </span>
         </ui-select-match>
-        <ui-select-choices class="ui-select-search" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
+        <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
             <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.fullName}}
           </div>
@@ -44,7 +46,8 @@
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-list="$ctrl.state.listOfCreatorTags"
-      apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"></plan-search-filter>
+      apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"
+      refresh-tag-list="$ctrl.state.loadListOfCreatorTags(searchObj)"></plan-search-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
@@ -57,19 +60,20 @@
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
             <b><a href="javascript:void(0)" ng-click="$ctrl.onPlanClicked(plan)">{{plan.name}}</a></b>
-            <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy)}}</i></div>
+            <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
                 class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
               <span class="label"> {{tag.name}} 
-                <i class="fa fa-times pointer" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
+                <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
               </span>
             </div>
             <div class="tags">
-              <div ng-repeat="tag in $ctrl.getSATagCategories(plan.tagMapping.linkTags.serviceAreaIds) track by tag.id" 
-                class="tag label satags">
-              <span class="label satag"> {{tag.code}} 
-                <i class="fa fa-times pointer" ng-if="$ctrl.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
+              <div ng-repeat="serviceAreaId in plan.tagMapping.linkTags.serviceAreaIds" 
+                   class="tag label satags">
+                <span class="label satag">
+                  {{$ctrl.idToServiceAreaCode[serviceAreaId] || 'loading...'}} 
+                <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
               </span>
             </div>
           </td>

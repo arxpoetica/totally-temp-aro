@@ -1,7 +1,8 @@
 class ResourcePermissionsEditorController {
   
-  constructor($http) {
+  constructor($http,$timeout) {
     this.$http = $http
+    this.$timeout = $timeout
     this.accessTypes = Object.freeze({
       RESOURCE_READ: { displayName: 'Read', permissionBits: null, actors: [] },
       RESOURCE_WRITE: { displayName: 'Write', permissionBits: null, actors: [] },
@@ -10,7 +11,11 @@ class ResourcePermissionsEditorController {
   }
 
   $onInit() {
+    if (typeof this.enabled === 'undefined') {
+      this.enabled = true   // If not defined, then make it true
+    }
     this.loadResourceAccess()
+    this.subSystemActors = this.systemActors && this.systemActors.slice(0, 10)
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
 
@@ -69,9 +74,26 @@ class ResourcePermissionsEditorController {
       })
       .catch((err) => console.error(err))
   }
+
+  searchActors(filterObj) {
+    if(filterObj !== '') {
+      var reg = new RegExp(filterObj, 'i');  
+      this.subSystemActors = this.systemActors.filter((actor) => {
+          //Filter users
+          if (actor.hasOwnProperty('firstName')) {
+            return actor.firstName.match(reg) || actor.lastName.match(reg)
+          }
+          //Filter Groups
+          else if(actor.hasOwnProperty('originalName')) {
+            return actor.originalName.match(reg)
+          }
+        });  
+      this.$timeout()
+    }
+  }
 }
 
-ResourcePermissionsEditorController.$inject = ['$http']
+ResourcePermissionsEditorController.$inject = ['$http','$timeout']
 
 let resourcePermissionsEditor = {
   templateUrl: '/components/common/resource-permissions-editor.html',
@@ -79,6 +101,7 @@ let resourcePermissionsEditor = {
     resourceType: '@',
     resourceId: '@',
     systemActors: '<',
+    enabled: '<',
     registerSaveAccessCallback: '&' // To be called to register a callback, which will save the access list
   },
   controller: ResourcePermissionsEditorController

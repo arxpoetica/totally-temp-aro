@@ -9,16 +9,16 @@ class LocationProperties {
 }
 
 class LocationEditorController {
-  constructor($timeout, $http, state) {
+  constructor($timeout, $http, state, tracker) {
     this.$timeout = $timeout
     this.$http = $http
     this.state = state
+    this.tracker = tracker
     this.selectedMapObject = null
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
     this.deletedFeatures = []
     this.currentTransaction = null
-    this.lastUsedNumberOfLocations = 1
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
   }
 
@@ -37,7 +37,12 @@ class LocationEditorController {
   $onInit() {
     this.resumeOrCreateTransaction()
   }
-
+  
+  $onDestroy(){
+    // to bring bakc the hidden locations
+    this.state.requestMapLayerRefresh.next(null)
+  }
+  
   resumeOrCreateTransaction() {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
@@ -48,9 +53,11 @@ class LocationEditorController {
         var existingTransactions = result.data.filter((item) => item.libraryId === selectedLibraryItem.identifier)
         if (existingTransactions.length > 0) {
           // We have an existing transaction for this library item. Use it.
+          this.tracker.trackEvent(this.tracker.CATEGORIES.RESUME_LOCATION_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', existingTransactions[0].id)
           return Promise.resolve({ data: existingTransactions[0] })
         } else {
           // Create a new transaction and return it
+          this.tracker.trackEvent(this.tracker.CATEGORIES.NEW_LOCATION_TRANSACTION, this.tracker.ACTIONS.CLICK)
           return this.$http.post('/service/library/transaction', {
             libraryId: selectedLibraryItem.identifier,
             userId: this.state.loggedInUser.id
@@ -100,6 +107,7 @@ class LocationEditorController {
     }
 
     // All modifications will already have been saved to the server. Commit the transaction.
+    this.tracker.trackEvent(this.tracker.CATEGORIES.COMMIT_LOCATION_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
       .then((result) => {
         // Transaction has been committed, start a new one
@@ -138,6 +146,7 @@ class LocationEditorController {
     }, (deleteTransaction) => {
       if (deleteTransaction) {
         // The user has confirmed that the transaction should be deleted
+        this.tracker.trackEvent(this.tracker.CATEGORIES.DISCARD_LOCATION_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
@@ -152,12 +161,6 @@ class LocationEditorController {
           })
       }
     })
-  }
-
-  // Sets the last-used number-of-locations property so we can use it for new locations
-  setLastUsedNumberOfLocations(newValue) {
-    console.log(newValue)
-    this.lastUsedNumberOfLocations = newValue
   }
 
   // Marks the properties of the selected location as dirty (changed).
@@ -186,6 +189,7 @@ class LocationEditorController {
   formatLocationForService(objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
+    
     var featureObj = {
       objectId: objectId,
       geometry: {
@@ -197,18 +201,20 @@ class LocationEditorController {
       },
       dataType: 'location'
     }
+    
     return featureObj
   }
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
-    var numberOfLocations = this.lastUsedNumberOfLocations
+    //if (feature.is_locked) return
+    var numberOfLocations = 1   // Default number of locations should always be 1. #159981791
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
     this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.is_locked, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
-    this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+    if (!feature.is_locked) this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
     this.$timeout()
   }
 
@@ -218,6 +224,8 @@ class LocationEditorController {
   }
 
   handleObjectModified(mapObject) {
+    console.log('modified')
+    console.log(mapObject)
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
       .then((result) => {
@@ -239,7 +247,7 @@ class LocationEditorController {
   }
 }
 
-LocationEditorController.$inject = ['$timeout', '$http', 'state']
+LocationEditorController.$inject = ['$timeout', '$http', 'state', 'tracker']
 
 let locationEditor = {
   templateUrl: '/components/sidebar/view/location-editor.html',

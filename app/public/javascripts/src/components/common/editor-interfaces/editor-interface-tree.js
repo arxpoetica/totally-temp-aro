@@ -77,7 +77,7 @@ class EditorInterfaceTreeController {
       closeOnConfirm: true
     }, (deleteTransaction) => {
       if (deleteTransaction) {
-        // The user has confirmed that the transaction should be deleted
+        // The user has confirmed that the item should be deleted
         parent.splice(index, 1)
         this.onChange()
       }

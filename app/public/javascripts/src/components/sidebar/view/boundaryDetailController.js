@@ -94,9 +94,15 @@ class BoundaryDetailController {
   }
 
   getCensusBlockInfo(cbId) {
+    var censusBlockInfo = null
     return this.$http.get('/census_blocks/' + cbId + '/details')
       .then((response) => {
-        return response.data
+        censusBlockInfo = response.data
+        return this.$http.get(`/service/plan-query/${this.state.plan.getValue().id}/censusBlockCounts?census-block-ids=${censusBlockInfo.id}`)
+      })
+      .then((response) => {
+        censusBlockInfo.locationCount = response.data
+        return censusBlockInfo
       })
   }
 
@@ -166,6 +172,6 @@ class BoundaryDetailController {
  
 }
 
-BoundaryDetailController.$inject = ['$http','$timeout','state']
+BoundaryDetailController.$inject = ['$http', '$timeout', 'state']
 
 export default BoundaryDetailController

@@ -1194,6 +1194,16 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   background-position: 4px 4px;
 }
 
+.sidebar-header-subinfo{
+	font-weight: normal;
+	margin-top: 10px;
+}
+
+.sidebar-header-subinfo-item{
+	display: inline-block;
+	margin-right: 10px;
+}
+
 .sidebar-table-header {
   padding: 10px;
   font-weight: 700;

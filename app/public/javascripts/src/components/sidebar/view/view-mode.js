@@ -35,7 +35,7 @@ let viewMode = {
 
       <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO].show"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO].show">
-        <equipment-detail></equipment-detail>
+        <equipment-detail ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"></equipment-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO].show"></accordion-panel-title>
@@ -51,6 +51,10 @@ let viewMode = {
       <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show">
         <network-plan-manage ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></network-plan-manage>
+      </accordion-panel-contents>
+      <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS].show"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS].show">
+        <summary-reports ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS"></summary-reports>
       </accordion-panel-contents>
       <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
       <accordion-panel-title title="'Coverage Boundary'"

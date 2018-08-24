@@ -8,10 +8,8 @@ exports.configure = (app, middleware) => {
 
   // error handler
   app.use((err, req, res, next) => {
-    console.log(err.stack)
-    res.status(500).json({
-      error: err.message
-    })
+    console.log(err)
+    res.status(err.status).json(err.body)
 
     if (process.env.NODE_ENV === 'production') {
       var base_url = process.env.APP_BASE_URL || 'Unknown'

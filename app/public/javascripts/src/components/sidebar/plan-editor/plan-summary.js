@@ -26,12 +26,6 @@ class PlanSummaryController {
     this.equipmentOrder = []
     this.fiberOrder = []
     this.locTagCoverage = []
-    
-    state.plan.subscribe((plan) => { 
-      this.plan = plan 
-      this.downloadEquipment = `/reports/planSummary/${this.plan.id}`
-      this.downloadLocations = `/reports/planSummary/${this.plan.id}/${this.state.selectedBoundaryType.name}`
-    })
     this.planEditorChangedObserver = state.planEditorChanged.subscribe((isPlanEditorChanged) => isPlanEditorChanged && this.getPlanSummary())
     this.censusTagCategories = this.state.censusCategories.getValue()
     this.censusTagCategoriesObserver = this.state.censusCategories.subscribe((newValue) => {
@@ -40,19 +34,12 @@ class PlanSummaryController {
   }
 
   $onInit() {
-    // this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
-    //   this.formatSummary(response.data)
-    // })
-
     this.selectedBoundaryType = this.state.selectedBoundaryType
 
     //fetching equipment order from networkEquipment.json
     var equipmentOrderKey = this.summaryCategoryTypes['Equipment']['groupBy']
     this.equipmentOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.equipments,equipmentOrderKey)
     this.equipmentOrder.push('junction_splitter')
-    
-    // var fiberOrderKey = this.summaryCategoryTypes['Fiber']['groupBy']
-    // this.fiberOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.cables,fiberOrderKey)
 
     //fetching location order from locationCategories.json
     var coverageOrderKey = 'plannerKey'
@@ -156,18 +143,6 @@ class PlanSummaryController {
 
   toggleIsKeyExpanded(type) {
     this.isKeyExpanded[type] = !this.isKeyExpanded[type]
-  }
-
-  downloadPlanSummary() {
-    this.$http.get(`/reports/planSummary/${this.plan.id}`).then((response) => {
-      this.Utils.downloadCSV(response.data,"planSummary.csv")
-    })
-  }
-
-  exportKml() {
-    this.$http.get(`/reports/planSummary/kml/${this.plan.id}/${this.state.selectedBoundaryType.name}`).then((response) => {
-      this.Utils.downloadCSV(response.data, "planSummary_polygon.kml")
-    })
   }
 
   togglelocationTagCoverage(selectedCoverageLoc) {

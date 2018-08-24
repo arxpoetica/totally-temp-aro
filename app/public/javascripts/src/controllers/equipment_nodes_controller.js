@@ -182,6 +182,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
+    state.requestLoadEquipmentList.next(true)
   }
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateMapLayers)

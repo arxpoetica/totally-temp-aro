@@ -51,10 +51,20 @@
       }
     },
     "IOF": {
-      "iconUrl": "/images/map_icons/frontier/fiber_backhaul.png"
+      "iconUrl": "/images/map_icons/frontier/fiber_backhaul.png",
+      "drawingOptions": {
+	"opacity": 0.5,
+	"lineWidth": 5,
+        "strokeStyle": "#ffff00"
+      }
     },
     "UNKNOWN": {
-      "iconUrl": "/images/map_icons/frontier/fiber_unknown.png"
+      "iconUrl": "/images/map_icons/frontier/fiber_unknown.png",
+      "drawingOptions": {
+	"opacity": 0.5,
+	"lineWidth": 5,
+        "strokeStyle": "#ffa500"
+      }
     },
     "COPPER": {
       "iconUrl": "/images/map_icons/frontier/copper.png"

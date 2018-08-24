@@ -109,6 +109,9 @@
       "ROAD_SEGMENT_INFO":{
         "show": true
       },
+      "PLAN_SUMMARY_REPORTS":{
+        "show": true
+      },
       "COVERAGE_BOUNDARY":{
         "show": true
       },
@@ -325,6 +328,9 @@
       "ROAD_SEGMENT_INFO":{
         "show": false
       },
+      "PLAN_SUMMARY_REPORTS":{
+        "show": true
+      },
       "COVERAGE_BOUNDARY":{
         "show": true
       },
@@ -540,6 +546,9 @@
       },
       "ROAD_SEGMENT_INFO":{
         "show": false
+      },
+      "PLAN_SUMMARY_REPORTS":{
+        "show": true
       },
       "COVERAGE_BOUNDARY":{
         "show": true
