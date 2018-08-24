@@ -1,5 +1,6 @@
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
+import equipmentDetailList from './sidebar/view/equipment-detail-list'
 import locationDetail from './sidebar/view/location-detail'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
@@ -83,6 +84,7 @@ import utils from './common/utilities'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
+   .component('equipmentDetailList', equipmentDetailList)
    .component('locationDetail', locationDetail)
    .component('roadSegmentDetail', roadSegmentDetail)
    .component('coverageBoundary', coverageBoundary)
