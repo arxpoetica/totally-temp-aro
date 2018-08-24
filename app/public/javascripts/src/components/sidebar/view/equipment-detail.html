@@ -13,6 +13,11 @@
       font-weight: bold;
       font-size: 1.1em;
     }
+
+		.equipment-list{
+			position: relative;
+    	height: 100%;
+		}
   </style>
   <!-- 
   <div class="equipment-detail" ng-if="$ctrl.selectedEquipmentInfo !== null">
@@ -26,7 +31,7 @@
   </div>
   -->
   
-	<div class="ei-panel" style="overflow:hidden">
+	<div class="ei-panel">
 	  <div class="mb-5 mt-2">
 	    <aro-search ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
 				object-name="Equipment"
@@ -66,22 +71,9 @@
 			</editor-interface-tree>
 		</div>
 		
-		<div style="overflow-y:auto">			
-			<table ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List" class="table table-condensed table-striped">
-				<thead>
-					<th>Site Clli</th>
-					<th>Type</th>
-				</thead>
-				<tbody>
-					<tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToequipmentInfo | orderObjectBy:'clli'" ng-click="$ctrl.viewSelectedEquipment(equipmentInfo)">
-						<td>{{equipmentInfo.clli}}</td>
-						<td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td>
-					</tr>
-
-					<tr ng-if="$ctrl.Utils.getObjectSize($ctrl.clliToequipmentInfo) >= $ctrl.MAX_Equipment_List">		
-						<td colspan="2">List limited to {{$ctrl.MAX_Equipment_List}} sites</td>
-					</tr>
-				</tbody>
-			</table>	
-		</div>	
+		<equipment-detail-list class="equipment-list" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List &&
+			$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO"
+			map-global-object-name="map"
+			view-selected-details="$ctrl.viewSelectedEquipment(selectedEquipment)">
+		</equipment-detail-list>
 	</div>

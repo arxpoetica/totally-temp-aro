@@ -1,0 +1,27 @@
+<style scoped>
+  .equipment-list {
+    position: relative;
+    height: 100%;
+    overflow-y: auto;
+  }
+</style>
+
+<div class="equipment-list">
+  <table class="table table-condensed table-striped">
+    <thead>
+      <th>Site Clli</th>
+      <th>Type</th>
+    </thead>
+    <tbody>
+      <tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToequipmentInfo | orderObjectBy:'siteClli'" 
+        ng-click="$ctrl.viewSelectedDetails({selectedEquipment:equipmentInfo})">
+        <td>{{equipmentInfo.siteClli}}</td>
+        <td>{{equipmentInfo._data_type}}</td>
+        <!-- <td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo.networkNodeType]}}</td> -->
+      </tr>
+      <tr ng-if="$ctrl.utils.getObjectSize($ctrl.clliToequipmentInfo) >= $ctrl.MAX_Equipment_List">
+        <td colspan="2">List limited to {{$ctrl.MAX_Equipment_List}} sites</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
