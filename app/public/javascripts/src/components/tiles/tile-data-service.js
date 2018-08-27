@@ -424,7 +424,14 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   // Mark all tiles in the HTML cache as dirty
   tileDataService.markHtmlCacheDirty = (tilesToRefresh) => {
     Object.keys(tileDataService.tileHtmlCache).forEach((cacheId) => {
-      const isDirty = tilesToRefresh ? tilesToRefresh.filter((item) => cacheId === `${item.zoom}-${item.x}-${item.y}`).length > 0 : true
+      var isDirty = false
+      if (tilesToRefresh) {
+        // Only mark specified tiles as dirty.
+        const matchingTiles = tilesToRefresh.filter((item) => cacheId.indexOf(`${item.zoom}-${item.x}-${item.y}`) === 0)
+        isDirty = matchingTiles.length > 0
+      } else {
+        isDirty = true  // Mark all tiles as dirty
+      }
       tileDataService.tileHtmlCache[cacheId].isDirty = isDirty
     })
   }

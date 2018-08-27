@@ -224,8 +224,6 @@ class LocationEditorController {
   }
 
   handleObjectModified(mapObject) {
-    console.log('modified')
-    console.log(mapObject)
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
       .then((result) => {

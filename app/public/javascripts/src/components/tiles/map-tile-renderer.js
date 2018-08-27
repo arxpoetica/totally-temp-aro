@@ -193,9 +193,28 @@ class MapTileRenderer {
     this.tileDataService.setMapLayers(mapLayers)
   }
 
+  // Helper to shuffle an array. From https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  shuffleArray(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+    return array;
+  }
+
   // Redraws cached tiles with the specified tile IDs
   redrawCachedTiles(tiles) {
-    tiles.forEach((tile) => {
+    // Shuffle the order of the tiles. Just for a UI "effect" - this has no bearing on performance, etc.
+    const shuffledTiles = this.shuffleArray(tiles)
+
+    shuffledTiles.forEach((tile) => {
       // There *can* be multiple cached tiles for a given zoom-x-y
       var tileId = TileUtilities.getTileId(tile.zoom, tile.x, tile.y)
       Object.keys(this.tileDataService.tileHtmlCache).forEach((cacheKey) => {
