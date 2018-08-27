@@ -2,7 +2,6 @@
   .equipment-list {
     position: relative;
     height: 100%;
-    overflow-y: auto;
   }
 </style>
 
@@ -13,13 +12,13 @@
       <th>Type</th>
     </thead>
     <tbody>
-      <tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToequipmentInfo | orderObjectBy:'siteClli'" 
-        ng-click="$ctrl.viewSelectedDetails({selectedEquipment:equipmentInfo})">
+      <tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToEquipmentInfo | orderObjectBy:'siteClli'" 
+        ng-click="$ctrl.onClickObject({selectedEquipment:equipmentInfo})">
         <td>{{equipmentInfo.siteClli}}</td>
         <td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo._data_type.split('.')[1]]}}</td>
       </tr>
-      <tr ng-if="$ctrl.utils.getObjectSize($ctrl.clliToequipmentInfo) >= $ctrl.MAX_Equipment_List">
-        <td colspan="2">List limited to {{$ctrl.MAX_Equipment_List}} sites</td>
+      <tr ng-if="$ctrl.Object.keys($ctrl.clliToEquipmentInfo).length >= $ctrl.MAX_EQUIPMENT_LIST">
+        <td colspan="2">List limited to {{$ctrl.MAX_EQUIPMENT_LIST}} sites</td>
       </tr>
     </tbody>
   </table>

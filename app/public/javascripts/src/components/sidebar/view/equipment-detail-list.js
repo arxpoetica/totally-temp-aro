@@ -2,14 +2,14 @@ import MapUtilities from '../../common/plan/map-utilities';
 
 class EquipmentDetailListController {
 
-  constructor($timeout, state, tileDataService, Utils) {
+  constructor($timeout, state, tileDataService) {
     this.$timeout = $timeout
     this.state = state
-    this.utils = Utils
     this.tileDataService = tileDataService
+    this.Object = Object;
 
-    this.clliToequipmentInfo = {}
-    this.MAX_Equipment_List = 100
+    this.clliToEquipmentInfo = {}
+    this.MAX_EQUIPMENT_LIST = 100
 
     //Handles zoom or equipment layer selection
     this.mapLayersChangeSubscription = state.mapLayers.skip(1).debounceTime(120).subscribe((reload) => {
@@ -52,8 +52,8 @@ class EquipmentDetailListController {
             var feature = features[iFeature]
             if (feature.properties &&
               feature.properties.object_id &&
-              this.utils.getObjectSize(this.clliToequipmentInfo) <= this.MAX_Equipment_List) {
-              this.clliToequipmentInfo[feature.properties.object_id] = feature.properties
+              Object.keys(this.clliToEquipmentInfo).length <= this.MAX_EQUIPMENT_LIST) {
+              this.clliToEquipmentInfo[feature.properties.object_id] = feature.properties
             }
           }
         })
@@ -64,7 +64,7 @@ class EquipmentDetailListController {
   refreshEquipmentList() {
     //refresh only in equipment list view
     if(this.state.activeViewModePanel === this.state.viewModePanels.EQUIPMENT_INFO) {
-      this.clliToequipmentInfo = {}
+      this.clliToEquipmentInfo = {}
       this.$timeout(this.getVisibleEquipmentIds(),500)
     }
   }
@@ -87,19 +87,19 @@ class EquipmentDetailListController {
 
   $onDestroy() {
     // Cleanup subscriptions
-    this.clliToequipmentInfo = {}
+    this.clliToEquipmentInfo = {}
     this.mapLayersChangeSubscription.unsubscribe()
     this.removeMapListeners()
   }
 }
 
-EquipmentDetailListController.$inject = ['$timeout', 'state', 'tileDataService', 'Utils']
+EquipmentDetailListController.$inject = ['$timeout', 'state', 'tileDataService']
 
 let equipmentDetailList = {
   templateUrl: '/components/sidebar/view/equipment-detail-list.html',
   bindings: {
     mapGlobalObjectName: '@',
-    viewSelectedDetails: '&'
+    onClickObject: '&'
   },
   controller: EquipmentDetailListController
 }
