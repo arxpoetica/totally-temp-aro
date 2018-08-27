@@ -61,7 +61,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
     objectKeyReplace(tileDefinition, '{rootPlanId}', rootPlanId)
-    objectKeyReplace(tileDefinition, '{boundaryType}', state.selectedBoundaryType.id)
 
     if (networkEquipment.equipmentType === 'point') {
       var pointTransform = getPointTransformForLayer(+networkEquipment.aggregateZoomThreshold)
@@ -76,19 +75,18 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // For equipments, we are going to filter out features that are planned and deleted
     var featureFilter = null
-    if (categoryType === 'equipment' || categoryType === 'boundaries') {
+    if (categoryType === 'equipment') {
       featureFilter = (feature) => {
-        if (!feature.properties) {
-          return true
-        } else if (feature.properties._data_type && feature.properties._data_type.split('.')[0] === 'equipment') {
-          // For now, just hide equipment features that are Planned and Deleted
-          return (!feature.properties.deployment_type
-            || (feature.properties.deployment_type === 1)
-            || (feature.properties.is_deleted !== 'true'))
-        } else {
-          // For all other features, do not display if the is_deleted flag is true
-          return feature.properties.is_deleted !== 'true'
-        }
+        // For now, just hide equipment features that are Planned and Deleted
+        return (!feature.properties.deployment_type
+          || (feature.properties.deployment_type === 1)
+          || (feature.properties.is_deleted !== 'true'))
+      }
+    } else if (categoryType === 'boundaries') {
+      featureFilter = (feature) => {
+        // Show boundaries with the currently selected boundary type AND that are not marked as deleted
+        return (feature.properties.boundary_type === state.selectedBoundaryType.id)
+               && (feature.properties.is_deleted !== 'true')
       }
     }
 

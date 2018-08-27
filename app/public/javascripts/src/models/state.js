@@ -164,7 +164,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     },
     selectedLayer: null,
     generatedDataRequest: {
-      generatePlanLocationLinks : false
+      generatePlanLocationLinks : false,
+      generateSubnetLinking: true
     },
     analysisSelectionMode: service.selectionModes.SELECTED_AREAS
   }
