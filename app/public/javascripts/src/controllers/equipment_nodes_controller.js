@@ -75,6 +75,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
     // For equipments, we are going to filter out features that are planned and deleted
     var featureFilter = null
+    var drawingOptions = networkEquipment.drawingOptions
     if (categoryType === 'equipment') {
       featureFilter = (feature) => {
         // For now, just hide equipment features that are Planned and Deleted
@@ -82,6 +83,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           || (feature.properties.deployment_type === 1)
           || (feature.properties.is_deleted !== 'true'))
       }
+      drawingOptions.labels = $scope.configuration.networkEquipment.labelDrawingOptions
     } else if (categoryType === 'boundaries') {
       featureFilter = (feature) => {
         // Show boundaries with the currently selected boundary type AND that are not marked as deleted
@@ -89,7 +91,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
                && (feature.properties.is_deleted !== 'true')
       }
     }
-
     return {
       tileDefinitions: [tileDefinition],
       iconUrl: networkEquipment.iconUrl, 
@@ -100,6 +101,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       lineWidth: networkEquipment.drawingOptions.lineWidth || 2,
       fillStyle: networkEquipment.drawingOptions.fillStyle,
       opacity: networkEquipment.drawingOptions.opacity || 0.5,
+      drawingOptions: drawingOptions,
       selectable: true,
       zIndex: networkEquipment.zIndex,
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
