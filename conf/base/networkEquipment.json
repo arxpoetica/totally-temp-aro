@@ -47,6 +47,16 @@
       }
     }
   },
+  "labelDrawingOptions": {
+    "properties": ["siteClli"],
+    "borderColor": "#000000",
+    "fillColor": "#e15426",
+    "textColor": "#ffffff",
+    "fontFamily": "Arial",
+    "fontSize": 15,
+    "align": "bottom",
+    "visibilityZoomThreshold": 12
+  },
   "equipments": {
     "central_office": {
       "label": "Central Office",

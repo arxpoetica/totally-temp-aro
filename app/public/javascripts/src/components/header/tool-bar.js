@@ -337,6 +337,11 @@ class ToolBarController {
     this.state.mapTileOptions.next(newMapTileOptions)
   }
 
+  showEquipmentLabelsChanged() {
+    this.state.viewSettingsChanged.next()
+    this.state.requestMapLayerRefresh.next(null)
+  }
+
   changeHeatMapOptions() {
     var newMapTileOptions = angular.copy(this.mapTileOptions)
     newMapTileOptions.heatMap.worldMaxValue=this.rangeValues[this.sliderValue]
@@ -362,8 +367,7 @@ class ToolBarController {
   }
 
   toggleSiteBoundary() {
-    this.state.viewSettingsChanged.next()
-    this.state.requestMapLayerRefresh.next(null)
+    this.state.viewSettingsChanged.next() // This will also refresh the map layer
   }
 
   showCableDirection() {

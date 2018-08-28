@@ -556,7 +556,6 @@ class MapTileRenderer {
   	          ctx.drawImage(entityImage, x, y) 
   	        } else {
               const originalAlpha = ctx.globalAlpha
-              //const modificationType = this.getModificationTypeForFeature(zoom, tileCoords, shape[0].x + geometryOffset.x, shape[0].y + geometryOffset.y, feature)
               if (modificationType === this.modificationTypes.ORIGINAL || modificationType === this.modificationTypes.DELETED) {
                 ctx.globalAlpha = 0.5
               }
@@ -572,6 +571,7 @@ class MapTileRenderer {
             const overlaySize = 12
             this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
+            this.renderFeatureLabels(ctx, mapLayer, feature, x + imageWidthBy2, y + imageHeightBy2, imageWidthBy2 * 2, imageHeightBy2 * 2)
             // Draw lock overlay if required
             if (feature.properties.is_locked) {
               ctx.drawImage(lockOverlayImage[0], x - 4, y - 4)
@@ -686,7 +686,52 @@ class MapTileRenderer {
     ctx.textBaseline = 'middle'
     ctx.strokeText(overlayText, x + width / 2, y + height / 2)
  }
-  
+
+  // Renders labels for a feature
+  renderFeatureLabels(ctx, mapLayer, feature, featureCenterX, featureCenterY, featureIconWidth, featureIconHeight) {
+
+    if (!mapLayer.drawingOptions || !mapLayer.drawingOptions.labels) {
+      return  // Nothing to draw
+    }
+
+    const labelMargin = 5, labelPadding = 3
+    var labelYOffset = 0
+    mapLayer.drawingOptions.labels.properties.forEach((labelProperty) => {
+      // Calculate the center of the label
+      var labelCenterX = featureCenterX, labelCenterY = featureCenterY
+      switch (mapLayer.drawingOptions.labels.align) {
+        case 'bottom':
+          labelCenterX = featureCenterX;
+          labelCenterY = featureCenterY + featureIconHeight / 2 + labelMargin + labelPadding + mapLayer.drawingOptions.labels.fontSize / 2
+          break;
+        case 'top':
+          labelCenterX = featureCenterX;
+          labelCenterY = featureCenterY - (featureIconHeight / 2 + labelMargin + labelPadding + mapLayer.drawingOptions.labels.fontSize / 2)
+          break;
+      }
+      labelCenterY += labelYOffset
+      // Draw the box for the label
+      const fontSize = mapLayer.drawingOptions.labels.fontSize
+      ctx.font = `${fontSize}px ${mapLayer.drawingOptions.labels.fontFamily}`
+      const labelText = feature.properties[labelProperty]
+      const textMetrics = ctx.measureText(labelText)
+      ctx.strokeStyle = mapLayer.drawingOptions.labels.borderColor
+      ctx.fillStyle = mapLayer.drawingOptions.labels.fillColor
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      const rectHeight = fontSize + labelPadding * 2
+      ctx.rect(labelCenterX - textMetrics.width / 2 - labelPadding, labelCenterY - fontSize / 2 - labelPadding,
+               textMetrics.width + labelPadding * 2, rectHeight)
+      ctx.fill()
+      ctx.stroke()
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.strokeStyle = mapLayer.drawingOptions.labels.textColor
+      ctx.fillStyle = mapLayer.drawingOptions.labels.textColor
+      ctx.fillText(labelText, labelCenterX, labelCenterY)
+      labelYOffset += rectHeight
+    })
+  }
 
   // Renders a polyline feature onto the canvas
   renderPolylineFeature(shape, geometryOffset, ctx, mapLayer, drawingStyleOverrides, isPolygonBorder) {
