@@ -539,6 +539,9 @@ class MapObjectEditorController {
     }
     this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
     this.state.requestMapLayerRefresh.next(tilesToRefresh)
+    // ToDo: this needs to be fixed by having a standard object model for features 
+    if (!feature.hasOwnProperty('dataType')) feature.dataType = "equipment."+feature.networkNodeType
+    
     mapMarker.feature = feature
     mapMarker.hitTest = (latLng) => {
       var scale = 1 << this.mapRef.getZoom()
@@ -577,6 +580,9 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     polygon.setOptions(this.polygonOptions)
+    
+    // ToDo: this needs to be fixed by having a standard object model for features 
+    if (!feature.hasOwnProperty('dataType')) feature.dataType = "equipment_boundary"
     
     polygon.feature = feature
     
