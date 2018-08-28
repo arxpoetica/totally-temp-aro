@@ -50,15 +50,21 @@ class EquipmentDetailListController {
           for (var iFeature = 0; iFeature < features.length; ++iFeature) {
             // Parse the geometry out.
             var feature = features[iFeature]
-            if (feature.properties &&
-              feature.properties.object_id &&
-              Object.keys(this.clliToEquipmentInfo).length <= this.MAX_EQUIPMENT_LIST) {
+            if (this.filterFeature(feature)) {
               this.clliToEquipmentInfo[feature.properties.object_id] = feature.properties
             }
           }
         })
         this.$timeout()
       })
+  }
+
+  filterFeature(feature) {
+    return feature.properties &&
+      feature.properties.object_id &&
+      feature.properties._data_type &&
+      feature.properties._data_type.split('.')[0] == 'equipment' &&
+      Object.keys(this.clliToEquipmentInfo).length <= this.MAX_EQUIPMENT_LIST
   }
 
   refreshEquipmentList() {
