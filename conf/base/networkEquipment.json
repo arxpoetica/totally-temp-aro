@@ -54,7 +54,8 @@
     "textColor": "#ffffff",
     "fontFamily": "Arial",
     "fontSize": 15,
-    "align": "bottom"
+    "align": "bottom",
+    "visibilityZoomThreshold": 12
   },
   "equipments": {
     "central_office": {

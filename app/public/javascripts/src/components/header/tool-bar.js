@@ -337,6 +337,11 @@ class ToolBarController {
     this.state.mapTileOptions.next(newMapTileOptions)
   }
 
+  showEquipmentLabelsChanged() {
+    this.state.viewSettingsChanged.next()
+    this.state.requestMapLayerRefresh.next(null)
+  }
+
   changeHeatMapOptions() {
     var newMapTileOptions = angular.copy(this.mapTileOptions)
     newMapTileOptions.heatMap.worldMaxValue=this.rangeValues[this.sliderValue]

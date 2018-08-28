@@ -83,6 +83,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     service.selectedToolBarAction = null
   }
 
+  service.showEquipmentLabels = true
 
   // The selection modes for the application
   service.selectionModes = {
