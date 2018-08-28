@@ -224,7 +224,6 @@ class PlanEditorController {
   }
   
   calculateCoverage(mapObject, spatialEdgeType, directed) {
-    console.log(mapObject)
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
