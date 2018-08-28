@@ -74,6 +74,18 @@
     </tr>
 
     <tr>
+      <td>Show equipment properties (csv)</td>
+      <td>
+        <div class="input-group">
+          <input class="form-control" type="text" ng-model="$ctrl.equipmentPropertiesToRender">
+          <span class="input-group-btn">
+            <button class="btn btn-default" ng-click="$ctrl.saveEquipmentPropertiesToRender()">Save</button>
+          </div>
+        </span>
+      </td>
+    </tr>
+
+    <tr>
       <th colspan="2">Heatmap settings</th>
     </tr>
 
@@ -83,23 +95,5 @@
         <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.powerExponent" ng-change="$ctrl.updateState()">
       </td>
     </tr>
-
-    <!-- <tr>
-      <td>
-        <input type="radio" name="heatmap" ng-model="$ctrl.mapTileOptions.heatMap.useAbsoluteMax" ng-value="true" ng-change="$ctrl.updateState()">Absolute</div>
-      </td>
-      <td>
-        <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.maxValue" ng-change="$ctrl.updateState()">
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        <input type="radio" name="heatmap" ng-model="$ctrl.mapTileOptions.heatMap.useAbsoluteMax" ng-value="false" ng-change="$ctrl.updateState()">World</div>
-      </td>
-      <td>
-        <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.worldMaxValue" ng-change="$ctrl.updateState()">
-      </td>
-    </tr> -->
   </tbody>
 </table>
