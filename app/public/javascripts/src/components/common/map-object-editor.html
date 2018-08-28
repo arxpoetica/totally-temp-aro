@@ -67,6 +67,11 @@
             &nbsp;&nbsp;<i class="fa fa-plus"></i>
             Add Boundary
           </a>
+          <a ng-if=" 'edit boundary' == option "
+             href="#" ng-click="$ctrl.editBoundary(item.objectId)">
+            &nbsp;&nbsp;<i class="fa fa-pencil"></i>
+            Edit Boundary
+          </a>
           <a ng-if=" 'delete' == option "
              href="#" ng-click="$ctrl.deleteObjectWithId(item.objectId)">
             &nbsp;&nbsp;<i class="fa fa-trash"></i>

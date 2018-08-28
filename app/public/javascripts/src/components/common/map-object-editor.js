@@ -225,6 +225,12 @@ class MapObjectEditorController {
     this.startDrawingBoundaryFor(this.createdMapObjects[objectId])
   }
   
+  editBoundary(objectId){
+    //var mapObject = 
+    this.selectMapObject(this.createdMapObjects[objectId])
+    this.toggleEditSelectedPolygon()
+  }
+  
   // deleteObjectWithId
   //createEditableExistingMapObject(feature, iconUrl)
   
@@ -265,6 +271,8 @@ class MapObjectEditorController {
                 options.push('select')// select 
                 if ('equipment' == dataTypeList[0]){
                   options.push('add boundary')// need to filter for: if not boundary 
+                }else if('equipment_boundary' == dataTypeList[0]){
+                  options.push('edit boundary')
                 }
                 options.push('delete')
               }else{
