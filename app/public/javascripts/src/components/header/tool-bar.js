@@ -367,8 +367,7 @@ class ToolBarController {
   }
 
   toggleSiteBoundary() {
-    this.state.viewSettingsChanged.next()
-    this.state.requestMapLayerRefresh.next(null)
+    this.state.viewSettingsChanged.next() // This will also refresh the map layer
   }
 
   showCableDirection() {
