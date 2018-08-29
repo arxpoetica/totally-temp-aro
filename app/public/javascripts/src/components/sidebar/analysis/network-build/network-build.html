@@ -15,6 +15,23 @@
     .trash {
       cursor: pointer
     }
+    
+    .input-increment-label-contain{
+      position: relative;
+    }
+    .input-increment-label-contain .input-w-label{
+      padding-right: 38px;
+    }
+    .input-increment-label-contain .input-increment-label{
+      position: absolute;
+      top: 6px;
+      right: 18px;
+      pointer-events: none;
+    }
+    
+    .line-break-item{
+      display: inline-block;
+    }
   </style>
   <div ng-style="!$ctrl.areControlsEnabled && {'position':'relative'}" style="height: 100%">
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
@@ -83,12 +100,14 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || $ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>Target Capital ({{ $ctrl.config.currency_symbol }}000s)</td>
-        <td> 
-          <input type="text" class="form-control text-right" placeholder="Amount"
-            ng-model="$ctrl.state.optimizationOptions.budget"
+        <td>Target Capital <div class="line-break-item">({{ $ctrl.config.currency_symbol }} thousands)</div></td>
+        <td class="input-increment-label-contain"> 
+          <input type="text" class="form-control text-right input-w-label" placeholder="Amount"
+            ng-model="$ctrl.budgetDisplay"
+            ng-change="$ctrl.onBudgetChange()"
             ng-model-options="{ debounce: 500 }"
             format="number">
+            <div class="input-increment-label">{{ $ctrl.config.currency_symbol }}K</div>
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">

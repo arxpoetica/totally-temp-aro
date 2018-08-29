@@ -10,6 +10,8 @@ class NetworkBuildController {
     this.config = config
 
     this.areControlsEnabled = true
+    this.budgetDisplay = this.state.optimizationOptions.budget / 1000
+    
     
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -52,7 +54,12 @@ class NetworkBuildController {
   onSelectionTypeChange(selectionType) {
     this.state.selectionTypeChanged.next(selectionType)
   } 
-
+  
+  
+  onBudgetChange(){
+    this.state.optimizationOptions.budget = this.budgetDisplay * 1000
+  }
+  
 }
 
 NetworkBuildController.$inject = ['$http', 'state', 'optimization']
