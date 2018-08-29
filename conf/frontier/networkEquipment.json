@@ -1,4 +1,18 @@
 {
+  "labelDrawingOptions": {
+    "properties": ["siteClli"],
+    "borderColor": null,
+    "fillColor": null,
+    "labelMargin": 3,
+    "labelPadding": 0,
+    "textStrokeColor": "#ffffff",
+    "textFillColor": "#e15426",
+    "fontFamily": "sans-serif",
+    "fontBold": true,
+    "fontSize": 28,
+    "align": "bottom",
+    "visibilityZoomThreshold": 12
+  },
   "equipments": {
     "central_office": {
       "iconUrl": "/images/map_icons/frontier/central_office.png",

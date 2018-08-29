@@ -52,7 +52,6 @@ class PlanInfoController {
             this.currentUserCanEdit = this.currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
           }
         })
-        console.log(this.currentUserCanEdit)
         this.$timeout()
       })
       .catch((err) => console.error(err))
