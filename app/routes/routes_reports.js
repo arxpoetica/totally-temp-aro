@@ -641,7 +641,6 @@ exports.configure = (api, middleware) => {
           CROSS JOIN all_boundaries b
           JOIN  reports.network_equipment ne
               ON ne.root_plan_id = i.plan_id
-              AND ne.is_branch_data
               AND ne.object_id = b.network_node_object_id
               AND ne.node_type_id <> 8
         ),

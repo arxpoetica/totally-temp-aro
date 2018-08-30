@@ -67,6 +67,7 @@ import dropTarget from './common/drop-target'
 import planSearch from './common/plan/plan-search'
 import planSearchFilter from './common/plan/plan-search-filter'
 import resourcePermissionsEditor from './common/resource-permissions-editor'
+import aroDrawingManager from './common/aro-drawing-manager'
 import accordion from './accordion/accordion'
 import accordionPanelContents from './accordion/accordion-panel-contents'
 import accordionPanelTitle from './accordion/accordion-panel-title'
@@ -148,6 +149,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('planSearch', planSearch)
    .component('planSearchFilter', planSearchFilter)
    .component('resourcePermissionsEditor', resourcePermissionsEditor)
+   .component('aroDrawingManager', aroDrawingManager)
    .component('accordion', accordion)
    .component('accordionPanelContents', accordionPanelContents)
    .component('accordionPanelTitle', accordionPanelTitle)

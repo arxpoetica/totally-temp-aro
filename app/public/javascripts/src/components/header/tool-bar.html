@@ -277,6 +277,12 @@
     <i class="fa fa-bookmark-o fa-rotate-180"></i>
   </button>
 
+  <aro-drawing-manager
+    map-global-object-name="map"
+    drawing-control="true"
+    drawing-modes="['polygon','polyline']">
+  </aro-drawing-manager>
+
   <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
