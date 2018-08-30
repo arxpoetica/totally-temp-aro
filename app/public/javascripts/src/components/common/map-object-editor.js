@@ -266,7 +266,11 @@ class MapObjectEditorController {
               validFeature = true
             }
             
+            // ToDo: MORE discrepancies, fix
             if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
+              validFeature = false
+            }
+            if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
               validFeature = false
             }
             
