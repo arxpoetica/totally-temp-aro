@@ -257,10 +257,20 @@ class MapObjectEditorController {
             var dataTypeList = ['']
             if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
             if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
+            
+            var validFeature = false
+            
             if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
                 && (!result.is_deleted || 'false' == result.is_deleted)
                 && !menuItemsById.hasOwnProperty( result.object_id) ){
-              
+              validFeature = true
+            }
+            
+            if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
+              validFeature = false
+            }
+            
+            if (validFeature){  
               // ToDo: MORE discrepancies, we NEED to fix this
               if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
               
