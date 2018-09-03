@@ -785,14 +785,14 @@ class MapTileRenderer {
 
     // Draw the polyline direction if the map options specify it
     if (mapLayer.showPolylineDirection) {
-      this.drawPolylineDirection(shape, ctx, ctx.strokeStyle)
+      this.drawPolylineDirection(shape, geometryOffset, ctx, ctx.strokeStyle)
     }
 
     ctx.globalAlpha = oldOpacity
   }
 
   // Draws an arrow showing the direction of a polyline
-  drawPolylineDirection(shape, ctx, strokeStyle) {
+  drawPolylineDirection(shape, geometryOffset, ctx, strokeStyle) {
     if (shape.length <= 1) {
       return // Nothing to do
     }
@@ -801,8 +801,8 @@ class MapTileRenderer {
     var polylineLength = 0.0
     var segmentLengths = []
     for (var iCoord = 0; iCoord < shape.length - 1; ++iCoord) {
-      const deltaX = shape[iCoord + 1].x - shape[iCoord].x
-      const deltaY = shape[iCoord + 1].y - shape[iCoord].y
+      const deltaX = shape[iCoord + 1].x - shape[iCoord].x + geometryOffset.x
+      const deltaY = shape[iCoord + 1].y - shape[iCoord].y + geometryOffset.y
       const segmentLength = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
       segmentLengths.push(segmentLength)
       polylineLength += segmentLength
@@ -826,10 +826,10 @@ class MapTileRenderer {
       }
       // The center point lies on this segment
       const fraction = remainingDistance / segmentLengths[currentSegment]
-      const deltaX = shape[currentSegment + 1].x - shape[currentSegment].x
-      const deltaY = shape[currentSegment + 1].y - shape[currentSegment].y
-      xCenter = shape[currentSegment].x + fraction * deltaX
-      yCenter = shape[currentSegment].y + fraction * deltaY
+      const deltaX = shape[currentSegment + 1].x - shape[currentSegment].x + geometryOffset.x
+      const deltaY = shape[currentSegment + 1].y - shape[currentSegment].y + geometryOffset.y
+      xCenter = shape[currentSegment].x + fraction * deltaX + geometryOffset.x
+      yCenter = shape[currentSegment].y + fraction * deltaY + geometryOffset.y
       centerSegment = currentSegment
       ++currentSegment
       break
