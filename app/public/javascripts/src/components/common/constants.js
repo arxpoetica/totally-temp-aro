@@ -2,6 +2,9 @@
 
 var Constants = Object.freeze({
 
+  // Map tile size in pixels
+  TILE_SIZE: 256,
+
   // Drag-and-drop editing on map
   DRAG_DROP_ENTITY_KEY: 'entity_type',
   DRAG_DROP_ENTITY_DETAILS_KEY: 'entity_details',
