@@ -91,22 +91,26 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
 
   globalSettings.createTag = () => {
     $http.post(`/service/tag-mapping/tags?name=${globalSettings.newTag.name}&description=${globalSettings.newTag.description}&colourHue=${globalSettings.newTag.colourHue}`)
-    .then((response) => {
-      state.loadListOfPlanTags()
-      globalSettings.getTags()
-      globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
-      globalSettings.newTag = {}
-    })
+      .then((response) => {
+        return state.loadListOfPlanTags()
+      })
+      .then(() => {
+        globalSettings.getTags()
+        globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+        globalSettings.newTag = {}
+      })
   }
 
   globalSettings.updateTag = () => {
-    $http.put(`/service/tag-mapping/tags`,_.omit(globalSettings.updatedTag,'type'))
-    .then((response) => {
-      state.loadListOfPlanTags()
-      globalSettings.getTags()
-      globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
-      globalSettings.updatedTag = {}
-    })
+    $http.put(`/service/tag-mapping/tags`, _.omit(globalSettings.updatedTag, 'type'))
+      .then((response) => {
+        return state.loadListOfPlanTags()
+      })
+      .then(() => {
+        globalSettings.getTags()
+        globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
+        globalSettings.updatedTag = {}
+      })
   }
 
   return globalSettings
