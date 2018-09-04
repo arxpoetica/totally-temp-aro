@@ -240,84 +240,80 @@ class MapObjectEditorController {
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       
       // NEED TO GET NEW FEATURES AS WELL
-      var lat = latLng.lat()
-      var lng = latLng.lng()
       this.getFeaturesAtPoint(latLng)
       .then((results) => {
         var menuItems = []
         var menuItemsById = {}
         
-        results.forEach((resultList) => {
-          resultList.forEach((result) => {
-            //populate context menu aray here
-            // we may need different behavour for different controllers using this
+        results.forEach((result) => {
+          //populate context menu aray here
+          // we may need different behavour for different controllers using this
+          
+          // if this.createdMapObjects[objectId]
+          var options = []
+          // ToDo: sometimes it's _data_type other times it's dataType
+          // regulate this using actual classes! 
+          var dataTypeList = ['']
+          if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
+          if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
+          
+          var validFeature = false
+          
+          if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
+              && (!result.is_deleted || 'false' == result.is_deleted)
+              && !menuItemsById.hasOwnProperty( result.object_id) ){
+            validFeature = true
+          }
+          
+          // ToDo: MORE discrepancies, fix
+          if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
+            validFeature = false
+          }
+          if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
+            validFeature = false
+          }
+          
+          if (validFeature){  
+            // ToDo: MORE discrepancies, we NEED to fix this
+            if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
             
-            // if this.createdMapObjects[objectId]
-            var options = []
-            // ToDo: sometimes it's _data_type other times it's dataType
-            // regulate this using actual classes! 
-            var dataTypeList = ['']
-            if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
-            if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
-            
-            var validFeature = false
-            
-            if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
-                && (!result.is_deleted || 'false' == result.is_deleted)
-                && !menuItemsById.hasOwnProperty( result.object_id) ){
-              validFeature = true
-            }
-            
-            // ToDo: MORE discrepancies, fix
-            if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
-              validFeature = false
-            }
-            if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
-              validFeature = false
-            }
-            
-            if (validFeature){  
-              // ToDo: MORE discrepancies, we NEED to fix this
-              if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
-              
-              var feature = result
-              if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
-                // it's on the edit layer / in the transaction
-                feature = this.createdMapObjects[result.objectId].feature
-                options.push('select')// select 
-                if ('equipment' == dataTypeList[0]){
-                  options.push('add boundary')// need to filter for: if not boundary 
-                }else if('equipment_boundary' == dataTypeList[0]){
-                  options.push('edit boundary')
-                }
-                options.push('delete')
-              }else{
-                options.push('edit existing')
+            var feature = result
+            if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
+              // it's on the edit layer / in the transaction
+              feature = this.createdMapObjects[result.objectId].feature
+              options.push('select')// select 
+              if ('equipment' == dataTypeList[0]){
+                options.push('add boundary')// need to filter for: if not boundary 
+              }else if('equipment_boundary' == dataTypeList[0]){
+                options.push('edit boundary')
               }
-              
-              var name = ''
-              if ('equipment_boundary' == dataTypeList[0]){
-                name = 'boundary'
-              }else if(feature.hasOwnProperty('networkNodeType')){
-                name = feature.networkNodeType
-              }else{
-                name = dataTypeList[1]
-              }
-              
-              menuItemsById[result.objectId] = options
-              menuItems.push({
-                'objectId': result.objectId, 
-                'options': options, 
-                'dataTypeList': dataTypeList, 
-                'name': name, 
-                'feature': feature, 
-                'latLng': latLng
-              })
-              
+              options.push('delete')
+            }else{
+              options.push('edit existing')
             }
-          })
+            
+            var name = ''
+            if ('equipment_boundary' == dataTypeList[0]){
+              name = 'boundary'
+            }else if(feature.hasOwnProperty('networkNodeType')){
+              name = feature.networkNodeType
+            }else{
+              name = dataTypeList[1]
+            }
+            
+            menuItemsById[result.objectId] = options
+            menuItems.push({
+              'objectId': result.objectId, 
+              'options': options, 
+              'dataTypeList': dataTypeList, 
+              'name': name, 
+              'feature': feature, 
+              'latLng': latLng
+            })
+            
+          }
         })
-        
+      
         this.menuItems = menuItems
         if (menuItems.length <= 0){
           this.closeContextMenu()
