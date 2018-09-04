@@ -360,7 +360,8 @@ class MapObjectEditorController {
     // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
     var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
     this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
+      console.log(mapOverlay)
+      hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
     })
     
     return Promise.all(hitPromises)
@@ -584,6 +585,7 @@ class MapObjectEditorController {
   }
 
   createPolygonMapObject(feature) {
+    console.log(feature)
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
@@ -612,6 +614,7 @@ class MapObjectEditorController {
       if (!this.state.showSiteBoundary) return false
       return google.maps.geometry.poly.containsLocation(latLng, polygon)
     }
+    console.log(polygon)
     return polygon
   }
 
@@ -772,6 +775,7 @@ class MapObjectEditorController {
         // Get the boundary geometry from aro-service
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
+          // ToDo: check for empty object, reject on true
           var serviceFeature = result.data
           serviceFeature.attributes = {
             network_node_object_id: serviceFeature.networkObjectId,
