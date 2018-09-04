@@ -7,6 +7,7 @@ import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
 import FeatureSelector from './feature-selector'
+import Constants from '../common/constants'
 
 class TileComponentController {
 
@@ -185,7 +186,6 @@ class TileComponentController {
       DELETE: 1,
       UPDATE: 2
     })
-    this.TILE_SIZE = 256
 
     this.state.requestPolygonSelect.subscribe((args) => {
       if (!this.mapRef || !args.coords) {
@@ -214,7 +214,8 @@ class TileComponentController {
           })
 
           // Get the locations from this tile that are in the polygon
-          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: this.TILE_SIZE, height: this.TILE_SIZE }, this.state.mapLayers.getValue(),
+          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+                                                                      this.state.mapLayers.getValue(),
                                                                       zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
         }
       }
@@ -272,7 +273,7 @@ class TileComponentController {
       console.error(this.mapRef.overlayMapTypes)
       return
     }
-    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
+    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE), 
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.selectedLocations.getValue(),
@@ -307,7 +308,8 @@ class TileComponentController {
 
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
       var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-      FeatureSelector.performHitDetection(this.tileDataService, { width: this.TILE_SIZE, height: this.TILE_SIZE }, this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
+      FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+                                          this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
                                           clickedPointPixels.x, clickedPointPixels.y)
       .then((results) => {
         var locationFeatures = []
@@ -426,8 +428,8 @@ class TileComponentController {
     // about a third of a tile past the edge of the world tile.
     siny = Math.min(Math.max(siny, -0.9999), 0.9999);
 
-    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
-    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+    var xUnscaled = Constants.TILE_SIZE * (0.5 + latLng.lng / 360);
+    var yUnscaled = Constants.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
 
     var scale = Math.pow(2.0, zoom)
     return {

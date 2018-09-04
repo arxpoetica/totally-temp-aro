@@ -404,9 +404,8 @@ class MapObjectEditorController {
     // Truncating to 0.9999 effectively limits latitude to 89.189. This is
     // about a third of a tile past the edge of the world tile.
     siny = Math.min(Math.max(siny, -0.9999), 0.9999);
-    this.TILE_SIZE = 256
-    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
-    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+    var xUnscaled = Constants.TILE_SIZE * (0.5 + latLng.lng / 360);
+    var yUnscaled = Constants.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
     var scale = Math.pow(2.0, zoom)
     
     return {
