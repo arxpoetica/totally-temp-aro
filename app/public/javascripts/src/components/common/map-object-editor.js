@@ -1,5 +1,7 @@
 import Constants from './constants'
-import MapUtilities from './plan/map-utilities';
+import MapUtilities from './plan/map-utilities'
+import FeatureSelector from '../tiles/feature-selector'
+
 class MapObjectEditorController {
 
   constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService, Utils) {
@@ -238,84 +240,80 @@ class MapObjectEditorController {
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       
       // NEED TO GET NEW FEATURES AS WELL
-      var lat = latLng.lat()
-      var lng = latLng.lng()
       this.getFeaturesAtPoint(latLng)
       .then((results) => {
         var menuItems = []
         var menuItemsById = {}
         
-        results.forEach((resultList) => {
-          resultList.forEach((result) => {
-            //populate context menu aray here
-            // we may need different behavour for different controllers using this
+        results.forEach((result) => {
+          //populate context menu aray here
+          // we may need different behavour for different controllers using this
+          
+          // if this.createdMapObjects[objectId]
+          var options = []
+          // ToDo: sometimes it's _data_type other times it's dataType
+          // regulate this using actual classes! 
+          var dataTypeList = ['']
+          if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
+          if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
+          
+          var validFeature = false
+          
+          if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
+              && (!result.is_deleted || 'false' == result.is_deleted)
+              && !menuItemsById.hasOwnProperty( result.object_id) ){
+            validFeature = true
+          }
+          
+          // ToDo: MORE discrepancies, fix
+          if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
+            validFeature = false
+          }
+          if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
+            validFeature = false
+          }
+          
+          if (validFeature){  
+            // ToDo: MORE discrepancies, we NEED to fix this
+            if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
             
-            // if this.createdMapObjects[objectId]
-            var options = []
-            // ToDo: sometimes it's _data_type other times it's dataType
-            // regulate this using actual classes! 
-            var dataTypeList = ['']
-            if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
-            if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
-            
-            var validFeature = false
-            
-            if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
-                && (!result.is_deleted || 'false' == result.is_deleted)
-                && !menuItemsById.hasOwnProperty( result.object_id) ){
-              validFeature = true
-            }
-            
-            // ToDo: MORE discrepancies, fix
-            if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
-              validFeature = false
-            }
-            if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
-              validFeature = false
-            }
-            
-            if (validFeature){  
-              // ToDo: MORE discrepancies, we NEED to fix this
-              if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
-              
-              var feature = result
-              if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
-                // it's on the edit layer / in the transaction
-                feature = this.createdMapObjects[result.objectId].feature
-                options.push('select')// select 
-                if ('equipment' == dataTypeList[0]){
-                  options.push('add boundary')// need to filter for: if not boundary 
-                }else if('equipment_boundary' == dataTypeList[0]){
-                  options.push('edit boundary')
-                }
-                options.push('delete')
-              }else{
-                options.push('edit existing')
+            var feature = result
+            if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
+              // it's on the edit layer / in the transaction
+              feature = this.createdMapObjects[result.objectId].feature
+              options.push('select')// select 
+              if ('equipment' == dataTypeList[0]){
+                options.push('add boundary')// need to filter for: if not boundary 
+              }else if('equipment_boundary' == dataTypeList[0]){
+                options.push('edit boundary')
               }
-              
-              var name = ''
-              if ('equipment_boundary' == dataTypeList[0]){
-                name = 'boundary'
-              }else if(feature.hasOwnProperty('networkNodeType')){
-                name = feature.networkNodeType
-              }else{
-                name = dataTypeList[1]
-              }
-              
-              menuItemsById[result.objectId] = options
-              menuItems.push({
-                'objectId': result.objectId, 
-                'options': options, 
-                'dataTypeList': dataTypeList, 
-                'name': name, 
-                'feature': feature, 
-                'latLng': latLng
-              })
-              
+              options.push('delete')
+            }else{
+              options.push('edit existing')
             }
-          })
+            
+            var name = ''
+            if ('equipment_boundary' == dataTypeList[0]){
+              name = 'boundary'
+            }else if(feature.hasOwnProperty('networkNodeType')){
+              name = feature.networkNodeType
+            }else{
+              name = dataTypeList[1]
+            }
+            
+            menuItemsById[result.objectId] = options
+            menuItems.push({
+              'objectId': result.objectId, 
+              'options': options, 
+              'dataTypeList': dataTypeList, 
+              'name': name, 
+              'feature': feature, 
+              'latLng': latLng
+            })
+            
+          }
         })
-        
+      
         this.menuItems = menuItems
         if (menuItems.length <= 0){
           this.closeContextMenu()
@@ -358,71 +356,12 @@ class MapObjectEditorController {
     var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
     
     // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-    var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-    })
-    
-    return Promise.all(hitPromises)
-  }
-  
-  
-  // ----- FOR TEST - will be moved to util file to be shared with tile.js ------------------- //
-  
-//Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
-  getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
-    // 1. Get the top left coordinates of the tile in lat lngs
-    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
-    // 2. Convert to pixels
-    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
-    // 3. Convert the clicked lat lng to pixels
-    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+    var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
 
-    return {
-      x: clickedPointPixels.x - nwCornerPixels.x,
-      y: clickedPointPixels.y - nwCornerPixels.y
-    }
+    return FeatureSelector.performHitDetection(this.tileDataService, { width: 256, height: 256 }, this.state.mapLayers.getValue(),
+                                               zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y)
   }
 
-  // Returns the latitiude and longitude of the northwest corner of a tile
-  // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
-  getNWTileCornerLatLng(tileZoom, tileX, tileY) {
-    var n = Math.pow(2.0, tileZoom)
-    var lon_deg = tileX / n * 360.0 - 180.0
-    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
-    var lat_deg = lat_rad * 180.0 / Math.PI
-    return {
-      lat: lat_deg,
-      lng: lon_deg
-    }
-  }
-
-  // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
-  // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
-  getPixelCoordinatesFromLatLng(latLng, zoom) {
-    var siny = Math.sin(latLng.lat * Math.PI / 180);
-    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
-    // about a third of a tile past the edge of the world tile.
-    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
-    this.TILE_SIZE = 256
-    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
-    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
-    var scale = Math.pow(2.0, zoom)
-    
-    return {
-      x: Math.floor(xUnscaled * scale),
-      y: Math.floor(yUnscaled * scale)
-    }
-  }
-  
-  
-  // --------------------------------
-  
-  
-  
-  
-  
-  
   makeIconAnchor(iconUrl, callback){
     if ('undefined' == typeof callback) callback = {}
     var img = new Image();
