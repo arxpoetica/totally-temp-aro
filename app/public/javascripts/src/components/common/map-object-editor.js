@@ -1,5 +1,7 @@
 import Constants from './constants'
-import MapUtilities from './plan/map-utilities';
+import MapUtilities from './plan/map-utilities'
+import FeatureSelector from '../tiles/feature-selector'
+
 class MapObjectEditorController {
 
   constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService, Utils) {
@@ -359,11 +361,9 @@ class MapObjectEditorController {
     
     // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
     var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-    })
-    
-    return Promise.all(hitPromises)
+
+    return FeatureSelector.performHitDetection(this.tileDataService, { width: 256, height: 256 }, this.state.mapLayers.getValue(),
+                                               zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y)
   }
   
   

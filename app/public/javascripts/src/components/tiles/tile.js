@@ -5,7 +5,8 @@
 
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
-import MapUtilities from '../common/plan/map-utilities';
+import MapUtilities from '../common/plan/map-utilities'
+import FeatureSelector from './feature-selector'
 
 class TileComponentController {
 
@@ -213,9 +214,8 @@ class TileComponentController {
           })
 
           // Get the locations from this tile that are in the polygon
-          this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-            pointInPolyPromises.push(mapOverlay.getPointsInPolygon(zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
-          })
+          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: this.TILE_SIZE, height: this.TILE_SIZE }, this.state.mapLayers.getValue(),
+                                                                      zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
         }
       }
       Promise.all(pointInPolyPromises) 
@@ -293,18 +293,7 @@ class TileComponentController {
                                                          this.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-    
-    // for test
-    /*
-    this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
-      console.log(event)
-      var lat = event.latLng.lat()
-      var lng = event.latLng.lng()
-      this.getFeaturesAtPoint(lat, lng)
-      
-    })
-    */
-    
+
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
 
       // Get latitiude and longitude
@@ -318,12 +307,8 @@ class TileComponentController {
 
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
       var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-
-      var hitPromises = []
-      this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-      })
-      Promise.all(hitPromises)
+      FeatureSelector.performHitDetection(this.tileDataService, { width: this.TILE_SIZE, height: this.TILE_SIZE }, this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
+                                          clickedPointPixels.x, clickedPointPixels.y)
       .then((results) => {
         var locationFeatures = []
         var analysisAreaFeatures = []
@@ -348,7 +333,7 @@ class TileComponentController {
           canSelectSA = true
         }  
 
-        results[0].forEach((result) => {
+        results.forEach((result) => {
           // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
           //console.log(result)
           if(result.location_id && (canSelectLoc || 
@@ -394,56 +379,14 @@ class TileComponentController {
     })
     
   }
-  
-  
-  
-  /*
-  getFeaturesAtPoint(lat, lng){
-    // Get zoom
-    var zoom = this.mapRef.getZoom()
-    // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
-    var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
-    
-    // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-    var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-    console.log(clickedPointPixels)
-    console.log(this.mapRef)
-    var hitPromises = []
-    
-    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-    })
-    console.log(hitPromises)
-    Promise.all(hitPromises)
-    .then((results) => {
-      console.log(results)
-      //results[0].forEach((result) => {
-      //  console.log(result)
-      //})
-    })
-  }
-  */
-  
-  
-  
-  
-  
-  
-  
-  
+
   // Removes the existing map overlay
   destoryMapOverlay() {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
     }
-    /*
-    if (this.overlayRightClickListener) {
-      google.maps.event.removeListener(this.overlayRightClickListener)
-      this.overlayRightClickListener = null
-    }
-    */
-    
+
     this.mapRef.overlayMapTypes.clear()
   }
 
