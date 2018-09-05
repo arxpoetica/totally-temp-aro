@@ -33,6 +33,10 @@
   .indent-1 {
     padding-left: 20px !important;
   }
+
+  #tblLocationInfo {
+    margin-bottom: 0px !important;
+  }
 </style>
 
 <div class="mb-5 mt-2">
@@ -155,6 +159,23 @@
       </tr>
     </tbody>
   </table>
+
+  <div style="width: 100%; margin-top: 2px; margin-bottom: 6px;">
+    <div class="ei-header" style="padding-top: 0px;" ng-click="$ctrl.toggleAuditLog = !$ctrl.toggleAuditLog">
+      <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.toggleAuditLog"></i>
+      <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.toggleAuditLog"></i>
+      Audit Log
+    </div>  
+  </div>
+
+  <span ng-if="$ctrl.toggleAuditLog && 
+  $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO">
+    <location-audit-log  
+      plan-id="$ctrl.plan.id"
+      object-id="$ctrl.selectedLocationObjectId"
+      current-user-id="$ctrl.currentUser.id">
+    </location-audit-log>
+  </span>
 
   <div>
     <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
