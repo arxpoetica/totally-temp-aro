@@ -45,6 +45,8 @@ class ViewModeLocationController {
             }
           }
           
+          this.selectedLocationObjectId = feature.object_id
+          this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
           this.getLocationInfo(this.plan.id,locationId,feature.object_id).then(locationInfo => this.showStaticMap(locationInfo))
         } else {
@@ -64,9 +66,7 @@ class ViewModeLocationController {
   getLocationInfo(planId, id, objectId){
     var promises = []
     promises.push(this.$http.get(`/locations/${planId}/${id}/show`))
-    objectId && promises.push(this.$http.get(`/service/audit/${planId}/location/${objectId}?user_id=${this.currentUser.id}`))
     return Promise.all(promises).then((results) => {
-      results[0].data.audit = results[1] && results[1].data
       return results[0].data
     })
   }
@@ -109,6 +109,7 @@ class ViewModeLocationController {
 
   viewSelectedLocation(selectedLocation) {
     //console.log(selectedLocation)
+    this.selectedLocationObjectId = selectedLocation.objectId
     this.updateSelectedState(selectedLocation, selectedLocation.id)
     this.getLocationInfo(this.plan.id,selectedLocation.id,selectedLocation.objectId)
     .then(locationInfo => this.showStaticMap(locationInfo))
@@ -117,11 +118,6 @@ class ViewModeLocationController {
       const ZOOM_FOR_LOCATION_SEARCH = 17
       this.state.requestSetMapZoom.next(ZOOM_FOR_LOCATION_SEARCH)
     })
-  }
-
-  getUserName(modifiedBy) {
-    var user = this.state.systemActors.find((actor) => actor.id === modifiedBy)
-    return user && user.firstName + ' ' + user.lastName
   }
   
   $onDestroy() {
