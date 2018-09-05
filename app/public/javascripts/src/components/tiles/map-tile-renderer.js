@@ -550,7 +550,7 @@ class MapTileRenderer {
             if((feature.properties && _.has(feature.properties,'network_node_type')
               && (_.indexOf(selectedEquipments,feature.properties.network_node_type) > -1)) 
               || (!_.has(feature.properties,'network_node_type')) ) {
-                PolygonFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, this.censusCategories, this.tileDataService, null,
+                PolygonFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, this.censusCategories, this.tileDataService, this.styles,
                                                      this.tileSize, this.selectedServiceArea, this.selectedServiceAreas, this.selectedDisplayMode, this.displayModes,
                                                      this.analysisSelectionMode, this.selectedCensusBlockId, this.selectedCensusCategoryId)
                 ctx.globalAlpha = 1.0
