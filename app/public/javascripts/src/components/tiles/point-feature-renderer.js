@@ -73,7 +73,7 @@ class PointFeatureRenderer {
     const overlaySize = 12
     this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
-    this.renderFeatureLabels(ctx, mapLayer, feature, x + imageWidthBy2, y + imageHeightBy2, imageHeightBy2 * 2)
+    this.renderFeatureLabels(ctx, mapLayer, feature, x + imageWidthBy2, y + imageHeightBy2, entityImage.width, entityImage.height)
     // Draw lock overlay if required
     if (feature.properties.is_locked) {
       ctx.drawImage(lockOverlayImage[0], x - 4, y - 4)
@@ -143,13 +143,13 @@ class PointFeatureRenderer {
   }
 
   // Renders labels for a feature
-  static renderFeatureLabels(ctx, mapLayer, feature, featureCenterX, featureCenterY, featureIconHeight) {
+  static renderFeatureLabels(ctx, mapLayer, feature, featureCenterX, featureCenterY, featureIconWidth, featureIconHeight) {
 
     if (!mapLayer.drawingOptions || !mapLayer.drawingOptions.labels) {
       return  // Nothing to draw
     }
 
-    const labelMargin = 5, labelPadding = 3
+    const labelMargin = mapLayer.drawingOptions.labels.labelMargin, labelPadding = mapLayer.drawingOptions.labels.labelPadding
     var labelYOffset = 0
     mapLayer.drawingOptions.labels.properties.forEach((labelProperty) => {
       // Calculate the center of the label
@@ -167,23 +167,34 @@ class PointFeatureRenderer {
       labelCenterY += labelYOffset
       // Draw the box for the label
       const fontSize = mapLayer.drawingOptions.labels.fontSize
-      ctx.font = `${fontSize}px ${mapLayer.drawingOptions.labels.fontFamily}`
+      ctx.font = (mapLayer.drawingOptions.labels.fontBold ? 'bold ' : '') + `${fontSize}px ${mapLayer.drawingOptions.labels.fontFamily}`
       const labelText = feature.properties[labelProperty]
       const textMetrics = ctx.measureText(labelText)
-      ctx.strokeStyle = mapLayer.drawingOptions.labels.borderColor
-      ctx.fillStyle = mapLayer.drawingOptions.labels.fillColor
-      ctx.lineWidth = 1
-      ctx.beginPath()
       const rectHeight = fontSize + labelPadding * 2
-      ctx.rect(labelCenterX - textMetrics.width / 2 - labelPadding, labelCenterY - fontSize / 2 - labelPadding,
-        textMetrics.width + labelPadding * 2, rectHeight)
-      ctx.fill()
-      ctx.stroke()
+      ctx.lineWidth = 1
+      if (mapLayer.drawingOptions.labels.borderColor || mapLayer.drawingOptions.labels.fillColor) {
+        ctx.strokeStyle = mapLayer.drawingOptions.labels.borderColor || '#000000'
+        ctx.fillStyle = mapLayer.drawingOptions.labels.fillColor || '#ffffff'
+        ctx.beginPath()
+        ctx.rect(labelCenterX - textMetrics.width / 2 - labelPadding, labelCenterY - fontSize / 2 - labelPadding,
+                 textMetrics.width + labelPadding * 2, rectHeight)
+        if (mapLayer.drawingOptions.labels.fillColor) {
+          ctx.fill()
+        }
+        if (mapLayer.drawingOptions.labels.fillColor) {
+          ctx.stroke()
+        }
+      }
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.strokeStyle = mapLayer.drawingOptions.labels.textColor
-      ctx.fillStyle = mapLayer.drawingOptions.labels.textColor
-      ctx.fillText(labelText, labelCenterX, labelCenterY)
+      if (mapLayer.drawingOptions.labels.textFillColor) {
+        ctx.fillStyle = mapLayer.drawingOptions.labels.textFillColor
+        ctx.fillText(labelText, labelCenterX, labelCenterY)
+      }
+      if (mapLayer.drawingOptions.labels.textStrokeColor) {
+        ctx.strokeStyle = mapLayer.drawingOptions.labels.textStrokeColor
+        ctx.strokeText(labelText, labelCenterX, labelCenterY)
+      }
       labelYOffset += rectHeight
     })
   }
