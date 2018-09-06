@@ -15,8 +15,12 @@ class aroDrawingManagerController {
           position: google.maps.ControlPosition.BOTTOM_CENTER,
           drawingModes: this.drawingModes
         },
+        polylineOptions: {
+          editable: this.editable
+        },
         polygonOptions: {
-          fillColor: 'transparent'
+          fillColor: 'transparent',
+          editable: this.editable
         }
       });
       this.drawingManager.setMap(this.mapRef);
@@ -73,7 +77,8 @@ let aroDrawingManager = {
   bindings: {
     mapGlobalObjectName: '@',
     drawingControl: '=',
-    drawingModes: '<'
+    drawingModes: '<',
+    editable: '='
   },
   controller: aroDrawingManagerController
 }
