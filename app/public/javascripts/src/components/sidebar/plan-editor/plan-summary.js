@@ -30,6 +30,13 @@ class PlanSummaryController {
     this.censusTagCategories = this.state.censusCategories.getValue()
     this.censusTagCategoriesObserver = this.state.censusCategories.subscribe((newValue) => {
       this.censusTagCategories = newValue
+      this.censusTagTodescription = {}
+      Object.keys(this.censusTagCategories).forEach((categoryId) => {
+        Object.keys(this.censusTagCategories[categoryId].tags).forEach((tagId) => {
+          var tag = this.censusTagCategories[categoryId].tags[tagId]
+          this.censusTagTodescription[tag.id] = tag.description
+        })
+      })
     })
   }
 
