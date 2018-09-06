@@ -274,8 +274,10 @@ class ToolBarController {
         }
       }
       // Clear all <li> elements from the dropdown.
-      while(dropdownUL.hasChildNodes()) {
-        dropdownUL.removeChild(dropdownUL.lastChild)
+      if (dropdownUL){
+        while(dropdownUL.hasChildNodes()) {
+          dropdownUL.removeChild(dropdownUL.lastChild)
+        }
       }
 
       // All buttons are in the toolbar. Go through all of them and mark the ones to be collapsed (if any).

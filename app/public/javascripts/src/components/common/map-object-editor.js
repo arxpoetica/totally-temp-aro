@@ -711,6 +711,7 @@ class MapObjectEditorController {
         // Get the boundary geometry from aro-service
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
+          // ToDo: check for empty object, reject on true
           var serviceFeature = result.data
           serviceFeature.attributes = {
             network_node_object_id: serviceFeature.networkObjectId,
