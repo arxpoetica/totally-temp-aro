@@ -1,0 +1,28 @@
+<style scoped>
+.table-wrapper-scroll-y {
+  display: block;
+  max-height: 50%;
+  overflow-y: auto;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+</style>
+
+<div class="table-wrapper-scroll-y">
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>Timestamp</th>
+      <th>User</th>
+      <th>Action</th>
+    </tr>      
+  </thead>
+  <tbody>
+    <tr ng-repeat="log in $ctrl.locationAuditLog.libraryAudit | orderBy:'-'">
+      <td>{{ log.modifiedDate | date:'EEE MMM dd y HH:mm:ss' }}</td>
+      <td>{{ log.userName }}</td>
+      <td>{{ log.crudAction }}</td>
+    </tr>
+  </tbody>
+</table>
+</div>

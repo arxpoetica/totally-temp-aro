@@ -1,3 +1,4 @@
+import Constants from '../constants'
 class MapUtilities {
 
   // Returns the tile coordinates (x, y) for a given lat/long and zoom level
@@ -40,6 +41,52 @@ class MapUtilities {
     }
 
     return visibleTiles
+  }
+
+  // Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
+  static getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
+    // 1. Get the top left coordinates of the tile in lat lngs
+    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
+    // 2. Convert to pixels
+    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
+    // 3. Convert the clicked lat lng to pixels
+    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
+
+    return {
+      x: clickedPointPixels.x - nwCornerPixels.x,
+      y: clickedPointPixels.y - nwCornerPixels.y
+    }
+  }
+
+  // Returns the latitiude and longitude of the northwest corner of a tile
+  // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
+  static getNWTileCornerLatLng(tileZoom, tileX, tileY) {
+    var n = Math.pow(2.0, tileZoom)
+    var lon_deg = tileX / n * 360.0 - 180.0
+    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
+    var lat_deg = lat_rad * 180.0 / Math.PI
+    return {
+      lat: lat_deg,
+      lng: lon_deg
+    }
+  }
+
+  // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
+  // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
+  static getPixelCoordinatesFromLatLng(latLng, zoom) {
+    var siny = Math.sin(latLng.lat * Math.PI / 180);
+    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
+    // about a third of a tile past the edge of the world tile.
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+
+    var xUnscaled = Constants.TILE_SIZE * (0.5 + latLng.lng / 360);
+    var yUnscaled = Constants.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+
+    var scale = Math.pow(2.0, zoom)
+    return {
+      x: Math.floor(xUnscaled * scale),
+      y: Math.floor(yUnscaled * scale)
+    }
   }
 }
 

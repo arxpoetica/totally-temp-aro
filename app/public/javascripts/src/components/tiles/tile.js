@@ -5,7 +5,9 @@
 
 import MapTileRenderer from './map-tile-renderer'
 import TileUtilities from './tile-utilities'
-import MapUtilities from '../common/plan/map-utilities';
+import MapUtilities from '../common/plan/map-utilities'
+import FeatureSelector from './feature-selector'
+import Constants from '../common/constants'
 
 class TileComponentController {
 
@@ -184,7 +186,6 @@ class TileComponentController {
       DELETE: 1,
       UPDATE: 2
     })
-    this.TILE_SIZE = 256
 
     this.state.requestPolygonSelect.subscribe((args) => {
       if (!this.mapRef || !args.coords) {
@@ -208,14 +209,14 @@ class TileComponentController {
           var tileCoords = { x: xTile, y: yTile }
           var convertedPixelCoords = []
           args.coords.forEach((latLng) => {
-            var pixelCoords = this.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
+            var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
             convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
           })
 
           // Get the locations from this tile that are in the polygon
-          this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-            pointInPolyPromises.push(mapOverlay.getPointsInPolygon(zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
-          })
+          pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+                                                                      this.state.mapLayers.getValue(),
+                                                                      zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
         }
       }
       Promise.all(pointInPolyPromises) 
@@ -272,7 +273,7 @@ class TileComponentController {
       console.error(this.mapRef.overlayMapTypes)
       return
     }
-    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(this.TILE_SIZE, this.TILE_SIZE), 
+    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE), 
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.selectedLocations.getValue(),
@@ -290,21 +291,10 @@ class TileComponentController {
                                                          this.state, 
                                                          this.configuration,
                                                          this.uiNotificationService, 
-                                                         this.getPixelCoordinatesWithinTile.bind(this)
+                                                         MapUtilities.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-    
-    // for test
-    /*
-    this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
-      console.log(event)
-      var lat = event.latLng.lat()
-      var lng = event.latLng.lng()
-      this.getFeaturesAtPoint(lat, lng)
-      
-    })
-    */
-    
+
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
 
       // Get latitiude and longitude
@@ -317,13 +307,10 @@ class TileComponentController {
       var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
 
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-      var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-
-      var hitPromises = []
-      this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-          hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-      })
-      Promise.all(hitPromises)
+      var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
+      FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+                                          this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
+                                          clickedPointPixels.x, clickedPointPixels.y)
       .then((results) => {
         var locationFeatures = []
         var analysisAreaFeatures = []
@@ -348,7 +335,7 @@ class TileComponentController {
           canSelectSA = true
         }  
 
-        results[0].forEach((result) => {
+        results.forEach((result) => {
           // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
           //console.log(result)
           if(result.location_id && (canSelectLoc || 
@@ -394,103 +381,15 @@ class TileComponentController {
     })
     
   }
-  
-  
-  
-  /*
-  getFeaturesAtPoint(lat, lng){
-    // Get zoom
-    var zoom = this.mapRef.getZoom()
-    // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
-    var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
-    
-    // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
-    var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-    console.log(clickedPointPixels)
-    console.log(this.mapRef)
-    var hitPromises = []
-    
-    this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-        hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
-    })
-    console.log(hitPromises)
-    Promise.all(hitPromises)
-    .then((results) => {
-      console.log(results)
-      //results[0].forEach((result) => {
-      //  console.log(result)
-      //})
-    })
-  }
-  */
-  
-  
-  
-  
-  
-  
-  
-  
+
   // Removes the existing map overlay
   destoryMapOverlay() {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
     }
-    /*
-    if (this.overlayRightClickListener) {
-      google.maps.event.removeListener(this.overlayRightClickListener)
-      this.overlayRightClickListener = null
-    }
-    */
-    
+
     this.mapRef.overlayMapTypes.clear()
-  }
-
-  // Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
-  getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
-    // 1. Get the top left coordinates of the tile in lat lngs
-    var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
-    // 2. Convert to pixels
-    var nwCornerPixels = this.getPixelCoordinatesFromLatLng(nwCornerLatLng, zoom)
-    // 3. Convert the clicked lat lng to pixels
-    var clickedPointPixels = this.getPixelCoordinatesFromLatLng({ lat: lat, lng: lng }, zoom)
-
-    return {
-      x: clickedPointPixels.x - nwCornerPixels.x,
-      y: clickedPointPixels.y - nwCornerPixels.y
-    }
-  }
-
-  // Returns the latitiude and longitude of the northwest corner of a tile
-  // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
-  getNWTileCornerLatLng(tileZoom, tileX, tileY) {
-    var n = Math.pow(2.0, tileZoom)
-    var lon_deg = tileX / n * 360.0 - 180.0
-    var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
-    var lat_deg = lat_rad * 180.0 / Math.PI
-    return {
-      lat: lat_deg,
-      lng: lon_deg
-    }
-  }
-
-  // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
-  // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
-  getPixelCoordinatesFromLatLng(latLng, zoom) {
-    var siny = Math.sin(latLng.lat * Math.PI / 180);
-    // Truncating to 0.9999 effectively limits latitude to 89.189. This is
-    // about a third of a tile past the edge of the world tile.
-    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
-
-    var xUnscaled = this.TILE_SIZE * (0.5 + latLng.lng / 360);
-    var yUnscaled = this.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
-
-    var scale = Math.pow(2.0, zoom)
-    return {
-      x: Math.floor(xUnscaled * scale),
-      y: Math.floor(yUnscaled * scale)
-    }
   }
 
   // Refresh map tiles

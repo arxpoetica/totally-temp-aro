@@ -2,6 +2,7 @@ class ViewModeLocationController {
 
   constructor($http, $timeout, state, configuration) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
     this.configuration = configuration
     this.plan = null
@@ -44,8 +45,10 @@ class ViewModeLocationController {
             }
           }
           
+          this.selectedLocationObjectId = feature.object_id
+          this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
-          this.getLocationInfo(this.plan.id,locationId).then(locationInfo => this.showStaticMap(locationInfo))
+          this.getLocationInfo(this.plan.id,locationId,feature.object_id).then(locationInfo => this.showStaticMap(locationInfo))
         } else {
           this.selectedLocationInfo = null
         }
@@ -60,9 +63,11 @@ class ViewModeLocationController {
     })
   }
   // Get the location Information
-  getLocationInfo(planId, id, callback){
-    return this.$http.get('/locations/' + planId + '/' + id + '/show').then((response) => {
-      return response.data
+  getLocationInfo(planId, id, objectId){
+    var promises = []
+    promises.push(this.$http.get(`/locations/${planId}/${id}/show`))
+    return Promise.all(promises).then((results) => {
+      return results[0].data
     })
   }
   
@@ -77,7 +82,7 @@ class ViewModeLocationController {
   
   showStaticMap(locationInfo) {
     this.selectedLocationInfo = locationInfo
-    this.showAttributes = this.currentUser.rol === 'sales' && !angular.equals(locationInfo.attributes, {})
+    this.showAttributes = (this.currentUser.rol === 'sales_engineer' || this.currentUser.rol === 'account_exec') && !angular.equals(locationInfo.attributes, {})
     
     var google_maps_key = this.configuration.google_maps_key
     var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
@@ -94,6 +99,7 @@ class ViewModeLocationController {
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
     
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
+    this.$timeout()
   }
 
   showDetailLocationInfo() {
@@ -103,8 +109,9 @@ class ViewModeLocationController {
 
   viewSelectedLocation(selectedLocation) {
     //console.log(selectedLocation)
+    this.selectedLocationObjectId = selectedLocation.objectId
     this.updateSelectedState(selectedLocation, selectedLocation.id)
-    this.getLocationInfo(this.plan.id,selectedLocation.id)
+    this.getLocationInfo(this.plan.id,selectedLocation.id,selectedLocation.objectId)
     .then(locationInfo => this.showStaticMap(locationInfo))
     .then(() => {
       map.setCenter({ lat: this.selectedLocationInfo.geog.coordinates[1], lng: this.selectedLocationInfo.geog.coordinates[0] })

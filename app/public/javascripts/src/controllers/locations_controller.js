@@ -61,8 +61,22 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
               if (hasFiltersSelected){
                 asGroup()
               }
-            }else {
+              else {
+                asSingle()
+              }
+            }
+            else {
               asSingle()
+            }
+
+            // Returns a feature filter if we are in "sales" mode, otherwise return null
+            function getFilterIfSales(locationType) {
+              if (!locationType.isSalesTile) {
+                return null
+              }
+              return (feature) => {
+                return (feature.properties.salesCategory === locationType.categoryKey)
+              }
             }
 
             function asSingle() {
@@ -83,7 +97,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                   iconUrl: `${baseUrl}${locationType.iconUrl}`,
                   renderMode: 'PRIMITIVE_FEATURES',
                   zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                  selectable: true
+                  selectable: true,
+                  featureFilter: getFilterIfSales(locationType)
                 }
                 createdMapLayerKeys.add(mapLayerKey)
               }
