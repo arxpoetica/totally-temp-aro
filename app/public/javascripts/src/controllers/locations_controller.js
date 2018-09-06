@@ -65,6 +65,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                 asSingle()
               }
             }
+            else {
+              asSingle()
+            }
 
             // Returns a feature filter if we are in "sales" mode, otherwise return null
             function getFilterIfSales(locationType) {
