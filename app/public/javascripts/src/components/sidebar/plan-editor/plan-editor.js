@@ -293,7 +293,7 @@ class PlanEditorController {
     if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)){
       
       var mapObject = this.selectedMapObject
-      console.log(mapObject)
+      //console.log(mapObject)
       // ToDo: fix. more of these terrible discrepancies
       var networkObjectId = mapObject.feature.networkObjectId
       if ('undefined' == typeof networkObjectId){
@@ -314,7 +314,7 @@ class PlanEditorController {
         var planId = this.state.plan.getValue().id
         this.$http.get(`/service/plan-feature/${planId}/equipment/${networkObjectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
-          console.log(result)
+          //console.log(result)
           
           equipmentPoint = result.data.geometry
           this.calculateCoverage(mapObject, equipmentPoint)
@@ -325,8 +325,8 @@ class PlanEditorController {
   
   //ToDo: shared code with calculateAutoBoundary(), combine
   calculateCoverage(mapObject, equipmentPoint, directed) {
-    console.log(mapObject)
-    console.log(equipmentPoint)
+    //console.log(mapObject)
+    //console.log(equipmentPoint)
     
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
@@ -347,10 +347,10 @@ class PlanEditorController {
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-    console.log(optimizationBody)
+    //console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
     .then((result) => {
-      console.log(result)
+      //console.log(result)
       // The user may have destroyed the component before we get here. In that case, just return
       if (this.isComponentDestroyed) {
         console.warn('Plan editor was closed while a boundary was being calculated')
@@ -684,7 +684,7 @@ class PlanEditorController {
     var siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
     var boundaryProperties = this.objectIdToProperties[objectId]
     if ('undefined' == typeof siteNetworkNodeType) siteNetworkNodeType = boundaryProperties.networkNodeType
-    console.log(siteNetworkNodeType)
+    
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,

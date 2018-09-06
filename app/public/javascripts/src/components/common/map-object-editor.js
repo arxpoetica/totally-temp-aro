@@ -360,7 +360,6 @@ class MapObjectEditorController {
     // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
     var clickedPointPixels = this.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
     this.mapRef.overlayMapTypes.forEach((mapOverlay) => {
-      console.log(mapOverlay)
       hitPromises.push(mapOverlay.performHitDetection(zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y))
     })
     
@@ -585,7 +584,6 @@ class MapObjectEditorController {
   }
 
   createPolygonMapObject(feature) {
-    console.log(feature)
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
@@ -614,7 +612,6 @@ class MapObjectEditorController {
       if (!this.state.showSiteBoundary) return false
       return google.maps.geometry.poly.containsLocation(latLng, polygon)
     }
-    console.log(polygon)
     return polygon
   }
 
