@@ -681,9 +681,10 @@ class PlanEditorController {
     // The site network node type can be in our map of obj-to-properties, OR it can be passed in (useful
     // in case we are editing existing boundaries, in which case the associated network node is not in our map)
     var objectProperties = this.objectIdToProperties[this.boundaryIdToEquipmentId[objectId]]
-    const siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
-    const boundaryProperties = this.objectIdToProperties[objectId]
-    
+    var siteNetworkNodeType = objectProperties ? objectProperties.siteNetworkNodeType : networkNodeType
+    var boundaryProperties = this.objectIdToProperties[objectId]
+    if ('undefined' == typeof siteNetworkNodeType) siteNetworkNodeType = boundaryProperties.networkNodeType
+    console.log(siteNetworkNodeType)
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: objectId,
@@ -939,10 +940,8 @@ class PlanEditorController {
         this.deleteBoundary(existingBoundaryId)
         existingBoundaryId = null
         
-        // ToDo: need to add spatialEdgeType, directed, networkNodeType to this BoundaryProperties but I'm not sure when this code is run
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 
                                                                               null, null, feature.attributes.networkNodeType, feature.deploymentType)
-        //                                                                    spatialEdgeType, directed, networkNodeType, deploymentType
         this.boundaryIdToEquipmentId[mapObject.objectId] = feature.attributes.network_node_object_id
         this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id] = mapObject.objectId
       }
