@@ -455,7 +455,27 @@ class MapTileRenderer {
       ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
     }
   }
-
+  
+  isFeatureLayerOn(categoryItemKey){
+    var isOn = false
+    if (this.configuration.networkEquipment.equipments[categoryItemKey].checked){
+      isOn = true
+    }
+    return isOn
+  }
+  
+  isFeatureLayerOnForBoundary(boundaryFeature){
+    var isOn = false
+    // if it doesn't have a network_node_type return TRUE 
+    if (!boundaryFeature.properties 
+        || !boundaryFeature.properties.network_node_type
+        || this.isFeatureLayerOn(boundaryFeature.properties.network_node_type)
+        ){
+      isOn = true
+    }
+    return isOn
+  }
+  
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
@@ -510,6 +530,7 @@ class MapTileRenderer {
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
+      
       geometry.forEach((shape) => {
         // Shape is an array of coordinates
         if (1 == shape.length) {
@@ -591,22 +612,16 @@ class MapTileRenderer {
           var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
 
           if (isClosedPolygon) {
-            var selectedEquipments = []
-            Object.keys(this.configuration.networkEquipment.equipments).forEach((categoryItemKey) => {
-              var networkEquipment = this.configuration.networkEquipment.equipments[categoryItemKey]
-              networkEquipment.checked && selectedEquipments.push(networkEquipment.networkNodeType)
-            })
-
+            
             // First draw a filled polygon with the fill color
             //show siteboundaries for the equipments that are selected
-            if((feature.properties && _.has(feature.properties,'network_node_type')
-              && (_.indexOf(selectedEquipments,feature.properties.network_node_type) > -1)) 
-              || (!_.has(feature.properties,'network_node_type')) ) {
-                this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
-                ctx.globalAlpha = 1.0
+            if (this.isFeatureLayerOnForBoundary(feature)){
+              this.renderPolygonFeature(feature, shape, geometryOffset, ctx, mapLayer)
+              ctx.globalAlpha = 1.0
             } else {
               return
             }
+            
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
@@ -1036,7 +1051,8 @@ class MapTileRenderer {
               var features = layerToFeatures[layerKey]
               for (var iFeature = 0; iFeature < features.length; ++iFeature) {
                 var feature = features[iFeature]
-                if (shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
+                
+                if (this.isFeatureLayerOnForBoundary(feature) && shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
                   hitFeatures.push(feature.properties)
                 }
               }
@@ -1190,7 +1206,6 @@ class MapTileRenderer {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
-      //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0
