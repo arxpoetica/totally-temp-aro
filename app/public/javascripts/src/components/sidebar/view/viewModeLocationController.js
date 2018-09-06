@@ -82,7 +82,7 @@ class ViewModeLocationController {
   
   showStaticMap(locationInfo) {
     this.selectedLocationInfo = locationInfo
-    this.showAttributes = this.currentUser.rol === 'sales' && !angular.equals(locationInfo.attributes, {})
+    this.showAttributes = (this.currentUser.rol === 'sales_engineer' || this.currentUser.rol === 'account_exec') && !angular.equals(locationInfo.attributes, {})
     
     var google_maps_key = this.configuration.google_maps_key
     var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
