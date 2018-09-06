@@ -102,7 +102,7 @@
         <td>{{ coverageinfo[$ctrl.summaryInstallationTypes['Total'].id][0].count || 0}}</td>
       </tr>
       <tr ng-if="$ctrl.isLocKeyExpanded[locationEntityType]" ng-repeat="(tag,taginfo) in $ctrl.locTagCoverage[locationEntityType]">
-        <td class="indent-2"> {{ $ctrl.censusTagCategories[tag].description }}</td>
+        <td class="indent-2"> {{ $ctrl.censusTagTodescription[tag] }}</td>
           <!-- <td ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">
             {{ taginfo[type][0][count] || 0}}
           </td> -->

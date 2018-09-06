@@ -19,7 +19,7 @@
   </thead>
   <tbody>
     <tr ng-repeat="log in $ctrl.locationAuditLog.libraryAudit | orderBy:'-'">
-      <td>{{ log.modifiedDate | date:'yyyy-MM-dd' }}</td>
+      <td>{{ log.modifiedDate | date:'EEE MMM dd y HH:mm:ss' }}</td>
       <td>{{ log.userName }}</td>
       <td>{{ log.crudAction }}</td>
     </tr>

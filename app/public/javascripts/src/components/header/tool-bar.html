@@ -174,7 +174,8 @@
   </button>
 
   <button ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
-            $ctrl.configuration.perspective.toolbar.showExportSelection.show"
+            $ctrl.configuration.perspective.toolbar.showExportSelection.show &&
+            $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
           ng-click="$ctrl.setSelectionExport()"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET }"
           data-toggle="tooltip"
