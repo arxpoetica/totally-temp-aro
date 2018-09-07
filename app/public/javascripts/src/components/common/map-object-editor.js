@@ -146,7 +146,7 @@ class MapObjectEditorController {
       // ToDo: this should be in plan-editor 
       if ('equipment' == this.featureType){
         var eventXY = this.getXYFromEvent(event)
-        this.updateContextMenu(event.latLng, eventXY.x, eventXY.y)
+        this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
       }
     })
     
@@ -236,12 +236,24 @@ class MapObjectEditorController {
   // deleteObjectWithId
   //createEditableExistingMapObject(feature, iconUrl)
   
-  updateContextMenu(latLng, x, y){
+  updateContextMenu(latLng, x, y, clickedMapObject) {
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       
       // NEED TO GET NEW FEATURES AS WELL
       this.getFeaturesAtPoint(latLng)
       .then((results) => {
+
+        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+        // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+        if (clickedMapObject) {
+          var clickedFeature = {
+            _data_type: this.isMarker(clickedMapObject) ? 'equipment' : 'equipment_boundary',
+            object_id: clickedMapObject.objectId,
+            is_deleted: false
+          }
+          results.push(clickedFeature)
+        }
+
         var menuItems = []
         var menuItemsById = {}
         
@@ -310,7 +322,6 @@ class MapObjectEditorController {
               'feature': feature, 
               'latLng': latLng
             })
-            
           }
         })
       
@@ -640,7 +651,7 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       }
       var eventXY = this.getXYFromEvent(event)
-      this.updateContextMenu(event.latLng, eventXY.x, eventXY.y)
+      this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
     
     this.createdMapObjects[mapObject.objectId] = mapObject
