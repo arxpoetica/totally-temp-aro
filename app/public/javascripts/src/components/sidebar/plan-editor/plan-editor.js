@@ -307,7 +307,7 @@ class PlanEditorController {
       
       if (this.objectIdToMapObject.hasOwnProperty(networkObjectId)){
         // we have an edited version of the equipment point
-        equipmentPoint.coordinates = [this.objectIdToMapObject[networkObjectId].position.lat(), this.objectIdToMapObject[networkObjectId].position.lng()]
+        equipmentPoint.coordinates = [this.objectIdToMapObject[networkObjectId].position.lng(), this.objectIdToMapObject[networkObjectId].position.lat()]
         this.calculateCoverage(mapObject, equipmentPoint)
       }else{
         // we do not have an edited version of the equipment point, get ti from the server 
@@ -335,11 +335,9 @@ class PlanEditorController {
     optimizationBody.analysis_type = 'COVERAGE'
     
     optimizationBody.point = equipmentPoint
-    //optimizationBody.polygon = {
-    //  "type": "Polygon",
-    //  "coordinates": mapObject.feature.geometry.coordinates
-    //}
-    optimizationBody.polygon = mapObject.feature.geometry
+    // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
+    optimizationBody.polygon = this.polygonPathsToWKT(mapObject.getPaths())
+
     //optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed  // directed analysis if thats what the user wants
     // Always send radius in meters to the back end
@@ -667,16 +665,24 @@ class PlanEditorController {
     return serviceFeature
   }
 
-  // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
-  formatBoundaryForService(objectId, networkNodeType) {
-    // Format the object and send it over to aro-service
-    var boundaryMapObject = this.objectIdToMapObject[objectId]
+  // Convert the paths in a Google Maps object into a Polygon WKT
+  polygonPathsToWKT(paths) {
     var allPaths = []
-    boundaryMapObject.getPaths().forEach((path) => {
+    paths.forEach((path) => {
       var pathPoints = []
       path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
       allPaths.push(pathPoints)
     })
+    return {
+      type: 'Polygon',
+      coordinates: allPaths
+    }
+  }
+
+  // Formats the boundary specified by the objectId so that it can be sent to aro-service for saving
+  formatBoundaryForService(objectId, networkNodeType) {
+    // Format the object and send it over to aro-service
+    var boundaryMapObject = this.objectIdToMapObject[objectId]
     
     // The site network node type can be in our map of obj-to-properties, OR it can be passed in (useful
     // in case we are editing existing boundaries, in which case the associated network node is not in our map)
@@ -690,10 +696,7 @@ class PlanEditorController {
       objectId: objectId,
       networkNodeType: siteNetworkNodeType, 
       networkObjectId: this.boundaryIdToEquipmentId[objectId],
-      geometry: {
-        type: 'Polygon',
-        coordinates: allPaths
-      },
+      geometry: this.polygonPathsToWKT(boundaryMapObject.getPaths()),
       boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
       attributes: {
         boundary_type_id: boundaryProperties.selectedSiteBoundaryTypeId, 
