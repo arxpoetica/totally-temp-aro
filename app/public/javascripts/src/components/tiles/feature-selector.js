@@ -4,7 +4,7 @@ var pointInPolygon = require('point-in-polygon')
 class FeatureSelector {
 
   // Loops through all features in this tile and selects the ones that match a comparator function
-  static selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected) {
+  static selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId) {
 
     // Build an array of promises that gets all map layer features (for the layers marked as selectable)
     var promises = []
@@ -58,7 +58,7 @@ class FeatureSelector {
   }
 
   // Gets all features that are within a given polygon
-  static getPointsInPolygon(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, polygonCoords) {
+  static getPointsInPolygon(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, polygonCoords, selectedBoundaryLayerId) {
 
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
@@ -125,7 +125,7 @@ class FeatureSelector {
       })
       return selectFeature
     }
-    return this.selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected)
+    return this.selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId)
   }
   
   static selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY) {
@@ -193,7 +193,7 @@ class FeatureSelector {
   }
 
   // Perform hit detection on features and get the first one (if any) under the mouse
-  static performHitDetection(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, xWithinTile, yWithinTile) {
+  static performHitDetection(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, xWithinTile, yWithinTile, selectedBoundaryLayerId) {
 
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
@@ -229,26 +229,35 @@ class FeatureSelector {
       //Load the selected service area 
       //if(feature.properties.code) { // ToDo: use featureType when implimented 
     	if(feature.properties.id) {
-        feature.loadGeometry().forEach(function (areaGeom) {
-          var areaPolyCoordinates = []
 
-          areaGeom.forEach(function (eachValue) {
-            var eachPoint = []
-            eachPoint.push(eachValue.x + deltaX)
-            eachPoint.push(eachValue.y + deltaY)
-            areaPolyCoordinates.push(eachPoint)
+        // Only select boundary features if the current boundary type is selected
+        var shouldTestFeature = true
+        if (feature.properties._data_type === 'equipment_boundary.select' && feature.properties.boundary_type) {
+          shouldTestFeature = feature.properties.boundary_type === selectedBoundaryLayerId
+        }
+
+        if (shouldTestFeature) {
+          feature.loadGeometry().forEach(function (areaGeom) {
+            var areaPolyCoordinates = []
+  
+            areaGeom.forEach(function (eachValue) {
+              var eachPoint = []
+              eachPoint.push(eachValue.x + deltaX)
+              eachPoint.push(eachValue.y + deltaY)
+              areaPolyCoordinates.push(eachPoint)
+            })
+  
+            if (pointInPolygon([xWithinTile, yWithinTile], areaPolyCoordinates)) {
+              selectFeature = true
+              return
+            }
           })
-
-          if (pointInPolygon([xWithinTile, yWithinTile], areaPolyCoordinates)) {
-            selectFeature = true
-            return
-          }
-        })
+        }
       }
 
       return selectFeature
     }
-    return this.selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected)
+    return this.selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId)
   }
 }
 

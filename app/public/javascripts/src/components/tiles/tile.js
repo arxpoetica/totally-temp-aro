@@ -216,7 +216,8 @@ class TileComponentController {
           // Get the locations from this tile that are in the polygon
           pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
                                                                       this.state.mapLayers.getValue(),
-                                                                      zoom, tileCoords.x, tileCoords.y, convertedPixelCoords))
+                                                                      zoom, tileCoords.x, tileCoords.y, convertedPixelCoords,
+                                                                      this.state.selectedBoundaryType.id))
         }
       }
       Promise.all(pointInPolyPromises) 
@@ -310,7 +311,7 @@ class TileComponentController {
       var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
       FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
                                           this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
-                                          clickedPointPixels.x, clickedPointPixels.y)
+                                          clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
         var locationFeatures = []
         var analysisAreaFeatures = []

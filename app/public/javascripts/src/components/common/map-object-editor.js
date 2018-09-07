@@ -359,7 +359,8 @@ class MapObjectEditorController {
     var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
 
     return FeatureSelector.performHitDetection(this.tileDataService, { width: 256, height: 256 }, this.state.mapLayers.getValue(),
-                                               zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y)
+                                               zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y,
+                                               this.state.selectedBoundaryType.id)
   }
 
   makeIconAnchor(iconUrl, callback){
