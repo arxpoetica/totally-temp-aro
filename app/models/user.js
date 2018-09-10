@@ -109,6 +109,10 @@ module.exports = class User {
         const ldapClient = ldap.createClient({
           url: authenticationConfig.url
         });
+        ldapClient.on('error', (err) => {
+          console.error('Error from ldap client:')
+          console.log(err)
+        })
         // Create a Distinguished Name (DN) that we represents the user that is trying to login
         const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
         return this.ldapBind(ldapClient, distinguishedName, password)
