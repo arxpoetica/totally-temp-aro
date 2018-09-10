@@ -4,7 +4,7 @@ var passport = require('passport')
 var querystring = require('querystring')
 var public_config = helpers.public_config
 var config = helpers.config
-const authenticationConfig = models.UIConfiguration.getConfigurationSet('authentication')
+const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
 exports.configure = (app, middleware) => {
   var LocalStrategy = require('passport-local').Strategy
@@ -15,40 +15,50 @@ exports.configure = (app, middleware) => {
     passwordField: 'password'
   },
   (email, password, callback) => {
-    if (authenticationConfig.useLdap) {
-      console.log(`Attempting LDAP login for user ${email}`)
-      models.User.loginLDAP(email, password)
-        .then((user) => {
-          console.log(`Successfully logged in user ${email} with LDAP`)
-          console.log(user)
-          return callback(null, user)
-        })
-        .catch((err) => {
-          console.warn(`LDAP login failed for user ${email}. Trying local login`)
-          models.User.login(email, password)
-            .then((user) => { 
-              console.log(`Logged in user ${email} with local cached login (fallback from LDAP login)`)
-              return callback(null, user) 
+    authenticationConfigPromise
+      .then((authenticationConfig) => {
+        if (authenticationConfig.enabled) {
+          console.log(`Attempting LDAP login for user ${email}`)
+          models.User.loginLDAP(email, password)
+            .then((user) => {
+              console.log(`Successfully logged in user ${email} with LDAP`)
+              console.log(user)
+              return callback(null, user)
             })
             .catch((err) => {
-              console.error(`Could not log in user ${email} with either LDAP or local login`)
-              if (!require('node-errors').isCustomError(err)) return callback(err)
-              return callback(null, false, { message: err.message })
-            })
-      })
-    } else {
-      // Regular login, not LDAP
-      models.User.login(email, password)
-      .then((user) => {
-        console.log(`Logged in user ${email} with local login`)
-        return callback(null, user)
+              console.warn(`LDAP login failed for user ${email}. Trying local login`)
+              models.User.login(email, password)
+                .then((user) => { 
+                  console.log(`Logged in user ${email} with local cached login (fallback from LDAP login)`)
+                  return callback(null, user) 
+                })
+                .catch((err) => {
+                  console.error(`Could not log in user ${email} with either LDAP or local login`)
+                  if (!require('node-errors').isCustomError(err)) return callback(err)
+                  return callback(null, false, { message: err.message })
+                })
+          })
+        } else {
+          // Regular login, not LDAP
+          models.User.login(email, password)
+          .then((user) => {
+            console.log(`Logged in user ${email} with local login`)
+            return callback(null, user)
+          })
+          .catch((err) => {
+            console.error(`Could not log in user ${email} with local login`)
+            console.error(err)
+            if (!require('node-errors').isCustomError(err)) return callback(err)
+            return callback(null, false, { message: err.message })
+          })
+        }
       })
       .catch((err) => {
-        console.error(`Could not log in user ${email} with local login`)
+        console.error(`Error when getting authentication configuration`)
+        console.error(err)
         if (!require('node-errors').isCustomError(err)) return callback(err)
         return callback(null, false, { message: err.message })
       })
-    }
   }))
 
   passport.serializeUser((user, callback) => {

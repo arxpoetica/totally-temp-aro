@@ -15,8 +15,8 @@ var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
 const ldap = require('ldapjs')
 const UIConfiguration = require('./ui_configuration')
-const authenticationConfig = (new UIConfiguration()).getConfigurationSet('authentication')
 var models = require('../models')
+const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
 module.exports = class User {
 
@@ -62,26 +62,30 @@ module.exports = class User {
   static ldapGetUserDetails(ldapClient, username) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
-      // Time out if the LDAP bind fails (setting timeout on the client does not help).
-      // The LDAP server may be unreachable, or may not be sending a response.
-      setTimeout(() => reject('LDAP bind timed out'), 8000)
-      const ldapOpts = {
-        filter: `CN=${username}`,
-        scope: 'sub',
-        attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute]
-      };
-      ldapClient.search(authenticationConfig.ldapOptions.base, ldapOpts, (err, search) => {
-        if (err) {
-          reject(err) // There was an error when performing the search
-        }
-        search.on('searchEntry', (entry) => {
-          resolve({
-            firstName: entry.object[authenticationConfig.ldapOptions.firstNameAttribute],
-            lastName: entry.object[authenticationConfig.ldapOptions.lastNameAttribute]
+      authenticationConfigPromise
+        .then((authenticationConfig) => {
+          // Time out if the LDAP bind fails (setting timeout on the client does not help).
+          // The LDAP server may be unreachable, or may not be sending a response.
+          setTimeout(() => reject('LDAP bind timed out'), 8000)
+          const ldapOpts = {
+            filter: `CN=${username}`,
+            scope: 'sub',
+            attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute, authenticationConfig.groupsAttribute]
+          };
+          ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
+            if (err) {
+              reject(err) // There was an error when performing the search
+            }
+            search.on('searchEntry', (entry) => {
+              resolve({
+                firstName: entry.object[authenticationConfig.firstNameAttribute],
+                lastName: entry.object[authenticationConfig.lastNameAttribute],
+                groups: entry.object[authenticationConfig.groupsAttribute]
+              })
+            })
+            search.on('error', (err) => reject(err))
           })
         })
-        search.on('error', (err) => reject(err))
-      })
     })
   }
 
@@ -98,15 +102,17 @@ module.exports = class User {
 
   static loginLDAP(username, password) {
 
-    // Create a LDAP client that we will user for authentication
-    const ldapClient = ldap.createClient({
-      url: authenticationConfig.ldapOptions.url
-    });
-    // Create a Distinguished Name (DN) that we represents the user that is trying to login
-    const distinguishedName = authenticationConfig.ldapOptions.distinguishedName.replace('$USERNAME$', username)
-
     var userDetails = null
-    return this.ldapBind(ldapClient, distinguishedName, password)
+    return authenticationConfigPromise
+      .then((authenticationConfig) => {
+        // Create a LDAP client that we will user for authentication
+        const ldapClient = ldap.createClient({
+          url: authenticationConfig.url
+        });
+        // Create a Distinguished Name (DN) that we represents the user that is trying to login
+        const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
+        return this.ldapBind(ldapClient, distinguishedName, password)
+      })
       .then(() => this.ldapGetUserDetails(ldapClient, username))
       .then((result) => {
         // We have the first and last names, upsert the user
