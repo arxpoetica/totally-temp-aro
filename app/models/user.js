@@ -58,14 +58,14 @@ module.exports = class User {
   }
 
   // Retrieve details of a successfully logged in LDAP user
-  static ldapGetUserDetails(ldapClient, username) {
+  static ldapGetUserNames(ldapClient, username) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
       authenticationConfigPromise
         .then((authenticationConfig) => {
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
-          setTimeout(() => reject('LDAP bind timed out'), 8000)
+          setTimeout(() => reject('ldapGetUserNames(): LDAP bind timed out'), 8000)
           const ldapOpts = {
             filter: `CN=${username}`,
             scope: 'sub',
@@ -78,8 +78,38 @@ module.exports = class User {
             search.on('searchEntry', (entry) => {
               resolve({
                 firstName: entry.object[authenticationConfig.firstNameAttribute],
-                lastName: entry.object[authenticationConfig.lastNameAttribute],
-                groups: entry.object[authenticationConfig.groupsAttribute]
+                lastName: entry.object[authenticationConfig.lastNameAttribute]
+              })
+            })
+            search.on('error', (err) => reject(err))
+          })
+        })
+    })
+  }
+
+  // Retrieve details of a successfully logged in LDAP user
+  static ldapGetGroupsForUser(ldapClient, username) {
+    // We assume that the ldapClient has been successfully bound at this point.
+    return new Promise((resolve, reject) => {
+      authenticationConfigPromise
+        .then((authenticationConfig) => {
+          // Time out if the LDAP bind fails (setting timeout on the client does not help).
+          // The LDAP server may be unreachable, or may not be sending a response.
+          setTimeout(() => reject('ldapGetGroupsForUser(): LDAP bind timed out'), 8000)
+          const ldapOpts = {
+            filter: `CN=${username}`,
+            scope: 'sub',
+            attributes: [authenticationConfig.groupsAttribute]
+          };
+          ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
+            if (err) {
+              // NOTE: We are resolving with an empty list of groups, don't want an error in group
+              // search to stop the user from logging in
+              resolve({ ldapGroups: [] })
+            }
+            search.on('searchEntry', (entry) => {
+              resolve({
+                ldapGroups: entry.object[authenticationConfig.groupsAttribute]
               })
             })
             search.on('error', (err) => reject(err))
@@ -90,7 +120,10 @@ module.exports = class User {
 
   // Create a new user
   static createUser(firstName, lastName, email, password, ldapGroups) {
-    return database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN $1`, ldapGroups)
+    const getGroups = ldapGroups 
+                      ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN $1`, ldapGroups)
+                      : Promise.resolve([])
+    getGroups
       .then((aroGroups) => {
         var createUserRequest = {
           method: 'POST',
@@ -135,16 +168,16 @@ module.exports = class User {
   }
 
   // Find or create a user
-  static findOrCreateUser(firstName, lastName, email, password, ldapGroups) {
+  static findOrCreateUser(userDetails, email, password) {
     return database.query(`SELECT auth.users WHERE email=${email}`)
       .then((user) => {
-        return user ? Promise.resolve() : this.createUser(firstName, lastName, email, password, ldapGroups)
+        return user ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email, password, userDetails.ldapGroups)
       })
   }
 
   static loginLDAP(username, password) {
 
-    var ldapClient = null
+    var ldapClient = null, userDetails = {}
     return authenticationConfigPromise
       .then((authenticationConfig) => {
         // Create a LDAP client that we will user for authentication
@@ -159,12 +192,17 @@ module.exports = class User {
         const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
         return this.ldapBind(ldapClient, distinguishedName, password)
       })
-      .then(() => this.ldapGetUserDetails(ldapClient, username))
-      .then((userDetails) => {
-        // We have the first and last names, upsert the user
-        console.log(userDetails)
-        process.exit(0)
-        return this.findOrCreateUser(userDetails.firstName, userDetails.lastName, username, password, userDetails.groups)
+      .then(() => this.ldapGetUserNames(ldapClient, username))
+      .then((details) => {
+        userDetails.firstName = details.firstName
+        userDetails.lastName = details.lastName
+        return this.ldapGetGroupsForUser(ldapClient, username)
+      })
+      .then((details) => {
+        // Why not get the groups at the same time as first/last name? Because in case group membership is not
+        // found, we still want to allow the user to log in.
+        userDetails.ldapGroups = details.ldapGroups
+        return this.findOrCreateUser(userDetails, username, password)
       })
       .then(() => {
         var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
