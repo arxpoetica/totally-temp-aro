@@ -14,7 +14,6 @@ var pify = require('pify')
 var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
 const ldap = require('ldapjs')
-const UIConfiguration = require('./ui_configuration')
 var models = require('../models')
 const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
@@ -70,7 +69,7 @@ module.exports = class User {
           const ldapOpts = {
             filter: `CN=${username}`,
             scope: 'sub',
-            attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute, authenticationConfig.groupsAttribute]
+            attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute]
           };
           ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
             if (err) {
@@ -89,24 +88,67 @@ module.exports = class User {
     })
   }
 
+  // Create a new user
+  static createUser(firstName, lastName, email, password, ldapGroups) {
+    return database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN $1`, ldapGroups)
+      .then((aroGroups) => {
+        var createUserRequest = {
+          method: 'POST',
+          url: `${config.aro_service_url}/auth/users`,
+          body: {
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            fullName: `${firstName} ${lastName}`,
+            rol: 'admin',
+            groupIds: aroGroups
+          },
+          json: true
+        }
+        return models.AROService.request(createUserRequest)
+      })
+      .then((user) => {
+        createdUser = user
+        return this.hashPassword(password)
+      })
+      .then((hashedPassword) => {
+        // Update the details for this user. Note that aro-service ignores the password field so it will not be set
+        const sql = `
+          UPDATE auth.users
+          SET password = '${hashedPassword}'
+          WHERE email='${username}';
+        `
+        return database.query(sql);
+      })
+      .then(() => database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN $1`, ldapGroups))
+      .then((aroGroups) => {
+        // The newly created user should belong to all groups in "aroGroups"
+        createdUser.groupIds = aroGroups
+        var putUserDetails = {
+          method: 'PUT',
+          url: `${config.aro_service_url}/auth/users`,
+          body: createdUser,
+          json: true
+        }
+        return models.AROService.request(putUserDetails)
+      })
+  }
+
   // Find or create a user
-  static findOrCreateUser(firstName, lastName, email) {
-    // We have a PSQL function to create users, that will throw an error if the user exists.
-    return database.query(`SELECT auth.add_user('${firstName}', '${lastName}', '${email}');`)
-      .then(() => this.addUserToGroup(email, 'Public'))
-      .catch((err) => {
-        // Error means that the user exists. Return a resolved promise. Kindof a poor mans UPSERT.
-        return Promise.resolve()
+  static findOrCreateUser(firstName, lastName, email, password, ldapGroups) {
+    return database.query(`SELECT auth.users WHERE email=${email}`)
+      .then((user) => {
+        return user ? Promise.resolve() : this.createUser(firstName, lastName, email, password, ldapGroups)
       })
   }
 
   static loginLDAP(username, password) {
 
-    var userDetails = null
+    var ldapClient = null
     return authenticationConfigPromise
       .then((authenticationConfig) => {
         // Create a LDAP client that we will user for authentication
-        const ldapClient = ldap.createClient({
+        ldapClient = ldap.createClient({
           url: authenticationConfig.url
         });
         ldapClient.on('error', (err) => {
@@ -118,20 +160,11 @@ module.exports = class User {
         return this.ldapBind(ldapClient, distinguishedName, password)
       })
       .then(() => this.ldapGetUserDetails(ldapClient, username))
-      .then((result) => {
+      .then((userDetails) => {
         // We have the first and last names, upsert the user
-        userDetails = result
-        return this.findOrCreateUser(userDetails.firstName, userDetails.lastName, username)
-      })
-      .then(() => this.hashPassword(password))
-      .then((hashedPassword) => {
-        // Update the details for this user
-        const sql = `
-          UPDATE auth.users
-          SET first_name = '${userDetails.firstName}', last_name = '${userDetails.lastName}', password = '${hashedPassword}', rol = 'admin'
-          WHERE email='${username}';
-        `
-        return database.query(sql);
+        console.log(userDetails)
+        process.exit(0)
+        return this.findOrCreateUser(userDetails.firstName, userDetails.lastName, username, password, userDetails.groups)
       })
       .then(() => {
         var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
