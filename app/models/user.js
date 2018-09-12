@@ -95,7 +95,11 @@ module.exports = class User {
         .then((authenticationConfig) => {
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
-          setTimeout(() => reject('ldapGetGroupsForUser(): LDAP bind timed out'), 8000)
+          setTimeout(() => {
+            // NOTE: We are not rejecting in case of timeouts for getting groups
+            console.log('ldapGetGroupsForUser(): LDAP bind timed out')
+            resolve({ ldapGroups: [] })
+          }, 8000)
           const ldapOpts = {
             filter: `CN=${username}`,
             scope: 'sub',
@@ -112,7 +116,13 @@ module.exports = class User {
                 ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
               })
             })
-            search.on('error', (err) => reject(err))
+            search.on('error', (err) => {
+              // NOTE: We are resolving with an empty list of groups, don't want an error in group
+              // search to stop the user from logging in
+              console.log('ERROR when performing ldap search')
+              console.log(err)
+              resolve({ ldapGroups: [] })
+            })
           })
         })
     })
