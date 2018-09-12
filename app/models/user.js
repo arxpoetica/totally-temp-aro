@@ -150,8 +150,7 @@ module.exports = class User {
         }
         return models.AROService.request(createUserRequest)
       })
-      .then((user) => {
-        createdUser = user
+      .then(() => {
         return this.hashPassword(password)
       })
       .then((hashedPassword) => {
