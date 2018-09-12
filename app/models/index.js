@@ -1,4 +1,4 @@
-
+exports.Authentication = require('./authentication')
 exports.CountySubdivision = require('./county_subdivision')
 exports.CensusBlock = require('./census_block')
 UIConfigurationClass = require('./ui_configuration')

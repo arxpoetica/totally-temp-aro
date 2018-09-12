@@ -14,9 +14,8 @@ var pify = require('pify')
 var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
 const ldap = require('ldapjs')
-const UIConfiguration = require('./ui_configuration')
-const authenticationConfig = (new UIConfiguration()).getConfigurationSet('authentication')
 var models = require('../models')
+const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
 module.exports = class User {
 
@@ -59,71 +58,148 @@ module.exports = class User {
   }
 
   // Retrieve details of a successfully logged in LDAP user
-  static ldapGetUserDetails(ldapClient, username) {
+  static ldapGetUserNames(ldapClient, username) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
-      // Time out if the LDAP bind fails (setting timeout on the client does not help).
-      // The LDAP server may be unreachable, or may not be sending a response.
-      setTimeout(() => reject('LDAP bind timed out'), 8000)
-      const ldapOpts = {
-        filter: `CN=${username}`,
-        scope: 'sub',
-        attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute, 'memberOf']
-      };
-      ldapClient.search(authenticationConfig.ldapOptions.base, ldapOpts, (err, search) => {
-        if (err) {
-          reject(err) // There was an error when performing the search
-        }
-        search.on('searchEntry', (entry) => {
-          console.log('------------------ LDAP User details ----------------')
-          console.log(entry.object)
-          resolve({
-            firstName: entry.object[authenticationConfig.ldapOptions.firstNameAttribute],
-            lastName: entry.object[authenticationConfig.ldapOptions.lastNameAttribute]
+      authenticationConfigPromise
+        .then((authenticationConfig) => {
+          // Time out if the LDAP bind fails (setting timeout on the client does not help).
+          // The LDAP server may be unreachable, or may not be sending a response.
+          setTimeout(() => reject('ldapGetUserNames(): LDAP bind timed out'), 8000)
+          const ldapOpts = {
+            filter: `CN=${username}`,
+            scope: 'sub',
+            attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute]
+          };
+          ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
+            if (err) {
+              reject(err) // There was an error when performing the search
+            }
+            search.on('searchEntry', (entry) => {
+              resolve({
+                firstName: entry.object[authenticationConfig.firstNameAttribute],
+                lastName: entry.object[authenticationConfig.lastNameAttribute]
+              })
+            })
+            search.on('error', (err) => reject(err))
           })
         })
-        search.on('error', (err) => reject(err))
-      })
     })
   }
 
+  // Retrieve details of a successfully logged in LDAP user
+  static ldapGetGroupsForUser(ldapClient, username) {
+    // We assume that the ldapClient has been successfully bound at this point.
+    return new Promise((resolve, reject) => {
+      authenticationConfigPromise
+        .then((authenticationConfig) => {
+          // Time out if the LDAP bind fails (setting timeout on the client does not help).
+          // The LDAP server may be unreachable, or may not be sending a response.
+          setTimeout(() => {
+            // NOTE: We are not rejecting in case of timeouts for getting groups
+            console.log('ldapGetGroupsForUser(): LDAP bind timed out')
+            resolve({ ldapGroups: [] })
+          }, 8000)
+          const ldapOpts = {
+            filter: `CN=${username}`,
+            scope: 'sub',
+            attributes: [authenticationConfig.groupsAttribute]
+          };
+          ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
+            if (err) {
+              // NOTE: We are resolving with an empty list of groups, don't want an error in group
+              // search to stop the user from logging in
+              resolve({ ldapGroups: [] })
+            }
+            search.on('searchEntry', (entry) => {
+              resolve({
+                ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
+              })
+            })
+            search.on('error', (err) => {
+              // NOTE: We are resolving with an empty list of groups, don't want an error in group
+              // search to stop the user from logging in
+              console.log('ERROR when performing ldap search')
+              console.log(err)
+              resolve({ ldapGroups: [] })
+            })
+          })
+        })
+    })
+  }
+
+  // Create a new user
+  static createUser(firstName, lastName, email, password, ldapGroups) {
+    const getGroups = ldapGroups 
+                      ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN ($1)`, [ldapGroups])
+                      : Promise.resolve([])
+    return getGroups
+      .then((aroGroups) => {
+        var createUserRequest = {
+          method: 'POST',
+          url: `${config.aro_service_url}/auth/users`,
+          body: {
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            fullName: `${firstName} ${lastName}`,
+            rol: 'admin',
+            groupIds: aroGroups.map((item) => item.auth_group_id)
+          },
+          json: true
+        }
+        return models.AROService.request(createUserRequest)
+      })
+      .then(() => {
+        return this.hashPassword(password)
+      })
+      .then((hashedPassword) => {
+        // Update the details for this user. Note that aro-service ignores the password field so it will not be set
+        const sql = `
+          UPDATE auth.users
+          SET password = '${hashedPassword}'
+          WHERE email='${email}';
+        `
+        return database.query(sql);
+      })
+  }
+
   // Find or create a user
-  static findOrCreateUser(firstName, lastName, email) {
-    // We have a PSQL function to create users, that will throw an error if the user exists.
-    return database.query(`SELECT auth.add_user('${firstName}', '${lastName}', '${email}');`)
-      .then(() => this.addUserToGroup(email, 'Public'))
-      .catch((err) => {
-        // Error means that the user exists. Return a resolved promise. Kindof a poor mans UPSERT.
-        return Promise.resolve()
+  static findOrCreateUser(userDetails, email, password) {
+    return database.query(`SELECT * FROM auth.users WHERE email='${email}'`)
+      .then((user) => {
+        return user.length > 0 ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email, password, userDetails.ldapGroups)
       })
   }
 
   static loginLDAP(username, password) {
 
-    // Create a LDAP client that we will user for authentication
-    const ldapClient = ldap.createClient({
-      url: authenticationConfig.ldapOptions.url
-    });
-    // Create a Distinguished Name (DN) that we represents the user that is trying to login
-    const distinguishedName = authenticationConfig.ldapOptions.distinguishedName.replace('$USERNAME$', username)
-
-    var userDetails = null
-    return this.ldapBind(ldapClient, distinguishedName, password)
-      .then(() => this.ldapGetUserDetails(ldapClient, username))
-      .then((result) => {
-        // We have the first and last names, upsert the user
-        userDetails = result
-        return this.findOrCreateUser(userDetails.firstName, userDetails.lastName, username)
+    var ldapClient = null, userDetails = {}
+    return authenticationConfigPromise
+      .then((authenticationConfig) => {
+        // Create a LDAP client that we will user for authentication
+        ldapClient = ldap.createClient({
+          url: authenticationConfig.url
+        });
+        ldapClient.on('error', (err) => {
+          console.error('Error from ldap client:')
+          console.log(err)
+        })
+        // Create a Distinguished Name (DN) that we represents the user that is trying to login
+        const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
+        return this.ldapBind(ldapClient, distinguishedName, password)
       })
-      .then(() => this.hashPassword(password))
-      .then((hashedPassword) => {
-        // Update the details for this user
-        const sql = `
-          UPDATE auth.users
-          SET first_name = '${userDetails.firstName}', last_name = '${userDetails.lastName}', password = '${hashedPassword}', rol = 'admin'
-          WHERE email='${username}';
-        `
-        return database.query(sql);
+      .then(() => this.ldapGetUserNames(ldapClient, username))
+      .then((details) => {
+        userDetails.firstName = details.firstName
+        userDetails.lastName = details.lastName
+        return this.ldapGetGroupsForUser(ldapClient, username)
+      })
+      .then((details) => {
+        // Why not get the groups at the same time as first/last name? Because in case group membership is not
+        // found, we still want to allow the user to log in.
+        userDetails.ldapGroups = details.ldapGroups
+        return this.findOrCreateUser(userDetails, username, password)
       })
       .then(() => {
         var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
