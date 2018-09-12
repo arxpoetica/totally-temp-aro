@@ -68,13 +68,15 @@ module.exports = class User {
       const ldapOpts = {
         filter: `CN=${username}`,
         scope: 'sub',
-        attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute]
+        attributes: [authenticationConfig.ldapOptions.firstNameAttribute, authenticationConfig.ldapOptions.lastNameAttribute, 'memberOf']
       };
       ldapClient.search(authenticationConfig.ldapOptions.base, ldapOpts, (err, search) => {
         if (err) {
           reject(err) // There was an error when performing the search
         }
         search.on('searchEntry', (entry) => {
+          console.log('------------------ LDAP User details ----------------')
+          console.log(entry.object)
           resolve({
             firstName: entry.object[authenticationConfig.ldapOptions.firstNameAttribute],
             lastName: entry.object[authenticationConfig.ldapOptions.lastNameAttribute]
