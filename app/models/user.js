@@ -131,7 +131,7 @@ module.exports = class User {
   // Create a new user
   static createUser(firstName, lastName, email, password, ldapGroups) {
     const getGroups = ldapGroups 
-                      ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN ($1)`, ldapGroups)
+                      ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN ($1)`, [ldapGroups])
                       : Promise.resolve([])
     getGroups
       .then((aroGroups) => {
@@ -159,29 +159,17 @@ module.exports = class User {
         const sql = `
           UPDATE auth.users
           SET password = '${hashedPassword}'
-          WHERE email='${username}';
+          WHERE email='${email}';
         `
         return database.query(sql);
-      })
-      .then(() => database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN $1`, ldapGroups))
-      .then((aroGroups) => {
-        // The newly created user should belong to all groups in "aroGroups"
-        createdUser.groupIds = aroGroups
-        var putUserDetails = {
-          method: 'PUT',
-          url: `${config.aro_service_url}/auth/users`,
-          body: createdUser,
-          json: true
-        }
-        return models.AROService.request(putUserDetails)
       })
   }
 
   // Find or create a user
   static findOrCreateUser(userDetails, email, password) {
-    return database.query(`SELECT auth.users WHERE email=${email}`)
+    return database.query(`SELECT * FROM auth.users WHERE email='${email}'`)
       .then((user) => {
-        return user ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email, password, userDetails.ldapGroups)
+        return user.length > 0 ? Promise.resolve() : this.createUser(userDetails.firstName, userDetails.lastName, email, password, userDetails.ldapGroups)
       })
   }
 
@@ -214,6 +202,7 @@ module.exports = class User {
         userDetails.ldapGroups = details.ldapGroups
         return this.findOrCreateUser(userDetails, username, password)
       })
+      .then(() => new Promise((resolve, reject) => {setTimeout(() => resolve(), 2000)}))
       .then(() => {
         var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
         return database.findOne(sql, [username])
