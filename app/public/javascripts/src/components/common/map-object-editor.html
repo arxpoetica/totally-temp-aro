@@ -62,7 +62,7 @@
             &nbsp;&nbsp;<i class="fa fa-pencil"></i>
             Select
           </a>
-          <a ng-if=" 'add boundary' == option "
+          <a ng-if=" 'add boundary' == option && $ctrl.allowBoundaryCreation"
              href="#" ng-click="$ctrl.startDrawingBoundaryForId(item.objectId)">
             &nbsp;&nbsp;<i class="fa fa-plus"></i>
             Add Boundary

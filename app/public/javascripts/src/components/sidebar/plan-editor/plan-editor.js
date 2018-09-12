@@ -46,6 +46,7 @@ class PlanEditorController {
     this.viewLabel = ''
     this.isEditFeatureProps = true
     this.mapObjectEditorComms = {}
+    this.networkNodeSBTypes = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
     this.allEditableNetworkNodeTypes = [
       'central_office',
@@ -137,6 +138,9 @@ class PlanEditorController {
         const properties = new EquipmentProperties(attributes.siteIdentifier, attributes.siteName, feature.networkNodeType,
                                                    attributes.selectedEquipmentType, networkNodeEquipment, feature.deploymentType)
         this.objectIdToProperties[feature.objectId] = properties
+      })
+      transactionFeatures.forEach((feature) => {
+        this.getViewObjectSBTypes(feature.objectId)
       })
       return this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/transaction-features/equipment_boundary`)
     }).then((result) => {
@@ -846,6 +850,23 @@ class PlanEditorController {
       console.error(err)
     })
   }
+
+  getViewObjectSBTypes(objectId) {
+    // Get SB types of a equipment
+    this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=boundaryType&$filter=networkNodeObjectId eq guid'${objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
+    .then((result) => {
+      this.networkNodeSBTypes[objectId] = result.data
+    })
+  }
+
+  networkNodeHasSBType(objectId) {
+    return this.networkNodeSBTypes[objectId].filter(boundary => boundary.boundaryType === this.state.selectedBoundaryType.id).length > 0
+  }
+
+  isBoundaryCreationAllowed(mapObject) {
+    //Dont allow adding a same boundary type if exists
+    return this.state.showSiteBoundary && mapObject && mapObject.objectId && !this.networkNodeHasSBType(mapObject.objectId)
+  }
   
   editViewObject(){
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
@@ -902,6 +923,7 @@ class PlanEditorController {
                 console.error(err)
               }
             })
+          this.getViewObjectSBTypes(mapObject.objectId)  
           this.$timeout()
         })
         .catch((err) => console.error(err))
@@ -1077,6 +1099,7 @@ class PlanEditorController {
   
   toggleSiteBoundary() {
     //if(this.state.showSiteBoundary && this.selectedBoundaryType) {
+      this.isBoundaryCreationAllowed(this.selectedMapObject)
       this.state.viewSettingsChanged.next()
     //} 
   }
