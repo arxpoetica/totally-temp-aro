@@ -133,7 +133,7 @@ module.exports = class User {
     const getGroups = ldapGroups 
                       ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN ($1)`, [ldapGroups])
                       : Promise.resolve([])
-    getGroups
+    return getGroups
       .then((aroGroups) => {
         var createUserRequest = {
           method: 'POST',
@@ -201,7 +201,6 @@ module.exports = class User {
         userDetails.ldapGroups = details.ldapGroups
         return this.findOrCreateUser(userDetails, username, password)
       })
-      .then(() => new Promise((resolve, reject) => {setTimeout(() => resolve(), 2000)}))  // REMOVE THIS once aro-service makes user creation a blocking call
       .then(() => {
         var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
         return database.findOne(sql, [username])
