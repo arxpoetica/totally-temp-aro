@@ -201,7 +201,7 @@ module.exports = class User {
         userDetails.ldapGroups = details.ldapGroups
         return this.findOrCreateUser(userDetails, username, password)
       })
-      .then(() => new Promise((resolve, reject) => {setTimeout(() => resolve(), 2000)}))
+      .then(() => new Promise((resolve, reject) => {setTimeout(() => resolve(), 2000)}))  // REMOVE THIS once aro-service makes user creation a blocking call
       .then(() => {
         var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
         return database.findOne(sql, [username])
