@@ -109,7 +109,7 @@ module.exports = class User {
             }
             search.on('searchEntry', (entry) => {
               resolve({
-                ldapGroups: entry.object[authenticationConfig.groupsAttribute]
+                ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
               })
             })
             search.on('error', (err) => reject(err))
