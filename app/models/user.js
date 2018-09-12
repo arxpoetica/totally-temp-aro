@@ -121,7 +121,7 @@ module.exports = class User {
   // Create a new user
   static createUser(firstName, lastName, email, password, ldapGroups) {
     const getGroups = ldapGroups 
-                      ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN $1`, ldapGroups)
+                      ? database.query(`SELECT auth_group_id FROM auth.external_group_mapping WHERE external_group_name IN ($1)`, ldapGroups)
                       : Promise.resolve([])
     getGroups
       .then((aroGroups) => {
@@ -134,7 +134,7 @@ module.exports = class User {
             lastName: lastName,
             fullName: `${firstName} ${lastName}`,
             rol: 'admin',
-            groupIds: aroGroups
+            groupIds: aroGroups.map((item) => item.auth_group_id)
           },
           json: true
         }
