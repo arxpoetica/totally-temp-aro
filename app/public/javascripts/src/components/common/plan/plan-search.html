@@ -7,7 +7,7 @@
     <div class="form-group has-feedback has-clear">
       <!-- (tagging) paste not working if tagging-label="false" and tagging-tokens are set -->
       <!-- http://plnkr.co/edit/kauNS7YjckRfi616k4PT?p=preview -->
-      <ui-select tag-on-blur tagging tagging-label="" tagging-tokens=",|/" multiple ng-model="$ctrl.searchText"
+      <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.searchText"
         theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
