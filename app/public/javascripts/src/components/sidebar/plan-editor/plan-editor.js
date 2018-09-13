@@ -860,7 +860,8 @@ class PlanEditorController {
   }
 
   networkNodeHasSBType(objectId) {
-    return this.networkNodeSBTypes[objectId].filter(boundary => boundary.boundaryType === this.state.selectedBoundaryType.id).length > 0
+    return this.networkNodeSBTypes.hasOwnProperty(objectId) && 
+      this.networkNodeSBTypes[objectId].filter(boundary => boundary.boundaryType === this.state.selectedBoundaryType.id).length > 0
   }
 
   isBoundaryCreationAllowed(mapObject) {
