@@ -14,7 +14,10 @@ class Authentication {
       WHERE eat.name = $1;
     `
     return database.query(sql, [authName])
-      .then((result) => Promise.resolve(result[0].config))
+      .then((result) => {
+        // NOTE: Can return null if we don't have a config
+        Promise.resolve(result && (result.length > 0) && result[0].config)
+      })
   }
 }
 

@@ -17,7 +17,7 @@ exports.configure = (app, middleware) => {
   (email, password, callback) => {
     authenticationConfigPromise
       .then((authenticationConfig) => {
-        if (authenticationConfig.enabled) {
+        if (authenticationConfig && authenticationConfig.enabled) {
           console.log(`Attempting LDAP login for user ${email}`)
           models.User.loginLDAP(email, password)
             .then((user) => {
