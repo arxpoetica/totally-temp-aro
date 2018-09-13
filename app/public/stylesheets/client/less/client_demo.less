@@ -1,0 +1,50 @@
+// Declaring variables
+@primary:         #4d99e5;
+@success:         #1a79db;
+@focus:           #217fdf;
+
+// Using variables
+.btn-primary, .btn-success {
+  background-color: @primary;
+  border-color: @primary;
+}
+
+.btn-primary.active {
+  background-color: @primary;
+  border-color: @primary;
+}
+
+.btn-primary:focus, .btn-primary:hover, .open>.dropdown-toggle.btn-success {
+  background-color: @success;
+  border-color: @success;
+}
+
+.btn-primary.active:hover, .btn-primary.active:focus, .btn-success:active, .btn-success:active:hover, .btn-success.active:hover, .open>.dropdown-toggle.btn-success:hover, .btn-success:active:focus, .btn-success.active:focus, .open>.dropdown-toggle.btn-success:focus, .btn-success:active.focus, .btn-success.active.focus, .open>.dropdown-toggle.btn-success.focus {
+  background-color: @focus;
+  border-color: @focus;
+}
+
+.panel-primary>.panel-heading {
+    color: #fff;
+    background-color: @primary;
+    border-color: @primary;
+}
+
+.map-tools-button.active {
+  background-color: @focus;
+}
+
+.pagination>.active>a, .pagination>.active>a:focus, .pagination>.active>a:hover, .pagination>.active>span, .pagination>.active>span:focus, .pagination>.active>span:hover  {
+    background-color: @primary;
+    border-color: @primary;
+}
+
+.navbar-default {
+    background-color: @primary;
+    border-color: @primary;
+}
+
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover {
+  background-color: @success;
+  border-color: @success;
+}
