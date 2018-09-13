@@ -1,3 +1,5 @@
+import Constants from '../../common/constants'
+
 class PlanInfoController {
   constructor($http, state, $timeout, Utils) {
     this.$http = $http
@@ -38,11 +40,16 @@ class PlanInfoController {
           }
         })
         // Get the actors that have access for this resource
-        return this.$http.get(`/service/auth/acl/PLAN/${this.state.plan.getValue().id}`)
+        return Promise.all([
+          this.$http.get(`/service/auth/acl/PLAN/${this.state.plan.getValue().id}`),
+          this.$http.get(`/service/auth/acl/SYSTEM/${this.state.loggedInUser.id}`)
+        ])
       })
-      .then((result) => {
+      .then((results) => {
+        const planPermissions = results[0].data, systemPermissions = results[1].data
+        // First, check if the user or usergroups have write permissions
         var currentUserCanWrite = false, currentUserIsAdmin = false
-        result.data.resourcePermissions.forEach((access) => {
+        planPermissions.resourcePermissions.forEach((access) => {
           // We are checking if the logged in user or any of the users groups have permission to write.
           if ((this.state.loggedInUser.id === access.systemActorId)
               || (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
@@ -52,6 +59,17 @@ class PlanInfoController {
             this.currentUserCanEdit = this.currentUserCanEdit || currentUserCanWrite || currentUserIsAdmin
           }
         })
+
+        // Next, check the global namespace to see if this user or groups have "SuperUser" permissions
+        systemPermissions.resourcePermissions.forEach((access) => {
+          // We are checking if the logged in user or any of the users groups have permission to write.
+          if ((this.state.loggedInUser.id === access.systemActorId)
+              || (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
+            const currentUserIsGod = (access.rolePermissions === Constants.SUPER_USER_PERMISSIONS)
+            this.currentUserCanEdit = this.currentUserCanEdit || currentUserIsGod
+          }
+        })
+
         this.$timeout()
       })
       .catch((err) => console.error(err))
