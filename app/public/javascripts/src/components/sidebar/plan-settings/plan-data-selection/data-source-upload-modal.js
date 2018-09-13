@@ -19,6 +19,9 @@ class DataSourceUploadController {
     ]
     this.saCreationType
     this.selectedEquipment
+
+    this.cableTypes =  ["FEEDER", "DISTRIBUTION", "IOF", "UNKNOWN", "COPPER"]
+    this.selectedcableType = this.cableTypes[0]
     //Default Polygon radius in meters
     this.radius = 20000
 
@@ -112,13 +115,18 @@ class DataSourceUploadController {
           }, submit)
         }
       }
+      // For uploading fiber no need to create library using getLibraryId()
+      if (this.state.uploadDataSource.name === 'fiber') {
+        this.setCableConstructionType(this.selectedcableType)
+      } else {
       this.getLibraryId()
-        .then((libraryId) => {
+        .then((library) => {
           if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'polygon_equipment')
-            this.layerBoundary(this.selectedEquipment.identifier,libraryId)
+            this.layerBoundary(this.selectedEquipment.identifier,library.identifier)
           else  
-            this.submit(libraryId)
+            this.submit(library.identifier)
         })
+      }  
     }
   }
 
@@ -137,7 +145,7 @@ class DataSourceUploadController {
 
     return this.$http(libraryOptions)
     .then((response) => {
-      return Promise.resolve(response.data.identifier)
+      return Promise.resolve(response.data)
     })
   }
 
@@ -181,6 +189,29 @@ class DataSourceUploadController {
       this.state.dataItems['service_layer'].allLibraryItems.push(e.data.serviceLayerLibrary)
       this.isUpLoad = false
       this.close()
+    })
+  }
+
+  setCableConstructionType(cableType) {
+    var cableOptions = {
+      url: '/service/v1/library_cable?user_id=' + this.state.loggedInUser.id,
+      method: 'POST',
+      data: {
+        "libraryItem": {
+          "dataType": this.state.uploadDataSource.name,
+          "name": $('#data_source_upload_modal input[type=text]').get(0).value
+        },
+        "param": {
+          "param_type": "cable_param",
+          "fiberType": cableType
+        }
+      },
+      json: true
+    }
+
+    return this.$http(cableOptions)
+    .then((response) => {
+      this.submit(response.data.libraryItem.identifier)
     })
   }
 
