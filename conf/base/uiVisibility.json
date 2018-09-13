@@ -33,7 +33,7 @@
       "large_businesses": {
         "show": true
       },
-      "celltower":{
+      "celltower": {
         "show": true
       },
       "household": {
@@ -58,29 +58,29 @@
         "show": true
       }
     },
-    "networkEquipment":{
-      "central_office":{
+    "networkEquipment": {
+      "central_office": {
         "show": true
       },
-      "dslam":{
+      "dslam": {
         "show": true
       },
-      "fiber_distribution_hub":{
+      "fiber_distribution_hub": {
         "show": true
       },
-      "fiber_distribution_terminal":{
+      "fiber_distribution_terminal": {
         "show": true
       },
-      "bulk_distribution_terminal":{
+      "bulk_distribution_terminal": {
         "show": true
       },
-      "splice_point":{
+      "splice_point": {
         "show": true
       },
-      "fiveg_coverage":{
+      "fiveg_coverage": {
         "show": true
       },
-      "cell_5g":{
+      "cell_5g": {
         "show": true
       },
       "loop_extender": {
@@ -89,40 +89,40 @@
       "network_anchor": {
         "show": true
       },
-      "planned":{
+      "planned": {
         "show": true
       },
-      "existing":{
+      "existing": {
         "show": true
       }
     },
-    "viewModePanels":{
-      "LOCATION_INFO":{
+    "viewModePanels": {
+      "LOCATION_INFO": {
         "show": true
       },
-      "EQUIPMENT_INFO":{
+      "EQUIPMENT_INFO": {
         "show": true
       },
-      "BOUNDARIES_INFO":{
+      "BOUNDARIES_INFO": {
         "show": true
       },
-      "ROAD_SEGMENT_INFO":{
+      "ROAD_SEGMENT_INFO": {
         "show": true
       },
-      "PLAN_SUMMARY_REPORTS":{
+      "PLAN_SUMMARY_REPORTS": {
         "show": true
       },
-      "COVERAGE_BOUNDARY":{
+      "COVERAGE_BOUNDARY": {
         "show": true
       },
-      "EDIT_LOCATIONS":{
+      "EDIT_LOCATIONS": {
         "show": true
       },
-      "PLAN_INFO":{
+      "PLAN_INFO": {
         "show": true
       }
     },
-    "displayModeButtons":{
+    "displayModeButtons": {
       "VIEW": {
         "show": true
       },
@@ -139,34 +139,34 @@
         "show": true
       }
     },
-    "areaNetworkPlanning":{
+    "areaNetworkPlanning": {
       "expertMode": {
         "show": true
       }
     },
-    "competitorNetworks":{
+    "competitorNetworks": {
       "fiberPlantAlternateLabel": false,
       "showCompetitorTypes": true,
       "disableGeotel": false,
       "disableRoutes": false,
       "disableRoutesBuffer": false
     },
-    "targetBuilder":{
+    "targetBuilder": {
       "expertMode": {
         "show": true
       }
     },
     "toolbar": {
-      "globalSettings":{
-        "show":true,
-	"manageUsers":{
-	 "show":true,
-	 "registerUser":{
-	  "show":true
-	 }
-	}
+      "globalSettings": {
+        "show": true,
+        "manageUsers": {
+          "show": true,
+          "registerUser": {
+            "show": true
+          }
+        }
       },
-      "emphericalPlan":{
+      "emphericalPlan": {
         "show": true
       },
       "savePlanAs": {
@@ -190,29 +190,31 @@
           "show": true
         }
       },
-      "selectionSingle":{
+      "selectionSingle": {
         "show": true
       },
-      "selectionPolygon":{
+      "selectionPolygon": {
         "show": true
       },
-      "openCoverageBoundary":{
+      "openCoverageBoundary": {
+        "show": true
+      },
+      "annotationTool": {
         "show": true
       }
-
     },
     "fiberPlantAlternateLabel": false,
-    "planSettings":{
-      "resourceSelection":{
+    "planSettings": {
+      "resourceSelection": {
         "show": true
       },
-      "networkConfiguration":{
+      "networkConfiguration": {
         "show": true
       },
-      "projectConfiguration":{
+      "projectConfiguration": {
         "show": true
       },
-      "dataSelection":{
+      "dataSelection": {
         "show": true
       }
     },
@@ -258,7 +260,7 @@
       "household": {
         "show": false
       },
-      "celltower":{
+      "celltower": {
         "show": false
       },
       "ethernet_lit_building": {
@@ -277,29 +279,29 @@
         "show": true
       }
     },
-    "networkEquipment":{
-      "central_office":{
+    "networkEquipment": {
+      "central_office": {
         "show": true
       },
-      "dslam":{
+      "dslam": {
         "show": true
       },
-      "fiber_distribution_hub":{
+      "fiber_distribution_hub": {
         "show": true
       },
-      "fiber_distribution_terminal":{
+      "fiber_distribution_terminal": {
         "show": true
       },
-      "bulk_distribution_terminal":{
+      "bulk_distribution_terminal": {
         "show": false
       },
-      "splice_point":{
+      "splice_point": {
         "show": true
       },
-      "fiveg_coverage":{
+      "fiveg_coverage": {
         "show": false
       },
-      "cell_5g":{
+      "cell_5g": {
         "show": true
       },
       "loop_extender": {
@@ -308,40 +310,40 @@
       "network_anchor": {
         "show": true
       },
-      "planned":{
+      "planned": {
         "show": true
       },
-      "existing":{
+      "existing": {
         "show": true
       }
     },
-    "viewModePanels":{
-      "LOCATION_INFO":{
+    "viewModePanels": {
+      "LOCATION_INFO": {
         "show": true
       },
-      "EQUIPMENT_INFO":{
+      "EQUIPMENT_INFO": {
         "show": true
       },
-      "BOUNDARIES_INFO":{
+      "BOUNDARIES_INFO": {
         "show": true
       },
-      "ROAD_SEGMENT_INFO":{
+      "ROAD_SEGMENT_INFO": {
         "show": false
       },
-      "PLAN_SUMMARY_REPORTS":{
+      "PLAN_SUMMARY_REPORTS": {
+        "show": false
+      },
+      "COVERAGE_BOUNDARY": {
+        "show": false
+      },
+      "EDIT_LOCATIONS": {
         "show": true
       },
-      "COVERAGE_BOUNDARY":{
-        "show": true
-      },
-      "EDIT_LOCATIONS":{
-        "show": true
-      },
-      "PLAN_INFO":{
+      "PLAN_INFO": {
         "show": false
       }
     },
-    "displayModeButtons":{
+    "displayModeButtons": {
       "VIEW": {
         "show": true
       },
@@ -358,34 +360,34 @@
         "show": true
       }
     },
-    "areaNetworkPlanning":{
+    "areaNetworkPlanning": {
       "expertMode": {
         "show": false
       }
     },
-    "competitorNetworks":{
+    "competitorNetworks": {
       "fiberPlantAlternateLabel": true,
       "showCompetitorTypes": false,
       "disableGeotel": true,
       "disableRoutes": true,
       "disableRoutesBuffer": true
     },
-    "targetBuilder":{
+    "targetBuilder": {
       "expertMode": {
         "show": false
       }
     },
     "toolbar": {
-      "globalSettings":{
-        "show":true,
-	"manageUsers":{
-	 "show":true,
-	 "registerUser":{
-	  "show":true
-	 }
-	}
+      "globalSettings": {
+        "show": true,
+        "manageUsers": {
+          "show": true,
+          "registerUser": {
+            "show": true
+          }
+        }
       },
-      "emphericalPlan":{
+      "emphericalPlan": {
         "show": false
       },
       "savePlanAs": {
@@ -409,28 +411,30 @@
           "show": true
         }
       },
-      "selectionSingle":{
+      "selectionSingle": {
         "show": true
       },
-      "selectionPolygon":{
+      "selectionPolygon": {
+        "show": false
+      },
+      "openCoverageBoundary": {
         "show": true
       },
-      "openCoverageBoundary":{
-        "show": true
+      "annotationTool": {
+        "show": false
       }
-
     },
-    "planSettings":{
-      "resourceSelection":{
+    "planSettings": {
+      "resourceSelection": {
         "show": true
       },
-      "networkConfiguration":{
+      "networkConfiguration": {
         "show": true
       },
-      "projectConfiguration":{
+      "projectConfiguration": {
         "show": true
       },
-      "dataSelection":{
+      "dataSelection": {
         "show": true
       }
     },
@@ -477,7 +481,7 @@
       "household": {
         "show": false
       },
-      "celltower":{
+      "celltower": {
         "show": false
       },
       "ethernet_lit_building": {
@@ -496,29 +500,29 @@
         "show": true
       }
     },
-    "networkEquipment":{
-      "central_office":{
+    "networkEquipment": {
+      "central_office": {
         "show": true
       },
-      "dslam":{
+      "dslam": {
         "show": true
       },
-      "fiber_distribution_hub":{
+      "fiber_distribution_hub": {
         "show": true
       },
-      "fiber_distribution_terminal":{
+      "fiber_distribution_terminal": {
         "show": true
       },
-      "bulk_distribution_terminal":{
+      "bulk_distribution_terminal": {
         "show": false
       },
-      "splice_point":{
+      "splice_point": {
         "show": true
       },
-      "fiveg_coverage":{
+      "fiveg_coverage": {
         "show": false
       },
-      "cell_5g":{
+      "cell_5g": {
         "show": true
       },
       "loop_extender": {
@@ -527,40 +531,40 @@
       "network_anchor": {
         "show": true
       },
-      "planned":{
+      "planned": {
         "show": false
       },
-      "existing":{
+      "existing": {
         "show": true
       }
     },
-    "viewModePanels":{
-      "LOCATION_INFO":{
+    "viewModePanels": {
+      "LOCATION_INFO": {
         "show": true
       },
-      "EQUIPMENT_INFO":{
+      "EQUIPMENT_INFO": {
         "show": false
       },
-      "BOUNDARIES_INFO":{
+      "BOUNDARIES_INFO": {
         "show": false
       },
-      "ROAD_SEGMENT_INFO":{
+      "ROAD_SEGMENT_INFO": {
         "show": false
       },
-      "PLAN_SUMMARY_REPORTS":{
+      "PLAN_SUMMARY_REPORTS": {
         "show": true
       },
-      "COVERAGE_BOUNDARY":{
+      "COVERAGE_BOUNDARY": {
         "show": true
       },
-      "EDIT_LOCATIONS":{
+      "EDIT_LOCATIONS": {
         "show": true
       },
-      "PLAN_INFO":{
+      "PLAN_INFO": {
         "show": false
       }
     },
-    "displayModeButtons":{
+    "displayModeButtons": {
       "VIEW": {
         "show": true
       },
@@ -577,34 +581,34 @@
         "show": false
       }
     },
-    "areaNetworkPlanning":{
+    "areaNetworkPlanning": {
       "expertMode": {
         "show": false
       }
     },
-    "competitorNetworks":{
+    "competitorNetworks": {
       "showCompetitorTypes": false,
       "disableGeotel": true,
       "disableFiberRouteData": true,
       "showRoute": true,
       "showRouteBuffers": true
     },
-    "targetBuilder":{
+    "targetBuilder": {
       "expertMode": {
         "show": false
       }
     },
     "toolbar": {
-      "globalSettings":{
-        "show":true,
-	"manageUsers":{
-	 "show":true,
-	 "registerUser":{
-	  "show":true
-	 }
-	}
+      "globalSettings": {
+        "show": true,
+        "manageUsers": {
+          "show": true,
+          "registerUser": {
+            "show": true
+          }
+        }
       },
-      "emphericalPlan":{
+      "emphericalPlan": {
         "show": false
       },
       "savePlanAs": {
@@ -628,29 +632,31 @@
           "show": false
         }
       },
-      "selectionSingle":{
+      "selectionSingle": {
         "show": true
       },
-      "selectionPolygon":{
+      "selectionPolygon": {
         "show": true
       },
-      "openCoverageBoundary":{
+      "openCoverageBoundary": {
+        "show": true
+      },
+      "annotationTool": {
         "show": true
       }
-
     },
     "fiberPlantAlternateLabel": true,
-    "planSettings":{
-      "resourceSelection":{
+    "planSettings": {
+      "resourceSelection": {
         "show": true
       },
-      "networkConfiguration":{
+      "networkConfiguration": {
         "show": true
       },
-      "projectConfiguration":{
+      "projectConfiguration": {
         "show": true
       },
-      "dataSelection":{
+      "dataSelection": {
         "show": true
       }
     },
