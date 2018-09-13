@@ -112,6 +112,7 @@ module.exports = class User {
               resolve({ ldapGroups: [] })
             }
             search.on('searchEntry', (entry) => {
+              console.log(`Found group for user ${username}: ${entry.object[authenticationConfig.groupsAttribute]}`)
               resolve({
                 ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
               })
