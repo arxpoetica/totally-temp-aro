@@ -4,8 +4,8 @@ class PolygonFeatureRenderer {
 
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
-                       selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, analysisSelectionMode,
-                       selectedCensusBlockId, selectedCensusCategoryId) {
+                       selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea,
+                       analysisSelectionMode, selectedCensusBlockId, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon

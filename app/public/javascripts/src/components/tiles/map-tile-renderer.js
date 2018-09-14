@@ -566,7 +566,7 @@ class MapTileRenderer {
             if (this.isFeatureLayerOnForBoundary(feature)){
               PolygonFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, this.censusCategories, this.tileDataService, this.styles,
                 this.tileSize, this.selectedServiceArea, this.selectedServiceAreas, this.selectedDisplayMode, this.displayModes,
-                this.analysisSelectionMode, this.selectedCensusBlockId, this.selectedCensusCategoryId)
+                this.selectedAnalysisArea, this.analysisSelectionMode, this.selectedCensusBlockId, this.selectedCensusCategoryId)
               ctx.globalAlpha = 1.0
             } else {
               return
