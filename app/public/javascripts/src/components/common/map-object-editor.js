@@ -844,10 +844,12 @@ class MapObjectEditorController {
       this.selectMapObject(null)
     }
     var mapObjectToDelete = this.createdMapObjects[objectId]
-    mapObjectToDelete.setMap(null)
-    delete this.createdMapObjects[objectId]
-    this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
-    this.contextMenuCss.display = 'none'  // Hide the context menu
+    if(mapObjectToDelete) {
+      mapObjectToDelete.setMap(null)
+      delete this.createdMapObjects[objectId]
+      this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
+      this.contextMenuCss.display = 'none'  // Hide the context menu      
+    }
   }
 
   startDrawingBoundaryFor(mapObject) {

@@ -16,7 +16,7 @@ class Authentication {
     return database.query(sql, [authName])
       .then((result) => {
         // NOTE: Can return null if we don't have a config
-        Promise.resolve(result && (result.length > 0) && result[0].config)
+        return Promise.resolve(result && (result.length > 0) && result[0].config)
       })
   }
 }
