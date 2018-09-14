@@ -34,6 +34,7 @@ var addUserToGroup = (email, groupName) => {
 }
 
 // Do not add to Public group via aro-service as we do not have access to it
+argv.groupIds = []
 models.User.registerWithPassword(argv, argv.password)
   .then((userId) => {
     console.log('User registered successfully with id =', userId)
@@ -46,6 +47,6 @@ models.User.registerWithPassword(argv, argv.password)
     process.exit(0)
   })
   .catch((err) => {
-    console.log('Error', err.message)
+    console.log('Error', err)
     process.exit(1)
   })

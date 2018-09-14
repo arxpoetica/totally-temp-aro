@@ -264,12 +264,12 @@ module.exports = class User {
   }
 
   // Registers a user with a password
-  static registerWithPassword(user, addToPublicGroup, clearTextPassword) {
+  static registerWithPassword(user, clearTextPassword) {
     if (!clearTextPassword || clearTextPassword == '') {
       return Promise.reject('You must specify a password for registering the user')
     }
     return this.hashPassword(clearTextPassword)
-      .then((hashedPassword) => this.register(user, addToPublicGroup, hashedPassword))
+      .then((hashedPassword) => this.register(user, hashedPassword))
   }
 
   // Registers a user without a password
@@ -317,6 +317,21 @@ module.exports = class User {
       var groupPromises = []
       user.groupIds.forEach((groupId) => groupPromises.push(this.addUserToGroup(user.email, groupId)))
       return Promise.all(groupPromises)
+    })
+    .then(() => {
+      // If the "global super user" flag is set, then change that setting. Again, can't use service as this may be called from ETL.
+      var superUserPromise = Promise.resolve()
+      if (user.isGlobalSuperUser) {
+        const sql = `
+          INSERT INTO auth.global_actor_permission(actor_id, permissions)
+          VALUES(
+            (SELECT id FROM auth.users WHERE email=${user.email}),
+            31
+          )
+        `
+        superUserPromise = database.query(sql, [])
+      }
+      return superUserPromise
     })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
