@@ -869,6 +869,17 @@ class PlanEditorController {
     return this.state.showSiteBoundary && mapObject && mapObject.objectId && !this.networkNodeHasSBType(mapObject.objectId)
   }
   
+  refreshViewObjectSBTypes(boundaryObjectId) {
+    // as transaction is not commited yet, remove boundaryType of equipment from networkNodeSBTypes list
+    this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=boundaryType,networkNodeObjectId&$filter=objectId eq guid'${boundaryObjectId}' and deleted eq false&$top=100`)
+    .then((result) => {
+      // remove deleted boundaries before commiting the transaction
+      var siteInfo = result.data[0]
+      var currentSiteBoundaries = this.networkNodeSBTypes[siteInfo.networkNodeObjectId].filter(ele => ele.boundaryType !== siteInfo.boundaryType)
+      this.networkNodeSBTypes[result.data[0].networkNodeObjectId] = currentSiteBoundaries
+    })
+  }
+
   editViewObject(){
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
   }
@@ -1088,6 +1099,7 @@ class PlanEditorController {
     } else {
       this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
       .then(() => {
+        this.refreshViewObjectSBTypes(mapObject.objectId) //refresh network node SB type
         this.state.planEditorChanged.next(true) //recaluculate plansummary
       })
     }
