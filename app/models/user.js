@@ -15,6 +15,8 @@ var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
 const ldap = require('ldapjs')
 var models = require('../models')
+var hstore = require('pg-hstore')()
+const LoginStatus = require('./constants/loginStatus')
 const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
 module.exports = class User {
@@ -58,14 +60,17 @@ module.exports = class User {
   }
 
   // Retrieve details of a successfully logged in LDAP user
-  static ldapGetUserNames(ldapClient, username) {
+  static ldapGetUserNames(ldapClient, username, sessionDetails) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
       authenticationConfigPromise
         .then((authenticationConfig) => {
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
-          setTimeout(() => reject('ldapGetUserNames(): LDAP bind timed out'), 8000)
+          setTimeout(() => {
+            sessionDetails.login_status_id = LoginStatus.LDAP_SERVER_TIMEOUT
+            reject('ldapGetUserNames(): LDAP bind timed out')
+          }, 8000)
           const ldapOpts = {
             filter: `CN=${username}`,
             scope: 'sub',
@@ -73,6 +78,7 @@ module.exports = class User {
           };
           ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
             if (err) {
+              sessionDetails.login_status_id = LoginStatus.LDAP_ERROR_GETTING_ATTRIBUTES
               reject(err) // There was an error when performing the search
             }
             search.on('searchEntry', (entry) => {
@@ -81,14 +87,17 @@ module.exports = class User {
                 lastName: entry.object[authenticationConfig.lastNameAttribute]
               })
             })
-            search.on('error', (err) => reject(err))
+            search.on('error', (err) => {
+              sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
+              reject(err)
+            })
           })
         })
     })
   }
 
   // Retrieve details of a successfully logged in LDAP user
-  static ldapGetGroupsForUser(ldapClient, username) {
+  static ldapGetGroupsForUser(ldapClient, username, sessionDetails) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
       authenticationConfigPromise
@@ -112,7 +121,8 @@ module.exports = class User {
               resolve({ ldapGroups: [] })
             }
             search.on('searchEntry', (entry) => {
-              console.log(`Found group for user ${username}: ${entry.object[authenticationConfig.groupsAttribute]}`)
+              // Ugh - We've designed other stuff for multiple groups, but logging a single group. Fine for now as FTR has single groups.
+              sessionDetails.attributes = { 'LDAP_group': entry.object[authenticationConfig.groupsAttribute] }
               resolve({
                 ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
               })
@@ -176,6 +186,11 @@ module.exports = class User {
   static loginLDAP(username, password) {
 
     var ldapClient = null, userDetails = {}
+    var sessionDetails = {
+      login_status_id: LoginStatus.UNDEFINED_ERROR,
+      attributes: {}
+    }
+
     return authenticationConfigPromise
       .then((authenticationConfig) => {
         // Create a LDAP client that we will user for authentication
@@ -185,6 +200,7 @@ module.exports = class User {
         ldapClient.on('error', (err) => {
           console.error('Error from ldap client:')
           console.log(err)
+          sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
         })
         // Create a Distinguished Name (DN) that we represents the user that is trying to login
         const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
@@ -194,7 +210,7 @@ module.exports = class User {
       .then((details) => {
         userDetails.firstName = details.firstName
         userDetails.lastName = details.lastName
-        return this.ldapGetGroupsForUser(ldapClient, username)
+        return this.ldapGetGroupsForUser(ldapClient, username, sessionDetails)
       })
       .then((details) => {
         // Why not get the groups at the same time as first/last name? Because in case group membership is not
@@ -208,6 +224,8 @@ module.exports = class User {
       })
       .then((user) => {
         delete user.password
+        sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
+        this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
       .catch((err) => {
@@ -220,6 +238,10 @@ module.exports = class User {
   static login (email, password) {
     var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE LOWER(email)=$1'
     var user
+    var sessionDetails = {
+      login_status_id: LoginStatus.UNDEFINED_ERROR,
+      attributes: {}
+    }
 
     return database.findOne(sql, [email.toLowerCase()])
       .then((_user) => {
@@ -232,11 +254,30 @@ module.exports = class User {
       })
       .then((res) => {
         if (!res) {
+          sessionDetails.login_status_id = LoginStatus.INCORRECT_PASSWORD
+          this.saveLoginAudit(user.id, sessionDetails)
           return Promise.reject(errors.forbidden('Invalid password'))
         }
         delete user.password
+        sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_CACHED_PASSWORD
+        this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
+  }
+
+  static saveLoginAudit(userId, sessionDetails) {
+    try {
+      // At this point we say that the user has been logged in successfully. Save the login attempt.
+      hstore.stringify(sessionDetails.attributes, (attributes) => {
+        var sql = `INSERT INTO auth.user_session(actor_id, login_timestamp, login_status_id, attributes)
+                  VALUES($1, $2, $3, $4);`
+        database.query(sql, [userId, new Date(), sessionDetails.login_status_id, attributes])
+      })
+    } catch (err) {
+      // We do not want to stop logins in case of any errors when saving session audits.
+      console.error('ERROR when trying to save login audit:')
+      console.error(err)
+    }
   }
 
   static findByEmail (email) {
