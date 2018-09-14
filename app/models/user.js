@@ -274,10 +274,22 @@ module.exports = class User {
 
   // Registers a user without a password
   static registerWithoutPassword(user) {
-    return this.register(user, true, null)
+    return this.register(user)
   }
-    
-  static register(user, addToPublicGroup, hashedPassword) {
+
+  static addUserToGroup(email, groupId) {
+    const sqlAddUserToGroup = `
+      INSERT INTO auth.user_auth_group(user_id, auth_group_id)
+      VALUES(
+        (SELECT id FROM auth.users WHERE email='${email}'),
+        ${groupId}
+      );
+    `
+    return database.query(sqlAddUserToGroup)
+  }
+
+  // Note that this is also called from the ETL script, so we can't use aro-service here
+  static register(user, hashedPassword) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -301,9 +313,10 @@ module.exports = class User {
       return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
     })
     .then(() => {
-      // Note that addToPublicGroup can be false, if we are calling this from an ETL script (in which case we do not
-      // have access to aro-service at that point)
-      return addToPublicGroup ? this.addUserToGroup(user.email, 'Public') : Promise.resolve()
+      // Set the group membership for the user
+      var groupPromises = []
+      user.groupIds.forEach((groupId) => groupPromises.push(this.addUserToGroup(user.email, groupId)))
+      return Promise.all(groupPromises)
     })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
@@ -312,40 +325,6 @@ module.exports = class User {
       }
       return Promise.reject(err)
     })
-  }
-
-  // Used to set administrator permissions for a user in the new permissions schema
-  static addUserToGroup(email, groupName) {
-
-    var userId = null, groupId = null
-    return Promise.all([
-      database.query(`SELECT id FROM auth.users WHERE email='${email}'`),
-      database.query(`SELECT id FROM auth.auth_group WHERE name='${groupName}'`)
-    ])
-      .then((results) => {
-        userId = results[0][0].id
-        groupId = results[1][0].id
-        // Get the user details from aro-service
-        var getUserDetails = {
-          method: 'GET',
-          url: `${config.aro_service_url}/auth/users/${userId}`
-        }
-        return models.AROService.request(getUserDetails)
-      })
-      .then((result) => {
-        var serviceUser = JSON.parse(result)
-        // Add the group id to the user, and save it back to aro-service
-        if (serviceUser.groupIds.indexOf(groupId) < 0) {
-          serviceUser.groupIds.push(groupId)
-        }
-        var putUserDetails = {
-          method: 'PUT',
-          url: `${config.aro_service_url}/auth/users`,
-          body: serviceUser,
-          json: true
-        }
-        return models.AROService.request(putUserDetails)
-      })
   }
 
   static find_by_id (id) {

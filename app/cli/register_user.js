@@ -34,7 +34,7 @@ var addUserToGroup = (email, groupName) => {
 }
 
 // Do not add to Public group via aro-service as we do not have access to it
-models.User.registerWithPassword(argv, false, argv.password)
+models.User.registerWithPassword(argv, argv.password)
   .then((userId) => {
     console.log('User registered successfully with id =', userId)
     // Add the user to the Public group
