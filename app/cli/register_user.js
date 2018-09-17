@@ -35,6 +35,7 @@ var addUserToGroup = (email, groupName) => {
 
 // Do not add to Public group via aro-service as we do not have access to it
 argv.groupIds = []
+argv.isGlobalSuperUser = true
 models.User.registerWithPassword(argv, argv.password)
   .then((userId) => {
     console.log('User registered successfully with id =', userId)
