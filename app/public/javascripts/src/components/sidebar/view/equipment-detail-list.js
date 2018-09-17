@@ -64,8 +64,20 @@ class EquipmentDetailListController {
       feature.properties.object_id &&
       feature.properties._data_type &&
       feature.properties._data_type.split('.')[0] == 'equipment' &&
-      feature.properties.is_deleted !== 'true' &&
+      feature.properties.is_deleted !== 'true' && //deleted planned sites 
+      !this.isExistingSiteDeleted(feature.properties.object_id) && //deleted exisiting sites
       Object.keys(this.clliToEquipmentInfo).length <= this.MAX_EQUIPMENT_LIST
+  }
+
+  isExistingSiteDeleted(objectId) {
+    var isDeleted = false
+    if (this.tileDataService.modifiedFeatures.hasOwnProperty(objectId)) {
+      const modifiedFeature = this.tileDataService.modifiedFeatures[objectId]
+      if (modifiedFeature.deleted) {
+        isDeleted = true
+      }
+    }  
+    return isDeleted
   }
 
   refreshEquipmentList() {
