@@ -134,7 +134,6 @@ class ManageUsersController {
       email: '',
       confirmEmail: '',
       companyName: '',
-      perspective: this.userTypes[0].perspective,
       groups: []
     }
   }
