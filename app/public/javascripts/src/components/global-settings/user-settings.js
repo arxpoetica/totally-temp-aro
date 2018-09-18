@@ -14,7 +14,6 @@ class UserSettingsController {
       .then((result) => this.allProjectTemplates = result.data)
       .catch((err) => console.error(err))
 
-    // TODO-Parag: Get this from the DB
     this.perspectives = [
       {
         name: 'Admin',
@@ -37,7 +36,6 @@ class UserSettingsController {
         perspective: "account_exec"
       }
     ]
-
   }
 
   $onInit() {
