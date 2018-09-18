@@ -1653,6 +1653,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
       service.loggedInUser.perspective = result.data.perspective || 'default'
+      configuration.loadPerspective(service.loggedInUser.perspective)
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {

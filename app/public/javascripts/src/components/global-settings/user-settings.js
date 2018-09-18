@@ -1,9 +1,10 @@
 class UserSettingsController {
 
-  constructor($http, $timeout, state, Utils) {
+  constructor($http, $timeout, state, configuration, Utils) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+    this.configuration = configuration
     this.utils = Utils
     this.searchSessionToken = this.utils.getInsecureV4UUID()
 
@@ -106,10 +107,15 @@ class UserSettingsController {
 
   saveSettings() {
     this.$http.post(`/service/auth/users/${this.userId}/configuration`, this.userConfiguration)
+    // The perspective may have changed. Reload it if we are the currently logged in user
+    if (this.userId === this.state.loggedInUser.id) {
+      this.configuration.loadPerspective(this.userConfiguration.perspective)
+      this.$timeout()
+    }
   }
 }
 
-UserSettingsController.$inject = ['$http', '$timeout', 'state', 'Utils']
+UserSettingsController.$inject = ['$http', '$timeout', 'state', 'configuration', 'Utils']
 
 let userSettings = {
   templateUrl: '/components/global-settings/user-settings.html',
