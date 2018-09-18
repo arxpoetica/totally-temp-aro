@@ -70,12 +70,16 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             }
 
             // Returns a feature filter if we are in "sales" mode, otherwise return null
-            function getFilterIfSales(locationType) {
+            function getFilterIfSales(locationType, filterName) {
               if (!locationType.isSalesTile) {
                 return null
               }
+              if (!filterName) {
+                console.warn('We must have a filter name at this point')
+              }
               return (feature) => {
                 return (feature.properties.salesCategory === locationType.categoryKey)
+                       && (feature.properties.salesType === filterName)
               }
             }
 
@@ -127,7 +131,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                       renderMode: 'PRIMITIVE_FEATURES',
                       zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
                       selectable: true,
-                      featureFilter: getFilterIfSales(locationType)
+                      featureFilter: getFilterIfSales(locationType, filter.name)
                     }
                     createdMapLayerKeys.add(mapLayerKey)
                   }
