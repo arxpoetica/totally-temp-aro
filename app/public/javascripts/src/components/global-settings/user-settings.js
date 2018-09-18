@@ -108,6 +108,7 @@ class UserSettingsController {
     // The perspective may have changed. Reload it if we are the currently logged in user
     if (this.userId === this.state.loggedInUser.id) {
       this.configuration.loadPerspective(this.userConfiguration.perspective)
+      this.state.reloadLocationTypes()
       this.$timeout()
     }
   }

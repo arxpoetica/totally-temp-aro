@@ -596,21 +596,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
 
-    var locationTypes = []
-    if (configuration && configuration.locationCategories && configuration.locationCategories.categories) {
-      var locations = configuration.locationCategories.categories
-      Object.keys(locations).forEach((locationKey) => {
-        var location = locations[locationKey]
-
-        if (configuration.perspective.locationCategories[locationKey].show) {
-            location.checked = location.selected
-            locationTypes.push(location)
-        }
-      })
-    }
-    service.locationTypes.next(locationTypes)
-    service.constructionSites.next(angular.copy(locationTypes))
-
+    service.reloadLocationTypes()
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 
@@ -627,6 +613,23 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     service.uploadDataSources = []
     service.dataItems = {}
 
+  }
+
+  service.reloadLocationTypes = () => {
+    var locationTypes = []
+    if (configuration && configuration.locationCategories && configuration.locationCategories.categories) {
+      var locations = configuration.locationCategories.categories
+      Object.keys(locations).forEach((locationKey) => {
+        var location = locations[locationKey]
+
+        if (configuration.perspective.locationCategories[locationKey].show) {
+            location.checked = location.selected
+            locationTypes.push(location)
+        }
+      })
+    }
+    service.locationTypes.next(locationTypes)
+    service.constructionSites.next(angular.copy(locationTypes))
   }
 
   initializeState()
@@ -1654,7 +1657,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
       service.loggedInUser.perspective = result.data.perspective || 'default'
       configuration.loadPerspective(service.loggedInUser.perspective)
-      initializeState()
+      service.reloadLocationTypes() // These may change with the perspective
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {
