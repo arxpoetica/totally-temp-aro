@@ -1,23 +1,52 @@
 class UserSettingsController {
 
-  constructor($http, state, globalSettingsService, Utils) {
+  constructor($http, $timeout, state, Utils) {
     this.$http = $http
+    this.$timeout = $timeout
     this.state = state
-    this.globalSettingsService = globalSettingsService
     this.utils = Utils
     this.searchSessionToken = this.utils.getInsecureV4UUID()
 
     this.userConfiguration = {}
-    $http.get(`/service/auth/users/${state.loggedInUser.id}/configuration`)
-      .then((result) => {
-        this.userConfiguration = result.data
-        this.initSearchBox()
-      })
-      .catch((err) => console.error(err))
-
     this.allProjectTemplates = []
     $http.get(`/service/v1/project-template?user_id=${state.loggedInUser.id}`)
       .then((result) => this.allProjectTemplates = result.data)
+      .catch((err) => console.error(err))
+
+    // TODO-Parag: Get this from the DB
+    this.perspectives = [
+      {
+        name: 'Admin',
+        perspective: 'admin'
+      },
+      {
+        name: 'Standard',
+        perspective: 'standard'
+      },
+      {
+        name: 'Biz-dev',
+        perspective: 'biz-dev'
+      },
+      {
+        name: 'Sales Engineers',
+        perspective: 'sales_engineer'
+      },
+      {
+        name : "Account Executive",
+        perspective: "account_exec"
+      }
+    ]
+
+  }
+
+  $onInit() {
+    this.userConfiguration = {}
+    this.$http.get(`/service/auth/users/${this.userId}/configuration`)
+      .then((result) => {
+        this.userConfiguration = result.data
+        this.initSearchBox()
+        this.$timeout()
+      })
       .catch((err) => console.error(err))
   }
 
@@ -76,14 +105,17 @@ class UserSettingsController {
   }
 
   saveSettings() {
-    this.$http.post(`/service/auth/users/${this.state.loggedInUser.id}/configuration`, this.userConfiguration)
+    this.$http.post(`/service/auth/users/${this.userId}/configuration`, this.userConfiguration)
   }
 }
 
-UserSettingsController.$inject = ['$http', 'state', 'globalSettingsService', 'Utils']
+UserSettingsController.$inject = ['$http', '$timeout', 'state', 'Utils']
 
 let userSettings = {
   templateUrl: '/components/global-settings/user-settings.html',
+  bindings: {
+    userId: '<'
+  },
   controller: UserSettingsController
 }
 

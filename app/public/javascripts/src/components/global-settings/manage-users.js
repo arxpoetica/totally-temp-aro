@@ -32,29 +32,6 @@ class ManageUsersController {
         this.loadUsers()
         $timeout()
       })
-    // TODO-Parag: Get this from the DB
-    this.userTypes = [
-      {
-        name: 'Admin',
-        perspective: 'admin'
-      },
-      {
-        name: 'Standard',
-        perspective: 'standard'
-      },
-      {
-        name: 'Biz-dev',
-        perspective: 'biz-dev'
-      },
-      {
-        name: 'Sales Engineers',
-        perspective: 'sales_engineer'
-      },
-      {
-        name : "Account Executive",
-        perspective: "account_exec"
-      }
-    ]
     this.initializeNewUser()
   }
 
