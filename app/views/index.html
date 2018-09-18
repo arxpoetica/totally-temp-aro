@@ -56,16 +56,8 @@
       <% include modal_data_management.html %>
     </div>
 
-    <div ng-controller="build_lease_controller">
-      <% include modal_build_lease.html %>
-    </div>
-
     <div ng-controller="settings_controller">
       <% include modal_application_settings.html %>
-    </div>
-
-    <div ng-controller="selected_census_block_controller">
-      <% include modal_census_block.html %>
     </div>
 
     <div ng-controller="customer_profile_controller">
@@ -85,11 +77,7 @@
     <div id="left-col-wrapper">
       <div id="left-col" class="left-col-expanded">
         <div style="pointer-events: auto">
-        <% if (config.ui.layout === 'accordion') { %>
-          <% include layout_accordion.html %>
-        <% } else if (config.ui.layout === 'default') { %>
           <% include layout_default.html %>
-        <% } %>
         </div>
       </div>
     </div>
@@ -103,31 +91,8 @@
       <% include modal_selected_location.html %>
 
     </div>
-    
-    <div ng-controller="expert_mode_controller">
-      <% include modal_expert_mode.html %>
-    </div>
-
-    <div ng-controller="selected_fiber_controller">
-      <% include controller_selected_fiber.html %>
-    </div>
-
-    <div ng-controller="route_controller">
-    </div>
-
-    <div ng-controller="market_size_controller">
-      <% include modal_market_profile.html %>
-    </div>
 
     <map-split></map-split>
-
-    <div ng-controller="contextual_menu_controller">
-      <ul class="dropdown-menu" id="contextual_menu">
-        <li ng-repeat="option in options">
-          <a href="javascript:void(0)" ng-click="select_option($index)">{{option.label}}</a>
-        </li>
-      </ul>
-    </div>
 
     <div id="loader-wrapper"><div class="loader"></div></div>
     <div growl></div>
@@ -253,25 +218,16 @@
   
   <script src="javascripts/lib/controllers/body_controller.js"></script>
   <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
-  <script src="javascripts/lib/controllers/route_controller.js"></script>
   <script src="javascripts/lib/controllers/locations_controller.js"></script>
-  <script src="javascripts/lib/controllers/market_size_controller.js"></script>
   <script src="javascripts/lib/controllers/equipment_nodes_controller.js"></script>
   <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
   <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
-  <script src="javascripts/lib/controllers/expert_mode_controller.js"></script>
-  <script src="javascripts/lib/controllers/selected_fiber_controller.js"></script>
-  <script src="javascripts/lib/controllers/contextual_menu_controller.js"></script>
   <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
-  <script src="javascripts/lib/controllers/legend_controller.js"></script>
   <script src="javascripts/lib/controllers/global_search_controller.js"></script>
   <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
-  <script src="javascripts/lib/controllers/selected_census_block_controller.js"></script>
   <script src="javascripts/lib/controllers/settings_controller.js"></script>
-  <script src="javascripts/lib/controllers/build_lease_controller.js"></script>
   <script src="javascripts/lib/controllers/data_management_controller.js"></script>
   <script src="javascripts/lib/controllers/construction_sites_controller.js"></script>
-  <script src="javascripts/lib/controllers/map_settings_controller.js"></script>
   <script src="javascripts/lib/models/configuration.js"></script>
   <script src="javascripts/lib/models/tracker.js"></script>
   <script src="javascripts/lib/models/map_utils.js"></script>

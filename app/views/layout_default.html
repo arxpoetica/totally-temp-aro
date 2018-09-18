@@ -62,25 +62,6 @@
 </div> -->
 <boundaries></boundaries>
 
-<div class="map-tool-wrapper" ng-controller="map_settings_controller">
-  <div ng-show="map_tools.is_visible('map_settings')" class="map-tool panel panel-primary">
-    <!-- <div class="panel-heading" ng-bind="map_tools.get_tool_name('map_settings')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('map_settings')" ng-click="map_tools.collapse('map_settings')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('map_settings')" ng-click="map_tools.expand('map_settings')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-    </div> -->
-    <div class="panel-heading">
-      View Settings
-    </div>
-    <div class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded('map_settings')">
-      <% include controller_map_settings.html %>
-    </div>
-  </div>
-</div>
-
 <div class="map-tool-wrapper" ng-controller="fiber_plant_controller">
   <div ng-show="map_tools.is_visible('fiber_plant')" class="map-tool panel panel-primary">
     <div class="panel-heading" ng-bind="map_tools.get_tool_name('fiber_plant')">
