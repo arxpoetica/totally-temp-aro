@@ -535,6 +535,7 @@ class MapObjectEditorController {
   }
 
   createPolygonMapObject(feature) {
+    console.log(feature)
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
@@ -724,6 +725,8 @@ class MapObjectEditorController {
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           // ToDo: check for empty object, reject on true
+          console.log(feature)
+          console.log(('' == result))
           var serviceFeature = result.data
           serviceFeature.attributes = {
             network_node_object_id: serviceFeature.networkObjectId,
@@ -762,6 +765,7 @@ class MapObjectEditorController {
     featurePromise
       .then((result) => {
         featureToUse = result
+        console.log(result)
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
         
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })

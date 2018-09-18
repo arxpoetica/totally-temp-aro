@@ -55,9 +55,17 @@ class PolygonFeatureRenderer {
       //Highlight the selected SA in view mode
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
-
+    
+    //console.log(feature)
+    //console.log(mapLayer.tileDefinitions[0].vtlType)
+    //console.log(styles)
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)
-      && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType) {
+      && ('BoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType
+          || 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType
+        )
+      ) {
+      //&& 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType
+      //console.log(styles)
       drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
