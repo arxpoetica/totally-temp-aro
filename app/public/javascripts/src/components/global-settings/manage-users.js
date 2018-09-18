@@ -32,26 +32,27 @@ class ManageUsersController {
         this.loadUsers()
         $timeout()
       })
+    // TODO-Parag: Get this from the DB
     this.userTypes = [
       {
         name: 'Admin',
-        rol: 'admin'
+        perspective: 'admin'
       },
       {
         name: 'Standard',
-        rol: 'standard'
+        perspective: 'standard'
       },
       {
         name: 'Biz-dev',
-        rol: 'biz-dev'
+        perspective: 'biz-dev'
       },
       {
         name: 'Sales Engineers',
-        rol: 'sales_engineer'
+        perspective: 'sales_engineer'
       },
       {
         name : "Account Executive",
-        rol: "account_exec"
+        perspective: "account_exec"
       }
     ]
     this.initializeNewUser()
@@ -156,25 +157,9 @@ class ManageUsersController {
       email: '',
       confirmEmail: '',
       companyName: '',
-      rol: this.userTypes[0].rol,
+      perspective: this.userTypes[0].perspective,
       groups: []
     }
-  }
-
-  changeRol(user) {
-    swal({
-      title: 'Are you sure?',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, (confirmation) => {
-      if (!confirmation) return this.loadUsers()
-      this.$http.post('/admin/users/change_rol', { user: user.id, rol: user.rol }).then((response) => {
-        this.loadUsers()
-      })
-    })
   }
 
   copyLink(user) {

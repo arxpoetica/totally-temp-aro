@@ -85,7 +85,7 @@ class DataSelectionController {
   // Updates the 'valid' flags for all data items
   updateSelectionValidation() {
     Object.keys(this.allDataItems).forEach((dataItemKey) => {
-      if(this.currentUser.rol === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
+      if(this.currentUser.perspective === 'sales' && this.sales_role_remove.indexOf(dataItemKey) !== -1) {
         this.allDataItems[dataItemKey].hidden = true
       }
 

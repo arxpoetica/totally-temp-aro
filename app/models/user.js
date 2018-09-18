@@ -203,7 +203,7 @@ module.exports = class User {
         return this.findOrCreateUser(userDetails, username, password)
       })
       .then(() => {
-        var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE email=$1'
+        var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE email=$1'
         return database.findOne(sql, [username])
       })
       .then((user) => {
@@ -218,7 +218,7 @@ module.exports = class User {
   }
 
   static login (email, password) {
-    var sql = 'SELECT id, first_name, last_name, email, password, rol, company_name FROM auth.users WHERE LOWER(email)=$1'
+    var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE LOWER(email)=$1'
     var user
 
     return database.findOne(sql, [email.toLowerCase()])
@@ -259,10 +259,6 @@ module.exports = class User {
       .then(() => database.execute('DELETE FROM auth.users WHERE id=$1', [user_id]))
   }
 
-  static changeRol (user_id, rol) {
-    return database.execute('UPDATE auth.users SET rol=$2 WHERE id=$1', [user_id, rol])
-  }
-
   // Registers a user with a password
   static registerWithPassword(user, addToPublicGroup, clearTextPassword) {
     if (!clearTextPassword || clearTextPassword == '') {
@@ -290,7 +286,7 @@ module.exports = class User {
     .then((createdUser) => {
       createdUserId = createdUser[0].add_user
       var full_name = user.firstName + ' ' + user.lastName
-      var setString = `company_name='${user.companyName}', rol='${user.rol}', full_name='${full_name}'`
+      var setString = `company_name='${user.companyName}', full_name='${full_name}'`
       if (hashedPassword) {
         setString += `, password='${hashedPassword}'` // Set the password only if it is specified
       }
@@ -350,7 +346,7 @@ module.exports = class User {
 
   static find_by_id (id) {
     return database.findOne(`
-        SELECT id, first_name, last_name, email, rol, company_name
+        SELECT id, first_name, last_name, email, company_name
         FROM auth.users WHERE id=$1
       `, [id])
   }

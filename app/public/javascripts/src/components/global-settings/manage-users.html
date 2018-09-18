@@ -39,8 +39,8 @@
           <td>{{user.email}}</td>
           <td>
             <select class="form-control"
-                    ng-model="user.rol"
-                    ng-options="item.rol as item.rol for item in $ctrl.userTypes">
+                    ng-model="user.perspective"
+                    ng-options="item.perspective as item.perspective for item in $ctrl.userTypes">
             </select>
           </td>
           <td>
@@ -141,8 +141,8 @@
     <label class="col-sm-4 control-label">Permissions</label>
     <div class="col-sm-8">
       <select class="form-control"
-              ng-model="$ctrl.newUser.rol"
-              ng-options="item.rol as item.name for item in $ctrl.userTypes">
+              ng-model="$ctrl.newUser.perspective"
+              ng-options="item.perspective as item.name for item in $ctrl.userTypes">
       </select>
     </div>
   </div>

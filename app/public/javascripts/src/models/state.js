@@ -59,7 +59,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
     $rootScope.$on('configuration_loaded', (event, data) => {
-      configuration.loadPerspective(service.loggedInUser.rol)
+      configuration.loadPerspective(service.loggedInUser.perspective)
       resolve()
     })
   })
@@ -1652,6 +1652,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     .then((result) => {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
+      service.loggedInUser.perspective = result.data.perspective || 'default'
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {

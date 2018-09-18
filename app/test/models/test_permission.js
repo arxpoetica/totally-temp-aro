@@ -95,20 +95,6 @@ describe('Permission', () => {
       })
   })
 
-  it('should grant access to the guest user', (done) => {
-    test_utils.loginApp(owner)
-    request
-      .post('/permissions/' + plan_id + '/grant')
-      .accept('application/json')
-      .send({ user_id: guest.id })
-      .end((err, res) => {
-        if (err) return done(err)
-        // var plan = res.body
-        expect(res.statusCode).to.be.equal(200)
-        done()
-      })
-  })
-
   it('should return one element for guest\'s plans', () => {
     return models.NetworkPlan.findAll(guest, {})
       .then((plans) => {
@@ -120,10 +106,6 @@ describe('Permission', () => {
         expect(plan.owner_first_name).to.be.equal(owner.first_name)
         expect(plan.owner_last_name).to.be.equal(owner.last_name)
       })
-  })
-
-  it('should revoke access to the guest user', () => {
-    return models.Permission.revokeAccess(plan_id, guest.id)
   })
 
   it('should return an empty list for guest\'s plans', () => {
