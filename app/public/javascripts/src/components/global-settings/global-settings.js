@@ -15,10 +15,21 @@ class GlobalSettingsController {
       TAG_MANAGER: 'Tag Manager'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
+    this.userIdForSettingsEdit = this.state.loggedInUser.id
   }
 
   modalHide() {
     this.state.showGlobalSettings = false
+  }
+
+  backToGlobalSettings() {
+    this.userIdForSettingsEdit = this.state.loggedInUser.id
+    this.currentView = this.views.GLOBAL_SETTINGS
+  }
+
+  openUserSettingsForUserId(userId) {
+    this.userIdForSettingsEdit = userId
+    this.currentView = this.views.USER_SETTINGS
   }
 }
 

@@ -45,6 +45,7 @@
               <a ng-show="user.resend_link" title="Link copied to the clipboard" id="resend-link-button-{{ user.id }}" class="btn btn-xs btn-default"
                 ng-click="$ctrl.copyLink(user)"><span class="glyphicon glyphicon-link"></span></a>
               <a class="btn btn-xs btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-send"></span></a>
+              <a class="btn btn-xs btn-primary" ng-click="$ctrl.openUserSettingsForUserId({userId: user.id})"><span class="fa fa-cog"></span></a>
               <a class="btn btn-xs btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"><span class="glyphicon glyphicon-trash"></span></a>
             </div>
           </td>

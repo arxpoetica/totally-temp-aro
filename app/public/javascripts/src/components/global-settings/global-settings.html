@@ -31,7 +31,7 @@
         <br>Manage Groups
       </button>
 
-      <button class="btn settings-btn" ng-click="$ctrl.currentView = $ctrl.views.USER_SETTINGS">
+      <button class="btn settings-btn" ng-click="$ctrl.openUserSettingsForUserId($ctrl.state.loggedInUser.id)">
         <i class="fa fa-2x fa-cogs"></i>
         <br>User Settings
       </button>
@@ -44,14 +44,16 @@
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
 
-    <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS" manager-view="$ctrl.globalSettingsService.currentManageUserView">
+    <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
+                  manager-view="$ctrl.globalSettingsService.currentManageUserView"
+                  open-user-settings-for-user-id="$ctrl.openUserSettingsForUserId(userId)">
     </manage-users>
 
     <manage-groups ng-if="$ctrl.currentView === $ctrl.views.MANAGE_GROUPS" manager-view="$ctrl.globalSettingsService.currentManageUserView">
     </manage-groups>
 
     <user-settings ng-if="$ctrl.currentView === $ctrl.views.USER_SETTINGS"
-                   user-id="$ctrl.state.loggedInUser.id">
+                   user-id="$ctrl.userIdForSettingsEdit">
     </user-settings>
 
     <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER" manager-view="$ctrl.globalSettingsService.currentTagManagerView">
@@ -80,6 +82,6 @@
     <button ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
 
     <!-- Back button - show when we are in any mode other than "Global Settings" -->
-    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary pull-right" ng-click="$ctrl.currentView = $ctrl.views.GLOBAL_SETTINGS">Back</button>
+    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary pull-right" ng-click="$ctrl.backToGlobalSettings()">Back</button>
   </modal-footer>
 </modal>

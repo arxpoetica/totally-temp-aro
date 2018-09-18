@@ -225,7 +225,8 @@ ManageUsersController.$inject = ['$http', '$timeout', 'state', 'globalSettingsSe
 let manageUsers = {
   templateUrl: '/components/global-settings/manage-users.html',
   bindings: {
-    managerView: '='
+    managerView: '=',
+    openUserSettingsForUserId: '&'
   },
   controller: ManageUsersController
 }
