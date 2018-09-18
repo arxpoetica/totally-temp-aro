@@ -23,9 +23,6 @@
             Email
           </th>
           <th>
-            Role
-          </th>
-          <th>
             Groups
           </th>
           <th>
@@ -37,12 +34,6 @@
         <tr ng-repeat="user in $ctrl.filteredUsers">
           <td>{{user.firstName}} {{user.lastName}}</td>
           <td>{{user.email}}</td>
-          <td>
-            <select class="form-control"
-                    ng-model="user.perspective"
-                    ng-options="item.perspective as item.perspective for item in $ctrl.userTypes">
-            </select>
-          </td>
           <td>
             <aro-multi-select model="user.userGroups"
                               all-items="$ctrl.allGroups">

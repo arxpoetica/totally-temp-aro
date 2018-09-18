@@ -17,12 +17,8 @@ class GlobalSettingsController {
     this.currentView = this.views.GLOBAL_SETTINGS
   }
 
-  modalShown() {
-    this.state.showGlobalSettings.next(true)
-  }
-
   modalHide() {
-    this.state.showGlobalSettings.next(false)
+    this.state.showGlobalSettings = false
   }
   
   toggleViewMode() {

@@ -258,7 +258,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
   service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
   service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
-  service.showGlobalSettings = new Rx.BehaviorSubject(false)
+  service.showGlobalSettings = false
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
   service.planInputsModal =  new Rx.BehaviorSubject(false)
