@@ -842,6 +842,7 @@ class PlanEditorController {
         this.viewIconUrl = viewConfig.iconUrl
         this.isEditFeatureProps = false
         //this.updateSelectedState(feature, feature.objectId)
+        this.getViewObjectSBTypes(feature.objectId)
       }else{
         // clear selection
         this.clearViewSelection()
@@ -853,6 +854,7 @@ class PlanEditorController {
 
   getViewObjectSBTypes(objectId) {
     // Get SB types of a equipment
+    !this.networkNodeSBTypes.hasOwnProperty(objectId) &&
     this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=boundaryType&$filter=networkNodeObjectId eq guid'${objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
     .then((result) => {
       this.networkNodeSBTypes[objectId] = result.data
