@@ -20,27 +20,6 @@ class GlobalSettingsController {
   modalHide() {
     this.state.showGlobalSettings = false
   }
-  
-  toggleViewMode() {
-    this.currentView = this.views.GLOBAL_SETTINGS
-  }
-
-  toggleMyAccountMode() {
-    this.currentView = this.views.MY_ACCOUNT
-  }
-
-  toggleManageUsersMode() {
-    this.currentView = this.views.MANAGE_USERS
-  }
-
-  toggleManageGroupsMode() {
-    this.currentView = this.views.MANAGE_GROUPS
-  }
-
-  toggleUserSettings() {
-    this.currentView = this.views.USER_SETTINGS
-  }
-
 }
 
 GlobalSettingsController.$inject = ['state', 'globalSettingsService', 'configuration', '$http']
