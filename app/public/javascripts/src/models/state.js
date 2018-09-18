@@ -1654,6 +1654,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
       service.loggedInUser.perspective = result.data.perspective || 'default'
       configuration.loadPerspective(service.loggedInUser.perspective)
+      initializeState()
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {

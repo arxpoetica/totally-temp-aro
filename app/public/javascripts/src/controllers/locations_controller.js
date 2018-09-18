@@ -126,7 +126,8 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                       iconUrl: `${baseUrl}${filter.icon}`,
                       renderMode: 'PRIMITIVE_FEATURES',
                       zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                      selectable: true
+                      selectable: true,
+                      featureFilter: getFilterIfSales(locationType)
                     }
                     createdMapLayerKeys.add(mapLayerKey)
                   }
