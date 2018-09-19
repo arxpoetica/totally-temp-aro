@@ -279,6 +279,7 @@
   </button>
 
   <aro-drawing-manager
+    ng-show="$ctrl.configuration.perspective.toolbar.annotationTool.show"
     map-global-object-name="map"
     drawing-control="true"
     drawing-modes="['polygon','polyline']"

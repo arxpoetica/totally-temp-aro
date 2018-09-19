@@ -135,6 +135,32 @@
       <input type="text" class="form-control" ng-model="$ctrl.newUser.companyName">
     </div>
   </div>
+
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Groups</label>
+    <div class="col-sm-8">
+      <aro-multi-select model="$ctrl.newUser.groups"
+                        all-items="$ctrl.allGroups">
+      </aro-multi-select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-4 control-label">System-wide Super User</label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" ng-model="$ctrl.newUser.isGlobalSuperUser">
+    </div>
+  </div>
+  <!--
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Perspective</label>
+    <div class="col-sm-8">
+      <select class="form-control"
+              ng-model="$ctrl.newUser.rol"
+              ng-options="item.rol as item.name for item in $ctrl.userTypes">
+      </select>
+    </div>
+  </div>
+  -->
   </form>
   <button class="btn btn-primary pull-right" ng-click="$ctrl.registerUser()"><i class="fa fa-save"></i>&nbsp;&nbsp;Register user</button>
 </div>

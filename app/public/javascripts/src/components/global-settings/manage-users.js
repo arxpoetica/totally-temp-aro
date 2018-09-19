@@ -30,6 +30,7 @@ class ManageUsersController {
         this.allGroups = result.data
         result.data.forEach((group) => this.mapIdToGroup[group.id] = group)
         this.loadUsers()
+        this.initializeNewUser()
         $timeout()
       })
     this.initializeNewUser()
@@ -128,13 +129,15 @@ class ManageUsersController {
   }
 
   initializeNewUser() {
+    const publicGroup = this.allGroups.filter((item) => item.name === 'Public')[0]
     this.newUser = {
       firstName: '',
       lastName: '',
       email: '',
       confirmEmail: '',
       companyName: '',
-      groups: []
+      isGlobalSuperUser: false,
+      groups: publicGroup ? [publicGroup] : []
     }
   }
 
@@ -210,7 +213,7 @@ class ManageUsersController {
     this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
 
 
-    this.$http.post('/admin/users/registerWithoutPassword', this.newUser)
+    this.$http.post('/admin/users/registerWithoutPassword', serviceUser)
       .then((response) => {
         this.loadUsers()
         swal({ title: 'User registered', type: 'success' })

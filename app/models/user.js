@@ -15,6 +15,8 @@ var stringify = pify(require('csv-stringify'))
 var pync = require('pync')
 const ldap = require('ldapjs')
 var models = require('../models')
+var hstore = require('pg-hstore')()
+const LoginStatus = require('./constants/loginStatus')
 const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
 module.exports = class User {
@@ -58,37 +60,7 @@ module.exports = class User {
   }
 
   // Retrieve details of a successfully logged in LDAP user
-  static ldapGetUserNames(ldapClient, username) {
-    // We assume that the ldapClient has been successfully bound at this point.
-    return new Promise((resolve, reject) => {
-      authenticationConfigPromise
-        .then((authenticationConfig) => {
-          // Time out if the LDAP bind fails (setting timeout on the client does not help).
-          // The LDAP server may be unreachable, or may not be sending a response.
-          setTimeout(() => reject('ldapGetUserNames(): LDAP bind timed out'), 8000)
-          const ldapOpts = {
-            filter: `CN=${username}`,
-            scope: 'sub',
-            attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute]
-          };
-          ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
-            if (err) {
-              reject(err) // There was an error when performing the search
-            }
-            search.on('searchEntry', (entry) => {
-              resolve({
-                firstName: entry.object[authenticationConfig.firstNameAttribute],
-                lastName: entry.object[authenticationConfig.lastNameAttribute]
-              })
-            })
-            search.on('error', (err) => reject(err))
-          })
-        })
-    })
-  }
-
-  // Retrieve details of a successfully logged in LDAP user
-  static ldapGetGroupsForUser(ldapClient, username) {
+  static ldapGetAttributes(ldapClient, username, sessionDetails) {
     // We assume that the ldapClient has been successfully bound at this point.
     return new Promise((resolve, reject) => {
       authenticationConfigPromise
@@ -96,33 +68,29 @@ module.exports = class User {
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
           setTimeout(() => {
-            // NOTE: We are not rejecting in case of timeouts for getting groups
-            console.log('ldapGetGroupsForUser(): LDAP bind timed out')
-            resolve({ ldapGroups: [] })
+            sessionDetails.login_status_id = LoginStatus.LDAP_SERVER_TIMEOUT
+            reject('ldapGetUserNames(): LDAP bind timed out')
           }, 8000)
           const ldapOpts = {
             filter: `CN=${username}`,
             scope: 'sub',
-            attributes: [authenticationConfig.groupsAttribute]
+            attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute, authenticationConfig.groupsAttribute]
           };
           ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
             if (err) {
-              // NOTE: We are resolving with an empty list of groups, don't want an error in group
-              // search to stop the user from logging in
-              resolve({ ldapGroups: [] })
+              sessionDetails.login_status_id = LoginStatus.LDAP_ERROR_GETTING_ATTRIBUTES
+              reject(err) // There was an error when performing the search
             }
             search.on('searchEntry', (entry) => {
-              console.log(`Found group for user ${username}: ${entry.object[authenticationConfig.groupsAttribute]}`)
               resolve({
+                firstName: entry.object[authenticationConfig.firstNameAttribute],
+                lastName: entry.object[authenticationConfig.lastNameAttribute],
                 ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
               })
             })
             search.on('error', (err) => {
-              // NOTE: We are resolving with an empty list of groups, don't want an error in group
-              // search to stop the user from logging in
-              console.log('ERROR when performing ldap search')
-              console.log(err)
-              resolve({ ldapGroups: [] })
+              sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
+              reject(err)
             })
           })
         })
@@ -175,7 +143,12 @@ module.exports = class User {
 
   static loginLDAP(username, password) {
 
-    var ldapClient = null, userDetails = {}
+    var ldapClient = null
+    var sessionDetails = {
+      login_status_id: LoginStatus.UNDEFINED_ERROR,
+      attributes: {}
+    }
+
     return authenticationConfigPromise
       .then((authenticationConfig) => {
         // Create a LDAP client that we will user for authentication
@@ -185,21 +158,14 @@ module.exports = class User {
         ldapClient.on('error', (err) => {
           console.error('Error from ldap client:')
           console.log(err)
+          sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
         })
         // Create a Distinguished Name (DN) that we represents the user that is trying to login
         const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
         return this.ldapBind(ldapClient, distinguishedName, password)
       })
-      .then(() => this.ldapGetUserNames(ldapClient, username))
-      .then((details) => {
-        userDetails.firstName = details.firstName
-        userDetails.lastName = details.lastName
-        return this.ldapGetGroupsForUser(ldapClient, username)
-      })
-      .then((details) => {
-        // Why not get the groups at the same time as first/last name? Because in case group membership is not
-        // found, we still want to allow the user to log in.
-        userDetails.ldapGroups = details.ldapGroups
+      .then(() => this.ldapGetAttributes(ldapClient, username, sessionDetails))
+      .then((userDetails) => {
         return this.findOrCreateUser(userDetails, username, password)
       })
       .then(() => {
@@ -208,6 +174,8 @@ module.exports = class User {
       })
       .then((user) => {
         delete user.password
+        sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
+        this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
       .catch((err) => {
@@ -220,6 +188,10 @@ module.exports = class User {
   static login (email, password) {
     var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE LOWER(email)=$1'
     var user
+    var sessionDetails = {
+      login_status_id: LoginStatus.UNDEFINED_ERROR,
+      attributes: {}
+    }
 
     return database.findOne(sql, [email.toLowerCase()])
       .then((_user) => {
@@ -232,11 +204,30 @@ module.exports = class User {
       })
       .then((res) => {
         if (!res) {
+          sessionDetails.login_status_id = LoginStatus.INCORRECT_PASSWORD
+          this.saveLoginAudit(user.id, sessionDetails)
           return Promise.reject(errors.forbidden('Invalid password'))
         }
         delete user.password
+        sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_CACHED_PASSWORD
+        this.saveLoginAudit(user.id, sessionDetails)
         return user
       })
+  }
+
+  static saveLoginAudit(userId, sessionDetails) {
+    try {
+      // At this point we say that the user has been logged in successfully. Save the login attempt.
+      hstore.stringify(sessionDetails.attributes, (attributes) => {
+        var sql = `INSERT INTO auth.user_session(actor_id, login_timestamp, login_status_id, attributes)
+                  VALUES($1, $2, $3, $4);`
+        database.query(sql, [userId, new Date(), sessionDetails.login_status_id, attributes])
+      })
+    } catch (err) {
+      // We do not want to stop logins in case of any errors when saving session audits.
+      console.error('ERROR when trying to save login audit:')
+      console.error(err)
+    }
   }
 
   static findByEmail (email) {
@@ -260,20 +251,32 @@ module.exports = class User {
   }
 
   // Registers a user with a password
-  static registerWithPassword(user, addToPublicGroup, clearTextPassword) {
+  static registerWithPassword(user, clearTextPassword) {
     if (!clearTextPassword || clearTextPassword == '') {
       return Promise.reject('You must specify a password for registering the user')
     }
     return this.hashPassword(clearTextPassword)
-      .then((hashedPassword) => this.register(user, addToPublicGroup, hashedPassword))
+      .then((hashedPassword) => this.register(user, hashedPassword))
   }
 
   // Registers a user without a password
   static registerWithoutPassword(user) {
-    return this.register(user, true, null)
+    return this.register(user)
   }
-    
-  static register(user, addToPublicGroup, hashedPassword) {
+
+  static addUserToGroup(email, groupId) {
+    const sqlAddUserToGroup = `
+      INSERT INTO auth.user_auth_group(user_id, auth_group_id)
+      VALUES(
+        (SELECT id FROM auth.users WHERE email='${email}'),
+        ${groupId}
+      );
+    `
+    return database.query(sqlAddUserToGroup)
+  }
+
+  // Note that this is also called from the ETL script, so we can't use aro-service here
+  static register(user, hashedPassword) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -297,9 +300,25 @@ module.exports = class User {
       return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
     })
     .then(() => {
-      // Note that addToPublicGroup can be false, if we are calling this from an ETL script (in which case we do not
-      // have access to aro-service at that point)
-      return addToPublicGroup ? this.addUserToGroup(user.email, 'Public') : Promise.resolve()
+      // Set the group membership for the user
+      var groupPromises = []
+      user.groupIds.forEach((groupId) => groupPromises.push(this.addUserToGroup(user.email, groupId)))
+      return Promise.all(groupPromises)
+    })
+    .then(() => {
+      // If the "global super user" flag is set, then change that setting. Again, can't use service as this may be called from ETL.
+      var superUserPromise = Promise.resolve()
+      if (user.isGlobalSuperUser) {
+        const sql = `
+          INSERT INTO auth.global_actor_permission(actor_id, permissions)
+          VALUES(
+            (SELECT id FROM auth.users WHERE email=${user.email}),
+            31
+          )
+        `
+        superUserPromise = database.query(sql, [])
+      }
+      return superUserPromise
     })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
@@ -308,40 +327,6 @@ module.exports = class User {
       }
       return Promise.reject(err)
     })
-  }
-
-  // Used to set administrator permissions for a user in the new permissions schema
-  static addUserToGroup(email, groupName) {
-
-    var userId = null, groupId = null
-    return Promise.all([
-      database.query(`SELECT id FROM auth.users WHERE email='${email}'`),
-      database.query(`SELECT id FROM auth.auth_group WHERE name='${groupName}'`)
-    ])
-      .then((results) => {
-        userId = results[0][0].id
-        groupId = results[1][0].id
-        // Get the user details from aro-service
-        var getUserDetails = {
-          method: 'GET',
-          url: `${config.aro_service_url}/auth/users/${userId}`
-        }
-        return models.AROService.request(getUserDetails)
-      })
-      .then((result) => {
-        var serviceUser = JSON.parse(result)
-        // Add the group id to the user, and save it back to aro-service
-        if (serviceUser.groupIds.indexOf(groupId) < 0) {
-          serviceUser.groupIds.push(groupId)
-        }
-        var putUserDetails = {
-          method: 'PUT',
-          url: `${config.aro_service_url}/auth/users`,
-          body: serviceUser,
-          json: true
-        }
-        return models.AROService.request(putUserDetails)
-      })
   }
 
   static find_by_id (id) {
