@@ -15,36 +15,22 @@ class GlobalSettingsController {
       TAG_MANAGER: 'Tag Manager'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
-  }
-
-  modalShown() {
-    this.state.showGlobalSettings.next(true)
+    this.userIdForSettingsEdit = this.state.loggedInUser.id
   }
 
   modalHide() {
-    this.state.showGlobalSettings.next(false)
+    this.state.showGlobalSettings = false
   }
-  
-  toggleViewMode() {
+
+  backToGlobalSettings() {
+    this.userIdForSettingsEdit = this.state.loggedInUser.id
     this.currentView = this.views.GLOBAL_SETTINGS
   }
 
-  toggleMyAccountMode() {
-    this.currentView = this.views.MY_ACCOUNT
-  }
-
-  toggleManageUsersMode() {
-    this.currentView = this.views.MANAGE_USERS
-  }
-
-  toggleManageGroupsMode() {
-    this.currentView = this.views.MANAGE_GROUPS
-  }
-
-  toggleUserSettings() {
+  openUserSettingsForUserId(userId) {
+    this.userIdForSettingsEdit = userId
     this.currentView = this.views.USER_SETTINGS
   }
-
 }
 
 GlobalSettingsController.$inject = ['state', 'globalSettingsService', 'configuration', '$http']

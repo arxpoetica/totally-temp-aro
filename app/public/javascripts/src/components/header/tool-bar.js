@@ -79,7 +79,7 @@ class ToolBarController {
   } 
 
   openGlobalSettings() {
-    this.state.showGlobalSettings.next(true)
+    this.state.showGlobalSettings = true
   }
 
   setSelectionSingle() {

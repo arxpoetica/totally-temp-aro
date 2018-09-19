@@ -36,14 +36,6 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  app.post('/admin/users/change_rol', check_admin, (request, response, next) => {
-    var userId = request.body.user
-    var rol = request.body.rol
-    models.User.changeRol(userId, rol)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   app.post('/admin/users/resend', check_admin, (request, response, next) => {
     var user_id = request.body.user
     models.User.resendLink(user_id)

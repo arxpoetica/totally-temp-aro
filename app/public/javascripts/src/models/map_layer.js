@@ -1,7 +1,7 @@
 /* global app google map _ encodeURIComponent document $ */
 'use strict'
 
-app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,Notification) => {
+app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notification) => {
   var plan = null
   $rootScope.$on('plan_selected', (e, p) => {
     plan = p
@@ -85,7 +85,7 @@ app.service('MapLayer', ($http, $rootScope, selection, map_tools, $q, map_utils,
 
       data_layer.addListener('click', (event) => {
         $rootScope.$broadcast('map_layer_clicked_feature', event, this)
-        if (!selection.isEnabled()) return
+        // if (!selection.isEnabled()) return
         var changes
         if (this.single_selection) {
           changes = this.createEmptyChanges()

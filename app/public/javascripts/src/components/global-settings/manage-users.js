@@ -33,28 +33,6 @@ class ManageUsersController {
         this.initializeNewUser()
         $timeout()
       })
-    this.userTypes = [
-      {
-        name: 'Admin',
-        rol: 'admin'
-      },
-      {
-        name: 'Standard',
-        rol: 'standard'
-      },
-      {
-        name: 'Biz-dev',
-        rol: 'biz-dev'
-      },
-      {
-        name: 'Sales Engineers',
-        rol: 'sales_engineer'
-      },
-      {
-        name : "Account Executive",
-        rol: "account_exec"
-      }
-    ]
     this.initializeNewUser()
   }
 
@@ -158,26 +136,9 @@ class ManageUsersController {
       email: '',
       confirmEmail: '',
       companyName: '',
-      rol: this.userTypes[0].rol,
       isGlobalSuperUser: false,
       groups: publicGroup ? [publicGroup] : []
     }
-  }
-
-  changeRol(user) {
-    swal({
-      title: 'Are you sure?',
-      type: 'warning',
-      confirmButtonColor: '#DD6B55',
-      confirmButtonText: 'Yes',
-      showCancelButton: true,
-      closeOnConfirm: true
-    }, (confirmation) => {
-      if (!confirmation) return this.loadUsers()
-      this.$http.post('/admin/users/change_rol', { user: user.id, rol: user.rol }).then((response) => {
-        this.loadUsers()
-      })
-    })
   }
 
   copyLink(user) {
@@ -267,7 +228,8 @@ ManageUsersController.$inject = ['$http', '$timeout', 'state', 'globalSettingsSe
 let manageUsers = {
   templateUrl: '/components/global-settings/manage-users.html',
   bindings: {
-    managerView: '='
+    managerView: '=',
+    openUserSettingsForUserId: '&'
   },
   controller: ManageUsersController
 }
