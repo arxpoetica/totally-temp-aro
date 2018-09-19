@@ -120,7 +120,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
     ODN_1: 'Hub-only split',
-    ODN_2: 'Hub-distribution split'
+    ODN_2: 'Hub-distribution split',
+    ODN_3: 'Hybrid split'
   }
 
   // Optimization options - initialize once
