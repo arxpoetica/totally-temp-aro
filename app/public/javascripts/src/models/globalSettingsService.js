@@ -71,9 +71,9 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
       url: '/settings/update_settings',
       data: data
     }).then((response) => {
-      state.showGlobalSettings.next(false)
+      state.showGlobalSettings = false
     }).catch((response) => {
-      state.showGlobalSettings.next(false)
+      state.showGlobalSettings = false
     })
   }
 

@@ -62,7 +62,6 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
           config.perspective = getPerspectiveByKey('account_exec')
         break
       }
-      config.perspective.name = userPerspective
     }
 
     return config

@@ -70,7 +70,7 @@ function check_permission (rol) {
 
 function check_admin (request, response, next) {
   var user = request.user
-  if (user.rol !== 'admin') {
+  if (user.perspective !== 'admin') {
     response.status(403).json({
       error: 'Forbidden'
     })

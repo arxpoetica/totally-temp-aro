@@ -34,7 +34,6 @@ var routes = [
   'competitors',
   'user',
   'map',
-  'permission',
   'wirecenter',
   'county_subdivision',
   'census_block',

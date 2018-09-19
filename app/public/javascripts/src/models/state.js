@@ -59,7 +59,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // Promises for app initialization (configuration loaded, map ready, etc.)
   var configurationLoadedPromise = new Promise((resolve, reject) => {
     $rootScope.$on('configuration_loaded', (event, data) => {
-      configuration.loadPerspective(service.loggedInUser.rol)
+      configuration.loadPerspective(service.loggedInUser.perspective)
       resolve()
     })
   })
@@ -120,7 +120,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
     ODN_1: 'Hub-only split',
-    ODN_2: 'Hub-distribution split'
+    ODN_2: 'Hub-distribution split',
+    ODN_3: 'Hybrid split'
   }
 
   // Optimization options - initialize once
@@ -258,7 +259,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.requestMapLayerRefresh = new Rx.BehaviorSubject({})
   service.requestCreateMapOverlay = new Rx.BehaviorSubject(null)
   service.requestDestroyMapOverlay = new Rx.BehaviorSubject(null)
-  service.showGlobalSettings = new Rx.BehaviorSubject(false)
+  service.showGlobalSettings = false
   service.showNetworkAnalysisOutput = false
   service.networkPlanModal =  new Rx.BehaviorSubject(false)
   service.planInputsModal =  new Rx.BehaviorSubject(false)
@@ -596,21 +597,7 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
   var initializeState = function () {
 
-    var locationTypes = []
-    if (configuration && configuration.locationCategories && configuration.locationCategories.categories) {
-      var locations = configuration.locationCategories.categories
-      Object.keys(locations).forEach((locationKey) => {
-        var location = locations[locationKey]
-
-        if (configuration.perspective.locationCategories[locationKey].show) {
-            location.checked = location.selected
-            locationTypes.push(location)
-        }
-      })
-    }
-    service.locationTypes.next(locationTypes)
-    service.constructionSites.next(angular.copy(locationTypes))
-
+    service.reloadLocationTypes()
     service.selectedDisplayMode.next(service.displayModes.VIEW)
     service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
 
@@ -627,6 +614,23 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     service.uploadDataSources = []
     service.dataItems = {}
 
+  }
+
+  service.reloadLocationTypes = () => {
+    var locationTypes = []
+    if (configuration && configuration.locationCategories && configuration.locationCategories.categories) {
+      var locations = configuration.locationCategories.categories
+      Object.keys(locations).forEach((locationKey) => {
+        var location = locations[locationKey]
+
+        if (configuration.perspective.locationCategories[locationKey].show) {
+            location.checked = location.selected
+            locationTypes.push(location)
+        }
+      })
+    }
+    service.locationTypes.next(locationTypes)
+    service.constructionSites.next(angular.copy(locationTypes))
   }
 
   initializeState()
@@ -1652,6 +1656,9 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     .then((result) => {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
+      service.loggedInUser.perspective = result.data.perspective || 'default'
+      configuration.loadPerspective(service.loggedInUser.perspective)
+      service.reloadLocationTypes() // These may change with the perspective
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {

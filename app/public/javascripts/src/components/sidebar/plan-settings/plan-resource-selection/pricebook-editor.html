@@ -4,9 +4,23 @@
   }
 </style>
 
+<!-- Allow the user to select the state for which this strategy will be applied -->
+<form class="form-horizontal">
+  <div class="form-group">
+    <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
+    <div class="col-sm-4">
+      <select class="form-control"
+              ng-model="$ctrl.selectedStateForStrategy"
+              ng-options="item for item in $ctrl.statesForStrategy"
+              ng-change="$ctrl.definePriceBookForSelectedState()">
+      </select>
+    </div>
+  </div>
+</form>
+
 <!-- Create tabs for each priceBookDefinition -->
 <ul class="nav nav-tabs" role="tablist">
-  <li ng-repeat="priceBookDefinition in $ctrl.priceBookDefinitions"
+  <li ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
       role="presentation"
       ng-class="{ 'active': $index === 0 }">
     <a href="#{{priceBookDefinition.id}}" role="tab" data-toggle="tab">
@@ -17,7 +31,7 @@
 
 <!-- Create tab contents for each priceBookDefinition -->
 <div class="tab-content" style="max-height: 500px; overflow-y: auto">
-  <div ng-repeat="priceBookDefinition in $ctrl.priceBookDefinitions"
+  <div ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
        role="tabpanel"
        ng-class="{ 'tab-pane': true, 'active': $index === 0 }"
        id="{{priceBookDefinition.id}}">
