@@ -48,12 +48,16 @@ class ResourceManagerController {
   }
 
   createBlankPriceBook() {
-    var createdManagerId = -1 // Save for later use
+    var createdManagerId = -1, resourceName = null // Save for later use
     // Get the name of the new plan from the user
     this.getNewResourceDetailsFromUser()
-    .then((resourceName) => {
+    .then((result) => {
+      resourceName = result
+      return this.getPriceStrategyFromUser()
+    })
+    .then((priceStrategy) => {
       // Create a new pricebook with the specified name and description
-      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName })
+      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: priceStrategy })
     })
     .then((result) => {
       // Save the created pricebook id for later use, and return the list of all pricebooks
@@ -84,22 +88,27 @@ class ResourceManagerController {
   cloneSelectedPriceBook() {
     // Create a resource manager
     var createdManagerId = -1
+    var resourceName = null
     this.getNewResourceDetailsFromUser()
-    .then((resourceName) => {
-      // Create a new pricebook with the specified name and description
-      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: 'state_pricing' })
-    })
-    .then((result) => {
-      // Save the created pricebook id for later use, and return the assignments for the selected manager
-      createdManagerId = result.data.id
-      return this.$http.get(`/service/v1/pricebook/${this.selectedResourceManager.id}/assignment`)
-    })
-    .then((result) => {
-      // Take the assignments for the selected manager and overwrite them onto the created manager
-      return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, result.data)
-    })
-    .then(() => this.onManagerCreated(createdManagerId))
-    .catch((err) => console.error(err))
+      .then((result) => {
+        resourceName = result
+        return this.getPriceStrategyFromUser()
+      })
+      .then((priceStrategy) => {
+        // Create a new pricebook with the specified name and description
+        return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: priceStrategy })
+      })
+      .then((result) => {
+        // Save the created pricebook id for later use, and return the assignments for the selected manager
+        createdManagerId = result.data.id
+        return this.$http.get(`/service/v1/pricebook/${this.selectedResourceManager.id}/assignment`)
+      })
+      .then((result) => {
+        // Take the assignments for the selected manager and overwrite them onto the created manager
+        return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, result.data)
+      })
+      .then(() => this.onManagerCreated(createdManagerId))
+      .catch((err) => console.error(err))
   }
 
   cloneSelectedManagerFromSource(managerId) {
@@ -220,6 +229,38 @@ class ResourceManagerController {
     })
   }
 
+  getPriceStrategyFromUser() {
+    this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
+    // Showing this because SweetAlert 1 does not take in forms. Fix this when upgrading to SweetAlert 2
+    const allowedStrategies = ['morphology', 'market_pricing', 'state_pricing']
+    return new Promise((resolve, reject) => {
+      var swalOptions = {
+        title: 'Pricebook Strategy',
+        text: `Enter one of these: ${allowedStrategies}`,
+        type: 'input',
+        showCancelButton: true,
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'OK'
+      }
+      // Why setTimeout()? SweetAlert does not show consecutive messages unless there is a delay.
+      // In any event, this whole getPriceStrategyFromUser() stuff is because I could not cram it all into one dialog.
+      // Best to fix all of this when moving to SweetAlert2 or any other lib.
+      setTimeout(() => {
+        swal(swalOptions, (pricebookStrategy) => {
+          this.restoreBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
+          if (allowedStrategies) {
+            if (allowedStrategies.indexOf(pricebookStrategy) >= 0) {
+              resolve(pricebookStrategy)
+            } else {
+              reject('Invalid strategy specified')
+            }
+          } else {
+            reject('Cancelled')
+          }
+        })
+      }, 100)
+    })
+  }
 }
 
 ResourceManagerController.$inject = ['$http', '$document']
