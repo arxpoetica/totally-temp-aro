@@ -87,7 +87,7 @@ class ResourceManagerController {
     this.getNewResourceDetailsFromUser()
     .then((resourceName) => {
       // Create a new pricebook with the specified name and description
-      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName })
+      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: 'state_pricing' })
     })
     .then((result) => {
       // Save the created pricebook id for later use, and return the assignments for the selected manager

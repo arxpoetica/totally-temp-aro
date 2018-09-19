@@ -4,6 +4,16 @@
   }
 </style>
 
+<!-- Allow the user to select the state for which this strategy will be applied -->
+<div class="form-group">
+  <label class="col-sm-4 control-label">Strategy code</label>
+  <select class="form-control"
+          ng-model="$ctrl.selectedStateForStrategy"
+          ng-options="item for item in $ctrl.statesForStrategy"
+          ng-change="$ctrl.definePriceBookForSelectedState()">
+  </select>
+</div>
+
 <!-- Create tabs for each priceBookDefinition -->
 <ul class="nav nav-tabs" role="tablist">
   <li ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"

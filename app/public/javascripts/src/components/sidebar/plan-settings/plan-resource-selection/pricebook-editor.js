@@ -7,6 +7,8 @@ class PriceBookEditorController {
     this.pristineAssignments = []
     this.priceBookName = ''
     this.DEFAULT_STATE_CODE = '*'
+    this.statesForStrategy = [this.DEFAULT_STATE_CODE]
+    this.selectedStateForStrategy = this.statesForStrategy[0]
   }
 
   $onChanges(changesObj) {
@@ -20,25 +22,28 @@ class PriceBookEditorController {
       return
     }
     this.$http.get(`/service/v1/pricebook/${this.priceBookId}`)
-    .then((result) => {
-      this.priceBookName = result.data.name
-      this.priceBookNameChanged({ name: this.priceBookName })
-    })
-    .catch((err) => console.log(err))
-
-    Promise.all([
-      this.$http.get(`/service/v1/pricebook/${this.priceBookId}/definition`),
-      this.$http.get(`/service/v1/pricebook/${this.priceBookId}/assignment`)
-    ])
-    .then((results) => {
-      this.priceBookDefinitions = results[0].data
-      var assignmentResult = results[1].data
-      // Save a deep copy of the result, we can use this later if we save modifications to the server
-      this.pristineAssignments = angular.copy(assignmentResult)
-      this.definePriceBookForState('WA')
-      this.$timeout()
-    })
-    .catch((err) => console.log(err))
+      .then((result) => {
+        this.priceBookName = result.data.name
+        this.priceBookNameChanged({ name: this.priceBookName })
+        return Promise.all([
+          this.$http.get(`/service/v1/pricebook-strategies/${result.data.priceStrategy}`),
+          this.$http.get(`/service/v1/pricebook/${this.priceBookId}/definition`),
+          this.$http.get(`/service/v1/pricebook/${this.priceBookId}/assignment`)
+        ])
+      })
+      .then((results) => {
+        this.statesForStrategy = [this.DEFAULT_STATE_CODE].concat(results[0].data)
+        // We want unique values in this.statesForStrategy (morphology returns '*' from the server)
+        this.statesForStrategy = [...new Set(this.statesForStrategy)] // array --> set --> back to array
+        this.selectedStateForStrategy = this.statesForStrategy[0]
+        this.priceBookDefinitions = results[1].data
+        var assignmentResult = results[2].data
+        // Save a deep copy of the result, we can use this later if we save modifications to the server
+        this.pristineAssignments = angular.copy(assignmentResult)
+        this.definePriceBookForSelectedState()
+        this.$timeout()
+      })
+      .catch((err) => console.log(err))
   }
 
   // Ensures that pristine cost assignments contain items for the specified state code.
@@ -57,15 +62,15 @@ class PriceBookEditorController {
     }
   }
 
-  definePriceBookForState(stateCode) {
+  definePriceBookForSelectedState() {
 
     // First ensure that we have pristine assignments for the given state code
-    this.ensurePristineCostAssignmentsForState(stateCode)
+    this.ensurePristineCostAssignmentsForState(this.selectedStateForStrategy)
 
     // Build a map of cost assignment ids to objects
     var itemIdToCostAssignment = {}
     var itemDetailIdToDetailAssignment = {}
-    const costAssignmentsForState = this.pristineAssignments.costAssignments.filter((item) => item.state === stateCode)
+    const costAssignmentsForState = this.pristineAssignments.costAssignments.filter((item) => item.state === this.selectedStateForStrategy)
     costAssignmentsForState.forEach((costAssignment) => {
       itemIdToCostAssignment[costAssignment.itemId] = costAssignment
     })
