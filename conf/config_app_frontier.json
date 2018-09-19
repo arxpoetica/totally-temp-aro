@@ -11,8 +11,8 @@
   "currency_symbol": "$",
   "from_email_address": "aro-demo@app.altvil.com",
   "hsv_defaults" : {
-	"saturation": 0.5,
-	"value": 0.5
+	"saturation": 1,
+	"value": 1
    },
   "length": {
 		"length_units": "miles",
