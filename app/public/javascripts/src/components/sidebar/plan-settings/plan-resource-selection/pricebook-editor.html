@@ -7,8 +7,8 @@
 <!-- Allow the user to select the state for which this strategy will be applied -->
 <form class="form-horizontal">
   <div class="form-group">
-    <label class="col-sm-4 control-label">Strategy code</label>
-    <div class="col-sm-8">
+    <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
+    <div class="col-sm-4">
       <select class="form-control"
               ng-model="$ctrl.selectedStateForStrategy"
               ng-options="item for item in $ctrl.statesForStrategy"

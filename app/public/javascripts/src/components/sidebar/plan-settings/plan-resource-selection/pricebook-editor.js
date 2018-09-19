@@ -5,10 +5,16 @@ class PriceBookEditorController {
     this.priceBookDefinitions = []
     this.structuredPriceBookDefinitions = []
     this.pristineAssignments = []
-    this.priceBookName = ''
+    this.currentPriceBook = null
     this.DEFAULT_STATE_CODE = '*'
     this.statesForStrategy = [this.DEFAULT_STATE_CODE]
     this.selectedStateForStrategy = this.statesForStrategy[0]
+    this.allStrategies = {}
+    this.$http.get(`/service/v1/pricebook-strategies`)
+      .then((result) => {
+        result.data.forEach((strategy) => this.allStrategies[strategy.name] = strategy)
+      })
+      .catch((err) => console.error(err))
   }
 
   $onChanges(changesObj) {
@@ -23,8 +29,8 @@ class PriceBookEditorController {
     }
     this.$http.get(`/service/v1/pricebook/${this.priceBookId}`)
       .then((result) => {
-        this.priceBookName = result.data.name
-        this.priceBookNameChanged({ name: this.priceBookName })
+        this.currentPriceBook = result.data
+        this.priceBookNameChanged({ name: this.currentPriceBook.name })
         return Promise.all([
           this.$http.get(`/service/v1/pricebook-strategies/${result.data.priceStrategy}`),
           this.$http.get(`/service/v1/pricebook/${this.priceBookId}/definition`),
