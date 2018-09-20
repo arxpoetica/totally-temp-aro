@@ -1574,7 +1574,13 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
       if(filterObj) {
         var columns = searchColumn.split(',')
         if(columns.length === 1 ){
-          filter = searchColumn === 'id' ? `${searchColumn} eq ${filterObj}` : `${searchColumn} eq '${filterObj}'`
+          if(searchColumn === 'id') {
+            filter = `${searchColumn} eq ${filterObj}`
+          } else if (searchColumn === 'clli') {
+            filter = `substringof(${searchColumn},'${filterObj}')`
+          } else {
+            filter = `${searchColumn} eq '${filterObj}'`
+          }
         }
         else {
           var colFilter = columns.map(col => `substringof(${col},'${filterObj}')`).join(" or ")
