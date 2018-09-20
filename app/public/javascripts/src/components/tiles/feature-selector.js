@@ -5,7 +5,6 @@ class FeatureSelector {
 
   // Loops through all features in this tile and selects the ones that match a comparator function
   static selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId) {
-
     // Build an array of promises that gets all map layer features (for the layers marked as selectable)
     var promises = []
     Object.keys(mapLayers).forEach((mapLayerKey) => {
@@ -198,7 +197,6 @@ class FeatureSelector {
     var minimumRoadDistance = 10;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
-      //console.log(feature)
       var selectFeature = false
       var imageWidthBy2 = icon ? icon.width / 2 : 0
       var imageHeightBy2 = icon ? icon.height / 2 : 0

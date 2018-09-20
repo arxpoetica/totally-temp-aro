@@ -1501,7 +1501,31 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     })
     return service.flattenDeep(selectedEquipmentIds)
   }
-
+  
+  service.isFeatureLayerOn = (categoryItemKey) => {
+    var isOn = false
+    if (configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) 
+        && configuration.networkEquipment.equipments[categoryItemKey].checked){
+      isOn = true
+    }
+    return isOn
+  }
+  
+  service.isFeatureLayerOnForBoundary = (boundaryFeature) => {
+    // if it doesn't have a network_node_type return TRUE 
+    var isOn = true
+    var networkNodeType = ''
+    if (boundaryFeature.network_node_type){
+      networkNodeType = boundaryFeature.network_node_type
+    }else if(boundaryFeature.properties && boundaryFeature.properties.network_node_type){
+      networkNodeType = boundaryFeature.properties.network_node_type
+    }
+    if ('' != networkNodeType){
+      isOn = service.isFeatureLayerOn(networkNodeType)
+    }
+    return isOn
+  }
+  
   service.entityTypeList = {
     LocationObjectEntity: [],
     NetworkEquipmentEntity: [],
