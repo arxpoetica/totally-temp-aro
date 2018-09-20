@@ -139,10 +139,5 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootSc
     }
   ]
 
-  if (config.ARO_CLIENT === 'demo') {
-    var tool = tools.available_tools.find((item) => item.id === tools.TOOL_IDS.AREA_NETWORK_PLANNING)
-    tools.available_tools.splice(tools.available_tools.indexOf(tool), 1)
-  }
-
   return tools
 }])
