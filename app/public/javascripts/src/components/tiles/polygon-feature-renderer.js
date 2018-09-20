@@ -56,16 +56,8 @@ class PolygonFeatureRenderer {
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
     
-    //console.log(feature)
-    //console.log(mapLayer.tileDefinitions[0].vtlType)
-    //console.log(styles)
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)
-      && ('BoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType
-          || 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType
-        )
-      ) {
-      //&& 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType
-      //console.log(styles)
+        && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType){
       drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
