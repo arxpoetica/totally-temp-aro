@@ -17,7 +17,7 @@ class BoundaryDetailController {
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       //In ruler mode click should not enable boundary view action
-      if(this.state.allowViewModeClickAction()) {
+      if(this.state.StateViewMode.allowViewModeClickAction(this.state)) {
         this.selectedBoundary = null
         if ( event.hasOwnProperty('censusFeatures') 
             && event.censusFeatures.length > 0 

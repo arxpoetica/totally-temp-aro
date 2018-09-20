@@ -52,7 +52,7 @@
           <td>
             <span class="tags">
               <div ng-if="!$ctrl.addGeneralTags" ng-repeat="tag in $ctrl.getTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.global}) track by tag.id" 
-                class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
+                class="tag label" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
                 <span class="label"> {{tag.name}} 
                   <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('general',tag)"></i>
                 </span>
@@ -80,7 +80,7 @@
               object-name="Service Area"
               search-list="$ctrl.state.listOfServiceAreaTags"
               selected-list="$ctrl.saPlanTags"
-              refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></edit-plan-tag>
+              refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)"></edit-plan-tag>
             <span><i class="fa fa-plus pointer" ng-if="$ctrl.isEditMode && !$ctrl.addSATags" ng-click="$ctrl.addSATags = true"></i></span>
           </td>
         </tr>

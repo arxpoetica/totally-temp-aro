@@ -26,7 +26,7 @@ class EquipmentDetailController {
     this.mapFeatureSelectedSubscriber = state.mapFeaturesSelectedEvent.skip(1).subscribe((options) => {
       // most of this function is assuring the properties we need exist. 
       // In ruler mode click should not perform any view action's
-      if (!this.state.allowViewModeClickAction()) return
+      if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
       if (!options.hasOwnProperty('equipmentFeatures')) return
       if (0 == options.equipmentFeatures.length) return
       

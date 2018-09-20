@@ -92,7 +92,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   globalSettings.createTag = () => {
     $http.post(`/service/tag-mapping/tags?name=${globalSettings.newTag.name}&description=${globalSettings.newTag.description}&colourHue=${globalSettings.newTag.colourHue}`)
       .then((response) => {
-        return state.loadListOfPlanTags()
+        return state.StateViewMode.loadListOfPlanTags($http,state)
       })
       .then(() => {
         globalSettings.getTags()
@@ -104,7 +104,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   globalSettings.updateTag = () => {
     $http.put(`/service/tag-mapping/tags`, _.omit(globalSettings.updatedTag, 'type'))
       .then((response) => {
-        return state.loadListOfPlanTags()
+        return state.StateViewMode.loadListOfPlanTags($http,state)
       })
       .then(() => {
         globalSettings.getTags()
