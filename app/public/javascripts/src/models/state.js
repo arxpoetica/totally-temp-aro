@@ -1395,7 +1395,7 @@ class State {
       result.data.forEach( (cat) => {
         let tagsById = {}
         cat.tags.forEach( (tag) => {
-          tag.colourHash = service.getTagColour(tag)
+          tag.colourHash = service.StateViewMode.getTagColour(tag)
           tagsById[ tag.id+'' ] = tag
         })
         cat.tags = tagsById
@@ -1423,62 +1423,7 @@ class State {
   service.listOfServiceAreaTags = []
   service.listOfCreatorTags = []
   service.currentPlanServiceAreaTags = []
-  // service.loadListOfPlanTags = () => {
-  //   var promises = [
-  //     $http.get(`/service/tag-mapping/tags`)
-  //   ]
-
-  //   return Promise.all(promises)
-  //     .then((results) => {
-  //       service.listOfTags = results[0].data
-  //     }) 
-  // }
-  //service.loadListOfPlanTags()
   service.StateViewMode.loadListOfPlanTags($http,service)
-
-  service.loadListOfCreatorTags = (filterObj) => {
-    if(filterObj == '') return
-    var filter = ""
-    filter = filterObj ? filter.concat(` substringof(fullName,'${filterObj}')`) : filter
-    if (filterObj || service.listOfCreatorTags.length == 0) {
-      $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=10`)
-        .then((results) => {
-          service.listOfCreatorTags = service.removeDuplicates(service.listOfCreatorTags.concat(results.data),'id')
-        })
-    }
-  }
-
-  service.loadListOfCreatorTagsById = (filterExp) => {
-    if (filterExp) {
-      // Our $top is high, and should never be hit as we are getting createdBy for plans that are visible in "search plans"
-      return $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filterExp}&$orderby=id&$top=10000`)
-        .then((results) => {
-          return service.listOfCreatorTags = service.removeDuplicates(service.listOfCreatorTags.concat(results.data),'id')
-        })
-    }
-  }
-
-  const MAX_SERVICE_AREAS_FROM_ODATA = 10
-  service.loadListOfSAPlanTags = (filterObj) => {
-    var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj.toUpperCase()}')`) : filter
-    if(filterObj || service.listOfServiceAreaTags.length == 0) {
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
-      .then((results) => {
-        service.listOfServiceAreaTags = service.removeDuplicates(service.listOfServiceAreaTags.concat(results.data),'id')
-      })  
-    } 
-  }
-
-  service.removeDuplicates = (myArr,prop) => {
-    return myArr.filter((obj, pos, arr) => {
-      return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos;
-    });
-  }
-
-  service.getTagColour = (tag) => {
-    return hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
-  }
 
   service.clearViewMode = new Rx.BehaviorSubject(false)
   service.clearEditingMode = new Rx.BehaviorSubject(false)

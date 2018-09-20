@@ -27,7 +27,7 @@
     <edit-plan-tag object-name="Service Area"
                    search-list="$ctrl.state.listOfServiceAreaTags"
                    selected-list="$ctrl.state.currentPlanServiceAreaTags"
-                   refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)">
+                   refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)">
     </edit-plan-tag>
 
     <!-- Parent plan selector - header -->

@@ -87,7 +87,7 @@ class PlanSearchController {
     })
 
     // Our $top is high, and should never be hit as we are getting createdBy for a select few ids
-    return this.state.loadListOfCreatorTagsById(filter)
+    return this.state.StateViewMode.loadListOfCreatorTagsById(this.$http,this.state,filter)
       .then((results) => {
         this.$timeout()
       })

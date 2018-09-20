@@ -1,7 +1,8 @@
 class PlanInputsModalController {
-  constructor(state,$element) {
+  constructor(state,$element,$http) {
     this.state    = state
     this.$element = $element
+    this.$http = $http
     this.initModalData()
   }
 
@@ -77,7 +78,7 @@ class PlanInputsModalController {
 
 }
 
-PlanInputsModalController.$inject = ['state','$element']
+PlanInputsModalController.$inject = ['state','$element','$http']
 
 let planInputsModal = {
   templateUrl: '/components/header/plan-inputs-modal.html',

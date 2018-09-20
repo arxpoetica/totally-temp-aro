@@ -12,7 +12,7 @@
         <ui-select-match placeholder="Search for Plan Names">
           <span class="tag" ng-if=$item.type>
             {{$item.type}}:
-            <span class="label" ng-if="$item.type!='svc' || $item.type!='created_by'" ng-style="{'background-color': $ctrl.state.getTagColour($item)}">{{$item.name}}</span>
+            <span class="label" ng-if="$item.type!='svc' || $item.type!='created_by'" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour($item)}">{{$item.name}}</span>
             <span class="label satags satag" ng-if="$item.type=='svc' || $item.type=='created_by'">{{$item.code || $item.fullName}}</span>
           </span>
           <span class="tag" ng-if=!$item.type>
@@ -21,7 +21,7 @@
         </ui-select-match>
         <ui-select-choices class="ui-select-width-300" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
           <div>
-            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.fullName}}
+            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.StateViewMode.getTagColour(item), 'margin-right':'5px' }"></span>{{item.name || item.code || item.fullName}}
           </div>
         </ui-select-choices>
       </ui-select>
@@ -42,12 +42,12 @@
       object-name="Service Area"
       search-list="$ctrl.state.listOfServiceAreaTags"
       apply-search="$ctrl.applySaSearchFilter(selectedFilters)"
-      refresh-tag-list="$ctrl.state.loadListOfSAPlanTags(searchObj)"></plan-search-filter>
+      refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)"></plan-search-filter>
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-list="$ctrl.state.listOfCreatorTags"
       apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"
-      refresh-tag-list="$ctrl.state.loadListOfCreatorTags(searchObj)"></plan-search-filter>
+      refresh-tag-list="$ctrl.state.StateViewMode.loadListOfCreatorTags($ctrl.$http,$ctrl.state,searchObj)"></plan-search-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
@@ -63,7 +63,7 @@
             <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
-                class="tag label" ng-style="{'background-color': $ctrl.state.getTagColour(tag)}">
+                class="tag label" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
               <span class="label"> {{tag.name}} 
                 <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
               </span>
