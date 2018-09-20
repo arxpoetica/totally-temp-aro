@@ -83,6 +83,8 @@ import editorInterfaceTable from './common/editor-interfaces/editor-interface-ta
 import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
 import utils from './common/utilities'
 
+import state from '../models/state'
+
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -164,4 +166,5 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceTable', editorInterfaceTable)
    .component('editorInterfaceValue', editorInterfaceValue)
    .service('Utils', utils)
+   .service('state', state)
    

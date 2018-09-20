@@ -1,12 +1,18 @@
-/* global app localStorage map */
-app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
+import StateViewMode from './state-view-mode'
 
+/* global app localStorage map */
+class State {
+//app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
+
+  constructor($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
   var service = {}
   service.INVALID_PLAN_ID = -1
   service.MAX_EXPORTABLE_AREA = 11000000000 //25000000
+
+  service.StateViewMode = StateViewMode
 
   service.OPTIMIZATION_TYPES = {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
@@ -111,11 +117,11 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   })
   service.activeEditPlanPanel = service.EditPlanPanels.EDIT_PLAN
 
-  service.allowViewModeClickAction = () => {
-    return (service.selectedDisplayMode.getValue() === service.displayModes.VIEW || service.selectedDisplayMode.getValue() === service.displayModes.EDIT_PLAN) && 
-    service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
-    !service.isRulerEnabled //ruler mode click should not enable other  view action
-  }
+  // service.allowViewModeClickAction = () => {
+  //   return (service.selectedDisplayMode.getValue() === service.displayModes.VIEW || service.selectedDisplayMode.getValue() === service.displayModes.EDIT_PLAN) && 
+  //   service.activeViewModePanel !== service.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
+  //   !service.isRulerEnabled //ruler mode click should not enable other  view action
+  // }
 
   service.routingModes = {
     DIRECT_ROUTING: 'Direct Routing',
@@ -479,8 +485,8 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
     hue %= 1
     // We are changing the hue while keeping saturation/value the same. Also the fill colors are lighter than stroke colors.
     return {
-      strokeStyle: hsvToRgb(hue, 0.5, 0.5),
-      fillStyle: hsvToRgb(hue, 0.8, 0.5)
+      strokeStyle: service.StateViewMode.hsvToRgb(hue, 0.5, 0.5),
+      fillStyle: service.StateViewMode.hsvToRgb(hue, 0.8, 0.5)
     }
   }
 
@@ -1417,17 +1423,18 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   service.listOfServiceAreaTags = []
   service.listOfCreatorTags = []
   service.currentPlanServiceAreaTags = []
-  service.loadListOfPlanTags = () => {
-    var promises = [
-      $http.get(`/service/tag-mapping/tags`)
-    ]
+  // service.loadListOfPlanTags = () => {
+  //   var promises = [
+  //     $http.get(`/service/tag-mapping/tags`)
+  //   ]
 
-    return Promise.all(promises)
-      .then((results) => {
-        service.listOfTags = results[0].data
-      }) 
-  }
-  service.loadListOfPlanTags()
+  //   return Promise.all(promises)
+  //     .then((results) => {
+  //       service.listOfTags = results[0].data
+  //     }) 
+  // }
+  //service.loadListOfPlanTags()
+  service.StateViewMode.loadListOfPlanTags($http,service)
 
   service.loadListOfCreatorTags = (filterObj) => {
     if(filterObj == '') return
@@ -1793,4 +1800,10 @@ app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'm
   }
 
   return service
-}])
+//}])
+}
+}
+
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
+
+export default State
