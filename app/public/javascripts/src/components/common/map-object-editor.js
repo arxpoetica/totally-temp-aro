@@ -82,7 +82,7 @@ class MapObjectEditorController {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
-      console.log(event)
+      //console.log(event)
       this.handleMapEntitySelected(event)
     })
 
@@ -105,7 +105,6 @@ class MapObjectEditorController {
       this.$timeout()
     })
     this.dragEndEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
-      //console.log(event)
       this.isHavingBoundaryDraggedOver = false
       this.$timeout()
     })
@@ -147,8 +146,6 @@ class MapObjectEditorController {
       // ToDo: this should be in plan-editor 
       if ('equipment' == this.featureType){// we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
-        console.log('edit right click listener')
-        console.log(event)
         this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
       }
     })
@@ -297,47 +294,17 @@ class MapObjectEditorController {
         results.forEach((result) => {
           //populate context menu aray here
           // we may need different behavour for different controllers using this
-          
-          // if this.createdMapObjects[objectId]
           var options = []
-          // ToDo: sometimes it's _data_type other times it's dataType
-          // regulate this using actual classes! 
           var dataTypeList = this.getDataTypeList(result)
-          //if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
-          //if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
           if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
           var validFeature = false
           
           // have we already added this one?
           if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
               && !menuItemsById.hasOwnProperty( result.objectId) ){
-            //validFeature = true
             validFeature = this.filterFeatureForSelection(result)
           }
           
-          // ToDo: MORE discrepancies, fix
-          /*
-          if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
-            validFeature = false
-          }
-          if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
-            validFeature = false
-          }
-          */
-          // ToDo: MORE discrepancies, we NEED to fix this
-          
-          
-          /*
-          if (validFeature && !this.createdMapObjects.hasOwnProperty(result.objectId)){
-            // NOT on the edit layer
-            // the feature layer has to visible
-            if ('equipment' == dataTypeList[0]){
-              validFeature = (dataTypeList.length > 0 && this.state.isFeatureLayerOn(dataTypeList[1]))
-            }else{
-              validFeature = this.state.isFeatureLayerOnForBoundary(result)
-            }
-          }
-          */
           if (validFeature){  
             var feature = result
             if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
@@ -587,7 +554,6 @@ class MapObjectEditorController {
   }
 
   createPolygonMapObject(feature) {
-    console.log(feature)
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
@@ -674,7 +640,6 @@ class MapObjectEditorController {
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
               path.setAt(0, path.getAt(path.length - 1))
-              //path.forEach((item) => console.log(`${item.lat()}, ${item.lng()}`))
               self.onModifyObject && self.onModifyObject({mapObject})
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
@@ -700,8 +665,8 @@ class MapObjectEditorController {
       // changes with google maps implementations. So iterate over the keys to find the right object.
       
       // ToDo: this kind of thing needs to be in the controller
-      console.log('rightclick editable object')
-      console.log(event)
+      //console.log('rightclick editable object')
+      //console.log(event)
       if ('location' == this.featureType){
         this.selectMapObject(mapObject)
       }
@@ -826,7 +791,6 @@ class MapObjectEditorController {
     featurePromise
       .then((result) => {
         featureToUse = result
-        console.log(result)
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
         
         return this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
@@ -914,8 +878,8 @@ class MapObjectEditorController {
       delete this.createdMapObjects[objectId]
       this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
       this.contextMenuCss.display = 'none'  // Hide the context menu      
-      console.log('delete object')
-      console.log(mapObjectToDelete)
+      //console.log('delete object')
+      //console.log(mapObjectToDelete)
     }
   }
 
