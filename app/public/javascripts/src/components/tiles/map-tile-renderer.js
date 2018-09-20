@@ -9,7 +9,7 @@ class MapTileRenderer {
 
   constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
-              selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, configuration, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+              selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -28,7 +28,7 @@ class MapTileRenderer {
     this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
-    this.configuration = configuration
+    this.state = state
     this.uiNotificationService = uiNotificationService
     this.getPixelCoordinatesWithinTile = getPixelCoordinatesWithinTile
     this.latestTileUniqueId = 0
@@ -56,14 +56,6 @@ class MapTileRenderer {
       MODIFIED: 'MODIFIED',
       DELETED: 'DELETED'
     })
-    
-    this.getActiveViewModePanel = () =>{
-      return state.activeViewModePanel
-    }
-    
-    this.getMapLayers = () =>{
-      return state.mapLayers.getValue()
-    }
     
     // we should start holding the styles here so they can be adstracted, I'll start
     this.styles = {
@@ -457,26 +449,6 @@ class MapTileRenderer {
     }
   }
   
-  isFeatureLayerOn(categoryItemKey){
-    var isOn = false
-    if (this.configuration.networkEquipment.equipments[categoryItemKey].checked){
-      isOn = true
-    }
-    return isOn
-  }
-  
-  isFeatureLayerOnForBoundary(boundaryFeature){
-    var isOn = false
-    // if it doesn't have a network_node_type return TRUE 
-    if (!boundaryFeature.properties 
-        || !boundaryFeature.properties.network_node_type
-        || this.isFeatureLayerOn(boundaryFeature.properties.network_node_type)
-        ){
-      isOn = true
-    }
-    return isOn
-  }
-  
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
@@ -498,7 +470,7 @@ class MapTileRenderer {
           continue
         }
         if (this.selectedDisplayMode == this.displayModes.VIEW 
-            &&this.getActiveViewModePanel() == this.viewModePanels.EDIT_LOCATIONS
+            &&this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS
             && this.tileDataService.featuresToExclude.has(featureId) 
             && feature.properties._data_type && feature.properties._data_type == "location"){
           // this is a location that is being edited
@@ -563,7 +535,7 @@ class MapTileRenderer {
             
             // First draw a filled polygon with the fill color
             //show siteboundaries for the equipments that are selected
-            if (this.isFeatureLayerOnForBoundary(feature)){
+            if (this.state.isFeatureLayerOnForBoundary(feature)){
               PolygonFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, this.censusCategories, this.tileDataService, this.styles,
                 this.tileSize, this.selectedServiceArea, this.selectedServiceAreas, this.selectedDisplayMode, this.displayModes,
                 this.selectedAnalysisArea, this.analysisSelectionMode, this.selectedCensusBlockId, this.selectedCensusCategoryId)

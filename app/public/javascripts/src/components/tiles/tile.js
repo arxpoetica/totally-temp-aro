@@ -36,14 +36,13 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, state, tileDataService, configuration, uiNotificationService) {
+  constructor($document, state, tileDataService, uiNotificationService) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.state = state
     this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
-    this.configuration = configuration
     this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
@@ -290,7 +289,6 @@ class TileComponentController {
                                                          this.state.displayModes,
                                                          this.state.viewModePanels, 
                                                          this.state, 
-                                                         this.configuration,
                                                          this.uiNotificationService, 
                                                          MapUtilities.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
@@ -313,6 +311,8 @@ class TileComponentController {
                                           this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
                                           clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
+        console.log('map click')
+        console.log(results)
         var locationFeatures = []
         var analysisAreaFeatures = []
         var serviceAreaFeatures = []
@@ -339,6 +339,7 @@ class TileComponentController {
         results.forEach((result) => {
           // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
           //console.log(result)
+          // ToDo: filter out deleted etc 
           if(result.location_id && (canSelectLoc || 
               this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
             locationFeatures = locationFeatures.concat(result)
@@ -465,7 +466,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'configuration', 'uiNotificationService']
+TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'uiNotificationService']
 
 let tile = {
   template: '',

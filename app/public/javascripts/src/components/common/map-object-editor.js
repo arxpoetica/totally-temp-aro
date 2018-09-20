@@ -82,6 +82,7 @@ class MapObjectEditorController {
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
+      console.log(event)
       this.handleMapEntitySelected(event)
     })
 
@@ -144,8 +145,10 @@ class MapObjectEditorController {
     
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
       // ToDo: this should be in plan-editor 
-      if ('equipment' == this.featureType){
+      if ('equipment' == this.featureType){// we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
+        console.log('edit right click listener')
+        console.log(event)
         this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
       }
     })
@@ -239,7 +242,6 @@ class MapObjectEditorController {
   updateContextMenu(latLng, x, y, clickedMapObject) {
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       
-      // NEED TO GET NEW FEATURES AS WELL
       this.getFeaturesAtPoint(latLng)
       .then((results) => {
 
@@ -285,10 +287,20 @@ class MapObjectEditorController {
             validFeature = false
           }
           
+          // ToDo: MORE discrepancies, we NEED to fix this
+          if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
+          
+          if (validFeature && !this.createdMapObjects.hasOwnProperty(result.objectId)){
+            // NOT on the edit layer
+            // the feature layer has to visible
+            if ('equipment' == dataTypeList[0]){
+              validFeature = (dataTypeList.length > 0 && this.state.isFeatureLayerOn(dataTypeList[1]))
+            }else{
+              validFeature = this.state.isFeatureLayerOnForBoundary(result)
+            }
+          }
+          
           if (validFeature){  
-            // ToDo: MORE discrepancies, we NEED to fix this
-            if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
-            
             var feature = result
             if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
               // it's on the edit layer / in the transaction
@@ -352,6 +364,7 @@ class MapObjectEditorController {
     
     // Get zoom
     var zoom = this.mapRef.getZoom()
+    /*
     var hitPromises = []
     hitPromises.push( new Promise((resolve, reject) => {
       var hits = []
@@ -363,6 +376,7 @@ class MapObjectEditorController {
       })
       resolve(hits)
     }))
+    */
     // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
     var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
     
@@ -648,6 +662,8 @@ class MapObjectEditorController {
       // changes with google maps implementations. So iterate over the keys to find the right object.
       
       // ToDo: this kind of thing needs to be in the controller
+      console.log('rightclick editable object')
+      console.log(event)
       if ('location' == this.featureType){
         this.selectMapObject(mapObject)
       }
@@ -725,8 +741,10 @@ class MapObjectEditorController {
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
         .then((result) => {
           // ToDo: check for empty object, reject on true
-          console.log(feature)
-          console.log(('' == result))
+          if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')){
+            return Promise.reject( `object: ${feature.objectId} may have been deleted` )
+          }
+          
           var serviceFeature = result.data
           serviceFeature.attributes = {
             network_node_object_id: serviceFeature.networkObjectId,
@@ -853,6 +871,8 @@ class MapObjectEditorController {
       delete this.createdMapObjects[objectId]
       this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
       this.contextMenuCss.display = 'none'  // Hide the context menu      
+      console.log('delete object')
+      console.log(mapObjectToDelete)
     }
   }
 
