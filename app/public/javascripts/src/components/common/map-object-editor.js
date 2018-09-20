@@ -239,6 +239,41 @@ class MapObjectEditorController {
   // deleteObjectWithId
   //createEditableExistingMapObject(feature, iconUrl)
   
+  getDataTypeList(feature){
+    var dataTypeList = ['']
+    if (feature.hasOwnProperty('_data_type')) dataTypeList = feature._data_type.split('.')
+    if (feature.hasOwnProperty('dataType')) dataTypeList = feature.dataType.split('.')
+    return dataTypeList
+  }
+  
+  filterFeatureForSelection(feature){
+    // has it been deleted?
+    if (feature.is_deleted && "false" != feature.is_deleted) return false
+    // is the boundary type visible? (caf2 etc.)
+    if (feature.hasOwnProperty('boundary_type') && feature.boundary_type != this.state.selectedBoundaryType.id) return false
+    if (feature.hasOwnProperty('boundaryTypeId') && feature.boundaryTypeId != this.state.selectedBoundaryType.id) return false
+    var objectId = '' 
+    if (feature.hasOwnProperty('object_id')){
+      objectId = feature.object_id
+    }else if (feature.hasOwnProperty('objectId')){
+      objectId = feature.objectId
+    }
+    
+    if ('' != objectId && !this.createdMapObjects.hasOwnProperty(objectId)){
+      // we have an objectId and the feature is NOT on the edit layer
+      var dataTypeList = this.getDataTypeList(feature)
+      var validFeature = true
+      if ('equipment' == dataTypeList[0]){
+        validFeature = (dataTypeList.length > 0 && this.state.isFeatureLayerOn(dataTypeList[1]))
+      }else{
+        validFeature = this.state.isFeatureLayerOnForBoundary(feature)
+      }
+      if (!validFeature) return false
+    }
+    
+    return true
+  }
+  
   updateContextMenu(latLng, x, y, clickedMapObject) {
     if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
       
@@ -267,29 +302,32 @@ class MapObjectEditorController {
           var options = []
           // ToDo: sometimes it's _data_type other times it's dataType
           // regulate this using actual classes! 
-          var dataTypeList = ['']
-          if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
-          if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
-          
+          var dataTypeList = this.getDataTypeList(result)
+          //if (result.hasOwnProperty('_data_type')) dataTypeList = result._data_type.split('.')
+          //if (result.hasOwnProperty('dataType')) dataTypeList = result.dataType.split('.')
+          if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
           var validFeature = false
           
+          // have we already added this one?
           if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
-              && (!result.is_deleted || 'false' == result.is_deleted)
-              && !menuItemsById.hasOwnProperty( result.object_id) ){
-            validFeature = true
+              && !menuItemsById.hasOwnProperty( result.objectId) ){
+            //validFeature = true
+            validFeature = this.filterFeatureForSelection(result)
           }
           
           // ToDo: MORE discrepancies, fix
+          /*
           if (result.hasOwnProperty('boundary_type') && result.boundary_type != this.state.selectedBoundaryType.id){
             validFeature = false
           }
           if (result.hasOwnProperty('boundaryTypeId') && result.boundaryTypeId != this.state.selectedBoundaryType.id){
             validFeature = false
           }
-          
+          */
           // ToDo: MORE discrepancies, we NEED to fix this
-          if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
           
+          
+          /*
           if (validFeature && !this.createdMapObjects.hasOwnProperty(result.objectId)){
             // NOT on the edit layer
             // the feature layer has to visible
@@ -299,7 +337,7 @@ class MapObjectEditorController {
               validFeature = this.state.isFeatureLayerOnForBoundary(result)
             }
           }
-          
+          */
           if (validFeature){  
             var feature = result
             if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
@@ -689,7 +727,12 @@ class MapObjectEditorController {
       let filteredList = []
       for (let i=0; i<featureList.length; i++){
         let feature = featureList[i]
-        if (!feature.object_id || (!this.createdMapObjects.hasOwnProperty(feature.object_id) && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay')) ){
+        if (!feature.object_id 
+            || (!this.createdMapObjects.hasOwnProperty(feature.object_id) 
+                && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay')
+                && this.filterFeatureForSelection(feature)
+               ) 
+          ){
           filteredList.push(feature)
         }
       }
