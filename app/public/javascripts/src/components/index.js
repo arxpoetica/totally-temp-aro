@@ -20,7 +20,6 @@ import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 import showTargets from './sidebar/analysis/show-targets'
 import networkAnalysis from './sidebar/analysis/network-analysis/network-analysis'
-import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
 import networkBuild from './sidebar/analysis/network-build/network-build'
@@ -42,6 +41,7 @@ import planResourceEditorModal from './sidebar/plan-settings/plan-resource-selec
 import planResourceSelection from './sidebar/plan-settings/plan-resource-selection/plan-resource-selection'
 import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pricebook-editor'
 import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
+import pricebookCreator from './sidebar/plan-settings/plan-resource-selection/pricebook-creator'
 import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
 import boundaries from './views/boundaries'
 import mapSplit from './map/map-split'
@@ -129,6 +129,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('planResourceSelection', planResourceSelection)
    .component('pricebookEditor', pricebookEditor)
    .component('resourceManager', resourceManager)
+   .component('pricebookCreator', pricebookCreator)
    .component('roicEditor', roicEditor)
    .component('boundaries', boundaries)
    .component('mapSplit', mapSplit)

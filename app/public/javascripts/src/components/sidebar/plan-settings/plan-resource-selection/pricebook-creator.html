@@ -1,0 +1,26 @@
+<style scoped>
+  .with-margin {
+    margin-bottom: 5px;
+  }
+</style>
+<modal id="priceBookCreatorModal" visible="$ctrl.state.showPriceBookCreator" backdrop="static" on-hide="$ctrl.onHideModal()">
+  <modal-header title="Create PriceBook"></modal-header>
+  <modal-body>
+
+    <form>
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Strategy</label>
+        <div class="col-sm-8">
+          <select class="form-control"
+            ng-model="$ctrl.selectedPriceStrategy"
+            ng-options="item.description for item in $ctrl.priceStrategies">
+          </select>
+        </div>
+      </div>
+    </form>
+  </modal-body>
+  <modal-footer>
+    <button class="btn btn-primary pull-left" ng-click="$ctrl.createPriceBook()">Create PriceBook</button>
+    <button class="btn btn-danger pull-right" ng-click="$ctrl.close()">Cancel</button>
+  </modal-footer>
+</modal>

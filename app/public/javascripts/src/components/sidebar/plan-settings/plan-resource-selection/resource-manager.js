@@ -1,7 +1,8 @@
 class ResourceManagerController {
-  constructor($http, $document) {
+  constructor($http, $document, state) {
     this.$http = $http
     this.$document = $document
+    this.state = state
     // Hold a mapping that we use to map from resource keys to endpoints
     this.resourceKeyToEndpointId = {
       price_book: 'pricebook',
@@ -48,6 +49,9 @@ class ResourceManagerController {
   }
 
   createBlankPriceBook() {
+    // this.state.showPlanResourceEditorModal = false
+    this.state.showPriceBookCreator = true
+    return
     var createdManagerId = -1, resourceName = null // Save for later use
     // Get the name of the new plan from the user
     this.getNewResourceDetailsFromUser()
@@ -207,6 +211,8 @@ class ResourceManagerController {
   }
 
   getNewResourceDetailsFromUser() {
+    this.state.planInputsModal.next(true)
+    return Promise.resolve('asdf')
     // Get the name for a new plan from the user
     this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
     return new Promise((resolve, reject) => {
@@ -263,7 +269,7 @@ class ResourceManagerController {
   }
 }
 
-ResourceManagerController.$inject = ['$http', '$document']
+ResourceManagerController.$inject = ['$http', '$document', 'state']
 
 let resourceManager = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager.html',
