@@ -9,10 +9,12 @@ class FeatureSelector {
     var promises = []
     Object.keys(mapLayers).forEach((mapLayerKey) => {
       var mapLayer = mapLayers[mapLayerKey]
+      //console.log(mapLayer.tileDefinitions[0].vtlType)
       if (mapLayer.selectable) {
         const numNeighbors = 1
         for (var deltaX = -numNeighbors; deltaX <= numNeighbors; ++deltaX) {
           for (var deltaY = -numNeighbors; deltaY <= numNeighbors; ++deltaY) {
+            //console.log( tileDataService.getTileData(mapLayer, tileZoom, tileX + deltaX, tileY + deltaY) )
             var res = Promise.all([
               Promise.resolve({ deltaX: deltaX, deltaY: deltaY }),
               tileDataService.getTileData(mapLayer, tileZoom, tileX + deltaX, tileY + deltaY)
@@ -44,6 +46,7 @@ class FeatureSelector {
               for (var iFeature = 0; iFeature < features.length; ++iFeature) {
                 var feature = features[iFeature]
                 if (shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
+                  //console.log(feature)
                   hitFeatures.push(feature.properties)
                 }
               }

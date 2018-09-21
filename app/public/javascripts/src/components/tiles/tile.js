@@ -337,6 +337,7 @@ class TileComponentController {
         }  
 
         results.forEach((result) => {
+          //console.log(result)
           // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
           // ToDo: filter out deleted etc 
           if(result.location_id && (canSelectLoc || 

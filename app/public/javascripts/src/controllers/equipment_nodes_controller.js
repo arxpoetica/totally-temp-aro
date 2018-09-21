@@ -91,6 +91,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         // Show boundaries with the currently selected boundary type AND that are not marked as deleted
         return (feature.properties.boundary_type === state.selectedBoundaryType.id)
                && (feature.properties.is_deleted !== 'true')
+        //return feature.properties.boundary_type === state.selectedBoundaryType.id
       }
     }
     return {
