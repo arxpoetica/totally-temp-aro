@@ -451,10 +451,19 @@ class MapTileRenderer {
   
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+    
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
     const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
-
+    /*
+    if (features.length > 0){
+      console.log(features)
+      console.log(filteredFeatures)
+      console.log(mapLayer.tileDefinitions[0].vtlType)
+      console.log(this.tileDataService.featuresToExclude)
+      console.log(this.tileDataService.modifiedBoundaries)
+    }    
+    */
     for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
       // Parse the geometry out.
       var feature = filteredFeatures[iFeature]

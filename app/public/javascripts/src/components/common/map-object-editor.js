@@ -258,12 +258,19 @@ class MapObjectEditorController {
     
     if ('' != objectId && !this.createdMapObjects.hasOwnProperty(objectId)){
       // we have an objectId and the feature is NOT on the edit layer
+      // check that the equipment layer is on for that feature
       var dataTypeList = this.getDataTypeList(feature)
       var validFeature = true
       if ('equipment' == dataTypeList[0]){
         validFeature = (dataTypeList.length > 0 && this.state.isFeatureLayerOn(dataTypeList[1]))
       }else{
         validFeature = this.state.isFeatureLayerOnForBoundary(feature)
+        if (validFeature && this.tileDataService.modifiedBoundaries.hasOwnProperty(objectId) 
+            && this.tileDataService.modifiedBoundaries[objectId].deleted){
+          // a bounds that is on and has been modified
+          // check to see if it's lying about being deleted
+          validFeature = false
+        }
       }
       if (!validFeature) return false
     }
@@ -704,12 +711,14 @@ class MapObjectEditorController {
       return filteredList
     }
     
+    var equipmentFeatures = []
     if (event.equipmentFeatures){
-      event.equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
+      equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
     }
     
+    var locations = []
     if (event.locations){
-      event.locations = filterArrayByObjectId(event.locations)
+      locations = filterArrayByObjectId(event.locations)
     }
 
     var feature = {
@@ -723,11 +732,11 @@ class MapObjectEditorController {
     
     var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     var featurePromise = null
-    if (this.featureType === 'location' && event.locations && event.locations.length > 0) {
+    if (this.featureType === 'location' && locations.length > 0) {
       // The map was clicked on, and there was a location under the cursor
-      feature.objectId = event.locations[0].object_id
+      feature.objectId = locations[0].object_id
       feature.isExistingObject = true
-      feature.is_locked = event.locations[0].is_locked
+      feature.is_locked = locations[0].is_locked
       
       featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
       .then((result) => {
@@ -738,9 +747,9 @@ class MapObjectEditorController {
         feature.directlyEditExistingFeature = true
         return Promise.resolve(feature)
       })
-    } else if (this.featureType === 'equipment' && event.equipmentFeatures && event.equipmentFeatures.length > 0) {
+    } else if (this.featureType === 'equipment' && equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
-      const clickedObject = event.equipmentFeatures[0]
+      const clickedObject = equipmentFeatures[0]
       feature.objectId = clickedObject.object_id 
       feature.isExistingObject = true
       if (clickedObject._data_type === 'equipment_boundary.select') {

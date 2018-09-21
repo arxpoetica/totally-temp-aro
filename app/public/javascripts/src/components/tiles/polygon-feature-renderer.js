@@ -55,7 +55,7 @@ class PolygonFeatureRenderer {
       //Highlight the selected SA in view mode
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
-    
+    //console.log(feature)
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)
         && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType){
       drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
