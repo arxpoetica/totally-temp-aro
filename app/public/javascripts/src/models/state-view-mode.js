@@ -92,6 +92,132 @@ class StateViewMode {
     return StateViewMode.hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
   }
 
+  // Reload view mode selections
+  static reloadSelectedServiceArea(state,serviceAreaId) {
+    //Display only one Selected SA Details in viewMode at a time
+    state.selectedServiceArea.next(serviceAreaId)
+    state.requestMapLayerRefresh.next(null)
+  }
+
+  static reloadSelectedAnalysisArea(state,analysisArea) {
+    state.selectedAnalysisArea.next(analysisArea)
+    state.requestMapLayerRefresh.next(null)
+  }
+
+  static reloadSelectedViewFeaturesByType(state,featuresByType) {
+    state.selectedViewFeaturesByType.next(featuresByType)
+    state.requestMapLayerRefresh.next(null)
+  }
+
+  static reloadSelectedCensusBlockId(state,censusBlock) {
+    state.selectedCensusBlockId.next(censusBlock)
+    state.requestMapLayerRefresh.next(null)
+  }
+
+  static reloadSelectedRoadSegments(state,road) {
+    state.selectedRoadSegments.next(road)
+    state.requestMapLayerRefresh.next(null)
+  }
+
+  // View mode search
+  static getSelectedEquipmentIds(flattenDeep,networkNodeTypes,configuration) {
+    var selectedEquipmentIds = []
+    var categoryItems = configuration.networkEquipment.equipments
+    Object.keys(categoryItems).forEach((categoryItemKey) => {
+      var networkEquipment = categoryItems[categoryItemKey]
+      networkEquipment.checked &&
+        selectedEquipmentIds.push(networkNodeTypes
+          .filter(equipmentEntity => equipmentEntity.name === networkEquipment.networkNodeType)
+          .map(equ => equ.id)
+        )
+
+    })
+    return flattenDeep(selectedEquipmentIds)
+  }
+  
+  static loadBoundaryEntityList($http,state,filterObj) {
+    if(filterObj == '') return
+    if (state.selectedBoundaryTypeforSearch) {
+      var visibleBoundaryLayer = state.selectedBoundaryTypeforSearch
+
+      visibleBoundaryLayer.type === 'census_blocks' && StateViewMode.loadEntityList($http,state,'CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
+      visibleBoundaryLayer.type === 'wirecenter' && StateViewMode.loadEntityList($http,state,'ServiceAreaView',filterObj,'id,code,name,centroid','code,name')
+      visibleBoundaryLayer.type === 'analysis_layer' && StateViewMode.loadEntityList($http,state,'AnalysisArea',filterObj,'id,code,centroid','code')
+    }
+  }
+
+  static loadEntityList($http,state,entityType,filterObj,select,searchColumn,configuration) {
+    if(filterObj == '') return
+    var entityListUrl = `/service/odata/${entityType}?$select=${select}`
+    if(entityType !== 'AnalysisLayer') {
+      entityListUrl = entityListUrl + "&$top=20"
+    }
+
+    var filter = ''
+    if(entityType === 'LocationObjectEntity') {
+      //for UUID odata doesn't support substring
+      var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+      if(pattern.test(filterObj)) {
+        filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
+      } else {
+        return //157501341: Location search should not reach out to endpoint without supplying a valid object id
+      }
+    } else {
+      if(filterObj) {
+        var columns = searchColumn.split(',')
+        if(columns.length === 1 ){
+          if(searchColumn === 'id') {
+            filter = `${searchColumn} eq ${filterObj}`
+          } else if (searchColumn === 'clli') {
+            filter = `substringof(${searchColumn},'${filterObj}')`
+          } else {
+            filter = `${searchColumn} eq '${filterObj}'`
+          }
+        }
+        else {
+          var colFilter = columns.map(col => `substringof(${col},'${filterObj}')`).join(" or ")
+          filter = `(${colFilter})`
+        }
+      }
+    }
+
+    var libraryItems = []
+    if(entityType === 'LocationObjectEntity') {
+      var selectedLocationLibraries = state.dataItems && state.dataItems.location && state.dataItems.location.selectedLibraryItems
+      if(selectedLocationLibraries) libraryItems = selectedLocationLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
+      if(libraryItems.length > 0) {
+        var libfilter = libraryItems.map(id => `libraryId eq ${id}`).join(" or ")
+        filter = filter ? filter.concat(` and (${libfilter})`) : `${libfilter}`
+        //filter = filter ? filter.concat(` and libraryId eq ${libraryItems.toString()}`) : `libraryId eq ${libraryItems.toString()}`
+      }
+    }
+
+    if(entityType === 'NetworkEquipmentEntity') {
+      //Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
+      filter = filter ? filter.concat(` and (planId eq ${state.plan.getValue().id})`) : filter
+      var selectedEquipments = StateViewMode.getSelectedEquipmentIds(state.flattenDeep,state.networkNodeTypes,configuration).map(id => `networkNodeType eq ${id}`).join(" or ")
+      //Search for equipments that are selected in NetworkEquipment modal
+      if (selectedEquipments == '') return
+      filter = selectedEquipments ? filter.concat(` and (${selectedEquipments})`) : filter
+    }
+
+    if(entityType === 'ServiceAreaView') {
+      filter = filter ? filter.concat(' and layer/id eq 1') : filter
+    }
+
+    entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
+
+    return $http.get(entityListUrl)
+    .then((results) => {
+      state.entityTypeList[entityType] = results.data
+      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity'
+        || entityType === 'AnalysisArea') {
+          state.entityTypeBoundaryList = state.entityTypeList[entityType]
+        }
+      return results.data
+    })
+
+  }
 }
 
 export default StateViewMode

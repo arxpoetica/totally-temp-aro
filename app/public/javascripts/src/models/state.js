@@ -566,36 +566,10 @@ class State {
   }
 
   service.selectedServiceArea = new Rx.BehaviorSubject()
-  service.reloadSelectedServiceArea = (serviceAreaId) => {
-    //Display only one Selected SA Details in viewMode at a time
-    service.selectedServiceArea.next(serviceAreaId)
-    service.requestMapLayerRefresh.next(null)
-  }
-
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
-  service.reloadSelectedAnalysisArea = (analysisArea) => {
-    service.selectedAnalysisArea.next(analysisArea)
-    service.requestMapLayerRefresh.next(null)
-  }
-
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
-  service.reloadSelectedViewFeaturesByType = (featuresByType) => {
-    service.selectedViewFeaturesByType.next(featuresByType)
-    service.requestMapLayerRefresh.next(null)
-  }
-  
   service.selectedCensusBlockId = new Rx.BehaviorSubject()
-  service.reloadSelectedCensusBlockId = (censusBlock) => {
-    service.selectedCensusBlockId.next(censusBlock)
-    service.requestMapLayerRefresh.next(null)
-  }
-  
-  
   service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedRoadSegments = (road) => {
-    service.selectedRoadSegments.next(road)
-    service.requestMapLayerRefresh.next(null)
-  }
 
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)
@@ -1437,22 +1411,6 @@ class State {
   service.flattenDeep = (arr) => {
     return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(service.flattenDeep(val)) : acc.concat(val), []);
   }
-
-  service.getSelectedEquipmentIds = () => {
-    var selectedEquipmentIds = []
-    var categoryItems = configuration.networkEquipment.equipments
-    Object.keys(categoryItems).forEach((categoryItemKey) => {
-      var networkEquipment = categoryItems[categoryItemKey]
-      //networkEquipment.checked && selectedEquipmentIds.push(service.networkNodeTypesEntity[networkEquipment.networkNodeType])
-      networkEquipment.checked && 
-        selectedEquipmentIds.push(service.networkNodeTypes
-          .filter(equipmentEntity => equipmentEntity.name === networkEquipment.networkNodeType)
-          .map(equ => equ.id)
-        )
-      
-    })
-    return service.flattenDeep(selectedEquipmentIds)
-  }
   
   service.isFeatureLayerOn = (categoryItemKey) => {
     var isOn = false
@@ -1493,92 +1451,8 @@ class State {
   service.clearEntityTypeBoundaryList = () => {
     service.entityTypeBoundaryList = []
   }
-
   service.selectedBoundaryTypeforSearch = null
-  service.loadBoundaryEntityList = (filterObj) => {
-    if(filterObj == '') return
-    if (service.selectedBoundaryTypeforSearch) {
-      var visibleBoundaryLayer = service.selectedBoundaryTypeforSearch
-
-      visibleBoundaryLayer.type === 'census_blocks' && service.loadEntityList('CensusBlocksEntity',filterObj,'id,tabblockId','tabblockId')
-      visibleBoundaryLayer.type === 'wirecenter' && service.loadEntityList('ServiceAreaView',filterObj,'id,code,name,centroid','code,name')
-      visibleBoundaryLayer.type === 'analysis_layer' && service.loadEntityList('AnalysisArea',filterObj,'id,code,centroid','code')
-    }
-  }
-
-  service.loadEntityList = (entityType,filterObj,select,searchColumn) => {
-    if(filterObj == '') return
-    var entityListUrl = `/service/odata/${entityType}?$select=${select}`
-    if(entityType !== 'AnalysisLayer') {
-      entityListUrl = entityListUrl + "&$top=20"
-    }
-
-    var filter = ''
-    if(entityType === 'LocationObjectEntity') {
-      //for UUID odata doesn't support substring
-      var pattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
-      if(pattern.test(filterObj)) {
-        filter = filterObj ? `${searchColumn} eq guid'${filterObj}'` : filter
-      } else {
-        return //157501341: Location search should not reach out to endpoint without supplying a valid object id
-      }
-    } else {
-      if(filterObj) {
-        var columns = searchColumn.split(',')
-        if(columns.length === 1 ){
-          if(searchColumn === 'id') {
-            filter = `${searchColumn} eq ${filterObj}`
-          } else if (searchColumn === 'clli') {
-            filter = `substringof(${searchColumn},'${filterObj}')`
-          } else {
-            filter = `${searchColumn} eq '${filterObj}'`
-          }
-        }
-        else {
-          var colFilter = columns.map(col => `substringof(${col},'${filterObj}')`).join(" or ")
-          filter = `(${colFilter})`
-        }
-      }
-    }
-
-    var libraryItems = []
-    if(entityType === 'LocationObjectEntity') {
-      var selectedLocationLibraries = service.dataItems && service.dataItems.location && service.dataItems.location.selectedLibraryItems
-      if(selectedLocationLibraries) libraryItems = selectedLocationLibraries.map(selectedLibraryItem => selectedLibraryItem.identifier)
-      if(libraryItems.length > 0) {
-        var libfilter = libraryItems.map(id => `libraryId eq ${id}`).join(" or ")
-        filter = filter ? filter.concat(` and (${libfilter})`) : `${libfilter}`
-        //filter = filter ? filter.concat(` and libraryId eq ${libraryItems.toString()}`) : `libraryId eq ${libraryItems.toString()}`
-      }
-    }
-
-    if(entityType === 'NetworkEquipmentEntity') {
-      //Filtering NetworkEquipmentEntity by planId so as to fetch latest equipment info
-      filter = filter ? filter.concat(` and (planId eq ${service.plan.getValue().id})`) : filter
-      var selectedEquipments = service.getSelectedEquipmentIds().map(id => `networkNodeType eq ${id}`).join(" or ")
-      //Search for equipments that are selected in NetworkEquipment modal
-      if (selectedEquipments == '') return
-      filter = selectedEquipments ? filter.concat(` and (${selectedEquipments})`) : filter
-    }
-
-    if(entityType === 'ServiceAreaView') {
-      filter = filter ? filter.concat(' and layer/id eq 1') : filter
-    }
-
-    entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
-
-    return $http.get(entityListUrl)
-    .then((results) => {
-      service.entityTypeList[entityType] = results.data
-      if(entityType === 'ServiceAreaView' || entityType === 'CensusBlocksEntity'
-        || entityType === 'AnalysisArea') {
-          service.entityTypeBoundaryList = service.entityTypeList[entityType]
-        }
-      return results.data
-    })
-
-  }
-
+  
   service.systemActors = [] // All the system actors (i.e. users and groups)
   service.reloadSystemActors = () => {
     service.systemActors = []

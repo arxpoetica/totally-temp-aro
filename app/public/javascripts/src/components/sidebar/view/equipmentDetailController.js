@@ -59,7 +59,7 @@ class EquipmentDetailController {
     var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
     selectedViewFeaturesByType.equipment = {}
 	  if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
-    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
 	}
 	
 	displayEquipment(planId, objectId){
@@ -93,13 +93,15 @@ class EquipmentDetailController {
     })
 	}
 
-  viewSelectedEquipment(selectedEquipment) {
+  viewSelectedEquipment(selectedEquipment,isZoom) {
     var plan = this.state.plan.getValue()
     var objectId = selectedEquipment.objectId || selectedEquipment.object_id
     this.updateSelectedState(selectedEquipment)
     this.displayEquipment(plan.id, objectId).then((equipmentInfo) => {
       if ("undefined" != typeof equipmentInfo){
         map.setCenter({ lat: this.selectedEquipmentGeog[1], lng: this.selectedEquipmentGeog[0] })
+        const ZOOM_FOR_EQUIPMENT_SEARCH = 14
+        isZoom && this.state.requestSetMapZoom.next(ZOOM_FOR_EQUIPMENT_SEARCH)
       }
     })
   }

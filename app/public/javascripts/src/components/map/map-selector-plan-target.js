@@ -70,7 +70,7 @@ class MapSelectorPlanTargetController {
       }
 
       if (event.roadSegments && event.roadSegments.size > 0) {
-          state.reloadSelectedRoadSegments(event.roadSegments)
+          state.StateViewMode.reloadSelectedRoadSegments(state,event.roadSegments)
       }
     })
 

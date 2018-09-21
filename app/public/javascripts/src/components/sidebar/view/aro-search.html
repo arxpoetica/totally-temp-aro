@@ -1,5 +1,5 @@
 <ui-select theme="bootstrap" ng-model="$ctrl.selected" close-on-select="true"
-  on-select="$ctrl.onSelectionChanged({selectedObj:$select.selected})">
+  on-select="$ctrl.onSelectionChanged({selectedObj:$select.selected,isZoom:true})">
   <ui-select-match placeholder="Select or search a {{$ctrl.objectName}} in the list...">
     {{ $select.selected[$ctrl.labelId] || $select.selected.tabblockId}}
   </ui-select-match>

@@ -45,7 +45,7 @@
     label-id="objectId"
     search-list="$ctrl.state.entityTypeList.LocationObjectEntity" 
     selected="$ctrl.selectedLocation" 
-    refresh-tag-list="$ctrl.state.loadEntityList('LocationObjectEntity',searchObj,'id,objectId','objectId')"
+    refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http,$ctrl.state,'LocationObjectEntity',searchObj,'id,objectId','objectId')"
     on-selection-changed="$ctrl.viewSelectedLocation(selectedObj)">
   </aro-search>
 </div>

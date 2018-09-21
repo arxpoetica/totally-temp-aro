@@ -778,7 +778,7 @@ class MapObjectEditorController {
         var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
         selectedViewFeaturesByType.equipment = {}
         selectedViewFeaturesByType.equipment[feature.objectId] = feature
-        this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+        this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
         return
       }
     } else {

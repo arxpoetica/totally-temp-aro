@@ -39,8 +39,8 @@
 				label-id="clli"
 	      search-list="$ctrl.state.entityTypeList.NetworkEquipmentEntity"
 	      selected="$ctrl.selectedEquipment"
-	      refresh-tag-list="$ctrl.state.loadEntityList('NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli')"
-	      on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj)">
+	      refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http,$ctrl.state,'NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli',$ctrl.configuration)"
+	      on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj,isZoom)">
 	    </aro-search>
 	  </div>
 	  
@@ -76,7 +76,7 @@
 			$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EQUIPMENT_INFO">
 			<equipment-detail-list
 				map-global-object-name="map"
-				on-click-object="$ctrl.viewSelectedEquipment(selectedEquipment)">
+				on-click-object="$ctrl.viewSelectedEquipment(selectedEquipment,isZoom)">
 			</equipment-detail-list>
 		</span>
 	</div>

@@ -1,7 +1,8 @@
 class BoundariesController {
 
-  constructor($rootScope,state,map_tools,MapLayer,map_layers,regions) {
+  constructor($rootScope,$http,state,map_tools,MapLayer,map_layers,regions) {
 
+    this.$http = $http
     this.state = state
     this.regions = regions
     this.map_tools = map_tools
@@ -199,7 +200,10 @@ class BoundariesController {
         lineWidth: 8
       }
     }
-    
+    if(config.ARO_CLIENT === 'frontier') {
+      layerSettings['analysis_layer']['strokeStyle'] = '#000000'
+    }
+
     layerSettings['aggregated_wirecenters'] = {
       dataUrls: [],
       renderMode: 'PRIMITIVE_FEATURES',
@@ -290,7 +294,7 @@ class BoundariesController {
   }
 
   $onInit() {
-    this.state.loadEntityList('AnalysisLayer',null,'id,name,description',null)
+    this.state.StateViewMode.loadEntityList(this.$http,this.state,'AnalysisLayer',null,'id,name,description',null)
     .then(() => {
       this.state.entityTypeList.AnalysisLayer.forEach((analysisLayer) => {
         this.state.boundaries.tileLayers.push({
@@ -319,7 +323,7 @@ class BoundariesController {
 
 }
 
-BoundariesController.$inject = ['$rootScope','state','map_tools','MapLayer','map_layers','regions']
+BoundariesController.$inject = ['$rootScope','$http','state','map_tools','MapLayer','map_layers','regions']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',

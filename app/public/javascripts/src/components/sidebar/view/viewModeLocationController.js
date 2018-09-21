@@ -77,7 +77,7 @@ class ViewModeLocationController {
     if ('undefined' != typeof feature && 'undefined' != typeof id){
       selectedViewFeaturesByType.location[ id ] = feature
     }
-    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
   }
   
   showStaticMap(locationInfo) {

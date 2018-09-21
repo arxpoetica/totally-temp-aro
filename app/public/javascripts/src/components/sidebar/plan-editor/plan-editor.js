@@ -815,7 +815,7 @@ class PlanEditorController {
     if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
       selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
     }
-    this.state.reloadSelectedViewFeaturesByType(selectedViewFeaturesByType)
+    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
   }
   
   clearViewSelection(){
