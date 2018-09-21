@@ -112,7 +112,6 @@ module.exports = class User {
             firstName: firstName,
             lastName: lastName,
             fullName: `${firstName} ${lastName}`,
-            rol: 'admin',
             groupIds: aroGroups.map((item) => item.auth_group_id)
           },
           json: true
@@ -251,17 +250,17 @@ module.exports = class User {
   }
 
   // Registers a user with a password
-  static registerWithPassword(user, clearTextPassword) {
+  static registerFromETL(user, clearTextPassword) {
     if (!clearTextPassword || clearTextPassword == '') {
       return Promise.reject('You must specify a password for registering the user')
     }
     return this.hashPassword(clearTextPassword)
-      .then((hashedPassword) => this.register(user, hashedPassword))
+      .then((hashedPassword) => this.register(user, hashedPassword, false))
   }
 
   // Registers a user without a password
   static registerWithoutPassword(user) {
-    return this.register(user)
+    return this.register(user, null, true)
   }
 
   static addUserToGroup(email, groupId) {
@@ -276,7 +275,7 @@ module.exports = class User {
   }
 
   // Note that this is also called from the ETL script, so we can't use aro-service here
-  static register(user, hashedPassword) {
+  static register(user, hashedPassword, useAroService) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -285,9 +284,29 @@ module.exports = class User {
       expect(user, 'user.lastName', 'string')
       expect(user, 'user.email', 'string')
     })
-    .then(() => database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`))
+    .then(() => {
+      if (useAroService) {
+        var createUserRequest = {
+          method: 'POST',
+          url: `${config.aro_service_url}/auth/users`,
+          body: {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: `${user.firstName} ${user.lastName}`,
+            groupIds: []
+          },
+          json: true
+        }
+        return models.AROService.request(createUserRequest)
+          .then((result) => Promise.resolve(result))
+      } else {
+        return database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`)
+          .then((result) => Promise.resolve(result[0].add_user))
+      }
+    })
     .then((createdUser) => {
-      createdUserId = createdUser[0].add_user
+      createdUserId = createdUser.id
       var full_name = user.firstName + ' ' + user.lastName
       var setString = `company_name='${user.companyName}', full_name='${full_name}'`
       if (hashedPassword) {
