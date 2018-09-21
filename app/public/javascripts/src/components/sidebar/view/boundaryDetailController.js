@@ -37,19 +37,19 @@ class BoundaryDetailController {
           this.selectedBoundaryTags = tagList
           
           let censusBlockId = event.censusFeatures[0].id
-          this.state.reloadSelectedCensusBlockId(censusBlockId)
+          this.state.StateViewMode.reloadSelectedCensusBlockId(this.state,censusBlockId)
           this.viewCensusBlockInfo(censusBlockId)
         } else if (event.hasOwnProperty('serviceAreas')
           && event.serviceAreas.length > 0
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
-            this.state.reloadSelectedServiceArea(event.serviceAreas[0].id)
+            this.state.StateViewMode.reloadSelectedServiceArea(this.state,event.serviceAreas[0].id)
         } else if (event.hasOwnProperty('analysisAreas')
           && event.analysisAreas.length > 0
           && event.analysisAreas[0].hasOwnProperty('code')
           && event.analysisAreas[0].hasOwnProperty('_data_type') ){
             this.viewAnalysisAreaInfo(event.analysisAreas[0])
-            this.state.reloadSelectedAnalysisArea(event.analysisAreas[0].id)
+            this.state.StateViewMode.reloadSelectedAnalysisArea(this.state,event.analysisAreas[0].id)
         }
       } else {
         return
@@ -69,7 +69,7 @@ class BoundaryDetailController {
   }
 
   getServiceAreaInfo(serviceAreaId) {
-    return this.state.loadEntityList('ServiceAreaView',serviceAreaId,'id,code,name','id')
+    return this.state.StateViewMode.loadEntityList(this.$http,this.state,'ServiceAreaView',serviceAreaId,'id,code,name','id')
     .then((serviceAreaInfo) => {
       return serviceAreaInfo[0]
     })
@@ -87,7 +87,7 @@ class BoundaryDetailController {
   }
 
   getAnalysisAreaInfo(analysisAreaId) {
-    return this.state.loadEntityList('AnalysisArea',analysisAreaId,'id,code','id')
+    return this.state.StateViewMode.loadEntityList(this.$http,this.state,'AnalysisArea',analysisAreaId,'id,code','id')
     .then((analysisAreaInfo) => {
       return analysisAreaInfo[0]
     })
@@ -118,17 +118,19 @@ class BoundaryDetailController {
   viewSelectedBoundary(selectedBoundary) {
     var visibleBoundaryLayer = this.state.selectedBoundaryTypeforSearch
     if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
-      this.state.reloadSelectedCensusBlockId(selectedBoundary.id)
+      this.state.StateViewMode.reloadSelectedCensusBlockId(this.state,selectedBoundary.id)
       this.viewCensusBlockInfo(selectedBoundary.id)
       .then(() => {
         map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })
+        const ZOOM_FOR_CB_SEARCH = 14
+        this.state.requestSetMapZoom.next(ZOOM_FOR_CB_SEARCH)
       })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
-      this.state.reloadSelectedServiceArea(selectedBoundary.id)
+      this.state.StateViewMode.reloadSelectedServiceArea(this.state,selectedBoundary.id)
       this.viewServiceAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {
-      this.state.reloadSelectedAnalysisArea(selectedBoundary.id)
+      this.state.StateViewMode.reloadSelectedAnalysisArea(this.state,selectedBoundary.id)
       this.viewAnalysisAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     }  

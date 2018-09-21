@@ -13,7 +13,7 @@
     </thead>
     <tbody>
       <tr style="cursor: pointer" ng-repeat="equipmentInfo in $ctrl.clliToEquipmentInfo | orderObjectBy:'siteClli'" 
-        ng-click="$ctrl.onClickObject({selectedEquipment:equipmentInfo})">
+        ng-click="$ctrl.onClickObject({selectedEquipment:equipmentInfo,isZoom:false})">
         <td>{{equipmentInfo.siteClli}}</td>
         <td>{{$ctrl.state.networkNodeTypesEntity[equipmentInfo._data_type.split('.')[1]]}}</td>
       </tr>
