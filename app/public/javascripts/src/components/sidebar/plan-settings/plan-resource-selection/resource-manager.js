@@ -50,12 +50,12 @@ class ResourceManagerController {
 
   createBlankPriceBook() {
     this.setEditingManagerId({ newId: null })
-    this.setEditingMode({ mode: 'SHOW_PRICEBOOK_CREATOR' })
+    this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
   cloneSelectedPriceBook() {
     this.setEditingManagerId({ newId: this.selectedResourceManager.id })
-    this.setEditingMode({ mode: 'SHOW_PRICEBOOK_CREATOR' })
+    this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
   cloneSelectedManagerFromSource(managerId) {
@@ -188,6 +188,7 @@ let resourceManager = {
     selectedResourceKey: '<',
     listMode: '<',
     editMode: '<',
+    createPriceBookMode: '<',
     setEditingMode: '&',
     setEditingManagerId: '&',
     onManagersChanged: '&',
