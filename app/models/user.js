@@ -292,12 +292,12 @@ module.exports = class User {
       var setString = `company_name='${user.companyName}', full_name='${full_name}'`
       if (hashedPassword) {
         setString += `, password='${hashedPassword}'` // Set the password only if it is specified
+      } else {
+        // Password was not specified - try sending a reset link (will fail on localhost)
+        this.resendLink(createdUserId)
+          .catch((err) => console.error(err))
       }
       return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
-    })
-    .then(() => {
-      // If password has been set, no need to send a reset email
-      return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
     })
     .then(() => {
       // Set the group membership for the user
@@ -312,7 +312,7 @@ module.exports = class User {
         const sql = `
           INSERT INTO auth.global_actor_permission(actor_id, permissions)
           VALUES(
-            (SELECT id FROM auth.users WHERE email=${user.email}),
+            (SELECT id FROM auth.users WHERE email='${user.email}'),
             31
           )
         `
@@ -322,6 +322,8 @@ module.exports = class User {
     })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
+      console.error('--------------------------------------------')
+      console.error(err)
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
       }
@@ -330,11 +332,25 @@ module.exports = class User {
   }
 
   static find_by_id (id) {
+    var userToReturn = null
     return database.findOne(`
         SELECT id, first_name, last_name, email, company_name
         FROM auth.users WHERE id=$1
       `, [id])
-  }
+      .then((user) => {
+        userToReturn = user
+        var req = {
+          method: 'GET',
+          url: `${config.aro_service_url}/auth/users/${user.id}/configuration`,
+          json: true
+        }
+        return models.AROService.request(req)
+      })
+      .then((result) => {
+        userToReturn.perspective = result.perspective
+        return Promise.resolve(userToReturn)
+      })
+}
 
   static find_by_text (text) {
     text = '%' + text + '%'
