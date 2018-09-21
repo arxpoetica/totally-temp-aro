@@ -17,6 +17,7 @@ class ResourceManagerController {
         deleteManager: `/service/v1/pricebook/${this.managerIdString}`
       }
     }
+    this.priceBookIdToClone = null
   }
 
   $onInit() {
@@ -49,70 +50,13 @@ class ResourceManagerController {
   }
 
   createBlankPriceBook() {
-    // this.state.showPlanResourceEditorModal = false
+    this.priceBookIdToClone = null
     this.state.showPriceBookCreator = true
-    return
-    var createdManagerId = -1, resourceName = null // Save for later use
-    // Get the name of the new plan from the user
-    this.getNewResourceDetailsFromUser()
-    .then((result) => {
-      resourceName = result
-      return this.getPriceStrategyFromUser()
-    })
-    .then((priceStrategy) => {
-      // Create a new pricebook with the specified name and description
-      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: priceStrategy })
-    })
-    .then((result) => {
-      // Save the created pricebook id for later use, and return the list of all pricebooks
-      createdManagerId = result.data.id
-      return this.$http.get('/service/v1/pricebook')
-    })
-    .then((result) => {
-      // Get the assignments for the default (0th) pricebook in the system
-      return this.$http.get(`/service/v1/pricebook/${result.data[0].id}/assignment`)
-    })
-    .then((result) => {
-      // Take the assignments of the default manager, set all values to 0 and then assign that to the newly created manager
-      var newManagerAssignments = result.data
-      newManagerAssignments.costAssignments.forEach((costAssignment) => {
-        costAssignment.state = '*'
-        costAssignment.cost = 0
-      })
-      newManagerAssignments.detailAssignments.forEach((detailAssignment) => {
-        detailAssignment.quantity = 0
-        detailAssignment.ratioFixed = 1
-      })
-      return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
-    })
-    .then(() => this.onManagerCreated(createdManagerId))
-    .catch((err) => console.error(err))
   }
 
   cloneSelectedPriceBook() {
-    // Create a resource manager
-    var createdManagerId = -1
-    var resourceName = null
-    this.getNewResourceDetailsFromUser()
-      .then((result) => {
-        resourceName = result
-        return this.getPriceStrategyFromUser()
-      })
-      .then((priceStrategy) => {
-        // Create a new pricebook with the specified name and description
-        return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: priceStrategy })
-      })
-      .then((result) => {
-        // Save the created pricebook id for later use, and return the assignments for the selected manager
-        createdManagerId = result.data.id
-        return this.$http.get(`/service/v1/pricebook/${this.selectedResourceManager.id}/assignment`)
-      })
-      .then((result) => {
-        // Take the assignments for the selected manager and overwrite them onto the created manager
-        return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, result.data)
-      })
-      .then(() => this.onManagerCreated(createdManagerId))
-      .catch((err) => console.error(err))
+    this.priceBookIdToClone = this.selectedResourceManager.id
+    this.state.showPriceBookCreator = true
   }
 
   cloneSelectedManagerFromSource(managerId) {
