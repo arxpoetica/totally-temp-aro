@@ -2,8 +2,9 @@ class PlanResourceEditorController {
   constructor(state) {
     this.state = state
     this.editingModes = Object.freeze({
-      LIST_RESOURCE_MANAGERS: 0,
-      EDIT_RESOURCE_MANAGER: 1
+      LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
+      EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
+      SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR'
     })
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.modalTitle = 'Resource Managers'
@@ -18,6 +19,8 @@ class PlanResourceEditorController {
     this.selectedEditingMode = newEditingMode
     if (newEditingMode === this.editingModes.LIST_RESOURCE_MANAGERS) {
       this.modalTitle = 'Resource Managers'
+    } else if (newEditingMode === this.editingModes.SHOW_PRICEBOOK_CREATOR) {
+      this.modalTitle = 'Create PriceBook'
     }
   }
 

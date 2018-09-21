@@ -10,10 +10,6 @@ class PriceBookCreatorController {
   }
 
   $onInit() {
-    this.initialize()
-  }
-
-  initialize() {
     this.selectedPriceStrategy = null
     var clonedPricebookPromise = this.sourcePriceBookId ? this.$http.get(`/service/v1/pricebook/${this.sourcePriceBookId}`) : Promise.resolve()
     Promise.all([this.$http.get('/service/v1/pricebook-strategies'), clonedPricebookPromise])
@@ -30,18 +26,6 @@ class PriceBookCreatorController {
         this.$timeout()
       })
       .catch((err) => console.error(err))
-  }
-
-  onHideModal() {
-    this.state.showPriceBookCreator = false
-  }
-
-  onShowModal() {
-    this.initialize()
-  }
-
-  close() {
-    this.state.showPriceBookCreator = false
   }
 
   createPriceBook() {
@@ -75,11 +59,15 @@ class PriceBookCreatorController {
         return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
       })
       .then(() => {
-        this.state.showPriceBookCreator = false
         this.onManagersChanged && this.onManagersChanged()
+        this.setEditingMode && this.setEditingMode({ mode: this.listMode })
         this.$timeout()
       })
       .catch((err) => console.error(err))
+  }
+
+  closeDialog() {
+    this.setEditingMode && this.setEditingMode({ mode: this.listMode })
   }
 }
 
@@ -89,7 +77,9 @@ let priceBookCreator = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-creator.html',
   bindings: {
     sourcePriceBookId: '<',
-    onManagersChanged: '&'
+    onManagersChanged: '&',
+    listMode: '<',
+    setEditingMode: '&',
   },
   controller: PriceBookCreatorController
 }

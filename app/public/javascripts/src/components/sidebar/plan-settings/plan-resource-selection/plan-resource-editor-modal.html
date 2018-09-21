@@ -12,6 +12,13 @@
                       set-current-selected-resource-key="$ctrl.setSelectedResourceKey(resourceKey)">
     </resource-manager>
 
+    <pricebook-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
+                       source-price-book-id="$ctrl.editingManagerId"
+                       list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                       set-editing-mode="$ctrl.setEditingMode(mode)"
+                       on-managers-changed="$ctrl.onManagersChanged()">
+    </pricebook-creator>
+
     <pricebook-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'price_book'"
                       price-book-id="$ctrl.editingManagerId"
                       list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"

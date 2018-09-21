@@ -17,7 +17,6 @@ class ResourceManagerController {
         deleteManager: `/service/v1/pricebook/${this.managerIdString}`
       }
     }
-    this.priceBookIdToClone = null
   }
 
   $onInit() {
@@ -50,13 +49,13 @@ class ResourceManagerController {
   }
 
   createBlankPriceBook() {
-    this.priceBookIdToClone = null
-    this.state.showPriceBookCreator = true
+    this.setEditingManagerId({ newId: null })
+    this.setEditingMode({ mode: 'SHOW_PRICEBOOK_CREATOR' })
   }
 
   cloneSelectedPriceBook() {
-    this.priceBookIdToClone = this.selectedResourceManager.id
-    this.state.showPriceBookCreator = true
+    this.setEditingManagerId({ newId: this.selectedResourceManager.id })
+    this.setEditingMode({ mode: 'SHOW_PRICEBOOK_CREATOR' })
   }
 
   cloneSelectedManagerFromSource(managerId) {
