@@ -76,6 +76,7 @@ class PriceBookCreatorController {
       })
       .then(() => {
         this.state.showPriceBookCreator = false
+        this.onManagersChanged && this.onManagersChanged()
         this.$timeout()
       })
       .catch((err) => console.error(err))
@@ -87,7 +88,8 @@ PriceBookCreatorController.$inject = ['$http', '$timeout', 'state']
 let priceBookCreator = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/pricebook-creator.html',
   bindings: {
-    sourcePriceBookId: '<'
+    sourcePriceBookId: '<',
+    onManagersChanged: '&'
   },
   controller: PriceBookCreatorController
 }
