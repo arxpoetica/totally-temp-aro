@@ -1,0 +1,57 @@
+<style scoped>
+  .with-margin {
+    margin-bottom: 5px;
+  }
+  .action-button-icon {
+    padding-right: 10px;
+  }
+</style>
+<form class="form-horizontal">
+  <!-- The source pricebook used when cloning -->
+  <div ng-if="$ctrl.sourcePriceBookId" class="form-group">
+    <label class="col-sm-4 control-label">PriceBook to clone</label>
+    <div class="col-sm-8">
+      <input class="form-control" ng-disabled="true" ng-model="$ctrl.sourcePriceBook.name">
+    </div>
+  </div>
+
+  <!-- The price strategy to be used for the pricebook. Can only be changed when creating a new pricebook (not when cloning) -->
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Price Strategy</label>
+    <div class="col-sm-8">
+      <select class="form-control"
+        ng-model="$ctrl.selectedPriceStrategy"
+        ng-options="item.description for item in $ctrl.priceStrategies"
+        ng-disabled="$ctrl.sourcePriceBookId">
+      </select>
+      <!-- If we are cloning an existing pricebook, show a message explaining why strategy is disabled-->
+      <small ng-if="$ctrl.sourcePriceBookId" class="form-text text-muted">You cannot change strategy when cloning an existing PriceBook</small>
+    </div>
+  </div>
+
+  <!-- The name of the new pricebook -->
+  <div class="form-group">
+    <label class="col-sm-4 control-label">Name</label>
+    <div class="col-sm-8">
+      <input class="form-control" ng-model="$ctrl.newPriceBookName">
+    </div>
+  </div>
+
+  <!-- The description of the new pricebook -->
+  <div class="form-group">
+      <label class="col-sm-4 control-label">Description</label>
+      <div class="col-sm-8">
+        <input class="form-control" ng-model="$ctrl.newPriceBookDescription">
+      </div>
+    </div>
+
+</form>
+  
+<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+  <button class="btn btn-default" ng-click="$ctrl.closeDialog()">
+    <i class="fa fa-undo action-button-icon"></i>Back
+  </button>
+  <button class="btn btn-primary" ng-click="$ctrl.createPriceBook()">
+    <i class="fa fa-save action-button-icon"></i>Create
+  </button>
+</div>

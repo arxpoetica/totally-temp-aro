@@ -112,7 +112,6 @@ module.exports = class User {
             firstName: firstName,
             lastName: lastName,
             fullName: `${firstName} ${lastName}`,
-            rol: 'admin',
             groupIds: aroGroups.map((item) => item.auth_group_id)
           },
           json: true
@@ -251,17 +250,17 @@ module.exports = class User {
   }
 
   // Registers a user with a password
-  static registerWithPassword(user, clearTextPassword) {
+  static registerFromETL(user, clearTextPassword) {
     if (!clearTextPassword || clearTextPassword == '') {
       return Promise.reject('You must specify a password for registering the user')
     }
     return this.hashPassword(clearTextPassword)
-      .then((hashedPassword) => this.register(user, hashedPassword))
+      .then((hashedPassword) => this.register(user, hashedPassword, false))
   }
 
   // Registers a user without a password
   static registerWithoutPassword(user) {
-    return this.register(user)
+    return this.register(user, null, true)
   }
 
   static addUserToGroup(email, groupId) {
@@ -276,7 +275,7 @@ module.exports = class User {
   }
 
   // Note that this is also called from the ETL script, so we can't use aro-service here
-  static register(user, hashedPassword) {
+  static register(user, hashedPassword, useAroService) {
 
     var createdUserId = null;
     return validate((expect) => {
@@ -285,19 +284,39 @@ module.exports = class User {
       expect(user, 'user.lastName', 'string')
       expect(user, 'user.email', 'string')
     })
-    .then(() => database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`))
+    .then(() => {
+      if (useAroService) {
+        var createUserRequest = {
+          method: 'POST',
+          url: `${config.aro_service_url}/auth/users`,
+          body: {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            fullName: `${user.firstName} ${user.lastName}`,
+            groupIds: []
+          },
+          json: true
+        }
+        return models.AROService.request(createUserRequest)
+          .then((result) => Promise.resolve(result))
+      } else {
+        return database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`)
+          .then((result) => Promise.resolve(result[0].add_user))
+      }
+    })
     .then((createdUser) => {
-      createdUserId = createdUser[0].add_user
+      createdUserId = createdUser.id
       var full_name = user.firstName + ' ' + user.lastName
       var setString = `company_name='${user.companyName}', full_name='${full_name}'`
       if (hashedPassword) {
         setString += `, password='${hashedPassword}'` // Set the password only if it is specified
+      } else {
+        // Password was not specified - try sending a reset link (will fail on localhost)
+        this.resendLink(createdUserId)
+          .catch((err) => console.error(err))
       }
       return database.query(`UPDATE auth.users SET ${setString} WHERE id=${createdUserId};`)
-    })
-    .then(() => {
-      // If password has been set, no need to send a reset email
-      return hashedPassword ? Promise.resolve() : this.resendLink(createdUserId)
     })
     .then(() => {
       // Set the group membership for the user
@@ -312,7 +331,7 @@ module.exports = class User {
         const sql = `
           INSERT INTO auth.global_actor_permission(actor_id, permissions)
           VALUES(
-            (SELECT id FROM auth.users WHERE email=${user.email}),
+            (SELECT id FROM auth.users WHERE email='${user.email}'),
             31
           )
         `
@@ -322,6 +341,8 @@ module.exports = class User {
     })
     .then(() => Promise.resolve(createdUserId))
     .catch((err) => {
+      console.error('--------------------------------------------')
+      console.error(err)
       if (err.message.indexOf('duplicate key') >= 0) {
         return Promise.reject(errors.request('There\'s already a user with that email address (%s)', user.email))
       }
@@ -330,11 +351,25 @@ module.exports = class User {
   }
 
   static find_by_id (id) {
+    var userToReturn = null
     return database.findOne(`
         SELECT id, first_name, last_name, email, company_name
         FROM auth.users WHERE id=$1
       `, [id])
-  }
+      .then((user) => {
+        userToReturn = user
+        var req = {
+          method: 'GET',
+          url: `${config.aro_service_url}/auth/users/${user.id}/configuration`,
+          json: true
+        }
+        return models.AROService.request(req)
+      })
+      .then((result) => {
+        userToReturn.perspective = result.perspective
+        return Promise.resolve(userToReturn)
+      })
+}
 
   static find_by_text (text) {
     text = '%' + text + '%'

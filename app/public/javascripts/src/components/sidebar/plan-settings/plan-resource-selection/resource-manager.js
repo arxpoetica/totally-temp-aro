@@ -1,7 +1,8 @@
 class ResourceManagerController {
-  constructor($http, $document) {
+  constructor($http, $document, state) {
     this.$http = $http
     this.$document = $document
+    this.state = state
     // Hold a mapping that we use to map from resource keys to endpoints
     this.resourceKeyToEndpointId = {
       price_book: 'pricebook',
@@ -48,67 +49,13 @@ class ResourceManagerController {
   }
 
   createBlankPriceBook() {
-    var createdManagerId = -1, resourceName = null // Save for later use
-    // Get the name of the new plan from the user
-    this.getNewResourceDetailsFromUser()
-    .then((result) => {
-      resourceName = result
-      return this.getPriceStrategyFromUser()
-    })
-    .then((priceStrategy) => {
-      // Create a new pricebook with the specified name and description
-      return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: priceStrategy })
-    })
-    .then((result) => {
-      // Save the created pricebook id for later use, and return the list of all pricebooks
-      createdManagerId = result.data.id
-      return this.$http.get('/service/v1/pricebook')
-    })
-    .then((result) => {
-      // Get the assignments for the default (0th) pricebook in the system
-      return this.$http.get(`/service/v1/pricebook/${result.data[0].id}/assignment`)
-    })
-    .then((result) => {
-      // Take the assignments of the default manager, set all values to 0 and then assign that to the newly created manager
-      var newManagerAssignments = result.data
-      newManagerAssignments.costAssignments.forEach((costAssignment) => {
-        costAssignment.state = '*'
-        costAssignment.cost = 0
-      })
-      newManagerAssignments.detailAssignments.forEach((detailAssignment) => {
-        detailAssignment.quantity = 0
-        detailAssignment.ratioFixed = 1
-      })
-      return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, newManagerAssignments)
-    })
-    .then(() => this.onManagerCreated(createdManagerId))
-    .catch((err) => console.error(err))
+    this.setEditingManagerId({ newId: null })
+    this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
   cloneSelectedPriceBook() {
-    // Create a resource manager
-    var createdManagerId = -1
-    var resourceName = null
-    this.getNewResourceDetailsFromUser()
-      .then((result) => {
-        resourceName = result
-        return this.getPriceStrategyFromUser()
-      })
-      .then((priceStrategy) => {
-        // Create a new pricebook with the specified name and description
-        return this.$http.post('/service/v1/pricebook', { name: resourceName, description: resourceName, priceStrategy: priceStrategy })
-      })
-      .then((result) => {
-        // Save the created pricebook id for later use, and return the assignments for the selected manager
-        createdManagerId = result.data.id
-        return this.$http.get(`/service/v1/pricebook/${this.selectedResourceManager.id}/assignment`)
-      })
-      .then((result) => {
-        // Take the assignments for the selected manager and overwrite them onto the created manager
-        return this.$http.put(`/service/v1/pricebook/${createdManagerId}/assignment`, result.data)
-      })
-      .then(() => this.onManagerCreated(createdManagerId))
-      .catch((err) => console.error(err))
+    this.setEditingManagerId({ newId: this.selectedResourceManager.id })
+    this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
   cloneSelectedManagerFromSource(managerId) {
@@ -207,6 +154,8 @@ class ResourceManagerController {
   }
 
   getNewResourceDetailsFromUser() {
+    this.state.planInputsModal.next(true)
+    return Promise.resolve('asdf')
     // Get the name for a new plan from the user
     this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
     return new Promise((resolve, reject) => {
@@ -228,42 +177,9 @@ class ResourceManagerController {
       })
     })
   }
-
-  getPriceStrategyFromUser() {
-    this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
-    // Showing this because SweetAlert 1 does not take in forms. Fix this when upgrading to SweetAlert 2
-    const allowedStrategies = ['morphology', 'market_pricing', 'state_pricing']
-    return new Promise((resolve, reject) => {
-      var swalOptions = {
-        title: 'Pricebook Strategy',
-        text: `Enter one of these: ${allowedStrategies}`,
-        type: 'input',
-        showCancelButton: true,
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'OK'
-      }
-      // Why setTimeout()? SweetAlert does not show consecutive messages unless there is a delay.
-      // In any event, this whole getPriceStrategyFromUser() stuff is because I could not cram it all into one dialog.
-      // Best to fix all of this when moving to SweetAlert2 or any other lib.
-      setTimeout(() => {
-        swal(swalOptions, (pricebookStrategy) => {
-          this.restoreBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
-          if (allowedStrategies) {
-            if (allowedStrategies.indexOf(pricebookStrategy) >= 0) {
-              resolve(pricebookStrategy)
-            } else {
-              reject('Invalid strategy specified')
-            }
-          } else {
-            reject('Cancelled')
-          }
-        })
-      }, 100)
-    })
-  }
 }
 
-ResourceManagerController.$inject = ['$http', '$document']
+ResourceManagerController.$inject = ['$http', '$document', 'state']
 
 let resourceManager = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/resource-manager.html',
@@ -272,6 +188,7 @@ let resourceManager = {
     selectedResourceKey: '<',
     listMode: '<',
     editMode: '<',
+    createPriceBookMode: '<',
     setEditingMode: '&',
     setEditingManagerId: '&',
     onManagersChanged: '&',
