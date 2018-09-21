@@ -178,39 +178,6 @@ class ResourceManagerController {
       })
     })
   }
-
-  getPriceStrategyFromUser() {
-    this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
-    // Showing this because SweetAlert 1 does not take in forms. Fix this when upgrading to SweetAlert 2
-    const allowedStrategies = ['morphology', 'market_pricing', 'state_pricing']
-    return new Promise((resolve, reject) => {
-      var swalOptions = {
-        title: 'Pricebook Strategy',
-        text: `Enter one of these: ${allowedStrategies}`,
-        type: 'input',
-        showCancelButton: true,
-        confirmButtonColor: '#DD6B55',
-        confirmButtonText: 'OK'
-      }
-      // Why setTimeout()? SweetAlert does not show consecutive messages unless there is a delay.
-      // In any event, this whole getPriceStrategyFromUser() stuff is because I could not cram it all into one dialog.
-      // Best to fix all of this when moving to SweetAlert2 or any other lib.
-      setTimeout(() => {
-        swal(swalOptions, (pricebookStrategy) => {
-          this.restoreBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
-          if (allowedStrategies) {
-            if (allowedStrategies.indexOf(pricebookStrategy) >= 0) {
-              resolve(pricebookStrategy)
-            } else {
-              reject('Invalid strategy specified')
-            }
-          } else {
-            reject('Cancelled')
-          }
-        })
-      }, 100)
-    })
-  }
 }
 
 ResourceManagerController.$inject = ['$http', '$document', 'state']
