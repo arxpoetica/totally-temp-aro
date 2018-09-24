@@ -10,7 +10,8 @@ class NetworkBuildController {
     this.config = config
 
     this.areControlsEnabled = true
-    this.budgetDisplay = this.state.optimizationOptions.budget / 1000
+    //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
+    this.budgetDisplay = this.state.optimizationOptions.budget
     
     
     state.plan.subscribe((newPlan) => {
@@ -57,7 +58,8 @@ class NetworkBuildController {
   
   
   onBudgetChange(){
-    this.state.optimizationOptions.budget = this.budgetDisplay * 1000
+    //this.state.optimizationOptions.budget = this.budgetDisplay * 1000
+    this.state.optimizationOptions.budget = this.budgetDisplay
   }
   
 }

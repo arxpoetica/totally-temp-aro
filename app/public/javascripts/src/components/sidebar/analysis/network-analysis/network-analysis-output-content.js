@@ -210,7 +210,7 @@ class NetworkAnalysisOutputContentController {
             this.state.optimizationOptions.uiSelectedAlgorithm = this.state.OPTIMIZATION_TYPES.BUDGET
 
             // Assigning Target Capital
-            this.state.optimizationOptions.budget = value.x
+            this.state.optimizationOptions.budget = value.x / 1000
 
             this.state.runOptimization()
 
