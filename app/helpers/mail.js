@@ -2,6 +2,8 @@ var nodemailer = require('nodemailer')
 var ses = require('nodemailer-ses-transport')
 var AWS = require('aws-sdk')
 var config = require('./config')
+const URL = require('url').URL
+const APP_BASE_HOST = (new URL(config.base_url)).hostname
 
 var region = process.env.AWS_REGION
 if (!region) {
@@ -15,7 +17,7 @@ var transporter = process.env.NODE_ENV === 'production' || process.env.NODE_ENV 
   : nodemailer.createTransport() // direct
 
 exports.sendMail = (options) => {
-  options.from = `ARO <${config.from_email_address}>`
+  options.from = `ARO <admin@${APP_BASE_HOST}>`
   return new Promise((resolve, reject) => {
     transporter.sendMail(options, (err, info) => {
       if (err) {

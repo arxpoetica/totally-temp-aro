@@ -9,7 +9,6 @@
   "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
-  "from_email_address": "demo@aro.altvil.com",
   "hsv_defaults" : {
   "saturation": 0.5,
   "value": 0.5
