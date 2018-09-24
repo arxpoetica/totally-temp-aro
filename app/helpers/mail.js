@@ -4,7 +4,7 @@ var AWS = require('aws-sdk')
 var config = require('./config')
 // Find the URL hostname. Cant use the NodeJS URL class because our container is at v6.11
 const searchStr = '://'   // Can be http:// or https://
-var APP_BASE_HOST = config.base_url.subString(config.base_url.indexOf(searchStr) + searchStr.length)
+var APP_BASE_HOST = config.base_url.substr(config.base_url.indexOf(searchStr) + searchStr.length)
 if (APP_BASE_HOST.indexOf(':') >= 0) {
   APP_BASE_HOST = APP_BASE_HOST.substr(0, APP_BASE_HOST.indexOf(':'))
 }
