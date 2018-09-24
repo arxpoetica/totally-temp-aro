@@ -33,17 +33,29 @@ var addUserToGroup = (email, groupName) => {
   return database.query(sqlAddUserToGroup)
 }
 
+// Default initialization of aro_core.user_configuration
+var initializeUserConfiguration = (userId) => {
+  const sql = `
+    INSERT INTO aro_core.user_configuration(user_id, perspective, project_template_id)
+    VALUES (${userId}, 'admin', 1);
+  `
+  return database.query(sql)
+}
+
 // Do not add to Public group via aro-service as we do not have access to it
 argv.groupIds = []
 argv.isGlobalSuperUser = true
+var createdUserId = null
 models.User.registerFromETL(argv, argv.password)
   .then((userId) => {
+    createdUserId = userId
     console.log('User registered successfully with id =', userId)
     // Add the user to the Public group
     return addUserToGroup(argv.email, 'Public')
   })
   .then(() => addUserToGroup(argv.email, 'Administrators')) // Add the users to the Administrators group
   .then(() => addUserToGroup(argv.email, 'SuperUsers')) // Add the users to the SuperUsers group
+  .then(() => initializeUserConfiguration(createdUserId))
   .then(() => {
     process.exit(0)
   })

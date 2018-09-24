@@ -302,7 +302,7 @@ module.exports = class User {
           .then((result) => Promise.resolve(result))
       } else {
         return database.query(`SELECT auth.add_user('${user.firstName}', '${user.lastName}', '${user.email}');`)
-          .then((result) => Promise.resolve(result[0].add_user))
+          .then((result) => Promise.resolve({id: result[0].add_user}))
       }
     })
     .then((createdUser) => {
