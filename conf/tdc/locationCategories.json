@@ -1,0 +1,21 @@
+{
+	"mapIconFolder": "/images/map_icons/aro/",
+	"v2": [
+		{
+			"iconUrl": "/images/map_icons/aro/businesses_small_default.png"
+		},
+		 {
+			"iconUrl": "/images/map_icons/aro/businesses_medium_default.png"
+		},
+		{
+			"iconUrl": "/images/map_icons/aro/businesses_large_default.png"
+		},
+		{
+			"iconUrl": "/images/map_icons/aro/households_default.png"
+		},
+		 {
+			"iconUrl": "/images/map_icons/aro/tower.png"
+		}
+	],
+	"env_is_test": false
+}
