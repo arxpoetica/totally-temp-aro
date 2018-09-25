@@ -243,6 +243,10 @@ class LocationEditorController {
       this.deleteObjectWithId && this.deleteObjectWithId(this.selectedMapObject.objectId)
     }
   }
+  
+  isBoundaryCreationAllowed(mapObject){
+    return false
+  }
 }
 
 LocationEditorController.$inject = ['$timeout', '$http', 'state', 'tracker']

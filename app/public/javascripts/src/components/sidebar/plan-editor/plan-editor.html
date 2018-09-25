@@ -52,7 +52,8 @@
                          get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                          object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
                          create-object-on-click="false"
-                         allow-boundary-creation="$ctrl.isBoundaryCreationAllowed($ctrl.selectedMapObject)"
+                         
+                         is-boundary-creation-allowed="$ctrl.isBoundaryCreationAllowed(mapObject)"
                          hide-object-ids="$ctrl.objectIdsToHide"
                          feature-type="equipment"
                          on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"

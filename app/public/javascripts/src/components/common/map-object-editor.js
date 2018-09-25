@@ -319,7 +319,7 @@ class MapObjectEditorController {
               feature = this.createdMapObjects[result.objectId].feature
               options.push('select')// select 
               if ('equipment' == dataTypeList[0]){
-                options.push('add boundary')// need to filter for: if not boundary 
+                if (this.isBoundaryCreationAllowed({'mapObject':result})) options.push('add boundary')// need to filter for: if not boundary 
               }else if('equipment_boundary' == dataTypeList[0]){
                 options.push('edit boundary')
               }
@@ -458,7 +458,7 @@ class MapObjectEditorController {
 
   // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
   getDropTargetCSSForMapObject(mapObject) {
-    if (!this.isMarker(mapObject)) {
+    if (!this.isMarker(mapObject) || !this.isBoundaryCreationAllowed({'mapObject':mapObject})) { // <------------------- here
       return null
     }
     // Without the 'this.objectIdToDropCSS' cache we get into an infinite digest cycle
@@ -1003,7 +1003,8 @@ let mapObjectEditor = {
     modifyingLibraryId: '<',  // Can be null, valid only if we are modifying locations
     deleteMode: '<',
     createObjectOnClick: '<',
-    allowBoundaryCreation: '<',
+    //allowBoundaryCreation: '<',
+    isBoundaryCreationAllowed: '&', 
     hideObjectIds: '<',    // A set of IDs that we will suppress visibility for
     featureType: '@',
     onInit: '&',

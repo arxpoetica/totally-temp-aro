@@ -1114,7 +1114,7 @@ class PlanEditorController {
   
   toggleSiteBoundary() {
     //if(this.state.showSiteBoundary && this.selectedBoundaryType) {
-      this.isBoundaryCreationAllowed(this.selectedMapObject)
+      //this.isBoundaryCreationAllowed(this.selectedMapObject)
       this.state.viewSettingsChanged.next()
     //} 
   }
