@@ -89,6 +89,9 @@
       "network_anchor": {
         "show": true
       },
+      "multiple_dwelling_unit": {
+        "show": true
+      },
       "planned": {
         "show": true
       },
@@ -310,6 +313,9 @@
       "network_anchor": {
         "show": true
       },
+      "multiple_dwelling_unit": {
+        "show": true
+      },
       "planned": {
         "show": true
       },
@@ -529,6 +535,9 @@
         "show": true
       },
       "network_anchor": {
+        "show": true
+      },
+      "multiple_dwelling_unit": {
         "show": true
       },
       "planned": {

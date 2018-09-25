@@ -24,6 +24,7 @@ class GlobalSettingsController {
 
   backToGlobalSettings() {
     this.userIdForSettingsEdit = this.state.loggedInUser.id
+    this.globalSettingsService.currentManageUserView = this.globalSettingsService.ManageUserViews.Users
     this.currentView = this.views.GLOBAL_SETTINGS
   }
 
