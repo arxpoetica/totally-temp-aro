@@ -190,6 +190,20 @@
         "strokeStyle": "#0000ff"
       },
       "isequipment": true
+    },
+    "multiple_dwelling_unit": {
+      "label": "Multiple Dwelling Unit",
+      "networkNodeType": "multiple_dwelling_unit",
+      "dataItemKey": "equipment",
+      "iconUrl": "/images/map_icons/aro/multiple_dwelling_unit.png",
+      "selectedIconUrl": "/images/map_icons/aro/multiple_dwelling_unit.png",
+      "aggregateZoomThreshold": "11",
+      "equipmentType": "point",
+      "zIndex": 7540, 
+      "drawingOptions": {
+        "strokeStyle": "#0000ff"
+      },
+      "isequipment": true
     }
   },
   "cables": {

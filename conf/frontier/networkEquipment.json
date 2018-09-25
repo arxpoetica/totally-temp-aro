@@ -43,6 +43,9 @@
     "loop_extender": {
       "iconUrl": "/images/map_icons/frontier/loop_extender.png"
     },
+    "multiple_dwelling_unit": {
+      "iconUrl": "/images/map_icons/frontier/multiple_dwelling_unit.png"
+    },
     "network_anchor": {
       "iconUrl": "/images/map_icons/frontier/network_anchor.png"
     }
