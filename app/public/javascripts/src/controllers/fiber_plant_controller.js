@@ -54,8 +54,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       var aggregateOptionsType = null, cbStrokeStyle = null, cbFillStyle = null
       if (state.competition.useAllCompetitors) {
         // Our endpoint uses "all competitors"
+        const strengthDescriptor = (blockType === 'census-block') ? 'cb-strength' : 'cbg-strength'
         var cbTileDefinition = {
-          dataId: `v1.competitive.${dataSource}.${providerType}.cb-strength.tiles.poly.${polyTransform}.${selectedCompetitionResourceManager.id}`,
+          dataId: `v1.competitive.${dataSource}.${providerType}.${strengthDescriptor}.tiles.poly.${polyTransform}.${selectedCompetitionResourceManager.id}`,
           vtlType: (blockType === 'census-block') ? 'CompetitiveCBPolyLayer' : 'CompetitiveCBGPolyLayer',
           strengthResourceManagerId: selectedCompetitionResourceManager.id,
           networkDataSource: dataSource,
