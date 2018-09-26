@@ -51,14 +51,14 @@
     <p><strong>Fiber Route Data</strong></p>
     <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showFiberRoutes"
-           ng-disabled="configuration.perspective.competitorNetworks.disableRoutes"
+           ng-disabled="true || configuration.perspective.competitorNetworks.disableRoutes"
            ng-click="toggleShowFiberRoutesData()">
     Routes
 
     <br>
     <input type="checkbox" class="checkboxfill"
            ng-checked="planState.competition.showFiberRoutesBuffer"
-           ng-disabled="configuration.perspective.competitorNetworks.disableRoutesBuffer"
+           ng-disabled="true || configuration.perspective.competitorNetworks.disableRoutesBuffer"
            ng-click="toggleShowFiberRoutesBufferData()">
     Routes Buffer
 
