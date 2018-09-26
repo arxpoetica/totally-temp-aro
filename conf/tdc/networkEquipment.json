@@ -18,6 +18,10 @@
       "iconUrl": "/images/map_icons/tdc/central_office.png",
       "greyOutIconUrl": "/images/map_icons/frontier/central_office_grey.png"
     },
+    "splice_point": {
+      "label": "TSP",
+      "iconUrl": "/images/map_icons/tdc/splice_point.png"
+    },
     "fiber_distribution_hub": {
       "label": "HF",
       "iconUrl": "/images/map_icons/tdc/fiber_distribution_hub.png"
@@ -26,13 +30,13 @@
       "label": "LF SDU",
       "iconUrl": "/images/map_icons/tdc/fiber_distribution_terminal.png"
     },
+    "multiple_dwelling_unit": {
+      "label": "LF MDU",
+      "iconUrl": "/images/map_icons/tdc/multiple_dwelling_unit.png"
+    },
     "bulk_distribution_terminal": {
       "label": "Coil",
       "iconUrl": "/images/map_icons/tdc/bulk_distribution_terminal.png"
-    },
-    "splice_point": {
-      "label": "TSP",
-      "iconUrl": "/images/map_icons/tdc/splice_point.png"
     }
   },
   "cables": {
