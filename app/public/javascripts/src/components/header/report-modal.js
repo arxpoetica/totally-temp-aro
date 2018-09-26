@@ -3,7 +3,7 @@ class ReportModalController {
     this.state = state
     this.analysis = []
     this.$http = $http
-    $scope.configuration = configuration
+    this.configuration = $scope.configuration = configuration
 
     this.plan
     state.plan.subscribe((newPlan) => {
@@ -15,7 +15,7 @@ class ReportModalController {
 
   close() {
     this.state.reportModal.next(false)
-    this.state.previousModal.next(true)
+    //this.state.previousModal.next(true)
   }
 
   modalShown() {
@@ -27,11 +27,13 @@ class ReportModalController {
 
   modalHide() {
     this.state.reportModal.next(false)
-    this.state.previousModal.next(true)
+    //this.state.previousModal.next(true)
   }
     
   loadPlanReport() {
+    //console.log("load report: "+this.plan.id)
     this.$http.get(`/reports/tabc/${this.plan.id}/list`).then((response) => {
+      //console.log(response)
       //if ($scope.plan.id !== plan.id) return
       var twoDigits = (d) => d > 9 ? String(d) : '0' + d
       var date = new Date()
@@ -112,7 +114,8 @@ class ReportModalController {
           url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${this.plan.id}.csv`
         }
       ])
-      if (configuration.perspective.extendedAnalysis) {
+      
+      if (this.configuration.perspective.extendedAnalysis){
         analysis = analysis.concat([
           {
             name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Output`,
@@ -126,6 +129,8 @@ class ReportModalController {
           }
         ])
       }
+      
+      //console.log(analysis)
       this.analysis = analysis
     })
   }

@@ -287,7 +287,7 @@ class State {
   service.isLoadingPlan = false
   service.expertModeBody = null
   //This modal will be used to toogle from report modal to current modal 
-  service.previousModal
+  //service.previousModal
 
   service.selectionTypeChanged.next(service.selectionModes.SELECTED_AREAS)
 
