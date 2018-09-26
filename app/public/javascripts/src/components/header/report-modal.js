@@ -132,6 +132,8 @@ class ReportModalController {
       
       //console.log(analysis)
       this.analysis = analysis
+    }).catch((err) => {
+      console.error(err)
     })
   }
 
