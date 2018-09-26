@@ -48,9 +48,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       if (state.competition.useAllCompetitors) {
         // Our endpoint uses "all competitors"
         var cbTileDefinition = {
-          dataId: `v1.competitive-carrier.${dataSource}.1.census-block-group.tiles.${providerType}.${polyTransform}.1`,
-          vtlType: 'CompetitiveCBGProviderLayer',
-          strengthResourceManagerId: 1,
+          dataId: `v1.competitive-carrier.${dataSource}.1.${blockType}.tiles.${providerType}.${polyTransform}.3`,
+          vtlType: 'CompetitiveCBProviderLayer',
+          strengthResourceManagerId: 3,
           networkDataSource: dataSource,
           carrierId: 1,
           providerType: providerType,
@@ -65,9 +65,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
           var carrierId = selectedCompetitor.id
           var cbTileDefinition = {
-            dataId: `v1.competitive-carrier.${dataSource}.${carrierId}.census-block-group.tiles.${providerType}.${polyTransform}.1`,
-            vtlType: 'CompetitiveCBGProviderLayer',
-            strengthResourceManagerId: 1,
+            dataId: `v1.competitive-carrier.${dataSource}.${carrierId}.${blockType}.tiles.${providerType}.${polyTransform}.3`,
+            vtlType: (blockType === 'census-block') ? 'CompetitiveCBProviderLayer' : 'CompetitiveCBGProviderLayer',
+            strengthResourceManagerId: 3,
             networkDataSource: dataSource,
             carrierId: carrierId,
             providerType: providerType,
