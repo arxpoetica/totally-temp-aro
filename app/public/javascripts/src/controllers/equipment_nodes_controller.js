@@ -15,7 +15,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     $scope.layerTypeVisibility.planned = configuration.networkEquipment.visibility.defaultShowPlannedEquipment
   }
   $scope.mapZoom = 0//map.getZoom()
-  
+  $scope.equ_tdc_order = ['central_office','splice_point','fiber_distribution_hub','fiber_distribution_terminal','multiple_dwelling_unit','bulk_distribution_terminal','dslam','cell_5g','loop_extender','network_anchor']
   var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
   
   // Get the point transformation mode with the current zoom level
@@ -157,6 +157,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     createdMapLayerKeys.forEach((createdMapLayerKey) => {
       delete oldMapLayers[createdMapLayerKey]
     })
+
+    if(config.ARO_CLIENT === 'tdc') {
+      var equ = angular.copy($scope.configuration.networkEquipment.equipments)
+      $scope.configuration.networkEquipment.equipments={}
+      $scope.equ_tdc_order.forEach((key) => {
+        $scope.configuration.networkEquipment.equipments[key] = equ[key]
+      })
+    }
 
     // Create layers for network equipment nodes and cables
     createdMapLayerKeys.clear()
