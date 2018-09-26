@@ -17,6 +17,13 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
 
+    // We need a competition resource manager selected before we can update any layers
+    const selectedCompetitionResourceManager = state.resourceItems && state.resourceItems.competition_manager && state.resourceItems.competition_manager.selectedManager
+    if (!selectedCompetitionResourceManager) {
+      console.warn('The user attempted to show competitor networks, but a competition resource manager has not been selected yet. Skipping...')
+      return
+    }
+
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())
 
@@ -48,9 +55,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       if (state.competition.useAllCompetitors) {
         // Our endpoint uses "all competitors"
         var cbTileDefinition = {
-          dataId: `v1.competitive.${dataSource}.${providerType}.cb-strength.tiles.poly.${polyTransform}.3`,
+          dataId: `v1.competitive.${dataSource}.${providerType}.cb-strength.tiles.poly.${polyTransform}.${selectedCompetitionResourceManager.id}`,
           vtlType: (blockType === 'census-block') ? 'CompetitiveCBPolyLayer' : 'CompetitiveCBGPolyLayer',
-          strengthResourceManagerId: 3,
+          strengthResourceManagerId: selectedCompetitionResourceManager.id,
           networkDataSource: dataSource,
           providerType: providerType,
           transform: polyTransform
@@ -64,9 +71,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
           var carrierId = selectedCompetitor.id
           var cbTileDefinition = {
-            dataId: `v1.competitive-carrier.${dataSource}.${carrierId}.${blockType}.tiles.${providerType}.${polyTransform}.3`,
+            dataId: `v1.competitive-carrier.${dataSource}.${carrierId}.${blockType}.tiles.${providerType}.${polyTransform}.${selectedCompetitionResourceManager.id}`,
             vtlType: (blockType === 'census-block') ? 'CompetitiveCBProviderLayer' : 'CompetitiveCBGProviderLayer',
-            strengthResourceManagerId: 3,
+            strengthResourceManagerId: selectedCompetitionResourceManager.id,
             networkDataSource: dataSource,
             carrierId: carrierId,
             providerType: providerType,
