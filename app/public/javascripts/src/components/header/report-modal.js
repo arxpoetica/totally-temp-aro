@@ -37,8 +37,9 @@ class ReportModalController {
       //if ($scope.plan.id !== plan.id) return
       var twoDigits = (d) => d > 9 ? String(d) : '0' + d
       var date = new Date()
+      console.log(this.plan)
       var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
-      var prefix = (reportId) => `${now}_${this.plan.id}_${twoDigits(reportId)}_${this.plan.area_name}`
+      var prefix = (reportId) => `${now}_${this.plan.id}_${twoDigits(reportId)}_${this.plan.areaName}`
       var tabcNames = [
         { name: 'T', id: 1, description: 'A_ring' },
         { name: 'A', id: 2, description: 'B_ring' },
@@ -112,18 +113,23 @@ class ReportModalController {
           name: 'Service Area Summary',
           type: '.csv',
           url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${this.plan.id}.csv`
+        }, 
+        {
+          name: prefix(14) + '_Equipment',
+          type: '.kml',
+          url: `/v1/report-extended/plan_report/${this.plan.id}.kml`
         }
       ])
       
       if (this.configuration.perspective.extendedAnalysis){
         analysis = analysis.concat([
           {
-            name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Output`,
+            name: `${now}_${this.plan.id}_${this.plan.areaName}_BVB_Summary_Output`,
             type: '.csv',
             url: `/reports/tabc/${this.plan.id}/build_vs_buy_summary`
           },
           {
-            name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Formatted`,
+            name: `${now}_${this.plan.id}_${this.plan.areaName}_BVB_Summary_Formatted`,
             type: '.xlsx',
             url: '/csv/BVB Summary Formatted.xlsx'
           }
