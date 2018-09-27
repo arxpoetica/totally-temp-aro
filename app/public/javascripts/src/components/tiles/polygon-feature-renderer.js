@@ -43,7 +43,7 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       ctx.globalCompositeOperation = 'multiply'
-    } else if (selectedServiceArea == feature.properties.id
+    } else if (selectedServiceArea && (selectedServiceArea == feature.properties.id)
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle

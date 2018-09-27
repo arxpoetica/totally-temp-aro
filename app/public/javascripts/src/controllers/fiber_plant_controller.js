@@ -16,7 +16,13 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
-    return; // TODO - Parag. Shorted out while we are moving to tiles V2.0
+
+    // We need a competition resource manager selected before we can update any layers
+    const selectedCompetitionResourceManager = state.resourceItems && state.resourceItems.competition_manager && state.resourceItems.competition_manager.selectedManager
+    if (!selectedCompetitionResourceManager) {
+      console.warn('The user attempted to show competitor networks, but a competition resource manager has not been selected yet. Skipping...')
+      return
+    }
 
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())
@@ -28,7 +34,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     createdMapLayerKeys.clear()
 
     // Add map layers based on the selection
-    var censusBlockUrls = []
+    var censusBlockTileDefinitions = []
     var mapLayerKey = `competitor_censusBlocks`
     const CENSUS_BLOCK_ZOOM_THRESHOLD = 11
     var blockType = map.getZoom() > CENSUS_BLOCK_ZOOM_THRESHOLD ? 'census-block' : 'census-block-group'
@@ -48,7 +54,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       var aggregateOptionsType = null, cbStrokeStyle = null, cbFillStyle = null
       if (state.competition.useAllCompetitors) {
         // Our endpoint uses "all competitors"
-        censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/strength/${providerType}/${blockType}/poly/${polyTransform}/`)
+        const strengthDescriptor = (blockType === 'census-block') ? 'cb-strength' : 'cbg-strength'
+        var cbTileDefinition = {
+          dataId: `v1.competitive.${dataSource}.${providerType}.${strengthDescriptor}.tiles.poly.${polyTransform}.${selectedCompetitionResourceManager.id}`,
+          vtlType: (blockType === 'census-block') ? 'CompetitiveCBPolyLayer' : 'CompetitiveCBGPolyLayer',
+          strengthResourceManagerId: selectedCompetitionResourceManager.id,
+          networkDataSource: dataSource,
+          providerType: providerType,
+          transform: polyTransform
+        }
+        censusBlockTileDefinitions.push(cbTileDefinition)
         aggregateOptionsType = 'all'
         cbStrokeStyle = '#000000'
         cbFillStyle = '#505050'
@@ -56,7 +71,16 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         // We want to use only the selected competitors
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
           var carrierId = selectedCompetitor.id
-          censusBlockUrls.push(`/tile/v1/competitive/${dataSource}/carrier/${carrierId}/${providerType}/${blockType}/${polyTransform}/`)
+          var cbTileDefinition = {
+            dataId: `v1.competitive-carrier.${dataSource}.${carrierId}.${blockType}.tiles.${providerType}.${polyTransform}.${selectedCompetitionResourceManager.id}`,
+            vtlType: (blockType === 'census-block') ? 'CompetitiveCBProviderLayer' : 'CompetitiveCBGProviderLayer',
+            strengthResourceManagerId: selectedCompetitionResourceManager.id,
+            networkDataSource: dataSource,
+            carrierId: carrierId,
+            providerType: providerType,
+            transform: polyTransform
+          }
+          censusBlockTileDefinitions.push(cbTileDefinition)
         })
         aggregateOptionsType = 'individual'
         if (state.competition.selectedCompetitors.length > 0) {
@@ -65,9 +89,9 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         }
       }
 
-      if (censusBlockUrls.length > 0) {
+      if (censusBlockTileDefinitions.length > 0) {
         var mapLayer = {
-          dataUrls: censusBlockUrls,
+          tileDefinitions: censusBlockTileDefinitions,
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
           strokeStyle: cbStrokeStyle,
           fillStyle: cbFillStyle,
@@ -100,63 +124,63 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       }
     }
 
-    // Create fiber routes layer
-    if (state.competition.showFiberRoutes) {
-      var fiberLineWidth = 2
-      if (state.competition.useAllCompetitors) {
-        var mapLayerKey = `competitor_fiberRoutes_all`
-        oldMapLayers[mapLayerKey] = {
-          dataUrls: [`/tile/v1/fiber/competitive/all/tiles/line/${lineTransform}/`],
-          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          strokeStyle: '#000000',
-          fillStyle: '#000000',
-          zIndex: 1042, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-          lineWidth: fiberLineWidth
-        }
-        createdMapLayerKeys.add(mapLayerKey)
-      } else {
-        state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
-          var mapLayerKey = `competitor_fiberRoutes_${providerType}_${selectedCompetitor.id}`
-          oldMapLayers[mapLayerKey] = {
-            dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/line/${lineTransform}/`],
-            iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-            strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle,
-            zIndex: 1043, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-            lineWidth: fiberLineWidth
-          }
-          createdMapLayerKeys.add(mapLayerKey)
-        })
-      }
-    }
+    // // Create fiber routes layer
+    // if (state.competition.showFiberRoutes) {
+    //   var fiberLineWidth = 2
+    //   if (state.competition.useAllCompetitors) {
+    //     var mapLayerKey = `competitor_fiberRoutes_all`
+    //     oldMapLayers[mapLayerKey] = {
+    //       dataUrls: [`/tile/v1/fiber/competitive/all/tiles/line/${lineTransform}/`],
+    //       iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+    //       strokeStyle: '#000000',
+    //       fillStyle: '#000000',
+    //       zIndex: 1042, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+    //       lineWidth: fiberLineWidth
+    //     }
+    //     createdMapLayerKeys.add(mapLayerKey)
+    //   } else {
+    //     state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
+    //       var mapLayerKey = `competitor_fiberRoutes_${providerType}_${selectedCompetitor.id}`
+    //       oldMapLayers[mapLayerKey] = {
+    //         dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/line/${lineTransform}/`],
+    //         iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+    //         strokeStyle: selectedCompetitor.strokeStyle,
+    //         fillStyle: selectedCompetitor.fillStyle,
+    //         zIndex: 1043, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+    //         lineWidth: fiberLineWidth
+    //       }
+    //       createdMapLayerKeys.add(mapLayerKey)
+    //     })
+    //   }
+    // }
 
-    // Create fiber routes buffer layer. Copy-pasted from "fiber routes layer" as the endpoints are changing at the moment.
-    if (state.competition.showFiberRoutesBuffer) {
-      if (state.competition.useAllCompetitors) {
-        var mapLayerKey = `competitor_fiberRoutesBuffer_all`
-        oldMapLayers[mapLayerKey] = {
-          dataUrls: [`/tile/v1/fiber/competitive/all/tiles/buffer/${polyTransform}/`],
-          iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          strokeStyle: '#000000',
-          zIndex: 1044, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-          fillStyle: '#000000'
-        }
-        createdMapLayerKeys.add(mapLayerKey)
-      } else {
-        state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
-          var mapLayerKey = `competitor_fiberRoutesBuffer_${providerType}_${selectedCompetitor.id}`
-          oldMapLayers[mapLayerKey] = {
-            dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/buffer/${polyTransform}/`],
-            iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-            strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle,
-            zIndex: 1045, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-            opacity: 0.4
-          }
-          createdMapLayerKeys.add(mapLayerKey)
-        })
-      }
-    }
+    // // Create fiber routes buffer layer. Copy-pasted from "fiber routes layer" as the endpoints are changing at the moment.
+    // if (state.competition.showFiberRoutesBuffer) {
+    //   if (state.competition.useAllCompetitors) {
+    //     var mapLayerKey = `competitor_fiberRoutesBuffer_all`
+    //     oldMapLayers[mapLayerKey] = {
+    //       dataUrls: [`/tile/v1/fiber/competitive/all/tiles/buffer/${polyTransform}/`],
+    //       iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+    //       strokeStyle: '#000000',
+    //       zIndex: 1044, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+    //       fillStyle: '#000000'
+    //     }
+    //     createdMapLayerKeys.add(mapLayerKey)
+    //   } else {
+    //     state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
+    //       var mapLayerKey = `competitor_fiberRoutesBuffer_${providerType}_${selectedCompetitor.id}`
+    //       oldMapLayers[mapLayerKey] = {
+    //         dataUrls: [`/tile/v1/fiber/competitive/carrier/${selectedCompetitor.id}/tiles/buffer/${polyTransform}/`],
+    //         iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
+    //         strokeStyle: selectedCompetitor.strokeStyle,
+    //         fillStyle: selectedCompetitor.fillStyle,
+    //         zIndex: 1045, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+    //         opacity: 0.4
+    //       }
+    //       createdMapLayerKeys.add(mapLayerKey)
+    //     })
+    //   }
+    // }
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)

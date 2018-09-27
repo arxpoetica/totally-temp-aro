@@ -48,7 +48,7 @@ class PlanEditorController {
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
-    this.allEditableNetworkNodeTypes = [
+    const editableNetworkNodeTypes = [
       'central_office',
       'dslam',
       'fiber_distribution_hub',
@@ -60,19 +60,13 @@ class PlanEditorController {
       'network_anchor',
       'multiple_dwelling_unit'
     ]
-    // Create a list of enabled network node types that we WILL allow the user to drag onto the map
-    this.enabledNetworkNodeTypes = [
-      'central_office',
-      'dslam',
-      'fiber_distribution_hub',
-      'fiber_distribution_terminal',
-      'cell_5g',
-      'splice_point',
-      'bulk_distribution_terminal',
-      'loop_extender',
-      'network_anchor',
-      'multiple_dwelling_unit'
-    ]
+    this.allEditableNetworkNodeTypes = []
+    Object.keys(configuration.perspective.networkEquipment).forEach((equipmentType) => {
+      const equipment = configuration.perspective.networkEquipment[equipmentType]
+      if (equipment.show && (editableNetworkNodeTypes.indexOf(equipmentType) >= 0)) {
+        this.allEditableNetworkNodeTypes.push(equipmentType)
+      }
+    })
     
     this.censusCategories = this.state.censusCategories.getValue()
     this.state.censusCategories.subscribe((newValue) => {
