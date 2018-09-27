@@ -458,7 +458,7 @@ class MapObjectEditorController {
 
   // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
   getDropTargetCSSForMapObject(mapObject) {
-    if (!this.isMarker(mapObject) || !this.isBoundaryCreationAllowed({'mapObject':mapObject})) { // <------------------- here
+    if (!this.isMarker(mapObject) || !this.isBoundaryCreationAllowed({'mapObject':mapObject})) { 
       return null
     }
     // Without the 'this.objectIdToDropCSS' cache we get into an infinite digest cycle

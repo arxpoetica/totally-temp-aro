@@ -825,8 +825,10 @@ class PlanEditorController {
   }
 
   isBoundaryCreationAllowed(mapObject) {
+    // temporary allow all
+    return true
     //Dont allow adding a same boundary type if exists
-    return this.state.showSiteBoundary && mapObject && mapObject.objectId && !this.networkNodeHasSBType(mapObject.objectId)
+    //return this.state.showSiteBoundary && mapObject && mapObject.objectId && !this.networkNodeHasSBType(mapObject.objectId)
   }
   
   refreshViewObjectSBTypes(boundaryObjectId) {
