@@ -110,7 +110,20 @@ exports.configure = (api, middleware) => {
       .then((output) => response.send(output))
       .catch(next)
   })
-
+  
+  api.get('/report-extended/:name/:plan_id/:type', (request, response, next) => {
+    var name = request.params.name
+    var plan_id = request.params.plan_id
+    var type = request.params.type
+    var req = {
+      method: 'GET',
+      url: config.aro_service_url + `/report-extended/${name}/${plan_id}.${type}`
+    }
+    return models.AROService.request(req)
+      .then((output) => response.send(output))
+      .catch(next)
+  })
+  
   api.get('/reports/tabc/:plan_id/kml/:type', (request, response, next) => {
     var plan_id = request.params.plan_id
     var type = request.params.type

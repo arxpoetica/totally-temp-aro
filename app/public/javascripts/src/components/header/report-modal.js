@@ -29,8 +29,35 @@ class ReportModalController {
     this.state.reportModal.next(false)
     //this.state.previousModal.next(true)
   }
-    
-  loadPlanReport() {
+  
+  loadPlanReport(){
+    this.analysis = []
+    this.$http.get(`/service/installed/report/meta-data`).then((response) => {
+      if (response.data){
+        var reports = response.data
+        
+        var twoDigits = (d) => d > 9 ? String(d) : '0' + d
+        var date = new Date()
+        var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
+        //var prefix = `${now}_${this.plan.id}_${this.plan.areaName}_`
+        var prefix = `${now}_${this.plan.id}_`
+        
+        var analysis = []
+        reports.forEach((report) => {
+          analysis.push({
+            name: `${prefix}${report.name}`,
+            type: `.${report.mediaType}`,
+            url: `/report-extended/${report.name}/${this.plan.id}/${report.mediaType}`
+          })
+        })
+        this.analysis = analysis
+      }
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  /*
+  loadPlanReportOld() {
     //console.log("load report: "+this.plan.id)
     this.$http.get(`/reports/tabc/${this.plan.id}/list`).then((response) => {
       //console.log(response)
@@ -142,7 +169,7 @@ class ReportModalController {
       console.error(err)
     })
   }
-
+  */
 }
 
 ReportModalController.$inject = ['$scope', '$http', 'state', 'configuration']
