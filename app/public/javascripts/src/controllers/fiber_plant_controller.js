@@ -145,8 +145,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         var allFiberBufferTileDefinition = {
           dataId: `v1.tiles.fiber.competitive.buffer.all.buffer.${polyTransform}`,
           vtlType: 'CompetitiveAllFiberBufferLayer',
-          lineTransform: lineTransform,
-          polyTransform: polyTransform
+          lineTransform: lineTransform
         }
         var mapLayerKey = `competitor_fiberRoutesBuffer_all`
         oldMapLayers[mapLayerKey] = {
