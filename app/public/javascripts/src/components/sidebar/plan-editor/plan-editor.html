@@ -87,7 +87,7 @@
           <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipments"
                             ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
                             icon="{{equipment.iconUrl}}" 
-                            is-disabled="$ctrl.enabledNetworkNodeTypes.indexOf(equipment.networkNodeType) < 0"
+                            is-disabled="false"
                             entity-type="networkEquipment"
                             entity-details="{{equipment.networkNodeType}}">
           </draggable-button>
