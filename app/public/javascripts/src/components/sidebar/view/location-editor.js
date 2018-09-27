@@ -46,6 +46,7 @@ class LocationEditorController {
   resumeOrCreateTransaction() {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
+    this.lastUsedNumberOfLocations = 1
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.state.dataItems.location.selectedLibraryItems[0]
     this.$http.get(`/service/library/transaction?user_id=${this.state.loggedInUser.id}`)
@@ -163,6 +164,11 @@ class LocationEditorController {
     })
   }
 
+  // Sets the last-used number-of-locations property so we can use it for new locations
+  setLastUsedNumberOfLocations(newValue) {
+    this.lastUsedNumberOfLocations = +newValue
+  }
+
   // Marks the properties of the selected location as dirty (changed).
   markSelectedLocationPropertiesDirty() {
     if (this.selectedMapObject) {
@@ -207,7 +213,7 @@ class LocationEditorController {
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
     //if (feature.is_locked) return
-    var numberOfLocations = 1   // Default number of locations should always be 1. #159981791
+    var numberOfLocations = this.lastUsedNumberOfLocations  // use last used number of locations until commit
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
