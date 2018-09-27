@@ -637,12 +637,13 @@ exports.configure = (api, middleware) => {
         matched_equipment AS (
           SELECT 
             ne.*
-          FROM  inputs i
-          CROSS JOIN all_boundaries b
-          JOIN  reports.network_equipment ne
+          FROM all_boundaries b
+          CROSS JOIN  inputs i
+          LEFT JOIN  reports.network_equipment ne
               ON ne.root_plan_id = i.plan_id
               AND ne.object_id = b.network_node_object_id
               AND ne.node_type_id <> 8
+          
         ),
         
         all_boundary_info AS (
@@ -661,7 +662,7 @@ exports.configure = (api, middleware) => {
           ON sa.service_layer_id = sl.id
           AND ST_Intersects(sa.geom, xb.geom) 
         GROUP BY 1, 2, 3,4
-        )
+        ) 
         
         SELECT DISTINCT
           ST_AsKML(b.geom) AS site_boundary_geom,
@@ -669,11 +670,10 @@ exports.configure = (api, middleware) => {
           COALESCE(e.site_clli, '') AS "Site CLLI Code"
         --  ,e.site_name AS "Site Name"
         --  i.description AS "Boundary Type" 
-        FROM inputs i
-        CROSS JOIN all_boundary_info b
+        FROM  all_boundary_info b
+        CROSS JOIN inputs i
         LEFT JOIN matched_equipment e
-           ON e.object_id = b.equipment_object_id 
-        WHERE e.geom  IS NOT NULL;        
+           ON e.object_id = b.equipment_object_id ;
         `
         return database.query(planQ)
       })
