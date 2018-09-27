@@ -29,16 +29,44 @@ class ReportModalController {
     this.state.reportModal.next(false)
     //this.state.previousModal.next(true)
   }
-    
-  loadPlanReport() {
+  
+  loadPlanReport(){
+    this.analysis = []
+    this.$http.get(`/service/installed/report/meta-data`).then((response) => {
+      if (response.data){
+        var reports = response.data
+        
+        var twoDigits = (d) => d > 9 ? String(d) : '0' + d
+        var date = new Date()
+        var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
+        //var prefix = `${now}_${this.plan.id}_${this.plan.areaName}_`
+        var prefix = `${now}_${this.plan.id}_`
+        
+        var analysis = []
+        reports.forEach((report) => {
+          analysis.push({
+            name: `${prefix}${report.name}`,
+            type: `.${report.mediaType}`,
+            url: `/report-extended/${report.name}/${this.plan.id}/${report.mediaType}`
+          })
+        })
+        this.analysis = analysis
+      }
+    }).catch((err) => {
+      console.error(err)
+    })
+  }
+  /*
+  loadPlanReportOld() {
     //console.log("load report: "+this.plan.id)
     this.$http.get(`/reports/tabc/${this.plan.id}/list`).then((response) => {
       //console.log(response)
       //if ($scope.plan.id !== plan.id) return
       var twoDigits = (d) => d > 9 ? String(d) : '0' + d
       var date = new Date()
+      console.log(this.plan)
       var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
-      var prefix = (reportId) => `${now}_${this.plan.id}_${twoDigits(reportId)}_${this.plan.area_name}`
+      var prefix = (reportId) => `${now}_${this.plan.id}_${twoDigits(reportId)}_${this.plan.areaName}`
       var tabcNames = [
         { name: 'T', id: 1, description: 'A_ring' },
         { name: 'A', id: 2, description: 'B_ring' },
@@ -112,18 +140,23 @@ class ReportModalController {
           name: 'Service Area Summary',
           type: '.csv',
           url: `/service-reports/ServiceAreaSummary.csv/v1/report-extended/service_area_summary/${this.plan.id}.csv`
+        }, 
+        {
+          name: prefix(14) + '_Equipment',
+          type: '.kml',
+          url: `/v1/report-extended/plan_report/${this.plan.id}.kml`
         }
       ])
       
       if (this.configuration.perspective.extendedAnalysis){
         analysis = analysis.concat([
           {
-            name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Output`,
+            name: `${now}_${this.plan.id}_${this.plan.areaName}_BVB_Summary_Output`,
             type: '.csv',
             url: `/reports/tabc/${this.plan.id}/build_vs_buy_summary`
           },
           {
-            name: `${now}_${this.plan.id}_${this.plan.area_name}_BVB_Summary_Formatted`,
+            name: `${now}_${this.plan.id}_${this.plan.areaName}_BVB_Summary_Formatted`,
             type: '.xlsx',
             url: '/csv/BVB Summary Formatted.xlsx'
           }
@@ -136,7 +169,7 @@ class ReportModalController {
       console.error(err)
     })
   }
-
+  */
 }
 
 ReportModalController.$inject = ['$scope', '$http', 'state', 'configuration']
