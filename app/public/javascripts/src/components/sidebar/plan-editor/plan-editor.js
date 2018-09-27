@@ -229,7 +229,39 @@ class PlanEditorController {
     }
   }
   
-  // ToDo: shared code with calculateCoverage(), combine
+  
+  onRequestCalculateCoverage(){
+    if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)){
+      var mapObject = this.selectedMapObject
+      // ToDo: fix. more of these terrible discrepancies
+      var networkObjectId = mapObject.feature.networkObjectId
+      if ('undefined' == typeof networkObjectId){
+        networkObjectId = mapObject.feature.attributes.network_node_object_id
+      }
+      
+      var equipmentPoint = {
+        type: 'Point',
+        coordinates: []
+      }
+      
+      if (this.objectIdToMapObject.hasOwnProperty(networkObjectId)){
+        // we have an edited version of the equipment point
+        equipmentPoint.coordinates = [this.objectIdToMapObject[networkObjectId].position.lng(), this.objectIdToMapObject[networkObjectId].position.lat()]
+        this.calculateCoverage(mapObject, equipmentPoint)
+      }else{
+        // we do not have an edited version of the equipment point, get ti from the server 
+        var planId = this.state.plan.getValue().id
+        this.$http.get(`/service/plan-feature/${planId}/equipment/${networkObjectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          equipmentPoint = result.data.geometry
+          this.calculateCoverage(mapObject, equipmentPoint)
+        })
+      }
+    }
+  }
+  
+  
+  //Note: similar code as calculateCoverage(), not sure we can combine them
   calculateAutoBoundary(mapObject, spatialEdgeType, directed) {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
@@ -294,46 +326,8 @@ class PlanEditorController {
   }
   
   
-  
-  onRequestCalculateCoverage(){
-    if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)){
-      
-      var mapObject = this.selectedMapObject
-      //console.log(mapObject)
-      // ToDo: fix. more of these terrible discrepancies
-      var networkObjectId = mapObject.feature.networkObjectId
-      if ('undefined' == typeof networkObjectId){
-        networkObjectId = mapObject.feature.attributes.network_node_object_id
-      }
-      
-      var equipmentPoint = {
-        type: 'Point',
-        coordinates: []
-      }
-      
-      if (this.objectIdToMapObject.hasOwnProperty(networkObjectId)){
-        // we have an edited version of the equipment point
-        equipmentPoint.coordinates = [this.objectIdToMapObject[networkObjectId].position.lng(), this.objectIdToMapObject[networkObjectId].position.lat()]
-        this.calculateCoverage(mapObject, equipmentPoint)
-      }else{
-        // we do not have an edited version of the equipment point, get ti from the server 
-        var planId = this.state.plan.getValue().id
-        this.$http.get(`/service/plan-feature/${planId}/equipment/${networkObjectId}?userId=${this.state.loggedInUser.id}`)
-        .then((result) => {
-          //console.log(result)
-          
-          equipmentPoint = result.data.geometry
-          this.calculateCoverage(mapObject, equipmentPoint)
-        })
-      }
-    }
-  }
-  
-  //ToDo: shared code with calculateAutoBoundary(), combine
+  //Note: similar code as calculateAutoBoundary(), not sure we can combine them
   calculateCoverage(mapObject, equipmentPoint, directed) {
-    //console.log(mapObject)
-    //console.log(equipmentPoint)
-    
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
@@ -346,52 +340,20 @@ class PlanEditorController {
 
     //optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed  // directed analysis if thats what the user wants
-    // Always send radius in meters to the back end
-    //optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
-
+    
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-    //console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
     .then((result) => {
-      //console.log(result)
       // The user may have destroyed the component before we get here. In that case, just return
       if (this.isComponentDestroyed) {
         console.warn('Plan editor was closed while a boundary was being calculated')
         return
       }
-      /*
-      // Construct a feature that we will pass to the map object editor, which will create the map object
-      var boundaryProperties = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
-                                                      optimizationBody.spatialEdgeType, optimizationBody.directed, mapObject.featureType)
-      // ToDo: this should use AroFeatureFactory
-      var feature = {
-        objectId: this.utils.getUUID(),
-        networkNodeType: boundaryProperties.networkNodeType, 
-        geometry: {
-          type: 'Polygon',
-          coordinates: result.data.polygon.coordinates
-        },
-        boundaryTypeId: boundaryProperties.selectedSiteBoundaryTypeId,
-        attributes: {
-          network_node_type: boundaryProperties.networkNodeType,
-          selected_site_move_update: boundaryProperties.selectedSiteMoveUpdate,
-          selected_site_boundary_generation: boundaryProperties.selectedSiteBoundaryGeneration,
-          network_node_object_id: equipmentObjectId, // This is the Network Equipment that this boundary is associated with
-          spatialEdgeType: boundaryProperties.spatialEdgeType,
-          directed: boundaryProperties.directed
-        }
-      }
-      */
-      //this.objectIdToProperties[feature.objectId] = boundaryProperties
-      //this.boundaryIdToEquipmentId[feature.objectId] = equipmentObjectId
-      //this.equipmentIdToBoundaryId[equipmentObjectId] = feature.objectId
-      this.computedBoundaries.add(mapObject.feature.objectId)
-      //this.createMapObjects && this.createMapObjects([feature])
       
+      this.computedBoundaries.add(mapObject.feature.objectId)
       this.digestBoundaryCoverage(mapObject.feature.objectId, result.data)
       this.isWorkingOnCoverage = false
-      //this.state.planEditorChanged.next(true) //recaluculate plansummary
     })
     .catch((err) => {
       console.error(err)

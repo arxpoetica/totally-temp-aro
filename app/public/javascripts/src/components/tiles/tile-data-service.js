@@ -187,16 +187,16 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }
 
   var formatCensusBlockData = function(cBlock){
-	let sepA = ';'
-	let sepB = ':'
+    let sepA = ';'
+    let sepB = ':'
     cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
-    	let kvPairs = cBlock.properties.tags.split( sepA )
-    	cBlock.properties.tags = {}
-    	kvPairs.forEach((pair) => {
-    	  let kv = pair.split( sepB )
-    	  // incase there are extra ':'s in the value we join all but the first together 
-    	  if ("" != kv[0]) cBlock.properties.tags[ kv[0]+"" ] = kv.slice(1).join( sepB )
-    	}) 
+  	let kvPairs = cBlock.properties.tags.split( sepA )
+  	cBlock.properties.tags = {}
+  	kvPairs.forEach((pair) => {
+  	  let kv = pair.split( sepB )
+  	  // incase there are extra ':'s in the value we join all but the first together 
+  	  if ("" != kv[0]) cBlock.properties.tags[ kv[0]+"" ] = kv.slice(1).join( sepB )
+  	}) 
     //return cBlock 
   }
   
