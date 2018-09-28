@@ -122,7 +122,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           var fiberTileDefinition = {
             dataId: `v1.tiles.fiber.competitive.carrier.line.${selectedCompetitor.id}.${lineTransform}`,
             vtlType: 'CompetitiveFiberLayer',
-            lineTransform: lineTransform
+            lineTransform: lineTransform,
+            carrierId: selectedCompetitor.id
           }
           var mapLayerKey = `competitor_fiberRoutes_${providerType}_${selectedCompetitor.id}`
           oldMapLayers[mapLayerKey] = {
@@ -161,7 +162,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
       } else {
         state.competition.selectedCompetitors.forEach((selectedCompetitor) => {
           var fiberBufferTileDefinition = {
-            dataId: `v1.tiles.fiber.competitive.carrier.buffer.competitive.fiber_buffer`,
+            dataId: `v1.tiles.fiber.competitive.carrier.buffer.${selectedCompetitor.id}.${polyTransform}`,
             vtlType: 'CompetitiveFiberBufferLayer',
             carrierId: selectedCompetitor.id,
             polyTransform: polyTransform
