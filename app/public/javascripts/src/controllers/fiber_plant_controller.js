@@ -99,7 +99,8 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   const createLayersForFiber = (mapLayerKey, state, lineTransform, oldMapLayers, createdMapLayerKeys) => {
     // Create fiber routes layer
     if (state.competition.showFiberRoutes) {
-      var fiberLineWidth = 2
+      const fiberLineWidth = 2
+      const providerType = state.competition.selectedCompetitorType.id
       if (state.competition.useAllCompetitors) {
         var fiberTileDefinition = {
           dataId: `v1.tiles.fiber.competitive.all.line.${lineTransform}`,
@@ -141,6 +142,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   const createLayersForFiberBuffer = (mapLayerKey, state, lineTransform, polyTransform, oldMapLayers, createdMapLayerKeys) => {
     // Create fiber routes buffer layer.
     if (state.competition.showFiberRoutesBuffer) {
+      const providerType = state.competition.selectedCompetitorType.id
       if (state.competition.useAllCompetitors) {
         var allFiberBufferTileDefinition = {
           dataId: `v1.tiles.fiber.competitive.buffer.all.buffer.${polyTransform}`,
@@ -213,7 +215,6 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     } else if (state.competition.useGeotelDataSource) {
       dataSource = 'geotel'
     }
-    const providerType = state.competition.selectedCompetitorType.id
 
     createLayersForCensusBlocks(mapLayerKey, state, dataSource, oldMapLayers, createdMapLayerKeys)
     createLayersForFiber(mapLayerKey, state, lineTransform, oldMapLayers, createdMapLayerKeys)
