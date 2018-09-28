@@ -20,12 +20,18 @@ class GlobalSettingsController {
 
   modalHide() {
     this.state.showGlobalSettings = false
+    this.globalSettingsService.currentManageUserView = this.globalSettingsService.ManageUserViews.Users
+    this.backToGlobalSettings()
   }
 
   backToGlobalSettings() {
     this.userIdForSettingsEdit = this.state.loggedInUser.id
-    this.globalSettingsService.currentManageUserView = this.globalSettingsService.ManageUserViews.Users
     this.currentView = this.views.GLOBAL_SETTINGS
+  }
+
+  isManageUsersView() {
+    return this.globalSettingsService.currentManageUserView === this.globalSettingsService.ManageUserViews.SendEmail || 
+    this.globalSettingsService.currentManageUserView === this.globalSettingsService.ManageUserViews.RegisterUser
   }
 
   openUserSettingsForUserId(userId) {
