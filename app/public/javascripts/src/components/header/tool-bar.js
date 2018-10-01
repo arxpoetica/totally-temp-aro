@@ -30,6 +30,8 @@ class ToolBarController {
     this.rulerSegments = []
     this.rulerPolyLine = null 
 
+    this.state.showFiberSize = false
+
     this.rangeValues = []
     const initial = 1000
     const final = 5000000
@@ -532,6 +534,7 @@ class ToolBarController {
       this.rulerAction()
     }
   }
+
 }
 
 ToolBarController.$inject = ['$element', '$timeout', '$document','$http' ,'state', 'map_tools', '$window', 'configuration']

@@ -567,7 +567,11 @@ class MapTileRenderer {
               }
               PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             } else {
-              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, null, false, this.tileSize)
+              var drawingStyles = {
+                lineWidth: this.state.showFiberSize ? feature.properties.fiber_strands : mapLayer.lineWidth,
+                strokeStyle: mapLayer.strokeStyle
+              }
+              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             }
           }
         }
