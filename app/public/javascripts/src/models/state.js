@@ -255,19 +255,6 @@ class State {
     heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
   }  
   service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
-  service.mapTypeIds = {
-    HYBRID: 'hybrid',
-    ROADMAP: 'roadmap'
-  }
-  service.mapTypeId = (config.ARO_CLIENT === 'frontier') ? service.mapTypeIds.HYBRID : service.mapTypeIds.ROADMAP
-  service.setMapTypeId = (obj) => service.mapTypeId = obj.mapTypeId
-  service.setInitialMapTypeId = () => {
-    var mapTypeId = service.mapTypeIds.ROADMAP
-    if (config.ARO_CLIENT === 'frontier' && service.loggedInUser.perspective === 'admin' || service.loggedInUser === 'default' || service.loggedInUser.perspective === 'standard') {
-      mapTypeId = service.mapTypeIds.HYBRID
-    }
-    service.setMapTypeId({mapTypeId})
-  }
 
   service.defaultPlanCoordinates = {
     zoom: 14,
@@ -1528,7 +1515,6 @@ class State {
       service.loggedInUser.perspective = result.data.perspective || 'default'
       configuration.loadPerspective(service.loggedInUser.perspective)
       service.reloadLocationTypes() // These may change with the perspective
-      service.setInitialMapTypeId()
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {

@@ -11,7 +11,8 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       'networkEquipment',
       'units',
       'aroClient',
-      "uiVisibility"
+      'mapType',
+      'uiVisibility'
     ]
 
     configurationTypes.forEach((configurationType) => {
