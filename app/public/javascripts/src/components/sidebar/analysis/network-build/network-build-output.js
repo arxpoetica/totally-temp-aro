@@ -1,12 +1,13 @@
 class NetworkBuildOutputController {
 
-  constructor($http, state, map_tools) {
+  constructor($http, state, map_tools, configuration) {
     this.state = state
     this.$http = $http
     this.map_tools = map_tools
     this.networkBuildSummary = {}
     this.plannedNetworkDemand = {}
     this.config = config
+    this.configuration = configuration
     this.plan = null
 
     state.plan
@@ -20,12 +21,15 @@ class NetworkBuildOutputController {
       if(plan && plan.planState === 'COMPLETED') this.getNetworkBuildReport()
     })
     
+    console.log(this.configuration)
+    console.log(this.state.networkNodeTypesEntity)
   }
 
   getNetworkBuildReport() {
     this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
       this.networkBuildSummary = response.data
       this.plannedNetworkDemand = this.networkBuildSummary.demandSummary.networkDemands.filter((item) => item.demandType === 'planned_demand')[0]
+      console.log(this.networkBuildSummary)
     })  
   }
 
@@ -44,7 +48,7 @@ class NetworkBuildOutputController {
   // }
 }
 
-NetworkBuildOutputController.$inject = ['$http','state','map_tools']
+NetworkBuildOutputController.$inject = ['$http','state','map_tools', 'configuration']
 
 let networkBuildOutput = {
   templateUrl: '/components/sidebar/analysis/network-build/network-build-output.html',
