@@ -10,26 +10,21 @@ class NetworkBuildOutputController {
     this.configuration = configuration
     this.plan = null
 
-    state.plan
-    .subscribe((plan) => {
+    state.plan.subscribe((plan) => {
       this.plan = plan
       if(plan.planState === 'COMPLETED') this.getNetworkBuildReport()
     })
 
-    state.planOptimization
-    .subscribe((plan) => {
+    state.planOptimization.subscribe((plan) => {
       if(plan && plan.planState === 'COMPLETED') this.getNetworkBuildReport()
     })
     
-    console.log(this.configuration)
-    console.log(this.state.networkNodeTypesEntity)
   }
 
   getNetworkBuildReport() {
     this.$http.get(`/service/report/plan/${this.plan.id}`).then((response) => {
       this.networkBuildSummary = response.data
       this.plannedNetworkDemand = this.networkBuildSummary.demandSummary.networkDemands.filter((item) => item.demandType === 'planned_demand')[0]
-      console.log(this.networkBuildSummary)
     })  
   }
 

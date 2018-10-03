@@ -42,7 +42,7 @@
         <th colspan="2">Equipment Capex</th>
       </tr>
       <tr ng-repeat="equipmentCost in $ctrl.networkBuildSummary.priceModel.equipmentCosts">
-        <td class="indent-1 text-capitalize">{{$ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
+        <td class="indent-1 text-capitalize">{{$ctrl.configuration.networkEquipment.equipments[equipmentCost.nodeType].label || $ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
         <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
       </tr>
 
