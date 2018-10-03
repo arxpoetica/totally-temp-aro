@@ -119,7 +119,9 @@
 </div>
 
 <div class="map-tools-buttons-container">
-  <div ng-controller="map_tools_controller" ng-class="{ 'map_tools_container': true, 'map-tools-vertical-center': configuration.perspective.mapTools.centerVertically }">
+  <div ng-controller="map_tools_controller"
+       ng-class="{ 'map_tools_container': true, 'map-tools-vertical-center': configuration.perspective.mapTools.centerVertically }"
+       ng-style="{ 'padding-top': configuration.perspective.mapTools.centerVertically ? '0px' : '10px' }">
     <div ng-repeat="tool in map_tools.available_tools">
       <hr ng-if="tool.separator">
       <p ng-if="!tool.separator">
