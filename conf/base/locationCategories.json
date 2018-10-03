@@ -167,7 +167,7 @@
     },
     "tier_1": {
       "show": true,
-      "label": "DNB Tier 1 (<1,000 ft from splice point)",
+      "label": "DNB Tier 1",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -187,7 +187,7 @@
     },
     "tier_2": {
       "show": true,
-      "label": "DNB Tier 2 (1,000-3,000 ft)",
+      "label": "DNB Tier 2",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -207,7 +207,7 @@
     },
     "tier_3": {
       "show": true,
-      "label": "DNB Tier 3 (>3,000 ft)",
+      "label": "DNB Tier 3",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",

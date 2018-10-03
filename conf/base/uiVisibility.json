@@ -287,13 +287,13 @@
         "show": true
       },
       "dslam": {
-        "show": true
+        "show": false
       },
       "fiber_distribution_hub": {
-        "show": true
+        "show": false
       },
       "fiber_distribution_terminal": {
-        "show": true
+        "show": false
       },
       "bulk_distribution_terminal": {
         "show": false
@@ -305,16 +305,16 @@
         "show": false
       },
       "cell_5g": {
-        "show": true
+        "show": false
       },
       "loop_extender": {
-        "show": true
+        "show": false
       },
       "network_anchor": {
-        "show": true
+        "show": false
       },
       "multiple_dwelling_unit": {
-        "show": true
+        "show": false
       },
       "planned": {
         "show": true
@@ -511,13 +511,13 @@
         "show": true
       },
       "dslam": {
-        "show": true
+        "show": false
       },
       "fiber_distribution_hub": {
-        "show": true
+        "show": false
       },
       "fiber_distribution_terminal": {
-        "show": true
+        "show": false
       },
       "bulk_distribution_terminal": {
         "show": false
@@ -529,16 +529,16 @@
         "show": false
       },
       "cell_5g": {
-        "show": true
+        "show": false
       },
       "loop_extender": {
-        "show": true
+        "show": false
       },
       "network_anchor": {
-        "show": true
+        "show": false
       },
       "multiple_dwelling_unit": {
-        "show": true
+        "show": false
       },
       "planned": {
         "show": false

@@ -1,22 +1,21 @@
 class NetworkBuildOutputController {
 
-  constructor($http, state, map_tools) {
+  constructor($http, state, map_tools, configuration) {
     this.state = state
     this.$http = $http
     this.map_tools = map_tools
     this.networkBuildSummary = {}
     this.plannedNetworkDemand = {}
     this.config = config
+    this.configuration = configuration
     this.plan = null
 
-    state.plan
-    .subscribe((plan) => {
+    state.plan.subscribe((plan) => {
       this.plan = plan
       if(plan.planState === 'COMPLETED') this.getNetworkBuildReport()
     })
 
-    state.planOptimization
-    .subscribe((plan) => {
+    state.planOptimization.subscribe((plan) => {
       if(plan && plan.planState === 'COMPLETED') this.getNetworkBuildReport()
     })
     
@@ -44,7 +43,7 @@ class NetworkBuildOutputController {
   // }
 }
 
-NetworkBuildOutputController.$inject = ['$http','state','map_tools']
+NetworkBuildOutputController.$inject = ['$http','state','map_tools', 'configuration']
 
 let networkBuildOutput = {
   templateUrl: '/components/sidebar/analysis/network-build/network-build-output.html',

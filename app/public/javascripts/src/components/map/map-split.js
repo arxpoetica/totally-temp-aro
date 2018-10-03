@@ -36,7 +36,7 @@ class MapSplitController {
         })
         state.splitterObj.next(this.splitterObj)
       }
-      let element = $compile('<map-toggle-component></map-toggle-component>')($scope)
+      let element = $compile('<map-toggle-component user-perspective="$ctrl.state.loggedInUser.perspective" map-global-object-name="map"></map-toggle-component>')($scope)
       element[0].index = 3
       map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(element[0])
     })
