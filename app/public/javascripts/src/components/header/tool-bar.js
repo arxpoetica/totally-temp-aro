@@ -31,6 +31,7 @@ class ToolBarController {
     this.rulerPolyLine = null 
 
     this.state.showFiberSize = false
+    this.state.viewSetting.selectedFiberOption = this.state.viewFiberOptions[0]
 
     this.rangeValues = []
     const initial = 1000
