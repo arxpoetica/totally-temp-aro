@@ -21,7 +21,8 @@
       "boundaries": {
         "showIcon": true,
         "showLabel": false
-      }
+      },
+      "centerVertically": false
     },
     "locationCategories": {
       "small_businesses": {
@@ -248,7 +249,8 @@
       },
       "prosects": {
         "show": true
-      }
+      },
+      "centerVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -472,7 +474,8 @@
       },
       "prosects": {
         "show": true
-      }
+      },
+      "centerVertically": true
     },
     "locationCategories": {
       "small_businesses": {
