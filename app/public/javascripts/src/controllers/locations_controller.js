@@ -127,9 +127,9 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
                     // We want to create an individual layer
                     oldMapLayers[mapLayerKey] = {
                       tileDefinitions: [tileDefinition],
-                      iconUrl: `${baseUrl}${locationType.iconUrl}`,
+                      iconUrl: `${baseUrl}${filter.iconUrl}`,  // NOTE that we are using the icon for the filter, not the location category
                       renderMode: 'PRIMITIVE_FEATURES',
-                      zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+                      zIndex: locationType.zIndex,
                       selectable: true,
                       featureFilter: getFilterIfSales(locationType, filter.name)
                     }
@@ -160,7 +160,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
         tileDefinitions: mergedLayerDefinitions,
         iconUrl: `${baseUrl}${firstLocation.iconUrl}`,
         renderMode: 'HEATMAP',
-        zIndex: 6500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
+        zIndex: 6500,
         aggregateMode: 'FLATTEN'
       }
       createdMapLayerKeys.add(mapLayerKey)
