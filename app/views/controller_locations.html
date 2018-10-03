@@ -7,10 +7,14 @@
       </div>
       <div class="row" style="padding-bottom: 5px;margin-right: 0;margin-left: 0;padding-left: 11px;">
         <div class="col-md-4" style="padding-left: 0;padding-right: 0" ng-repeat="filter in locationFilters">
-          <input type="checkbox" class="checkboxfill layer-type-checkboxes"
-                 ng-model="filter.checked"
-                 ng-checked="filter.checked" ng-change="updateMapLayers()">
-          <span>{{filter.label}} </span>
+          <div class="ctype-checkbox">
+            <input type="checkbox" class="checkboxfill layer-type-checkboxes"
+                   style="margin-top: 0px; margin-right: 3px;"
+                   ng-model="filter.checked"
+                   ng-checked="filter.checked" ng-change="updateMapLayers()">
+            <img ng-src="{{filter.iconUrl}}" style="width:16px; margin-right:5px">
+            <span>{{filter.label}}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -18,7 +22,7 @@
       <ul class="customer-type">
         <!-- Loop through all location types -->
         <li ng-repeat="locationType in derivedLocationTypes">
-          <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
+          <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">{{locationType.label}}</div>
           <div class="ctype-checkbox">
             <input type="checkbox" class="checkboxfill" ng-style="stylebtn"

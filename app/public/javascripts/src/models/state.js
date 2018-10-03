@@ -341,21 +341,21 @@ class State {
       id: 1,
       label: "Prospect",
       name: "prospect",
-      icon: "/images/map_icons/aro/prospects.png",
+      iconUrl: "/images/map_icons/aro/prospects.png",
       checked: false
     },
     {
       id: 2,
       label: "Winback",
       name: "winback",
-      icon: "/images/map_icons/aro/winback.png",
+      iconUrl: "/images/map_icons/aro/winback.png",
       checked: false,
     },
     {
       id: 3,
       label: "Customer",
       name: "customer",
-      icon: "/images/map_icons/aro/customers.png",
+      iconUrl: "/images/map_icons/aro/customers.png",
       checked: false
     }
   ]
