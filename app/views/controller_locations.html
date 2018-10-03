@@ -18,7 +18,7 @@
       <ul class="customer-type">
         <!-- Loop through all location types -->
         <li ng-repeat="locationType in derivedLocationTypes">
-          <div class="ctype-icon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
+          <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
           <div class="ctype-name">{{locationType.label}}</div>
           <div class="ctype-checkbox">
             <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
