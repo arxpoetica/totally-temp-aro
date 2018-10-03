@@ -63,6 +63,13 @@ html, body {
   top: 0px;
   padding-left: 10px;
   padding-top: 10px;
+  height: 100%;
+}
+
+.map-tools-vertical-center {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .map-tool-wrapper {
