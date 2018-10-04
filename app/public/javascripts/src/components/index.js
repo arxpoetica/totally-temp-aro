@@ -3,6 +3,7 @@ import equipmentDetail from './sidebar/view/equipment-detail'
 import equipmentDetailList from './sidebar/view/equipment-detail-list'
 import locationDetail from './sidebar/view/location-detail/location-detail'
 import locationAuditLog from './sidebar/view/location-audit-log'
+import locationDetailPropertiesFactory from '../components/sidebar/view/location-detail/location-detail-properties-factory'
 import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
@@ -84,7 +85,6 @@ import editorInterfaceValue from './common/editor-interfaces/editor-interface-va
 import utils from './common/utilities'
 
 import state from '../models/state'
-
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -168,4 +168,4 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceValue', editorInterfaceValue)
    .service('Utils', utils)
    .service('state', state)
-   
+   .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)   
