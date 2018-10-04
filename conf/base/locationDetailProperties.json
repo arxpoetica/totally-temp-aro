@@ -37,7 +37,7 @@
         },
         "type": "locationKey"
       },
-      "dontuse_industry_id": {
+      "industry_name": {
         "displayProperties": {
           "levelOfDetail": 1,
           "format": "",
