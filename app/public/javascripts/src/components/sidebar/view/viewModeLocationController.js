@@ -1,3 +1,346 @@
+const displayPropsLocation = [{
+  "propertyName": "BusinessInformation",
+  "levelOfDetail": 0,
+  "format": "",
+  "displayName": "Business Information",
+  "enumTypeURL": "",
+  "displayDataType": "object",
+  "defaultValue": "",
+  "visible": true,
+  "editable": false
+},
+{
+  "propertyName": "CompetitorInformation",
+  "levelOfDetail": 0,
+  "format": "",
+  "displayName": "Competitor Information",
+  "enumTypeURL": "",
+  "displayDataType": "object",
+  "defaultValue": "",
+  "visible": true,
+  "editable": false
+},
+{
+  "propertyName": "NetworkInformation",
+  "levelOfDetail": 0,
+  "format": "",
+  "displayName": "Network Information",
+  "enumTypeURL": "",
+  "displayDataType": "object",
+  "defaultValue": "",
+  "visible": true,
+  "editable": false
+},
+{
+  "propertyName": "ProductInformation",
+  "levelOfDetail": 0,
+  "format": "",
+  "displayName": "Product Information",
+  "enumTypeURL": "",
+  "displayDataType": "object",
+  "defaultValue": "",
+  "visible": true,
+  "editable": false
+},
+{
+  "propertyName": "MiscInformation",
+  "levelOfDetail": 0,
+  "format": "",
+  "displayName": "Miscellaneous Information",
+  "enumTypeURL": "",
+  "displayDataType": "object",
+  "defaultValue": "",
+  "visible": true,
+  "editable": false
+}]
+
+const displayPropsBusinessInformation = [
+  {
+    "propertyName": "Name",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Name",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "Address",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Address",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "Industry",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Industry",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "DnBTier",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "D & B Tier",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "wirecenter",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Wirecenter",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "latLng",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Lat / Lng",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  }
+]
+
+const displayPropsPrimaryCompetitor = [{
+  "propertyName": "PrimaryCompetitor",
+  "levelOfDetail": 1,
+  "format": "",
+  "displayName": "PrimaryCompetitor",
+  "enumTypeURL": "",
+  "displayDataType": "string",
+  "defaultValue": "",
+  "visible": true,
+  "editable": false
+}]
+
+const displayPropsNetworkInformation = [
+  {
+    "propertyName": "NetworkType",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Network Type",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "FiosCapableInd",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Fios Capable",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "HSICapableInd",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "HSI Capable",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "MaxHSISpeed",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Max HSI Speed",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "CPE_COMPOSITE_RANKING_SCORE",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "CPE Score",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  }
+]
+
+const displayPropsProductInformation = [
+  {
+    "propertyName": "eia",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "EIA",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "ereachpath",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "eREACH",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "ipvpn",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "IPVPN",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "voip",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "VOIP",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "metroE",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "MetroE",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "MaxSpeed",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "MaxSpeed",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "MaxQoS",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "MaxQoS",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  }
+]
+
+const displayPropsMiscInformation = [
+  {
+    "propertyName": "tabblock_id",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Census Block",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "number_of_households",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Number of Households",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "number_of_businesses",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Number of Businesses",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "number_of_towers",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Number of towers",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "distance_to_client_fiber",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Distance From Existing Network:",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  },
+  {
+    "propertyName": "distance_to_planned_network",
+    "levelOfDetail": 1,
+    "format": "",
+    "displayName": "Distance From Planned Network",
+    "enumTypeURL": "",
+    "displayDataType": "string",
+    "defaultValue": "",
+    "visible": true,
+    "editable": false
+  }
+]
 class ViewModeLocationController {
 
   constructor($http, $timeout, state, configuration) {
@@ -48,7 +391,9 @@ class ViewModeLocationController {
           this.selectedLocationObjectId = feature.object_id
           this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
-          this.getLocationInfo(this.plan.id,locationId,feature.object_id).then(locationInfo => this.showStaticMap(locationInfo))
+          this.getLocationInfo(this.plan.id,locationId,feature.object_id)
+            .then(locationInfo => this.showStaticMap(locationInfo))
+            .catch((err) => console.error(err))
         } else {
           this.selectedLocationInfo = null
         }
@@ -62,13 +407,65 @@ class ViewModeLocationController {
       }
     })
   }
+
+  getAttributeValue(attributes, key) {
+    return attributes.filter((item) => item.key === key)[0].value
+  }
+
   // Get the location Information
   getLocationInfo(planId, id, objectId){
-    var promises = []
-    promises.push(this.$http.get(`/locations/${planId}/${id}/show`))
-    return Promise.all(promises).then((results) => {
-      return results[0].data
-    })
+    return this.$http.get(`/locations/${planId}/${id}/show`)
+      .then((result) => {
+
+        // Save the selected location info in the hierarchical manner that we want.
+        // ALL HARDCODING FOR NOW!!!
+        const locationInfo = result.data
+        var selectedLocationInfo = {
+          geog: locationInfo.geog,
+          BusinessInformation: {
+            Name: locationInfo.attributes.filter((item) => item.key === 'BusinessName')[0].value,
+            Address: locationInfo.address,
+            Industry: locationInfo.attributes.filter((item) => item.key === 'dontuse_industry_id')[0].value,
+            DnBTier: locationInfo.attributes.filter((item) => item.key === 'locationCategory')[0].value,
+            wirecenter: locationInfo.attributes.filter((item) => item.key === 'CLLI8')[0].value,
+            latLng: `${locationInfo.geog.coordinates[1]}  ${locationInfo.geog.coordinates[0]}`,
+            getDisplayProperties: () => displayPropsBusinessInformation
+          },
+          CompetitorInformation: {
+            PrimaryCompetitor: locationInfo.attributes.filter((item) => item.key === 'PrimaryCompetitor')[0].value,
+            getDisplayProperties: () => displayPropsPrimaryCompetitor
+          },
+          NetworkInformation: {
+            NetworkType: locationInfo.attributes.filter((item) => item.key === 'network')[0].value,
+            FiosCapableInd: locationInfo.attributes.filter((item) => item.key === 'FiosCapableInd')[0].value,
+            HSICapableInd: locationInfo.attributes.filter((item) => item.key === 'HSICapableInd')[0].value,
+            MaxHSISpeed: locationInfo.attributes.filter((item) => item.key === 'MaxSpeed')[0].value,
+            CPE_COMPOSITE_RANKING_SCORE: locationInfo.attributes.filter((item) => item.key === 'CPE_COMPOSITE_RANKING_SCORE')[0].value,
+            getDisplayProperties: () => displayPropsNetworkInformation
+          },
+          ProductInformation: {
+            eia: locationInfo.attributes.filter((item) => item.key === 'eia')[0].value,
+            ereachpath: locationInfo.attributes.filter((item) => item.key === 'ereachpath')[0].value,
+            ipvpn: locationInfo.attributes.filter((item) => item.key === 'ipvpn')[0].value,
+            voip: locationInfo.attributes.filter((item) => item.key === 'voip')[0].value,
+            metroE: locationInfo.attributes.filter((item) => item.key === 'metroE')[0].value,
+            MaxSpeed: locationInfo.attributes.filter((item) => item.key === 'MaxSpeed')[0].value,
+            MaxQoS: locationInfo.attributes.filter((item) => item.key === 'MaxQoS')[0].value,
+            getDisplayProperties: () => displayPropsProductInformation
+          },
+          MiscInformation: {
+            tabblock_id: locationInfo.tabblock_id,
+            number_of_households: locationInfo.number_of_households,
+            number_of_businesses: locationInfo.number_of_businesses,
+            number_of_towers: locationInfo.number_of_towers,
+            distance_to_client_fiber: `${locationInfo.distance_to_client_fiber} m`,
+            distance_to_planned_network: `${locationInfo.distance_to_planned_network} m`,
+            getDisplayProperties: () => displayPropsMiscInformation
+          },
+          getDisplayProperties: () => displayPropsLocation
+        }
+        return selectedLocationInfo
+      })
   }
   
   updateSelectedState(feature, id){
