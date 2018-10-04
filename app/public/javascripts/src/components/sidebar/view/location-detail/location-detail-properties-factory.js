@@ -22,7 +22,12 @@ class LocationDetailPropertiesFactory {
         if (category.type === 'locationKey') {
           outLocationDetailProperties[categoryKey] = properties[categoryKey]
         } else if (category.type === 'attributeKey') {
-          outLocationDetailProperties[categoryKey] = properties.attributes.filter((item) => item.key === categoryKey)[0].value
+          const matchedAttribute = properties.attributes.filter((item) => item.key === categoryKey)[0]
+          if (matchedAttribute) {
+            outLocationDetailProperties[categoryKey] = properties.attributes.filter((item) => item.key === categoryKey)[0].value
+          } else {
+            outLocationDetailProperties[categoryKey] = '<undefined>'
+          }
         }
       }
       outLocationDetailProperties.getDisplayProperties = () => displayProperties
