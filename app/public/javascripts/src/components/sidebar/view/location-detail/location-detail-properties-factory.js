@@ -22,9 +22,9 @@ class LocationDetailPropertiesFactory {
         if (category.type === 'locationKey') {
           outLocationDetailProperties[categoryKey] = properties[categoryKey]
         } else if (category.type === 'attributeKey') {
-          const matchedAttribute = properties.attributes.filter((item) => item.key === categoryKey)[0]
+          const matchedAttribute = properties.attributes.filter((item) => item ? (item.key === categoryKey) : false)[0]
           if (matchedAttribute) {
-            outLocationDetailProperties[categoryKey] = properties.attributes.filter((item) => item.key === categoryKey)[0].value
+            outLocationDetailProperties[categoryKey] = matchedAttribute.value
           } else {
             outLocationDetailProperties[categoryKey] = '<undefined>'
           }
