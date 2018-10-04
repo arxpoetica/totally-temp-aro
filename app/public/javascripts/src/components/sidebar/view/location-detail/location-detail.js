@@ -341,7 +341,7 @@ const displayPropsMiscInformation = [
     "editable": false
   }
 ]
-class ViewModeLocationController {
+class LocationDetailController {
 
   constructor($http, $timeout, state, configuration) {
     this.$http = $http
@@ -524,6 +524,12 @@ class ViewModeLocationController {
   }
 }
 
-ViewModeLocationController.$inject = ['$http', '$timeout', 'state', 'configuration']
+LocationDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
 
-export default ViewModeLocationController
+let locationDetail = {
+  templateUrl: '/components/sidebar/view/location-detail/location-detail.html',
+  bindings: {},
+  controller: LocationDetailController
+}
+
+export default locationDetail
