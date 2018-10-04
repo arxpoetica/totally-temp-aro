@@ -162,7 +162,8 @@ class BoundariesController {
       opacity: 0.7,
       zIndex: 3510, // ToDo: MOVE THIS TO A SETTINGS FILE!
       highlightStyle: {
-        strokeStyle: '#000000',
+        strokeStyle: '#800080',
+        lineOpacity: 1,
         fillStyle: 'green',
         opacity: 0.3
       }
@@ -178,6 +179,7 @@ class BoundariesController {
       opacity: 0.7,
       zIndex: 3520, // ToDo: MOVE THIS TO A SETTINGS FILE!
       highlightStyle: {
+        strokeStyle: '#800080',
         lineWidth: 8
       }
     }
@@ -196,7 +198,7 @@ class BoundariesController {
       opacity: 0.7,
       zIndex: 3530, // ToDo: MOVE THIS TO A SETTINGS FILE!
       highlightStyle: {
-        strokeStyle: '#000000',
+        strokeStyle: '#800080',
         lineWidth: 8
       }
     }
