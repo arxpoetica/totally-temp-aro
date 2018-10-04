@@ -27,42 +27,48 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
       <td>Max Pixel Width</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.max" placeholder="Max Pixel Width">
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.max" 
+          ng-change="$ctrl.fiberOptionChanged()" placeholder="Max Pixel Width">
       </td>
     </tr>
 
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
       <td>Min Pixel Width</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.min" placeholder="Min Pixel Width">
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.min" 
+          ng-change="$ctrl.fiberOptionChanged()" placeholder="Min Pixel Width">
       </td>
     </tr>
 
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.opacity">
       <td>Max Opacity</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.max" placeholder="Max Opacity">
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.max" 
+          ng-change="$ctrl.fiberOptionChanged()" placeholder="Max Opacity">
       </td>
     </tr>
 
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.opacity">
       <td>Min Opacity</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.min" placeholder="Min Opacity">
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.min" 
+          ng-change="$ctrl.fiberOptionChanged()" placeholder="Min Opacity">
       </td>
     </tr>
 
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
       <td>Exponent</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.divisor" placeholder="Exponent">
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.divisor" 
+          ng-change="$ctrl.fiberOptionChanged()" placeholder="Exponent">
       </td>
     </tr>
 
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth &&  $ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor">
       <td>Atomic Divisor</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" placeholder="Atomic Divisor">
+        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" 
+          ng-change="$ctrl.fiberOptionChanged()" placeholder="Atomic Divisor">
       </td>
     </tr>
 

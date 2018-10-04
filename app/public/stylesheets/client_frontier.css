@@ -124,3 +124,7 @@
   background: #4d99e5 !important;
   border: #4d99e5 !important;
 }
+
+#left-col-wrapper {
+  bottom: 25px; /* footer height */
+}

@@ -566,6 +566,14 @@ class MapTileRenderer {
                 strokeStyle: mapLayer.highlightStyle.strokeStyle
               }
               PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
+            } else if (this.state.showFiberSize && feature.properties._data_type === "fiber" && this.state.viewSetting.selectedFiberOption.id !== 1) {
+              var selectedFiberOption = this.state.viewSetting.selectedFiberOption
+              var viewOption = selectedFiberOption.pixelWidth
+              var drawingStyles = {
+                lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field,feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
+                strokeStyle: mapLayer.strokeStyle
+              }
+              PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             } else {
               PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, null, false, this.tileSize)
             }

@@ -21,7 +21,8 @@
       "boundaries": {
         "showIcon": true,
         "showLabel": false
-      }
+      },
+      "centerVertically": false
     },
     "locationCategories": {
       "small_businesses": {
@@ -39,19 +40,19 @@
       "household": {
         "show": true
       },
-      "ethernet_lit_building": {
+      "Ethernet Lit Buildings": {
         "show": false
       },
-      "lit_building": {
+      "Fiber Lit Buildings": {
         "show": false
       },
-      "tier_1": {
+      "Tier 1": {
         "show": false
       },
-      "tier_2": {
+      "Tier 2": {
         "show": false
       },
-      "tier_3": {
+      "Tier 3": {
         "show": false
       },
       "prosects": {
@@ -248,7 +249,8 @@
       },
       "prosects": {
         "show": true
-      }
+      },
+      "centerVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -266,19 +268,19 @@
       "celltower": {
         "show": false
       },
-      "ethernet_lit_building": {
+      "Ethernet Lit Buildings": {
         "show": true
       },
-      "lit_building": {
+      "Fiber Lit Buildings": {
         "show": true
       },
-      "tier_1": {
+      "Tier 1": {
         "show": true
       },
-      "tier_2": {
+      "Tier 2": {
         "show": true
       },
-      "tier_3": {
+      "Tier 3": {
         "show": true
       }
     },
@@ -472,7 +474,8 @@
       },
       "prosects": {
         "show": true
-      }
+      },
+      "centerVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -490,19 +493,19 @@
       "celltower": {
         "show": false
       },
-      "ethernet_lit_building": {
+      "Ethernet Lit Buildings": {
         "show": true
       },
-      "lit_building": {
+      "Fiber Lit Buildings": {
         "show": true
       },
-      "tier_1": {
+      "Tier 1": {
         "show": true
       },
-      "tier_2": {
+      "Tier 2": {
         "show": true
       },
-      "tier_3": {
+      "Tier 3": {
         "show": true
       }
     },

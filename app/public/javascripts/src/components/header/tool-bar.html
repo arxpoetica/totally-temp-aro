@@ -249,6 +249,17 @@
       <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
         style="margin-left: 2px;">
       <font>Site Labels</font>
+
+      <div class="dropdown-divider"></div>
+      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
+        style="margin-left: 2px;">
+      <font>Fiber Size</font>
+      <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
+        ng-model="$ctrl.state.viewSetting.selectedFiberOption"
+        ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
+        ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">
+      </select>
+
     </div>
   </div>
 

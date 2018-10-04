@@ -12,6 +12,7 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
       'units',
       'aroClient',
       'mapType',
+      'locationDetailProperties',
       'uiVisibility'
     ]
 

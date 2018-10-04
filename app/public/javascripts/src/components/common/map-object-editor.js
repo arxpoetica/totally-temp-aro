@@ -330,11 +330,17 @@ class MapObjectEditorController {
             
             var name = ''
             if ('equipment_boundary' == dataTypeList[0]){
-              name = 'boundary'
+              name = 'Boundary'
             }else if(feature.hasOwnProperty('networkNodeType')){
               name = feature.networkNodeType
             }else{
               name = dataTypeList[1]
+            }
+            
+            if (this.configuration.networkEquipment.equipments.hasOwnProperty(name)){
+              name = this.configuration.networkEquipment.equipments[name].label
+            }else if(this.state.networkNodeTypesEntity.hasOwnProperty(name)){
+              name = this.state.networkNodeTypesEntity[name]
             }
             
             menuItemsById[result.objectId] = options
