@@ -52,8 +52,11 @@ module.exports = class User {
       setTimeout(() => reject('LDAP bind timed out'), 4000)
       ldapClient.bind(distinguishedName, password, (err) => {
         if (err) {
+          console.log('LDAP: ldapBind() had an error:')
+          console.log(err)
           reject(err) // There was an error binding with the given credentials
         }
+        console.log('LDAP: ldapBind() was successful')
         resolve() // Successfully bound with the given credentials
       })
     })
@@ -65,6 +68,8 @@ module.exports = class User {
     return new Promise((resolve, reject) => {
       authenticationConfigPromise
         .then((authenticationConfig) => {
+          console.log('LDAP: ldapGetAttributes() config is')
+          console.log(authenticationConfig)
           // Time out if the LDAP bind fails (setting timeout on the client does not help).
           // The LDAP server may be unreachable, or may not be sending a response.
           setTimeout(() => {
@@ -76,12 +81,19 @@ module.exports = class User {
             scope: 'sub',
             attributes: [authenticationConfig.firstNameAttribute, authenticationConfig.lastNameAttribute, authenticationConfig.groupsAttribute]
           };
+          console.log('LDAP: using ldapOpts')
+          console.log(ldapOpts)
           ldapClient.search(authenticationConfig.base, ldapOpts, (err, search) => {
             if (err) {
+              console.log('LDAP search returned error:')
+              console.log(err)
               sessionDetails.login_status_id = LoginStatus.LDAP_ERROR_GETTING_ATTRIBUTES
               reject(err) // There was an error when performing the search
             }
             search.on('searchEntry', (entry) => {
+              console.log('LDAP search returned success:')
+              console.log(entry)
+              console.log(entry.object)
               resolve({
                 firstName: entry.object[authenticationConfig.firstNameAttribute],
                 lastName: entry.object[authenticationConfig.lastNameAttribute],
@@ -89,6 +101,8 @@ module.exports = class User {
               })
             })
             search.on('error', (err) => {
+              console.log('LDAP search.on.error')
+              console.log(err)
               sessionDetails.login_status_id = LoginStatus.UNDEFINED_ERROR
               reject(err)
             })
@@ -150,6 +164,8 @@ module.exports = class User {
 
     return authenticationConfigPromise
       .then((authenticationConfig) => {
+        console.log('LDAP: authenticationConfig is')
+        console.log(authenticationConfig)
         // Create a LDAP client that we will user for authentication
         ldapClient = ldap.createClient({
           url: authenticationConfig.url
@@ -163,15 +179,22 @@ module.exports = class User {
         const distinguishedName = authenticationConfig.distinguishedName.replace('$USERNAME$', username)
         return this.ldapBind(ldapClient, distinguishedName, password)
       })
-      .then(() => this.ldapGetAttributes(ldapClient, username, sessionDetails))
+      .then(() => {
+        console.log('LDAP: Returned from ldapBind()')
+        return this.ldapGetAttributes(ldapClient, username, sessionDetails)
+      })
       .then((userDetails) => {
+        console.log('LDAP: Returned from ldapGetAttributes(). userDetails is now')
+        console.log(userDetails)
         return this.findOrCreateUser(userDetails, username, password)
       })
       .then(() => {
+        console.log('LDAP: Returned from findOrCreateUser()')
         var sql = 'SELECT id, first_name, last_name, email, password, company_name FROM auth.users WHERE email=$1'
         return database.findOne(sql, [username])
       })
       .then((user) => {
+        console.log('LDAP - returned from database.findOne()')
         delete user.password
         sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
         this.saveLoginAudit(user.id, sessionDetails)
