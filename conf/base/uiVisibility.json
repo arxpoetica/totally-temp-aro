@@ -59,6 +59,10 @@
         "show": true
       }
     },
+    "locationDetails": {
+      "showMoreInfoButton": true,
+      "showAuditLog": true
+    },
     "networkEquipment": {
       "central_office": {
         "show": true
@@ -284,6 +288,10 @@
         "show": true
       }
     },
+    "locationDetails": {
+      "showMoreInfoButton": false,
+      "showAuditLog": false
+    },
     "networkEquipment": {
       "central_office": {
         "show": true
@@ -508,6 +516,10 @@
       "Tier 3": {
         "show": true
       }
+    },
+    "locationDetails": {
+      "showMoreInfoButton": false,
+      "showAuditLog": false
     },
     "networkEquipment": {
       "central_office": {
