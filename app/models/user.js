@@ -351,23 +351,17 @@ module.exports = class User {
   }
 
   static find_by_id (id) {
-    var userToReturn = null
     return database.findOne(`
         SELECT id, first_name, last_name, email, company_name
         FROM auth.users WHERE id=$1
       `, [id])
       .then((user) => {
-        userToReturn = user
-        var req = {
-          method: 'GET',
-          url: `${config.aro_service_url}/auth/users/${user.id}/configuration`,
-          json: true
-        }
-        return models.AROService.request(req)
-      })
-      .then((result) => {
-        userToReturn.perspective = result.perspective
-        return Promise.resolve(userToReturn)
+        // Why are we setting this to 'admin'? Perspective will not really be required on the server side
+        // except in middleware.check_admin, but that is used by routes like routes_admin_settings.js and
+        // routes_admin_users.js. For today, lets not break anything.
+        // Also, note that all the plan ACL has moved to service.
+        user.perspective = 'admin'
+        return Promise.resolve(user)
       })
 }
 
