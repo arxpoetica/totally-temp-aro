@@ -26,30 +26,62 @@ class NetworkBuildController {
       }
     })
 
-    state.selectedLocations
-      .subscribe((selectedLocations) => {
-        // The selected locations have changed. Get the count and addresses that we want to show
-        this.targetsTotal = selectedLocations.size
-        var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
-        $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              this.targets = result.data
-            }
-          })
+    state.selectedLocations.subscribe((selectedLocations) => {
+      // The selected locations have changed. Get the count and addresses that we want to show
+      console.log(selectedLocations)
+      this.targetsTotal = selectedLocations.size
+      var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
+      $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          this.targets = result.data
+        }
       })
+    })
 
-    state.selectedServiceAreas
-      .subscribe((selectedServiceAreas) => {
-        // The selected SA have changed.
-        var serviceAreaIds = Array.from(selectedServiceAreas)
-        $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              this.serviceAreas = result.data
-            }
+    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
+      // The selected SA have changed.
+      console.log(selectedServiceAreas)
+      var serviceAreaIds = Array.from(selectedServiceAreas)
+      $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          this.serviceAreas = result.data
+        }
+      })
+    })  
+    
+    state.selectedAnalysisArea.subscribe((selectedAnalysisAreas) => {
+      console.log(selectedAnalysisAreas)
+    })
+    
+    state.mapFeaturesSelectedEvent.subscribe((event) => {
+      console.log(event)
+      if (event.analysisAreas){
+        event.analysisAreas.forEach((item, index) => {
+          console.log(item)
+          console.log(index)
+          //var geometry = feature.loadGeometry()
+          //this.state.StateViewMode.reloadSelectedAnalysisArea(this.state, item.id)
+          /*
+          this.state.requestPolygonSelect.next({
+            coords: [all the coords here]
           })
-      })  
+          */
+          var filter = `(id eq ${item.id})`
+          $http.get(`/service/odata/analysisarea?$filter=${filter}&$top=1`)
+          .then((results) => {
+            console.log(results)
+            this.state.requestPolygonSelect.next({
+              coords: results.data[0].geog.coordinates[0][0]
+            })
+          })
+          
+          
+        })
+      }
+      
+    })
   }
 
   onSelectionTypeChange(selectionType) {

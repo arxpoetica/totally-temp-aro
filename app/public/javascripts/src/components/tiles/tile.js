@@ -187,10 +187,11 @@ class TileComponentController {
     })
 
     this.state.requestPolygonSelect.subscribe((args) => {
+      console.log(args)
       if (!this.mapRef || !args.coords) {
         return
       }
-
+      
       var mapBounds = this.mapRef.getBounds()
       var neCorner = mapBounds.getNorthEast()
       var swCorner = mapBounds.getSouthWest()
@@ -208,7 +209,16 @@ class TileComponentController {
           var tileCoords = { x: xTile, y: yTile }
           var convertedPixelCoords = []
           args.coords.forEach((latLng) => {
-            var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
+            var lat, lng
+            
+            if (latLng.hasOwnProperty('lat')){
+              lat = latLng.lat()
+              lng = latLng.lng()
+            }else{
+              lat = latLng[1]
+              lng = latLng[0]
+            }
+            var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
             convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
           })
 
@@ -253,7 +263,14 @@ class TileComponentController {
           })
 
           function processArea() {
-            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{ return {lat: a.lat() , lng: a.lng()} })}).getPath())
+            console.log(google.maps)
+            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{
+              if (a.hasOwnProperty('lat')){
+                return {lat: a.lat() , lng: a.lng()} 
+              }else{
+                return {lat: a[1] , lng: a[0]} 
+              }
+            })}).getPath())
           }
         })
         .catch((err) => console.error(err))
@@ -312,7 +329,7 @@ class TileComponentController {
                                           clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
         //console.log('map click')
-        //console.log(results)
+        console.log(results)
         var locationFeatures = []
         var analysisAreaFeatures = []
         var serviceAreaFeatures = []
@@ -369,7 +386,7 @@ class TileComponentController {
           censusFeatures: censusFeatures
         }
         
-        //console.log(hitFeatures)
+        console.log(hitFeatures)
         
         if (locationFeatures.length > 0) {
           this.state.hackRaiseEvent(locationFeatures)

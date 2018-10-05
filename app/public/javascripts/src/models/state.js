@@ -552,6 +552,7 @@ class State {
         .then((result) => {
           var selectedSASet = new Set()
           result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
+          console.log('reloadSelectedServiceAreas')
           service.selectedServiceAreas.next(selectedSASet)
           service.requestMapLayerRefresh.next(null)
           if (forceMapRefresh) {
