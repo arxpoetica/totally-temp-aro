@@ -57,6 +57,7 @@ class NetworkBuildController {
     
     state.mapFeaturesSelectedEvent.subscribe((event) => {
       console.log(event)
+      if ('ANALYSIS_AREAS' != state.optimizationOptions.analysisSelectionMode) return
       if (event.analysisAreas){
         event.analysisAreas.forEach((item, index) => {
           console.log(item)
@@ -72,16 +73,21 @@ class NetworkBuildController {
           $http.get(`/service/odata/analysisarea?$filter=${filter}&$top=1`)
           .then((results) => {
             console.log(results)
-            this.state.requestPolygonSelect.next({
-              coords: results.data[0].geog.coordinates[0][0]
-            })
-          })
-          
-          
+            if (results.data[0].geog && results.data[0].geog.coordinates 
+                && results.data[0].geog.coordinates.length > 0){
+              results.data[0].geog.coordinates.forEach((shapes) => {
+                shapes.forEach((coords) => {
+                  this.state.requestPolygonSelect.next({
+                    'coords': coords
+                  })
+                })
+              })
+            }
+          })      
         })
       }
-      
     })
+    
   }
 
   onSelectionTypeChange(selectionType) {

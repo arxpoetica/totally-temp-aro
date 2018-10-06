@@ -95,7 +95,7 @@
           </select>
         </td>
       </tr>
-      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS'">
+      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS' || $ctrl.state.optimizationOptions.analysisSelectionMode === 'ANALYSIS_AREAS'">
         <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
           <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
         </td>

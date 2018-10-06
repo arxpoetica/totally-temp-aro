@@ -93,6 +93,7 @@ class State {
 
   // The selection modes for the application
   service.selectionModes = {
+    ANALYSIS_AREAS: 'Analysis Areas',
     SELECTED_AREAS: 'Service Areas',
     SELECTED_LOCATIONS: 'Locations'
   }
@@ -175,7 +176,7 @@ class State {
       generatePlanLocationLinks : false,
       generateSubnetLinking: true
     },
-    analysisSelectionMode: service.selectionModes.SELECTED_AREAS
+    analysisSelectionMode: 'SELECTED_AREAS'
   }
 
   if(config.ARO_CLIENT === 'frontier')
