@@ -28,7 +28,7 @@ class NetworkBuildController {
 
     state.selectedLocations.subscribe((selectedLocations) => {
       // The selected locations have changed. Get the count and addresses that we want to show
-      console.log(selectedLocations)
+      if (state.optimizationOptions.analysisSelectionMode != 'SELECTED_LOCATIONS') return
       this.targetsTotal = selectedLocations.size
       var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
       $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
@@ -41,7 +41,7 @@ class NetworkBuildController {
 
     state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
-      console.log(selectedServiceAreas)
+      if (state.optimizationOptions.analysisSelectionMode != 'SELECTED_AREAS') return
       var serviceAreaIds = Array.from(selectedServiceAreas)
       $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
       .then((result) => {
@@ -51,30 +51,15 @@ class NetworkBuildController {
       })
     })  
     
-    state.selectedAnalysisArea.subscribe((selectedAnalysisAreas) => {
-      console.log(selectedAnalysisAreas)
-    })
-    
     state.mapFeaturesSelectedEvent.subscribe((event) => {
-      console.log(event)
-      console.log(state.areaSelectionMode)
-      //if ('ANALYSIS_AREAS' != state.optimizationOptions.analysisSelectionMode) return
-      if (state.areaSelectionMode != state.areaSelectionModes.GROUP) return
+      if (state.areaSelectionMode != state.areaSelectionModes.GROUP || state.optimizationOptions.analysisSelectionMode != 'SELECTED_AREAS') return
       if (event.analysisAreas){
         event.analysisAreas.forEach((item, index) => {
-          //console.log(item)
-          //console.log(index)
-          //var geometry = feature.loadGeometry()
-          //this.state.StateViewMode.reloadSelectedAnalysisArea(this.state, item.id)
-          /*
-          this.state.requestPolygonSelect.next({
-            coords: [all the coords here]
-          })
-          */
+          
           var filter = `(id eq ${item.id})`
           $http.get(`/service/odata/analysisarea?$filter=${filter}&$top=1`)
           .then((results) => {
-            console.log(results)
+            //console.log(results)
             if (results.data[0].geog && results.data[0].geog.coordinates 
                 && results.data[0].geog.coordinates.length > 0){
               results.data[0].geog.coordinates.forEach((shapes) => {
@@ -89,6 +74,7 @@ class NetworkBuildController {
         })
       }
     })
+    
     
   }
 

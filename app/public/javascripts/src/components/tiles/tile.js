@@ -187,7 +187,7 @@ class TileComponentController {
     })
 
     this.state.requestPolygonSelect.subscribe((args) => {
-      console.log(args)
+      //console.log(args)
       if (!this.mapRef || !args.coords) {
         return
       }
@@ -248,13 +248,25 @@ class TileComponentController {
           
           var selectedLocationsIds = []
           var selectedServiceAreaIds = []
-
-          selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+          
+          
+          // ToDo: need to combine this with the overlayClickListener below
+          var canSelectLoc = true
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS 
+              && this.state.optimizationOptions.analysisSelectionMode != 'SELECTED_LOCATIONS'){
+            canSelectLoc = false
+          }
+          
+          if (canSelectLoc){
+            selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+          }
           selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
           
           state.hackRaiseEvent(selectedLocationsIds)
 
           //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          //console.log(selectedLocationsIds)
+          //console.log(selectedServiceAreaIds)
           state.mapFeaturesSelectedEvent.next({
             locations: selectedLocationsIds,
             serviceAreas: selectedServiceAreaIds,
@@ -263,7 +275,7 @@ class TileComponentController {
           })
 
           function processArea() {
-            console.log(google.maps)
+            //console.log(google.maps)
             return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{
               if (a.hasOwnProperty('lat')){
                 return {lat: a.lat() , lng: a.lng()} 
@@ -329,7 +341,7 @@ class TileComponentController {
                                           clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
         //console.log('map click')
-        console.log(results)
+        //console.log(results)
         var locationFeatures = []
         var analysisAreaFeatures = []
         var serviceAreaFeatures = []
@@ -387,7 +399,7 @@ class TileComponentController {
           censusFeatures: censusFeatures
         }
         
-        console.log(hitFeatures)
+        //console.log(hitFeatures)
         
         if (locationFeatures.length > 0) {
           this.state.hackRaiseEvent(locationFeatures)
