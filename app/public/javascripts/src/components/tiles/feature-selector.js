@@ -46,9 +46,7 @@ class FeatureSelector {
               for (var iFeature = 0; iFeature < features.length; ++iFeature) {
                 var feature = features[iFeature]
                 if (shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
-                  console.log(' - feature - ')
-                  console.log(feature)
-                  console.log(feature.loadGeometry())
+                  //console.log(feature)
                   hitFeatures.push(feature.properties)
                 }
               }

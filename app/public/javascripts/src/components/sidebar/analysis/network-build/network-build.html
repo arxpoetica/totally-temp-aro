@@ -194,9 +194,24 @@
                   ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
             <option ng-repeat="(selectionId, selectionText) in $ctrl.state.selectionModes" value="{{selectionId}}">{{selectionText}}</option>
           </select>
+          
+          
+          
+          
+          <div ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS'">
+            <span ng-repeat="(areaSelectionKey, areaSelectionValue) in $ctrl.state.areaSelectionModes">
+              <input type="radio" name="network-build-areaSelectionMode" 
+              ng-model="$ctrl.state.areaSelectionMode" 
+              value="{{areaSelectionValue}}"> {{areaSelectionValue}} &nbsp;&nbsp;&nbsp;
+            </span>
+          </div>
+          
+          
+          
+          
         </td>
       </tr>
-      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS' || $ctrl.state.optimizationOptions.analysisSelectionMode === 'ANALYSIS_AREAS'">
+      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === 'SELECTED_AREAS'">
         <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
           <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
         </td>

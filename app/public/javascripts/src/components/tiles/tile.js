@@ -349,6 +349,7 @@ class TileComponentController {
               canSelectLoc = !canSelectLoc
               break
           }
+          if (this.state.areaSelectionMode == this.state.areaSelectionModes.GROUP) canSelectSA = false
         } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
           canSelectSA = true
         }  

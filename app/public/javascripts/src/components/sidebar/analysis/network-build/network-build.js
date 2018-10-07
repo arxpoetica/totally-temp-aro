@@ -57,11 +57,13 @@ class NetworkBuildController {
     
     state.mapFeaturesSelectedEvent.subscribe((event) => {
       console.log(event)
-      if ('ANALYSIS_AREAS' != state.optimizationOptions.analysisSelectionMode) return
+      console.log(state.areaSelectionMode)
+      //if ('ANALYSIS_AREAS' != state.optimizationOptions.analysisSelectionMode) return
+      if (state.areaSelectionMode != state.areaSelectionModes.GROUP) return
       if (event.analysisAreas){
         event.analysisAreas.forEach((item, index) => {
-          console.log(item)
-          console.log(index)
+          //console.log(item)
+          //console.log(index)
           //var geometry = feature.loadGeometry()
           //this.state.StateViewMode.reloadSelectedAnalysisArea(this.state, item.id)
           /*
@@ -93,7 +95,6 @@ class NetworkBuildController {
   onSelectionTypeChange(selectionType) {
     this.state.selectionTypeChanged.next(selectionType)
   } 
-  
   
   onBudgetChange(){
     //this.state.optimizationOptions.budget = this.budgetDisplay * 1000

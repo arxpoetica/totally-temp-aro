@@ -93,11 +93,19 @@ class State {
 
   // The selection modes for the application
   service.selectionModes = {
-    ANALYSIS_AREAS: 'Analysis Areas',
+    //ANALYSIS_AREAS: 'Analysis Areas',
     SELECTED_AREAS: 'Service Areas',
     SELECTED_LOCATIONS: 'Locations'
   }
-
+  
+  service.areaSelectionModes = {
+      SINGLE: 'single',
+      GROUP: 'group'
+  }
+  
+  service.areaSelectionMode = service.areaSelectionModes.SINGLE
+  //service.areaSelectionMode = service.areaSelectionModes.GROUP
+  
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',
