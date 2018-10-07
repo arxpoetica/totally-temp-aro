@@ -7,7 +7,7 @@
 	"manageUsers":{
 	 "show":true,
 	 "registerUser":{
-	  "show":false
+	  "show":true
 	 }
 	}
       }
@@ -35,7 +35,7 @@
 	"manageUsers":{
 	 "show":true,
 	 "registerUser":{
-	  "show":false
+	  "show":true
 	 }
 	}
       }
