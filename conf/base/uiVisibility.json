@@ -576,7 +576,7 @@
         "show": false
       },
       "PLAN_SUMMARY_REPORTS": {
-        "show": true
+        "show": false
       },
       "COVERAGE_BOUNDARY": {
         "show": true
