@@ -1,21 +1,20 @@
 class BoundariesController {
 
-  constructor($rootScope,$http,state,map_tools,MapLayer,map_layers,regions) {
+  constructor($rootScope,$http,state,map_tools,MapLayer,map_layers,regions,configuration) {
 
     this.$http = $http
     this.state = state
     this.regions = regions
     this.map_tools = map_tools
+    this.configuration = configuration
 
     var countySubdivisionsLayer
     var censusBlocksLayer
-    var analysisLayersColors = ['coral']
-    var serviceLayersColors = [
-      '#00ff00', 'coral', 'darkcyan', 'dodgerblue'
-    ]
 
     // Creates map layers based on selection in the UI
     this.createdMapLayerKeys = new Set()
+
+    this.selectedCensusCat
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
@@ -34,49 +33,25 @@ class BoundariesController {
       this.censusCategories = newValue
     })
     
-    globalServiceLayers.forEach((serviceLayer) => {
-      if (!serviceLayer.show_in_boundaries) return
-      var wirecenter_layer = {
-        name: serviceLayer.description, //serviceLayer.description, // Service Areas 
-        type: 'wirecenter',
-        api_endpoint: '/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/',
-        tileDefinition: {
-          dataId: 'v1.tiles.service_area_by_library.{libraryId}.{transform}',
-          vtlType: 'ServiceAreaLayerByLibrary',
-          libraryId: '{libraryId}',
-          transform: '{transform}'
-        },
-        layerId: serviceLayer.id,
-        visible: false,
-        disabled: false,
-        aggregateZoomThreshold: 10
-      }
-      
-      wirecenter_layer.visible_check = config.ARO_CLIENT === 'frontier' //enable wirecenter for frontier by default
-      this.state.boundaries.tileLayers.push(wirecenter_layer)
+    $rootScope.$on('configuration_loaded', () => {
+      globalServiceLayers.forEach((serviceLayer) => {
+        if (!serviceLayer.show_in_boundaries) return
+        var wirecenter_layer = {
+          name: serviceLayer.description, //serviceLayer.description, // Service Areas 
+          type: 'wirecenter',
+          layerId: serviceLayer.id
+        }
+
+        wirecenter_layer.visible_check = this.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
+        this.state.boundaries.tileLayers.push(wirecenter_layer)
+      })
+
+      this.state.boundaries.tileLayers.push({
+        name: 'Census Blocks',
+        type: 'census_blocks'
+      })
     })
-    
-    
-    this.state.boundaries.tileLayers.push({
-    	name: 'Census Blocks',
-      type: 'census_blocks',
-      api_endpoint: "/tile/v1/census_block/tiles/${tilePointTransform}/",
-      tileDefinition: {
-        dataId: 'v1.tiles.census_block.{transform}',
-        vtlType: 'CensusBlockLayer',
-        transform: '{transform}'
-      },
-    //layerId: serviceLayer.id,
-      visible: false,
-      disabled: false,
-      aggregateZoomThreshold: 10
-    	  
-    })
-    
-    this.selectedCensusCat
-    
   }
-  
   
   onSelectCensusCat(){
     let id = null
@@ -84,58 +59,11 @@ class BoundariesController {
     this.state.reloadSelectedCensusCategoryId(id)
   }
   
-  // for MapLayer objects 
-  toggleVisibility(layer) {
-	 layer.visible = layer.visible_check;
-   layer.configureVisibility()
-   this.regions.setSearchOption(layer.type, layer.visible)
-  }
-  
   // for layers drawn on vector tiles
   tilesToggleVisibility(layer) {
     layer.visible = layer.visible_check;
-    //this.disableOtherLayers()
     this.updateMapLayers()
     //this.state.resetBoundarySearch.next(true)
-  }
-  
-  layerView(mode) {
-    this.state.activeboundaryLayerMode = this.state.boundaryLayerMode[mode]
-    this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.VIEW && this.enableAllLayers()
-    this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH && this.clearLayerSelections()
-  }
-
-  enableAllLayers() {
-    this.state.boundaries.tileLayers.forEach((boundaryLayer) => {
-      boundaryLayer.disabled = false
-    })
-  }
-
-  clearLayerSelections() {
-    this.state.activeViewModePanel = this.state.viewModePanels.BOUNDARIES_INFO
-    this.state.boundaries.tileLayers.forEach((boundaryLayer) => {
-      boundaryLayer.visible_check = false
-      boundaryLayer.visible = boundaryLayer.visible_check;
-    })
-    this.updateMapLayers()
-  }
-
-  disableOtherLayers() {
-    // if(this.state.activeViewModePanel === this.state.viewModePanels.BOUNDARIES_INFO && 
-    //   this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH) {
-    if(this.state.activeboundaryLayerMode === this.state.boundaryLayerMode.SEARCH) {
-      var isOneLayerEnable = false
-      this.state.boundaries.tileLayers.forEach((boundary) => {
-        if (boundary.visible) isOneLayerEnable = true
-      })
-      if(isOneLayerEnable) {
-        _.filter(this.state.boundaries.tileLayers,(boundary) => !boundary.visible).forEach((boundary) => {
-          boundary.disabled = true
-        })
-      } else {
-        this.enableAllLayers()
-      }
-    }  
   }
 
   // Replaces any occurrences of searchText by replaceText in the keys of an object
@@ -151,98 +79,10 @@ class BoundariesController {
     // ToDo: this function could stand to be cleaned up
     
     // ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  
-    var layerSettings = {}
-    layerSettings['wirecenter'] = {
-      dataUrls: [],
-      renderMode: 'PRIMITIVE_FEATURES',
-      selectable: true,
-      strokeStyle: '#00ff00',
-      lineWidth: 4,
-      fillStyle: "transparent",
-      opacity: 0.7,
-      zIndex: 3510, // ToDo: MOVE THIS TO A SETTINGS FILE!
-      highlightStyle: {
-        strokeStyle: '#800080',
-        lineOpacity: 1,
-        fillStyle: 'green',
-        opacity: 0.3
-      }
-    }
-
-    layerSettings['census_blocks'] = {
-      dataUrls: [],
-      renderMode: 'PRIMITIVE_FEATURES',
-      selectable: true,
-      strokeStyle: '#d3db43',
-      lineWidth: 1,
-      fillStyle: "transparent",
-      opacity: 0.7,
-      zIndex: 3520, // ToDo: MOVE THIS TO A SETTINGS FILE!
-      highlightStyle: {
-        strokeStyle: '#800080',
-        lineWidth: 8
-      }
-    }
-    if(config.ARO_CLIENT === 'frontier') {
-      layerSettings['census_blocks']['strokeStyle'] = '#000000'
-      layerSettings['census_blocks']['opacity'] = 0.5
-    }
-
-    layerSettings['analysis_layer'] = layerSettings['aggregated_analysis_layer'] = {
-      dataUrls: [],
-      renderMode: 'PRIMITIVE_FEATURES',
-      selectable: true,
-      strokeStyle: '#ff0000',
-      lineWidth: 2,
-      fillStyle: "transparent",
-      opacity: 0.7,
-      zIndex: 3530, // ToDo: MOVE THIS TO A SETTINGS FILE!
-      highlightStyle: {
-        strokeStyle: '#800080',
-        lineWidth: 8
-      }
-    }
-    if(config.ARO_CLIENT === 'frontier') {
-      layerSettings['analysis_layer']['strokeStyle'] = '#000000'
-    }
-
-    layerSettings['aggregated_wirecenters'] = {
-      dataUrls: [],
-      renderMode: 'PRIMITIVE_FEATURES',
-      selectable: true,
-      aggregateMode: 'FLATTEN',
-      strokeStyle: '#00ff00',
-      lineWidth: 1,
-      fillStyle: "transparent",
-      opacity: 0.7,
-      zIndex: 3500, // ToDo: MOVE THIS TO A SETTINGS FILE!
-      highlightStyle: {
-        strokeStyle: '#000000',
-        fillStyle: 'green',
-        opacity: 0.3, 
-        lineWidth: 8
-      }
-    }
-
-    layerSettings['aggregated_census_blocks'] = {
-      dataUrls: [],
-      renderMode: 'PRIMITIVE_FEATURES',
-      selectable: true,
-      aggregateMode: 'FLATTEN',
-      strokeStyle: '#333333',
-      lineWidth: 1,
-      fillStyle: "transparent",
-      opacity: 0.7,
-      zIndex: 3540, // ToDo: MOVE THIS TO A SETTINGS FILE!
-      highlightStyle: {
-        strokeStyle: '#000000',
-        fillStyle: 'green',
-        opacity: 0.3,
-        lineWidth: 8
-      }
-    }
-      
-    layerSettings['default'] = layerSettings['wirecenter']
+    var layerSettings = this.configuration.boundaryCategories && this.configuration.boundaryCategories.categories
+    
+    if(layerSettings && layerSettings['wirecenter'])
+      layerSettings['default'] = layerSettings['wirecenter']
     	  
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
@@ -264,7 +104,8 @@ class BoundariesController {
         
         this.state.boundaries.tileLayers.forEach((layer) => {
           if (layer.visible) {
-            var pointTransform = this.getPointTransformForLayer(+layer.aggregateZoomThreshold)
+            var layerOptions = layerSettings[layer.type]
+            var pointTransform = this.getPointTransformForLayer(+layerOptions.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
 
             var settingsKey
@@ -272,7 +113,7 @@ class BoundariesController {
 
             if (!layerSettings.hasOwnProperty(settingsKey)) { settingsKey = 'default' }
             oldMapLayers[mapLayerKey] = angular.copy(layerSettings[settingsKey])
-            var tileDefinition = angular.copy(layer.tileDefinition)
+            var tileDefinition = angular.copy(layerOptions.tileDefinition)
             this.objectKeyReplace(tileDefinition, '{transform}', pointTransform)
             this.objectKeyReplace(tileDefinition, '{libraryId}', selectedServiceAreaLibrary.identifier)
             this.objectKeyReplace(tileDefinition, '{analysisLayerId}', layer.analysisLayerId)
@@ -302,17 +143,7 @@ class BoundariesController {
         this.state.boundaries.tileLayers.push({
           name: analysisLayer.description,
           type: 'analysis_layer',
-          api_endpoint: "/tile/v1/analysis_area/tiles/${analysisLayerId}/${tilePointTransform}/",
-          tileDefinition: {
-            dataId: 'v1.tiles.analysis_area.{analysisLayerId}.{transform}',
-            vtlType: 'AnalysisAreaLayer',
-            polyTransform: '{transform}',
-            analysisLayerId: '{analysisLayerId}'
-          },
-          analysisLayerId: analysisLayer.id,
-          visible: false,
-          disabled: false,
-          aggregateZoomThreshold: 10
+          analysisLayerId: analysisLayer.id
         })
       })
 
@@ -321,11 +152,12 @@ class BoundariesController {
         tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
       })
     })
+
   }
 
 }
 
-BoundariesController.$inject = ['$rootScope','$http','state','map_tools','MapLayer','map_layers','regions']
+BoundariesController.$inject = ['$rootScope','$http','state','map_tools','MapLayer','map_layers','regions','configuration']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',
