@@ -33,26 +33,56 @@ class BoundariesController {
       this.censusCategories = newValue
     })
     
+    this.isConfigurationLoaded = false
     $rootScope.$on('configuration_loaded', () => {
-      globalServiceLayers.forEach((serviceLayer) => {
-        if (!serviceLayer.show_in_boundaries) return
-        var wirecenter_layer = {
-          name: serviceLayer.description, //serviceLayer.description, // Service Areas 
-          type: 'wirecenter',
-          layerId: serviceLayer.id
-        }
-
-        wirecenter_layer.visible_check = this.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
-        this.state.boundaries.tileLayers.push(wirecenter_layer)
-      })
-
-      this.state.boundaries.tileLayers.push({
-        name: 'Census Blocks',
-        type: 'census_blocks'
-      })
+      this.isConfigurationLoaded = true
+      this.reloadVisibleLayers()
     })
   }
   
+  reloadVisibleLayers() {
+    var newTileLayers = []
+    globalServiceLayers.forEach((serviceLayer) => {
+      if (!serviceLayer.show_in_boundaries) return
+      var wirecenter_layer = {
+        name: serviceLayer.description, //serviceLayer.description, // Service Areas 
+        type: 'wirecenter',
+        layerId: serviceLayer.id
+      }
+
+      wirecenter_layer.visible_check = this.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
+      newTileLayers.push(wirecenter_layer)
+    })
+
+    newTileLayers.push({
+      name: 'Census Blocks',
+      type: 'census_blocks'
+    })
+
+    return this.state.StateViewMode.loadEntityList(this.$http,this.state,'AnalysisLayer',null,'id,name,description',null)
+      .then(() => {
+        var analysisLayers = this.state.entityTypeList.AnalysisLayer
+        if (this.configuration.perspective.limitAnalysisAreas.enabled) {
+          const namesToInclude = this.configuration.perspective.limitAnalysisAreas.showOnlyNames
+          analysisLayers = analysisLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
+        }
+        analysisLayers.forEach((analysisLayer) => {
+          newTileLayers.push({
+            name: analysisLayer.description,
+            type: 'analysis_layer',
+            analysisLayerId: analysisLayer.id
+          })
+        })
+
+        //enable wirecenter for frontier by default
+        this.state.boundaries.tileLayers.forEach((tileLayers) => {
+          tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
+        })
+        this.state.boundaries.tileLayers = newTileLayers
+        return Promise.resolve()
+      })
+  }
+
   onSelectCensusCat(){
     let id = null
     if (null != this.selectedCensusCat) id = this.selectedCensusCat.id
@@ -129,12 +159,15 @@ class BoundariesController {
   }
 
   $doCheck() {
+    if (!this.isConfigurationLoaded) {
+      return  // Configuration is not loaded yet - do not do anything
+    }
     // When the perspective changes, some map layers may be hidden/shown.
     if (this.oldPerspective !== this.configuration.perspective) {
+      this.oldPerspective = this.configuration.perspective
       this.reloadVisibleLayers()
         .then(() => this.updateMapLayers())
         .catch((err) => console.error(err))
-      this.oldPerspective = this.configuration.perspective
     }
   }
 
@@ -147,24 +180,11 @@ class BoundariesController {
   }
 
   $onInit() {
-    this.state.StateViewMode.loadEntityList(this.$http,this.state,'AnalysisLayer',null,'id,name,description',null)
-    .then(() => {
-      this.state.entityTypeList.AnalysisLayer.forEach((analysisLayer) => {
-        this.state.boundaries.tileLayers.push({
-          name: analysisLayer.description,
-          type: 'analysis_layer',
-          analysisLayerId: analysisLayer.id
-        })
-      })
-
-      //enable wirecenter for frontier by default
-      this.state.boundaries.tileLayers.forEach((tileLayers) => {
-        tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
-      })
-    })
-
+    if (this.isConfigurationLoaded) {
+      this.reloadVisibleLayers()
+      .then(() => this.updateMapLayers())
+    }
   }
-
 }
 
 BoundariesController.$inject = ['$rootScope', '$http', 'state', 'map_tools', 'configuration', 'regions']
