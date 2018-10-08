@@ -168,6 +168,27 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
+
+  // Watch for changes in the locationTypes and trigger a map layer update when that happens
+  $scope.derivedLocationTypes = []
+  state.locationTypes.subscribe((newValue) => {
+    $scope.derivedLocationTypes = newValue  // For the checkboxes to bind to
+    updateMapLayers()
+  })
+
+  $scope.handleFiltersChanged = () => {
+    // When filters change, we want to turn on/off the Tier checkboxes
+    var isMinOneFilterChecked = false
+    $scope.locationFilters.forEach((filter) => isMinOneFilterChecked |= (filter.checked))
+    const locationTypesToChange = ['Tier 1', 'Tier 2', 'Tier 3']
+    $scope.derivedLocationTypes.forEach((locationType, index) => {
+      if (locationTypesToChange.indexOf(locationType.key) >= 0) {
+        $scope.derivedLocationTypes[index].checked = isMinOneFilterChecked
+      }
+    })
+    updateMapLayers()
+  }
+
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateMapLayers)
 
@@ -195,13 +216,6 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
     }
     state.locationTypes.next(newLocationTypes)
   }
-
-  // Watch for changes in the locationTypes and trigger a map layer update when that happens
-  $scope.derivedLocationTypes = []
-  state.locationTypes.subscribe((newValue) => {
-    $scope.derivedLocationTypes = newValue  // For the checkboxes to bind to
-    updateMapLayers()
-  })
 
   // Update map layers when the heatmap options change
   state.mapTileOptions
