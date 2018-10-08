@@ -17,7 +17,7 @@
         "show": false
       }
     },
-    "limitAnalysisAreas": {
+    "limitBoundaries": {
       "enabled": false
     },
     "mapTools": {
@@ -45,7 +45,7 @@
         "show": false
       }
     },
-    "limitAnalysisAreas": {
+    "limitBoundaries": {
       "enabled": true,
       "showOnlyNames": ["zipcode"]
     },
@@ -74,13 +74,13 @@
         "show": false
       }
     },
-    "limitAnalysisAreas": {
+    "limitBoundaries": {
       "enabled": true,
       "showOnlyNames": ["zipcode"]
     },
     "mapTools": {
       "boundaries": {
-        "showIcon": true,
+        "showIcon": false,
         "showLabel": false
       }
     }

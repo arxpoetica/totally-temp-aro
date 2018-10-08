@@ -226,7 +226,7 @@
         "show": true
       }
     },
-    "limitAnalysisAreas": {
+    "limitBoundaries": {
       "enabled": false
     },
     "extendedAnalysis": true
@@ -457,7 +457,7 @@
         "show": true
       }
     },
-    "limitAnalysisAreas": {
+    "limitBoundaries": {
       "enabled": false
     },
     "extendedAnalysis": true,
@@ -690,7 +690,7 @@
         "show": true
       }
     },
-    "limitAnalysisAreas": {
+    "limitBoundaries": {
       "enabled": false
     },
     "extendedAnalysis": true,
