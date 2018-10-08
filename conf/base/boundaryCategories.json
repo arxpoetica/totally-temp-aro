@@ -1,8 +1,6 @@
 {
   "categories": {
     "wirecenter": {
-      "dataUrls": [],
-			"api_endpoint": "/tile/v1/service_area/tiles/${layerId}/${tilePointTransform}/",
 			"visible_check": false,
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
@@ -28,8 +26,6 @@
 			"aggregateZoomThreshold": 10
     },
     "census_blocks": {
-      "dataUrls": [],
-			"api_endpoint": "/tile/v1/census_block/tiles/${tilePointTransform}/",
 			"visible_check": false,
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
@@ -52,8 +48,6 @@
 			"aggregateZoomThreshold": 10
     },
     "analysis_layer": {
-      "dataUrls": [],
-			"api_endpoint": "/tile/v1/analysis_area/tiles/${analysisLayerId}/${tilePointTransform}/",
 			"visible_check": false,
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
@@ -77,7 +71,6 @@
 			"aggregateZoomThreshold": 10
     },
     "aggregated_wirecenters": {
-      "dataUrls": [],
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
       "aggregateMode": "FLATTEN",
@@ -94,7 +87,6 @@
       }
     },
     "aggregated_census_blocks": {
-      "dataUrls": [],
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
       "aggregateMode": "FLATTEN",
@@ -111,7 +103,6 @@
       }
     },
     "aggregated_analysis_layer": {
-      "dataUrls": [],
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
       "strokeStyle": "#ff0000",
