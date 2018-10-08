@@ -226,6 +226,9 @@
         "show": true
       }
     },
+    "limitAnalysisAreas": {
+      "enabled": false
+    },
     "extendedAnalysis": true
   },
   {
@@ -453,6 +456,9 @@
       "dataSelection": {
         "show": true
       }
+    },
+    "limitAnalysisAreas": {
+      "enabled": false
     },
     "extendedAnalysis": true,
     "hasLocationFilters": true
@@ -683,6 +689,9 @@
       "dataSelection": {
         "show": true
       }
+    },
+    "limitAnalysisAreas": {
+      "enabled": false
     },
     "extendedAnalysis": true,
     "hasLocationFilters": true

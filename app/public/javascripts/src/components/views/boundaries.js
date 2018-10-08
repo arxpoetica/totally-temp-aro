@@ -1,6 +1,6 @@
 class BoundariesController {
 
-  constructor($rootScope,$http,state,map_tools,MapLayer,map_layers,regions,configuration) {
+  constructor($rootScope, $http, state, map_tools, configuration, regions) {
 
     this.$http = $http
     this.state = state
@@ -128,6 +128,16 @@ class BoundariesController {
     this.state.mapLayers.next(oldMapLayers)
   }
 
+  $doCheck() {
+    // When the perspective changes, some map layers may be hidden/shown.
+    if (this.oldPerspective !== this.configuration.perspective) {
+      this.reloadVisibleLayers()
+        .then(() => this.updateMapLayers())
+        .catch((err) => console.error(err))
+      this.oldPerspective = this.configuration.perspective
+    }
+  }
+
   // Get the point transformation mode with the current zoom level
   getPointTransformForLayer(zoomThreshold) {
     var mapZoom = map.getZoom()
@@ -157,7 +167,7 @@ class BoundariesController {
 
 }
 
-BoundariesController.$inject = ['$rootScope','$http','state','map_tools','MapLayer','map_layers','regions','configuration']
+BoundariesController.$inject = ['$rootScope', '$http', 'state', 'map_tools', 'configuration', 'regions']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',

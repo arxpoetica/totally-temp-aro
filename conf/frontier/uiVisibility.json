@@ -16,6 +16,15 @@
       "multiple_dwelling_unit": {
         "show": false
       }
+    },
+    "limitAnalysisAreas": {
+      "enabled": false
+    },
+    "mapTools": {
+      "boundaries": {
+        "showIcon": true,
+        "showLabel": false
+      }
     }
   },
   {
@@ -35,6 +44,16 @@
       "multiple_dwelling_unit": {
         "show": false
       }
+    },
+    "limitAnalysisAreas": {
+      "enabled": true,
+      "showOnlyNames": ["zipcode"]
+    },
+    "mapTools": {
+      "boundaries": {
+        "showIcon": false,
+        "showLabel": false
+      }
     }
   },
   {
@@ -53,6 +72,16 @@
     "networkEquipment": {
       "multiple_dwelling_unit": {
         "show": false
+      }
+    },
+    "limitAnalysisAreas": {
+      "enabled": true,
+      "showOnlyNames": ["zipcode"]
+    },
+    "mapTools": {
+      "boundaries": {
+        "showIcon": true,
+        "showLabel": false
       }
     }
   }
