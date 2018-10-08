@@ -287,6 +287,32 @@
         },
         "type": "locationKey"
       },
+      "latitude": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Latitude",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "longitude": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Longitude",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
       "number_of_households": {
         "displayProperties": {
           "levelOfDetail": 1,

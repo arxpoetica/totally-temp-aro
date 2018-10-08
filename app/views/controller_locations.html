@@ -11,7 +11,8 @@
             <input type="checkbox" class="checkboxfill layer-type-checkboxes"
                    style="margin-top: 0px; margin-right: 3px;"
                    ng-model="filter.checked"
-                   ng-checked="filter.checked" ng-change="updateMapLayers()">
+                   ng-checked="filter.checked"
+                   ng-change="handleFiltersChanged()">
             <img ng-src="{{filter.iconUrl}}" style="width:16px; margin-right:5px">
             <span>{{filter.label}}</span>
           </div>

@@ -1,6 +1,6 @@
 class BoundariesController {
 
-  constructor($rootScope,$http,state,map_tools,MapLayer,map_layers,regions,configuration) {
+  constructor($rootScope, $http, state, map_tools, configuration, regions) {
 
     this.$http = $http
     this.state = state
@@ -33,26 +33,71 @@ class BoundariesController {
       this.censusCategories = newValue
     })
     
+    this.isConfigurationLoaded = false
     $rootScope.$on('configuration_loaded', () => {
-      globalServiceLayers.forEach((serviceLayer) => {
-        if (!serviceLayer.show_in_boundaries) return
-        var wirecenter_layer = {
-          name: serviceLayer.description, //serviceLayer.description, // Service Areas 
-          type: 'wirecenter',
-          layerId: serviceLayer.id
-        }
-
-        wirecenter_layer.visible_check = this.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
-        this.state.boundaries.tileLayers.push(wirecenter_layer)
-      })
-
-      this.state.boundaries.tileLayers.push({
-        name: 'Census Blocks',
-        type: 'census_blocks'
-      })
+      this.isConfigurationLoaded = true
+      this.reloadVisibleLayers()
+        .then(() => this.updateMapLayers())
+        .catch((err) => console.error(err))
     })
   }
   
+  reloadVisibleLayers() {
+    return this.state.StateViewMode.loadEntityList(this.$http,this.state,'AnalysisLayer',null,'id,name,description',null)
+      .then(() => {
+        var newTileLayers = []
+        var filteredGlobalServiceLayers = globalServiceLayers
+        if (this.configuration && this.configuration.perspective && this.configuration.perspective.limitBoundaries.enabled) {
+          const namesToInclude = this.configuration.perspective.limitBoundaries.showOnlyNames
+          filteredGlobalServiceLayers = globalServiceLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
+        }
+        filteredGlobalServiceLayers.forEach((serviceLayer) => {
+          if (!serviceLayer.show_in_boundaries) return
+          var wirecenter_layer = {
+            name: serviceLayer.description, //serviceLayer.description, // Service Areas 
+            type: 'wirecenter',
+            layerId: serviceLayer.id
+          }
+    
+          wirecenter_layer.visible_check = this.configuration && this.configuration.boundaryCategories && this.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
+          wirecenter_layer.visible = serviceLayer.name === 'wirecenter'
+          newTileLayers.push(wirecenter_layer)
+        })
+    
+        var includeCensusBlocks = true
+        if (this.configuration && this.configuration.perspective && this.configuration.perspective.limitBoundaries.enabled) {
+          const namesToInclude = this.configuration.perspective.limitBoundaries.showOnlyNames
+          includeCensusBlocks = namesToInclude.indexOf('census_blocks') >= 0
+        }
+        if (includeCensusBlocks) {
+          newTileLayers.push({
+            name: 'Census Blocks',
+            type: 'census_blocks'
+          })
+        }
+    
+        var analysisLayers = this.state.entityTypeList.AnalysisLayer
+        if (this.configuration && this.configuration.perspective && this.configuration.perspective.limitBoundaries.enabled) {
+          const namesToInclude = this.configuration.perspective.limitBoundaries.showOnlyNames
+          analysisLayers = analysisLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
+        }
+        analysisLayers.forEach((analysisLayer) => {
+          newTileLayers.push({
+            name: analysisLayer.description,
+            type: 'analysis_layer',
+            analysisLayerId: analysisLayer.id
+          })
+        })
+
+        //enable wirecenter for frontier by default
+        this.state.boundaries.tileLayers.forEach((tileLayers) => {
+          tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
+        })
+        this.state.boundaries.tileLayers = newTileLayers
+        return Promise.resolve()
+      })
+  }
+
   onSelectCensusCat(){
     let id = null
     if (null != this.selectedCensusCat) id = this.selectedCensusCat.id
@@ -128,6 +173,19 @@ class BoundariesController {
     this.state.mapLayers.next(oldMapLayers)
   }
 
+  $doCheck() {
+    if (!this.isConfigurationLoaded) {
+      return  // Configuration is not loaded yet - do not do anything
+    }
+    // When the perspective changes, some map layers may be hidden/shown.
+    if (this.oldPerspective !== this.configuration.perspective) {
+      this.oldPerspective = this.configuration.perspective
+      this.reloadVisibleLayers()
+        .then(() => this.updateMapLayers())
+        .catch((err) => console.error(err))
+    }
+  }
+
   // Get the point transformation mode with the current zoom level
   getPointTransformForLayer(zoomThreshold) {
     var mapZoom = map.getZoom()
@@ -137,27 +195,12 @@ class BoundariesController {
   }
 
   $onInit() {
-    this.state.StateViewMode.loadEntityList(this.$http,this.state,'AnalysisLayer',null,'id,name,description',null)
-    .then(() => {
-      this.state.entityTypeList.AnalysisLayer.forEach((analysisLayer) => {
-        this.state.boundaries.tileLayers.push({
-          name: analysisLayer.description,
-          type: 'analysis_layer',
-          analysisLayerId: analysisLayer.id
-        })
-      })
-
-      //enable wirecenter for frontier by default
-      this.state.boundaries.tileLayers.forEach((tileLayers) => {
-        tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
-      })
-    })
-
+    this.reloadVisibleLayers()
+      .then(() => this.updateMapLayers())
   }
-
 }
 
-BoundariesController.$inject = ['$rootScope','$http','state','map_tools','MapLayer','map_layers','regions','configuration']
+BoundariesController.$inject = ['$rootScope', '$http', 'state', 'map_tools', 'configuration', 'regions']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',

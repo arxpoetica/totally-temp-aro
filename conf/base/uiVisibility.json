@@ -226,6 +226,9 @@
         "show": true
       }
     },
+    "limitBoundaries": {
+      "enabled": false
+    },
     "extendedAnalysis": true
   },
   {
@@ -454,6 +457,9 @@
         "show": true
       }
     },
+    "limitBoundaries": {
+      "enabled": false
+    },
     "extendedAnalysis": true,
     "hasLocationFilters": true
   },
@@ -576,7 +582,7 @@
         "show": false
       },
       "PLAN_SUMMARY_REPORTS": {
-        "show": true
+        "show": false
       },
       "COVERAGE_BOUNDARY": {
         "show": true
@@ -683,6 +689,9 @@
       "dataSelection": {
         "show": true
       }
+    },
+    "limitBoundaries": {
+      "enabled": false
     },
     "extendedAnalysis": true,
     "hasLocationFilters": true
