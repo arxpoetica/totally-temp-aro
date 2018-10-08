@@ -1,0 +1,40 @@
+{
+  "categories": {
+    "wirecenter": {
+			"visible_check": true,
+			"highlightStyle": {
+        "strokeStyle": "#800080"
+      },
+			"aggregateZoomThreshold": 0
+    },
+    "census_blocks": {
+      "strokeStyle": "#000000",
+      "opacity": 0.5,
+			"highlightStyle": {
+        "strokeStyle": "#800080"
+      }
+    },
+    "analysis_layer": {
+      "strokeStyle": "#000000",
+			"highlightStyle": {
+        "strokeStyle": "#800080"
+      }
+    },
+    "aggregated_wirecenters": {
+			"highlightStyle": {
+        "strokeStyle": "#800080"
+      }
+    },
+    "aggregated_census_blocks": {
+			"highlightStyle": {
+        "strokeStyle": "#800080"
+      }
+    },
+    "aggregated_analysis_layer": {
+			"strokeStyle": "#000000",
+			"highlightStyle": {
+        "strokeStyle": "#800080"
+      }
+    }
+  }
+}
