@@ -13,6 +13,7 @@ exports.configure = (api, middleware) => {
       serviceLayers: cache.serviceLayers,
       analysisLayers: cache.analysisLayers,
       mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP', 
+      appConfiguration: cache.configuration,
       // For google maps licensing, specify one of the following:
       // 1. Nothing (no API_KEY, no CLIENT_ID, no CHANNEL)
       // 2. API_KEY only

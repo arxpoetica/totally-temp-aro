@@ -4,7 +4,7 @@ import StateViewMode from './state-view-mode'
 class State {
 //app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
+  constructor($rootScope, $http, $document, $timeout, $sce, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
@@ -63,20 +63,12 @@ class State {
   ]
 
   // Promises for app initialization (configuration loaded, map ready, etc.)
-  var configurationLoadedPromise = new Promise((resolve, reject) => {
-    $rootScope.$on('configuration_loaded', (event, data) => {
-      configuration.loadPerspective(service.loggedInUser.perspective)
-      resolve()
-    })
-  })
-  var mapReadyPromise = new Promise((resolve, reject) => {
+  service.mapReadyPromise = new Promise((resolve, reject) => {
     $document.ready(() => {
       // At this point we will have access to the global map variable
       map.ready(() => resolve())
     })
   })
-  // appReadyPromise will resolve when the map and configuration are loaded
-  service.appReadyPromise = Promise.all([configurationLoadedPromise, mapReadyPromise])
 
   //toolbar actions
   service.toolbarActions = Object.freeze({
@@ -584,7 +576,7 @@ class State {
   service.plan = new Rx.BehaviorSubject(null)
 
   // Initialize the state of the application (the parts that depend upon configuration being loaded from the server)
-  var initializeState = function () {
+  service.initializeState = function () {
 
     service.reloadLocationTypes()
     service.selectedDisplayMode.next(service.displayModes.VIEW)
@@ -607,27 +599,18 @@ class State {
 
   service.reloadLocationTypes = () => {
     var locationTypes = []
-    if (configuration && configuration.locationCategories && configuration.locationCategories.categories) {
-      var locations = configuration.locationCategories.categories
-      Object.keys(locations).forEach((locationKey) => {
-        var location = locations[locationKey]
+    var locations = service.configuration.locationCategories.categories
+    Object.keys(locations).forEach((locationKey) => {
+      var location = locations[locationKey]
 
-        if (configuration.perspective.locationCategories[locationKey].show) {
-            location.checked = location.selected
-            locationTypes.push(location)
-        }
-      })
-    }
+      if (service.configuration.perspective.locationCategories[locationKey].show) {
+          location.checked = location.selected
+          locationTypes.push(location)
+      }
+    })
     service.locationTypes.next(locationTypes)
     service.constructionSites.next(angular.copy(locationTypes))
   }
-
-  initializeState()
-
-  // When configuration is loaded from the server, update it in the state
-  $rootScope.$on('configuration_loaded', () => {
-    initializeState()
-  })
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
@@ -1423,8 +1406,8 @@ class State {
   
   service.isFeatureLayerOn = (categoryItemKey) => {
     var isOn = false
-    if (configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) 
-        && configuration.networkEquipment.equipments[categoryItemKey].checked){
+    if (service.configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) 
+        && service.configuration.networkEquipment.equipments[categoryItemKey].checked){
       isOn = true
     }
     return isOn
@@ -1522,8 +1505,9 @@ class State {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
       service.loggedInUser.perspective = result.data.perspective || 'default'
-      configuration.loadPerspective(service.loggedInUser.perspective)
-      service.reloadLocationTypes() // These may change with the perspective
+      configuration.loadPerspective(service.loggedInUser.perspective, service.configuration) // For now
+      service.configuration.loadPerspective(service.loggedInUser.perspective)
+      service.initializeState()
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
     })
     .then((result) => {
@@ -1554,6 +1538,20 @@ class State {
       // Set it to the default so that the map gets initialized
       initializeToDefaultCoords(plan)
     })
+  }
+
+  service.configuration = {}
+  service.initializeAppConfiguration = (loggedInUser, appConfiguration) => {
+    service.configuration = appConfiguration
+    service.configuration.loadPerspective = (perspective) => {
+      // If a perspective is not found, go to the default
+      const defaultPerspective = service.configuration.uiVisibility.filter(item => item.name === 'default')[0]
+      const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
+      service.configuration.perspective = thisPerspective || defaultPerspective
+    }
+    configuration.loadPerspective(loggedInUser.perspective, service.configuration) // For now
+    service.configuration.loadPerspective(loggedInUser.perspective)
+    service.setLoggedInUser(loggedInUser)
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
@@ -1662,6 +1660,6 @@ class State {
 }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
 
 export default State

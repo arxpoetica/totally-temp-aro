@@ -186,7 +186,7 @@
       // At this point, our angular app and the document is initialized. Take the "logged in user" that we have on the
       // server side, use EJS to expand it and then set that in our "state" service. This is done so that we don't
       // have to rely on a global user object (like we did before this change)
-      angular.element(document.body).injector().get('state').setLoggedInUser(<%- JSON.stringify(user) %>);
+      angular.element(document.body).injector().get('state').initializeAppConfiguration(<%- JSON.stringify(user) %>, <%- JSON.stringify(appConfiguration) %>);
     }
 
     var user_id = <%= user.id %>;
