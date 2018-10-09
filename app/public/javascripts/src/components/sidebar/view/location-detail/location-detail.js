@@ -74,6 +74,8 @@ class LocationDetailController {
   getLocationInfo(planId, id, objectId){
     return this.$http.get(`/locations/${planId}/${id}/show`)
       .then((result) => {
+        result.data.latitude = result.data.geog.coordinates[1]
+        result.data.longitude = result.data.geog.coordinates[0]
         var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
         locationProperties.geog = result.data.geog
         return Promise.resolve(locationProperties)

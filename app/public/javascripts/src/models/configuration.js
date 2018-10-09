@@ -9,6 +9,7 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     var configurationTypes = [
       'locationCategories',
       'networkEquipment',
+      'boundaryCategories',
       'units',
       'aroClient',
       'mapType',

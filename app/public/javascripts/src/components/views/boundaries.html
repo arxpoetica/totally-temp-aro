@@ -10,13 +10,6 @@
     <div class="panel-heading" ng-bind="$ctrl.map_tools.get_tool_name('boundaries')"></div>
     <div class="panel-body map-tool-panel-body" ng-show="$ctrl.map_tools.is_expanded('boundaries')">
 
-      <!-- <div class="btn-group">
-        <label ng-class="{ 'btn btn-primary': true, 'btn-selected': $ctrl.state.activeboundaryLayerMode === $ctrl.state.boundaryLayerMode.VIEW }" 
-          ng-model="$ctrl.state.activeboundaryLayerMode" btn-radio="'view'" ng-click="$ctrl.layerView($ctrl.state.boundaryLayerMode.VIEW)">View</label>
-        <label ng-class="{ 'btn btn-primary': true, 'btn-selected': $ctrl.state.activeboundaryLayerMode === $ctrl.state.boundaryLayerMode.SEARCH }" 
-          ng-model="$ctrl.state.activeboundaryLayerMode" btn-radio="'search'" ng-click="$ctrl.layerView($ctrl.state.boundaryLayerMode.SEARCH)">Search</label>
-      </div> -->
-
       <div>
         <div ng-repeat="layer in $ctrl.state.boundaries.tileLayers">
           <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">

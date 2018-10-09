@@ -54,7 +54,7 @@
         "displayProperties": {
           "levelOfDetail": 1,
           "format": "",
-          "displayName": "D & B Tier",
+          "displayName": "D&B Tier",
           "enumTypeURL": "",
           "displayDataType": "string",
           "defaultValue": "",
@@ -63,38 +63,11 @@
         },
         "type": "attributeKey"
       },
-      "CLLI8": {
-        "displayProperties": {
-          "levelOfDetail": 1,
-          "format": "",
-          "displayName": "Wirecenter",
-          "enumTypeURL": "",
-          "displayDataType": "string",
-          "defaultValue": "",
-          "visible": true,
-          "editable": false
-        },
-        "type": "attributeKey"
-      }
-    }
-  },
-  "competitorInformation": {
-    "displayProperties": {
-      "levelOfDetail": 0,
-      "format": "",
-      "displayName": "Competitor Information",
-      "enumTypeURL": "",
-      "displayDataType": "object",
-      "defaultValue": "",
-      "visible": true,
-      "editable": false
-    },
-    "children": {
       "PrimaryCompetitor": {
         "displayProperties": {
           "levelOfDetail": 1,
           "format": "",
-          "displayName": "PrimaryCompetitor",
+          "displayName": "Primary Competitor",
           "enumTypeURL": "",
           "displayDataType": "string",
           "defaultValue": "",
@@ -184,11 +157,11 @@
       }
     }
   },
-  "productInformation": {
+  "productAvailability": {
     "displayProperties": {
       "levelOfDetail": 0,
       "format": "",
-      "displayName": "Product Information",
+      "displayName": "Product Availability",
       "enumTypeURL": "",
       "displayDataType": "object",
       "defaultValue": "",
@@ -306,6 +279,32 @@
           "levelOfDetail": 1,
           "format": "",
           "displayName": "Census Block",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "latitude": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Latitude",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "longitude": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Longitude",
           "enumTypeURL": "",
           "displayDataType": "string",
           "defaultValue": "",
