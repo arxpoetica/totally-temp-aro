@@ -93,10 +93,19 @@ class State {
 
   // The selection modes for the application
   service.selectionModes = {
+    //ANALYSIS_AREAS: 'Analysis Areas',
     SELECTED_AREAS: 'Service Areas',
     SELECTED_LOCATIONS: 'Locations'
   }
-
+  
+  service.areaSelectionModes = {
+      SINGLE: 'single',
+      GROUP: 'group'
+  }
+  
+  service.areaSelectionMode = service.areaSelectionModes.SINGLE
+  //service.areaSelectionMode = service.areaSelectionModes.GROUP
+  
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',
@@ -175,7 +184,7 @@ class State {
       generatePlanLocationLinks : false,
       generateSubnetLinking: true
     },
-    analysisSelectionMode: service.selectionModes.SELECTED_AREAS
+    analysisSelectionMode: 'SELECTED_AREAS'
   }
 
   if(config.ARO_CLIENT === 'frontier')

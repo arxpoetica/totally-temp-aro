@@ -16,6 +16,8 @@ class BoundaryDetailController {
     })
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
+      console.log("boundaryDetailController")
+      console.log(event)
       //160712271: On click of equipment or location dont show boundary details
       if (event.hasOwnProperty('equipmentFeatures') && event.equipmentFeatures.length > 0) return
       if (event.hasOwnProperty('locations') && event.locations.length > 0) return
@@ -46,12 +48,14 @@ class BoundaryDetailController {
           && event.serviceAreas.length > 0
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
+            console.log('add service area')
             this.state.StateViewMode.reloadSelectedServiceArea(this.state,event.serviceAreas[0].id)
         } else if (event.hasOwnProperty('analysisAreas')
           && event.analysisAreas.length > 0
           && event.analysisAreas[0].hasOwnProperty('code')
           && event.analysisAreas[0].hasOwnProperty('_data_type') ){
             this.viewAnalysisAreaInfo(event.analysisAreas[0])
+            console.log('add Analysis area')
             this.state.StateViewMode.reloadSelectedAnalysisArea(this.state,event.analysisAreas[0].id)
         }
       } else {

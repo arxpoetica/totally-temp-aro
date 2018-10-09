@@ -26,11 +26,11 @@
          affect things too much -->
     <!-- For google maps licensing, we can get either 1. An API key, 2. A ClientID(+ optional Channel) combo, or 3. None of the above (free tier) -->
     <%if (googleMapsLicensing.API_KEY) {%>
-      <script src="https://maps.googleapis.com/maps/api/js?v=3<%- '&amp;key=' + googleMapsLicensing.API_KEY %>&amp;libraries=visualization,drawing"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3<%- '&amp;key=' + googleMapsLicensing.API_KEY %>&amp;libraries=visualization,drawing,geometry"></script>
     <%} else if (googleMapsLicensing.CLIENT_ID) {%>
-      <script src="https://maps.googleapis.com/maps/api/js?v=3<%- '&amp;client=' + googleMapsLicensing.CLIENT_ID %><%- googleMapsLicensing.CHANNEL ? '&amp;channel=' + googleMapsLicensing.CHANNEL : '' %>&amp;libraries=visualization,drawing"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3<%- '&amp;client=' + googleMapsLicensing.CLIENT_ID %><%- googleMapsLicensing.CHANNEL ? '&amp;channel=' + googleMapsLicensing.CHANNEL : '' %>&amp;libraries=visualization,drawing,geometry"></script>
     <%} else {%>
-      <script src="https://maps.googleapis.com/maps/api/js?v=3&amp;libraries=visualization,drawing"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?v=3&amp;libraries=visualization,drawing,geometry"></script>
     <%}%>
 
     <!-- Include bundles with vendor scripts -->

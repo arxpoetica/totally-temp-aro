@@ -187,10 +187,11 @@ class TileComponentController {
     })
 
     this.state.requestPolygonSelect.subscribe((args) => {
+      //console.log(args)
       if (!this.mapRef || !args.coords) {
         return
       }
-
+      
       var mapBounds = this.mapRef.getBounds()
       var neCorner = mapBounds.getNorthEast()
       var swCorner = mapBounds.getSouthWest()
@@ -208,7 +209,16 @@ class TileComponentController {
           var tileCoords = { x: xTile, y: yTile }
           var convertedPixelCoords = []
           args.coords.forEach((latLng) => {
-            var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, latLng.lat(), latLng.lng())
+            var lat, lng
+            
+            if (latLng.hasOwnProperty('lat')){
+              lat = latLng.lat()
+              lng = latLng.lng()
+            }else{
+              lat = latLng[1]
+              lng = latLng[0]
+            }
+            var pixelCoords = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
             convertedPixelCoords.push([pixelCoords.x, pixelCoords.y])
           })
 
@@ -228,7 +238,7 @@ class TileComponentController {
             result.forEach((selectedObj) => {
               if (selectedObj.location_id) {
                 selectedLocations.add(selectedObj.location_id)
-              } else if(selectedObj.id) {
+              } else if("service_layer" == selectedObj._data_type && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
               } else if (selectedObj.gid) {
                 selectedRoadSegments.add(selectedObj);
@@ -238,13 +248,25 @@ class TileComponentController {
           
           var selectedLocationsIds = []
           var selectedServiceAreaIds = []
-
-          selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+          
+          
+          // ToDo: need to combine this with the overlayClickListener below
+          var canSelectLoc = true
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS 
+              && this.state.optimizationOptions.analysisSelectionMode != 'SELECTED_LOCATIONS'){
+            canSelectLoc = false
+          }
+          
+          if (canSelectLoc){
+            selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
+          }
           selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
           
           state.hackRaiseEvent(selectedLocationsIds)
 
           //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          //console.log(selectedLocationsIds)
+          //console.log(selectedServiceAreaIds)
           state.mapFeaturesSelectedEvent.next({
             locations: selectedLocationsIds,
             serviceAreas: selectedServiceAreaIds,
@@ -253,7 +275,14 @@ class TileComponentController {
           })
 
           function processArea() {
-            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{ return {lat: a.lat() , lng: a.lng()} })}).getPath())
+            //console.log(google.maps)
+            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{
+              if (a.hasOwnProperty('lat')){
+                return {lat: a.lat() , lng: a.lng()} 
+              }else{
+                return {lat: a[1] , lng: a[0]} 
+              }
+            })}).getPath())
           }
         })
         .catch((err) => console.error(err))
@@ -332,6 +361,7 @@ class TileComponentController {
               canSelectLoc = !canSelectLoc
               break
           }
+          if (this.state.areaSelectionMode == this.state.areaSelectionModes.GROUP) canSelectSA = false
         } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
           canSelectSA = true
         }  
