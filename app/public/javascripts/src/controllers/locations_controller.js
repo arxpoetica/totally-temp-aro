@@ -193,7 +193,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   $rootScope.$on('map_zoom_changed', updateMapLayers)
 
   // Create a new set of map layers
-  state.appReadyPromise.then(() => {
+  state.mapReadyPromise.then(() => {
     updateMapLayers()
   })
 

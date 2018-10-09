@@ -232,7 +232,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   }
   
   // Create a new set of map layers
-  state.appReadyPromise.then(() => {
+  state.mapReadyPromise.then(() => {
     updateMapLayers()
   })
 

@@ -1,12 +1,11 @@
 class BoundariesController {
 
-  constructor($rootScope, $http, state, map_tools, configuration, regions) {
+  constructor($rootScope, $http, state, map_tools, regions) {
 
     this.$http = $http
     this.state = state
     this.regions = regions
     this.map_tools = map_tools
-    this.configuration = configuration
 
     var countySubdivisionsLayer
     var censusBlocksLayer
@@ -32,14 +31,6 @@ class BoundariesController {
     this.state.censusCategories.subscribe((newValue) => {
       this.censusCategories = newValue
     })
-    
-    this.isConfigurationLoaded = false
-    $rootScope.$on('configuration_loaded', () => {
-      this.isConfigurationLoaded = true
-      this.reloadVisibleLayers()
-        .then(() => this.updateMapLayers())
-        .catch((err) => console.error(err))
-    })
   }
   
   reloadVisibleLayers() {
@@ -47,8 +38,8 @@ class BoundariesController {
       .then(() => {
         var newTileLayers = []
         var filteredGlobalServiceLayers = globalServiceLayers
-        if (this.configuration && this.configuration.perspective && this.configuration.perspective.limitBoundaries.enabled) {
-          const namesToInclude = this.configuration.perspective.limitBoundaries.showOnlyNames
+        if (this.state.configuration.perspective.limitBoundaries.enabled) {
+          const namesToInclude = this.state.configuration.perspective.limitBoundaries.showOnlyNames
           filteredGlobalServiceLayers = globalServiceLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
         }
         filteredGlobalServiceLayers.forEach((serviceLayer) => {
@@ -59,14 +50,14 @@ class BoundariesController {
             layerId: serviceLayer.id
           }
     
-          wirecenter_layer.visible_check = this.configuration && this.configuration.boundaryCategories && this.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
+          wirecenter_layer.visible_check = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
           wirecenter_layer.visible = serviceLayer.name === 'wirecenter'
           newTileLayers.push(wirecenter_layer)
         })
     
         var includeCensusBlocks = true
-        if (this.configuration && this.configuration.perspective && this.configuration.perspective.limitBoundaries.enabled) {
-          const namesToInclude = this.configuration.perspective.limitBoundaries.showOnlyNames
+        if (this.state.configuration.perspective.limitBoundaries.enabled) {
+          const namesToInclude = this.state.configuration.perspective.limitBoundaries.showOnlyNames
           includeCensusBlocks = namesToInclude.indexOf('census_blocks') >= 0
         }
         if (includeCensusBlocks) {
@@ -77,8 +68,8 @@ class BoundariesController {
         }
     
         var analysisLayers = this.state.entityTypeList.AnalysisLayer
-        if (this.configuration && this.configuration.perspective && this.configuration.perspective.limitBoundaries.enabled) {
-          const namesToInclude = this.configuration.perspective.limitBoundaries.showOnlyNames
+        if (this.state.configuration.perspective.limitBoundaries.enabled) {
+          const namesToInclude = this.state.configuration.perspective.limitBoundaries.showOnlyNames
           analysisLayers = analysisLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
         }
         analysisLayers.forEach((analysisLayer) => {
@@ -124,7 +115,7 @@ class BoundariesController {
     // ToDo: this function could stand to be cleaned up
     
     // ToDo: layerSettings will come from settings, possibly by way of one of the other arrays  
-    var layerSettings = this.configuration.boundaryCategories && this.configuration.boundaryCategories.categories
+    var layerSettings = this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories
     
     if(layerSettings && layerSettings['wirecenter'])
       layerSettings['default'] = layerSettings['wirecenter']
@@ -174,12 +165,9 @@ class BoundariesController {
   }
 
   $doCheck() {
-    if (!this.isConfigurationLoaded) {
-      return  // Configuration is not loaded yet - do not do anything
-    }
     // When the perspective changes, some map layers may be hidden/shown.
-    if (this.oldPerspective !== this.configuration.perspective) {
-      this.oldPerspective = this.configuration.perspective
+    if (this.oldPerspective !== this.state.configuration.perspective) {
+      this.oldPerspective = this.state.configuration.perspective
       this.reloadVisibleLayers()
         .then(() => this.updateMapLayers())
         .catch((err) => console.error(err))
@@ -197,10 +185,11 @@ class BoundariesController {
   $onInit() {
     this.reloadVisibleLayers()
       .then(() => this.updateMapLayers())
+      .catch((err) => console.error(err))
   }
 }
 
-BoundariesController.$inject = ['$rootScope', '$http', 'state', 'map_tools', 'configuration', 'regions']
+BoundariesController.$inject = ['$rootScope', '$http', 'state', 'map_tools', 'regions']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',

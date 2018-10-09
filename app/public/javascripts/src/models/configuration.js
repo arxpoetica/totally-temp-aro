@@ -44,25 +44,26 @@ app.service('configuration',['$location', '$http', '$rootScope', ($location, $ht
     // Our configuration object will have a "perspective" property. This decides what the logged in user can see
     // in the UI (i.e. the users perspective). Start with a default, and allow it to be changed when the logged in user changes.
 
-    var getPerspectiveByKey = (key)=> {
-      return config.uiVisibility.filter((c)=>{
+    var getPerspectiveByKey = (key, newConfigurationImplementation)=> {
+      return newConfigurationImplementation.uiVisibility.filter((c)=>{
         return c.name === key
       })[0]
     }
 
-    config.loadPerspective = (userPerspective) => {
+    config.loadPerspective = (userPerspective, newConfigurationImplementation) => {
+      console.error('Its over... Do not call me anymore!')
       switch (userPerspective) {
         case 'admin':
         default:
-          config.perspective = getPerspectiveByKey('default')
+          config.perspective = getPerspectiveByKey('default', newConfigurationImplementation)
         break
 
         case 'sales_engineer':
-          config.perspective = getPerspectiveByKey('sales_engineer')
+          config.perspective = getPerspectiveByKey('sales_engineer', newConfigurationImplementation)
         break
 
         case 'account_exec':
-          config.perspective = getPerspectiveByKey('account_exec')
+          config.perspective = getPerspectiveByKey('account_exec', newConfigurationImplementation)
         break
       }
     }
