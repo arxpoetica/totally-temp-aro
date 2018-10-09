@@ -238,7 +238,7 @@ class TileComponentController {
             result.forEach((selectedObj) => {
               if (selectedObj.location_id) {
                 selectedLocations.add(selectedObj.location_id)
-              } else if(selectedObj.id) {
+              } else if("service_layer" == selectedObj._data_type && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
               } else if (selectedObj.gid) {
                 selectedRoadSegments.add(selectedObj);
