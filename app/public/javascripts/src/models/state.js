@@ -1556,6 +1556,11 @@ class State {
     })
   }
 
+  service.configuration = {}
+  service.setAppConfiguration = (appConfiguration) => {
+    service.configuration = appConfiguration
+  }
+
   service.planEditorChanged = new Rx.BehaviorSubject(false)
 
   // Ask the user if they want to "steal" and existing transaction from another user.

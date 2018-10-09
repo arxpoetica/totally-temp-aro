@@ -1,4 +1,6 @@
 var database = require('./database')
+const UIConfigurationClass = require('./ui_configuration')
+const UIConfiguration = new UIConfigurationClass()
 
 exports.serviceLayers = []
 exports.analysisLayers = []
@@ -35,11 +37,29 @@ function loadAnalysisLayers () {
     })
 }
 
+function loadConfiguration() {
+  const configurationTypes = [
+    'locationCategories',
+    'networkEquipment',
+    'boundaryCategories',
+    'units',
+    'aroClient',
+    'mapType',
+    'locationDetailProperties',
+    'uiVisibility'
+  ]
+
+  exports.configuration = {}
+  configurationTypes.forEach((configurationType) => exports.configuration[configurationType] = UIConfiguration.getConfigurationSet(configurationType))
+  return Promise.resolve()  
+}
+
 exports.refresh = () => {
   return Promise.all([
     loadAnalysisLayers(),
     loadServiceLayers(),
-    loadFiberTypes()
+    loadFiberTypes(),
+    loadConfiguration()
   ])
   .then(() => console.log(`Cache loaded ${exports.serviceLayers.length} service areas, ${exports.analysisLayers.length} analysis layers`))
 }
