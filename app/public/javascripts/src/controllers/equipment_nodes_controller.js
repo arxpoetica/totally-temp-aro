@@ -3,7 +3,7 @@
 app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
-  $scope.planState = state
+  $scope.state = state
   $scope.currentUser = state.loggedInUser
   $scope.layerTypeVisibility = {
     existing: false,
