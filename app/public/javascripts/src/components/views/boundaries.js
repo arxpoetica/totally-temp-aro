@@ -42,7 +42,7 @@ class BoundariesController {
         filteredGlobalServiceLayers.forEach((serviceLayer) => {
           if (!serviceLayer.show_in_boundaries) return
           var wirecenter_layer = {
-            name: serviceLayer.description, //serviceLayer.description, // Service Areas 
+            description: serviceLayer.description, // Service Areas 
             type: 'wirecenter',
             layerId: serviceLayer.id
           }
@@ -58,7 +58,7 @@ class BoundariesController {
         }
         if (includeCensusBlocks) {
           newTileLayers.push({
-            name: 'Census Blocks',
+            description: 'Census Blocks',
             type: 'census_blocks'
           })
         }
@@ -70,7 +70,7 @@ class BoundariesController {
         }
         analysisLayers.forEach((analysisLayer) => {
           newTileLayers.push({
-            name: analysisLayer.description,
+            description: analysisLayer.description,
             type: 'analysis_layer',
             analysisLayerId: analysisLayer.id
           })
