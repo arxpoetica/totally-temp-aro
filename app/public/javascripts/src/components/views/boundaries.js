@@ -7,9 +7,6 @@ class BoundariesController {
     this.regions = regions
     this.map_tools = map_tools
 
-    var countySubdivisionsLayer
-    var censusBlocksLayer
-
     // Creates map layers based on selection in the UI
     this.createdMapLayerKeys = new Set()
 
@@ -50,8 +47,7 @@ class BoundariesController {
             layerId: serviceLayer.id
           }
     
-          wirecenter_layer.visible_check = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
-          wirecenter_layer.visible = (serviceLayer.name === 'wirecenter') || (serviceLayer.name === 'BSA Wirecenters')
+          wirecenter_layer.visible = this.state.configuration.boundaryCategories.categories[serviceLayer.name].visible
           newTileLayers.push(wirecenter_layer)
         })
     
@@ -80,28 +76,17 @@ class BoundariesController {
           })
         })
 
-        //enable wirecenter for frontier by default
-        this.state.boundaries.tileLayers.forEach((tileLayers) => {
-          tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
-        })
         this.state.boundaries.tileLayers = newTileLayers
-        return Promise.resolve()
+        this.updateMapLayers()
       })
+      .catch((err) => console.error(err))
   }
 
   onSelectCensusCat(){
-    let id = null
-    if (null != this.selectedCensusCat) id = this.selectedCensusCat.id
+    const id = this.selectedCensusCat && this.selectedCensusCat.id
     this.state.reloadSelectedCensusCategoryId(id)
   }
   
-  // for layers drawn on vector tiles
-  tilesToggleVisibility(layer) {
-    layer.visible = layer.visible_check;
-    this.updateMapLayers()
-    //this.state.resetBoundarySearch.next(true)
-  }
-
   // Replaces any occurrences of searchText by replaceText in the keys of an object
   objectKeyReplace(obj, searchText, replaceText) {
     Object.keys(obj).forEach((key) => {
@@ -129,9 +114,6 @@ class BoundariesController {
     })
 
     this.createdMapLayerKeys.clear()
-
-    // Hold a list of layers that we want merged
-    var mergedLayerUrls = []
 
     // Add map layers based on the selection
     var selectedServiceAreaLibraries = this.state.dataItems && this.state.dataItems.service_layer && this.state.dataItems.service_layer.selectedLibraryItems
@@ -169,8 +151,6 @@ class BoundariesController {
     if (this.oldPerspective !== this.state.configuration.perspective) {
       this.oldPerspective = this.state.configuration.perspective
       this.reloadVisibleLayers()
-        .then(() => this.updateMapLayers())
-        .catch((err) => console.error(err))
     }
   }
 
@@ -184,8 +164,6 @@ class BoundariesController {
 
   $onInit() {
     this.reloadVisibleLayers()
-      .then(() => this.updateMapLayers())
-      .catch((err) => console.error(err))
   }
 }
 
