@@ -7,6 +7,7 @@ import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBou
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
+import TileUtilities from '../../tiles/tile-utilities.js'
 
 
 class PlanEditorController {
@@ -21,6 +22,8 @@ class PlanEditorController {
     this.tileDataService = tileDataService
     this.tracker = tracker
     this.selectedMapObject = null
+    this.selectedMapObjectLat = null
+    this.selectedMapObjectLng = null
     //this.selectedEquipmentInfo = {}
     this.objectIdToProperties = {}
     this.objectIdToMapObject = {}
@@ -975,6 +978,8 @@ class PlanEditorController {
     }
     
     this.selectedMapObject = mapObject
+    this.selectedMapObjectLat = mapObject && mapObject.position.lat()
+    this.selectedMapObjectLng = mapObject && mapObject.position.lng()
     
     // debug
     //console.log(this.selectedMapObject)
@@ -991,6 +996,8 @@ class PlanEditorController {
 
   handleObjectModified(mapObject) {
     if (this.isMarker(mapObject)) {
+      this.selectedMapObjectLat = mapObject && mapObject.position.lat()
+      this.selectedMapObjectLng = mapObject && mapObject.position.lng()
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       .then((result) => {
@@ -1227,6 +1234,13 @@ class PlanEditorController {
       return Promise.resolve('')
     }
     return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
+  }
+
+  setSelectedMapObjectLoc() {
+    var isValid = TileUtilities.isValidLatLong(+this.selectedMapObjectLat,+this.selectedMapObjectLng)
+    if(!isValid) return  
+    this.selectedMapObject.setPosition({ lat: +this.selectedMapObjectLat, lng: +this.selectedMapObjectLng })
+    this.handleObjectModified(this.selectedMapObject) 
   }
 
   $doCheck() {
