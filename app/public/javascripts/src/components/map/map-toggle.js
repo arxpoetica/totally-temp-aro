@@ -48,8 +48,8 @@ class MapToggleController {
     } else {
       // Depending upon the user perspective, set the map type on the map object
       this.mapRefPromise
-        .then((results) => {
-          const mapRef = results[0]
+        .then((result) => {
+          const mapRef = result
           this.currentMapType = this.state.configuration.mapType[this.userPerspective] || this.state.configuration.mapType.default
           mapRef.setMapTypeId(this.currentMapType)
         })
