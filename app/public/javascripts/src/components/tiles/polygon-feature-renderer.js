@@ -5,7 +5,7 @@ class PolygonFeatureRenderer {
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
                        selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea,
-                       analysisSelectionMode, selectedCensusBlockId, selectedCensusCategoryId) {
+                       analysisSelectionMode, selectionModes, selectedCensusBlockId, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon
@@ -37,7 +37,7 @@ class PolygonFeatureRenderer {
 
     } else if (selectedServiceAreas.has(feature.properties.id)
       && selectedDisplayMode == displayModes.ANALYSIS
-      && analysisSelectionMode == "SELECTED_AREAS") {
+      && analysisSelectionMode == selectionModes.SELECTED_AREAS) {
       //Highlight the selected SA
       //highlight if analysis mode -> selection type is service areas 
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle

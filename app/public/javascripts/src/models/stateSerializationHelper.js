@@ -267,9 +267,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.budget = +postBody.optimization.budget/1000
     }
     state.optimizationOptions.analysisSelectionMode = postBody.locationConstraints.analysisSelectionMode
-    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
+    if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_AREAS) {
       optimization.setMode('boundaries')
-    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
+    } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_LOCATIONS) {
       optimization.setMode('targets')
     }
   }
