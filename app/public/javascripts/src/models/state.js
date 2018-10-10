@@ -1209,7 +1209,7 @@ class State {
   // Clear the tile cache for plan outputs like fiber, 5G nodes, etc.
   service.clearTileCachePlanOutputs = () => {
     // The tile cache will clear all cache entries whose keys contain the given keywords
-    tileDataService.clearDataCacheContaining(configuration.networkEquipment.tileCacheKeywords)
+    tileDataService.clearDataCacheContaining(service.configuration.networkEquipment.tileCacheKeywords)
   }
 
   service.showModifyQuestionDialog = () => {
