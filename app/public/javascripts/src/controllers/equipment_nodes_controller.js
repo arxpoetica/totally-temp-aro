@@ -5,14 +5,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   $scope.map_tools = map_tools
   $scope.state = state
   $scope.currentUser = state.loggedInUser
-  $scope.layerTypeVisibility = {
-    existing: false,
-    planned: false
-  }
-  if (state.configuration.networkEquipment) {
-    $scope.layerTypeVisibility.existing = state.configuration.networkEquipment.visibility.defaultShowExistingEquipment
-    $scope.layerTypeVisibility.planned = state.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
-  }
   $scope.mapZoom = 0//map.getZoom()
   $scope.equ_tdc_order = ['central_office','splice_point','fiber_distribution_hub','fiber_distribution_terminal','multiple_dwelling_unit','bulk_distribution_terminal','dslam','cell_5g','loop_extender','network_anchor']
   var usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
@@ -121,7 +113,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           || usePointAggregate
           || $scope.mapZoom > networkEquipment.aggregateZoomThreshold) {
         
-        if ($scope.layerTypeVisibility.existing && networkEquipment.checked) {
+        if (state.equipmentLayerTypeVisibility.existing && networkEquipment.checked) {
           // We need to show the existing network equipment. Loop through all the selected library ids.
           state.dataItems && state.dataItems[networkEquipment.dataItemKey] 
             && state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
@@ -132,7 +124,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
         }
   
         const planId = state.plan && state.plan.getValue() && state.plan.getValue().id
-        if ($scope.layerTypeVisibility.planned && networkEquipment.checked && planId) {
+        if (state.equipmentLayerTypeVisibility.planned && networkEquipment.checked && planId) {
           // We need to show the planned network equipment for this plan.
           var mapLayerKey = `${categoryItemKey}_planned`
           mapLayers[mapLayerKey] = createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
@@ -202,12 +194,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     updateMapLayers()
   }
 
-  // When the type (existing, planned) changes, update map layers
-  $scope.setLayerTypeVisibility = (type, newValue) => {
-    $scope.layerTypeVisibility[type] = newValue
-    updateMapLayers()
-  }
-  
   $scope.zoomTo = (zoomLevel) => { 
     zoomLevel = Number(zoomLevel) + 1
     //console.log(zoomLevel)

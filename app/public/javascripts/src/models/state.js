@@ -82,6 +82,10 @@ class State {
   }
 
   service.showEquipmentLabels = false
+  service.equipmentLayerTypeVisibility = {
+    existing: false,
+    planned: false
+  }
 
   // The selection modes for the application
   service.selectionModes = {
@@ -1472,6 +1476,9 @@ class State {
   service.loggedInUser = null
   service.setLoggedInUser = (user) => {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
+
+    service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
+    service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
 
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
