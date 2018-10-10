@@ -2,8 +2,6 @@ import EquipmentProperties from './equipment-properties'
 import BoundaryProperties from './boundary-properties'
 import Constants from '../../common/constants'
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
-import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
-import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
@@ -11,12 +9,11 @@ import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipme
 
 class PlanEditorController {
 
-  constructor($timeout, $http, $element, state, configuration, Utils, tileDataService, tracker) {
+  constructor($timeout, $http, $element, state, Utils, tileDataService, tracker) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
     this.state = state
-    this.configuration = configuration
     this.utils = Utils
     this.tileDataService = tileDataService
     this.tracker = tracker
@@ -61,8 +58,8 @@ class PlanEditorController {
       'multiple_dwelling_unit'
     ]
     this.allEditableNetworkNodeTypes = []
-    Object.keys(configuration.perspective.networkEquipment).forEach((equipmentType) => {
-      const equipment = configuration.perspective.networkEquipment[equipmentType]
+    Object.keys(this.state.configuration.perspective.networkEquipment).forEach((equipmentType) => {
+      const equipment = this.state.configuration.perspective.networkEquipment[equipmentType]
       if (equipment.show && (editableNetworkNodeTypes.indexOf(equipmentType) >= 0)) {
         this.allEditableNetworkNodeTypes.push(equipmentType)
       }
@@ -123,7 +120,7 @@ class PlanEditorController {
                               .filter((item) => item.crudAction !== 'delete')
                               .map((item) => item.feature)
       // Save the iconUrls in the list of objects returned from aro-service
-      transactionFeatures.forEach((feature) => feature.iconUrl = this.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
+      transactionFeatures.forEach((feature) => feature.iconUrl = this.state.configuration.networkEquipment.equipments[feature.networkNodeType].iconUrl)
       // Important: Create the map objects first. The events raised by the map object editor will
       // populate the objectIdToMapObject object when the map objects are created
       this.createMapObjects && this.createMapObjects(transactionFeatures)
@@ -269,7 +266,7 @@ class PlanEditorController {
     optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed  // directed analysis if thats what the user wants
     // Always send radius in meters to the back end
-    optimizationBody.radius = this.lastUsedBoundaryDistance * this.configuration.units.length_units_to_meters
+    optimizationBody.radius = this.lastUsedBoundaryDistance * this.state.configuration.units.length_units_to_meters
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
@@ -368,7 +365,7 @@ class PlanEditorController {
     for (var localI=0; localI<boundaryData.coverageInfo.length; localI++){
       var location = boundaryData.coverageInfo[localI]
       if ("number" != typeof location.distance) continue // skip these 
-      if ('feet' == this.configuration.units.length_units) location.distance *= 3.28084
+      if ('feet' == this.state.configuration.units.length_units) location.distance *= 3.28084
       locations.push(location)
       if (!censusBlockCountById.hasOwnProperty(location.censusBlockId)){
         censusBlockCountById[location.censusBlockId] = 0
@@ -520,7 +517,7 @@ class PlanEditorController {
         xAxes: [{
           scaleLabel: {
             display: true,
-            labelString: 'distance, '+this.configuration.units.length_units, 
+            labelString: 'distance, ' + this.state.configuration.units.length_units, 
             gridLines: {
               offsetGridLines: false
             }
@@ -717,7 +714,7 @@ class PlanEditorController {
     if (!this.objectIdToProperties.hasOwnProperty(objectId)) {
       return
     }
-    var layers = this.configuration.networkEquipment.equipments
+    var layers = this.state.configuration.networkEquipment.equipments
     var networkNodeType = this.objectIdToProperties[objectId].siteNetworkNodeType
     
     // ToDo: there are discrepancies in out naming, fix that
@@ -795,7 +792,7 @@ class PlanEditorController {
         // use feature's coord NOT the event's coords
         this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
         this.viewFeature = AroFeatureFactory.createObject(result.data)
-        var viewConfig = this.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+        var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
         this.viewLabel = viewConfig.label
         this.viewIconUrl = viewConfig.iconUrl
         this.isEditFeatureProps = false
@@ -1213,13 +1210,13 @@ class PlanEditorController {
   getObjectIconUrl(eventArgs) {
     if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE) {
       // The value we have been passed is a network node type. Return the icon directly.
-      return Promise.resolve(this.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
+      return Promise.resolve(this.state.configuration.networkEquipment.equipments[eventArgs.objectValue].iconUrl)
     } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID) {
       const planId = this.state.plan.getValue().id
       return this.$http.get(`/service/plan-feature/${planId}/equipment/${eventArgs.objectValue}?userId=${this.state.loggedInUser.id}`)
       .then((result) => {
         const networkNodeType = result.data.networkNodeType
-        return Promise.resolve(this.configuration.networkEquipment.equipments[networkNodeType].iconUrl)
+        return Promise.resolve(this.state.configuration.networkEquipment.equipments[networkNodeType].iconUrl)
       })
       .catch((err) => console.error(err))
     } else if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY) {
@@ -1248,7 +1245,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'configuration', 'Utils', 'tileDataService', 'tracker']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'Utils', 'tileDataService', 'tracker']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',

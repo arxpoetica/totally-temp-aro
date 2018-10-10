@@ -1,5 +1,5 @@
 /* global app $ Chart config */
-app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'configuration', 'map_tools', 'MapLayer', 'regions','$filter','state', ($scope, $rootScope, $http, $timeout, configuration, map_tools, MapLayer, regions, $filter, state) => {
+app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$http', '$timeout', 'map_tools', 'MapLayer', 'regions','$filter','state', ($scope, $rootScope, $http, $timeout, map_tools, MapLayer, regions, $filter, state) => {
   $scope.map_tools = map_tools
   $scope.aboveWirecenter = false
   $scope.premisesFilterEntityTypes = { household: true }
@@ -18,26 +18,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.opexCostFilter = 'household'
   $scope.state = state
 
-
-  // Load the location filters only after the configuration has been loaded
-  $scope.isLoadingConfiguration = true
-  $rootScope.$on('configuration_loaded', () => {
-
-    $scope.entityTypes = {
-      smallBusiness: configuration.locationCategories.business.segments.small.label,
-      mediumBusiness: configuration.locationCategories.business.segments.medium.label,
-      largeBusiness: configuration.locationCategories.business.segments.large.label,
-      household: configuration.locationCategories.household.label
-    }
-    if (configuration.locationCategories.celltower.show) {
-      $scope.entityTypes.cellTower = configuration.locationCategories.celltower.label
-    }
-    $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
-      key: key,
-      name: $scope.entityTypes[key]
-    }))
-    $scope.isLoadingConfiguration = false
-  })
   var entityTypesMapping = {
     household: 'household',
     small: 'smallBusiness',
@@ -46,13 +26,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     celltower: 'cellTower'
   }
   $scope.premisesPercentage = 'false'
-  // $scope.routeOpportunitiesDistanceThresholds = [
-  //   { name: 'On Route', value: 30 },
-  //   { name: '1/4 ' + config.length.length_units, value: config.length.length_units_to_meters / 4 },
-  //   { name: '1/2 ' + config.length.length_units, value: config.length.length_units_to_meters / 2 },
-  //   { name: '1 ' + config.length.length_units, value: config.length.length_units_to_meters / 1 }
-  // ]
-
   var dirty = false
 
   var charts = {}
@@ -219,8 +192,24 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     refreshCurrentTab()
   })
 
+  var initEntityTypes = () => {
+    $scope.entityTypes = {
+      smallBusiness: state.configuration.locationCategories.business.segments.small.label,
+      mediumBusiness: state.configuration.locationCategories.business.segments.medium.label,
+      largeBusiness: state.configuration.locationCategories.business.segments.large.label,
+      household: state.configuration.locationCategories.household.label
+    }
+    if (state.configuration.locationCategories.celltower.show) {
+      $scope.entityTypes.cellTower = state.configuration.locationCategories.celltower.label
+    }
+    $scope.entityTypesArray = Object.keys($scope.entityTypes).map((key) => ({
+      key: key,
+      name: $scope.entityTypes[key]
+    }))
+  }
   $rootScope.$on('map_tool_changed_visibility', (e, tool) => {
     if (map_tools.is_visible('financial_profile')) {
+      initEntityTypes()
       if (config.ARO_CLIENT !== 'verizon') {
         $scope.selectedArea = null
         return
@@ -234,6 +223,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         regions.hide()
       }
     } else if (tool === 'financial_profile') {
+      initEntityTypes()
       $('a[href="#map-tools-financial"]:not(.collapsed)').click()
 
       if ($scope.layersStatus) {
@@ -610,21 +600,6 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
       }
     })
   }
-
-  // function loadRouteOpportunities () {
-  //   var url = `/financial_profile/${$scope.plan.id}/routeopportunities`
-  //   var params = {
-  //     distanceThresholds: $scope.routeOpportunitiesDistanceThresholds.map((item) => item.value)
-  //   }
-  //   $http({
-  //     url: url,
-  //     method: 'GET',
-  //     params: params
-  //   })
-  //   .then((response) => {
-  //     $scope.routeOpportunities = response.data
-  //   })
-  // }
 
   $scope.downloadChart = (id, name) => {
     var canvas = document.getElementById(id)

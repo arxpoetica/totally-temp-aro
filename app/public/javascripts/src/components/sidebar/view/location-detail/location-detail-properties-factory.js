@@ -1,8 +1,7 @@
 class LocationDetailPropertiesFactory {
 
-  constructor($http, configuration) {
+  constructor($http) {
     this.$http = $http
-    this.configuration = configuration
   }
 
   createObject(objectDescriptor, properties, outLocationDetailProperties) {
@@ -37,11 +36,11 @@ class LocationDetailPropertiesFactory {
 
   getLocationDetailPropertiesFor(locationDetails) {
     var locationDetailProperties = {}
-    this.createObject(this.configuration.locationDetailProperties, locationDetails, locationDetailProperties)
+    this.createObject(this.state.configuration.locationDetailProperties, locationDetails, locationDetailProperties)
     return locationDetailProperties
   }
 }
 
-LocationDetailPropertiesFactory.$inject = ['$http', 'configuration']
+LocationDetailPropertiesFactory.$inject = ['$http']
 
 export default LocationDetailPropertiesFactory

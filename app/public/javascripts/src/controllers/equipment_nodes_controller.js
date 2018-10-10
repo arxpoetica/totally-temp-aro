@@ -1,18 +1,17 @@
 /* global app user_id config map _ google swal config $ globalServiceLayers */
 // Equipment Nodes Controller
-app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', 'configuration', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state, configuration) => {
+app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '$location', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state', ($scope, $rootScope, $http, $location, map_tools, MapLayer, $timeout, optimization, state) => {
   // Controller instance variables
   $scope.map_tools = map_tools
-  $scope.configuration = configuration
   $scope.planState = state
   $scope.currentUser = state.loggedInUser
   $scope.layerTypeVisibility = {
     existing: false,
     planned: false
   }
-  if (configuration.networkEquipment) {
-    $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
-    $scope.layerTypeVisibility.planned = configuration.networkEquipment.visibility.defaultShowPlannedEquipment
+  if (state.configuration.networkEquipment) {
+    $scope.layerTypeVisibility.existing = state.configuration.networkEquipment.visibility.defaultShowExistingEquipment
+    $scope.layerTypeVisibility.planned = state.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
   }
   $scope.mapZoom = 0//map.getZoom()
   $scope.equ_tdc_order = ['central_office','splice_point','fiber_distribution_hub','fiber_distribution_terminal','multiple_dwelling_unit','bulk_distribution_terminal','dslam','cell_5g','loop_extender','network_anchor']
@@ -56,7 +55,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Creates a single map layer by substituting tileDefinition parameters
   var createSingleMapLayer = (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
 
-    var tileDefinition = angular.copy($scope.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
+    var tileDefinition = angular.copy(state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
     objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{libraryId}', libraryId)
@@ -83,8 +82,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
           || (feature.properties.deployment_type === 1)
           || (feature.properties.is_deleted !== 'true'))
       }
-      if (state.showEquipmentLabels && map.getZoom() > $scope.configuration.networkEquipment.labelDrawingOptions.visibilityZoomThreshold) {
-        drawingOptions.labels = $scope.configuration.networkEquipment.labelDrawingOptions
+      if (state.showEquipmentLabels && map.getZoom() > state.configuration.networkEquipment.labelDrawingOptions.visibilityZoomThreshold) {
+        drawingOptions.labels = state.configuration.networkEquipment.labelDrawingOptions
       }
     } else if (categoryType === 'boundaries') {
       featureFilter = (feature) => {
@@ -146,10 +145,6 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
-    if (!$scope.configuration || !$scope.configuration.networkEquipment) {
-      return
-    }
-
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())
 
@@ -159,53 +154,45 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     })
 
     if(config.ARO_CLIENT === 'tdc') {
-      var equ = angular.copy($scope.configuration.networkEquipment.equipments)
-      $scope.configuration.networkEquipment.equipments={}
+      var equ = angular.copy(state.configuration.networkEquipment.equipments)
+      state.configuration.networkEquipment.equipments = {}
       $scope.equ_tdc_order.forEach((key) => {
-        $scope.configuration.networkEquipment.equipments[key] = equ[key]
+        state.configuration.networkEquipment.equipments[key] = equ[key]
       })
     }
 
     // Create layers for network equipment nodes and cables
     createdMapLayerKeys.clear()
-    createMapLayersForCategory($scope.configuration.networkEquipment.equipments, 'equipment', oldMapLayers, createdMapLayerKeys);
-    createMapLayersForCategory($scope.configuration.networkEquipment.cables, 'cable', oldMapLayers, createdMapLayerKeys);
+    createMapLayersForCategory(state.configuration.networkEquipment.equipments, 'equipment', oldMapLayers, createdMapLayerKeys);
+    createMapLayersForCategory(state.configuration.networkEquipment.cables, 'cable', oldMapLayers, createdMapLayerKeys);
     // Hack to check/uncheck site boundaries based on view settings
-    Object.keys($scope.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
+    Object.keys(state.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
       var selectedBoundaryName
       state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
       if(boundaryKey === 'siteBoundaries') {
-        $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
+        state.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName)
       } else if (boundaryKey === 'fiveg_coverage') {
-        $scope.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName
-          && $scope.configuration.networkEquipment.equipments['cell_5g'].checked)
+        state.configuration.networkEquipment.boundaries[boundaryKey].checked = (state.showSiteBoundary && boundaryKey === selectedBoundaryName
+          && state.configuration.networkEquipment.equipments['cell_5g'].checked)
       }
     })
 
     // Hack to show copper in toolbar ruler options
-    Object.keys($scope.configuration.networkEquipment.cables).forEach((cable) => {
-      if(cable === 'COPPER' && $scope.configuration.networkEquipment.cables['COPPER'].checked) {  
+    Object.keys(state.configuration.networkEquipment.cables).forEach((cable) => {
+      if(cable === 'COPPER' && state.configuration.networkEquipment.cables['COPPER'].checked) {  
         state.rulerActions.indexOf(state.allRulerActions.COPPER) === -1 && state.rulerActions.push(state.allRulerActions.COPPER)
-      } else if (cable === 'COPPER' && !$scope.configuration.networkEquipment.cables['COPPER'].checked){
+      } else if (cable === 'COPPER' && !state.configuration.networkEquipment.cables['COPPER'].checked){
         var index = state.rulerActions.indexOf(state.allRulerActions.COPPER)
         index !== -1 && state.rulerActions.splice(index, 1)
       }
     })
-    createMapLayersForCategory($scope.configuration.networkEquipment.boundaries, 'boundaries', oldMapLayers, createdMapLayerKeys)
+    createMapLayersForCategory(state.configuration.networkEquipment.boundaries, 'boundaries', oldMapLayers, createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
   // When the map zoom changes, map layers can change
   $rootScope.$on('map_zoom_changed', updateMapLayers)
-
-  // If configuration is loaded again, update default visibility of "show existing equipment"
-  $rootScope.$on('configuration_loaded', () => {
-    $scope.layerTypeVisibility.existing = configuration.networkEquipment.visibility.defaultShowExistingEquipment
-    $scope.layerTypeVisibility.planned = configuration.networkEquipment.visibility.defaultShowPlannedEquipment
-    updateMapLayers()
-    $timeout()
-  })
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
@@ -238,9 +225,11 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
+    .skip(1)
     .subscribe((newValue) => updateMapLayers())
 
   // Update map layers when the dataItems property of state changes
   state.viewSettingsChanged
-  .subscribe(() => updateMapLayers())
+    .skip(1)
+    .subscribe(() => updateMapLayers())
 }])

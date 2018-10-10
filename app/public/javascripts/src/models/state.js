@@ -2,9 +2,9 @@ import StateViewMode from './state-view-mode'
 
 /* global app localStorage map */
 class State {
-//app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
+//app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
+  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
@@ -1504,7 +1504,6 @@ class State {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
       service.loggedInUser.perspective = result.data.perspective || 'default'
-      configuration.loadPerspective(service.loggedInUser.perspective, service.configuration) // For now
       service.configuration.loadPerspective(service.loggedInUser.perspective)
       service.initializeState()
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
@@ -1548,9 +1547,9 @@ class State {
       const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
       service.configuration.perspective = thisPerspective || defaultPerspective
     }
-    configuration.loadPerspective(loggedInUser.perspective, service.configuration) // For now
     service.configuration.loadPerspective(loggedInUser.perspective)
     service.setLoggedInUser(loggedInUser)
+    tileDataService.setLockIcon(service.configuration.locationCategories.entityLockIcon)
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
@@ -1659,6 +1658,6 @@ class State {
 }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
 
 export default State

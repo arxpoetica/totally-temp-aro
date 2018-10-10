@@ -1,8 +1,7 @@
 class PlanSummaryController {
   
-  constructor(state,configuration,Utils,$http,$timeout) {
+  constructor(state, Utils, $http, $timeout) {
     this.state = state
-    this.configuration = configuration
     this.Utils = Utils
     this.$http = $http
     this.$timeout = $timeout
@@ -45,12 +44,12 @@ class PlanSummaryController {
 
     //fetching equipment order from networkEquipment.json
     var equipmentOrderKey = this.summaryCategoryTypes['Equipment']['groupBy']
-    this.equipmentOrder = this.orderSummaryByCategory(this.configuration.networkEquipment.equipments,equipmentOrderKey)
+    this.equipmentOrder = this.orderSummaryByCategory(this.state.configuration.networkEquipment.equipments,equipmentOrderKey)
     this.equipmentOrder.push('junction_splitter')
 
     //fetching location order from locationCategories.json
     var coverageOrderKey = 'plannerKey'
-    this.coverageOrder = this.orderSummaryByCategory(this.configuration.locationCategories.categories,coverageOrderKey)
+    this.coverageOrder = this.orderSummaryByCategory(this.state.configuration.locationCategories.categories,coverageOrderKey)
     this.isLocKeyExpanded = this.coverageOrder.reduce(function(result, item, index, array) {
       result[item] = false;
       return result;
@@ -209,7 +208,7 @@ class PlanSummaryController {
   }
 }
   
-PlanSummaryController.$inject = ['state','configuration','Utils','$http','$timeout']
+PlanSummaryController.$inject = ['state', 'Utils', '$http', '$timeout']
 
 let planSummary = {
   templateUrl: '/components/sidebar/plan-editor/plan-summary.html',

@@ -16,7 +16,7 @@ class BoundariesController {
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
 
     // Update map layers when the dataItems property of state changes
-    this.state.dataItemsChanged.subscribe((newValue) => this.updateMapLayers())
+    this.state.dataItemsChanged.skip(1).subscribe((newValue) => this.updateMapLayers())
 
     // Update map layers when the selection type in analysis mode changes
     this.state.selectionTypeChanged.subscribe((newValue) => this.updateMapLayers())

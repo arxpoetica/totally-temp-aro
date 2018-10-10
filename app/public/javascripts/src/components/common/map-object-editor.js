@@ -4,13 +4,12 @@ import FeatureSelector from '../tiles/feature-selector'
 
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, configuration, state, tileDataService, Utils) {
+  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, Utils) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
     this.$document = $document
     this.$timeout = $timeout
-    this.configuration = configuration
     this.state = state
     this.tileDataService = tileDataService
     this.utils = Utils
@@ -337,8 +336,8 @@ class MapObjectEditorController {
               name = dataTypeList[1]
             }
             
-            if (this.configuration.networkEquipment.equipments.hasOwnProperty(name)){
-              name = this.configuration.networkEquipment.equipments[name].label
+            if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
+              name = this.state.configuration.networkEquipment.equipments[name].label
             }else if(this.state.networkNodeTypesEntity.hasOwnProperty(name)){
               name = this.state.networkNodeTypesEntity[name]
             }
@@ -521,7 +520,7 @@ class MapObjectEditorController {
       mapMarker.setOptions({clickable:false}); //Don't allow right click for locked markers
       var lockIconOverlay = new google.maps.Marker({
         icon: {
-          url: this.configuration.locationCategories.entityLockIcon, //,
+          url: this.state.configuration.locationCategories.entityLockIcon, //,
           anchor: new google.maps.Point(12, 24)
         },
         clickable: false,
@@ -997,7 +996,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'configuration', 'state', 'tileDataService', 'Utils']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'Utils']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
