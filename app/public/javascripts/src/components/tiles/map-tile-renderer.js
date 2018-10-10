@@ -525,7 +525,7 @@ class MapTileRenderer {
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
                                                selectedLocationImage, lockOverlayImage, this.selectedDisplayMode, this.displayModes,
-                                               this.analysisSelectionMode, this.selectedLocations, this.selectedViewFeaturesByType)
+                                               this.analysisSelectionMode, this.state.selectionModes, this.selectedLocations, this.selectedViewFeaturesByType)
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
@@ -547,7 +547,7 @@ class MapTileRenderer {
             if (this.state.isFeatureLayerOnForBoundary(feature)){
               PolygonFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, this.censusCategories, this.tileDataService, this.styles,
                 this.tileSize, this.selectedServiceArea, this.selectedServiceAreas, this.selectedDisplayMode, this.displayModes,
-                this.selectedAnalysisArea, this.analysisSelectionMode, this.selectedCensusBlockId, this.selectedCensusCategoryId)
+                this.selectedAnalysisArea, this.analysisSelectionMode, this.state.selectionModes, this.selectedCensusBlockId, this.selectedCensusCategoryId)
               ctx.globalAlpha = 1.0
             } else {
               return
