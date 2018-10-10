@@ -2,7 +2,7 @@ class PointFeatureRenderer {
 
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
                        selectedLocationImage, lockOverlayImage,
-                       selectedDisplayMode, displayModes, analysisSelectionMode, selectedLocations, selectedViewFeaturesByType) {
+                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, selectedLocations, selectedViewFeaturesByType) {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
     var selectedListType = null 
@@ -36,7 +36,7 @@ class PointFeatureRenderer {
 
     if (feature.properties.location_id && selectedLocations.has(+feature.properties.location_id)
       //show selected location icon at analysis mode -> selection type is locations    
-      && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == "SELECTED_LOCATIONS") {
+      && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
       // Draw selected icon
       ctx.drawImage(selectedLocationImage[0], x, y)
     } else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) // for edit mode view of existing 

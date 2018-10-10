@@ -85,8 +85,8 @@
 }
 
 .map_tool_label {
-  background: transparent;
-  color: #D9272D;
+  color: white;
+  background-color: #1f7de6;
 }
 
 #global-search-toolbutton .select2-chosen {

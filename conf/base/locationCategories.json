@@ -130,7 +130,7 @@
       "selected": false,
       "group": 1
     },
-    "ethernet_lit_building": {
+    "Ethernet Lit Buildings": {
       "show": true,
       "showIcon": false,
       "label": "Ethernet Lit Buildings",
@@ -145,16 +145,16 @@
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
       "zIndex": 6680,
-      "categoryKey": "ethernet_lit_building",
-      "plannerKey": "ethernet_lit_building",
-      "key": "ethernet_lit_building",
+      "categoryKey": "Ethernet Lit Buildings",
+      "plannerKey": "Ethernet Lit Buildings",
+      "key": "Ethernet Lit Buildings",
       "selected": false,
       "group": 2
     },
-    "lit_building": {
+    "Fiber Lit Buildings": {
       "show": true,
       "showIcon": false,
-      "label": "Fiber Lit Building",
+      "label": "Fiber Lit Buildings",
       "tileDefinition": {
         "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
@@ -166,13 +166,13 @@
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/lit_building.png",
       "zIndex": 6770,
-      "categoryKey": "lit_building",
-      "plannerKey": "lit_building",
-      "key": "lit_building",
+      "categoryKey": "Fiber Lit Buildings",
+      "plannerKey": "Fiber Lit Buildings",
+      "key": "Fiber Lit Buildings",
       "selected": false,
       "group": 2
     },
-    "tier_1": {
+    "Tier 1": {
       "show": true,
       "showIcon": false,
       "label": "DNB Tier 1",
@@ -187,13 +187,13 @@
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_1.png",
       "zIndex": 6860,
-      "categoryKey": "tier_1",
-      "plannerKey": "tier_1",
-      "key": "tier_1",
+      "categoryKey": "Tier 1",
+      "plannerKey": "Tier 1",
+      "key": "Tier 1",
       "selected": false,
       "group": 3
     },
-    "tier_2": {
+    "Tier 2": {
       "show": true,
       "showIcon": false,
       "label": "DNB Tier 2",
@@ -208,13 +208,13 @@
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_2.png",
       "zIndex": 6950,
-      "categoryKey": "tier_2",
-      "plannerKey": "tier_2",
-      "key": "tier_2",
+      "categoryKey": "Tier 2",
+      "plannerKey": "Tier 2",
+      "key": "Tier 2",
       "selected": false,
       "group": 3
     },
-    "tier_3": {
+    "Tier 3": {
       "show": true,
       "showIcon": false,
       "label": "DNB Tier 3",
@@ -229,9 +229,9 @@
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_3.png",
       "zIndex": 7040,
-      "categoryKey": "tier_3",
-      "plannerKey": "tier_3",
-      "key": "tier_3",
+      "categoryKey": "Tier 3",
+      "plannerKey": "Tier 3",
+      "key": "Tier 3",
       "selected": false,
       "group": 3
     }

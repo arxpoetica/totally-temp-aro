@@ -1,0 +1,383 @@
+{
+  "businessInformation": {
+    "displayProperties": {
+      "levelOfDetail": 0,
+      "format": "",
+      "displayName": "Business Information",
+      "enumTypeURL": "",
+      "displayDataType": "object",
+      "defaultValue": "",
+      "visible": true,
+      "editable": false    
+    },
+    "children": {
+      "BusinessName": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Name",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "address": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Address",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "industry_name": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Industry",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "locationCategory": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "D&B Tier",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "PrimaryCompetitor": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Primary Competitor",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      }
+    }
+  },
+  "networkInformation": {
+    "displayProperties": {
+      "levelOfDetail": 0,
+      "format": "",
+      "displayName": "Network Information",
+      "enumTypeURL": "",
+      "displayDataType": "object",
+      "defaultValue": "",
+      "visible": true,
+      "editable": false
+    },
+    "children": {
+      "network": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Network Type",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type":"attributeKey"
+      },
+      "FiosCapableInd": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Fios Capable",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "HSICapableInd": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "HSI Capable",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "DPI_MAXSPEED": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Max HSI Speed",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "CPE_COMPOSITE_RANKING_SCORE": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "CPE Score",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      }
+    }
+  },
+  "productAvailability": {
+    "displayProperties": {
+      "levelOfDetail": 0,
+      "format": "",
+      "displayName": "Product Availability",
+      "enumTypeURL": "",
+      "displayDataType": "object",
+      "defaultValue": "",
+      "visible": true,
+      "editable": false
+    },
+    "children": {
+      "eia": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "EIA",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "ereachpath": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "eREACH",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "ipvpn": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "IPVPN",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "voip": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "VOIP",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "metroE": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "MetroE",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "MaxSpeed": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "MaxSpeed",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      },
+      "MaxQoS": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "MaxQoS",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "attributeKey"
+      }
+    }
+  },
+  "miscInformation": {
+    "displayProperties": {
+      "levelOfDetail": 0,
+      "format": "",
+      "displayName": "Miscellaneous Information",
+      "enumTypeURL": "",
+      "displayDataType": "object",
+      "defaultValue": "",
+      "visible": true,
+      "editable": false
+    },
+    "children": {
+      "tabblock_id": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Census Block",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "latitude": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Latitude",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "longitude": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Longitude",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "number_of_households": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Number of Households",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "number_of_businesses": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Number of Businesses",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "number_of_towers": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Number of towers",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "distance_to_client_fiber": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Distance From Existing Network:",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      },
+      "distance_to_planned_network": {
+        "displayProperties": {
+          "levelOfDetail": 1,
+          "format": "",
+          "displayName": "Distance From Planned Network",
+          "enumTypeURL": "",
+          "displayDataType": "string",
+          "defaultValue": "",
+          "visible": true,
+          "editable": false
+        },
+        "type": "locationKey"
+      }
+    }
+  }
+}

@@ -5,7 +5,7 @@ class PolygonFeatureRenderer {
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
                        selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea,
-                       analysisSelectionMode, selectedCensusBlockId, selectedCensusCategoryId) {
+                       analysisSelectionMode, selectionModes, selectedCensusBlockId, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon
@@ -19,6 +19,7 @@ class PolygonFeatureRenderer {
       && 'census_block' == feature.properties.layerType) {
       if (selectedCensusBlockId == feature.properties.id) {
         // Hilight selected census block
+        drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
       }
 
@@ -36,23 +37,26 @@ class PolygonFeatureRenderer {
 
     } else if (selectedServiceAreas.has(feature.properties.id)
       && selectedDisplayMode == displayModes.ANALYSIS
-      && analysisSelectionMode == "SELECTED_AREAS") {
+      && analysisSelectionMode == selectionModes.SELECTED_AREAS) {
       //Highlight the selected SA
       //highlight if analysis mode -> selection type is service areas 
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
+      drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
       ctx.globalCompositeOperation = 'multiply'
     } else if (selectedServiceArea && (selectedServiceArea == feature.properties.id)
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity      
       ctx.globalCompositeOperation = 'multiply'
     } else if (feature.properties.hasOwnProperty('_data_type')
       && 'analysis_area' === feature.properties._data_type
       && selectedAnalysisArea == feature.properties.id
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
     //console.log(feature)

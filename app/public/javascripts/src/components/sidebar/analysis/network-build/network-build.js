@@ -13,6 +13,10 @@ class NetworkBuildController {
     //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
     this.budgetDisplay = this.state.optimizationOptions.budget
     
+    this.selectionModeLabels = {}
+    this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
+    this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
+    
     
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -26,36 +30,63 @@ class NetworkBuildController {
       }
     })
 
-    state.selectedLocations
-      .subscribe((selectedLocations) => {
-        // The selected locations have changed. Get the count and addresses that we want to show
-        this.targetsTotal = selectedLocations.size
-        var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
-        $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              this.targets = result.data
-            }
-          })
+    state.selectedLocations.subscribe((selectedLocations) => {
+      // The selected locations have changed. Get the count and addresses that we want to show
+      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_LOCATIONS) return
+      this.targetsTotal = selectedLocations.size
+      var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
+      $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          this.targets = result.data
+        }
       })
+    })
 
-    state.selectedServiceAreas
-      .subscribe((selectedServiceAreas) => {
-        // The selected SA have changed.
-        var serviceAreaIds = Array.from(selectedServiceAreas)
-        $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-          .then((result) => {
-            if (result.status >= 200 && result.status <= 299) {
-              this.serviceAreas = result.data
+    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
+      // The selected SA have changed.
+      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
+      //console.log(selectedServiceAreas)
+      var serviceAreaIds = Array.from(selectedServiceAreas)
+      $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          this.serviceAreas = result.data
+        }
+      })
+    })  
+    
+    state.mapFeaturesSelectedEvent.subscribe((event) => {
+      if (state.areaSelectionMode != state.areaSelectionModes.GROUP 
+          || state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
+      if (event.analysisAreas){
+        event.analysisAreas.forEach((item, index) => {
+          
+          var filter = `(id eq ${item.id})`
+          $http.get(`/service/odata/analysisarea?$filter=${filter}&$top=1`)
+          .then((results) => {
+            //console.log(results)
+            if (results.data[0].geog && results.data[0].geog.coordinates 
+                && results.data[0].geog.coordinates.length > 0){
+              results.data[0].geog.coordinates.forEach((shapes) => {
+                shapes.forEach((coords) => {
+                  this.state.requestPolygonSelect.next({
+                    'coords': coords
+                  })
+                })
+              })
             }
-          })
-      })  
+          })      
+        })
+      }
+    })
+    
+    
   }
 
   onSelectionTypeChange(selectionType) {
     this.state.selectionTypeChanged.next(selectionType)
   } 
-  
   
   onBudgetChange(){
     //this.state.optimizationOptions.budget = this.budgetDisplay * 1000

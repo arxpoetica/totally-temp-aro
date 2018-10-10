@@ -1,10 +1,11 @@
-class ViewModeLocationController {
+class LocationDetailController {
 
-  constructor($http, $timeout, state, configuration) {
+  constructor($http, $timeout, state, configuration, locationDetailPropertiesFactory) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.configuration = configuration
+    this.locationDetailPropertiesFactory = locationDetailPropertiesFactory
     this.plan = null
     this.selectedLocationInfo = null
     this.map_url = null
@@ -48,7 +49,9 @@ class ViewModeLocationController {
           this.selectedLocationObjectId = feature.object_id
           this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
-          this.getLocationInfo(this.plan.id,locationId,feature.object_id).then(locationInfo => this.showStaticMap(locationInfo))
+          this.getLocationInfo(this.plan.id,locationId,feature.object_id)
+            .then(locationInfo => this.showStaticMap(locationInfo))
+            .catch((err) => console.error(err))
         } else {
           this.selectedLocationInfo = null
         }
@@ -62,13 +65,22 @@ class ViewModeLocationController {
       }
     })
   }
+
+  getAttributeValue(attributes, key) {
+    return attributes.filter((item) => item.key === key)[0].value
+  }
+
   // Get the location Information
   getLocationInfo(planId, id, objectId){
-    var promises = []
-    promises.push(this.$http.get(`/locations/${planId}/${id}/show`))
-    return Promise.all(promises).then((results) => {
-      return results[0].data
-    })
+    return this.$http.get(`/locations/${planId}/${id}/show`)
+      .then((result) => {
+        result.data.latitude = result.data.geog.coordinates[1]
+        result.data.longitude = result.data.geog.coordinates[0]
+        var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
+        locationProperties.geog = result.data.geog
+        return Promise.resolve(locationProperties)
+      })
+      .catch((err) => console.error(err))
   }
   
   updateSelectedState(feature, id){
@@ -127,6 +139,12 @@ class ViewModeLocationController {
   }
 }
 
-ViewModeLocationController.$inject = ['$http', '$timeout', 'state', 'configuration']
+LocationDetailController.$inject = ['$http', '$timeout', 'state', 'configuration', 'locationDetailPropertiesFactory']
 
-export default ViewModeLocationController
+let locationDetail = {
+  templateUrl: '/components/sidebar/view/location-detail/location-detail.html',
+  bindings: {},
+  controller: LocationDetailController
+}
+
+export default locationDetail

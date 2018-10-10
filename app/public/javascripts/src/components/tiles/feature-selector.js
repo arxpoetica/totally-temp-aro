@@ -114,11 +114,10 @@ class FeatureSelector {
                 eachPoint.push(eachValue.y + deltaY)
                 areaPolyCoordinates.push(eachPoint)
               })
-
-              polygonCoords.forEach(function (polyCoord) {
+              polygonCoords.some(function (polyCoord) {
                 if (pointInPolygon([polyCoord[0], polyCoord[1]], areaPolyCoordinates)) {
                   selectFeature = true
-                  return
+                  return true
                 }
               })
             })

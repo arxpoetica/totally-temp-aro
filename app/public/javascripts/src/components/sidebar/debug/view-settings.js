@@ -16,7 +16,7 @@ class ViewSettingsController {
   }
 
   fiberOptionChanged() {
-    this.$rootScope.$broadcast("map_setting_changed", { type: "fiber_option", setting: this.state.viewSetting.selectedFiberOption });
+    this.state.requestMapLayerRefresh.next(null)
   }
 
   saveEquipmentPropertiesToRender() {
