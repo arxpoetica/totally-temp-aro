@@ -85,9 +85,8 @@ class State {
 
   // The selection modes for the application
   service.selectionModes = {
-    //ANALYSIS_AREAS: 'Analysis Areas',
-    SELECTED_AREAS: 'Service Areas',
-    SELECTED_LOCATIONS: 'Locations'
+    SELECTED_AREAS: 'SELECTED_AREAS', 
+    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS'
   }
   
   service.areaSelectionModes = {
@@ -176,7 +175,7 @@ class State {
       generatePlanLocationLinks : false,
       generateSubnetLinking: true
     },
-    analysisSelectionMode: 'SELECTED_AREAS'
+    analysisSelectionMode: service.selectionModes.SELECTED_AREAS
   }
 
   if(config.ARO_CLIENT === 'frontier')
@@ -580,7 +579,7 @@ class State {
 
     service.reloadLocationTypes()
     service.selectedDisplayMode.next(service.displayModes.VIEW)
-    service.optimizationOptions.analysisSelectionMode = 'SELECTED_AREAS'
+    service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
@@ -1334,7 +1333,7 @@ class State {
         },
       locationConstraints: {
         locationTypes: [],
-        analysisSelectionMode: "SELECTED_AREAS"
+        analysisSelectionMode: service.selectionModes.SELECTED_AREAS
       },
       networkConstraints: {
         networkTypes: [

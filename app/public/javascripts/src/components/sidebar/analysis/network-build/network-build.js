@@ -13,6 +13,10 @@ class NetworkBuildController {
     //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
     this.budgetDisplay = this.state.optimizationOptions.budget
     
+    this.selectionModeLabels = {}
+    this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
+    this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
+    
     
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -28,7 +32,7 @@ class NetworkBuildController {
 
     state.selectedLocations.subscribe((selectedLocations) => {
       // The selected locations have changed. Get the count and addresses that we want to show
-      if (state.optimizationOptions.analysisSelectionMode != 'SELECTED_LOCATIONS') return
+      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_LOCATIONS) return
       this.targetsTotal = selectedLocations.size
       var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
       $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
@@ -41,7 +45,7 @@ class NetworkBuildController {
 
     state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
-      if (state.optimizationOptions.analysisSelectionMode != 'SELECTED_AREAS') return
+      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
       //console.log(selectedServiceAreas)
       var serviceAreaIds = Array.from(selectedServiceAreas)
       $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
@@ -53,7 +57,8 @@ class NetworkBuildController {
     })  
     
     state.mapFeaturesSelectedEvent.subscribe((event) => {
-      if (state.areaSelectionMode != state.areaSelectionModes.GROUP || state.optimizationOptions.analysisSelectionMode != 'SELECTED_AREAS') return
+      if (state.areaSelectionMode != state.areaSelectionModes.GROUP 
+          || state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
       if (event.analysisAreas){
         event.analysisAreas.forEach((item, index) => {
           

@@ -252,15 +252,23 @@ class TileComponentController {
           
           // ToDo: need to combine this with the overlayClickListener below
           var canSelectLoc = true
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS 
-              && this.state.optimizationOptions.analysisSelectionMode != 'SELECTED_LOCATIONS'){
-            canSelectLoc = false
+          var canSelectSA = true
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS){
+            if (this.state.optimizationOptions.analysisSelectionMode != this.state.selectionModes.SELECTED_LOCATIONS){
+              canSelectLoc = false
+            }
+            if (this.state.optimizationOptions.analysisSelectionMode != this.state.selectionModes.SELECTED_AREAS){
+              canSelectSA = false
+            }
           }
           
           if (canSelectLoc){
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
           }
-          selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+          
+          if (canSelectSA){
+            selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
+          }
           
           state.hackRaiseEvent(selectedLocationsIds)
 
@@ -354,10 +362,10 @@ class TileComponentController {
         
         if(this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
           switch (this.state.optimizationOptions.analysisSelectionMode) {
-            case 'SELECTED_AREAS':
+            case this.state.selectionModes.SELECTED_AREAS:
               canSelectSA = !canSelectSA
               break
-            case 'SELECTED_LOCATIONS':
+            case this.state.selectionModes.SELECTED_LOCATIONS:
               canSelectLoc = !canSelectLoc
               break
           }
