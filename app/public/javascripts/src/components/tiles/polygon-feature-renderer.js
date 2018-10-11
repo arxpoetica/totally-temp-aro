@@ -11,6 +11,8 @@ class PolygonFeatureRenderer {
         return featureObj
       } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !featureObj.selectedServiceAreas.has(featureObj.feature.properties.id)) {
         return featureObj
+      } else {
+        return featureObj
       }
     })
 
