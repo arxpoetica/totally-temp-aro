@@ -464,6 +464,8 @@ class MapTileRenderer {
       console.log(this.tileDataService.modifiedBoundaries)
     }    
     */
+
+    var closedPolygonFeatureLayersList = []
     for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
       // Parse the geometry out.
       var feature = filteredFeatures[iFeature]
@@ -545,9 +547,13 @@ class MapTileRenderer {
             // First draw a filled polygon with the fill color
             //show siteboundaries for the equipments that are selected
             if (this.state.isFeatureLayerOnForBoundary(feature)){
-              PolygonFeatureRenderer.renderFeature(feature, shape, geometryOffset, ctx, mapLayer, this.censusCategories, this.tileDataService, this.styles,
-                this.tileSize, this.selectedServiceArea, this.selectedServiceAreas, this.selectedDisplayMode, this.displayModes,
-                this.selectedAnalysisArea, this.analysisSelectionMode, this.state.selectionModes, this.selectedCensusBlockId, this.selectedCensusCategoryId)
+              var featureObj = {'feature':feature,'shape':shape,'geometryOffset': geometryOffset,'ctx':ctx,'mapLayer': mapLayer,'censusCategories': this.censusCategories, 
+              'tileDataService': this.tileDataService,'styles': this.styles,
+              'tileSize': this.tileSize,'selectedServiceArea': this.selectedServiceArea,'selectedServiceAreas': this.selectedServiceAreas, 
+              'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
+              'selectedAnalysisArea':this.selectedAnalysisArea,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
+              'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}
+              closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
             } else {
               return
@@ -581,6 +587,8 @@ class MapTileRenderer {
         }
       })
     }
+    //render polygon feature
+    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList)
   }
 }
 
