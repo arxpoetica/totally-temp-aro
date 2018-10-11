@@ -60,6 +60,8 @@
       }
     },
     "locationDetails": {
+      "showDefaultDetails": true,
+      "showSalesDetails": false,
       "showMoreInfoButton": true,
       "showAuditLog": true
     },
@@ -292,6 +294,8 @@
       }
     },
     "locationDetails": {
+      "showDefaultDetails": false,
+      "showSalesDetails": true,
       "showMoreInfoButton": false,
       "showAuditLog": false
     },
@@ -524,6 +528,8 @@
       }
     },
     "locationDetails": {
+      "showDefaultDetails": false,
+      "showSalesDetails": true,
       "showMoreInfoButton": false,
       "showAuditLog": false
     },
