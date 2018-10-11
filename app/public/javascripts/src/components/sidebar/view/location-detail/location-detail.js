@@ -73,11 +73,17 @@ class LocationDetailController {
   getLocationInfo(planId, id, objectId){
     return this.$http.get(`/locations/${planId}/${id}/show`)
       .then((result) => {
-        result.data.latitude = result.data.geog.coordinates[1]
-        result.data.longitude = result.data.geog.coordinates[0]
-        var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
-        locationProperties.geog = result.data.geog
-        return Promise.resolve(locationProperties)
+        if (this.state.configuration.perspective.locationDetails.showDefaultDetails) {
+          return Promise.resolve(result.data)
+        } else if (this.state.configuration.perspective.locationDetails.showSalesDetails) {
+          result.data.latitude = result.data.geog.coordinates[1]
+          result.data.longitude = result.data.geog.coordinates[0]
+          var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
+          locationProperties.geog = result.data.geog
+          return Promise.resolve(locationProperties)
+        } else {
+          return Promise.reject('You must have either default or sales details shown')
+        }
       })
       .catch((err) => console.error(err))
   }

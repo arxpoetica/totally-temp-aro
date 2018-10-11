@@ -52,7 +52,120 @@
 <div class="view-mode-container" ng-if="$ctrl.selectedLocationInfo !== null">
   <img width="100%" ng-attr-src="{{$ctrl.map_url}}">
   <br>
-  <div style="width: 100%; padding-right: 10px;">
+
+  <!-- For "default" or non-sales users, we will show the old style of information -->
+  <div ng-if="$ctrl.state.configuration.perspective.locationDetails.showDefaultDetails" style="width: 100%; padding-right: 10px;">
+    <table id="tblLocationInfo" class="table table-condensed table-striped">
+      <tbody>
+        <tr>
+          <td>Address</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.address}}
+          </td>
+        </tr>
+        <tr>
+          <td>Latitude</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.geog.coordinates[1]}}
+          </td>
+        </tr>
+        <tr>
+          <td>Longitude</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.geog.coordinates[0]}}
+          </td>
+        </tr>
+        <tr>
+          <td>Census Block</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.tabblock_id}}
+          </td>
+        </tr>
+        <tr ng-repeat="(k,v) in $ctrl.selectedLocationInfo.attributes" ng-if="$ctrl.showAttributes">
+          <td>{{v.key + ':'}}</td>
+          <td>{{v.value}}</td>
+        </tr>
+        <tr>
+          <td>HouseHold Count</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.number_of_households}}
+          </td>
+        </tr>
+  
+        <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids.length > 0">
+          <td class="indent-1">HouseHold IDs</td>
+          <td>
+            <span>
+                  <div id="show-source">
+                    <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
+                      <li class="item"
+                          ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.hhSourceIds.object_ids track by $index">
+                        {{ target }}
+                      </li>
+                    </ul>
+                  </div>
+               </span>
+          </td>
+        </tr>
+  
+        <tr>
+          <td>Business Count</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.number_of_businesses}}
+          </td>
+        </tr>
+  
+        <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids.length > 0">
+          <td class="indent-1">Business IDs</td>
+          <td>
+            <div id="show-source">
+              <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
+                <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.bizSourceIds.object_ids track by $index">
+                  {{ target }}
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+  
+        <tr>
+          <td>Tower Count</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.number_of_towers}}
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids && $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids.length > 0">
+          <td class="indent-1">Tower IDs</td>
+          <td>
+            <div id="show-source">
+              <ul style="list-style-type:none; padding:0; margin-bottom: 0px;">
+                <li class="item" ng-repeat="target in $ctrl.selectedLocationInfo.locSourceIds.towerSourceIds.object_ids track by $index">
+                  {{ target }}
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+  
+        <tr>
+          <td>Distance From Existing Network:</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.distance_to_client_fiber | number: 0}}m
+          </td>
+        </tr>
+  
+        <tr>
+          <td>Distance From Planned Network:</td>
+          <td>
+            {{$ctrl.selectedLocationInfo.distance_to_planned_network | number: 0}}m
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- For "sales" users, we will show the location details along with attributes -->
+  <div ng-if="$ctrl.state.configuration.perspective.locationDetails.showSalesDetails" style="width: 100%; padding-right: 10px;">
     <editor-interface-tree object-to-view="$ctrl.selectedLocationInfo"
                            is-edit="false">
     </editor-interface-tree>
