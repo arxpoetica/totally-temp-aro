@@ -22,7 +22,7 @@
         "showIcon": true,
         "showLabel": false
       },
-      "centerVertically": false
+      "alignVertically": false
     },
     "locationCategories": {
       "small_businesses": {
@@ -259,7 +259,7 @@
       "prosects": {
         "show": true
       },
-      "centerVertically": true
+      "alignVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -493,7 +493,7 @@
       "prosects": {
         "show": true
       },
-      "centerVertically": true
+      "alignVertically": true
     },
     "locationCategories": {
       "small_businesses": {

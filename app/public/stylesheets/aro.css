@@ -60,21 +60,20 @@ html, body {
 .map-tools-buttons-container {
   position:absolute;
   left: 0px;
-  top: 0px;
+  top: 10px;
   padding-left: 10px;
   height: 100%;
 }
 
-.map-tools-vertical-center {
+.map-tools-vertical-align {
   position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 65px;
 }
 
 .map-tool-wrapper {
   position: absolute;
   top: 75px;
-  left: 75px;
+  left: 85px;
   z-index: 1;
 }
 
