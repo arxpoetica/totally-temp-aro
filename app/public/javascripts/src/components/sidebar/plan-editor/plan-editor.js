@@ -978,8 +978,8 @@ class PlanEditorController {
     }
     
     this.selectedMapObject = mapObject
-    this.selectedMapObjectLat = mapObject && mapObject.position.lat()
-    this.selectedMapObjectLng = mapObject && mapObject.position.lng()
+    this.selectedMapObjectLat = mapObject && mapObject.position && mapObject.position.lat()
+    this.selectedMapObjectLng = mapObject && mapObject.position && mapObject.position.lng()
     
     // debug
     //console.log(this.selectedMapObject)
@@ -996,8 +996,8 @@ class PlanEditorController {
 
   handleObjectModified(mapObject) {
     if (this.isMarker(mapObject)) {
-      this.selectedMapObjectLat = mapObject && mapObject.position.lat()
-      this.selectedMapObjectLng = mapObject && mapObject.position.lng()
+      this.selectedMapObjectLat = mapObject && mapObject.position && mapObject.position.lat()
+      this.selectedMapObjectLng = mapObject && mapObject.position && mapObject.position.lng()
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       .then((result) => {
