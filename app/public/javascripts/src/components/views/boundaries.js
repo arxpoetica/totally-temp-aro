@@ -51,7 +51,7 @@ class BoundariesController {
           }
     
           wirecenter_layer.visible_check = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
-          wirecenter_layer.visible = (serviceLayer.name === 'wirecenter') || (serviceLayer.name === 'BSA Wirecenters')
+          wirecenter_layer.visible = wirecenter_layer.visible_check
           newTileLayers.push(wirecenter_layer)
         })
     

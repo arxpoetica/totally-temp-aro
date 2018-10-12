@@ -2,21 +2,18 @@
   {
     "name": "default",
     "toolbar": {
-      "globalSettings":{
-        "show":true,
-	"manageUsers":{
-	 "show":true,
-	 "registerUser":{
-	  "show":true
-	 }
-	}
+      "globalSettings": {
+        "show": true,
+        "manageUsers": {
+          "show": true,
+          "registerUser": {
+            "show": true
+          }
+        }
       }
     },
     "networkEquipment": {
       "dslam": {
-        "show": false
-      },
-      "cell_5g": {
         "show": false
       },
       "loop_extender": {
@@ -25,33 +22,70 @@
       "network_anchor": {
         "show": false
       }
-    }
+    },
+    "boundaries":{
+      "census_blocks": {
+        "show": false
+      }
+    }    
   },
   {
     "name": "sales_engineer",
     "toolbar": {
-      "globalSettings":{
-        "show":true,
-	"manageUsers":{
-	 "show":true,
-	 "registerUser":{
-	  "show":true
-	 }
-	}
+      "globalSettings": {
+        "show": true,
+        "manageUsers": {
+          "show": true,
+          "registerUser": {
+            "show": true
+          }
+        }
+      }
+    },
+    "networkEquipment": {
+      "dslam": {
+        "show": false
+      },
+      "loop_extender": {
+        "show": false
+      },
+      "network_anchor": {
+        "show": false
+      }
+    },
+    "boundaries":{
+      "census_blocks": {
+        "show": false
       }
     }
   },
   {
     "name": "account_exec",
     "toolbar": {
-      "globalSettings":{
-        "show":true,
-	"manageUsers":{
-	 "show":true,
-	 "registerUser":{
-	  "show":false
-	 }
-	}
+      "globalSettings": {
+        "show": true,
+        "manageUsers": {
+          "show": true,
+          "registerUser": {
+            "show": false
+          }
+        }
+      }
+    },
+    "networkEquipment": {
+      "dslam": {
+        "show": false
+      },
+      "loop_extender": {
+        "show": false
+      },
+      "network_anchor": {
+        "show": false
+      }
+    },
+    "boundaries":{
+      "census_blocks": {
+        "show": false
       }
     }
   }
