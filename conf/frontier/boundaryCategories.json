@@ -1,7 +1,7 @@
 {
   "categories": {
     "wirecenter": {
-			"visible_check": true,
+			"visible": true,
 			"highlightStyle": {
         "strokeStyle": "#800080"
       },

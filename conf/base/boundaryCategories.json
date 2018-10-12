@@ -1,7 +1,6 @@
 {
   "categories": {
     "wirecenter": {
-			"visible_check": false,
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
       "strokeStyle": "#00ff00",
@@ -26,7 +25,6 @@
 			"aggregateZoomThreshold": 10
     },
     "census_blocks": {
-			"visible_check": false,
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
       "strokeStyle": "#d3db43",
@@ -48,7 +46,6 @@
 			"aggregateZoomThreshold": 10
     },
     "analysis_layer": {
-			"visible_check": false,
       "renderMode": "PRIMITIVE_FEATURES",
       "selectable": true,
       "strokeStyle": "#ff0000",
