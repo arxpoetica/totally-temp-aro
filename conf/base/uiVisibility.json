@@ -106,6 +106,17 @@
         "show": true
       }
     },
+    "boundaries":{
+      "wirecenter": {
+        "show": true
+      },
+      "census_blocks": {
+        "show": true
+      },
+      "analysis_layer": {
+        "show": true
+      }
+    },
     "viewModePanels": {
       "LOCATION_INFO": {
         "show": true
@@ -340,6 +351,17 @@
         "show": true
       }
     },
+    "boundaries":{
+      "wirecenter": {
+        "show": true
+      },
+      "census_blocks": {
+        "show": true
+      },
+      "analysis_layer": {
+        "show": true
+      }
+    },
     "viewModePanels": {
       "LOCATION_INFO": {
         "show": true
@@ -571,6 +593,17 @@
         "show": false
       },
       "existing": {
+        "show": true
+      }
+    },
+    "boundaries":{
+      "wirecenter": {
+        "show": true
+      },
+      "census_blocks": {
+        "show": true
+      },
+      "analysis_layer": {
         "show": true
       }
     },

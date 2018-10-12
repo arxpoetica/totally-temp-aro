@@ -49,9 +49,6 @@ class BoundariesController {
             type: 'wirecenter',
             layerId: serviceLayer.id
           }
-    
-          wirecenter_layer.visible_check = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[wirecenter_layer.type].visible_check
-          wirecenter_layer.visible = (serviceLayer.name === 'wirecenter') || (serviceLayer.name === 'BSA Wirecenters')
           newTileLayers.push(wirecenter_layer)
         })
     
@@ -80,11 +77,15 @@ class BoundariesController {
           })
         })
 
-        //enable wirecenter for frontier by default
-        this.state.boundaries.tileLayers.forEach((tileLayers) => {
-          tileLayers.type === 'wirecenter' && this.tilesToggleVisibility(tileLayers)
-        })
         this.state.boundaries.tileLayers = newTileLayers
+
+        //enable visible boundaries by default
+        this.state.boundaries.tileLayers.forEach((tileLayers) => {
+          var isLayerVisible = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[tileLayers.type].visible
+          tileLayers.visible = isLayerVisible
+          tileLayers.visible && this.tilesToggleVisibility(tileLayers)
+        })
+        
         return Promise.resolve()
       })
   }
@@ -97,7 +98,6 @@ class BoundariesController {
   
   // for layers drawn on vector tiles
   tilesToggleVisibility(layer) {
-    layer.visible = layer.visible_check;
     this.updateMapLayers()
     //this.state.resetBoundarySearch.next(true)
   }
