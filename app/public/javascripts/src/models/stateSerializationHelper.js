@@ -146,6 +146,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         postBody.networkConstraints.networkTypes.push(technologyKey)
       }
     })
+
+    // Add Route from Existing Fiber
+    if(state.optimizationOptions.networkConstraints.routeFromFiber) {
+      postBody.networkConstraints.fiberRoutingMode = state.fiberRoutingModes.ROUTE_FROM_FIBER
+    }
   }
 
   // ------------------------------------------------------------------------------------------------------------------
@@ -301,6 +306,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
           cellNodeConstraintsObj.selectedTile = selectedTile[0]
         }
       }
+    }
+
+    if (postBody.networkConstraints && postBody.networkConstraints.fiberRoutingMode &&
+      postBody.networkConstraints.fiberRoutingMode == state.fiberRoutingModes.ROUTE_FROM_FIBER) {
+      state.optimizationOptions.networkConstraints.routeFromFiber = true
     }
   }
 
