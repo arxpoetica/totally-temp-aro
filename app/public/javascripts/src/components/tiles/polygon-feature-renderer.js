@@ -2,6 +2,42 @@ import PolylineFeatureRenderer from './polyline-feature-renderer'
 
 class PolygonFeatureRenderer {
 
+  // First renders unselected polygon's then selected polygons
+  // So selected polygon styles will be visible
+  static renderFeatures(closedPolygonFeatureLayersList){
+
+    var unselectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
+      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != featureObj.selectedServiceArea) {
+        return featureObj
+      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !featureObj.selectedServiceAreas.has(featureObj.feature.properties.id)) {
+        return featureObj
+      } else {
+        return featureObj
+      }
+    })
+
+    var selectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
+      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id == featureObj.selectedServiceArea) {
+        return featureObj
+      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && featureObj.selectedServiceAreas.has(featureObj.feature.properties.id)) {
+        return featureObj
+      }
+    })
+  
+    unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
+      PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
+        Obj.tileSize, Obj.selectedServiceArea, Obj.selectedServiceAreas, Obj.selectedDisplayMode, Obj.displayModes,
+        Obj.selectedAnalysisArea, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+    })
+
+    selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
+      PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
+        Obj.tileSize, Obj.selectedServiceArea, Obj.selectedServiceAreas, Obj.selectedDisplayMode, Obj.displayModes,
+        Obj.selectedAnalysisArea, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+    })
+
+  }
+
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
                        selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea,
@@ -44,13 +80,11 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-      ctx.globalCompositeOperation = 'multiply'
     } else if (selectedServiceArea && (selectedServiceArea == feature.properties.id)
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
-      drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity      
-      ctx.globalCompositeOperation = 'multiply'
+      drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
     } else if (feature.properties.hasOwnProperty('_data_type')
       && 'analysis_area' === feature.properties._data_type
       && selectedAnalysisArea == feature.properties.id

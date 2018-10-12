@@ -22,7 +22,7 @@
         "showIcon": true,
         "showLabel": false
       },
-      "centerVertically": false
+      "alignVertically": false
     },
     "locationCategories": {
       "small_businesses": {
@@ -60,6 +60,8 @@
       }
     },
     "locationDetails": {
+      "showDefaultDetails": true,
+      "showSalesDetails": false,
       "showMoreInfoButton": true,
       "showAuditLog": true
     },
@@ -257,7 +259,7 @@
       "prosects": {
         "show": true
       },
-      "centerVertically": true
+      "alignVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -292,6 +294,8 @@
       }
     },
     "locationDetails": {
+      "showDefaultDetails": false,
+      "showSalesDetails": true,
       "showMoreInfoButton": false,
       "showAuditLog": false
     },
@@ -489,7 +493,7 @@
       "prosects": {
         "show": true
       },
-      "centerVertically": true
+      "alignVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -524,6 +528,8 @@
       }
     },
     "locationDetails": {
+      "showDefaultDetails": false,
+      "showSalesDetails": true,
       "showMoreInfoButton": false,
       "showAuditLog": false
     },

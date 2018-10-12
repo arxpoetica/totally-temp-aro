@@ -433,6 +433,7 @@ module.exports = class Location {
       })
       .then((result)=>{
         if (!result || !result.attributes) {
+          locationInfo.attributes = []
           return Promise.resolve() // There are no attributes for households, celltowers
         } else {
           locationInfo.attributes = []
@@ -688,7 +689,7 @@ module.exports = class Location {
   static showTowers (location_id) {
     var sql = `
       SELECT
-        sita_number, parcel_address AS address
+        sita_number, address
        FROM towers
       WHERE location_id = $1
     `
