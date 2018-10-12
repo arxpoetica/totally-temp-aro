@@ -551,8 +551,11 @@ module.exports = class MarketSize {
         sql += `
           JOIN client.employees_by_location e ON
                 e.id = spend.employees_by_location_id
-            AND e.min_value <= b.number_of_employees
-            AND e.max_value >= b.number_of_employees
+            -- For ARO-Sales tiles, we are storing the number of employees in attributes->'original_employees',
+            -- and setting the aro.businesses.number_of_employees column to 2.
+            -- If the attribute is present use it. Else, use the proper number_of_employees column
+            AND e.min_value <= COALESCE(CAST(b.attributes->'original_employees' AS INTEGER), b.number_of_employees)
+            AND e.max_value >= COALESCE(CAST(b.attributes->'original_employees' AS INTEGER), b.number_of_employees)
          `
         if (config.spend_by_city) {
           sql += `
