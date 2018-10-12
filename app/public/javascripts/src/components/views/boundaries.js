@@ -80,9 +80,8 @@ class BoundariesController {
         this.state.boundaries.tileLayers.forEach((tileLayers) => {
           var isLayerVisible = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[tileLayers.type].visible
           tileLayers.visible = isLayerVisible
-          tileLayers.visible && this.tilesToggleVisibility(tileLayers)
         })
-        
+        this.updateMapLayers()
         return Promise.resolve()
       })
       .catch((err) => console.error(err))
