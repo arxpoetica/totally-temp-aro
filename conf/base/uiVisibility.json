@@ -413,9 +413,9 @@
     "competitorNetworks": {
       "fiberPlantAlternateLabel": true,
       "showCompetitorTypes": false,
-      "disableGeotel": true,
-      "disableRoutes": true,
-      "disableRoutesBuffer": true
+      "disableGeotel": false,
+      "disableRoutes": false,
+      "disableRoutesBuffer": false
     },
     "targetBuilder": {
       "expertMode": {
@@ -657,10 +657,9 @@
     },
     "competitorNetworks": {
       "showCompetitorTypes": false,
-      "disableGeotel": true,
-      "disableFiberRouteData": true,
-      "showRoute": true,
-      "showRouteBuffers": true
+      "disableGeotel": false,
+      "disableRoutes": false,
+      "disableRoutesBuffer": false
     },
     "targetBuilder": {
       "expertMode": {
