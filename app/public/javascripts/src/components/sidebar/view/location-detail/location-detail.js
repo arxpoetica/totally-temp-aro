@@ -81,6 +81,7 @@ class LocationDetailController {
           result.data.longitude = result.data.geog.coordinates[0]
           var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
           locationProperties.geog = result.data.geog
+          locationProperties.location_id = result.data.location_id
           return Promise.resolve(locationProperties)
         } else {
           return Promise.reject('You must have either default or sales details shown')

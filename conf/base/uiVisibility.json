@@ -202,14 +202,12 @@
       "measuringStick": {
         "show": true
       },
-      "showViewSettings": {
+      "viewSettings": {
         "show": true,
-        "site_boundaries": {
-          "show": true
-        },
-        "directed_cable": {
-          "show": true
-        }
+        "showSiteBoundaries": true,
+        "showDirectedCable": true,
+        "showSiteLabels": true,
+        "showFiberSize": true
       },
       "selectionSingle": {
         "show": true
@@ -307,7 +305,7 @@
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
-      "showMoreInfoButton": false,
+      "showMoreInfoButton": true,
       "showAuditLog": false
     },
     "networkEquipment": {
@@ -413,9 +411,9 @@
     "competitorNetworks": {
       "fiberPlantAlternateLabel": true,
       "showCompetitorTypes": false,
-      "disableGeotel": true,
-      "disableRoutes": true,
-      "disableRoutesBuffer": true
+      "disableGeotel": false,
+      "disableRoutes": false,
+      "disableRoutesBuffer": false
     },
     "targetBuilder": {
       "expertMode": {
@@ -447,14 +445,12 @@
       "measuringStick": {
         "show": true
       },
-      "showViewSettings": {
+      "viewSettings": {
         "show": true,
-        "site_boundaries": {
-          "show": true
-        },
-        "directed_cable": {
-          "show": true
-        }
+        "showSiteBoundaries": true,
+        "showDirectedCable": true,
+        "showSiteLabels": true,
+        "showFiberSize": true
       },
       "selectionSingle": {
         "show": true
@@ -552,7 +548,7 @@
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
-      "showMoreInfoButton": false,
+      "showMoreInfoButton": true,
       "showAuditLog": false
     },
     "networkEquipment": {
@@ -657,10 +653,9 @@
     },
     "competitorNetworks": {
       "showCompetitorTypes": false,
-      "disableGeotel": true,
-      "disableFiberRouteData": true,
-      "showRoute": true,
-      "showRouteBuffers": true
+      "disableGeotel": false,
+      "disableRoutes": false,
+      "disableRoutesBuffer": false
     },
     "targetBuilder": {
       "expertMode": {
@@ -692,14 +687,12 @@
       "measuringStick": {
         "show": true
       },
-      "showViewSettings": {
+      "viewSettings": {
         "show": true,
-        "site_boundaries": {
-          "show": false
-        },
-        "directed_cable": {
-          "show": false
-        }
+        "showSiteBoundaries": true,
+        "showDirectedCable": true,
+        "showSiteLabels": false,
+        "showFiberSize": false
       },
       "selectionSingle": {
         "show": true
