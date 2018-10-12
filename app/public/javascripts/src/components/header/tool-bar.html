@@ -209,7 +209,7 @@
 
   <div class="myDropdown1">
     <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.isViewSettingsEnabled }"
-            ng-show="$ctrl.state.configuration.perspective.toolbar.showViewSettings.show"
+            ng-show="$ctrl.state.configuration.perspective.toolbar.viewSettings.show"
       ng-click = "$ctrl.viewSettingsAction()"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
       title="Show view settings...">
@@ -225,7 +225,7 @@
       <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
         style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">
 
-      <div ng-if="$ctrl.state.configuration.perspective.toolbar.showViewSettings.site_boundaries.show">
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteBoundaries">
         <div class="dropdown-divider"></div>
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
                style="margin-left: 2px;">
@@ -237,7 +237,7 @@
         </select>
       </div>
 
-      <div ng-if="$ctrl.state.configuration.perspective.toolbar.showViewSettings.directed_cable.show">
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showDirectedCable">
         <div class="dropdown-divider"></div>
 
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection()" name="ctype-name"
@@ -245,21 +245,24 @@
         <font>Directed Cable</font>
       </div>
 
-      <div class="dropdown-divider"></div>
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
-        style="margin-left: 2px;">
-      <font>Site Labels</font>
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteLabels">
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
+          style="margin-left: 2px;">
+        <font>Site Labels</font>
+      </div>
 
-      <div class="dropdown-divider"></div>
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
-        style="margin-left: 2px;">
-      <font>Fiber Size</font>
-      <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
-        ng-model="$ctrl.state.viewSetting.selectedFiberOption"
-        ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
-        ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">
-      </select>
-
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showFiberSize">
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
+          style="margin-left: 2px;">
+        <font>Fiber Size</font>
+        <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
+          ng-model="$ctrl.state.viewSetting.selectedFiberOption"
+          ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
+          ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">
+        </select>
+      </div>
     </div>
   </div>
 

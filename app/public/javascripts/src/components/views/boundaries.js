@@ -46,8 +46,6 @@ class BoundariesController {
             type: 'wirecenter',
             layerId: serviceLayer.id
           }
-    
-          wirecenter_layer.visible = this.state.configuration.boundaryCategories.categories[serviceLayer.name].visible
           newTileLayers.push(wirecenter_layer)
         })
     
@@ -77,7 +75,15 @@ class BoundariesController {
         })
 
         this.state.boundaries.tileLayers = newTileLayers
-        this.updateMapLayers()
+
+        //enable visible boundaries by default
+        this.state.boundaries.tileLayers.forEach((tileLayers) => {
+          var isLayerVisible = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[tileLayers.type].visible
+          tileLayers.visible = isLayerVisible
+          tileLayers.visible && this.tilesToggleVisibility(tileLayers)
+        })
+        
+        return Promise.resolve()
       })
       .catch((err) => console.error(err))
   }
