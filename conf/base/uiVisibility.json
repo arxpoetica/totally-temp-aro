@@ -202,14 +202,12 @@
       "measuringStick": {
         "show": true
       },
-      "showViewSettings": {
+      "viewSettings": {
         "show": true,
-        "site_boundaries": {
-          "show": true
-        },
-        "directed_cable": {
-          "show": true
-        }
+        "showSiteBoundaries": true,
+        "showDirectedCable": true,
+        "showSiteLabels": true,
+        "showFiberSize": true
       },
       "selectionSingle": {
         "show": true
@@ -447,14 +445,12 @@
       "measuringStick": {
         "show": true
       },
-      "showViewSettings": {
+      "viewSettings": {
         "show": true,
-        "site_boundaries": {
-          "show": true
-        },
-        "directed_cable": {
-          "show": true
-        }
+        "showSiteBoundaries": true,
+        "showDirectedCable": true,
+        "showSiteLabels": true,
+        "showFiberSize": true
       },
       "selectionSingle": {
         "show": true
@@ -691,14 +687,12 @@
       "measuringStick": {
         "show": true
       },
-      "showViewSettings": {
+      "viewSettings": {
         "show": true,
-        "site_boundaries": {
-          "show": false
-        },
-        "directed_cable": {
-          "show": false
-        }
+        "showSiteBoundaries": true,
+        "showDirectedCable": true,
+        "showSiteLabels": false,
+        "showFiberSize": false
       },
       "selectionSingle": {
         "show": true
