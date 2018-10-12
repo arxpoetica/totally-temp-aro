@@ -305,7 +305,7 @@
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
-      "showMoreInfoButton": false,
+      "showMoreInfoButton": true,
       "showAuditLog": false
     },
     "networkEquipment": {
@@ -548,7 +548,7 @@
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
-      "showMoreInfoButton": false,
+      "showMoreInfoButton": true,
       "showAuditLog": false
     },
     "networkEquipment": {
