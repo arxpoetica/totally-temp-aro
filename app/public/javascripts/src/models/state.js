@@ -83,6 +83,11 @@ class State {
 
   service.showEquipmentLabels = false
 
+  service.fiberRoutingModes = {
+    ROUTE_FROM_NODES: 'ROUTE_FROM_NODES',
+    ROUTE_FROM_FIBER: 'ROUTE_FROM_FIBER'
+  }
+
   // The selection modes for the application
   service.selectionModes = {
     SELECTED_AREAS: 'SELECTED_AREAS', 
@@ -143,7 +148,9 @@ class State {
         polygonStrategy: 'FIXED_RADIUS',
         tiles: [],
         selectedTile: null
-      }
+      },
+      routeFromFiber: false,
+      fiberRoutingMode: null
     },
     financialConstraints: {
       cashFlowStrategyType: 'EXTERNAL',
@@ -173,7 +180,7 @@ class State {
     selectedLayer: null,
     generatedDataRequest: {
       generatePlanLocationLinks : false,
-      generateSubnetLinking: true
+      generateSubnetLinking: false
     },
     analysisSelectionMode: service.selectionModes.SELECTED_AREAS
   }
