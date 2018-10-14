@@ -20,7 +20,7 @@
         "libraryId": "{libraryId}",
         "transform": "{transform}"
       },
-			"visible": false,
+			"visible": true,
       "disabled": false,
 			"aggregateZoomThreshold": 10
     },

@@ -2,9 +2,9 @@ import StateViewMode from './state-view-mode'
 
 /* global app localStorage map */
 class State {
-//app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
+//app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
+  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
@@ -82,6 +82,10 @@ class State {
   }
 
   service.showEquipmentLabels = false
+  service.equipmentLayerTypeVisibility = {
+    existing: false,
+    planned: false
+  }
 
   service.fiberRoutingModes = {
     ROUTE_FROM_NODES: 'ROUTE_FROM_NODES',
@@ -1212,7 +1216,7 @@ class State {
   // Clear the tile cache for plan outputs like fiber, 5G nodes, etc.
   service.clearTileCachePlanOutputs = () => {
     // The tile cache will clear all cache entries whose keys contain the given keywords
-    tileDataService.clearDataCacheContaining(configuration.networkEquipment.tileCacheKeywords)
+    tileDataService.clearDataCacheContaining(service.configuration.networkEquipment.tileCacheKeywords)
   }
 
   service.showModifyQuestionDialog = () => {
@@ -1480,6 +1484,9 @@ class State {
   service.setLoggedInUser = (user) => {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
+    service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
+    service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
+
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
 
@@ -1511,7 +1518,6 @@ class State {
       // Default location may not be set for this user. In this case, use a system default
       const searchLocation = result.data.defaultLocation || service.defaultPlanCoordinates.areaName
       service.loggedInUser.perspective = result.data.perspective || 'default'
-      configuration.loadPerspective(service.loggedInUser.perspective, service.configuration) // For now
       service.configuration.loadPerspective(service.loggedInUser.perspective)
       service.initializeState()
       return $http.get(`/search/addresses?text=${searchLocation}&sessionToken=${Utils.getInsecureV4UUID()}`)
@@ -1555,9 +1561,9 @@ class State {
       const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
       service.configuration.perspective = thisPerspective || defaultPerspective
     }
-    configuration.loadPerspective(loggedInUser.perspective, service.configuration) // For now
     service.configuration.loadPerspective(loggedInUser.perspective)
     service.setLoggedInUser(loggedInUser)
+    tileDataService.setLockIcon(service.configuration.locationCategories.entityLockIcon)
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
@@ -1666,6 +1672,6 @@ class State {
 }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'configuration', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
 
 export default State

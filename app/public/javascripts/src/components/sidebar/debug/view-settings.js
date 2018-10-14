@@ -1,14 +1,13 @@
 class ViewSettingsController {
 
-  constructor(state, configuration, $rootScope) {
+  constructor(state, $rootScope) {
     this.state = state
-    this.configuration = configuration
     this.$rootScope = $rootScope
 
     this.state.viewSetting.selectedFiberOption = this.state.viewFiberOptions[0]
     this.mapTileOptions
 
-    this.equipmentPropertiesToRender = JSON.stringify(this.configuration.networkEquipment.labelDrawingOptions.properties)
+    this.equipmentPropertiesToRender = JSON.stringify(this.state.configuration.networkEquipment.labelDrawingOptions.properties)
 
     // Map tile settings used for debugging
     this.state.mapTileOptions
@@ -20,7 +19,7 @@ class ViewSettingsController {
   }
 
   saveEquipmentPropertiesToRender() {
-    this.configuration.networkEquipment.labelDrawingOptions.properties = JSON.parse(this.equipmentPropertiesToRender)
+    this.state.configuration.networkEquipment.labelDrawingOptions.properties = JSON.parse(this.equipmentPropertiesToRender)
     this.state.viewSettingsChanged.next()
     this.state.requestMapLayerRefresh.next(null)
   }
@@ -32,7 +31,7 @@ class ViewSettingsController {
   }
 }
 
-ViewSettingsController.$inject = ['state', 'configuration', '$rootScope']
+ViewSettingsController.$inject = ['state', '$rootScope']
 
 let viewSettings = {
   templateUrl: '/components/sidebar/debug/view-settings.html',

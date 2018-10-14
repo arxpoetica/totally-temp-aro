@@ -1,8 +1,7 @@
 class EquipmentDetailModalController {
 
-  constructor(state,configuration) {
+  constructor(state) {
     this.state = state
-    this.configuration = configuration
     this.map_url = null
   
     $('#selected_equipment_modal').on('shown.bs.modal', (e) => {
@@ -20,7 +19,7 @@ class EquipmentDetailModalController {
     
     this.equipment = equipment
 
-    var google_maps_key = this.configuration.google_maps_key
+    var google_maps_key = this.state.configuration.google_maps_key
     var coordinates = equipment.geog.coordinates[1] + ',' + equipment.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -70,7 +69,7 @@ class EquipmentDetailModalController {
 
 }
 
-EquipmentDetailModalController.$inject = ['state','configuration']
+EquipmentDetailModalController.$inject = ['state']
 
 let equipmentDetailModal = {
   templateUrl: '/components/sidebar/view/equipment-detail-modal.html',

@@ -7,9 +7,6 @@ class BoundariesController {
     this.regions = regions
     this.map_tools = map_tools
 
-    var countySubdivisionsLayer
-    var censusBlocksLayer
-
     // Creates map layers based on selection in the UI
     this.createdMapLayerKeys = new Set()
 
@@ -19,7 +16,7 @@ class BoundariesController {
     $rootScope.$on('map_zoom_changed', this.updateMapLayers.bind(this))
 
     // Update map layers when the dataItems property of state changes
-    this.state.dataItemsChanged.subscribe((newValue) => this.updateMapLayers())
+    this.state.dataItemsChanged.skip(1).subscribe((newValue) => this.updateMapLayers())
 
     // Update map layers when the selection type in analysis mode changes
     this.state.selectionTypeChanged.subscribe((newValue) => this.updateMapLayers())
@@ -45,7 +42,7 @@ class BoundariesController {
         filteredGlobalServiceLayers.forEach((serviceLayer) => {
           if (!serviceLayer.show_in_boundaries) return
           var wirecenter_layer = {
-            name: serviceLayer.description, //serviceLayer.description, // Service Areas 
+            description: serviceLayer.description, // Service Areas 
             type: 'wirecenter',
             layerId: serviceLayer.id
           }
@@ -59,7 +56,7 @@ class BoundariesController {
         }
         if (includeCensusBlocks) {
           newTileLayers.push({
-            name: 'Census Blocks',
+            description: 'Census Blocks',
             type: 'census_blocks'
           })
         }
@@ -71,7 +68,7 @@ class BoundariesController {
         }
         analysisLayers.forEach((analysisLayer) => {
           newTileLayers.push({
-            name: analysisLayer.description,
+            description: analysisLayer.description,
             type: 'analysis_layer',
             analysisLayerId: analysisLayer.id
           })
@@ -83,25 +80,18 @@ class BoundariesController {
         this.state.boundaries.tileLayers.forEach((tileLayers) => {
           var isLayerVisible = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[tileLayers.type].visible
           tileLayers.visible = isLayerVisible
-          tileLayers.visible && this.tilesToggleVisibility(tileLayers)
         })
-        
+        this.updateMapLayers()
         return Promise.resolve()
       })
+      .catch((err) => console.error(err))
   }
 
   onSelectCensusCat(){
-    let id = null
-    if (null != this.selectedCensusCat) id = this.selectedCensusCat.id
+    const id = this.selectedCensusCat && this.selectedCensusCat.id
     this.state.reloadSelectedCensusCategoryId(id)
   }
   
-  // for layers drawn on vector tiles
-  tilesToggleVisibility(layer) {
-    this.updateMapLayers()
-    //this.state.resetBoundarySearch.next(true)
-  }
-
   // Replaces any occurrences of searchText by replaceText in the keys of an object
   objectKeyReplace(obj, searchText, replaceText) {
     Object.keys(obj).forEach((key) => {
@@ -129,9 +119,6 @@ class BoundariesController {
     })
 
     this.createdMapLayerKeys.clear()
-
-    // Hold a list of layers that we want merged
-    var mergedLayerUrls = []
 
     // Add map layers based on the selection
     var selectedServiceAreaLibraries = this.state.dataItems && this.state.dataItems.service_layer && this.state.dataItems.service_layer.selectedLibraryItems
@@ -169,8 +156,6 @@ class BoundariesController {
     if (this.oldPerspective !== this.state.configuration.perspective) {
       this.oldPerspective = this.state.configuration.perspective
       this.reloadVisibleLayers()
-        .then(() => this.updateMapLayers())
-        .catch((err) => console.error(err))
     }
   }
 
@@ -184,8 +169,6 @@ class BoundariesController {
 
   $onInit() {
     this.reloadVisibleLayers()
-      .then(() => this.updateMapLayers())
-      .catch((err) => console.error(err))
   }
 }
 

@@ -1,13 +1,12 @@
 class ViewModeController {
   
-  constructor($scope, state, configuration) {
+  constructor(state) {
     this.state = state
     this.currentUser = state.loggedInUser
-    $scope.configuration = configuration
   }
 }
 
-ViewModeController.$inject = ['$scope', 'state', 'configuration']
+ViewModeController.$inject = ['state']
 
 let viewMode = {
     templateUrl: '/components/sidebar/view/view-mode.html',

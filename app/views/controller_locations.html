@@ -1,6 +1,6 @@
 <div>
   <!-- Locations layer modal -->
-  <div id="locations_controller" ng-show="!isLoadingConfiguration">
+  <div id="locations_controller">
     <div ng-if="configuration.perspective.mapTools['prosects'].show">
       <div style="padding-left: 10px">
         <span style="font-weight: bold">Filter:</span>
@@ -38,18 +38,6 @@
 
     <div ng-if="disablelocations" class="alert alert-warning" role="alert">
       Locations not displayed at this zoom level
-    </div>
-  </div>
-
-  <!-- Spinner that will be shown while the configuration is being loaded from the server -->
-  <div style="margin:30px;text-align:center;" ng-if="isLoadingConfiguration">
-    <p>Loading location categories</p>
-    <div class="spinner">
-      <div class="rect1"></div>
-      <div class="rect2"></div>
-      <div class="rect3"></div>
-      <div class="rect4"></div>
-      <div class="rect5"></div>
     </div>
   </div>
 </div>

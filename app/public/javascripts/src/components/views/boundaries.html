@@ -14,14 +14,14 @@
         <div ng-repeat="layer in $ctrl.state.boundaries.tileLayers" ng-if="$ctrl.state.configuration.perspective.boundaries[layer.type].show">
           <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
             <div class="pull-right">
-              <input type="checkbox" class="checkboxfill" ng-model="layer.visible" name="ctype-name" ng-change="$ctrl.tilesToggleVisibility(layer)"
+              <input type="checkbox" class="checkboxfill" ng-model="layer.visible" name="ctype-name" ng-change="$ctrl.updateMapLayers()"
                 ng-disabled="layer.disabled">
             </div>
             <div class="pull-right" style="margin-right: 30px">
               <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
             </div>
             <label>
-              {{layer.name}}
+              {{layer.description}}
               
               <div ng-if="'census_blocks' == layer.type && layer.visible" style="padding-left: 0.5em;">
                 <select class="form-control" style="margin-bottom: 0.5em;"

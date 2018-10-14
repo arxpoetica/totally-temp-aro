@@ -84,7 +84,7 @@
           <p class="text-center">Click and drag equipment/boundary onto the map</p>
           <hr class="plan-editor-hr">
           <!-- Equipment buttons. Only add the ones in the allEditableNetworkNodeTypes list -->
-          <draggable-button ng-repeat="equipment in $ctrl.configuration.networkEquipment.equipments"
+          <draggable-button ng-repeat="equipment in $ctrl.state.configuration.networkEquipment.equipments"
                             ng-if="$ctrl.allEditableNetworkNodeTypes.indexOf(equipment.networkNodeType) >= 0"
                             icon="{{equipment.iconUrl}}" 
                             is-disabled="false"
@@ -134,7 +134,7 @@
               </draggable-button>
             </div>
             <div style="flex: 0 0 auto; line-height: 45px; padding-left: 5px; padding-right: 5px;">
-              Distance ({{$ctrl.configuration.units.length_units}})
+              Distance ({{$ctrl.state.configuration.units.length_units}})
             </div>
             <div style="flex: 1 1 auto; margin-top: 5px; padding-left: 5px; padding-right: 5px;">
               <input class="form-control"
