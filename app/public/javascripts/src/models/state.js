@@ -1553,8 +1553,9 @@ class State {
   }
 
   service.configuration = {}
-  service.initializeAppConfiguration = (loggedInUser, appConfiguration) => {
+  service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing) => {
     service.configuration = appConfiguration
+    service.googleMapsLicensing = googleMapsLicensing
     service.configuration.loadPerspective = (perspective) => {
       // If a perspective is not found, go to the default
       const defaultPerspective = service.configuration.uiVisibility.filter(item => item.name === 'default')[0]

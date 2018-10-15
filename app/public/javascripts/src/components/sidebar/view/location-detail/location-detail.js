@@ -102,7 +102,6 @@ class LocationDetailController {
     this.selectedLocationInfo = locationInfo
     this.showAttributes = (this.currentUser.perspective === 'sales_engineer' || this.currentUser.perspective === 'account_exec') && !angular.equals(locationInfo.attributes, {})
     
-    var google_maps_key = this.state.configuration.google_maps_key
     var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -111,7 +110,7 @@ class LocationDetailController {
       scale: 2,
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
-      key: google_maps_key
+      key: this.state.googleMapsLicensing.API_KEY
     }
     this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
