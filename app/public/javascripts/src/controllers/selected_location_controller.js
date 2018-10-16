@@ -104,7 +104,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
                           location.business_install_costs * location.number_of_businesses
     $scope.location = location
 
-    var google_maps_key = 'AIzaSyDYjYSshVYlkt2hxjrpqTg31KdMkw-TXSM'
     var coordinates = location.geog.coordinates[1] + ',' + location.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -113,7 +112,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
       scale: 2,         // So we set scale = 2 and size of '434x110'
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
-      key: google_maps_key
+      key: state.googleMapsLicensing.API_KEY
     }
     $scope.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')

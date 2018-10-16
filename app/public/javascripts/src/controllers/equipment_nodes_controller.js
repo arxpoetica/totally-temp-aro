@@ -136,7 +136,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
 
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
-  var updateMapLayers = () => {
+  $scope.updateMapLayers = () => {
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(state.mapLayers.getValue())
 
@@ -184,14 +184,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
     state.mapLayers.next(oldMapLayers)
   }
   // When the map zoom changes, map layers can change
-  $rootScope.$on('map_zoom_changed', updateMapLayers)
+  $rootScope.$on('map_zoom_changed', $scope.updateMapLayers)
 
   // Change the visibility of a network equipment layer. layerObj should refer to an object
   // in state.js --> networkEquipments[x].layers
   $scope.changeLayerVisibility = (layerObj, isVisible) => {
     // "visibilityType" allows us to distinguish between planned and existing layers
     layerObj.checked = isVisible
-    updateMapLayers()
+    $scope.updateMapLayers()
   }
 
   $scope.zoomTo = (zoomLevel) => { 
@@ -206,16 +206,16 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   
   // Create a new set of map layers
   state.mapReadyPromise.then(() => {
-    updateMapLayers()
+    $scope.updateMapLayers()
   })
 
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
     .skip(1)
-    .subscribe((newValue) => updateMapLayers())
+    .subscribe((newValue) => $scope.updateMapLayers())
 
   // Update map layers when the dataItems property of state changes
   state.viewSettingsChanged
     .skip(1)
-    .subscribe(() => updateMapLayers())
+    .subscribe(() => $scope.updateMapLayers())
 }])
