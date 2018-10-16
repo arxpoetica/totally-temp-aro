@@ -1,0 +1,37 @@
+<div style="margin: 10px">
+
+  <!-- Buttons to commit or discard a transaction -->
+  <div class="text-center">
+    <div class="btn-group ">
+      <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+      <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+    </div>
+  </div>
+  <br>
+
+  <table class="table table-condensed table-striped" style="margin-bottom: 10px">
+    <tr>
+      <td>Layer Name</td>
+      <td>
+        <input type="text" class="form-control" placeholder="Layer Name"
+          ng-model="$ctrl.serviceLayerFeature.name">
+      </td>
+    </tr>
+    <tr>
+      <td>Draw Layer</td>
+      <td>
+        <aro-drawing-manager
+          map-global-object-name="map"
+          drawing-control="false" 
+          drawing-modes="['polygon']"
+          editable="false"
+          default-drawing-mode="polygon"
+          feature-type="createServiceLayer"
+          delete-map-objects="$ctrl.discardChanges"
+          register-create-map-object-callback="$ctrl.registerCreateMapObjectCallback(createMapObjects)">
+        </aro-drawing-manager>
+      </td>
+    </tr>
+  </table>
+
+</div>

@@ -15,7 +15,8 @@ class DataSourceUploadController {
 
     this.saCreationTypes = [
       {id:"upload_file",label:"Upload From File"},
-      {id:"polygon_equipment",label:"Create Polygon From Equipment"}
+      {id:"polygon_equipment",label:"Create Polygon From Equipment"},
+      {id:"draw_polygon",label:"Draw Polygon on map"},
     ]
     this.saCreationType
     this.selectedEquipment
@@ -100,6 +101,14 @@ class DataSourceUploadController {
         this.isUploading = false
         console.error(err)
       })
+    } else if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'draw_polygon') {
+      this.getLibraryId() // Just create Datasource
+      .then((result) => {
+        this.isUploading = false
+        this.close()
+        this.addDatasource(result)
+      })
+      // Draw the layer by entering edit mode
     } else {
       if (this.state.uploadDataSource.name != 'service_layer' || this.saCreationType.id != 'polygon_equipment') {
         var files = $('#data_source_upload_modal input[type=file]').get(0).files

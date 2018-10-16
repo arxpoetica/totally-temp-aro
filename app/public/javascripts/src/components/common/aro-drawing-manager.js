@@ -3,13 +3,19 @@ class aroDrawingManagerController {
     this.$window = $window
     this.isEphemralShapes = false
     this.drawingManager = null
+
+    this.drawingModeTypes = {
+      'marker': google.maps.drawing.OverlayType.MARKER,
+      'polyline': google.maps.drawing.OverlayType.POLYLINE,
+      'polygon': google.maps.drawing.OverlayType.POLYGON
+    }
   }
 
   enableDrawingManager() {
     if (!this.drawingManager) {
       this.all_overlays = []
       this.drawingManager = new google.maps.drawing.DrawingManager({
-        drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+        drawingMode: this.drawingModeTypes[this.defaultDrawingMode],
         drawingControl: this.drawingControl,
         drawingControlOptions: {
           position: google.maps.ControlPosition.BOTTOM_CENTER,
@@ -27,17 +33,12 @@ class aroDrawingManagerController {
 
       google.maps.event.addListener(this.drawingManager, 'overlaycomplete', (e) => {
         this.all_overlays.push(e);
-        if (e.type != google.maps.drawing.OverlayType.MARKER) {
-          // Switch back to non-drawing mode after drawing a shape.
-          this.drawingManager.setDrawingMode(null);
-        }
+        this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: this.all_overlays})
+        this.featureType === 'createServiceLayer' && this.editable && this.addMapObjectEvents(this.all_overlays)
       });
     } else {
       if (this.drawingManager) {
-        this.drawingManager.setOptions({
-          drawingMode: google.maps.drawing.OverlayType.POLYLINE,
-          drawingControl: true
-        })
+        this.drawingManager.setMap(this.mapRef)
       }
     }
   }
@@ -49,9 +50,7 @@ class aroDrawingManagerController {
 
   removeDrawingManager() {
     if (this.drawingManager) {
-      this.drawingManager.setOptions({
-        drawingControl: false
-      })
+      this.drawingManager.setMap(null)
     }
   }
 
@@ -65,9 +64,46 @@ class aroDrawingManagerController {
     }
   }
 
+  addMapObjectEvents(features) {
+    features.forEach((feature) => {
+      this.addMapObjectEvent(feature)
+    })
+  }
+
+  addMapObjectEvent(feature) {
+    if (feature.type === 'polygon') {
+      var mapObject= feature
+
+      mapObject.overlay.getPaths().forEach((path, index) => {
+        google.maps.event.addListener(path, 'insert_at',() => {
+          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: [mapObject]})
+        });
+        google.maps.event.addListener(path, 'remove_at',() => {
+          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: [mapObject]})
+        });
+        google.maps.event.addListener(path, 'set_at',() => {
+          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({ createMapObjects: [mapObject] })
+        });
+      });
+    } else {
+      throw `createMapObject() not supported for geometry type ${feature.type}`
+    }
+  }
+
   $onInit() {
     this.mapRef = this.$window[this.mapGlobalObjectName]
   }
+
+  $onChanges(changes) {
+    if (changes.deleteMapObjects.currentValue) {
+      this.setEphemralShapes()
+    }
+  }
+
+  $onDestroy() {
+    this.setEphemralShapes()
+  }
+
 }
 
 aroDrawingManagerController.$inject = ['$window']
@@ -78,7 +114,11 @@ let aroDrawingManager = {
     mapGlobalObjectName: '@',
     drawingControl: '=',
     drawingModes: '<',
-    editable: '='
+    editable: '=',
+    defaultDrawingMode: '@',
+    featureType: '@',
+    deleteMapObjects: '<',
+    registerCreateMapObjectCallback: '&'
   },
   controller: aroDrawingManagerController
 }
