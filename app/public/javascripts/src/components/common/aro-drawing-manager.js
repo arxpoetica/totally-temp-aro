@@ -36,6 +36,10 @@ class aroDrawingManagerController {
         this.all_overlays.push(e);
         this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: this.all_overlays})
         addListeners && this.addMapObjectEvents(this.all_overlays)
+        if (addListeners) {
+          // Switch back to non-drawing mode after drawing a shape.
+          this.drawingManager.setMap(null);
+        }
       });
     } else {
       if (this.drawingManager) {
