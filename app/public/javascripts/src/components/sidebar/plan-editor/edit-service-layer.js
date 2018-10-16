@@ -6,11 +6,11 @@ class EditServiceLayerController {
     this.state = state
     this.utils = Utils
     this.discardChanges = false
+    this.currentTransaction = null
     // this.dataSourceName
   }
 
   createServiceLayerTemplate() {
-    this.currentTransaction = null
     this.serviceLayerFeature = {
       dataType: 'service_layer',
       geometry: {
@@ -22,6 +22,17 @@ class EditServiceLayerController {
   }
 
   registerCreateMapObjectCallback(createMapObjects) {
+    this.createServiceLayerTemplate()
+
+    // createMapObjects.forEach((mapObject,index)  => {
+    //   mapObject.overlay.getPaths().forEach((path) => {
+    //     var pathPoints = []
+    //     path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+    //     pathPoints.push(pathPoints[0])  // Close the polygon
+    //     this.serviceLayerFeature.geometry.coordinates[0].push(pathPoints)
+    //   })
+    // })
+
     var mapObject = createMapObjects[0]
     mapObject.overlay.getPaths().forEach((path) => {
       var pathPoints = []
@@ -77,11 +88,13 @@ class EditServiceLayerController {
     })
     .then((result) => {
       // Transaction has been committed, start a new one
+      this.currentTransaction = null
       this.createServiceLayerTemplate()
       this.state.recreateTilesAndCache()
       return this.resumeOrCreateTransaction()
     })
     .catch((err) => {
+      this.currentTransaction = null
       this.createServiceLayerTemplate()
       this.state.recreateTilesAndCache()
       this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
@@ -107,11 +120,13 @@ class EditServiceLayerController {
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
+            this.currentTransaction = null
             this.createServiceLayerTemplate()
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
           .catch((err) => {
+            this.currentTransaction = null
             this.createServiceLayerTemplate()
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
             this.$timeout()

@@ -14,6 +14,7 @@ class aroDrawingManagerController {
   enableDrawingManager() {
     if (!this.drawingManager) {
       this.all_overlays = []
+      var addListeners = this.featureType != 'ephemralShape' && this.editable
       this.drawingManager = new google.maps.drawing.DrawingManager({
         drawingMode: this.drawingModeTypes[this.defaultDrawingMode],
         drawingControl: this.drawingControl,
@@ -34,7 +35,7 @@ class aroDrawingManagerController {
       google.maps.event.addListener(this.drawingManager, 'overlaycomplete', (e) => {
         this.all_overlays.push(e);
         this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: this.all_overlays})
-        this.featureType === 'createServiceLayer' && this.editable && this.addMapObjectEvents(this.all_overlays)
+        addListeners && this.addMapObjectEvents(this.all_overlays)
       });
     } else {
       if (this.drawingManager) {
@@ -112,11 +113,11 @@ let aroDrawingManager = {
   templateUrl:'/components/common/aro-drawing-manager.html',
   bindings: {
     mapGlobalObjectName: '@',
+    featureType: '@',
     drawingControl: '=',
     drawingModes: '<',
     editable: '=',
     defaultDrawingMode: '@',
-    featureType: '@',
     deleteMapObjects: '<',
     registerCreateMapObjectCallback: '&'
   },

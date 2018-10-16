@@ -22,11 +22,11 @@
       <td>
         <aro-drawing-manager
           map-global-object-name="map"
-          drawing-control="false" 
-          drawing-modes="['polygon']"
-          editable="false"
-          default-drawing-mode="polygon"
           feature-type="createServiceLayer"
+          drawing-control="true" 
+          drawing-modes="['polygon']"
+          editable="true"
+          default-drawing-mode="polygon"
           delete-map-objects="$ctrl.discardChanges"
           register-create-map-object-callback="$ctrl.registerCreateMapObjectCallback(createMapObjects)">
         </aro-drawing-manager>
