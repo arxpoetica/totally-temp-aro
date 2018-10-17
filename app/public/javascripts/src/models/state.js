@@ -1564,7 +1564,8 @@ class State {
     }
     service.configuration.loadPerspective(loggedInUser.perspective)
     service.setLoggedInUser(loggedInUser)
-    tileDataService.setLockIcon(service.configuration.locationCategories.entityLockIcon)
+    tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
+    tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)

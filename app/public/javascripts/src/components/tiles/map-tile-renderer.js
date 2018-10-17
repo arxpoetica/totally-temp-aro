@@ -341,13 +341,15 @@ class MapTileRenderer {
       }
     })
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
-    singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.LOCK_ICON_KEY))
+    singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.LOCK_ICON_KEY))
+    singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.INVALIDATED_ICON_KEY))
     
     this.uiNotificationService.addNotification('main', 'rendering tiles')
     // Get all the data for this tile
     return Promise.all(singleTilePromises)
       .then((singleTileResults) => {
-        var lockOverlayImage = singleTileResults.splice(singleTileResults.length - 1)
+        var invalidatedOverlayImage = singleTileResults.splice(singleTileResults.length - 1)[0]
+        var lockOverlayImage = singleTileResults.splice(singleTileResults.length - 1)[0]
         var selectedLocationImage = singleTileResults.splice(singleTileResults.length - 1)
 
         // Reconstruct rendering data
@@ -362,7 +364,7 @@ class MapTileRenderer {
         if (htmlCache && htmlCache.isDirty && isLatestVersion) {
           htmlCache.backBufferCanvas.getContext('2d').clearRect(0, 0, htmlCache.backBufferCanvas.width, htmlCache.backBufferCanvas.height)
           htmlCache.heatmapCanvas.getContext('2d').clearRect(0, 0, htmlCache.heatmapCanvas.width, htmlCache.heatmapCanvas.height)
-          this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
+          this.renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, htmlCache.backBufferCanvas, htmlCache.heatmapCanvas)
 
           // Copy the back buffer image onto the front buffer
           var ctx = htmlCache.frontBufferCanvas.getContext('2d')
@@ -385,7 +387,7 @@ class MapTileRenderer {
   }
 
   // Renders a single layer on a tile
-  renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, canvas, heatmapCanvas) {
+  renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, canvas, heatmapCanvas) {
     var ctx = canvas.getContext('2d')
     ctx.lineWidth = 1
     var heatMapData = []
@@ -397,7 +399,7 @@ class MapTileRenderer {
         renderingData[mapLayerKey].data.forEach((featureData, index) => {
           var features = []
           Object.keys(featureData.layerToFeatures).forEach((layerKey) => features = features.concat(featureData.layerToFeatures[layerKey]))
-          this.renderFeatures(ctx, zoom, coord, features, featureData, selectedLocationImage, lockOverlayImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
+          this.renderFeatures(ctx, zoom, coord, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, renderingData[mapLayerKey].dataOffsets[index], heatMapData, this.mapTileOptions.selectedHeatmapOption.id, mapLayer)
         })
       }
     })
@@ -450,7 +452,7 @@ class MapTileRenderer {
   }
   
   // Render a set of features on the map
-  renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+  renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
@@ -526,7 +528,7 @@ class MapTileRenderer {
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
-                                               selectedLocationImage, lockOverlayImage, this.selectedDisplayMode, this.displayModes,
+                                               selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, this.selectedDisplayMode, this.displayModes,
                                                this.analysisSelectionMode, this.state.selectionModes, this.selectedLocations, this.selectedViewFeaturesByType)
   	      } else {
   	        // Display heatmap
