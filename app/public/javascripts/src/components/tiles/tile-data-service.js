@@ -27,9 +27,12 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
       .catch((err) => callback({ status: 'failure', data: err }))
   }, MAX_CONCURRENT_VECTOR_TILE_REQUESTS)
 
-  tileDataService.LOCK_ICON_KEY = 'LOCK_ICON'
-  tileDataService.setLockIcon = (iconUrl) => {
-    tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, iconUrl)
+  tileDataService.locationStates = {
+    LOCK_ICON_KEY: 'LOCK_ICON_KEY',
+    INVALIDATED_ICON_KEY: 'INVALIDATED_ICON_KEY'
+  }
+  tileDataService.setLocationStateIcon = (locationState, iconUrl) => {
+    tileDataService.addEntityImageForLayer(locationState, iconUrl)
   }
 
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {

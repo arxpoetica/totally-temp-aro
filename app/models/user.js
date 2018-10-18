@@ -97,7 +97,9 @@ module.exports = class User {
               resolve({
                 firstName: entry.object[authenticationConfig.firstNameAttribute],
                 lastName: entry.object[authenticationConfig.lastNameAttribute],
-                ldapGroups: [entry.object[authenticationConfig.groupsAttribute]]
+                // Note that sometimes 'entry.object[authenticationConfig.groupsAttribute]' is a single string,
+                // while sometimes it is an array of strings. Do a [].concat() so we always get back an array 
+                ldapGroups: [].concat(entry.object[authenticationConfig.groupsAttribute])
               })
             })
             search.on('error', (err) => {

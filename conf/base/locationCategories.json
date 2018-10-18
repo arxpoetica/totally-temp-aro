@@ -1,6 +1,7 @@
 {
   "mapIconFolder": "/images/map_icons/aro/",
   "entityLockIcon": "/images/map_icons/aro/lock_overlay.png",
+  "entityInvalidatedIcon": "/images/map_icons/aro/invalidated_overlay.png",
   "business": {
     "user_upload": {
       "active": true,
