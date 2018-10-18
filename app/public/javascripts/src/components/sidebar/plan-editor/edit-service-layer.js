@@ -81,7 +81,7 @@ class EditServiceLayerController {
     if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
-    if (!this.serviceLayerFeature.geometry) {
+    if (this.serviceLayerFeature.geometry.coordinates[0].length <= 0) {
       console.error('Service Layer Not Drawn. We should never be in this state. Aborting commit...')
       return
     }
