@@ -743,8 +743,8 @@ class MapObjectEditorController {
       feature.objectId = locations[0].object_id
       feature.isExistingObject = true
       // A feature is "locked" if the workflow state is LOCKED or INVALIDATED.
-      feature.is_locked = (locations[0].workflow_state & WorkflowState.LOCKED)
-                          || (locations[0].workflow_state & WorkflowState.INVALIDATED)
+      feature.is_locked = (locations[0].workflow_state_id & WorkflowState.LOCKED)
+                          || (locations[0].workflow_state_id & WorkflowState.INVALIDATED)
       
       featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
       .then((result) => {
