@@ -75,8 +75,10 @@
         ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER">
       </accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EDIT_SERVICE_LAYER" 
-        ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER">
-        <edit-service-layer></edit-service-layer>
+        ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW && 
+          $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER">
+        <edit-service-layer ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW && 
+        $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.EDIT_SERVICE_LAYER"></edit-service-layer>
       </accordion-panel-contents>
 
     </accordion>

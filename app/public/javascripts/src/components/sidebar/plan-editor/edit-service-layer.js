@@ -7,7 +7,8 @@ class EditServiceLayerController {
     this.utils = Utils
     this.discardChanges = false
     this.currentTransaction = null
-    // this.dataSourceName
+    this.serviceLayerName = null
+    this.serviceLayerCode = null
   }
 
   createServiceLayerTemplate() {
@@ -17,7 +18,10 @@ class EditServiceLayerController {
         type: 'MultiPolygon',
         coordinates: [[]]
       },
-      name: null
+      attributes: {
+        name: null,
+        code: null
+      }
     }
   }
 
@@ -40,7 +44,7 @@ class EditServiceLayerController {
       pathPoints.push(pathPoints[0])  // Close the polygon
       this.serviceLayerFeature.geometry.coordinates[0].push(pathPoints)
     })
-    console.log(JSON.stringify(this.serviceLayerFeature))
+    //console.log(JSON.stringify(this.serviceLayerFeature))
   }
 
   resumeOrCreateTransaction() {
@@ -62,9 +66,11 @@ class EditServiceLayerController {
         }
       })
       .then((result) => {
+        this.discardChanges = false
         this.currentTransaction = result.data
       })
       .catch((err) => {
+        this.discardChanges = false
         this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
         this.$timeout()
         console.warn(err)
@@ -80,20 +86,24 @@ class EditServiceLayerController {
       return
     }
 
+    this.serviceLayerFeature.attributes.name = this.serviceLayerName
+    this.serviceLayerFeature.attributes.code = this.serviceLayerCode
     // send serviceLayer feature to service
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`,this.serviceLayerFeature)
     .then((result) => {
       // All modifications will already have been saved to the server. Commit the transaction.
-      this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
+      return this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
     })
     .then((result) => {
       // Transaction has been committed, start a new one
+      this.discardChanges = true
       this.currentTransaction = null
       this.createServiceLayerTemplate()
       this.state.recreateTilesAndCache()
       return this.resumeOrCreateTransaction()
     })
     .catch((err) => {
+      this.discardChanges = true
       this.currentTransaction = null
       this.createServiceLayerTemplate()
       this.state.recreateTilesAndCache()
@@ -115,17 +125,18 @@ class EditServiceLayerController {
       closeOnConfirm: true
     }, (deleteTransaction) => {
       if (deleteTransaction) {
-        this.discardChanges = true
         // The user has confirmed that the transaction should be deleted
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
+            this.discardChanges = true
             this.currentTransaction = null
             this.createServiceLayerTemplate()
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
           .catch((err) => {
+            this.discardChanges = true
             this.currentTransaction = null
             this.createServiceLayerTemplate()
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel

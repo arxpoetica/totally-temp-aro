@@ -95,18 +95,24 @@ class aroDrawingManagerController {
     }
   }
 
+  destroyDrawingManager() {
+    this.isEphemralShapes = false
+    this.clearAllShape()
+    this.removeDrawingManager()
+  }
+
   $onInit() {
     this.mapRef = this.$window[this.mapGlobalObjectName]
   }
 
   $onChanges(changes) {
-    if (changes.deleteMapObjects.currentValue) {
-      this.setEphemralShapes()
+    if (this.featureType != 'ephemralShape' && changes.deleteMapObjects.currentValue) {
+      this.destroyDrawingManager()
     }
   }
 
   $onDestroy() {
-    this.setEphemralShapes()
+    this.destroyDrawingManager()
   }
 
 }
