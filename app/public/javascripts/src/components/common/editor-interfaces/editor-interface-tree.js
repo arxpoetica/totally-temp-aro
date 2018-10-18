@@ -35,7 +35,7 @@ class EditorInterfaceTreeController {
   
   getSummeryCount(propVal){
     var summeryCount = 0
-    if ("function" == typeof propVal.getDisplayProperties){
+    if ("undefined" != typeof propVal && "function" == typeof propVal.getDisplayProperties){
       var props = propVal.getDisplayProperties()
       for (var i=0; i<props.length; i++){
         if (props[i].hasOwnProperty('levelOfDetail') && "1" == props[i].levelOfDetail){
