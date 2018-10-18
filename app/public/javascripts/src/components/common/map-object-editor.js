@@ -1,4 +1,5 @@
 import Constants from './constants'
+import WorkflowState from './workflow-state'
 import MapUtilities from './plan/map-utilities'
 import FeatureSelector from '../tiles/feature-selector'
 
@@ -741,7 +742,9 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = locations[0].object_id
       feature.isExistingObject = true
-      feature.is_locked = locations[0].is_locked
+      // A feature is "locked" if the workflow state is LOCKED or INVALIDATED.
+      feature.is_locked = (locations[0].workflow_state & WorkflowState.LOCKED)
+                          || (locations[0].workflow_state & WorkflowState.INVALIDATED)
       
       featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
       .then((result) => {

@@ -1,10 +1,4 @@
-// This should match values in table aro.workflow_state
-const WORKFLOW_STATE = {
-  UNDEFINED: 0,
-  CREATED: 1,
-  LOCKED: 2,
-  INVALIDATED: 4
-}
+import WorkflowState from '../common/workflow-state'
 
 class PointFeatureRenderer {
 
@@ -84,10 +78,10 @@ class PointFeatureRenderer {
     this.renderFeatureLabels(ctx, mapLayer, feature, x + imageWidthBy2, y + imageHeightBy2, entityImage.width, entityImage.height)
     // Draw locked/invalidated overlays if required. The backend currently stores workflow_state as an enum, but
     // they are numbered such that they can be considered as bitfields. So we can have multiple concurrent workflow states in theory.
-    if (feature.properties.workflow_state & WORKFLOW_STATE.LOCKED) {
+    if (feature.properties.workflow_state & WorkflowState.LOCKED) {
       ctx.drawImage(lockOverlayImage, x - 4, y - 4)
     }
-    if (feature.properties.workflow_state & WORKFLOW_STATE.INVALIDATED) {
+    if (feature.properties.workflow_state & WorkflowState.INVALIDATED) {
       ctx.drawImage(invalidatedOverlayImage, x - 4, y + 8)
     }
   }
