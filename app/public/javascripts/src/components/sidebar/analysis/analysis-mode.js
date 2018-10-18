@@ -16,10 +16,9 @@ class AnalysisModeController {
 
     this.expandedAccordionIndex = this.accordions.INPUT
 
-    state.plan
-      .subscribe((plan) => {
-        this.plan = plan
-      })
+    state.plan.subscribe((plan) => {
+      this.plan = plan
+    })
 
     this.zoomTarget = (target) => {
       state.requestSetMapCenter.next({ latitude: target.lat, longitude: target.lng})
@@ -27,16 +26,16 @@ class AnalysisModeController {
 
     this.removeTarget = (target) => {
       $http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: target.map((loc) => loc.id) })
-        .then((response) => {
-          this.state.reloadSelectedLocations()
-        })
+      .then((response) => {
+        this.state.reloadSelectedLocations()
+      })
     }
 
     this.removeServiceArea = (target) => {
       $http.post(`/service_areas/${this.plan.id}/removeServiceAreaTargets`, { serviceAreaIds: target.map((sa) => sa.id) })
-        .then((response) => {
-          this.state.reloadSelectedServiceAreas()
-        })
+      .then((response) => {
+        this.state.reloadSelectedServiceAreas()
+      })
     }
 
     this.validateRunButton = () => {
