@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Construction Sites Controller
-app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http', 'configuration', 'map_tools', 'map_layers', 'MapLayer', 'CustomOverlay', 'tracker', 'optimization', 'state', ($scope, $rootScope, $http, configuration, map_tools, map_layers, MapLayer, CustomOverlay, tracker, optimization, state) => {
+app.controller('construction_sites_controller', ['$scope', '$rootScope', 'map_tools', 'state', ($scope, $rootScope, map_tools, state) => {
   $scope.map_tools = map_tools
   $scope.selected_tool = null
   $scope.available_tools = [
@@ -124,5 +124,6 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', '$http'
 
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
+    .skip(1)
     .subscribe((newValue) => updateMapLayers())
 }])

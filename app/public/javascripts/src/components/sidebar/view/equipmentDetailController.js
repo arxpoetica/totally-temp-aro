@@ -1,14 +1,12 @@
 import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
-import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
 
 class EquipmentDetailController {
   
-	constructor($http, $timeout, state, configuration) {
+	constructor($http, $timeout, state) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.configuration = configuration
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     this.selectedEquipment = ''
@@ -67,9 +65,9 @@ class EquipmentDetailController {
     .then((result) => {
       const equipmentInfo = result.data
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
-        if (this.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
-          this.headerIcon = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
-          this.networkNodeLabel = this.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
+        if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
+          this.headerIcon = this.state.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
+          this.networkNodeLabel = this.state.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].label
         }else{
           // no icon
           this.headerIcon = ''
@@ -113,6 +111,6 @@ class EquipmentDetailController {
   }
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'configuration']
+EquipmentDetailController.$inject = ['$http', '$timeout', 'state']
 
 export default EquipmentDetailController

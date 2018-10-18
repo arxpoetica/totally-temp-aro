@@ -1,4 +1,4 @@
-app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationService', ($rootScope, configuration, uiNotificationService) => {
+app.service('tileDataService', ['uiNotificationService', (uiNotificationService) => {
 
   // IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
   var VectorTile = require('vector-tile').VectorTile
@@ -28,11 +28,9 @@ app.service('tileDataService', ['$rootScope', 'configuration', 'uiNotificationSe
   }, MAX_CONCURRENT_VECTOR_TILE_REQUESTS)
 
   tileDataService.LOCK_ICON_KEY = 'LOCK_ICON'
-  if (configuration.locationCategories && configuration.locationCategories.entityLockIcon) {
-    tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, configuration.locationCategories.entityLockIcon)
+  tileDataService.setLockIcon = (iconUrl) => {
+    tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, iconUrl)
   }
-  // If we get a 'configuration_loaded' event then we should definitely have the entityLockIcon
-  $rootScope.$on('configuration_loaded', () => tileDataService.addEntityImageForLayer(tileDataService.LOCK_ICON_KEY, configuration.locationCategories.entityLockIcon))
 
   tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {

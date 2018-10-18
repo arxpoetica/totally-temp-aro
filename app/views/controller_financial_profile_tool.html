@@ -212,7 +212,7 @@
           </form>
           <form class="form-inline">
             <!-- Checkboxes for business/household/celltower categories -->
-            <div ng-show="!isLoadingConfiguration">
+            <div>
               <div class="checkbox" style="margin-left: 10px" ng-repeat="(entityType, entityName) in entityTypes">
                   <input type="checkbox" class="checkboxfill"
                          ng-model="premisesFilterEntityTypes[entityType]"
@@ -220,17 +220,6 @@
                          ng-change="showPremisesChart(true)"
                   >
                   <span style="padding-left: 5px">{{ entityName }}</span>
-              </div>
-            </div>
-            <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-            <div ng-if="isLoadingConfiguration" class="ng-scope">
-              <div style="vertical-align:middle;line-height:20px;float:left">Loading location categories </div>
-              <div class="spinner" style="margin:0px;height:20px;font-size:14px;float:left">
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-                <div class="rect4"></div>
-                <div class="rect5"></div>
               </div>
             </div>
           </form>
@@ -267,17 +256,6 @@
                 >
                 <span style="padding-left: 5px">{{ entityName }}</span>
             </div>
-            <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-            <div ng-if="isLoadingConfiguration" class="ng-scope">
-              <div style="vertical-align:middle;line-height:20px;float:left">Loading location categories </div>
-              <div class="spinner" style="margin:0px;height:20px;font-size:14px;float:left">
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-                <div class="rect4"></div>
-                <div class="rect5"></div>
-              </div>
-            </div>
           </form>
           <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
           <button ng-click="downloadChart('financial-profile-chart-subscribers')" class="pull-right btn btn-default btn-sm">
@@ -291,17 +269,6 @@
             <div class="radio" ng-repeat="(entityType, entityName) in entityTypes">
               <input id="radio-{{ entityType }}" name="entityType" type="radio" ng-model="penetrationFilter.entityType" ng-change="showPenetrationChart(true)" value="{{entityType}}">
               <label for="radio-{{ entityType }}" class="radio-label">{{ entityName }}</label>
-            </div>
-            <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-            <div ng-if="isLoadingConfiguration" class="ng-scope">
-              <div style="vertical-align:middle;line-height:20px;float:left">Loading location categories </div>
-              <div class="spinner" style="margin:0px;height:20px;font-size:14px;float:left">
-                <div class="rect1"></div>
-                <div class="rect2"></div>
-                <div class="rect3"></div>
-                <div class="rect4"></div>
-                <div class="rect5"></div>
-              </div>
             </div>
           </form>
           <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
@@ -322,17 +289,6 @@
                      ng-change="showOpexRecurringChart(true)"
               >
               <span style="padding-left: 5px">{{ entityName }}</span>
-          </div>
-          <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-          <div ng-if="isLoadingConfiguration" class="ng-scope">
-            <div style="vertical-align:middle;line-height:20px;float:left">Loading location categories </div>
-            <div class="spinner" style="margin:0px;height:20px;font-size:14px;float:left">
-              <div class="rect1"></div>
-              <div class="rect2"></div>
-              <div class="rect3"></div>
-              <div class="rect4"></div>
-              <div class="rect5"></div>
-            </div>
           </div>
         </form>
         <canvas id="financial-profile-chart-opex-recurring" style="width:100%; height:200px"></canvas>

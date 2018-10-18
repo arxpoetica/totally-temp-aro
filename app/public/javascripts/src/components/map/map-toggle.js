@@ -1,15 +1,8 @@
 class MapToggleController {
-  constructor($document, $rootScope, configuration) {
+  constructor($document, state) {
     this.mapRefPromise = null
     this.$document = $document
-    if (configuration.mapType) {
-      // Configuration has already been loaded
-      this.configurationPromise = Promise.resolve(configuration)
-    } else {
-      this.configurationPromise = new Promise((resolve, reject) => {
-        $rootScope.$on('configuration_loaded', () => resolve(configuration))
-      })
-    }
+    this.state = state
     // Hold a map of 'mapTypeId' in state.js to the fontawesome icons
     this.buttonIcons = {
       hybrid: 'fa-globe',
@@ -54,11 +47,10 @@ class MapToggleController {
         .catch((err) => console.log(err))
     } else {
       // Depending upon the user perspective, set the map type on the map object
-      Promise.all([this.mapRefPromise, this.configurationPromise])
-        .then((results) => {
-          const mapRef = results[0]
-          const configuration = results[1]
-          this.currentMapType = configuration.mapType[this.userPerspective] || configuration.mapType.default
+      this.mapRefPromise
+        .then((result) => {
+          const mapRef = result
+          this.currentMapType = this.state.configuration.mapType[this.userPerspective] || this.state.configuration.mapType.default
           mapRef.setMapTypeId(this.currentMapType)
         })
         .catch((err) => console.log(err))
@@ -75,7 +67,7 @@ class MapToggleController {
   }
 }
 
-MapToggleController.$inject = ['$document', '$rootScope', 'configuration']
+MapToggleController.$inject = ['$document', 'state']
 
 let mapToggle = {
   template:'<button class="map-toggle" ng-click="$ctrl.toggle()"><i class="fa {{$ctrl.buttonIcons[$ctrl.currentMapType]}}"></i></button>',

@@ -22,6 +22,7 @@ class FeatureSelector {
             promises.push(res.then((results) => {
                 results[1].deltaXPx = results[0].deltaX * tileSize.width
                 results[1].deltaYPx = results[0].deltaY * tileSize.height
+                results[1].featureFilter = mapLayer.featureFilter
                 return Promise.resolve(results[1])
               })
             )
@@ -43,8 +44,9 @@ class FeatureSelector {
             // Loop through all layers in this result
             Object.keys(layerToFeatures).forEach((layerKey) => {
               var features = layerToFeatures[layerKey]
-              for (var iFeature = 0; iFeature < features.length; ++iFeature) {
-                var feature = features[iFeature]
+              const filteredFeatures = result.featureFilter ? features.filter(result.featureFilter) : features
+              for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
+                var feature = filteredFeatures[iFeature]
                 if (shouldFeatureBeSelected(feature, result.icon, result.deltaXPx, result.deltaYPx)) {
                   //console.log(feature)
                   hitFeatures.push(feature.properties)

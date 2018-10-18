@@ -1,9 +1,8 @@
 class GlobalSettingsController {
 
-  constructor(state, globalSettingsService,configuration, $http) {
+  constructor(state, globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
-    this.configuration = configuration
     this.currentUser = state.loggedInUser
 
     this.views = Object.freeze({
@@ -40,7 +39,7 @@ class GlobalSettingsController {
   }
 }
 
-GlobalSettingsController.$inject = ['state', 'globalSettingsService', 'configuration', '$http']
+GlobalSettingsController.$inject = ['state', 'globalSettingsService']
 
 let globalSettings = {
   templateUrl: '/components/global-settings/global-settings.html',

@@ -1,10 +1,9 @@
 class CoverageBoundaryController {
 
-  constructor($http, $timeout, state, configuration) {
+  constructor($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.configuration = configuration
     this.controlStates = Object.freeze({
       NO_TARGET_SELECTED: 'NO_TARGET_SELECTED',
       COMPUTING: 'COMPUTING',
@@ -102,7 +101,7 @@ class CoverageBoundaryController {
       coordinates: [this.targetMarker.position.lng(), this.targetMarker.position.lat()]
     }
     // Always send radius in meters to the back end
-    optimizationBody.radius = this.coverageRadius * this.configuration.units.length_units_to_meters
+    optimizationBody.radius = this.coverageRadius * this.state.configuration.units.length_units_to_meters
 
     return this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
@@ -146,6 +145,6 @@ class CoverageBoundaryController {
   }
 }
 
-CoverageBoundaryController.$inject = ['$http', '$timeout', 'state', 'configuration']
+CoverageBoundaryController.$inject = ['$http', '$timeout', 'state']
 
 export default CoverageBoundaryController

@@ -70,8 +70,8 @@
        type="button" class="btn btn-default" ng-href='/admin/users/csv'>Download CSV</a>
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"
        type="button" class="btn btn-default" ng-click="$ctrl.globalSettingsService.openSendMailView()">Send email to all users</a>
-    <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users && $ctrl.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
-       type="button" class="btn btn-default" ng-if="$ctrl.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
+    <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users && $ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
+       type="button" class="btn btn-default" ng-if="$ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
        ng-click="$ctrl.globalSettingsService.openNewUserView()">Register a new user</a>
 
     <button ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.SendEmail" type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.sendMail()">Send mail</button>

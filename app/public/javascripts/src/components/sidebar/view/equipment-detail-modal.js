@@ -1,8 +1,7 @@
 class EquipmentDetailModalController {
 
-  constructor(state,configuration) {
+  constructor(state) {
     this.state = state
-    this.configuration = configuration
     this.map_url = null
   
     $('#selected_equipment_modal').on('shown.bs.modal', (e) => {
@@ -20,7 +19,6 @@ class EquipmentDetailModalController {
     
     this.equipment = equipment
 
-    var google_maps_key = this.configuration.google_maps_key
     var coordinates = equipment.geog.coordinates[1] + ',' + equipment.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -29,7 +27,7 @@ class EquipmentDetailModalController {
       scale: 2,         // So we set scale = 2 and size of '434x110'
       maptype: 'roadmap',
       markers: 'color:red|label:E|' + coordinates,
-      key: google_maps_key
+      key: this.state.googleMapsLicensing.API_KEY
     }
     this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
@@ -70,7 +68,7 @@ class EquipmentDetailModalController {
 
 }
 
-EquipmentDetailModalController.$inject = ['state','configuration']
+EquipmentDetailModalController.$inject = ['state']
 
 let equipmentDetailModal = {
   templateUrl: '/components/sidebar/view/equipment-detail-modal.html',

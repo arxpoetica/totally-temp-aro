@@ -2,14 +2,13 @@ import Constants from '../common/constants'
 
 class ToolBarController {
 
-  constructor($element, $timeout,$document ,$http,state, map_tools, $window, configuration) {
+  constructor($element, $timeout,$document ,$http,state, map_tools, $window) {
     this.state = state
     this.$element = $element
     this.$timeout = $timeout
     this.$document = $document
     this.$window = $window
     this.$http = $http
-    this.configuration = configuration
     this.marginPixels = 10  // Margin between the container and the div containing the buttons
     this.dropdownWidthPixels = 36 // The width of the dropdown button
     this.numPreviousCollapsedButtons = 0
@@ -483,7 +482,6 @@ class ToolBarController {
     this.$http.post('/service/v1/network-analysis/p2p', optimizationBody)
     .then((result) => {
       //get copper properties
-      let copperFeatures = this.configuration.networkEquipment.cables['copper']
       var geoJson = {
         "type": "FeatureCollection",
         "features": [{
@@ -538,7 +536,7 @@ class ToolBarController {
 
 }
 
-ToolBarController.$inject = ['$element', '$timeout', '$document','$http' ,'state', 'map_tools', '$window', 'configuration']
+ToolBarController.$inject = ['$element', '$timeout', '$document','$http' ,'state', 'map_tools', '$window']
 
 let toolBar = {
   templateUrl: '/components/header/tool-bar.html',

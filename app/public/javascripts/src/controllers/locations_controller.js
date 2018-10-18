@@ -1,6 +1,6 @@
 /* global app _ config user_id $ map google randomColor tinycolor Chart swal */
 // Locations Controller
-app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', '$timeout','configuration', 'map_tools', 'optimization', 'state', ($scope, $rootScope, $http, $location, $timeout, configuration, map_tools, optimization, state) => {
+app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$location', '$timeout', 'map_tools', 'optimization', 'state', ($scope, $rootScope, $http, $location, $timeout, map_tools, optimization, state) => {
 
   // Get the point transformation mode with the current zoom level
   var getPointTransformForLayer = (zoomThreshold) => {
@@ -56,7 +56,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
             $scope.disablelocations = false
             $timeout()
 
-            if (configuration.perspective.hasLocationFilters) {
+            if (state.configuration.perspective.hasLocationFilters) {
               var hasFiltersSelected = $scope.locationFilters.filter((f)=>{return f.checked}).length > 0
               if (hasFiltersSelected){
                 asGroup()
@@ -223,6 +223,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
 
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
+    .skip(1)
     .subscribe((newValue) => updateMapLayers())
 
   // Update map layers when the selection type in analysis mode changes
@@ -232,11 +233,7 @@ app.controller('locations_controller', ['$scope', '$rootScope', '$http', '$locat
   state.selectedDisplayMode.subscribe((newValue) => updateMapLayers())
 
   $scope.map_tools = map_tools
-
-  // The state.locations object will be updated after the configuration is loaded
   $scope.planState = state;
-  $scope.configuration = configuration
-
   $rootScope.$on('plan_selected', (e, plan) => {
     $scope.plan = plan
     optimization.datasources = []

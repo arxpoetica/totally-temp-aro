@@ -1,10 +1,9 @@
 class LocationDetailController {
 
-  constructor($http, $timeout, state, configuration, locationDetailPropertiesFactory) {
+  constructor($http, $timeout, state, locationDetailPropertiesFactory) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.configuration = configuration
     this.locationDetailPropertiesFactory = locationDetailPropertiesFactory
     this.plan = null
     this.selectedLocationInfo = null
@@ -81,6 +80,7 @@ class LocationDetailController {
           result.data.longitude = result.data.geog.coordinates[0]
           var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
           locationProperties.geog = result.data.geog
+          locationProperties.location_id = result.data.location_id
           return Promise.resolve(locationProperties)
         } else {
           return Promise.reject('You must have either default or sales details shown')
@@ -102,7 +102,6 @@ class LocationDetailController {
     this.selectedLocationInfo = locationInfo
     this.showAttributes = (this.currentUser.perspective === 'sales_engineer' || this.currentUser.perspective === 'account_exec') && !angular.equals(locationInfo.attributes, {})
     
-    var google_maps_key = this.configuration.google_maps_key
     var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -111,7 +110,7 @@ class LocationDetailController {
       scale: 2,
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
-      key: google_maps_key
+      key: this.state.googleMapsLicensing.API_KEY
     }
     this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
@@ -145,7 +144,7 @@ class LocationDetailController {
   }
 }
 
-LocationDetailController.$inject = ['$http', '$timeout', 'state', 'configuration', 'locationDetailPropertiesFactory']
+LocationDetailController.$inject = ['$http', '$timeout', 'state', 'locationDetailPropertiesFactory']
 
 let locationDetail = {
   templateUrl: '/components/sidebar/view/location-detail/location-detail.html',

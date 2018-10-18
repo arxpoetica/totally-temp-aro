@@ -137,7 +137,7 @@
 
   <button class="btn"
           ng-click="$ctrl.openGlobalSettings()"
-          ng-show="$ctrl.configuration.perspective.toolbar.globalSettings.show"
+          ng-show="$ctrl.state.configuration.perspective.toolbar.globalSettings.show"
           data-toggle="tooltip"
           data-placement="bottom"
           title="Global Settings...">
@@ -147,7 +147,7 @@
   <div class="separator"></div>
 
   <button class="btn"
-          ng-show="$ctrl.configuration.perspective.toolbar.emphericalPlan.show"
+          ng-show="$ctrl.state.configuration.perspective.toolbar.emphericalPlan.show"
           ng-click="$ctrl.createEphemeralPlan()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -156,7 +156,7 @@
   </button>
 
   <button class="btn"
-          ng-show="$ctrl.configuration.perspective.toolbar.savePlanAs.show"
+          ng-show="$ctrl.state.configuration.perspective.toolbar.savePlanAs.show"
           ng-click="$ctrl.savePlanAs()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -165,7 +165,7 @@
   </button>
 
   <button class="btn"
-          ng-show="$ctrl.configuration.perspective.toolbar.showPlanModel.show"
+          ng-show="$ctrl.state.configuration.perspective.toolbar.showPlanModel.show"
           ng-click="$ctrl.showPlanModal()"
           data-toggle="tooltip"
           data-placement="bottom"
@@ -174,7 +174,7 @@
   </button>
 
   <button ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
-            $ctrl.configuration.perspective.toolbar.showExportSelection.show &&
+            $ctrl.state.configuration.perspective.toolbar.showExportSelection.show &&
             $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
           ng-click="$ctrl.setSelectionExport()"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET }"
@@ -186,7 +186,7 @@
 
   <div class="separator"></div>
 
-  <div class="rulerDropdown" ng-show="$ctrl.configuration.perspective.toolbar.measuringStick.show">
+  <div class="rulerDropdown" ng-show="$ctrl.state.configuration.perspective.toolbar.measuringStick.show">
     <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.isRulerEnabled }"
       ng-click="$ctrl.rulerAction()"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
@@ -209,7 +209,7 @@
 
   <div class="myDropdown1">
     <button type="button" ng-class="{ 'btn': true, 'btn-selected': $ctrl.isViewSettingsEnabled }"
-            ng-show="$ctrl.configuration.perspective.toolbar.showViewSettings.show"
+            ng-show="$ctrl.state.configuration.perspective.toolbar.viewSettings.show"
       ng-click = "$ctrl.viewSettingsAction()"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
       title="Show view settings...">
@@ -225,7 +225,7 @@
       <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
         style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">
 
-      <div ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.site_boundaries.show">
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteBoundaries">
         <div class="dropdown-divider"></div>
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
                style="margin-left: 2px;">
@@ -237,7 +237,7 @@
         </select>
       </div>
 
-      <div ng-if="$ctrl.configuration.perspective.toolbar.showViewSettings.directed_cable.show">
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showDirectedCable">
         <div class="dropdown-divider"></div>
 
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection()" name="ctype-name"
@@ -245,21 +245,24 @@
         <font>Directed Cable</font>
       </div>
 
-      <div class="dropdown-divider"></div>
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
-        style="margin-left: 2px;">
-      <font>Site Labels</font>
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteLabels">
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
+          style="margin-left: 2px;">
+        <font>Site Labels</font>
+      </div>
 
-      <div class="dropdown-divider"></div>
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
-        style="margin-left: 2px;">
-      <font>Fiber Size</font>
-      <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
-        ng-model="$ctrl.state.viewSetting.selectedFiberOption"
-        ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
-        ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">
-      </select>
-
+      <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showFiberSize">
+        <div class="dropdown-divider"></div>
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
+          style="margin-left: 2px;">
+        <font>Fiber Size</font>
+        <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
+          ng-model="$ctrl.state.viewSetting.selectedFiberOption"
+          ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
+          ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">
+        </select>
+      </div>
     </div>
   </div>
 
@@ -268,7 +271,7 @@
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
                    && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS
-                   && $ctrl.configuration.perspective.toolbar.selectionSingle.show"
+                   && $ctrl.state.configuration.perspective.toolbar.selectionSingle.show"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.SINGLE_PLAN_TARGET }"
           ng-click="$ctrl.setSelectionSingle()"
           data-toggle="tooltip"
@@ -280,7 +283,7 @@
   <button ng-show="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
                    || $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
                    && $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS
-                   && $ctrl.configuration.perspective.toolbar.selectionPolygon.show"
+                   && $ctrl.state.configuration.perspective.toolbar.selectionPolygon.show"
           ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_PLAN_TARGET }"
           ng-click="$ctrl.setSelectionPolygon()"
           data-toggle="tooltip"
@@ -290,7 +293,7 @@
   </button>
 
   <aro-drawing-manager
-    ng-show="$ctrl.configuration.perspective.toolbar.annotationTool.show"
+    ng-show="$ctrl.state.configuration.perspective.toolbar.annotationTool.show"
     map-global-object-name="map"
     drawing-control="true"
     drawing-modes="['polygon','polyline']"
@@ -300,7 +303,7 @@
   <div class="separator"></div>
 
   <button ng-show="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"
-          ng-if="$ctrl.configuration.perspective.toolbar.openCoverageBoundary.show"
+          ng-if="$ctrl.state.configuration.perspective.toolbar.openCoverageBoundary.show"
           ng-class="{ 'btn': true,
                       'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY
                                       && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY

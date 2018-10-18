@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, configuration, map_layers, tracker, map_tools,state) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, map_layers, map_tools,state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -15,13 +15,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
     pointHighlightStroke: 'rgba(77,153,229,1)'
   }
 
-  $scope.isLoadingConfiguration = true;
-  $rootScope.$on('configuration_loaded', function () {
-    $scope.cellTowerLabel = configuration.locationCategories.celltower.label;
-    $scope.isLoadingConfiguration = false;
-  });
-
-
+  $scope.state = state
+  
   $scope.select_random_location = () => {
     var map_layer = map_layers.getFeatureLayer('locations')
     var feature
@@ -67,22 +62,22 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   }
 
   state.plan
-  .subscribe((plan) => {
-    $scope.plan = plan
-  })
+    .subscribe((plan) => {
+      $scope.plan = plan
+    })
 
   state.showDetailedLocationInfo
-  .subscribe((locationInfo) => {
-    if(!locationInfo) return
-    setSelectedLocation(locationInfo)
-    $scope.market_size = null
-    $scope.fair_share = null
-    $scope.calculateMarketSize()
-    .then(() => {
-      $('#selected_location_controller').modal('show')
-      $('#selected_location_market_profile select[multiple]').select2('val', [])
+    .subscribe((locationInfo) => {
+      if(!locationInfo) return
+      setSelectedLocation(locationInfo)
+      $scope.market_size = null
+      $scope.fair_share = null
+      $scope.calculateMarketSize()
+      .then(() => {
+        $('#selected_location_controller').modal('show')
+        $('#selected_location_market_profile select[multiple]').select2('val', [])
+      })
     })
-  })
 
   $('#selected_location_controller').on('shown.bs.modal', (e) => {
     $('#selected_location_controller a[href="#selected_location_customer_profile"]').tab('show')
@@ -109,7 +104,6 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
                           location.business_install_costs * location.number_of_businesses
     $scope.location = location
 
-    var google_maps_key = 'AIzaSyDYjYSshVYlkt2hxjrpqTg31KdMkw-TXSM'
     var coordinates = location.geog.coordinates[1] + ',' + location.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -118,7 +112,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
       scale: 2,         // So we set scale = 2 and size of '434x110'
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
-      key: google_maps_key
+      key: state.googleMapsLicensing.API_KEY
     }
     $scope.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
       _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')

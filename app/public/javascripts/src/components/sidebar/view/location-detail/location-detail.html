@@ -170,7 +170,7 @@
                            is-edit="false">
     </editor-interface-tree>
   </div>
-  <div style="width: 100%; margin-top: 2px; margin-bottom: 6px;" ng-if="$ctrl.configuration.perspective.locationDetails.showAuditLog">
+  <div style="width: 100%; margin-top: 2px; margin-bottom: 6px;" ng-if="$ctrl.state.configuration.perspective.locationDetails.showAuditLog">
     <div class="ei-header" style="padding-top: 0px;" ng-click="$ctrl.toggleAuditLog = !$ctrl.toggleAuditLog">
       <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.toggleAuditLog"></i>
       <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.toggleAuditLog"></i>
@@ -180,14 +180,14 @@
 
   <span ng-if="$ctrl.toggleAuditLog
                && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO
-               && $ctrl.configuration.perspective.locationDetails.showAuditLog">
+               && $ctrl.state.configuration.perspective.locationDetails.showAuditLog">
     <location-audit-log plan-id="$ctrl.plan.id"
                         object-id="$ctrl.selectedLocationObjectId"
                         current-user-id="$ctrl.currentUser.id">
     </location-audit-log>
   </span>
 
-  <div ng-if="$ctrl.configuration.perspective.locationDetails.showMoreInfoButton">
+  <div ng-if="$ctrl.state.configuration.perspective.locationDetails.showMoreInfoButton">
     <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
   </div>
 </div>
