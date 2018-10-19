@@ -78,10 +78,10 @@ class PointFeatureRenderer {
     this.renderFeatureLabels(ctx, mapLayer, feature, x + imageWidthBy2, y + imageHeightBy2, entityImage.width, entityImage.height)
     // Draw locked/invalidated overlays if required. The backend currently stores workflow_state as an enum, but
     // they are numbered such that they can be considered as bitfields. So we can have multiple concurrent workflow states in theory.
-    if (feature.properties.workflow_state_id & WorkflowState.LOCKED) {
+    if (feature.properties.workflow_state_id & WorkflowState.LOCKED.id) {
       ctx.drawImage(lockOverlayImage, x - 4, y - 4)
     }
-    if (feature.properties.workflow_state_id & WorkflowState.INVALIDATED) {
+    if (feature.properties.workflow_state_id & WorkflowState.INVALIDATED.id) {
       ctx.drawImage(invalidatedOverlayImage, x - 4, y + 8)
     }
   }

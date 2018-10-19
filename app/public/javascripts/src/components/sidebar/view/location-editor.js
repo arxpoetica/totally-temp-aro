@@ -1,3 +1,4 @@
+import WorkflowState from '../../common/workflow-state'
 class LocationProperties {
   constructor(isLocked, numberOfLocations = 1) {
     this.locationTypes = ['Household']
@@ -205,7 +206,8 @@ class LocationEditorController {
       attributes: {
         number_of_households: objectProperties.numberOfLocations
       },
-      dataType: 'location'
+      dataType: 'location',
+      workflowState: WorkflowState.CREATED.name
     }
     
     return featureObj
