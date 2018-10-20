@@ -499,8 +499,8 @@ class MapObjectEditorController {
   createPointMapObject(feature, iconUrl) {
     // Create a "point" map object - a marker
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED)
-                          || (feature.workflow_state_id & WorkflowState.INVALIDATED))
+    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id)
+                          || (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
@@ -519,9 +519,9 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     
-    if (!feature.isEditable) {
+    if (!isEditable) {
       mapMarker.setOptions({clickable:false}); //Don't allow right click for locked markers
-      if (feature.workflow_state_id & WorkflowState.LOCKED) {
+      if (feature.workflow_state_id & WorkflowState.LOCKED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
             url: this.state.configuration.locationCategories.entityLockIcon,
@@ -533,7 +533,7 @@ class MapObjectEditorController {
         lockIconOverlay.bindTo('position', mapMarker, 'position')
         this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay 
       }
-      if (feature.workflow_state_id & WorkflowState.INVALIDATED) {
+      if (feature.workflow_state_id & WorkflowState.INVALIDATED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
             url: this.state.configuration.locationCategories.entityInvalidatedIcon,
