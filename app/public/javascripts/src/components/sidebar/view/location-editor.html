@@ -80,7 +80,7 @@
 
       <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
       <div class="disable-sibling-controls"
-           ng-hide="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isLocked">
+           ng-hide="!(($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.LOCKED.id) || ($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].workflowStateId == $ctrl.WorkflowState.INVALIDATED.id))">
         <i class="fa fa-5x fa-lock" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
       </div>
 

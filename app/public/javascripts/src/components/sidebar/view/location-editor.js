@@ -21,6 +21,7 @@ class LocationEditorController {
     this.deletedFeatures = []
     this.currentTransaction = null
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.WorkflowState = WorkflowState
   }
 
   registerObjectDeleteCallback(deleteObjectWithIdCallback) {
