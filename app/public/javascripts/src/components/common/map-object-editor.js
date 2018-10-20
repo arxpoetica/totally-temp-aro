@@ -724,6 +724,7 @@ class MapObjectEditorController {
         if (!feature.object_id 
             || (!this.createdMapObjects.hasOwnProperty(feature.object_id) 
                 && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay')
+                && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_invalidatedIconOverlay')
                 && this.filterFeatureForSelection(feature)
                ) 
           ){
