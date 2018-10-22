@@ -2,11 +2,11 @@
 
   <form>
 
-    <div ng-if="configuration.perspective.competitorNetworks.showCompetitorTypes">
+    <div ng-if="state.configuration.perspective.competitorNetworks.showCompetitorTypes">
       <p><strong>Competitor Types</strong></p>
       <select class="form-control"
-              ng-model="planState.competition.selectedCompetitorType"
-              ng-options="item as item.label for item in planState.competition.allCompetitorTypes"
+              ng-model="state.competition.selectedCompetitorType"
+              ng-options="item as item.label for item in state.competition.allCompetitorTypes"
               ng-change="onCompetitorTypeChanged()">
       </select>
     </div>
@@ -14,11 +14,11 @@
     <br>
     <p><strong>Competitors</strong></p>
     <input type="checkbox" class="checkboxfill"
-           ng-model="planState.competition.useAllCompetitors"
+           ng-model="state.competition.useAllCompetitors"
            ng-change="onUseAllCompetitorsChanged()"
     > Use All Competitors
-    <ui-select multiple ng-model="planState.competition.selectedCompetitors"
-               ng-disabled="planState.competition.useAllCompetitors"
+    <ui-select multiple ng-model="state.competition.selectedCompetitors"
+               ng-disabled="state.competition.useAllCompetitors"
                theme="bootstrap"
                close-on-select="true"
                on-select="onSelectedCompetitorsChanged()"
@@ -27,7 +27,7 @@
         <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $item.fillStyle, opacity: 0.7, 'margin-right':'5px' }"></span>
         {{$item.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-width-300" repeat="competitor in planState.competition.allCompetitors | filter: $select.search">
+      <ui-select-choices class="ui-select-width-300" repeat="competitor in state.competition.allCompetitors | filter: $select.search">
         <div>
           {{competitor.name}}
         </div>
@@ -36,13 +36,13 @@
 
     <br>
     <p><strong>Survey Data</strong></p>
-    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> {{configuration.perspective.competitorNetworks.fiberPlantAlternateLabel  ? 'FCC Form 477': 'NBM'}}
-    <input type="checkbox" class="checkboxfill" ng-model="planState.competition.useGeotelDataSource" ng-change="onDataSourceChanged()" ng-disabled="configuration.perspective.competitorNetworks.disableGeotel"> Geotel
+    <input type="checkbox" class="checkboxfill" ng-model="state.competition.useNBMDataSource" ng-change="onDataSourceChanged()"> {{state.configuration.perspective.competitorNetworks.fiberPlantAlternateLabel  ? 'FCC Form 477': 'NBM'}}
+    <input type="checkbox" class="checkboxfill" ng-model="state.competition.useGeotelDataSource" ng-change="onDataSourceChanged()" ng-disabled="state.configuration.perspective.competitorNetworks.disableGeotel"> Geotel
 
     <br>
     <p><strong>Survey Data</strong></p>
     <input type="checkbox" class="checkboxfill"
-           ng-checked="planState.competition.showCensusBlocks"
+           ng-checked="state.competition.showCensusBlocks"
            ng-click="toggleShowSurveyData()">
     Census Blocks
 
@@ -50,15 +50,15 @@
     <br>
     <p><strong>Fiber Route Data</strong></p>
     <input type="checkbox" class="checkboxfill"
-           ng-checked="planState.competition.showFiberRoutes"
-           ng-disabled="configuration.perspective.competitorNetworks.disableRoutes"
+           ng-checked="state.competition.showFiberRoutes"
+           ng-disabled="state.configuration.perspective.competitorNetworks.disableRoutes"
            ng-click="toggleShowFiberRoutesData()">
     Routes
 
     <br>
     <input type="checkbox" class="checkboxfill"
-           ng-checked="planState.competition.showFiberRoutesBuffer"
-           ng-disabled="configuration.perspective.competitorNetworks.disableRoutesBuffer"
+           ng-checked="state.competition.showFiberRoutesBuffer"
+           ng-disabled="state.configuration.perspective.competitorNetworks.disableRoutesBuffer"
            ng-click="toggleShowFiberRoutesBufferData()">
     Routes Buffer
 
@@ -66,8 +66,8 @@
     <br>
     <p><strong>Rendering</strong></p>
     <select class="form-control"
-            ng-model="planState.competition.selectedRenderingOption"
-            ng-options="item as item.label for item in planState.competition.allRenderingOptions"
+            ng-model="state.competition.selectedRenderingOption"
+            ng-options="item as item.label for item in state.competition.allRenderingOptions"
             ng-change="onRenderingChanged()">
     </select>
     <!-- to test different rendering options -->

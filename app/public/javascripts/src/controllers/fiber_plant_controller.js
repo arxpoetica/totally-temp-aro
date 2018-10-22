@@ -3,7 +3,7 @@
 app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', 'state', 'map_tools', ($scope, $rootScope, $location, state, map_tools) => {
 
   $scope.map_tools = map_tools
-  $scope.planState = state
+  $scope.state = state
 
   // Sliders for testing different rendering modes
   $scope.minAggregatedValue = 0.0

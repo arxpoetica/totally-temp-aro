@@ -1,4 +1,5 @@
 import Constants from './constants'
+import WorkflowState from './workflow-state'
 import MapUtilities from './plan/map-utilities'
 import FeatureSelector from '../tiles/feature-selector'
 
@@ -497,6 +498,9 @@ class MapObjectEditorController {
 
   createPointMapObject(feature, iconUrl) {
     // Create a "point" map object - a marker
+    // The marker is editable if the state is not LOCKED or INVALIDATED
+    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id)
+                          || (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
@@ -510,24 +514,37 @@ class MapObjectEditorController {
         color: "#000000",
         fontSize: "46px"
       }, 
-      draggable: !feature.is_locked, // Allow dragging only if feature is not locked
-      //clickable: !feature.is_locked, // Allow clicking (including right click) only if feature is not locked
+      draggable: isEditable, // Allow dragging only if feature is not locked
       clickable: true, // if it's an icon we can select it then the panel will tell us it's locked
       map: this.mapRef
     })
     
-    if (feature.is_locked) {
+    if (!isEditable) {
       mapMarker.setOptions({clickable:false}); //Don't allow right click for locked markers
-      var lockIconOverlay = new google.maps.Marker({
-        icon: {
-          url: this.state.configuration.locationCategories.entityLockIcon, //,
-          anchor: new google.maps.Point(12, 24)
-        },
-        clickable: false,
-        map: this.mapRef
-      })
-      lockIconOverlay.bindTo('position', mapMarker, 'position')
-      this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay 
+      if (feature.workflow_state_id & WorkflowState.LOCKED.id) {
+        var lockIconOverlay = new google.maps.Marker({
+          icon: {
+            url: this.state.configuration.locationCategories.entityLockIcon,
+            anchor: new google.maps.Point(12, 24)
+          },
+          clickable: false,
+          map: this.mapRef
+        })
+        lockIconOverlay.bindTo('position', mapMarker, 'position')
+        this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay 
+      }
+      if (feature.workflow_state_id & WorkflowState.INVALIDATED.id) {
+        var lockIconOverlay = new google.maps.Marker({
+          icon: {
+            url: this.state.configuration.locationCategories.entityInvalidatedIcon,
+            anchor: new google.maps.Point(12, 8)
+          },
+          clickable: false,
+          map: this.mapRef
+        })
+        lockIconOverlay.bindTo('position', mapMarker, 'position')
+        this.createdMapObjects[`${feature.objectId}_invalidatedIconOverlay`] = lockIconOverlay 
+      }
     }
 
     // Refresh only the tile containing the object and its neighbours (in case the object overlaps onto another tile)
@@ -707,6 +724,7 @@ class MapObjectEditorController {
         if (!feature.object_id 
             || (!this.createdMapObjects.hasOwnProperty(feature.object_id) 
                 && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay')
+                && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_invalidatedIconOverlay')
                 && this.filterFeatureForSelection(feature)
                ) 
           ){
@@ -731,7 +749,6 @@ class MapObjectEditorController {
         type: 'Point',
         coordinates: [event.latLng.lng(), event.latLng.lat()] 
       },
-      is_locked: false,
       isExistingObject: false
     }
     
@@ -741,8 +758,8 @@ class MapObjectEditorController {
       // The map was clicked on, and there was a location under the cursor
       feature.objectId = locations[0].object_id
       feature.isExistingObject = true
-      feature.is_locked = locations[0].is_locked
-      
+      // A feature is "locked" if the workflow state is LOCKED or INVALIDATED.
+      feature.workflow_state_id = locations[0].workflow_state_id
       featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
       .then((result) => {
         var serviceFeature = result.data

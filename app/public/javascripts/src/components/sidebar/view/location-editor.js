@@ -1,9 +1,10 @@
+import WorkflowState from '../../common/workflow-state'
 class LocationProperties {
-  constructor(isLocked, numberOfLocations = 1) {
+  constructor(workflowStateId, numberOfLocations = 1) {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
     this.numberOfLocations = numberOfLocations
-    this.isLocked = isLocked
+    this.workflowStateId = workflowStateId
     this.isDirty = false
   }
 }
@@ -20,6 +21,7 @@ class LocationEditorController {
     this.deletedFeatures = []
     this.currentTransaction = null
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.WorkflowState = WorkflowState
   }
 
   registerObjectDeleteCallback(deleteObjectWithIdCallback) {
@@ -205,22 +207,28 @@ class LocationEditorController {
       attributes: {
         number_of_households: objectProperties.numberOfLocations
       },
-      dataType: 'location'
+      dataType: 'location',
+      workflowState: WorkflowState.CREATED.name
     }
     
     return featureObj
   }
 
   handleObjectCreated(mapObject, usingMapClick, feature) {
-    //if (feature.is_locked) return
     var numberOfLocations = this.lastUsedNumberOfLocations  // use last used number of locations until commit
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
-    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.is_locked, numberOfLocations)
+    this.objectIdToProperties[mapObject.objectId] = new LocationProperties(feature.workflow_state_id, numberOfLocations)
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
-    if (!feature.is_locked) this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+    // The marker is editable if the state is not LOCKED or INVALIDATED
+    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED)
+                          || (feature.workflow_state_id & WorkflowState.INVALIDATED))
+
+    if (isEditable) {
+      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
+    }
     this.$timeout()
   }
 

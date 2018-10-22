@@ -420,9 +420,9 @@ exports.configure = (api, middleware) => {
            l.cb_gid,
            sa.id AS service_area_id,
            l.location_type, 
-         l.number_of_households,
-         lds.data_source_name,
-        l.is_locked,
+           l.number_of_households,
+           lds.data_source_name,
+           l.workflow_state_id,
            b.*
         FROM
           inputs i
@@ -474,7 +474,7 @@ exports.configure = (api, middleware) => {
         COALESCE(bl.service_area_id, sl.service_area_id) AS service_area_id,
         COALESCE(bl.number_of_households, sl.number_of_households) AS number_of_households,
         COALESCE(bl.data_source_name, sl.data_source_name) AS data_source_name,
-        COALESCE(bl.is_locked, sl.is_locked) AS is_locked		
+        COALESCE(bl.workflow_state_id, sl.workflow_state_id) AS workflow_state_id
       FROM service_area_locations sl
       FULL OUTER JOIN boundary_locations bl
           ON bl.location_object_id = sl.object_id
@@ -507,39 +507,39 @@ exports.configure = (api, middleware) => {
       )
       
       SELECT 
-      rl.location_object_id                                                                                     AS "Location Object ID",
-        rl.data_source_name                                                                                             AS "Data Source",
-        rl.number_of_households																					AS "Location Count",
-        rl.location_type                                                                                          AS "Location Type",
-        rl.is_locked AS "Locked",  
+      rl.location_object_id                                                                         AS "Location Object ID",
+        rl.data_source_name                                                                         AS "Data Source",
+        rl.number_of_households																					                            AS "Location Count",
+        rl.location_type                                                                            AS "Location Type",
+        ws.name                                                                                     AS "Location Status",  
         ST_Y(
-            rl.geom)                                                                                              AS "Location Latitude",
+            rl.geom)                                                                                AS "Location Latitude",
         ST_X(
-            rl.geom)                                                                                              AS "Location Longitude",
-        e.site_name                                                                                               AS "Covered-By Site Name",
-        e.site_clli                                                                                               AS "Covered-By Site CLLI",
-        e.object_id                                                                                               AS "Covered-By Site Object ID",
-        sa.name                                                                                                   AS "Wirecenter Name",
-        sa.code                                                                                                   AS "Wirecenter CLLI" ,
-        cb.tabblock_id                                                                                            AS "Census Block" ,
+            rl.geom)                                                                                AS "Location Longitude",
+        e.site_name                                                                                 AS "Covered-By Site Name",
+        e.site_clli                                                                                 AS "Covered-By Site CLLI",
+        e.object_id                                                                                 AS "Covered-By Site Object ID",
+        sa.name                                                                                     AS "Wirecenter Name",
+        sa.code                                                                                     AS "Wirecenter CLLI" ,
+        cb.tabblock_id                                                                              AS "Census Block" ,
         (SELECT description
          FROM aro_core.tag
          WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
                                                      FROM aro_core.category
                                                      WHERE description =
-                                                           'CAF Phase I Part I') :: text) :: int))                AS "CAF Phase I Part I Tag",
+                                                           'CAF Phase I Part I') :: text) :: int))  AS "CAF Phase I Part I Tag",
         (SELECT description
          FROM aro_core.tag
          WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
                                                      FROM aro_core.category
                                                      WHERE description =
-                                                           'CAF Phase I Part II') :: text) :: int))               AS "CAF Phase I Part II Tag",
+                                                           'CAF Phase I Part II') :: text) :: int)) AS "CAF Phase I Part II Tag",
         (SELECT description
          FROM aro_core.tag
          WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
                                                      FROM aro_core.category
                                                      WHERE description =
-                                                           'CAF Phase II') :: text) :: int))                      AS "CAF Phase II Tag" 
+                                                           'CAF Phase II') :: text) :: int))        AS "CAF Phase II Tag" 
                                 
       FROM reconciled_locations rl
       JOIN joiner cb
@@ -549,7 +549,9 @@ exports.configure = (api, middleware) => {
       LEFT JOIN all_boundaries b
         ON rl.boundary_object_id = b.object_id
       LEFT JOIN matched_equipment e
-          ON rl.equipment_object_id = e.object_id          
+        ON rl.equipment_object_id = e.object_id
+      JOIN aro.workflow_state ws
+        ON rl.workflow_state_id = ws.id
     `;
 
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])

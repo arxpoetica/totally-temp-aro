@@ -1,7 +1,9 @@
+import WorkflowState from '../common/workflow-state'
+
 class PointFeatureRenderer {
 
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
-                       selectedLocationImage, lockOverlayImage,
+                       selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
                        selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, selectedLocations, selectedViewFeaturesByType) {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
@@ -74,9 +76,13 @@ class PointFeatureRenderer {
     this.renderModificationOverlay(ctx, x + entityImage.width - overlaySize, y, overlaySize, overlaySize, modificationType)
 
     this.renderFeatureLabels(ctx, mapLayer, feature, x + imageWidthBy2, y + imageHeightBy2, entityImage.width, entityImage.height)
-    // Draw lock overlay if required
-    if (feature.properties.is_locked) {
-      ctx.drawImage(lockOverlayImage[0], x - 4, y - 4)
+    // Draw locked/invalidated overlays if required. The backend currently stores workflow_state as an enum, but
+    // they are numbered such that they can be considered as bitfields. So we can have multiple concurrent workflow states in theory.
+    if (feature.properties.workflow_state_id & WorkflowState.LOCKED.id) {
+      ctx.drawImage(lockOverlayImage, x - 4, y - 4)
+    }
+    if (feature.properties.workflow_state_id & WorkflowState.INVALIDATED.id) {
+      ctx.drawImage(invalidatedOverlayImage, x - 4, y + 8)
     }
   }
 

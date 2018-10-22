@@ -115,6 +115,7 @@ class State {
     PLAN_SUMMARY_REPORTS: 'PLAN_SUMMARY_REPORTS',
     COVERAGE_BOUNDARY: 'COVERAGE_BOUNDARY',
     EDIT_LOCATIONS: 'EDIT_LOCATIONS',
+    EDIT_SERVICE_LAYER: 'EDIT_SERVICE_LAYER',
     PLAN_INFO: 'PLAN_INFO'
   })
   service.activeViewModePanel = service.viewModePanels.LOCATION_INFO
@@ -1564,7 +1565,8 @@ class State {
     }
     service.configuration.loadPerspective(loggedInUser.perspective)
     service.setLoggedInUser(loggedInUser)
-    tileDataService.setLockIcon(service.configuration.locationCategories.entityLockIcon)
+    tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
+    tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
   }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)

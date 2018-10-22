@@ -117,10 +117,21 @@ class DataSelectionController {
     });
   }
 
+  editDataSource(itemKey) {
+    itemKey === 'location' && this.editLocations()
+    itemKey === 'service_layer' && this.editServiceLayer()
+  }
+
   editLocations() {
     // Put the application in "Edit Location" mode
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_LOCATIONS
+  }
+
+  editServiceLayer() {
+    // Put the application in "Edit Service Layer" mode
+    this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+    this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
   }
 }
 
