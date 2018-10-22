@@ -202,7 +202,14 @@ class StateViewMode {
     }
 
     if(entityType === 'ServiceAreaView') {
-      filter = filter ? filter.concat(' and layer/id eq 1') : filter
+      //filter = filter ? filter.concat(' and layer/id eq 1') : filter
+      var selectedServiceLayerLibraries = state.dataItems && state.dataItems.service_layer && state.dataItems.service_layer.selectedLibraryItems
+      if(selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
+      if(libraryItems.length > 0) {
+        //Filter using selected serviceLayer id
+        var layerfilter = libraryItems.map(libraryName => `layer/id eq ${state.nameToServiceLayers[libraryName].id}`).join(" or ")
+        filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
+      }
     }
 
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl

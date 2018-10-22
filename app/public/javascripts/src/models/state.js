@@ -1670,6 +1670,22 @@ class State {
       .catch((err) => console.error(err))
   }
 
+  service.serviceLayers = []
+  service.nameToServiceLayers = {}
+  service.loadServiceLayers = () => {
+    $http.get('/service/odata/ServiceLayer?$select=id,name,description')
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) {
+          service.serviceLayers = response.data
+          service.serviceLayers.forEach((layer) => {
+            service.nameToServiceLayers[layer.name] = layer
+          })
+        }
+      })
+  }
+
+  service.loadServiceLayers()
+
   return service
 //}])
 }

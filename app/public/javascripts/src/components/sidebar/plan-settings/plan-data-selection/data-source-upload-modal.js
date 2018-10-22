@@ -111,6 +111,7 @@ class DataSourceUploadController {
         this.state.dataItems.service_layer.selectedLibraryItems[0] = result
         this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
         this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
+        this.state.loadServiceLayers()
       })
       // Draw the layer by entering edit mode
     } else {
