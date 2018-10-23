@@ -16,7 +16,7 @@ class DataSourceUploadController {
     this.saCreationTypes = [
       {id:"upload_file",label:"Upload From File"},
       {id:"polygon_equipment",label:"Create Polygon From Equipment"},
-      {id:"draw_polygon",label:"Draw Polygon on map"},
+      {id:"draw_polygon",label:"Draw service areas on map"},
     ]
     this.saCreationType
     this.selectedEquipment

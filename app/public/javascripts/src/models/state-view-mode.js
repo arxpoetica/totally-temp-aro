@@ -33,6 +33,7 @@ class StateViewMode {
   static allowViewModeClickAction(state) {
     return (state.selectedDisplayMode.getValue() === state.displayModes.VIEW || state.selectedDisplayMode.getValue() === state.displayModes.EDIT_PLAN) &&
       state.activeViewModePanel !== state.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
+      state.activeViewModePanel !== state.viewModePanels.EDIT_SERVICE_LAYER && 
       !state.isRulerEnabled //ruler mode click should not enable other  view action
   }
 
