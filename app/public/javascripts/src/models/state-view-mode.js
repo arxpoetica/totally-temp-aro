@@ -33,6 +33,7 @@ class StateViewMode {
   static allowViewModeClickAction(state) {
     return (state.selectedDisplayMode.getValue() === state.displayModes.VIEW || state.selectedDisplayMode.getValue() === state.displayModes.EDIT_PLAN) &&
       state.activeViewModePanel !== state.viewModePanels.EDIT_LOCATIONS && //location edit shouldn't perform other action
+      state.activeViewModePanel !== state.viewModePanels.EDIT_SERVICE_LAYER && 
       !state.isRulerEnabled //ruler mode click should not enable other  view action
   }
 
@@ -72,13 +73,38 @@ class StateViewMode {
 
   static loadListOfSAPlanTags($http, state, filterObj) {
     const MAX_SERVICE_AREAS_FROM_ODATA = 10
-    var filter = "layer/id eq 1"
-    filter = filterObj ? filter.concat(` and substringof(nameCode,'${filterObj.toUpperCase()}')`) : filter
+    //var filter = "layer/id eq 1"
+    var libraryItems = []
+    var filter = ""
+
+    var selectedServiceLayerLibraries = state.dataItems && state.dataItems.service_layer && state.dataItems.service_layer.selectedLibraryItems
+    if(selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
+    if(libraryItems.length > 0) {
+      //Filter using selected serviceLayer id
+      var layerfilter = libraryItems.map(libraryName => `layer/id eq ${state.nameToServiceLayers[libraryName].id}`).join(" or ")
+      filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
+    }
+
+    filter = filterObj ? filter.concat(` and (substringof(code,'${filterObj}') or substringof(name,'${filterObj}'))`) : filter
     if (filterObj || state.listOfServiceAreaTags.length == 0) {
-      $http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
+      $http.get(`/service/odata/ServiceAreaView?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
         .then((results) => {
           state.listOfServiceAreaTags = StateViewMode.removeDuplicates(state.listOfServiceAreaTags.concat(results.data), 'id')
         })
+    }
+  }
+
+  static loadListOfSAPlanTagsById($http, state, promises) {
+    if(promises) {
+      return Promise.all(promises)
+        .then((results) => {
+          results.forEach((result) => {
+            //result.data.forEach((serviceArea) => state.listOfServiceAreaTags = StateViewMode.removeDuplicates(state.listOfServiceAreaTags.concat(results.data), 'id'))
+            state.listOfServiceAreaTags = StateViewMode.removeDuplicates(state.listOfServiceAreaTags.concat(result.data), 'id')
+          })
+          return state.listOfServiceAreaTags
+        })
+        .catch((err) => console.error(err))
     }
   }
 
@@ -202,7 +228,14 @@ class StateViewMode {
     }
 
     if(entityType === 'ServiceAreaView') {
-      filter = filter ? filter.concat(' and layer/id eq 1') : filter
+      //filter = filter ? filter.concat(' and layer/id eq 1') : filter
+      var selectedServiceLayerLibraries = state.dataItems && state.dataItems.service_layer && state.dataItems.service_layer.selectedLibraryItems
+      if(selectedServiceLayerLibraries) libraryItems = selectedServiceLayerLibraries.map(selectedLibraryItem => selectedLibraryItem.name)
+      if(libraryItems.length > 0) {
+        //Filter using selected serviceLayer id
+        var layerfilter = libraryItems.map(libraryName => `layer/id eq ${state.nameToServiceLayers[libraryName].id}`).join(" or ")
+        filter = filter ? filter.concat(` and (${layerfilter})`) : `${layerfilter}`
+      }
     }
 
     entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
