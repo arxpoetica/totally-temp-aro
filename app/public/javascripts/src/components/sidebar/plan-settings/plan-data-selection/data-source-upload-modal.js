@@ -16,7 +16,7 @@ class DataSourceUploadController {
     this.saCreationTypes = [
       {id:"upload_file",label:"Upload From File"},
       {id:"polygon_equipment",label:"Create Polygon From Equipment"},
-      {id:"draw_polygon",label:"Draw Polygon on map"},
+      {id:"draw_polygon",label:"Draw service areas on map"},
     ]
     this.saCreationType
     this.selectedEquipment
@@ -111,6 +111,7 @@ class DataSourceUploadController {
         this.state.dataItems.service_layer.selectedLibraryItems[0] = result
         this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
         this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
+        this.state.loadServiceLayers()
       })
       // Draw the layer by entering edit mode
     } else {

@@ -1,4 +1,4 @@
-class EditServiceLayerController {
+class CreateServiceLayerController {
   
   constructor($http,$timeout,state,Utils) {
     this.$http = $http
@@ -154,11 +154,11 @@ class EditServiceLayerController {
 
 }
   
-EditServiceLayerController.$inject = ['$http','$timeout','state','Utils']
+CreateServiceLayerController.$inject = ['$http','$timeout','state','Utils']
 
-let editServiceLayer = {
-  templateUrl: '/components/sidebar/plan-editor/edit-service-layer.html',
-  controller: EditServiceLayerController
+let createServiceLayer = {
+  templateUrl: '/components/sidebar/plan-editor/create-service-layer.html',
+  controller: CreateServiceLayerController
 }
 
-export default editServiceLayer
+export default createServiceLayer
