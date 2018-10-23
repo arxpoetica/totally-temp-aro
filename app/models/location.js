@@ -651,17 +651,13 @@ module.exports = class Location {
         businesses.id,
         businesses.industry_id,
         businesses.name,
-        -- For ARO-Sales tiles, we are storing the number of employees in attributes->'original_employees',
-        -- and setting the aro.businesses.number_of_employees column to 2.
-        -- If the attribute is present use it. Else, use the proper number_of_employees column
-        COALESCE(CAST(businesses.attributes->'original_employees' AS INTEGER), businesses.number_of_employees) as number_of_employees,
+        businesses.number_of_employees,
         businesses.address,
         costs.install_cost::float,
         costs.annual_recurring_cost::float,
         industries.description AS industry_description,
         ct.name as customer_type,
-        bs.size_name,
-        attributes->'original_employees'
+        bs.size_name
       FROM
         aro.businesses businesses
       LEFT JOIN client.business_install_costs costs
@@ -673,10 +669,7 @@ module.exports = class Location {
       LEFT JOIN client.customer_types ct
         ON ct.id = bct.customer_type_id
       LEFT JOIN client.businesses_sizes bs
-      -- For ARO-Sales tiles, we are storing the number of employees in attributes->'original_employees',
-      -- and setting the aro.businesses.number_of_employees column to 2.
-      -- If the attribute is present use it. Else, use the proper number_of_employees column
-        ON COALESCE(CAST(businesses.attributes->'original_employees' AS INTEGER), businesses.number_of_employees) >= bs.min_value AND COALESCE(CAST(businesses.attributes->'original_employees' AS INTEGER), businesses.number_of_employees) <= bs.max_value
+        ON businesses.number_of_employees >= bs.min_value AND businesses.number_of_employees <= bs.max_value
       WHERE
         location_id = $1
     `
