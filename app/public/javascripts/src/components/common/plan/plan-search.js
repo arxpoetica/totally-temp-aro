@@ -52,11 +52,9 @@ class PlanSearchController {
       promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
-    return Promise.all(promises)
-    .then((results) => {
-      results.forEach((result) => {
-        result.data.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
-      })
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http,this.state,promises)
+    .then((result) => {
+      result.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
       this.$timeout()
     })
     .catch((err) => console.error(err))
