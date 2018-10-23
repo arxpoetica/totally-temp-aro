@@ -35,13 +35,13 @@
       "show": true,
       "showIcon": true,
       "label": "Small Businesses",
-      "tileDefinition": {
+      "tileDefinitions": [{
         "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
         "libraryId": "${libraryId}",
         "locationEntityType": "small",
         "transformType": "${tilePointTransform}"
-      },
+      }],
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/businesses_small_default.png",
       "zIndex": 6560,
@@ -55,13 +55,13 @@
       "show": true,
       "showIcon": true,
       "label": "Medium Businesses",
-      "tileDefinition": {
+      "tileDefinitions": [{
         "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
         "libraryId": "${libraryId}",
         "locationEntityType": "medium",
         "transformType": "${tilePointTransform}"
-      },
+      }],
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/businesses_medium_default.png",
       "zIndex": 6570,
@@ -75,13 +75,13 @@
       "show": true,
       "showIcon": true,
       "label": "Large Businesses",
-      "tileDefinition": {
+      "tileDefinitions": [{
         "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
         "libraryId": "${libraryId}",
         "locationEntityType": "large",
         "transformType": "${tilePointTransform}"
-      },
+      }],
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/businesses_large_default.png",
       "zIndex": 6580,
@@ -95,13 +95,13 @@
       "show": true,
       "showIcon": true,
       "label": "Residential",
-      "tileDefinition": {
+      "tileDefinitions": [{
         "dataId": "v1.tiles.locations.${libraryId}.household.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
         "libraryId": "${libraryId}",
         "locationEntityType": "household",
         "transformType": "${tilePointTransform}"
-      },
+      }],
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/households_default.png",
       "zIndex": 6500,
@@ -115,13 +115,13 @@
       "show": true,
       "showIcon": true,
       "label": "Cell Sites",
-      "tileDefinition": {
+      "tileDefinitions": [{
         "dataId": "v1.tiles.locations.${libraryId}.celltower.${tilePointTransform}.entity",
         "vtlType": "LocationLayer",
         "libraryId": "${libraryId}",
         "locationEntityType": "celltower",
         "transformType": "${tilePointTransform}"
-      },
+      }],
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tower.png",
       "zIndex": 6590,
@@ -135,13 +135,29 @@
       "show": true,
       "showIcon": false,
       "label": "Ethernet Lit Buildings",
-      "tileDefinition": {
-        "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
-        "vtlType": "LocationLayer",
-        "libraryId": "${libraryId}",
-        "locationEntityType": "small",
-        "transformType": "${tilePointTransform}"
-      },
+      "tileDefinitions": [
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "small",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "medium",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "large",
+          "transformType": "${tilePointTransform}"
+        }
+      ],
       "isSalesTile": true,
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/ethernet_lit_building.png",
@@ -156,13 +172,29 @@
       "show": true,
       "showIcon": false,
       "label": "Fiber Lit Buildings",
-      "tileDefinition": {
-        "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
-        "vtlType": "LocationLayer",
-        "libraryId": "${libraryId}",
-        "locationEntityType": "small",
-        "transformType": "${tilePointTransform}"
-      },
+      "tileDefinitions": [
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "small",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "medium",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "large",
+          "transformType": "${tilePointTransform}"
+        }
+      ],
       "isSalesTile": true,
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/lit_building.png",
@@ -177,13 +209,29 @@
       "show": true,
       "showIcon": false,
       "label": "DNB Tier 1",
-      "tileDefinition": {
-        "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
-        "vtlType": "LocationLayer",
-        "libraryId": "${libraryId}",
-        "locationEntityType": "small",
-        "transformType": "${tilePointTransform}"
-      },
+      "tileDefinitions": [
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "small",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "medium",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "large",
+          "transformType": "${tilePointTransform}"
+        }
+      ],
       "isSalesTile": true,
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_1.png",
@@ -198,13 +246,29 @@
       "show": true,
       "showIcon": false,
       "label": "DNB Tier 2",
-      "tileDefinition": {
-        "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
-        "vtlType": "LocationLayer",
-        "libraryId": "${libraryId}",
-        "locationEntityType": "small",
-        "transformType": "${tilePointTransform}"
-      },
+      "tileDefinitions": [
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "small",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "medium",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "large",
+          "transformType": "${tilePointTransform}"
+        }
+      ],
       "isSalesTile": true,
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_2.png",
@@ -219,13 +283,29 @@
       "show": true,
       "showIcon": false,
       "label": "DNB Tier 3",
-      "tileDefinition": {
-        "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
-        "vtlType": "LocationLayer",
-        "libraryId": "${libraryId}",
-        "locationEntityType": "small",
-        "transformType": "${tilePointTransform}"
-      },
+      "tileDefinitions": [
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.small.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "small",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.medium.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "medium",
+          "transformType": "${tilePointTransform}"
+        },
+        {
+          "dataId": "v1.tiles.locations.${libraryId}.large.${tilePointTransform}.entity",
+          "vtlType": "LocationLayer",
+          "libraryId": "${libraryId}",
+          "locationEntityType": "large",
+          "transformType": "${tilePointTransform}"
+        }
+      ],
       "isSalesTile": true,
       "aggregateZoomThreshold": "15",
       "iconUrl": "/images/map_icons/aro/tier_3.png",
