@@ -144,7 +144,7 @@ class MapObjectEditorController {
     
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
       // ToDo: this should be in plan-editor 
-      if ('equipment' == this.featureType){// we're editing a equipment and eqipment bounds NOT locations
+      if ('equipment' == this.featureType || 'serviceArea' == this.featureType){// we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
         this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
       }
@@ -215,6 +215,7 @@ class MapObjectEditorController {
     hitFeatures['latLng'] = latLng
     if ('location' == this.featureType) hitFeatures['locations'] = [feature]
     if ('equipment' == this.featureType) hitFeatures['equipmentFeatures'] = [feature]
+    if ('serviceArea' == this.featureType)  hitFeatures['serviceAreas'] = [feature]
     
     this.state.mapFeaturesSelectedEvent.next(hitFeatures)
   }
@@ -362,7 +363,78 @@ class MapObjectEditorController {
           this.openContextMenu(x, y)
         }
       })
-    }else if('location' == this.featureType){
+    } else if ('serviceArea' == this.featureType) {
+
+      this.getFeaturesAtPoint(latLng)
+        .then((results) => {
+
+          // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+          // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          if (clickedMapObject) {
+            var clickedFeature = {
+              _data_type: 'service_layer',
+              object_id: clickedMapObject.objectId,
+              is_deleted: false
+            }
+            results.push(clickedFeature)
+          }
+
+          var menuItems = []
+          var menuItemsById = {}
+
+          results.forEach((result) => {
+            //populate context menu aray here
+            // we may need different behavour for different controllers using this
+            var options = []
+            var dataTypeList = this.getDataTypeList(result)
+            if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
+            var validFeature = false
+
+            // have we already added this one?
+            if ('service_layer' == dataTypeList[0]
+              && !menuItemsById.hasOwnProperty(result.objectId)) {
+              validFeature = true
+            }
+
+            if (validFeature) {
+              var feature = result
+              if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
+                // it's on the edit layer / in the transaction
+                feature = this.createdMapObjects[result.objectId].feature
+                options.push('select')// select 
+                options.push('edit service area')
+                options.push('delete')
+              } else {
+                options.push('edit existing')
+              }
+
+              var name = ''
+              if ('service_layer' == dataTypeList[0]) {
+                name = 'Service Area - ' + result.code //'Service Area'
+              } else {
+                name = dataTypeList[1]
+              }
+
+              menuItemsById[result.objectId] = options
+              menuItems.push({
+                'objectId': result.objectId,
+                'options': options,
+                'dataTypeList': dataTypeList,
+                'name': name,
+                'feature': feature,
+                'latLng': latLng
+              })
+            }
+          })
+
+          this.menuItems = menuItems
+          if (menuItems.length <= 0) {
+            this.closeContextMenu()
+          } else {
+            this.openContextMenu(x, y)
+          }
+        })
+    } else if('location' == this.featureType){
       this.menuItems = [{
         'objectId': this.selectedMapObject.objectId, 
         'options': ['delete'], 
@@ -946,6 +1018,7 @@ class MapObjectEditorController {
         //mapObject.label: 
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
+        mapObject.setEditable(true)
       }
     } else {
       //when deselected object close drop down if open

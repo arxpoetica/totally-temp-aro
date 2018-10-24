@@ -105,12 +105,16 @@ class EditServiceLayerController {
     return false
   }
 
+  handleObjectDeleted(mapObject) {
+    this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
+  }
+
   $onChanges(changesObj) {
     if (changesObj.currentTransaction) {}
   }
 
   $onDestroy() {
-    this.mapFeaturesSelectedEventObserver.unsubscribe();
+    this.mapFeaturesSelectedEventObserver && this.mapFeaturesSelectedEventObserver.unsubscribe();
   }
 
 }
