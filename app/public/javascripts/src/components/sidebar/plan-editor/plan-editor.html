@@ -350,7 +350,10 @@
           
           <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
             <div class="ei-header plan-editor-coverage-header">
-              Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
+              Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].totalCount}} 
+              <!-- 
+              | {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
+              -->
             </div>
             <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
             <div style="margin-bottom: 20px;">
