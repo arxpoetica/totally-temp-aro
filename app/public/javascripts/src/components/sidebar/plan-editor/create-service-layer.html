@@ -4,6 +4,7 @@
   <div class="text-center">
     <div class="btn-group ">
       <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+      <button class="btn btn-default" ng-click="$ctrl.commitTransactionChanges()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit1</button>      
       <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
     </div>
   </div>
@@ -40,5 +41,10 @@
       </td>
     </tr>
   </table>
+
+  <edit-service-layer 
+    map-global-object-name="map" 
+    current-transaction="$ctrl.currentTransaction">
+  </edit-service-layer>
 
 </div>

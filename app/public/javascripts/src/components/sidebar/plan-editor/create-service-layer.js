@@ -113,6 +113,27 @@ class CreateServiceLayerController {
     })
   }
 
+  commitTransactionChanges() {
+    this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
+    .then((result) => {
+      // Transaction has been committed, start a new one
+      this.discardChanges = true
+      this.currentTransaction = null
+      this.createServiceLayerTemplate()
+      this.state.recreateTilesAndCache()
+      return this.resumeOrCreateTransaction()
+    })
+    .catch((err) => {
+      this.discardChanges = true
+      this.currentTransaction = null
+      this.createServiceLayerTemplate()
+      this.state.recreateTilesAndCache()
+      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+      this.$timeout()
+      console.error(err)
+    })
+  }
+
   discardTransaction() {
     swal({
       title: 'Delete transaction?',
