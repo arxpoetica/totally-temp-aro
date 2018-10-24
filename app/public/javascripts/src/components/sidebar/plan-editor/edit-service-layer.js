@@ -7,23 +7,7 @@ class EditServiceLayerController {
     this.$timeout = $timeout
     this.state = state
     this.utils = Utils
-
-    this.polygonOptions = {
-      strokeColor: '#FF1493',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4,
-    }
-
-    this.selectedPolygonOptions = {
-      strokeColor: '#000000',
-      strokeOpacity: 0.8,
-      strokeWeight: 3,
-      fillColor: '#FF1493',
-      fillOpacity: 0.4,
-    }
-
+    
     this.createdMapObjects = {}
     this.objectIdToMapObject = {}
     this.selectedMapObject = null
@@ -93,12 +77,6 @@ class EditServiceLayerController {
       }
     }
     return serviceFeature
-  }
-
-  onModifyMapObject(mapObject) {
-    var serviceLayerFeature = this.formatServiceLayerForService(mapObject)
-    this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
-    .catch((err) => console.error(err))
   }
 
   isBoundaryCreationAllowed(mapObject){
