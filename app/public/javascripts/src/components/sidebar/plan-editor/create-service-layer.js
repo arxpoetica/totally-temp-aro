@@ -77,43 +77,26 @@ class CreateServiceLayerController {
       })
   }
 
-  commitTransaction() {
+  saveTransaction() {
     if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
-    if (this.serviceLayerFeature.geometry.coordinates[0].length <= 0) {
-      console.error('Service Layer Not Drawn. We should never be in this state. Aborting commit...')
-      return
-    }
 
-    this.serviceLayerFeature.attributes.name = this.serviceLayerName
-    this.serviceLayerFeature.attributes.code = this.serviceLayerCode
-    // send serviceLayer feature to service
-    this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`,this.serviceLayerFeature)
-    .then((result) => {
-      // All modifications will already have been saved to the server. Commit the transaction.
-      return this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
-    })
-    .then((result) => {
-      // Transaction has been committed, start a new one
-      this.discardChanges = true
-      this.currentTransaction = null
-      this.createServiceLayerTemplate()
-      this.state.recreateTilesAndCache()
-      return this.resumeOrCreateTransaction()
-    })
-    .catch((err) => {
-      this.discardChanges = true
-      this.currentTransaction = null
-      this.createServiceLayerTemplate()
-      this.state.recreateTilesAndCache()
-      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-      this.$timeout()
-      console.error(err)
-    })
+    if (this.serviceLayerFeature.geometry.coordinates[0].length > 0) {
+      this.serviceLayerFeature.attributes.name = this.serviceLayerName
+      this.serviceLayerFeature.attributes.code = this.serviceLayerCode
+      // send serviceLayer feature to service
+      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`,this.serviceLayerFeature)
+      .then((result) => {
+        // All modifications will already have been saved to the server. Commit the transaction.
+        this.commitTransaction()
+      })
+    } else {
+      this.commitTransaction()
+    }
   }
 
-  commitTransactionChanges() {
+  commitTransaction() {
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
     .then((result) => {
       // Transaction has been committed, start a new one
