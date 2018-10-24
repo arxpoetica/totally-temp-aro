@@ -330,12 +330,49 @@ class TileComponentController {
                                                          MapUtilities.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-
+    
+    // FOR TEST 
+    this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
+      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS) return
+      console.log("rightclick")
+      
+      this.getFeaturesUnderLatLng(event.latLng)
+      .then((hitFeatures) => {
+        console.log(hitFeatures)
+        /*
+        if (hitFeatures){
+          if (hitFeatures.locations.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures.locations)
+          }
+          
+          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        }
+        */
+      })
+    })
+    
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
+      this.getFeaturesUnderLatLng(event.latLng)
+      .then((hitFeatures) => {
+        //console.log(hitFeatures)
+        if (hitFeatures){
+          if (hitFeatures.locations.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures.locations)
+          }
+          
+          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        }
+      })
+    })
 
+    this.getFeaturesUnderLatLng = function(latLng){
       // Get latitiude and longitude
-      var lat = event.latLng.lat()
-      var lng = event.latLng.lng()
+      var lat = latLng.lat()
+      var lng = latLng.lng()
 
       // Get zoom
       var zoom = this.mapRef.getZoom()
@@ -344,7 +381,7 @@ class TileComponentController {
 
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
       var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-      FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+      return FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
                                           this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
                                           clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
@@ -398,7 +435,7 @@ class TileComponentController {
         })
         
         var hitFeatures = { 
-          latLng: event.latLng,
+          latLng: latLng,
           locations: locationFeatures,
           serviceAreas: serviceAreaFeatures,
           analysisAreas: analysisAreaFeatures,
@@ -407,6 +444,8 @@ class TileComponentController {
           censusFeatures: censusFeatures
         }
         
+        return hitFeatures
+        /*
         //console.log(hitFeatures)
         
         if (locationFeatures.length > 0) {
@@ -416,9 +455,14 @@ class TileComponentController {
         //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
         // ToDo: now that we have types these categories should to be dynamic
         this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        // */
       })
-      .catch((err) => console.error(err))
-    })
+      .catch((err) => {
+        console.error(err)
+      })
+    }
+    
+    
     
   }
 
@@ -428,7 +472,12 @@ class TileComponentController {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
     }
-
+    
+    if (this.overlayRightclickListener) {
+      google.maps.event.removeListener(this.overlayRightclickListener)
+      this.overlayRightclickListener = null
+    }
+    
     this.mapRef.overlayMapTypes.clear()
   }
 
