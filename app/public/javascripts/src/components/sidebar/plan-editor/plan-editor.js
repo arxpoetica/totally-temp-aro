@@ -1235,9 +1235,15 @@ class PlanEditorController {
   }
 
   setSelectedMapObjectLoc() {
-    var isValid = TileUtilities.isValidLatLong(+this.selectedMapObjectLat,+this.selectedMapObjectLng)
+    var isValid = TileUtilities.isValidLatLong(this.selectedMapObjectLat,this.selectedMapObjectLng)
     if(!isValid) return  
-    this.selectedMapObject.setPosition({ lat: +this.selectedMapObjectLat, lng: +this.selectedMapObjectLng })
+    console.log("In setSelectedMapObjectLoc")
+    //this.selectedMapObject.setPosition({ lat: this.selectedMapObjectLat, lng: this.selectedMapObjectLng })
+    console.log("selectedMapObjectLat: " + this.selectedMapObjectLat + ", selectedMapObjectLng: " + this.selectedMapObjectLng)        
+    var position = new google.maps.LatLng(this.selectedMapObjectLat,this.selectedMapObjectLng)
+    console.log("positionlat: " + position.lat() + ", positionlng: " + position.lng())
+    this.selectedMapObject.setPosition(position)
+    console.log("lat: " + this.selectedMapObject.position.lat() + ", lng: " + this.selectedMapObject.position.lng())
     this.handleObjectModified(this.selectedMapObject) 
   }
 
