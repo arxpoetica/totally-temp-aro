@@ -223,8 +223,8 @@ class LocationEditorController {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED)
-                          || (feature.workflow_state_id & WorkflowState.INVALIDATED))
+    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id)
+                          || (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
 
     if (isEditable) {
       this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
