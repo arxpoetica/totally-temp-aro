@@ -134,10 +134,10 @@ class State {
   // }
 
   service.routingModes = {
-    DIRECT_ROUTING: 'Direct Routing',
-    ODN_1: 'Hub-only split',
-    ODN_2: 'Hub-distribution split',
-    ODN_3: 'Hybrid split'
+    DIRECT_ROUTING: {id: 'DIRECT_ROUTING', label: 'Direct Routing'},
+    ODN_1: {id: 'ODN_1', label: 'Hub-only split'},
+    ODN_2: {id: 'ODN_2', label: 'Hub-distribution split'},
+    ODN_3: {id: 'ODN_3', label: 'Hybrid split'}
   }
 
   // Optimization options - initialize once
@@ -145,7 +145,7 @@ class State {
     uiAlgorithms: [],
     uiSelectedAlgorithm: null,
     networkConstraints: {
-      routingMode: 'DIRECT_ROUTING',
+      routingMode: service.routingModes.DIRECT_ROUTING.id,
       cellNodeConstraints: {
         cellRadius: 300.0,
         cellGranularityRatio: 0.5,
@@ -1238,27 +1238,58 @@ class State {
     })
   }
 
+  var checkToDisplayPopup = function () {
+    return new Promise((resolve, reject) => {
+      var locationTypes = angular.copy(service.locationTypes.getValue())
+      var isHouseholdSelected = locationTypes.filter((locationType) => locationType.key === 'household')[0].checked
+      
+      if(isHouseholdSelected && service.optimizationOptions.networkConstraints.routingMode == service.routingModes.DIRECT_ROUTING.id) {
+        swal({
+          title: '',
+          text: 'Are you sure you wish to proceed with direct routing given that households are selected?',
+          type: 'warning',
+          confirmButtonColor: '#DD6B55',
+          confirmButtonText: 'Yes',
+          showCancelButton: true,
+          cancelButtonText: 'No',
+          closeOnConfirm: true
+        }, (confirmClicked) => {
+          resolve(confirmClicked)
+        })
+      } else {
+        resolve(true)        
+      }
+    })
+  }
+
   service.runOptimization = () => {
     
-    service.clearTileCachePlanOutputs()
-    tileDataService.markHtmlCacheDirty()
-    service.requestMapLayerRefresh.next(null)
-
-    // Get the optimization options that we will pass to the server
-    var optimizationBody = service.getOptimizationBody()
-    // Make the API call that starts optimization calculations on aro-service
-    var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
-    apiUrl += `?userId=${service.loggedInUser.id}`
-    $http.post(apiUrl, optimizationBody)
-      .then((response) => {
-        //console.log(response)
-        if (response.status >= 200 && response.status <= 299) {
-          service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
-          service.startPolling()
-        } else {
-          console.error(response)
-        }
-      })
+    checkToDisplayPopup()
+    .then((result) => {
+      if(result) {
+        service.clearTileCachePlanOutputs()
+        tileDataService.markHtmlCacheDirty()
+        service.requestMapLayerRefresh.next(null)
+    
+        // Get the optimization options that we will pass to the server
+        var optimizationBody = service.getOptimizationBody()
+        // Make the API call that starts optimization calculations on aro-service
+        var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
+        apiUrl += `?userId=${service.loggedInUser.id}`
+        $http.post(apiUrl, optimizationBody)
+          .then((response) => {
+            //console.log(response)
+            if (response.status >= 200 && response.status <= 299) {
+              service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
+              service.startPolling()
+            } else {
+              console.error(response)
+            }
+          })
+      } else {
+        return
+      }
+    })
   }
 
   service.planOptimization = new Rx.BehaviorSubject(null)
@@ -1351,7 +1382,7 @@ class State {
         networkTypes: [
           "Fiber"
         ],
-        routingMode: "DIRECT_ROUTING"
+        routingMode: service.routingModes.DIRECT_ROUTING.id
       },
       optimization: {
         algorithmType: "DEFAULT",
