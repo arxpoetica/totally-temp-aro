@@ -688,7 +688,7 @@ class MapObjectEditorController {
 
   createMultiPolygonMapObject(feature) {
     // Create a "polygon" map object
-    //this.tileDataService.addFeatureToExclude(feature.objectId)
+    this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
     feature.geometry.coordinates[0][0].forEach((polygonVertex) => {
       polygonPath.push({

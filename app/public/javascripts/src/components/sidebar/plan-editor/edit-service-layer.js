@@ -38,9 +38,19 @@ class EditServiceLayerController {
   }
 
   handleSelectedObjectChanged(mapObject) {
-    if (null == this.currentTransaction) return    
+    if (null == this.currentTransaction) return   
+    if (null != mapObject){
+      this.updateSelectedState(mapObject)
+    } 
     this.selectedMapObject = mapObject
     this.$timeout()
+  }
+
+  updateSelectedState(selectedFeature){
+    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+    selectedViewFeaturesByType['serviceAreas'] = {}
+    if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.serviceAreas[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature      
+    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
   }
 
   handleObjectModified(mapObject) {
