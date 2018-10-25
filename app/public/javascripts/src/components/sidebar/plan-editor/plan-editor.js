@@ -11,10 +11,11 @@ import TileUtilities from '../../tiles/tile-utilities.js'
 
 class PlanEditorController {
 
-  constructor($timeout, $http, $element, state, Utils, tileDataService, tracker) {
+  constructor($timeout, $http, $element, $filter, state, Utils, tileDataService, tracker) {
     this.$timeout = $timeout
     this.$http = $http
     this.$element = $element
+    this.$filter = $filter
     this.state = state
     this.utils = Utils
     this.tileDataService = tileDataService
@@ -977,8 +978,10 @@ class PlanEditorController {
     }
     
     this.selectedMapObject = mapObject
-    this.selectedMapObjectLat = mapObject && mapObject.position && mapObject.position.lat()
-    this.selectedMapObjectLng = mapObject && mapObject.position && mapObject.position.lng()
+    var lat = mapObject && mapObject.position && mapObject.position.lat()
+    var lng = mapObject && mapObject.position && mapObject.position.lng()
+    this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
+    this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
     
     // debug
     //console.log(this.selectedMapObject)
@@ -993,10 +996,14 @@ class PlanEditorController {
     this.$timeout()
   }
 
-  handleObjectModified(mapObject) {
+  handleObjectModified(mapObject,isManualEdit) {
     if (this.isMarker(mapObject)) {
-      this.selectedMapObjectLat = mapObject && mapObject.position && mapObject.position.lat()
-      this.selectedMapObjectLng = mapObject && mapObject.position && mapObject.position.lng()
+      if(!isManualEdit) {
+        var lat = mapObject && mapObject.position && mapObject.position.lat()
+        var lng = mapObject && mapObject.position && mapObject.position.lng()
+        this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
+        this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
+      }
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       .then((result) => {
@@ -1238,14 +1245,10 @@ class PlanEditorController {
   setSelectedMapObjectLoc() {
     var isValid = TileUtilities.isValidLatLong(this.selectedMapObjectLat,this.selectedMapObjectLng)
     if(!isValid) return  
-    console.log("In setSelectedMapObjectLoc")
     //this.selectedMapObject.setPosition({ lat: this.selectedMapObjectLat, lng: this.selectedMapObjectLng })
-    console.log("selectedMapObjectLat: " + this.selectedMapObjectLat + ", selectedMapObjectLng: " + this.selectedMapObjectLng)        
     var position = new google.maps.LatLng(this.selectedMapObjectLat,this.selectedMapObjectLng)
-    console.log("positionlat: " + position.lat() + ", positionlng: " + position.lng())
     this.selectedMapObject.setPosition(position)
-    console.log("lat: " + this.selectedMapObject.position.lat() + ", lng: " + this.selectedMapObject.position.lng())
-    this.handleObjectModified(this.selectedMapObject) 
+    this.handleObjectModified(this.selectedMapObject,true) 
   }
 
   $doCheck() {
@@ -1267,7 +1270,7 @@ class PlanEditorController {
   }
 }
 
-PlanEditorController.$inject = ['$timeout', '$http', '$element', 'state', 'Utils', 'tileDataService', 'tracker']
+PlanEditorController.$inject = ['$timeout', '$http', '$element', '$filter','state', 'Utils', 'tileDataService', 'tracker']
 
 let planEditor = {
   templateUrl: '/components/sidebar/plan-editor/plan-editor.html',
