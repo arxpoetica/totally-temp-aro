@@ -383,6 +383,7 @@ class PlanEditorController {
       barChartData[barIndex]++
     }
     
+    boundsCoverage.totalCount = boundaryData.coverageInfo.length
     boundsCoverage.boundaryData.coverageInfo = locations
     boundsCoverage.censusBlockCountById = censusBlockCountById
     boundsCoverage.barChartData = barChartData
