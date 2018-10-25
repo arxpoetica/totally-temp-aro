@@ -557,7 +557,8 @@ exports.configure = (api, middleware) => {
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {  
       database.query(planQ).then(function (results) {
-        response.setHeader('Content-disposition', `attachment; filename=Plan locations-${plan.name}.csv`);
+        var cleanPlanName = plan.name.split(',').join('') // we may need to check for other problem characters 
+        response.setHeader('Content-disposition', `attachment; filename=Plan locations-${cleanPlanName}.csv`);
         response.set('Content-Type', 'text/csv');
         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
       })
