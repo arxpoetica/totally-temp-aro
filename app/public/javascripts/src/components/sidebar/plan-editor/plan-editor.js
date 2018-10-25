@@ -369,12 +369,12 @@ class PlanEditorController {
     
     for (var localI=0; localI<boundaryData.coverageInfo.length; localI++){
       var location = boundaryData.coverageInfo[localI]
-      if ("number" != typeof location.distance) continue // skip these 
-      if ('feet' == this.state.configuration.units.length_units) location.distance *= 3.28084
-      locations.push(location)
       if (!censusBlockCountById.hasOwnProperty(location.censusBlockId)){
         censusBlockCountById[location.censusBlockId] = 0
       }
+      if ("number" != typeof location.distance) continue // skip these 
+      if ('feet' == this.state.configuration.units.length_units) location.distance *= 3.28084
+      locations.push(location)
       censusBlockCountById[location.censusBlockId]++
       var dist = location.distance
       var barIndex = Math.floor(dist / 1000)
