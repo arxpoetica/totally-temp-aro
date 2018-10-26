@@ -1,12 +1,14 @@
-class CoverageReportGeneratorController {
-  constructor($http, $timeout, state) {
+class CoverageReportDownloaderController {
+  constructor($http, $timeout, state, Utils) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+    this.Utils = Utils
 
     this.coverageReport = null
     this.rateReachMatrices = []
     this.selectedRateReachMatrix = null
+    // Get the coverage report details
     this.$http.get('/service/rr/matrix')
       .then((result) => {
         this.rateReachMatrices = result.data
@@ -16,23 +18,21 @@ class CoverageReportGeneratorController {
       .catch(err => console.error(err))
   }
 
-  $onInit() {
-    // Get the coverage report details
-    this.coverageReport = null
-    this.$http.get(`/service/coverage/report/${this.coverageReportId}`)
-      .then((result) => this.coverageReport = result.data)
+  downloadReport() {
+    this.$http.get(`/service/coverage/query/form477/${this.coverageReportId}/${this.selectedRateReachMatrix.id}`)
+      .then((result) => this.Utils.downloadCSV(result.data, 'CoverageReport.csv'))
       .catch(err => console.error(err))
   }
 }
 
-CoverageReportGeneratorController.$inject = ['$http', '$timeout', 'state']
+CoverageReportDownloaderController.$inject = ['$http', '$timeout', 'state', 'Utils']
 
-let coverageReportGenerator = {
+let coverageReportDownloader = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-report-downloader.html',
   bindings: {
     coverageReportId: '<'
   },
-  controller: CoverageReportGeneratorController
+  controller: CoverageReportDownloaderController
 }
 
-export default coverageReportGenerator
+export default coverageReportDownloader

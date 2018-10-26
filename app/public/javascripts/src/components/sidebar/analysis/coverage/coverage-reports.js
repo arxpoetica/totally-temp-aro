@@ -2,7 +2,7 @@ class CoverageReportsController {
   constructor($http, $timeout) {
     this.$http = $http
     this.$timeout = $timeout
-    this.areCoverageReportsInitialized = false
+    this.coverageReport = null
   }
 
   $onInit() {
@@ -10,14 +10,19 @@ class CoverageReportsController {
     // For now, service is returning all the plans and we filter out the one that we need.
     this.$http.get(`/service/coverage/report`)
       .then((result) => {
-        this.areCoverageReportsInitialized = (result.data.filter(item => item.planId === this.planId).length > 0)
+        this.coverageReport = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
         this.$timeout()
       })
       .catch(err => console.error(err))
   }
 
   onCoverageInitialized() {
-    this.areCoverageReportsInitialized = true
+    this.$http.get(`/service/coverage/report`)
+      .then((result) => {
+        this.coverageReport = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
   }
 }
 

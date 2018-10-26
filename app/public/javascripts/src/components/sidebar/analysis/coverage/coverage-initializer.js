@@ -1,5 +1,3 @@
-import { createCipher } from "crypto";
-
 class CoverageInitializerController {
   constructor(state, $http) {
     this.state = state
@@ -26,6 +24,7 @@ class CoverageInitializerController {
       coverageAnalysisRequest: angular.copy(this.coveragePlan)
     }
     serviceCoveragePlan.coverageAnalysisRequest.planId = this.planId
+    serviceCoveragePlan.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
     var createdCoveragePlan = null
     this.$http.post(`/service/coverage/report`, serviceCoveragePlan)
       .then((result) => {
