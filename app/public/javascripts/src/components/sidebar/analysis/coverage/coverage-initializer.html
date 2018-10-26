@@ -1,2 +1,45 @@
+<style scoped>
+  #table-coverage-initializer td {
+    line-height: 33px;  /* To vertically align text */
+  }
+</style>
 
-Testing
+<table id="table-coverage-initializer" class="table table-condensed table-striped">
+  <tbody>
+    <tr>
+      <td>Name</td>
+      <td><input class="form-control" ng-model="$ctrl.coveragePlan.name"></td>
+    </tr>
+    <tr>
+      <td>Report type</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.coveragePlan.selectedReportType"
+                ng-options="item as item.name for item in $ctrl.reportTypes">
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
+      <td><input class="form-control" ng-model="$ctrl.coveragePlan.distanceThreshold"></td>
+    </tr>
+    <tr>
+      <td>Edge type</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.coveragePlan.spatialEdgeType"
+                ng-options="item.id as item.name for item in $ctrl.spatialEdgeTypes">
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Use site boundaries</td>
+      <td>
+        <input type="checkbox"
+               class="checkboxfill"
+               ng-model="$ctrl.coveragePlan.useSiteBoundaries"
+               name="ctype-name">
+      </td>
+    </tr>
+  </tbody>
+</table>
