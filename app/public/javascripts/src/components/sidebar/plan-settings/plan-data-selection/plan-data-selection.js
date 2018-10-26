@@ -18,10 +18,19 @@ class DataSelectionController {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+
+    this.isDataSourceEditable ={}
+    this.permissionBits = []
   }
 
   $onInit() {
     this.updateSelectionValidation()
+    this.getPermissionBits()
+    .then(() => {
+      Object.keys(this.allDataItems).forEach((dataSource) => {
+        this.validateSelectedDataSourceToEdit(dataSource)
+      })
+    })
   }
 
   $doCheck() {
@@ -76,10 +85,11 @@ class DataSelectionController {
     })
   }
 
-  onSelectionChanged() {
+  onSelectionChanged(dataSource) {
     this.isDirty = true
     this.state.dataItemsChanged.next(this.state.dataItems)
     this.updateSelectionValidation()
+    this.validateSelectedDataSourceToEdit(dataSource)
   }
 
   // Updates the 'valid' flags for all data items
@@ -132,6 +142,33 @@ class DataSelectionController {
     // Put the application in "Edit Service Layer" mode
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
+  }
+
+  getPermissionBits() {
+    return this.$http.get('/service/auth/permissions')
+    .then((result) => {
+      return this.permissionBits = result.data
+    })
+  }
+
+  validateSelectedDataSourceToEdit(dataSource) {
+    var selectedDatasources = this.allDataItems[dataSource].selectedLibraryItems
+    if(selectedDatasources.length == 1){
+      this.$http.get(`/service/auth/acl/LIBRARY/${selectedDatasources[0].identifier}`)
+      .then((result) => {
+        var loggedInUserDatasourcePermission = result.data.resourcePermissions.filter((permission) => permission.systemActorId == this.currentUser.id)[0]
+        var adminPermissionBit = this.permissionBits.filter((permission) => permission.name == 'RESOURCE_ADMIN')[0].id
+        var readPermissionBit = this.permissionBits.filter((permission) => permission.name == 'RESOURCE_READ')[0].id
+        var writePermissionBit = this.permissionBits.filter((permission) => permission.name == 'RESOURCE_WRITE')[0].id
+
+        this.isDataSourceEditable[dataSource] = (loggedInUserDatasourcePermission['rolePermissions'] != readPermissionBit &&
+          loggedInUserDatasourcePermission['rolePermissions'] <= (adminPermissionBit + readPermissionBit + writePermissionBit))
+
+        this.$timeout()
+      })
+    } else {
+      this.isDataSourceEditable[dataSource] = false      
+    }
   }
 }
 
