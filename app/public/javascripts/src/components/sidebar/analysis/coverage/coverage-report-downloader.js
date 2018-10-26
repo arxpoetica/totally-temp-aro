@@ -18,6 +18,18 @@ class CoverageReportDownloaderController {
       .catch(err => console.error(err))
   }
 
+  $onChanges(changesObj) {
+    if (changesObj && changesObj.coverageReportId) {
+      this.coverageReport = null
+      this.$http.get(`/service/coverage/report/${this.coverageReportId}`)
+        .then(result => {
+          this.coverageReport = result.data
+          this.$timeout()
+        })
+        .catch(err => console.error(err))
+    }
+  }
+
   downloadReport() {
     this.$http.get(`/service/coverage/query/form477/${this.coverageReportId}/${this.selectedRateReachMatrix.id}`)
       .then((result) => this.Utils.downloadCSV(result.data, 'CoverageReport.csv'))
