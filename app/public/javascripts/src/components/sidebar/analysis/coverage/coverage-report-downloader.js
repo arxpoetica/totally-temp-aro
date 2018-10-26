@@ -32,7 +32,21 @@ class CoverageReportDownloaderController {
 
   downloadReport() {
     this.$http.get(`/service/coverage/query/form477/${this.coverageReportId}/${this.selectedRateReachMatrix.id}`)
-      .then((result) => this.Utils.downloadCSV(result.data, 'CoverageReport.csv'))
+      .then((result) => {
+        const isEmptyResponse = (Object.keys(result.data || {}).length === 0)
+        if (isEmptyResponse) {
+          swal({
+            title: 'Empty coverage report',
+            text: 'We have an empty coverage report with the settings that you have selected',
+            type: 'error',
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'OK',
+            closeOnConfirm: true
+          })
+        } else {
+          this.Utils.downloadCSV(result.data, 'CoverageReport.csv')
+        }
+      })
       .catch(err => console.error(err))
   }
 }
