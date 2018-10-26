@@ -25,7 +25,7 @@ class CoverageInitializerController {
     }
     serviceCoveragePlan.coverageAnalysisRequest.planId = this.planId
     serviceCoveragePlan.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
-    serviceCoveragePlan.coverageAnalysisRequest.distanceThreshold = this.coveragePlan.distanceThreshold & this.state.configuration.units.length_units_to_meters
+    serviceCoveragePlan.coverageAnalysisRequest.distanceThreshold = this.coveragePlan.distanceThreshold * this.state.configuration.units.length_units_to_meters
     var createdCoveragePlan = null
     this.$http.post(`/service/coverage/report`, serviceCoveragePlan)
       .then((result) => {
