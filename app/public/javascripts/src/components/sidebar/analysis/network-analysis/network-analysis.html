@@ -90,6 +90,16 @@
         </td>
       </tr>
       <tr>
+        <td>Discount Rate (%)</td>
+        <td>
+          <input type="number"
+                 ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
+                 class="form-control text-right"
+                 min="0" max="500"
+                 percentage-input>
+        </td>
+      </tr>
+      <tr>
         <td>Selection Type</td>
         <td>
           <select class="form-control" 
