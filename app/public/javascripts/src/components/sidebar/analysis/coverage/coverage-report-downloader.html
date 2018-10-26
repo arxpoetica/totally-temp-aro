@@ -26,7 +26,7 @@
     <!-- The distance threshold of the coverage report -->
     <tr>
       <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
-      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.distanceThreshold * $ctrl.state.configuration.units.meters_to_length_units}}</td>
+      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.distanceThreshold * $ctrl.state.configuration.units.meters_to_length_units | number: 0}}</td>
     </tr>
 
     <!-- The edge type of the coverage report -->
