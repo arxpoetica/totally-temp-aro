@@ -1,0 +1,7 @@
+
+<coverage-initializer ng-if="!$ctrl.areCoverageReportsInitialized"
+                      plan-id="$ctrl.planId"
+                      on-coverage-initialized="$ctrl.onCoverageInitialized()">
+</coverage-initializer>
+
+<coverage-reports ng-if="$ctrl.areCoverageReportsInitialized"></coverage-reports>

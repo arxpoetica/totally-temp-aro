@@ -6,23 +6,15 @@
 
 <table id="table-coverage-initializer" class="table table-condensed table-striped">
   <tbody>
-    <tr>
-      <td>Name</td>
-      <td><input class="form-control" ng-model="$ctrl.coveragePlan.name"></td>
-    </tr>
-    <tr>
-      <td>Report type</td>
-      <td>
-        <select class="form-control"
-                ng-model="$ctrl.coveragePlan.selectedReportType"
-                ng-options="item as item.name for item in $ctrl.reportTypes">
-        </select>
-      </td>
-    </tr>
+
+    <!-- The distance threshold of the coverage report -->
     <tr>
       <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
       <td><input class="form-control" ng-model="$ctrl.coveragePlan.distanceThreshold"></td>
     </tr>
+
+
+    <!-- The edge type of the coverage report -->
     <tr>
       <td>Edge type</td>
       <td>
@@ -32,14 +24,7 @@
         </select>
       </td>
     </tr>
-    <tr>
-      <td>Use site boundaries</td>
-      <td>
-        <input type="checkbox"
-               class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useSiteBoundaries"
-               name="ctype-name">
-      </td>
-    </tr>
   </tbody>
 </table>
+
+<button class="btn btn-block btn-primary" ng-click="$ctrl.initializeCoverageReport()">Initialize coverage report</button>

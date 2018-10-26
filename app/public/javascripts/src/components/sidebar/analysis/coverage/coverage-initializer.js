@@ -1,10 +1,9 @@
+import { createCipher } from "crypto";
+
 class CoverageInitializerController {
-  constructor(state) {
+  constructor(state, $http) {
     this.state = state
-    this.reportTypes = [
-      { id: 'FORM_477', name: 'Form 477' },
-      { id: 'REGULAR', name: 'Regular' }
-    ]
+    this.$http = $http
     this.spatialEdgeTypes = [
       { id: 'road', name: 'Roads' },
       { id: 'copper', name: 'Copper' },
@@ -16,20 +15,38 @@ class CoverageInitializerController {
     ]
     this.coveragePlan = {
       coverageType: 'census_block',
-      name: 'Coverage Plan',
       distanceThreshold: 20000,
-      useSiteBoundaries: false,
       spatialEdgeType: 'road'
     }
-    this.coveragePlan.selectedReportType = this.reportTypes.filter((item) => item.id === 'FORM_477')[0]
+  }
+
+  initializeCoverageReport() {
+    // Format the coverage report that so it can be sent over to aro-service
+    var serviceCoveragePlan = {
+      coverageAnalysisRequest: angular.copy(this.coveragePlan)
+    }
+    serviceCoveragePlan.coverageAnalysisRequest.planId = this.planId
+    var createdCoveragePlan = null
+    this.$http.post(`/service/coverage/report`, serviceCoveragePlan)
+      .then((result) => {
+        createdCoveragePlan = result.data
+        console.log(createdCoveragePlan)
+        return this.$http.post(`/service/coverage/report/${createdCoveragePlan.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
+      })
+      .then(() => this.$http.post(`/service/coverage/report/${createdCoveragePlan.reportId}/process?user_id=${this.state.loggedInUser.id}`, {}))
+      .then(() => this.onCoverageInitialized())
+      .catch(err => console.error(err))
   }
 }
 
-CoverageInitializerController.$inject = ['state']
+CoverageInitializerController.$inject = ['state', '$http']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',
-  bindings: {},
+  bindings: {
+    planId: '<',
+    onCoverageInitialized: '&'
+  },
   controller: CoverageInitializerController
 }
 
