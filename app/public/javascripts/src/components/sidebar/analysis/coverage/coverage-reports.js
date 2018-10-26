@@ -8,6 +8,10 @@ class CoverageReportsController {
   $onInit() {
     // If reports have not been initialized for this plan id, show the initialization control. Else show the download control.
     // For now, service is returning all the plans and we filter out the one that we need.
+    this.initialize()
+  }
+
+  initialize() {
     this.$http.get(`/service/coverage/report`)
       .then((result) => {
         this.coverageReport = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
@@ -17,12 +21,11 @@ class CoverageReportsController {
   }
 
   onCoverageInitialized() {
-    this.$http.get(`/service/coverage/report`)
-      .then((result) => {
-        this.coverageReport = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
-        this.$timeout()
-      })
-      .catch(err => console.error(err))
+    this.initialize()
+  }
+
+  onReportSettingsReset() {
+    this.initialize()
   }
 }
 

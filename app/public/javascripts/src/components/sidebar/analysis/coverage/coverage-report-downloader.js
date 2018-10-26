@@ -49,6 +49,12 @@ class CoverageReportDownloaderController {
       })
       .catch(err => console.error(err))
   }
+
+  resetReportSettings() {
+    this.$http.delete(`/service/coverage/report/${this.coverageReportId}`)
+      .then(result => this.onReportSettingsReset())
+      .catch(err => console.error(err))
+  }
 }
 
 CoverageReportDownloaderController.$inject = ['$http', '$timeout', 'state', 'Utils']
@@ -56,7 +62,8 @@ CoverageReportDownloaderController.$inject = ['$http', '$timeout', 'state', 'Uti
 let coverageReportDownloader = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-report-downloader.html',
   bindings: {
-    coverageReportId: '<'
+    coverageReportId: '<',
+    onReportSettingsReset: '&'
   },
   controller: CoverageReportDownloaderController
 }
