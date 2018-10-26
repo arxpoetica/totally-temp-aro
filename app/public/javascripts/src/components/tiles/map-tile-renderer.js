@@ -483,10 +483,12 @@ class MapTileRenderer {
           continue
         }
         if (this.selectedDisplayMode == this.displayModes.VIEW 
-            &&this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS
+            && (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS || 
+              this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER)
             && this.tileDataService.featuresToExclude.has(featureId) 
-            && feature.properties._data_type && feature.properties._data_type == "location"){
-          // this is a location that is being edited
+            && feature.properties._data_type && (feature.properties._data_type == "location" || 
+              feature.properties._data_type == "service_layer")){
+          // this is a location/Service area that is being edited
           continue
         }
       }
