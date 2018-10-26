@@ -6,6 +6,17 @@
 
 <table id="table-coverage-report-generator" class="table table-condensed table-striped">
   <tbody>
+    <!-- The rate reach matrix to be used for generating the report -->
+    <tr>
+      <td>Rate Reach</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.selectedRateReachMatrix"
+                ng-options="item as item.name for item in $ctrl.rateReachMatrices">
+        </select>
+      </td>
+    </tr>
+
     <!-- The report type of the coverage report -->
     <tr>
       <td>Report type</td>
