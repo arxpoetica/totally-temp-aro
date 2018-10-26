@@ -571,10 +571,8 @@ exports.configure = (api, middleware) => {
     var site_boundary = request.params.site_boundary
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {
-
-    var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-
-    var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <Document>
         <name>${escape(`Site boundaries-${site_boundary}-${plan.name}`)}</name>
         <Style id="shapeColor">
@@ -603,15 +601,12 @@ exports.configure = (api, middleware) => {
         CROSS JOIN client.site_boundary_type bt
         WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id}
         ),
-        
         selected_service_layer AS (
-        SELECT
-             *
+        SELECT *
         FROM inputs i
         JOIN reports.plan_service_layer psl
         ON psl.root_plan_id = i.plan_id
         ),
-        
         modified_boundaries AS (
           SELECT 
             nb.*
@@ -622,7 +617,6 @@ exports.configure = (api, middleware) => {
             AND nb.boundary_type = i.boundary_type
             AND nb.date_from <> '294276-01-01 00:00:00'::timestamp
         ),
-        
         existing_boundaries AS (
           SELECT
             pbsa.id,
@@ -636,7 +630,6 @@ exports.configure = (api, middleware) => {
             AND pbsa.service_area_id = ANY(i.service_area_ids)
           GROUP BY 1, 2 
         ),
-        
         all_boundaries AS (
           SELECT *
           FROM modified_boundaries
@@ -649,7 +642,6 @@ exports.configure = (api, middleware) => {
               ON mb.object_id = xb.object_id
           */
         ),
-        
         matched_equipment AS (
           SELECT 
             ne.*
@@ -661,7 +653,6 @@ exports.configure = (api, middleware) => {
               AND ne.node_type_id <> 8
           
         ),
-        
         all_boundary_info AS (
         SELECT
           xb.geom,
@@ -679,17 +670,16 @@ exports.configure = (api, middleware) => {
           AND ST_Intersects(sa.geom, xb.geom) 
         GROUP BY 1, 2, 3,4
         ) 
-        
         SELECT DISTINCT
           ST_AsKML(b.geom) AS site_boundary_geom,
           ST_AsKML(e.geom) AS node_location,
           COALESCE(e.site_clli, '') AS "Site CLLI Code"
         --  ,e.site_name AS "Site Name"
         --  i.description AS "Boundary Type" 
-        FROM  all_boundary_info b
+        FROM  all_boundaries b
         CROSS JOIN inputs i
         LEFT JOIN matched_equipment e
-           ON e.object_id = b.equipment_object_id ;
+           ON e.object_id = b.network_node_object_id ;
         `
         return database.query(planQ)
       })
