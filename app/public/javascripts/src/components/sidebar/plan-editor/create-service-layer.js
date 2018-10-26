@@ -1,3 +1,5 @@
+import Constants from '../../common/constants'
+
 class CreateServiceLayerController {
   
   constructor($http,$timeout,state,Utils) {
@@ -5,46 +7,114 @@ class CreateServiceLayerController {
     this.$timeout = $timeout
     this.state = state
     this.utils = Utils
+
     this.discardChanges = false
     this.currentTransaction = null
+    
     this.serviceLayerName = null
     this.serviceLayerCode = null
+
+    this.createdMapObjects = {}
+    this.objectIdToMapObject = {}
+    this.selectedMapObject = null
   }
 
-  createServiceLayerTemplate() {
-    this.serviceLayerFeature = {
-      dataType: 'service_layer',
-      geometry: {
-        type: 'MultiPolygon',
-        coordinates: [[]]
-      },
-      attributes: {
-        name: null,
-        code: null
-      }
+  $onInit() {
+    this.resumeOrCreateTransaction()
+  }
+
+  // Convert the paths in a Google Maps object into a Polygon WKT
+  polygonPathsToWKT(paths) {
+    var allPaths = []
+    paths.forEach((path) => {
+      var pathPoints = []
+      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+      allPaths.push(pathPoints)
+    })
+    return {
+      type: 'MultiPolygon',
+      coordinates: [allPaths]
     }
   }
 
-  registerCreateMapObjectCallback(createMapObjects) {
-    this.createServiceLayerTemplate()
+  formatServiceLayerForService(mapObject) {
+    // ToDo: this should use AroFeatureFactory
+    var serviceFeature = {
+      //objectId: mapObject.feature.objectId,
+      dataType: 'service_layer',
+      geometry: this.polygonPathsToWKT(mapObject.getPaths()),
+      attributes: {
+        name: mapObject.feature.name,
+        code: mapObject.feature.code
+      }
+    }
+    return serviceFeature
+  }
 
-    // createMapObjects.forEach((mapObject,index)  => {
-    //   mapObject.overlay.getPaths().forEach((path) => {
-    //     var pathPoints = []
-    //     path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-    //     pathPoints.push(pathPoints[0])  // Close the polygon
-    //     this.serviceLayerFeature.geometry.coordinates[0].push(pathPoints)
-    //   })
-    // })
+  formatServiceLayerForService1(mapObject) {
+    // ToDo: this should use AroFeatureFactory
+    var serviceFeature = {
+      objectId: mapObject.feature.objectId,
+      dataType: 'service_layer',
+      geometry: this.polygonPathsToWKT(mapObject.getPaths()),
+      attributes: {
+        name: mapObject.feature.name,
+        code: mapObject.feature.code
+      }
+    }
+    return serviceFeature
+  }
 
-    var mapObject = createMapObjects[0]
-    mapObject.overlay.getPaths().forEach((path) => {
-      var pathPoints = []
-      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-      pathPoints.push(pathPoints[0])  // Close the polygon
-      this.serviceLayerFeature.geometry.coordinates[0].push(pathPoints)
-    })
-    //console.log(JSON.stringify(this.serviceLayerFeature))
+  handleObjectCreated(mapObject, usingMapClick, feature) {
+    this.objectIdToMapObject[mapObject.objectId] = mapObject
+    //this.updateObjectIdsToHide()
+
+    //Create New SA
+    if(!mapObject.feature.isExistingObject) {
+      mapObject.feature.name = this.serviceLayerName
+      mapObject.feature.code = this.serviceLayerCode
+      var serviceLayerFeature = this.formatServiceLayerForService(mapObject)
+      // send serviceLayer feature to service
+      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`,serviceLayerFeature)  
+    }
+    
+    this.$timeout()
+  }
+
+  handleSelectedObjectChanged(mapObject) {
+    if (null == this.currentTransaction) return   
+    if (null != mapObject){
+      this.updateSelectedState(mapObject)
+    } 
+    this.selectedMapObject = mapObject
+    this.$timeout()
+  }
+
+  handleObjectModified(mapObject) {
+    //const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
+    var serviceLayerFeature = this.formatServiceLayerForService1(mapObject)
+    this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
+      .catch((err) => console.error(err))
+    this.$timeout()
+  }
+
+  handleObjectDroppedOnMarker(eventArgs) {
+    console.log(eventArgs)    
+  }
+
+  handleObjectDeleted(mapObject) {
+    this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
+  }
+
+  updateSelectedState(selectedFeature){
+    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
+    selectedViewFeaturesByType['serviceAreas'] = {}
+    if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.serviceAreas[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature      
+    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
+  }
+
+  isBoundaryCreationAllowed(mapObject){
+    return false
   }
 
   resumeOrCreateTransaction() {
@@ -77,39 +147,18 @@ class CreateServiceLayerController {
       })
   }
 
-  saveTransaction() {
-    if (!this.currentTransaction) {
-      console.error('No current transaction. We should never be in this state. Aborting commit...')
-    }
-
-    if (this.serviceLayerFeature.geometry.coordinates[0].length > 0) {
-      this.serviceLayerFeature.attributes.name = this.serviceLayerName
-      this.serviceLayerFeature.attributes.code = this.serviceLayerCode
-      // send serviceLayer feature to service
-      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`,this.serviceLayerFeature)
-      .then((result) => {
-        // All modifications will already have been saved to the server. Commit the transaction.
-        this.commitTransaction()
-      })
-    } else {
-      this.commitTransaction()
-    }
-  }
-
   commitTransaction() {
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
     .then((result) => {
       // Transaction has been committed, start a new one
       this.discardChanges = true
       this.currentTransaction = null
-      this.createServiceLayerTemplate()
       this.state.recreateTilesAndCache()
       return this.resumeOrCreateTransaction()
     })
     .catch((err) => {
       this.discardChanges = true
       this.currentTransaction = null
-      this.createServiceLayerTemplate()
       this.state.recreateTilesAndCache()
       this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
       this.$timeout()
@@ -135,14 +184,12 @@ class CreateServiceLayerController {
             // Transaction has been discarded, start a new one
             this.discardChanges = true
             this.currentTransaction = null
-            this.createServiceLayerTemplate()
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
           .catch((err) => {
             this.discardChanges = true
             this.currentTransaction = null
-            this.createServiceLayerTemplate()
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
             this.$timeout()
             console.error(err)
@@ -151,10 +198,22 @@ class CreateServiceLayerController {
     })
   }
 
-  $onInit() {
-    this.createServiceLayerTemplate()
-    this.resumeOrCreateTransaction()
+  // Returns a promise that resolves to the iconUrl for a given object id
+  getObjectIconUrl(eventArgs) {
+    if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
+      // Icon doesn't matter for Service area, just return an empty string
+      return Promise.resolve('')
+    }
+    return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
   }
+
+  // $onChanges(changesObj) {
+    
+  // }
+
+  // $onDestroy() {
+    
+  // }
 
 }
   

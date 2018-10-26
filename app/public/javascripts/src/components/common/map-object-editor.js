@@ -382,6 +382,15 @@ class MapObjectEditorController {
           var menuItems = []
           var menuItemsById = {}
 
+          if(results.length == 0) {
+            var options = []
+            options.push('add Service Area')
+            menuItems.push({
+              'options': options,
+              'name': 'Add Service Area',
+              'latLng': latLng
+            })
+          } else {
           results.forEach((result) => {
             //populate context menu aray here
             // we may need different behavour for different controllers using this
@@ -426,7 +435,7 @@ class MapObjectEditorController {
               })
             }
           })
-
+        }
           this.menuItems = menuItems
           if (menuItems.length <= 0) {
             this.closeContextMenu()
@@ -532,6 +541,31 @@ class MapObjectEditorController {
       x: Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
       y: Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
     }
+  }
+
+  // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
+  getDropTargetCSSForServiceArea() {
+    
+    // Without the 'this.objectIdToDropCSS' cache we get into an infinite digest cycle
+    var dropTargetCSS = this.objectIdToDropCSS['serviceArea']
+    if (dropTargetCSS) {
+      return dropTargetCSS
+    }
+    const radius = 50;  // Pixels
+    var pixelCoords = this.latLngToPixel(this.mapRef.getCenter())
+    dropTargetCSS = {
+      position: 'absolute',
+      left: `${pixelCoords.x - radius}px`,
+      top: `${pixelCoords.y - radius}px`,
+      border: 'solid 3px black',
+      'border-style': 'dashed',
+      'border-radius': `${radius}px`,
+      width: `${radius * 2}px`,
+      height: `${radius * 2}px`,
+      'background-color': 'rgba(255, 255, 255, 0.5)'
+    }
+    this.objectIdToDropCSS['serviceArea'] = dropTargetCSS
+    return dropTargetCSS;
   }
 
   // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
@@ -780,7 +814,7 @@ class MapObjectEditorController {
       google.maps.event.addListener(mapObject, 'dragend', function(){
         self.onModifyObject && self.onModifyObject({mapObject})
       });
-    } else if (feature.geom.type === 'MultiPolygon') {
+    } else if (feature.geometry.type === 'MultiPolygon') {
       mapObject = this.createMultiPolygonMapObject(feature)
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
@@ -1106,6 +1140,50 @@ class MapObjectEditorController {
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
         pathPoints.push(pathPoints[0])  // Close the polygon
         feature.geometry.coordinates.push(pathPoints)
+      })
+      self.createMapObject(feature, null ,true)
+      // Remove the overlay. It will be replaced with the created map object
+      event.overlay.setMap(null)
+      // Kill the drawing manager
+      self.drawing.drawingManager.setMap(null)
+      self.drawing.drawingManager = null
+      self.drawing.markerIdForBoundary = null
+    });
+  }
+
+  startDrawingBoundaryForSA(latLng) {
+
+    if (this.drawing.drawingManager) {
+      // If we already have a drawing manager, discard it.
+      console.warn('We already have a drawing manager active')
+      this.drawing.drawingManager.setMap(null)
+      this.drawing.drawingManager = null
+    }
+
+    this.drawing.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingControl: false,
+      polygonOptions:this.selectedPolygonOptions
+    });
+    this.drawing.drawingManager.setMap(this.mapRef);
+    var self = this;
+    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function(event) {
+      // Create a boundary object using the regular object-creation workflow. A little awkward as we are converting
+      // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
+      // We keep it this way because the object creation workflow does other things like set up events, etc.
+      var feature = {
+        objectId: self.utils.getUUID(),
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: [[]]
+        },
+        isExistingObject: false
+      }
+      event.overlay.getPaths().forEach((path) => {
+        var pathPoints = []
+        path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+        pathPoints.push(pathPoints[0])  // Close the polygon
+        feature.geometry.coordinates[0].push(pathPoints)
       })
       self.createMapObject(feature, null ,true)
       // Remove the overlay. It will be replaced with the created map object

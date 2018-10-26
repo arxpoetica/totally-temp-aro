@@ -67,6 +67,11 @@
             &nbsp;&nbsp;<i class="fa fa-plus"></i>
             Add Boundary
           </a>
+          <a ng-if=" 'add Service Area' == option " 
+            href="#" ng-click="$ctrl.startDrawingBoundaryForSA(item.latLng)">
+            &nbsp;&nbsp;<i class="fa fa-plus"></i>
+            Add Service Area
+          </a>
           <a ng-if=" 'edit boundary' == option "
              href="#" ng-click="$ctrl.editBoundary(item.objectId)">
             &nbsp;&nbsp;<i class="fa fa-pencil"></i>
@@ -105,9 +110,14 @@
      does not help, because then the drop event on the drop targets does not work either -->
 <div class="map-object-drop-targets-container" style="position: absolute; left: 0px; top: 0px;">
   <drop-target ng-repeat="(key, mapObject) in $ctrl.createdMapObjects"
-               ng-if="$ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForMapObject(mapObject)"
+               ng-if="$ctrl.featureType != 'serviceArea' && $ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForMapObject(mapObject)"
                ng-style="$ctrl.getDropTargetCSSForMapObject(mapObject)"
                target-object-id="mapObject.objectId"
                on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">
+  </drop-target>
+  <drop-target 
+    ng-if="$ctrl.featureType == 'serviceArea' && $ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForServiceArea()"
+    ng-style="$ctrl.getDropTargetCSSForServiceArea()" 
+    on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">
   </drop-target>
 </div>
