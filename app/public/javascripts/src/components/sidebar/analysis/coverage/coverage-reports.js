@@ -12,8 +12,9 @@ class CoverageReportsController {
   }
 
   initialize() {
-    this.$http.get(`/service/coverage/report`)
+    this.$http.get(`/service/coverage/report/search/plan_id/${this.planId}`)
       .then((result) => {
+        // If we don't find a coverage report for this plan id, we get an empty array back.
         this.coverageReport = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
         this.$timeout()
       })
