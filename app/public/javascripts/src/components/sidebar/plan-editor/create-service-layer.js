@@ -40,20 +40,6 @@ class CreateServiceLayerController {
   formatServiceLayerForService(mapObject) {
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
-      //objectId: mapObject.feature.objectId,
-      dataType: 'service_layer',
-      geometry: this.polygonPathsToWKT(mapObject.getPaths()),
-      attributes: {
-        name: mapObject.feature.name,
-        code: mapObject.feature.code
-      }
-    }
-    return serviceFeature
-  }
-
-  formatServiceLayerForService1(mapObject) {
-    // ToDo: this should use AroFeatureFactory
-    var serviceFeature = {
       objectId: mapObject.feature.objectId,
       dataType: 'service_layer',
       geometry: this.polygonPathsToWKT(mapObject.getPaths()),
@@ -92,7 +78,7 @@ class CreateServiceLayerController {
 
   handleObjectModified(mapObject) {
     //const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
-    var serviceLayerFeature = this.formatServiceLayerForService1(mapObject)
+    var serviceLayerFeature = this.formatServiceLayerForService(mapObject)
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
       .catch((err) => console.error(err))
     this.$timeout()
