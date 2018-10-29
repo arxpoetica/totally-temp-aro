@@ -871,8 +871,6 @@ module.exports = class Location {
     return Promise.resolve()
     .then(()=>{
       var polyJSON = JSON.stringify({"type":"Polygon","coordinates": [polygon] })
-      // Hardcoding quickfix for frontier - #159551834
-      const HARDCODED_DATA_SOURCE_FOR_FRONTIER_QUICKFIX = 30
       var sql = `
           WITH inputs AS (
           SELECT   
@@ -887,6 +885,7 @@ module.exports = class Location {
             l.number_of_households AS "Location Count",
             ST_Y(l.geom) AS "Location Latitude",
             ST_X(l.geom) AS "Location Longitude",
+            ws.name AS "Location Status",  
             ST_Y(l.geom) || ' ' || ST_X(l.geom) AS "Lat Long Concat",
             s.name AS "Wirecenter Name",
             s.code AS "Wirecenter CLLI",
@@ -895,10 +894,13 @@ module.exports = class Location {
             (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase I Part II')::text)::int)) AS "CAF Phase I Part II Tag",
             (SELECT description FROM aro_core.tag WHERE id = ((c.tags->'category_map'->>(SELECT id FROM aro_core.category WHERE description = 'CAF Phase II')::text)::int)) AS "CAF Phase II Tag"
             FROM inputs i
-            JOIN aro.location_entity l ON ST_Contains(ST_SetSRID(ST_GeomFromGeoJSON(i.geojson),4326), l.geom) AND l.date_to = '294276-01-01 00:00:00'::date AND l.data_source_id = ${HARDCODED_DATA_SOURCE_FOR_FRONTIER_QUICKFIX}
+            JOIN client.active_plan_data_source apds ON apds.root_plan_id = i.root_plan_id AND data_type_id=1
+            JOIN aro.location_entity l ON ST_Contains(ST_SetSRID(ST_GeomFromGeoJSON(i.geojson),4326), l.geom) AND l.date_to = '294276-01-01 00:00:00'::date
+              AND l.data_source_id = ANY(apds.full_path)
             LEFT JOIN client.service_area s ON ST_Intersects(s.geom,ST_SetSRID(ST_GeomFromGeoJSON(i.geojson),4326)) AND ST_Contains(s.geom,l.geom) AND s.service_layer_id = 1
             JOIN aro_core.global_library g ON g.data_source_id = l.data_source_id
             JOIN aro.census_blocks c ON l.cb_gid = c.gid
+            JOIN aro.workflow_state ws ON l.workflow_state_id = ws.id
           )
           SELECT *
           FROM output

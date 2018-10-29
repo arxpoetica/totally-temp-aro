@@ -49,7 +49,7 @@ class aroDrawingManagerController {
   }
 
   clearAllShape() {
-    this.all_overlays.forEach((shape) => shape.overlay.setMap(null))
+    this.all_overlays && this.all_overlays.forEach((shape) => shape.overlay.setMap(null))
     this.all_overlays = [];
   }
 
