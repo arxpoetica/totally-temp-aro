@@ -387,7 +387,7 @@ exports.configure = (api, middleware) => {
       
       all_boundaries AS (
       SELECT
-        *	
+        *   
       FROM modified_boundaries
       /*    COALESCE(mb.id, xb.id)                                         AS id,
           COALESCE(mb.network_node_object_id, xb.network_node_object_id) AS network_node_object_id,
@@ -434,6 +434,7 @@ exports.configure = (api, middleware) => {
           JOIN client.extended_location l
             ON ST_Contains(mb.geom, l.geom)
                AND lds.ds_id = l.data_source_id
+			   AND l.date_to = '294276-01-01'
         JOIN client.service_area sa
           ON sa.service_layer_id = ssl.id
           AND ST_Contains(sa.geom, l.geom)
@@ -452,6 +453,7 @@ exports.configure = (api, middleware) => {
           JOIN client.extended_location l
             on
               lds.ds_id = l.data_source_id
+			   AND l.date_to = '294276-01-01'
           JOIN client.service_area sa
             on sal.id = sa.id
                AND ST_Contains(sa.geom, l.geom)
@@ -509,7 +511,7 @@ exports.configure = (api, middleware) => {
       SELECT 
       rl.location_object_id                                                                         AS "Location Object ID",
         rl.data_source_name                                                                         AS "Data Source",
-        rl.number_of_households																					                            AS "Location Count",
+        rl.number_of_households                                                                                                             AS "Location Count",
         rl.location_type                                                                            AS "Location Type",
         ws.name                                                                                     AS "Location Status",  
         ST_Y(
@@ -557,7 +559,8 @@ exports.configure = (api, middleware) => {
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {  
       database.query(planQ).then(function (results) {
-        response.setHeader('Content-disposition', `attachment; filename=Plan locations-${plan.name}.csv`);
+        var cleanPlanName = plan.name.split(',').join('') // we may need to check for other problem characters 
+        response.setHeader('Content-disposition', `attachment; filename=Plan locations-${cleanPlanName}.csv`);
         response.set('Content-Type', 'text/csv');
         results.length > 0 ? response.send(json2csv({data:results})) : response.send('')
       })
@@ -570,10 +573,8 @@ exports.configure = (api, middleware) => {
     var site_boundary = request.params.site_boundary
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {
-
-    var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-
-    var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g,'&#38;')
+      var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <Document>
         <name>${escape(`Site boundaries-${site_boundary}-${plan.name}`)}</name>
         <Style id="shapeColor">
@@ -602,15 +603,12 @@ exports.configure = (api, middleware) => {
         CROSS JOIN client.site_boundary_type bt
         WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id}
         ),
-        
         selected_service_layer AS (
-        SELECT
-             *
+        SELECT *
         FROM inputs i
         JOIN reports.plan_service_layer psl
         ON psl.root_plan_id = i.plan_id
         ),
-        
         modified_boundaries AS (
           SELECT 
             nb.*
@@ -621,7 +619,6 @@ exports.configure = (api, middleware) => {
             AND nb.boundary_type = i.boundary_type
             AND nb.date_from <> '294276-01-01 00:00:00'::timestamp
         ),
-        
         existing_boundaries AS (
           SELECT
             pbsa.id,
@@ -635,7 +632,6 @@ exports.configure = (api, middleware) => {
             AND pbsa.service_area_id = ANY(i.service_area_ids)
           GROUP BY 1, 2 
         ),
-        
         all_boundaries AS (
           SELECT *
           FROM modified_boundaries
@@ -648,7 +644,6 @@ exports.configure = (api, middleware) => {
               ON mb.object_id = xb.object_id
           */
         ),
-        
         matched_equipment AS (
           SELECT 
             ne.*
@@ -660,7 +655,6 @@ exports.configure = (api, middleware) => {
               AND ne.node_type_id <> 8
           
         ),
-        
         all_boundary_info AS (
         SELECT
           xb.geom,
@@ -678,17 +672,16 @@ exports.configure = (api, middleware) => {
           AND ST_Intersects(sa.geom, xb.geom) 
         GROUP BY 1, 2, 3,4
         ) 
-        
         SELECT DISTINCT
           ST_AsKML(b.geom) AS site_boundary_geom,
           ST_AsKML(e.geom) AS node_location,
           COALESCE(e.site_clli, '') AS "Site CLLI Code"
         --  ,e.site_name AS "Site Name"
         --  i.description AS "Boundary Type" 
-        FROM  all_boundary_info b
+        FROM  all_boundaries b
         CROSS JOIN inputs i
         LEFT JOIN matched_equipment e
-           ON e.object_id = b.equipment_object_id ;
+           ON e.object_id = b.network_node_object_id ;
         `
         return database.query(planQ)
       })

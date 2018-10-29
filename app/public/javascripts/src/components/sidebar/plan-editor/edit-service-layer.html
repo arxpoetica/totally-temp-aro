@@ -1,0 +1,19 @@
+<!-- Add a component to handle map editing -->
+<map-object-editor ng-if="$ctrl.currentTransaction"
+      map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
+      map-container-id="map-canvas-container"
+      get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
+      object-selected-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
+      create-object-on-click="false"
+      allow-boundary-creation="false"
+      is-boundary-creation-allowed="$ctrl.isBoundaryCreationAllowed(mapObject)"
+      feature-type="serviceArea"
+      on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
+      on-modify-object="$ctrl.handleObjectModified(mapObject)"
+      on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
+      on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
+      register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
+      register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
+      register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
+      register-create-editable-existing-map-object="$ctrl.registerCreateEditableExistingMapObject(createEditableExistingMapObject)">
+</map-object-editor>
