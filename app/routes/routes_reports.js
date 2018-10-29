@@ -387,7 +387,7 @@ exports.configure = (api, middleware) => {
       
       all_boundaries AS (
       SELECT
-        *	
+        *   
       FROM modified_boundaries
       /*    COALESCE(mb.id, xb.id)                                         AS id,
           COALESCE(mb.network_node_object_id, xb.network_node_object_id) AS network_node_object_id,
@@ -434,6 +434,7 @@ exports.configure = (api, middleware) => {
           JOIN client.extended_location l
             ON ST_Contains(mb.geom, l.geom)
                AND lds.ds_id = l.data_source_id
+			   AND NOT l.is_deleted
         JOIN client.service_area sa
           ON sa.service_layer_id = ssl.id
           AND ST_Contains(sa.geom, l.geom)
@@ -452,6 +453,7 @@ exports.configure = (api, middleware) => {
           JOIN client.extended_location l
             on
               lds.ds_id = l.data_source_id
+			AND NOT l.is_deleted
           JOIN client.service_area sa
             on sal.id = sa.id
                AND ST_Contains(sa.geom, l.geom)
@@ -509,7 +511,7 @@ exports.configure = (api, middleware) => {
       SELECT 
       rl.location_object_id                                                                         AS "Location Object ID",
         rl.data_source_name                                                                         AS "Data Source",
-        rl.number_of_households																					                            AS "Location Count",
+        rl.number_of_households                                                                                                             AS "Location Count",
         rl.location_type                                                                            AS "Location Type",
         ws.name                                                                                     AS "Location Status",  
         ST_Y(
