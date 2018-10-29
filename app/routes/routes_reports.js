@@ -434,7 +434,7 @@ exports.configure = (api, middleware) => {
           JOIN client.extended_location l
             ON ST_Contains(mb.geom, l.geom)
                AND lds.ds_id = l.data_source_id
-			   AND NOT l.is_deleted
+			   AND l.date_to = '294276-01-01'
         JOIN client.service_area sa
           ON sa.service_layer_id = ssl.id
           AND ST_Contains(sa.geom, l.geom)
@@ -453,7 +453,7 @@ exports.configure = (api, middleware) => {
           JOIN client.extended_location l
             on
               lds.ds_id = l.data_source_id
-			AND NOT l.is_deleted
+			   AND l.date_to = '294276-01-01'
           JOIN client.service_area sa
             on sal.id = sa.id
                AND ST_Contains(sa.geom, l.geom)
