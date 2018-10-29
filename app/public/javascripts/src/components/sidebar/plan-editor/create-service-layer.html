@@ -14,6 +14,7 @@
       <td>Name</td>
       <td>
         <input type="text" class="form-control" placeholder="Name"
+          ng-change="$ctrl.markSelectedServiceAreaPropertiesDirty()"
           ng-model="$ctrl.selectedMapObject.feature.name">
       </td>
     </tr>
@@ -21,19 +22,26 @@
       <td>Code</td>
       <td>
         <input type="text" class="form-control" placeholder="Code"
+          ng-change="$ctrl.markSelectedServiceAreaPropertiesDirty()"
           ng-model="$ctrl.selectedMapObject.feature.code">
       </td>
     </tr>
   </table>
+  <button ng-class="{ 'btn btn-block': true, 
+    'btn-default': !$ctrl.objectIdToMapObject[$ctrl.selectedMapObject.objectId].isDirty,
+    'btn-primary': $ctrl.objectIdToMapObject[$ctrl.selectedMapObject.objectId].isDirty }"
+    ng-click="$ctrl.saveSelectedServiceAreaProperties()">
+    <i class="fa fa-save"></i>&nbsp;&nbsp;Save service area properties
+  </button>
 
-  <div style="display: flex; flex-direction: row; width: 100%">
+  <!-- <div style="display: flex; flex-direction: row; width: 100%">
     <div style="flex: 0 0 auto">
       <draggable-button icon="/images/map_icons/aro/boundary_road_segments.png" 
       is-disabled="false" is-boundary="true" 
       entity-details='{ "spatialEdgeType": "{{$ctrl.Constants.MAP_OBJECT_CREATE_SERVICE_AREA}}", "directed": false }'>
       </draggable-button>
     </div>
-  </div>
+  </div> -->
 
   <map-object-editor ng-if="$ctrl.currentTransaction"
       map-global-object-name="map"

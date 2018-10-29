@@ -544,31 +544,6 @@ class MapObjectEditorController {
   }
 
   // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
-  getDropTargetCSSForServiceArea() {
-    
-    // Without the 'this.objectIdToDropCSS' cache we get into an infinite digest cycle
-    var dropTargetCSS = this.objectIdToDropCSS['serviceArea']
-    if (dropTargetCSS) {
-      return dropTargetCSS
-    }
-    const radius = 50;  // Pixels
-    var pixelCoords = this.latLngToPixel(this.mapRef.getCenter())
-    dropTargetCSS = {
-      position: 'absolute',
-      left: `${pixelCoords.x - radius}px`,
-      top: `${pixelCoords.y - radius}px`,
-      border: 'solid 3px black',
-      'border-style': 'dashed',
-      'border-radius': `${radius}px`,
-      width: `${radius * 2}px`,
-      height: `${radius * 2}px`,
-      'background-color': 'rgba(255, 255, 255, 0.5)'
-    }
-    this.objectIdToDropCSS['serviceArea'] = dropTargetCSS
-    return dropTargetCSS;
-  }
-
-  // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
   getDropTargetCSSForMapObject(mapObject) {
     if (!this.isMarker(mapObject) || !this.isBoundaryCreationAllowed({'mapObject':mapObject})) { 
       return null

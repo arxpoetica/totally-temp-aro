@@ -14,7 +14,6 @@ class CreateServiceLayerController {
     this.serviceLayerName = null
     this.serviceLayerCode = null
 
-    this.createdMapObjects = {}
     this.objectIdToMapObject = {}
     this.selectedMapObject = null
   }
@@ -191,6 +190,26 @@ class CreateServiceLayerController {
       return Promise.resolve('')
     }
     return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
+  }
+
+  markSelectedServiceAreaPropertiesDirty() {
+    if (this.selectedMapObject) {
+      var objectProperties = this.objectIdToMapObject[this.selectedMapObject.objectId]
+      objectProperties.isDirty = true
+    }
+  }
+
+  // Saves the properties of the selected service area
+  saveSelectedServiceAreaProperties() {
+    if (this.selectedMapObject) {
+      var serviceLayerFeature = this.formatServiceLayerForService(this.selectedMapObject)
+      this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
+      .then((result) => {
+        this.objectIdToMapObject[this.selectedMapObject.objectId].isDirty = false
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
+    }
   }
 
   // $onChanges(changesObj) {

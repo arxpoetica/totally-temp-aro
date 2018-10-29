@@ -110,14 +110,9 @@
      does not help, because then the drop event on the drop targets does not work either -->
 <div class="map-object-drop-targets-container" style="position: absolute; left: 0px; top: 0px;">
   <drop-target ng-repeat="(key, mapObject) in $ctrl.createdMapObjects"
-               ng-if="$ctrl.featureType != 'serviceArea' && $ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForMapObject(mapObject)"
+               ng-if="$ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForMapObject(mapObject)"
                ng-style="$ctrl.getDropTargetCSSForMapObject(mapObject)"
                target-object-id="mapObject.objectId"
                on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">
-  </drop-target>
-  <drop-target 
-    ng-if="$ctrl.featureType == 'serviceArea' && $ctrl.isHavingBoundaryDraggedOver && $ctrl.getDropTargetCSSForServiceArea()"
-    ng-style="$ctrl.getDropTargetCSSForServiceArea()" 
-    on-dropped="$ctrl.handleOnDropped({dropEvent: dropEvent, targetObjectId: targetObjectId})">
   </drop-target>
 </div>
