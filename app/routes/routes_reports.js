@@ -571,7 +571,7 @@ exports.configure = (api, middleware) => {
     var site_boundary = request.params.site_boundary
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
     .then((plan) => {
-      var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      var escape = (name) => name.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g,'&#38;')
       var kmlOutput = `<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <Document>
         <name>${escape(`Site boundaries-${site_boundary}-${plan.name}`)}</name>
