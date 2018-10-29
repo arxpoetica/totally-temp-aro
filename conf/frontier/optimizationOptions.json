@@ -1,0 +1,8 @@
+{
+  "technologies": {
+    "FiveG": {
+      "label": "Fixed Wireless",
+      "checked": false
+    }
+  }
+}

@@ -46,7 +46,8 @@ function loadConfiguration() {
     'aroClient',
     'mapType',
     'locationDetailProperties',
-    'uiVisibility'
+    'uiVisibility',
+    'optimizationOptions'
   ]
 
   exports.configuration = {}

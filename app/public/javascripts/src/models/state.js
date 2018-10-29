@@ -141,70 +141,70 @@ class State {
   }
 
   // Optimization options - initialize once
-  service.optimizationOptions = {
-    uiAlgorithms: [],
-    uiSelectedAlgorithm: null,
-    networkConstraints: {
-      routingMode: service.routingModes.DIRECT_ROUTING.id,
-      cellNodeConstraints: {
-        cellRadius: 300.0,
-        cellGranularityRatio: 0.5,
-        minimumRayLength: 45,
-        polygonStrategy: 'FIXED_RADIUS',
-        tiles: [],
-        selectedTile: null
-      },
-      routeFromFiber: false,
-      fiberRoutingMode: null
-    },
-    financialConstraints: {
-      cashFlowStrategyType: 'EXTERNAL',
-      discountRate: 0.06,
-      years: 15
-    },
-    threshold: 0, // This will be converted to a precentage when sending to the UI
-    preIrrThreshold: 1.0,
-    budget: 100000,
-    customOptimization: null,
-    routeGenerationOptions: [
-      { id: 'T', value: 'A Route', checked: false },
-      { id: 'A', value: 'B Route', checked: false },
-      { id: 'B', value: 'C Route', checked: false },
-      { id: 'C', value: 'D Route', checked: false }
-    ],
-    technologies: { // Note that the keys are passed in to the optimization endpoint, so don't change them
-      Fiber: {
-        label: 'Fiber',
-        checked: true
-      },
-      FiveG: {
-        label: '5G',
-        checked: false
-      }
-    },
-    selectedLayer: null,
-    generatedDataRequest: {
-      generatePlanLocationLinks : false,
-      generateSubnetLinking: false
-    },
-    analysisSelectionMode: service.selectionModes.SELECTED_AREAS
-  }
+  // service.optimizationOptions = {
+  //   uiAlgorithms: [],
+  //   uiSelectedAlgorithm: null,
+  //   networkConstraints: {
+  //     routingMode: service.routingModes.DIRECT_ROUTING.id,
+  //     cellNodeConstraints: {
+  //       cellRadius: 300.0,
+  //       cellGranularityRatio: 0.5,
+  //       minimumRayLength: 45,
+  //       polygonStrategy: 'FIXED_RADIUS',
+  //       tiles: [],
+  //       selectedTile: null
+  //     },
+  //     routeFromFiber: false,
+  //     fiberRoutingMode: null
+  //   },
+  //   financialConstraints: {
+  //     cashFlowStrategyType: 'EXTERNAL',
+  //     discountRate: 0.06,
+  //     years: 15
+  //   },
+  //   threshold: 0, // This will be converted to a precentage when sending to the UI
+  //   preIrrThreshold: 1.0,
+  //   budget: 100000,
+  //   customOptimization: null,
+  //   routeGenerationOptions: [
+  //     { id: 'T', value: 'A Route', checked: false },
+  //     { id: 'A', value: 'B Route', checked: false },
+  //     { id: 'B', value: 'C Route', checked: false },
+  //     { id: 'C', value: 'D Route', checked: false }
+  //   ],
+  //   technologies: { // Note that the keys are passed in to the optimization endpoint, so don't change them
+  //     Fiber: {
+  //       label: 'Fiber',
+  //       checked: true
+  //     },
+  //     FiveG: {
+  //       label: '5G',
+  //       checked: false
+  //     }
+  //   },
+  //   selectedLayer: null,
+  //   generatedDataRequest: {
+  //     generatePlanLocationLinks : false,
+  //     generateSubnetLinking: false
+  //   },
+  //   analysisSelectionMode: service.selectionModes.SELECTED_AREAS
+  // }
 
-  if(config.ARO_CLIENT === 'frontier')
-    service.optimizationOptions.technologies['FiveG'].label = 'Fixed Wireless'
+  // if(config.ARO_CLIENT === 'frontier')
+  //   service.optimizationOptions.technologies['FiveG'].label = 'Fixed Wireless'
 
   //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
-  //158954857: disabling some optimization types
-  service.optimizationOptions.uiAlgorithms = [
-    service.OPTIMIZATION_TYPES.UNCONSTRAINED,
-    //service.OPTIMIZATION_TYPES.MAX_IRR,
-    service.OPTIMIZATION_TYPES.BUDGET,
-    //service.OPTIMIZATION_TYPES.IRR_TARGET,
-    //service.OPTIMIZATION_TYPES.IRR_THRESH,
-    service.OPTIMIZATION_TYPES.COVERAGE
-  ]
+  // //158954857: disabling some optimization types
+  // service.optimizationOptions.uiAlgorithms = [
+  //   service.OPTIMIZATION_TYPES.UNCONSTRAINED,
+  //   //service.OPTIMIZATION_TYPES.MAX_IRR,
+  //   service.OPTIMIZATION_TYPES.BUDGET,
+  //   //service.OPTIMIZATION_TYPES.IRR_TARGET,
+  //   //service.OPTIMIZATION_TYPES.IRR_THRESH,
+  //   service.OPTIMIZATION_TYPES.COVERAGE
+  // ]
 
-  service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
+  // service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
 
   // View Settings layer - define once
   service.viewSetting = {
@@ -1367,28 +1367,29 @@ class State {
   })
 
   service.getDefaultPlanInputs = () => {
-    return {
-      analysis_type: "NETWORK_PLAN",
-      financialConstraints: {
-        cashFlowStrategyType: "EXTERNAL",
-          discountRate: 0.06,
-            years: 15
-        },
-      locationConstraints: {
-        locationTypes: [],
-        analysisSelectionMode: service.selectionModes.SELECTED_AREAS
-      },
-      networkConstraints: {
-        networkTypes: [
-          "Fiber"
-        ],
-        routingMode: service.routingModes.DIRECT_ROUTING.id
-      },
-      optimization: {
-        algorithmType: "DEFAULT",
-        algorithm: "UNCONSTRAINED"
-      },
-    }
+    // return {
+    //   analysis_type: "NETWORK_PLAN",
+    //   financialConstraints: {
+    //     cashFlowStrategyType: "EXTERNAL",
+    //       discountRate: 0.06,
+    //         years: 15
+    //     },
+    //   locationConstraints: {
+    //     locationTypes: [],
+    //     analysisSelectionMode: service.selectionModes.SELECTED_AREAS
+    //   },
+    //   networkConstraints: {
+    //     networkTypes: [
+    //       "Fiber"
+    //     ],
+    //     routingMode: service.routingModes.DIRECT_ROUTING.id
+    //   },
+    //   optimization: {
+    //     algorithmType: "DEFAULT",
+    //     algorithm: "UNCONSTRAINED"
+    //   },
+    // }
+    return angular.copy(service.configuration.optimizationOptions)
   }
 
   service.showDirectedCable = false
@@ -1596,9 +1597,26 @@ class State {
     }
     service.configuration.loadPerspective(loggedInUser.perspective)
     service.setLoggedInUser(loggedInUser)
+    service.setOptimizationOptions()
     tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
     tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
   }
+
+  service.setOptimizationOptions = () => {
+    service.optimizationOptions = angular.copy(service.configuration.optimizationOptions)
+
+    //158954857: disabling some optimization types
+    service.optimizationOptions.uiAlgorithms = [
+      service.OPTIMIZATION_TYPES.UNCONSTRAINED,
+      //service.OPTIMIZATION_TYPES.MAX_IRR,
+      service.OPTIMIZATION_TYPES.BUDGET,
+      //service.OPTIMIZATION_TYPES.IRR_TARGET,
+      //service.OPTIMIZATION_TYPES.IRR_THRESH,
+      service.OPTIMIZATION_TYPES.COVERAGE
+    ]
+
+    service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
+  } 
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
 
