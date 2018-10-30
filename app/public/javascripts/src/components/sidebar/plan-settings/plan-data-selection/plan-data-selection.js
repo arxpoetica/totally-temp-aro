@@ -99,7 +99,7 @@ class DataSelectionController {
           this.isDataSourceEditable[dataSourceKey] = permissions && (permissions[this.aclManager.PERMISSIONS.WRITE]
                                                                     || permissions[this.aclManager.PERMISSIONS.ADMIN]
                                                                     || permissions[this.aclManager.PERMISSIONS.IS_SUPERUSER])
-
+          this.$timeout()
         })
         .catch(err => console.error(err))
       }
