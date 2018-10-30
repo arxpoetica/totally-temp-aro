@@ -21,6 +21,8 @@ class MapObjectEditorController {
     this.selectedMapObject = null
     this.iconAnchors = {}
     this.menuItems = []
+    
+    /*
     // Save the context menu element so that we can remove it when the component is destroyed
     this.contextMenuElement = null
     this.contextMenuCss = {
@@ -30,6 +32,8 @@ class MapObjectEditorController {
       top: '100px',
       left: '100px'
     }
+    */
+    
     this.drawing = {
       drawingManager: null,
       markerIdForBoundary: null   // The objectId of the marker for which we are drawing the boundary
@@ -61,6 +65,8 @@ class MapObjectEditorController {
     if (!this.featureType) {
       console.warn('map-object-editor: featureType must be defined (currently either "location" or "equipment"')
     }
+    
+    /*
     // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
     // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
     // changes while the component is initializing, and we get a AngularJS error.
@@ -75,7 +81,8 @@ class MapObjectEditorController {
       var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
       mapCanvas.appendChild(this.dropTargetElement)
     }, 0)
-
+    */
+    
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
 
@@ -1150,7 +1157,8 @@ class MapObjectEditorController {
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
-
+    
+    /*
     // Remove the context menu from the document body
     this.$timeout(() => {
       var documentBody = this.$document.find('body')[0]
@@ -1158,7 +1166,8 @@ class MapObjectEditorController {
       var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
       mapCanvas.removeChild(this.dropTargetElement)
     }, 0)
-
+    */
+    
     // Remove any dragging DOM event listeners
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
