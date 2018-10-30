@@ -115,7 +115,8 @@ class MapObjectEditorController {
       if (hasBoundaryType) {
         // This will be handled by our custom drop targets. Do not use the map canvas' ondrop to handle it.
         return
-      }      
+      }   
+
       // Convert pixels to latlng
       var grabOffsetX = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_X)
       var grabOffsetY = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_Y)
@@ -125,19 +126,36 @@ class MapObjectEditorController {
       var offsetY = grabImageH - grabOffsetY // bottom
       
       var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
-      // ToDo feature should probably be a class
-      var feature = {
-        objectId: this.utils.getUUID(),
-        geometry: {
-          type: 'Point',
-          coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-        }, 
-        networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
+
+      if(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY) !== Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
+        // ToDo feature should probably be a class
+        var feature = {
+          objectId: this.utils.getUUID(),
+          geometry: {
+            type: 'Point',
+            coordinates: [dropLatLng.lng(), dropLatLng.lat()]
+          }, 
+          networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
+        }
+        
+        this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
+        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+        .catch((err) => console.error(err))
+      } else {
+        var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng());
+        var radius = 1000; //radius in meters
+        var path = this.generateHexagonPath(position,radius)
+        var feature = {
+          objectId: this.utils.getUUID(),
+          geometry: {
+            type: 'MultiPolygon',
+            coordinates: [[path]]
+          },
+          isExistingObject: false
+        }
+       this.createMapObject(feature, null, true)
       }
-      
-      this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
-      .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
-      .catch((err) => console.error(err))
+
       event.preventDefault();
     };
     
@@ -1168,6 +1186,17 @@ class MapObjectEditorController {
       self.drawing.drawingManager = null
       self.drawing.markerIdForBoundary = null
     });
+  }
+
+  generateHexagonPath(position,radius) {
+    var pathPoints = [];
+    for(var angle= -90;angle < 270; angle+=60) {
+      var point = google.maps.geometry.spherical.computeOffset(position, radius, angle)
+      pathPoints.push([point.lng(), point.lat()]);    
+    }
+    pathPoints.push(pathPoints[0])  // Close the polygon
+
+    return pathPoints
   }
 
   $onChanges(changesObj) {

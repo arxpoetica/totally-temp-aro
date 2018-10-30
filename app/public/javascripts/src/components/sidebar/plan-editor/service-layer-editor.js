@@ -1,12 +1,13 @@
 import Constants from '../../common/constants'
 
-class CreateServiceLayerController {
+class ServiceLayerEditorController {
   
   constructor($http,$timeout,state,Utils) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.utils = Utils
+    this.Constants = Constants
 
     this.discardChanges = false
     this.currentTransaction = null
@@ -222,11 +223,11 @@ class CreateServiceLayerController {
 
 }
   
-CreateServiceLayerController.$inject = ['$http','$timeout','state','Utils']
+ServiceLayerEditorController.$inject = ['$http','$timeout','state','Utils']
 
-let createServiceLayer = {
-  templateUrl: '/components/sidebar/plan-editor/create-service-layer.html',
-  controller: CreateServiceLayerController
+let serviceLayerEditor = {
+  templateUrl: '/components/sidebar/plan-editor/service-layer-editor.html',
+  controller: ServiceLayerEditorController
 }
 
-export default createServiceLayer
+export default serviceLayerEditor
