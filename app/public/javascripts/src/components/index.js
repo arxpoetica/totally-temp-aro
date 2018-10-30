@@ -86,6 +86,7 @@ import editorInterfaceValue from './common/editor-interfaces/editor-interface-va
 import utils from './common/utilities'
 
 import state from '../models/state'
+import aclManager from '../models/aclManager'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -170,4 +171,5 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceValue', editorInterfaceValue)
    .service('Utils', utils)
    .service('state', state)
+   .service('aclManager', aclManager)
    .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)   
