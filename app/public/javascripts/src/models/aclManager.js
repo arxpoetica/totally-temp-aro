@@ -56,9 +56,9 @@ class AclManager {
           if ((loggedInUser.id === access.systemActorId) || (loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const permission = access.rolePermissions
             // Note the or-equal-to (|=). So we start out with no permissions, and keep adding to them.
-            accessResult[this.PERMISSIONS.READ] |= ((permission & resolvedAccessTypes.RESOURCE_READ.permissionBits) != 0)
-            accessResult[this.PERMISSIONS.WRITE] |= ((permission & resolvedAccessTypes.RESOURCE_WRITE.permissionBits) != 0)
-            accessResult[this.PERMISSIONS.ADMIN] |= ((permission & resolvedAccessTypes.RESOURCE_ADMIN.permissionBits) != 0)
+            accessResult[this.PERMISSIONS.READ] = accessResult[this.PERMISSIONS.READ] || ((permission & resolvedAccessTypes.RESOURCE_READ.permissionBits) != 0)
+            accessResult[this.PERMISSIONS.WRITE] = accessResult[this.PERMISSIONS.WRITE] || ((permission & resolvedAccessTypes.RESOURCE_WRITE.permissionBits) != 0)
+            accessResult[this.PERMISSIONS.ADMIN] = accessResult[this.PERMISSIONS.ADMIN] || ((permission & resolvedAccessTypes.RESOURCE_ADMIN.permissionBits) != 0)
           }
         })
 

@@ -156,18 +156,6 @@ class DataSelectionController {
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
   }
-
-  showDataSourceEditButton(dataSourceKey) {
-    const isEditableType = (dataSourceKey === 'location' || dataSourceKey === 'service_layer')
-    const isSingleSourceSelected = (this.allDataItems[dataSourceKey].selectedLibraryItems.length === 1)
-    if (!isEditableType || !isSingleSourceSelected) {
-      return false
-    } else {
-      const permissions = this.aclManager.getEffectivePermissions('LIBRARY', this.allDataItems[dataSourceKey].selectedLibraryItems[0].id, this.state.loggedInUser)
-      const currentUserCanEdit = permissions && (permissions.WRITE || permissions.ADMIN || permissions.IS_SUPERUSER)
-      return currentUserCanEdit
-    }
-  }
 }
 
 DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state', 'aclManager']
