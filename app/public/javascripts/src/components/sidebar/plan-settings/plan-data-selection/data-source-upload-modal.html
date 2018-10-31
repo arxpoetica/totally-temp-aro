@@ -83,7 +83,7 @@
                     ng-repeat="dataSource in $ctrl.dataSources">
                   <strong ng-if="dataSource.isExpanded">{{dataSource.name}}</strong>
                   <span ng-if="!dataSource.isExpanded">{{dataSource.name}}</span>
-                  <div class="btn-group pull-right">
+                  <div class="btn-group pull-right" ng-if="dataSource.isEditableByUser">
                     <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
                       <i class="fa fa-trash"></i>
                     </button>
@@ -96,7 +96,7 @@
                     </button>
                   </div>
                   <div style="margin-left: 15px;">
-                    <resource-permissions-editor ng-if="dataSource.isExpanded" 
+                    <resource-permissions-editor ng-if="dataSource.isExpanded && dataSource.isEditableByUser"
                                                 resource-type="LIBRARY"
                                                 resource-id="{{dataSource.identifier}}"
                                                 system-actors="$ctrl.state.systemActors"

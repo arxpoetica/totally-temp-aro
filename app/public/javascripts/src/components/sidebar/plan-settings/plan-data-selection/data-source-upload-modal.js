@@ -1,9 +1,10 @@
 class DataSourceUploadController {
   
-  constructor($http, $timeout, state) {
+  constructor($http, $timeout, state, aclManager) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
+    this.aclManager = aclManager
     this.projectId = state.loggedInUser.projectId
     this.conicTileSystemUploaderApi = null  // Will be set if the conic tile uploader is active
     this.editingDataset = {
@@ -246,8 +247,23 @@ class DataSourceUploadController {
 
   loadDataSources() {
     if(this.isDataManagementView) {
-      this.dataSources = this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems
-      this.dataSources.forEach((item, index) => this.dataSources[index].isExpanded = false)
+      var aclPromises = []  // For each data source, get the effective ACL permissions and then allow/disallow editing
+      this.dataSources = angular.copy(this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems)
+      this.dataSources.forEach((item, index) => {
+        this.dataSources[index].isExpanded = false
+        this.dataSources[index].isEditableByUser = false
+        aclPromises.push(
+          this.aclManager.getEffectivePermissions('LIBRARY', this.dataSources[index].identifier, this.state.loggedInUser)
+            .then(permissions => {
+              this.dataSources[index].isEditableByUser = permissions && (permissions.ADMIN || permissions.IS_SUPERUSER)
+              return Promise.resolve()
+            })
+            .catch(err => console.error(err))
+        )
+      })
+      Promise.all(aclPromises)
+        .then(res => this.$timeout())
+        .catch(err => console.error(err))
     }
   }
 
@@ -265,7 +281,7 @@ class DataSourceUploadController {
 
 }
 
-DataSourceUploadController.$inject = ['$http', '$timeout', 'state']
+DataSourceUploadController.$inject = ['$http', '$timeout', 'state', 'aclManager']
 
 let globalDataSourceUploadModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-data-selection/data-source-upload-modal.html',

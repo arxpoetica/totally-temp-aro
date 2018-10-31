@@ -372,10 +372,13 @@ class PlanEditorController {
       if (!censusBlockCountById.hasOwnProperty(location.censusBlockId)){
         censusBlockCountById[location.censusBlockId] = 0
       }
-      if ("number" != typeof location.distance) continue // skip these 
-      if ('feet' == this.state.configuration.units.length_units) location.distance *= 3.28084
+      
       locations.push(location)
       censusBlockCountById[location.censusBlockId]++
+      
+      if ("number" != typeof location.distance) continue // skip these 
+      if ('feet' == this.state.configuration.units.length_units) location.distance *= 3.28084
+      
       var dist = location.distance
       var barIndex = Math.floor(dist / 1000)
       if (barIndex >= barChartData.length || 'undefined' == typeof barChartData[barIndex]){

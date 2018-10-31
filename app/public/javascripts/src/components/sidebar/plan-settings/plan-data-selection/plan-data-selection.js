@@ -99,7 +99,7 @@ class DataSelectionController {
           this.isDataSourceEditable[dataSourceKey] = permissions && (permissions[this.aclManager.PERMISSIONS.WRITE]
                                                                     || permissions[this.aclManager.PERMISSIONS.ADMIN]
                                                                     || permissions[this.aclManager.PERMISSIONS.IS_SUPERUSER])
-
+          this.$timeout()
         })
         .catch(err => console.error(err))
       }
@@ -155,18 +155,6 @@ class DataSelectionController {
     // Put the application in "Edit Service Layer" mode
     this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
     this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
-  }
-
-  showDataSourceEditButton(dataSourceKey) {
-    const isEditableType = (dataSourceKey === 'location' || dataSourceKey === 'service_layer')
-    const isSingleSourceSelected = (this.allDataItems[dataSourceKey].selectedLibraryItems.length === 1)
-    if (!isEditableType || !isSingleSourceSelected) {
-      return false
-    } else {
-      const permissions = this.aclManager.getEffectivePermissions('LIBRARY', this.allDataItems[dataSourceKey].selectedLibraryItems[0].id, this.state.loggedInUser)
-      const currentUserCanEdit = permissions && (permissions.WRITE || permissions.ADMIN || permissions.IS_SUPERUSER)
-      return currentUserCanEdit
-    }
   }
 }
 
