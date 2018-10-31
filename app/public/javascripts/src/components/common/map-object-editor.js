@@ -115,7 +115,8 @@ class MapObjectEditorController {
       if (hasBoundaryType) {
         // This will be handled by our custom drop targets. Do not use the map canvas' ondrop to handle it.
         return
-      }      
+      }   
+
       // Convert pixels to latlng
       var grabOffsetX = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_X)
       var grabOffsetY = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_Y)
@@ -125,19 +126,36 @@ class MapObjectEditorController {
       var offsetY = grabImageH - grabOffsetY // bottom
       
       var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
-      // ToDo feature should probably be a class
-      var feature = {
-        objectId: this.utils.getUUID(),
-        geometry: {
-          type: 'Point',
-          coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-        }, 
-        networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
+
+      if(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY) !== Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
+        // ToDo feature should probably be a class
+        var feature = {
+          objectId: this.utils.getUUID(),
+          geometry: {
+            type: 'Point',
+            coordinates: [dropLatLng.lng(), dropLatLng.lat()]
+          }, 
+          networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
+        }
+        
+        this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
+        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+        .catch((err) => console.error(err))
+      } else {
+        var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng());
+        var radius = 1000; //radius in meters
+        var path = this.generateHexagonPath(position,radius)
+        var feature = {
+          objectId: this.utils.getUUID(),
+          geometry: {
+            type: 'MultiPolygon',
+            coordinates: [[path]]
+          },
+          isExistingObject: false
+        }
+       this.createMapObject(feature, null, true)
       }
-      
-      this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
-      .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
-      .catch((err) => console.error(err))
+
       event.preventDefault();
     };
     
@@ -382,6 +400,15 @@ class MapObjectEditorController {
           var menuItems = []
           var menuItemsById = {}
 
+          if(results.length == 0) {
+            var options = []
+            options.push('add Service Area')
+            menuItems.push({
+              'options': options,
+              'name': 'Add Service Area',
+              'latLng': latLng
+            })
+          } else {
           results.forEach((result) => {
             //populate context menu aray here
             // we may need different behavour for different controllers using this
@@ -426,7 +453,7 @@ class MapObjectEditorController {
               })
             }
           })
-
+        }
           this.menuItems = menuItems
           if (menuItems.length <= 0) {
             this.closeContextMenu()
@@ -780,7 +807,7 @@ class MapObjectEditorController {
       google.maps.event.addListener(mapObject, 'dragend', function(){
         self.onModifyObject && self.onModifyObject({mapObject})
       });
-    } else if (feature.geom.type === 'MultiPolygon') {
+    } else if (feature.geometry.type === 'MultiPolygon') {
       mapObject = this.createMultiPolygonMapObject(feature)
       // Set up listeners on the map object
       mapObject.addListener('click', (event) => {
@@ -1115,6 +1142,61 @@ class MapObjectEditorController {
       self.drawing.drawingManager = null
       self.drawing.markerIdForBoundary = null
     });
+  }
+
+  startDrawingBoundaryForSA(latLng) {
+
+    if (this.drawing.drawingManager) {
+      // If we already have a drawing manager, discard it.
+      console.warn('We already have a drawing manager active')
+      this.drawing.drawingManager.setMap(null)
+      this.drawing.drawingManager = null
+    }
+
+    this.drawing.drawingManager = new google.maps.drawing.DrawingManager({
+      drawingMode: google.maps.drawing.OverlayType.POLYGON,
+      drawingControl: false,
+      polygonOptions:this.selectedPolygonOptions
+    });
+    this.drawing.drawingManager.setMap(this.mapRef);
+    var self = this;
+    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function(event) {
+      // Create a boundary object using the regular object-creation workflow. A little awkward as we are converting
+      // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
+      // We keep it this way because the object creation workflow does other things like set up events, etc.
+      var feature = {
+        objectId: self.utils.getUUID(),
+        geometry: {
+          type: 'MultiPolygon',
+          coordinates: [[]]
+        },
+        isExistingObject: false
+      }
+      event.overlay.getPaths().forEach((path) => {
+        var pathPoints = []
+        path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+        pathPoints.push(pathPoints[0])  // Close the polygon
+        feature.geometry.coordinates[0].push(pathPoints)
+      })
+      self.createMapObject(feature, null ,true)
+      // Remove the overlay. It will be replaced with the created map object
+      event.overlay.setMap(null)
+      // Kill the drawing manager
+      self.drawing.drawingManager.setMap(null)
+      self.drawing.drawingManager = null
+      self.drawing.markerIdForBoundary = null
+    });
+  }
+
+  generateHexagonPath(position,radius) {
+    var pathPoints = [];
+    for(var angle= -90;angle < 270; angle+=60) {
+      var point = google.maps.geometry.spherical.computeOffset(position, radius, angle)
+      pathPoints.push([point.lng(), point.lat()]);    
+    }
+    pathPoints.push(pathPoints[0])  // Close the polygon
+
+    return pathPoints
   }
 
   $onChanges(changesObj) {

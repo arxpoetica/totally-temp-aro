@@ -67,6 +67,11 @@
             &nbsp;&nbsp;<i class="fa fa-plus"></i>
             Add Boundary
           </a>
+          <a ng-if=" 'add Service Area' == option " 
+            href="#" ng-click="$ctrl.startDrawingBoundaryForSA(item.latLng)">
+            &nbsp;&nbsp;<i class="fa fa-plus"></i>
+            Add Service Area
+          </a>
           <a ng-if=" 'edit boundary' == option "
              href="#" ng-click="$ctrl.editBoundary(item.objectId)">
             &nbsp;&nbsp;<i class="fa fa-pencil"></i>
