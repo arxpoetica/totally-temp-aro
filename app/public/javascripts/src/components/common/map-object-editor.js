@@ -5,7 +5,7 @@ import FeatureSelector from '../tiles/feature-selector'
 
 class MapObjectEditorController {
 
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, Utils) {
+  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, contextMenuService, Utils) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -13,6 +13,7 @@ class MapObjectEditorController {
     this.$timeout = $timeout
     this.state = state
     this.tileDataService = tileDataService
+    this.contextMenuService = contextMenuService
     this.utils = Utils
     this.mapRef = null
     this.overlayRightClickListener = null
@@ -20,7 +21,7 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.iconAnchors = {}
-    this.menuItems = []
+    //this.menuItems = []
     
     /*
     // Save the context menu element so that we can remove it when the component is destroyed
@@ -192,15 +193,20 @@ class MapObjectEditorController {
   }
   
   closeContextMenu(){
+    /*
     var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
     const isDropdownHidden = dropdownMenu.is(':hidden')
     if (!isDropdownHidden) {
       var toggleButton = this.$document.find('.map-object-editor-context-menu')
       toggleButton.dropdown('toggle')
     }
+    */
+    this.contextMenuService.menuOff()
+    this.$timeout()
   }
   
-  openContextMenu(x, y){
+  openContextMenu(x, y, menuItems){
+    /*
     if ('undefined' != typeof x) this.contextMenuCss.left = `${x}px`
     if ('undefined' != typeof y) this.contextMenuCss.top = `${y}px`
     
@@ -214,16 +220,29 @@ class MapObjectEditorController {
       var toggleButton = this.$document.find('.map-object-editor-context-menu')
       toggleButton.dropdown('toggle')
     }
+    */
+    this.contextMenuService.populateMenu(menuItems)
+    this.contextMenuService.moveMenu(x, y)
+    this.contextMenuService.menuOn()
+    
     this.$timeout()
   }
   
+  onEditExistingFeature(data){
+    this.editExistingFeature(data.feature, data.latLng)
+  }
+  
   editExistingFeature(feature, latLng){
+    //console.log(data)
+    //var feature = data.feature
+    //var latLng = data.latLng
+    
     var hitFeatures = {}
     hitFeatures['latLng'] = latLng
     if ('location' == this.featureType) hitFeatures['locations'] = [feature]
     if ('equipment' == this.featureType) hitFeatures['equipmentFeatures'] = [feature]
     if ('serviceArea' == this.featureType)  hitFeatures['serviceAreas'] = [feature]
-    
+    console.log(this)
     this.state.mapFeaturesSelectedEvent.next(hitFeatures)
   }
   
@@ -325,15 +344,22 @@ class MapObjectEditorController {
             if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
               // it's on the edit layer / in the transaction
               feature = this.createdMapObjects[result.objectId].feature
-              options.push('select')// select 
+              //options.push('select')// select 
+              options.push( this.contextMenuService.makeItemOption('Select', this.selectProposedFeature, result.objectId, 'fa-pencil') )
               if ('equipment' == dataTypeList[0]){
-                if (this.isBoundaryCreationAllowed({'mapObject':result})) options.push('add boundary')// need to filter for: if not boundary 
+                if (this.isBoundaryCreationAllowed({'mapObject':result})){
+                  //options.push('add boundary')// need to filter for: if not boundary 
+                  options.push( this.contextMenuService.makeItemOption('Add Boundary', this.startDrawingBoundaryForId, result.objectId, 'fa-plus') )
+                }
               }else if('equipment_boundary' == dataTypeList[0]){
-                options.push('edit boundary')
+                //options.push('edit boundary')
+                options.push( this.contextMenuService.makeItemOption('Edit Boundary', this.editBoundary, result.objectId, 'fa-pencil') )
               }
-              options.push('delete')
+              //options.push('delete')
+              options.push( this.contextMenuService.makeItemOption('Delete', this.deleteObjectWithId, result.objectId, 'fa-trash') )
             }else{
-              options.push('edit existing')
+              //options.push('edit existing')
+              options.push( this.contextMenuService.makeItemOption('Edit Existing', this.editExistingFeature, {'feature':result, 'latLng':latLng}, 'fa-pencil') )
             }
             
             var name = ''
@@ -352,6 +378,7 @@ class MapObjectEditorController {
             }
             
             menuItemsById[result.objectId] = options
+            /*
             menuItems.push({
               'objectId': result.objectId, 
               'options': options, 
@@ -360,14 +387,22 @@ class MapObjectEditorController {
               'feature': feature, 
               'latLng': latLng
             })
+            */
+            var data = {
+              'objectId': result.objectId, 
+              'dataTypeList': dataTypeList, 
+              'feature': feature, 
+              'latLng': latLng
+            }
+            menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
           }
         })
       
-        this.menuItems = menuItems
+        //this.menuItems = menuItems
         if (menuItems.length <= 0){
           this.closeContextMenu()
         }else{
-          this.openContextMenu(x, y)
+          this.openContextMenu(x, y, menuItems)
         }
       })
     } else if ('serviceArea' == this.featureType) {
@@ -434,15 +469,15 @@ class MapObjectEditorController {
             }
           })
 
-          this.menuItems = menuItems
+          //this.menuItems = menuItems
           if (menuItems.length <= 0) {
             this.closeContextMenu()
           } else {
-            this.openContextMenu(x, y)
+            this.openContextMenu(x, y, menuItems)
           }
         })
     } else if('location' == this.featureType){
-      this.menuItems = [{
+      var menuItems = [{
         'objectId': this.selectedMapObject.objectId, 
         'options': ['delete'], 
         'dataTypeList': ['location'], 
@@ -451,7 +486,7 @@ class MapObjectEditorController {
         'latLng': latLng
       }]
       
-      this.openContextMenu(x, y)
+      this.openContextMenu(x, y, menuItems)
     }
   }
   
@@ -1175,7 +1210,7 @@ class MapObjectEditorController {
   }
 }
 
-MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'Utils']
+MapObjectEditorController.$inject = ['$http', '$element', '$compile', '$document', '$timeout', 'state', 'tileDataService', 'contextMenuService', 'Utils']
 
 let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',

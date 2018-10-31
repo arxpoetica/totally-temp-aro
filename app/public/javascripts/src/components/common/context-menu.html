@@ -18,14 +18,17 @@
 
 
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
-  <div class="dropdown">
+  
+  <div class="dropdown open">
+  
     <!-- Have a button but hide it. This markup is from the standard bootstrap dropdown docs.
          The .dropdown() method is called on this hidden button, which in turn shows the menu. -->
+    <!-- 
     <button ng-hide="true" class="btn btn-default dropdown-toggle map-object-editor-context-menu" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       Dropdown
       <span class="caret"></span>
     </button>
-    
+    -->
     <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
       <!-- Menu item to delete object -->
       <div class="map-object-editor-context-menu-dropdown-section" ng-repeat="item in $ctrl.menuItems">
@@ -35,7 +38,7 @@
         <li ng-repeat="option in item.options">
           <a href="#" ng-click="option.callback(option.data, item.data)">
             &nbsp;&nbsp;<i class="fa {{option.iconClass}}"></i>
-            {{option.Label}}
+            {{option.label}}
           </a>
           
           <!-- 
@@ -65,6 +68,7 @@
       </div>
       
     </ul>
-    
+  
   </div>
+ 
 </div>
