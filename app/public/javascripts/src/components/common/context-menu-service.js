@@ -10,7 +10,6 @@ app.service('contextMenuService', ['$rootScope', '$timeout', ($rootScope, $timeo
   service.menuXY = new Rx.Subject()
   
   service.populateMenu = (menuItems) => {
-    console.log(menuItems)
     service.menuItems.next(menuItems)
   }
   
@@ -28,30 +27,15 @@ app.service('contextMenuService', ['$rootScope', '$timeout', ($rootScope, $timeo
   
   // --- 
   
-  service.makeItemOption = (label, callback, data, iconClass) => {
+  service.makeItemOption = (label, iconClass, callback) => {
     return {
       'label': label, 
-      'callback': callback, 
-      'data': data, 
+      'callback': callback,
       'iconClass': iconClass
     }
   }
   
-  //makeMenuItem(objectId, options, dataTypeList, name, feature, latLng){
   service.makeMenuItem = (label, data, options) => {
-    /*
-    var menuItem = {
-      'label': name, 
-      'data': {
-        'objectId': objectId, 
-        'options': options, 
-        'dataTypeList': dataTypeList, 
-        'name': name, 
-        'feature': feature, 
-        'latLng': latLng
-      }
-    }
-    */
     var menuItem = {
       'label': label, 
       'data': data, 

@@ -21,19 +21,7 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.iconAnchors = {}
-    //this.menuItems = []
     
-    /*
-    // Save the context menu element so that we can remove it when the component is destroyed
-    this.contextMenuElement = null
-    this.contextMenuCss = {
-      display: 'block',
-      position: 'absolute',
-      visible: true,
-      top: '100px',
-      left: '100px'
-    }
-    */
     
     this.drawing = {
       drawingManager: null,
@@ -67,30 +55,12 @@ class MapObjectEditorController {
       console.warn('map-object-editor: featureType must be defined (currently either "location" or "equipment"')
     }
     
-    /*
-    // Remove the context menu from the map-object editor and put it as a child of the <BODY> tag. This ensures
-    // that the context menu appears on top of all the other elements. Wrap it in a $timeout(), otherwise the element
-    // changes while the component is initializing, and we get a AngularJS error.
-    this.$timeout(() => {
-      this.contextMenuElement = this.$element.find('.map-object-editor-context-menu-container')[0]
-      this.$element[0].removeChild(this.contextMenuElement)
-      var documentBody = this.$document.find('body')[0]
-      documentBody.appendChild(this.contextMenuElement)
-
-      this.dropTargetElement = this.$element.find('.map-object-drop-targets-container')[0]
-      this.$element[0].removeChild(this.dropTargetElement)
-      var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
-      mapCanvas.appendChild(this.dropTargetElement)
-    }, 0)
-    */
-    
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
-      //console.log(event)
       this.handleMapEntitySelected(event)
     })
 
@@ -159,7 +129,6 @@ class MapObjectEditorController {
     })
     
     
-    
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
     this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
@@ -177,7 +146,6 @@ class MapObjectEditorController {
   }
   
   
-  
   // ----- rightclick menu ----- //
 
   getXYFromEvent(event){
@@ -193,34 +161,11 @@ class MapObjectEditorController {
   }
   
   closeContextMenu(){
-    /*
-    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-    const isDropdownHidden = dropdownMenu.is(':hidden')
-    if (!isDropdownHidden) {
-      var toggleButton = this.$document.find('.map-object-editor-context-menu')
-      toggleButton.dropdown('toggle')
-    }
-    */
     this.contextMenuService.menuOff()
     this.$timeout()
   }
   
   openContextMenu(x, y, menuItems){
-    /*
-    if ('undefined' != typeof x) this.contextMenuCss.left = `${x}px`
-    if ('undefined' != typeof y) this.contextMenuCss.top = `${y}px`
-    
-    // Display the context menu and select the clicked marker
-    this.contextMenuCss.display = 'block'
-    
-    // Show the dropdown menu
-    var dropdownMenu = this.$document.find('.map-object-editor-context-menu-dropdown')
-    const isDropdownHidden = dropdownMenu.is(':hidden')
-    if (isDropdownHidden) {
-      var toggleButton = this.$document.find('.map-object-editor-context-menu')
-      toggleButton.dropdown('toggle')
-    }
-    */
     this.contextMenuService.populateMenu(menuItems)
     this.contextMenuService.moveMenu(x, y)
     this.contextMenuService.menuOn()
@@ -228,21 +173,12 @@ class MapObjectEditorController {
     this.$timeout()
   }
   
-  onEditExistingFeature(data){
-    this.editExistingFeature(data.feature, data.latLng)
-  }
-  
   editExistingFeature(feature, latLng){
-    //console.log(data)
-    //var feature = data.feature
-    //var latLng = data.latLng
-    
     var hitFeatures = {}
     hitFeatures['latLng'] = latLng
     if ('location' == this.featureType) hitFeatures['locations'] = [feature]
     if ('equipment' == this.featureType) hitFeatures['equipmentFeatures'] = [feature]
     if ('serviceArea' == this.featureType)  hitFeatures['serviceAreas'] = [feature]
-    console.log(this)
     this.state.mapFeaturesSelectedEvent.next(hitFeatures)
   }
   
@@ -253,15 +189,12 @@ class MapObjectEditorController {
   startDrawingBoundaryForId(objectId){
     this.startDrawingBoundaryFor(this.createdMapObjects[objectId])
   }
-  
+  /*
   editBoundary(objectId){
-    //var mapObject = 
     this.selectMapObject(this.createdMapObjects[objectId])
-    this.toggleEditSelectedPolygon()
+    //this.selectedMapObject.setEditable(true);
   }
-  
-  // deleteObjectWithId
-  //createEditableExistingMapObject(feature, iconUrl)
+  */
   
   getDataTypeList(feature){
     var dataTypeList = ['']
@@ -310,7 +243,6 @@ class MapObjectEditorController {
       
       this.getFeaturesAtPoint(latLng)
       .then((results) => {
-
         // We may have come here when the user clicked an existing map object. For now, just add it to the list.
         // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
         if (clickedMapObject) {
@@ -344,22 +276,17 @@ class MapObjectEditorController {
             if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
               // it's on the edit layer / in the transaction
               feature = this.createdMapObjects[result.objectId].feature
-              //options.push('select')// select 
-              options.push( this.contextMenuService.makeItemOption('Select', this.selectProposedFeature, result.objectId, 'fa-pencil') )
+              options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
               if ('equipment' == dataTypeList[0]){
                 if (this.isBoundaryCreationAllowed({'mapObject':result})){
-                  //options.push('add boundary')// need to filter for: if not boundary 
-                  options.push( this.contextMenuService.makeItemOption('Add Boundary', this.startDrawingBoundaryForId, result.objectId, 'fa-plus') )
+                  options.push( this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => {this.startDrawingBoundaryForId(result.objectId)}) )
                 }
               }else if('equipment_boundary' == dataTypeList[0]){
-                //options.push('edit boundary')
-                options.push( this.contextMenuService.makeItemOption('Edit Boundary', this.editBoundary, result.objectId, 'fa-pencil') )
+                //options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
               }
-              //options.push('delete')
-              options.push( this.contextMenuService.makeItemOption('Delete', this.deleteObjectWithId, result.objectId, 'fa-trash') )
+              options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(result.objectId)}) )
             }else{
-              //options.push('edit existing')
-              options.push( this.contextMenuService.makeItemOption('Edit Existing', this.editExistingFeature, {'feature':result, 'latLng':latLng}, 'fa-pencil') )
+              options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
             }
             
             var name = ''
@@ -378,16 +305,7 @@ class MapObjectEditorController {
             }
             
             menuItemsById[result.objectId] = options
-            /*
-            menuItems.push({
-              'objectId': result.objectId, 
-              'options': options, 
-              'dataTypeList': dataTypeList, 
-              'name': name, 
-              'feature': feature, 
-              'latLng': latLng
-            })
-            */
+            
             var data = {
               'objectId': result.objectId, 
               'dataTypeList': dataTypeList, 
@@ -398,7 +316,6 @@ class MapObjectEditorController {
           }
         })
       
-        //this.menuItems = menuItems
         if (menuItems.length <= 0){
           this.closeContextMenu()
         }else{
@@ -443,11 +360,11 @@ class MapObjectEditorController {
               if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
                 // it's on the edit layer / in the transaction
                 feature = this.createdMapObjects[result.objectId].feature
-                options.push('select')// select 
-                options.push('edit service area')
-                options.push('delete')
+                options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
+                options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+                options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(result.objectId)}) )
               } else {
-                options.push('edit existing')
+                options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
               }
 
               var name = ''
@@ -458,14 +375,14 @@ class MapObjectEditorController {
               }
 
               menuItemsById[result.objectId] = options
-              menuItems.push({
-                'objectId': result.objectId,
-                'options': options,
-                'dataTypeList': dataTypeList,
-                'name': name,
-                'feature': feature,
+              
+              var data = {
+                'objectId': result.objectId, 
+                'dataTypeList': dataTypeList, 
+                'feature': feature, 
                 'latLng': latLng
-              })
+              }
+              menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
             }
           })
 
@@ -477,15 +394,16 @@ class MapObjectEditorController {
           }
         })
     } else if('location' == this.featureType){
-      var menuItems = [{
+      var name = 'location'
+      var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(this.selectedMapObject.objectId)}) ]
+      var menuItems = []
+      var data = {
         'objectId': this.selectedMapObject.objectId, 
-        'options': ['delete'], 
         'dataTypeList': ['location'], 
-        'name': 'location', 
         'feature': this.selectedMapObject, 
         'latLng': latLng
-      }]
-      
+      }
+      menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
       this.openContextMenu(x, y, menuItems)
     }
   }
@@ -496,19 +414,7 @@ class MapObjectEditorController {
     
     // Get zoom
     var zoom = this.mapRef.getZoom()
-    /*
-    var hitPromises = []
-    hitPromises.push( new Promise((resolve, reject) => {
-      var hits = []
-      Object.getOwnPropertyNames(this.createdMapObjects).forEach((objectId) => {
-        var mapObject = this.createdMapObjects[objectId]
-        if ( mapObject.hitTest(latLng) ){
-          hits.push(mapObject.feature)
-        }
-      })
-      resolve(hits)
-    }))
-    */
+    
     // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
     var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
     
@@ -1069,15 +975,17 @@ class MapObjectEditorController {
     this.selectedMapObject = mapObject
     this.onSelectObject && this.onSelectObject({mapObject})
   }
-
+  
+  /*
   toggleEditSelectedPolygon() {
     if (!this.selectedMapObject || this.isMarker(this.selectedMapObject)) {
       return
     }
-    var isEditable = this.selectedMapObject.getEditable();
-    this.selectedMapObject.setEditable(!isEditable);
+    var isEditable = this.selectedMapObject.getEditable()
+    this.selectedMapObject.setEditable(!isEditable)
   }
-
+  */
+  
   removeCreatedMapObjects() {
     // Remove created objects from map
     this.selectMapObject(null)
@@ -1103,9 +1011,6 @@ class MapObjectEditorController {
       mapObjectToDelete.setMap(null)
       delete this.createdMapObjects[objectId]
       this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
-      this.contextMenuCss.display = 'none'  // Hide the context menu      
-      //console.log('delete object')
-      //console.log(mapObjectToDelete)
     }
   }
 

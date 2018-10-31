@@ -30,45 +30,18 @@
     </button>
     -->
     <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
-      <!-- Menu item to delete object -->
       <div class="map-object-editor-context-menu-dropdown-section" ng-repeat="item in $ctrl.menuItems">
         <li>
           {{item.label}}
         </li>
         <li ng-repeat="option in item.options">
-          <a href="#" ng-click="option.callback(option.data, item.data)">
+          <a href="#" ng-click="$ctrl.onOptionClick(option.callback, item.data)">
             &nbsp;&nbsp;<i class="fa {{option.iconClass}}"></i>
             {{option.label}}
           </a>
-          
-          <!-- 
-          <a ng-if=" 'edit existing' == option "
-             href="#" ng-click="$ctrl.editExistingFeature(item.feature, item.latLng)">
-            &nbsp;&nbsp;<i class="fa fa-pencil"></i>
-            Select
-          </a>
-          <a ng-if=" 'add boundary' == option "
-             href="#" ng-click="$ctrl.startDrawingBoundaryForId(item.objectId)">
-            &nbsp;&nbsp;<i class="fa fa-plus"></i>
-            Add Boundary
-          </a>
-          <a ng-if=" 'edit boundary' == option "
-             href="#" ng-click="$ctrl.editBoundary(item.objectId)">
-            &nbsp;&nbsp;<i class="fa fa-pencil"></i>
-            Edit Boundary
-          </a>
-          <a ng-if=" 'delete' == option "
-             href="#" ng-click="$ctrl.deleteObjectWithId(item.objectId)">
-            &nbsp;&nbsp;<i class="fa fa-trash"></i>
-            Delete
-          </a>
-          -->
-          
         </li>
       </div>
-      
     </ul>
   
   </div>
- 
 </div>
