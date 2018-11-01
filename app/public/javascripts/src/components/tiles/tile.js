@@ -36,13 +36,16 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, state, tileDataService, uiNotificationService) {
+  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
+    this.$timeout = $timeout
     this.state = state
     this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
+    this.contextMenuService = contextMenuService
+    
     this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
@@ -334,26 +337,87 @@ class TileComponentController {
     // FOR TEST 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
       if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS) return
-      console.log("rightclick")
       
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
-        console.log(hitFeatures)
-        /*
-        if (hitFeatures){
-          if (hitFeatures.locations.length > 0) {
-            this.state.hackRaiseEvent(hitFeatures.locations)
-          }
-          
-          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-          // ToDo: now that we have types these categories should to be dynamic
-          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        var menuItems = []
+        var menuItemsById = {}
+        
+        // ToDo: this should be formalised 
+        var featureCats = [ 
+          'locations',
+          'serviceAreas',
+          'analysisAreas',
+          'roadSegments',
+          'equipmentFeatures', 
+          'censusFeatures'
+        ]
+        
+        featureCats.forEach((cat) => {
+          hitFeatures[cat].forEach((feature) => {
+            if (feature.hasOwnProperty('object_id')) feature.objectId = feature.object_id
+            if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
+              menuItemsById[feature.objectId] = feature 
+              
+              // ToDo: formalize this
+              var singleHitFeature = {}
+              singleHitFeature.latLng = hitFeatures.latLng
+              singleHitFeature[cat] = [feature]
+              
+              var data = {
+                'objectId': feature.objectId, 
+                //'dataTypeList': dataTypeList, 
+                'feature': feature, 
+                'latLng': hitFeatures.latLng
+              }
+              
+              var options = []
+              options.push( this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
+                this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
+              }))
+              
+              var name = cat // change this
+              
+              menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
+              
+            }
+          })
+        })
+        
+        if (menuItems.length > 0){
+          var eventXY = this.getXYFromEvent(event)
+          this.contextMenuService.populateMenu(menuItems)
+          this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
+          this.contextMenuService.menuOn()
+          this.$timeout()
+        }else{
+          this.contextMenuService.menuOff()
+          this.$timeout()
         }
-        */
+        
       })
     })
     
+    // ToDo: this function should probably be a global utility
+    this.getXYFromEvent = function(event){
+      var mouseEvent = null
+      Object.keys(event).forEach((eventKey) => {
+        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+          mouseEvent = event[eventKey]
+        }
+      })
+      var x = mouseEvent.clientX
+      var y = mouseEvent.clientY
+      return {'x':x, 'y':y}
+    }
+    
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
+      if (this.contextMenuService.isMenuVisible.getValue()){
+        this.contextMenuService.menuOff()
+        this.$timeout()
+        return
+      }
+      
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {
         //console.log(hitFeatures)
@@ -434,6 +498,7 @@ class TileComponentController {
           }
         })
         
+        // ToDo: formalize this
         var hitFeatures = { 
           latLng: latLng,
           locations: locationFeatures,
@@ -553,7 +618,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'uiNotificationService']
+TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService']
 
 let tile = {
   template: '',

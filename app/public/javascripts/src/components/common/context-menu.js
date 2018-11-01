@@ -27,6 +27,7 @@ class ContextMenuController {
     })
     
     this.contextMenuService.menuXY.subscribe((menuXY) => {
+      if ('undefined' == typeof menuXY) return
       if ('undefined' != typeof menuXY.x) this.contextMenuCss.left = `${menuXY.x}px`
       if ('undefined' != typeof menuXY.y) this.contextMenuCss.top = `${menuXY.y}px`
     })

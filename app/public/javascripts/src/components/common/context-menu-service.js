@@ -5,9 +5,9 @@ app.service('contextMenuService', ['$rootScope', '$timeout', ($rootScope, $timeo
   
   var service = {}
   
-  service.isMenuVisible = new Rx.Subject()
+  service.isMenuVisible = new Rx.BehaviorSubject()
   service.menuItems = new Rx.Subject()
-  service.menuXY = new Rx.Subject()
+  service.menuXY = new Rx.BehaviorSubject()
   
   service.populateMenu = (menuItems) => {
     service.menuItems.next(menuItems)
