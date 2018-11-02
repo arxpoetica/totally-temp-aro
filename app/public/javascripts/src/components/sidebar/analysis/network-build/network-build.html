@@ -1,4 +1,4 @@
-<div style="height: 100%";>
+<div style="height: 100%">
   <style scoped>
     #tblNetworkBuild {
       height: 83%;
@@ -28,7 +28,6 @@
       right: 18px;
       pointer-events: none;
     }
-    
     .line-break-item{
       display: inline-block;
     }
@@ -198,6 +197,15 @@
                  class="form-control text-right"
                  min="0" max="500"
                  percentage-input>
+        </td>
+      </tr>
+      <tr>
+        <td>Analysis years</td>
+        <td>
+          <input type="number"
+                 ng-model="$ctrl.state.optimizationOptions.financialConstraints.years"
+                 class="form-control text-right"
+                 min="0" max="100">
         </td>
       </tr>
       <tr>

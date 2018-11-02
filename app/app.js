@@ -27,7 +27,6 @@ var middleware = require('./middleware')
 require('./routes/routes_authentication').configure(app, middleware)
 
 var api = express.Router()
-require('./routes/routes_ui_configuration').configure(api, middleware)  // No authentication for these routes
 var routes = [
   'status',
   'api',

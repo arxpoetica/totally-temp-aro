@@ -53,7 +53,7 @@
       <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
         <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
         <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
-        <td> {{value.rawCoverage}} </td>
+        <td> {{value.rawCoverage | number}} </td>
       </tr>
     </tbody>
   </table>

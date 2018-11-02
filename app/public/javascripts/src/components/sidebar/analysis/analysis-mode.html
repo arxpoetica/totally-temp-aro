@@ -62,6 +62,9 @@
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'">
         <analysis-expert-mode></analysis-expert-mode>
       </div>
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'">
+        <coverage-reports plan-id="$ctrl.state.plan.getValue().id"></coverage-reports>
+      </div>
     </accordion-panel-contents>
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="'OUTPUT'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'OUTPUT'">

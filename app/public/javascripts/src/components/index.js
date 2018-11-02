@@ -23,6 +23,9 @@ import showTargets from './sidebar/analysis/show-targets'
 import networkAnalysis from './sidebar/analysis/network-analysis/network-analysis'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
+import coverageReports from './sidebar/analysis/coverage/coverage-reports'
+import coverageInitializer from './sidebar/analysis/coverage/coverage-initializer'
+import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuild from './sidebar/analysis/network-build/network-build'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -30,8 +33,7 @@ import viewSettings from './sidebar/debug/view-settings'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
-import createServiceLayer from './sidebar/plan-editor/create-service-layer'
-import editServiceLayer from './sidebar/plan-editor/edit-service-layer'
+import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
@@ -113,15 +115,16 @@ app.component('boundaryDetail', boundaryDetail)
    .component('showTargets', showTargets)
    .component('networkAnalysis', networkAnalysis)
    .component('networkAnalysisOutput', networkAnalysisOutput)
-   .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
+   .component('coverageReports', coverageReports)
+   .component('coverageInitializer', coverageInitializer)
+   .component('coverageReportDownloader', coverageReportDownloader)
    .component('networkBuild', networkBuild)
    .component('networkBuildOutput', networkBuildOutput)
    .component('aroDebug', aroDebug)
    .component('viewSettings', viewSettings)
    .component('planEditor', planEditor)
    .component('planSummary', planSummary)
-   .component('createServiceLayer', createServiceLayer)
-   .component('editServiceLayer', editServiceLayer)
+   .component('serviceLayerEditor', serviceLayerEditor)
    .component('draggableButton', draggableButton)
    .component('conicTileSystemUploader', conicTileSystemUploader)
    .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
