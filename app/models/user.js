@@ -196,6 +196,8 @@ module.exports = class User {
         return database.findOne(sql, [username])
       })
       .then((user) => {
+        // At this point the login is 'successful'. Cache the user password so that we can log in even when LDAP is offline.
+        this.saveCachedPasswordForUser(username, password)   // Even if this fails, we should continue
         console.log('LDAP - returned from database.findOne()')
         delete user.password
         sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_EXTERNAL_AUTH
@@ -206,6 +208,23 @@ module.exports = class User {
         console.error('**** Error when logging in with LDAP')
         console.error(err)
         return Promise.reject(err)
+      })
+  }
+
+  static saveCachedPasswordForUser(email, password) {
+    return this.hashPassword(password)
+      .then((hashedPassword) => {
+        const sql = `
+          UPDATE auth.users
+          SET password = '${hashedPassword}'
+          WHERE email='${email}';
+        `
+        return database.query(sql)
+      })
+      .then(() => console.log(`LDAP - successfully updated cached password for user ${email}`))
+      .catch((err) => {
+        console.log(`LDAP - error when updating cached password for user ${email}`)
+        console.log(err)
       })
   }
 

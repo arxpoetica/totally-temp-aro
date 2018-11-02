@@ -1,9 +1,10 @@
 class DataSelectionController {
-  constructor($http, $timeout, $rootScope, state) {
+  constructor($http, $timeout, $rootScope, state, aclManager) {
     this.$http = $http
     this.$timeout = $timeout
     this.$rootScope = $rootScope
     this.state = state
+    this.aclManager = aclManager
     this.isDirty = false
     this.currentUser = state.loggedInUser
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
@@ -18,10 +19,15 @@ class DataSelectionController {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
+    this.isDataSourceEditable = {}
   }
 
   $onInit() {
     this.updateSelectionValidation()
+    Object.keys(this.allDataItems).forEach(dataSourceKey => {
+      this.isDataSourceEditable[dataSourceKey] = false
+      this.updateDataSourceEditableStatus(dataSourceKey)
+    })
   }
 
   $doCheck() {
@@ -76,10 +82,27 @@ class DataSelectionController {
     })
   }
 
-  onSelectionChanged() {
+  onSelectionChanged(dataSource) {
     this.isDirty = true
     this.state.dataItemsChanged.next(this.state.dataItems)
     this.updateSelectionValidation()
+    this.updateDataSourceEditableStatus(dataSource)
+  }
+
+  updateDataSourceEditableStatus(dataSourceKey) {
+    this.isDataSourceEditable[dataSourceKey] = (dataSourceKey === 'location' || dataSourceKey === 'service_layer')
+                                                && (this.allDataItems[dataSourceKey].selectedLibraryItems.length === 1)
+    if (this.isDataSourceEditable[dataSourceKey]) {
+      // We still think this is editable, now check for ACL by making a call to service
+      this.aclManager.getEffectivePermissions('LIBRARY', this.allDataItems[dataSourceKey].selectedLibraryItems[0].identifier, this.state.loggedInUser)
+        .then(permissions => {
+          this.isDataSourceEditable[dataSourceKey] = permissions && (permissions[this.aclManager.PERMISSIONS.WRITE]
+                                                                    || permissions[this.aclManager.PERMISSIONS.ADMIN]
+                                                                    || permissions[this.aclManager.PERMISSIONS.IS_SUPERUSER])
+          this.$timeout()
+        })
+        .catch(err => console.error(err))
+      }
   }
 
   // Updates the 'valid' flags for all data items
@@ -135,7 +158,7 @@ class DataSelectionController {
   }
 }
 
-DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state']
+DataSelectionController.$inject = ['$http', '$timeout', '$rootScope', 'state', 'aclManager']
 
 // Component did not work when it was called 'dataSelection'
 let planDataSelection = {

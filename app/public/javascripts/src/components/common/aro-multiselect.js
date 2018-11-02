@@ -17,7 +17,7 @@ class AroMultiSelectController {
         enableHTML:this.enableHtml ? true : false,
         onChange: () => {
           if (this.selectionChanged) {
-            this.selectionChanged()
+            this.selectionChanged({dataSource: this.datasourceType})
           }
         },
         maxHeight: this.maxHeight ? this.maxHeight : 200,
@@ -48,6 +48,7 @@ let aroMultiSelect = {
     </select>
   `,
   bindings: {
+    datasourceType: '@',
     model: '=',             // Will be passed in as a ng-model to our select. Two Way binding for now!
     allItems: '<',          // All the items to show.
     selectionChanged: '&',  // [Optional] Called when the selected items change

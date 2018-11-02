@@ -33,7 +33,7 @@ import viewSettings from './sidebar/debug/view-settings'
 import draggableButton from './sidebar/plan-editor/draggable-button'
 import planEditor from './sidebar/plan-editor/plan-editor'
 import planSummary from './sidebar/plan-editor/plan-summary'
-import createServiceLayer from './sidebar/plan-editor/create-service-layer'
+import serviceLayerEditor from './sidebar/plan-editor/service-layer-editor'
 import conicTileSystemUploader from './sidebar/plan-settings/plan-data-selection/conic-tile-system-uploader'
 import globalDataSourceUploadModal from './sidebar/plan-settings/plan-data-selection/data-source-upload-modal'
 import planDataSelection from './sidebar/plan-settings/plan-data-selection/plan-data-selection'
@@ -89,6 +89,7 @@ import editorInterfaceValue from './common/editor-interfaces/editor-interface-va
 import utils from './common/utilities'
 
 import state from '../models/state'
+import aclManager from '../models/aclManager'
 
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
@@ -122,7 +123,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('viewSettings', viewSettings)
    .component('planEditor', planEditor)
    .component('planSummary', planSummary)
-   .component('createServiceLayer', createServiceLayer)
+   .component('serviceLayerEditor', serviceLayerEditor)
    .component('draggableButton', draggableButton)
    .component('conicTileSystemUploader', conicTileSystemUploader)
    .component('globalDataSourceUploadModal', globalDataSourceUploadModal)
@@ -175,4 +176,5 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceValue', editorInterfaceValue)
    .service('Utils', utils)
    .service('state', state)
+   .service('aclManager', aclManager)
    .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)   
