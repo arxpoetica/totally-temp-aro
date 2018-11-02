@@ -1,8 +1,16 @@
 class CoverageReportsController {
-  constructor($http, $timeout) {
+  constructor($http, $timeout, state, aclManager) {
     this.$http = $http
     this.$timeout = $timeout
     this.coverageReport = null
+    this.isLoggedInUserSuperUser = false
+    aclManager.getEffectivePermissions('SYSTEM', '1', state.loggedInUser)
+      .then(permissions => {
+        // Only superusers can see the downloader
+        this.isLoggedInUserSuperUser = permissions && (permissions.IS_SUPERUSER)
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
   }
 
   $onInit() {
@@ -30,7 +38,7 @@ class CoverageReportsController {
   }
 }
 
-CoverageReportsController.$inject = ['$http', '$timeout']
+CoverageReportsController.$inject = ['$http', '$timeout', 'state', 'aclManager']
 
 let coverageReports = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-reports.html',

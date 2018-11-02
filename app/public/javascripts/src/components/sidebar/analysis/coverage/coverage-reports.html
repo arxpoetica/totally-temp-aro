@@ -1,10 +1,16 @@
 
-<coverage-initializer ng-if="!$ctrl.coverageReport"
-                      plan-id="$ctrl.planId"
-                      on-coverage-initialized="$ctrl.onCoverageInitialized()">
-</coverage-initializer>
+<div ng-if="$ctrl.isLoggedInUserSuperUser">
+  <coverage-initializer ng-if="!$ctrl.coverageReport"
+    plan-id="$ctrl.planId"
+    on-coverage-initialized="$ctrl.onCoverageInitialized()">
+  </coverage-initializer>
 
-<coverage-report-downloader ng-if="$ctrl.coverageReport"
-                            coverage-report-id="$ctrl.coverageReport.reportId"
-                            on-report-settings-reset="$ctrl.onReportSettingsReset()">
-</coverage-report-downloader>
+  <coverage-report-downloader ng-if="$ctrl.coverageReport"
+          coverage-report-id="$ctrl.coverageReport.reportId"
+          on-report-settings-reset="$ctrl.onReportSettingsReset()">
+  </coverage-report-downloader>
+</div>
+
+<div class="alert alert-danger" ng-if="!$ctrl.isLoggedInUserSuperUser" style="margin-top: 60px;">
+  You must be a system-wide superuser in order to use coverage reports.
+</div>
