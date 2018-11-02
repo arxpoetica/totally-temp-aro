@@ -376,7 +376,32 @@ class TileComponentController {
                 this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
               }))
               
-              var name = cat // change this
+              //console.log(feature)
+              
+              // ToDo: figure out a place to put the name finding logic - this is also in map-object-editor
+              var dataTypeList = ['']
+              if (feature.hasOwnProperty('_data_type')) dataTypeList = feature._data_type.split('.')
+              if (feature.hasOwnProperty('dataType')) dataTypeList = feature.dataType.split('.')
+              
+              var name = ''
+              if ('equipment_boundary' == dataTypeList[0]){
+                name = 'Boundary'
+              }else if(feature.hasOwnProperty('networkNodeType')){
+                name = feature.networkNodeType
+              }else if ('service_layer' == dataTypeList[0]) {
+                name = 'Service Area: ' + feature.code //'Service Area'
+              }else{
+                name = dataTypeList[1]
+              }
+              
+              if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
+                name = this.state.configuration.networkEquipment.equipments[name].label
+              }else if(this.state.networkNodeTypesEntity.hasOwnProperty(name)){
+                name = this.state.networkNodeTypesEntity[name]
+              }
+              
+              // ---
+              
               
               menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
               

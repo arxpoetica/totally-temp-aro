@@ -369,7 +369,7 @@ class MapObjectEditorController {
 
               var name = ''
               if ('service_layer' == dataTypeList[0]) {
-                name = 'Service Area - ' + result.code //'Service Area'
+                name = 'Service Area: ' + result.code //'Service Area'
               } else {
                 name = dataTypeList[1]
               }
@@ -394,7 +394,7 @@ class MapObjectEditorController {
           }
         })
     } else if('location' == this.featureType){
-      var name = 'location'
+      var name = 'Location'
       var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(this.selectedMapObject.objectId)}) ]
       var menuItems = []
       var data = {
