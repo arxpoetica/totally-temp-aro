@@ -336,7 +336,10 @@ class TileComponentController {
     
     // FOR TEST 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
-      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS) return
+      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW 
+          || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS
+          || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
+      ) return
       
       this.getFeaturesUnderLatLng(event.latLng)
       .then((hitFeatures) => {

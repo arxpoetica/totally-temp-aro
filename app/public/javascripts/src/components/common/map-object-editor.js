@@ -388,7 +388,7 @@ class MapObjectEditorController {
                 // it's on the edit layer / in the transaction
                 feature = this.createdMapObjects[result.objectId].feature
                 options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
-                options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+                //options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
                 options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(result.objectId)}) )
               } else {
                 options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
@@ -800,9 +800,6 @@ class MapObjectEditorController {
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
       
-      // ToDo: this kind of thing needs to be in the controller
-      //console.log('rightclick editable object')
-      //console.log(event)
       if ('location' == this.featureType){
         this.selectMapObject(mapObject)
       }
@@ -995,10 +992,8 @@ class MapObjectEditorController {
         mapObject.setOptions(this.selectedPolygonOptions)
         mapObject.setEditable(true)
       }
-    } else {
-      //when deselected object close drop down if open
-      this.closeContextMenu()
     }
+    
     this.selectedMapObject = mapObject
     this.onSelectObject && this.onSelectObject({mapObject})
   }
@@ -1038,10 +1033,6 @@ class MapObjectEditorController {
       mapObjectToDelete.setMap(null)
       delete this.createdMapObjects[objectId]
       this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
-      this.closeContextMenu()
-      //this.contextMenuCss.display = 'none'  // Hide the context menu      
-      //console.log('delete object')
-      //console.log(mapObjectToDelete)
     }
   }
 
