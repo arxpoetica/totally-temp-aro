@@ -1,0 +1,51 @@
+<style scoped>
+  #table-coverage-report-generator td {
+    line-height: 33px;  /* To vertically align text */
+  }
+</style>
+
+<table id="table-coverage-report-generator" class="table table-condensed table-striped">
+  <tbody>
+    <!-- The rate reach matrix to be used for generating the report -->
+    <tr>
+      <td>Rate Reach</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.selectedRateReachMatrix"
+                ng-options="item as item.name for item in $ctrl.rateReachMatrices">
+        </select>
+      </td>
+    </tr>
+
+    <!-- The report type of the coverage report -->
+    <tr>
+      <td>Report type</td>
+      <td>Form 477</td>
+    </tr>
+
+    <!-- The distance threshold of the coverage report -->
+    <tr>
+      <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
+      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.distanceThreshold * $ctrl.state.configuration.units.meters_to_length_units | number: 0}}</td>
+    </tr>
+
+    <!-- The edge type of the coverage report -->
+    <tr>
+      <td>Edge type</td>
+      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.spatialEdgeType}}</td>
+    </tr>
+
+    <!-- The A flag indicating whether we want to use the site boundaries -->
+    <tr>
+      <td>Use site boundaries</td>
+      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.useSiteBoundaries ? 'Yes' : 'No'}}</td>
+    </tr>
+  </tbody>  
+</table>
+
+<div class="col-md-6">
+  <button class="btn btn-block btn-primary" ng-click="$ctrl.downloadReport()"><i class="fa fa-download"></i>&nbsp;&nbsp;Download</button>
+</div>
+<div class="col-md-6">
+  <button class="btn btn-block btn-danger" ng-click="$ctrl.resetReportSettings()"><i class="fa fa-refresh"></i>&nbsp;&nbsp;Reset settings</button>
+</div>

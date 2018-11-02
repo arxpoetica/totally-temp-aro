@@ -23,6 +23,9 @@ import showTargets from './sidebar/analysis/show-targets'
 import networkAnalysis from './sidebar/analysis/network-analysis/network-analysis'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
+import coverageReports from './sidebar/analysis/coverage/coverage-reports'
+import coverageInitializer from './sidebar/analysis/coverage/coverage-initializer'
+import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuild from './sidebar/analysis/network-build/network-build'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -111,7 +114,9 @@ app.component('boundaryDetail', boundaryDetail)
    .component('showTargets', showTargets)
    .component('networkAnalysis', networkAnalysis)
    .component('networkAnalysisOutput', networkAnalysisOutput)
-   .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
+   .component('coverageReports', coverageReports)
+   .component('coverageInitializer', coverageInitializer)
+   .component('coverageReportDownloader', coverageReportDownloader)
    .component('networkBuild', networkBuild)
    .component('networkBuildOutput', networkBuildOutput)
    .component('aroDebug', aroDebug)
