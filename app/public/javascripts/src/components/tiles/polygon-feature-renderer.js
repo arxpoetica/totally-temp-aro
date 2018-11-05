@@ -27,20 +27,20 @@ class PolygonFeatureRenderer {
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, Obj.selectedServiceArea, Obj.selectedServiceAreas, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.selectedAnalysisArea, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+        Obj.selectedAnalysisArea, Obj.selectedAnalysisAreas, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, Obj.selectedServiceArea, Obj.selectedServiceAreas, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.selectedAnalysisArea, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+        Obj.selectedAnalysisArea, Obj.selectedAnalysisAreas, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
     })
 
   }
 
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
-                       selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea,
+                       selectedServiceArea, selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea, selectedAnalysisAreas,
                        analysisSelectionMode, selectionModes, selectedCensusBlockId, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
@@ -75,6 +75,13 @@ class PolygonFeatureRenderer {
       && selectedDisplayMode == displayModes.ANALYSIS
       && analysisSelectionMode == selectionModes.SELECTED_AREAS) {
       //Highlight the selected SA
+      //highlight if analysis mode -> selection type is service areas 
+      drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
+      drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
+      drawingStyles.opacity = mapLayer.highlightStyle.opacity
+      drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
+    } else if (selectedAnalysisAreas.has(feature.properties.id)
+               && selectedDisplayMode == displayModes.ANALYSIS) {
       //highlight if analysis mode -> selection type is service areas 
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle

@@ -60,4 +60,38 @@ exports.configure = (api, middleware) => {
     .catch(next)
   })
 
+  // Add analysis area targets to a plan
+  api.post('/analysis_areas/:planId/addAnalysisAreaTargets', (request, response, next) => {
+    var planId = request.params.planId
+    var analysisAreaIds = request.body.analysisAreaIds
+    models.Wirecenter.addAnalysisAreaTargets(planId, analysisAreaIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Remove analysis area targets from a plan
+  api.post('/analysis_areas/:planId/removeAnalysisAreaTargets', (request, response, next) => {
+    var planId = request.params.planId
+    var analysisAreaIds = request.body.analysisAreaIds
+    models.Wirecenter.removeAnalysisAreaTargets(planId, analysisAreaIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Remove all analysis area targets from a plan
+  api.delete('/analysis_areas/:planId/removeAllAnalysisAreaTargets', (request, response, next) => {
+    var planId = request.params.planId
+    models.Wirecenter.removeAllAnalysisAreaTargets(planId)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
+
+  // Select all highlighted analysis area targets from a plan
+  api.get('/analysis_areas/:planId/selectedAnalysisAreaIds', (request, response, next) => {
+    var planId = request.params.planId
+    models.Wirecenter.selectedAnalysisAreaIds(planId)
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  })
+
 }

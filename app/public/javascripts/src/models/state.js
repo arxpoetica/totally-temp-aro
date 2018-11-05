@@ -577,6 +577,27 @@ class State {
     }
   }
 
+  service.selectedAnalysisAreas = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedAnalysisAreas = (forceMapRefresh = false) => {
+    var plan = service.plan.getValue()
+    if (plan) {
+      $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
+        .then((result) => {
+          var selectedAnalysisAreasSet = new Set()
+          result.data.forEach((analysis_area) => selectedAnalysisAreasSet.add(+analysis_area.analysis_area_id))
+          service.selectedAnalysisAreas.next(selectedAnalysisAreasSet)
+          service.requestMapLayerRefresh.next(null)
+          if (forceMapRefresh) {
+            tileDataService.clearDataCache()
+            tileDataService.markHtmlCacheDirty()
+          }
+          return Promise.resolve()
+        })
+    } else {
+      return Promise.resolve()
+    }
+  }
+
   service.selectedServiceArea = new Rx.BehaviorSubject()
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})

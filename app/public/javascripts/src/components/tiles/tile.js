@@ -111,6 +111,13 @@ class TileComponentController {
       }
     })
 
+    // If selected Analysis Areas in viewmode change, set that in the tile data service
+    state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedAnalysisAreas(selectedAnalysisAreas)
+      }
+    })
+    
     // If selected Analysis Area in viewmode change, set that in the tile data service
     state.selectedAnalysisArea.subscribe((selectedAnalysisArea) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -319,6 +326,7 @@ class TileComponentController {
                                                          this.state.selectedLocations.getValue(),
                                                          this.state.selectedServiceAreas.getValue(),
                                                          this.state.selectedAnalysisArea.getValue(),
+                                                         this.state.selectedAnalysisAreas.getValue(),
                                                          this.state.selectedCensusBlockId.getValue(),
                                                          this.state.censusCategories.getValue(),
                                                          this.state.selectedCensusCategoryId.getValue(),
