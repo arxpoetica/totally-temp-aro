@@ -27,7 +27,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
-
+    optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
+    
     addNetworkAnalysisType(state, optimizationBody)    
 
     return optimizationBody

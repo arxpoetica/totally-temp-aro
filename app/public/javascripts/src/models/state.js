@@ -18,10 +18,15 @@ class State {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
     MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
     BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
-    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
-    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' },
+    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'Plan IRR Floor' },
+    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'Segment IRR Floor' },
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
+  }
+  
+  service.pruningStrategyTypes = {
+    INTER_WIRECENTER: {id: 'INTER_WIRECENTER', label: 'Inter Service Area'}, 
+    INTRA_WIRECENTER: {id: 'INTRA_WIRECENTER', label: 'Intra Service Area'}
   }
   
   service.viewFiberOptions = [
@@ -138,7 +143,7 @@ class State {
     uiAlgorithms: [],
     uiSelectedAlgorithm: null,
     networkConstraints: {
-      routingMode: 'DIRECT_ROUTING',
+      routingMode: 'ODN_3',
       cellNodeConstraints: {
         cellRadius: 300.0,
         cellGranularityRatio: 0.5,
@@ -155,8 +160,11 @@ class State {
       discountRate: 0.06,
       years: 15
     },
-    threshold: 0, // This will be converted to a precentage when sending to the UI
-    preIrrThreshold: 1.0,
+    fronthaulOptimization: {
+      optimizationMode: service.pruningStrategyTypes['INTER_WIRECENTER'].id
+    }, 
+    threshold: 0.08, // This will be converted to a percentage when sending to the UI
+    preIrrThreshold: 0.08,
     budget: 100000,
     customOptimization: null,
     routeGenerationOptions: [
@@ -192,8 +200,8 @@ class State {
     service.OPTIMIZATION_TYPES.UNCONSTRAINED,
     //service.OPTIMIZATION_TYPES.MAX_IRR,
     service.OPTIMIZATION_TYPES.BUDGET,
-    //service.OPTIMIZATION_TYPES.IRR_TARGET,
-    //service.OPTIMIZATION_TYPES.IRR_THRESH,
+    service.OPTIMIZATION_TYPES.IRR_TARGET,
+    service.OPTIMIZATION_TYPES.IRR_THRESH,
     service.OPTIMIZATION_TYPES.COVERAGE
   ]
 
@@ -1263,6 +1271,10 @@ class State {
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
     apiUrl += `?userId=${service.loggedInUser.id}`
+    
+    //console.log(apiUrl)
+    //console.log(optimizationBody)
+    
     $http.post(apiUrl, optimizationBody)
       .then((response) => {
         //console.log(response)
@@ -1365,7 +1377,7 @@ class State {
         networkTypes: [
           "Fiber"
         ],
-        routingMode: "DIRECT_ROUTING"
+        routingMode: "ODN_3"
       },
       optimization: {
         algorithmType: "DEFAULT",

@@ -38,7 +38,7 @@ class NetworkAnalysisController {
           this.targets = result.data
         })
         .catch(err => console.error(err))
-      })
+    })
 
       this.serviceAreasObserver = state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
