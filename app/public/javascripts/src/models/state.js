@@ -162,8 +162,8 @@ class State {
       discountRate: 0.06,
       years: 15
     },
-    threshold: 1.0, // This will be converted to a precentage when sending to the UI
-    preIrrThreshold: 0.1,
+    threshold: 0.08, // This will be converted to a percentage when sending to the UI
+    preIrrThreshold: 0.08,
     budget: 100000,
     customOptimization: null,
     routeGenerationOptions: [
