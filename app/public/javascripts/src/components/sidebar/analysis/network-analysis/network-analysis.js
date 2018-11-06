@@ -28,7 +28,7 @@ class NetworkAnalysisController {
       }
     })
 
-    state.selectedLocations.subscribe((selectedLocations) => {
+    this.locationsObserver = state.selectedLocations.subscribe((selectedLocations) => {
       // The selected locations have changed. Get the count and addresses that we want to show
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_LOCATIONS) return
       this.targetsTotal = selectedLocations.size
@@ -40,7 +40,7 @@ class NetworkAnalysisController {
         .catch(err => console.error(err))
       })
 
-    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
+      this.serviceAreasObserver = state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
       var serviceAreaIds = Array.from(selectedServiceAreas)
@@ -51,7 +51,7 @@ class NetworkAnalysisController {
       .catch(err => console.error(err))
     })
     
-    state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
+    this.analysisAreasObserver = state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
       // The selected analysis areas have changed.
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_ANALYSIS_AREAS) return
       var analysisAreaIds = Array.from(selectedAnalysisAreas)
@@ -67,6 +67,11 @@ class NetworkAnalysisController {
     this.state.selectionTypeChanged.next(selectionType)
   } 
 
+  $onDestroy() {
+    this.locationsObserver.unsubscribe()
+    this.serviceAreasObserver.unsubscribe()
+    this.analysisAreasObserver.unsubscribe()
+  }
 }
 
 NetworkAnalysisController.$inject = ['$http', 'state', 'optimization']
