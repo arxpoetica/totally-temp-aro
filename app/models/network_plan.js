@@ -95,6 +95,17 @@ module.exports = class NetworkPlan {
     return database.query(sql, [serviceAreaIds])
   }
 
+  static getAnalysisAreaAddresses (analysisAreaIds) {
+    if (!_.isArray(analysisAreaIds) || analysisAreaIds.length === 0) return Promise.resolve()
+
+    var sql = `
+      SELECT id, analysis_layer_id, code
+      FROM client.analysis_area
+      WHERE id IN ($1)
+    `
+    return database.query(sql, [analysisAreaIds])
+  }
+
   static _deleteSources (plan_id, network_node_ids) {
     if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return Promise.resolve()
 

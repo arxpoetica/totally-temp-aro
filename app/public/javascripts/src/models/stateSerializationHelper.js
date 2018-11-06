@@ -51,6 +51,21 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
       analysisSelectionMode: state.optimizationOptions.analysisSelectionMode
     }
+    if (state.optimizationOptions.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+      // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
+      const visibleAnalysisLayers = state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
+      if (visibleAnalysisLayers.length !== 1) {
+        const errorMessage = 'You must have exactly one analysis layer selected to perform this analysis'
+        swal({
+          title: 'Analysis Layer error',
+          text: errorMessage,
+          type: 'error',
+          closeOnConfirm: true
+        })
+        throw errorMessage
+      }
+      postBody.locationConstraints.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
+    }
   }
 
   // Add selected plan settings -> Data Selection to a POST body that we will send to aro-service for performing optimization
@@ -277,6 +292,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       optimization.setMode('boundaries')
     } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_LOCATIONS) {
       optimization.setMode('targets')
+    } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+      state.boundaries.tileLayers.forEach(layer => {
+        if (layer.type === 'analysis_layer') {
+          layer.visible = (layer.analysisLayerId === postBody.locationConstraints.analysisLayerId)
+        }
+      })
     }
   }
 

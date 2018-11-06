@@ -19,16 +19,11 @@ let showTargets = {
   template: `
     <style scoped>
       #show-targets{
-          height: 100%;
-          width: 97%;
-          position: absolute;
-          /*overflow: hidden;*/
-          overflow: auto;
-          min-height: 100px;
+        height: 100%;
+        width: 97%;
+        overflow: auto;
+        min-height: 100px;
       }   
-      /*#show-targets:hover {
-          overflow: auto;
-      }*/
     </style>
     <div id="show-targets">
       <div style="margin: 5px;min-height: 0px;">

@@ -100,16 +100,9 @@ class State {
   // The selection modes for the application
   service.selectionModes = {
     SELECTED_AREAS: 'SELECTED_AREAS', 
-    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS'
+    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS',
+    SELECTED_ANALYSIS_AREAS: 'SELECTED_ANALYSIS_AREAS'
   }
-  
-  service.areaSelectionModes = {
-      SINGLE: 'single',
-      GROUP: 'group'
-  }
-  
-  service.areaSelectionMode = service.areaSelectionModes.SINGLE
-  //service.areaSelectionMode = service.areaSelectionModes.GROUP
   
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
@@ -573,6 +566,27 @@ class State {
           var selectedSASet = new Set()
           result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
           service.selectedServiceAreas.next(selectedSASet)
+          service.requestMapLayerRefresh.next(null)
+          if (forceMapRefresh) {
+            tileDataService.clearDataCache()
+            tileDataService.markHtmlCacheDirty()
+          }
+          return Promise.resolve()
+        })
+    } else {
+      return Promise.resolve()
+    }
+  }
+
+  service.selectedAnalysisAreas = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedAnalysisAreas = (forceMapRefresh = false) => {
+    var plan = service.plan.getValue()
+    if (plan) {
+      $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
+        .then((result) => {
+          var selectedAnalysisAreasSet = new Set()
+          result.data.forEach((analysis_area) => selectedAnalysisAreasSet.add(+analysis_area.analysis_area_id))
+          service.selectedAnalysisAreas.next(selectedAnalysisAreasSet)
           service.requestMapLayerRefresh.next(null)
           if (forceMapRefresh) {
             tileDataService.clearDataCache()

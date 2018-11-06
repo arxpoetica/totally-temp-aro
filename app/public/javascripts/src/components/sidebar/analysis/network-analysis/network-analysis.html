@@ -132,15 +132,6 @@
                   ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
             <option ng-repeat="(selectionId, selectionVal) in $ctrl.state.selectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
           </select>
-          
-          <div ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
-            <span ng-repeat="(areaSelectionKey, areaSelectionValue) in $ctrl.state.areaSelectionModes">
-              <input type="radio" name="network-build-areaSelectionMode" 
-              ng-model="$ctrl.state.areaSelectionMode" 
-              value="{{areaSelectionValue}}"> {{areaSelectionValue}} &nbsp;&nbsp;&nbsp;
-            </span>
-          </div>
-          
         </td>
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
@@ -161,6 +152,16 @@
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
           <show-targets targets="$ctrl.targets"
                         remove-target="$ctrl.removeTarget({target:target})" zoom-target="$ctrl.zoomTarget({target:target})"></show-targets>
+        </td>
+      </tr>
+      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
+        <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
+          <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisArea({target:$ctrl.analysisAreas})"></span>
+        </td>
+        <td style="position: relative">
+          <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
+          <show-targets targets="$ctrl.analysisAreas"
+                        remove-target="$ctrl.removeAnalysisArea({target: target})" zoom-target="$ctrl.zoomTarget({target:$ctrl.targets})"></show-targets>
         </td>
       </tr>
     </tbody>
