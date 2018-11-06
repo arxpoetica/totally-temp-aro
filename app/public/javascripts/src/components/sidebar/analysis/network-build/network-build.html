@@ -16,25 +16,19 @@
       cursor: pointer
     }
     
-    .input-increment-label-contain{
-      position: relative;
-    }
-    .input-increment-label-contain .input-w-label{
-      padding-right: 38px;
-    }
-    .input-increment-label-contain .input-increment-label{
-      position: absolute;
-      top: 6px;
-      right: 18px;
-      pointer-events: none;
-    }
+    
     .line-break-item{
       display: inline-block;
     }
+    
   </style>
   <div ng-style="!$ctrl.areControlsEnabled && {'position':'relative'}" style="height: 100%">
   <table id="tblNetworkBuild" class="table table-condensed table-striped">
     <tbody>
+    
+    
+    
+    
       <tr>
         <td>Optimization Type</td>
         <td> 
@@ -45,7 +39,7 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
-        <td>IRR Threshold</td>
+        <td>Segment IRR Floor</td>
         <td>
           <div class="row">
               <div class="col-md-5">
@@ -53,7 +47,7 @@
                   type="range"
                   min="0"
                   max="1"
-                  step="0.01"
+                  step="0.001"
                   ng-model="$ctrl.state.optimizationOptions.preIrrThreshold"
                   style="margin-top: 10px">
               </div>
@@ -61,7 +55,7 @@
                 <div class="form-group form-group-sm">
                   <div class="input-group input-group-sm">
                     <input
-                      type="number"
+                      type="number" step="0.1"
                       ng-model="$ctrl.state.optimizationOptions.preIrrThreshold"
                       class="form-control text-right"
                       percentage-input>
@@ -73,25 +67,27 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>IRR Target(%)</td>
+        <td>Plan IRR Floor</td>
         <td> 
           <div class="row">
               <div class="col-md-5">
                 <input
                   type="range"
                   min="0"
-                  max="100"
-                  step="0.1"
+                  max="1"
+                  step="0.001"
                   ng-model="$ctrl.state.optimizationOptions.threshold"
                   style="margin-top: 10px">
               </div>
               <div class="col-md-7">
                 <div class="form-group form-group-sm">
-                  <div class="input-group-sm">
+                  <div class="input-group input-group-sm">
                     <input
                       type="number" step="0.1"
                       ng-model="$ctrl.state.optimizationOptions.threshold"
-                      class="form-control text-right">
+                      class="form-control text-right"
+                      percentage-input>
+                    <div class="input-group-addon">%</div>
                   </div>
                 </div>
               </div>
@@ -100,25 +96,34 @@
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'BUDGET' || $ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
         <td>Target Capital <div class="line-break-item">({{ $ctrl.config.currency_symbol }} thousands)</div></td>
-        <td class="input-increment-label-contain"> 
-          <input type="text" class="form-control text-right input-w-label" placeholder="Amount"
-            ng-model="$ctrl.budgetDisplay"
-            ng-change="$ctrl.onBudgetChange()"
-            ng-model-options="{ debounce: 500 }"
-            format="number">
-            <div class="input-increment-label">{{ $ctrl.config.currency_symbol }}K</div>
+        <td> 
+          <div class="input-group input-group-sm">
+	          <input type="text" class="form-control text-right" placeholder="Amount"
+	            ng-model="$ctrl.budgetDisplay"
+	            ng-change="$ctrl.onBudgetChange()"
+	            ng-model-options="{ debounce: 500 }"
+	            format="number">
+	          <div class="input-group-addon">{{ $ctrl.config.currency_symbol }}K</div>
+	        </div>
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">
         <td>Coverage Target(%)</td>
         <td>
-          <input type="text"
-            class="form-control text-right"
-            placeholder="Percentage"
-            ng-model="$ctrl.state.optimizationOptions.threshold"
-            name="coverage_target">
+          <div class="input-group input-group-sm">
+	          <input type="text"
+	            class="form-control text-right"
+	            placeholder="Percentage"
+	            ng-model="$ctrl.state.optimizationOptions.threshold"
+	            name="coverage_target">
+	          <div class="input-group-addon">%</div>
+	        </div>
         </td>
       </tr>
+      
+      
+      
+      
       <tr>
         <td>Endpoint Technology</td>
         <td>
@@ -231,7 +236,7 @@
         <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
           <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
         </td>
-        <td style="position: relative"> 
+        <td style="position: relative">
           <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
           <show-targets targets="$ctrl.serviceAreas"
                         remove-target="$ctrl.removeServiceArea({target:target})"></show-targets>
@@ -253,5 +258,5 @@
   <div class="disable-sibling-controls"
        ng-hide="$ctrl.areControlsEnabled">
   </div>
-  <div>
+  </div>
 </div>

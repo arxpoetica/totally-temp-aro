@@ -18,8 +18,8 @@ class State {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
     MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
     BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
-    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
-    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' },
+    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'Plan IRR Floor' },
+    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'Segment IRR Floor' },
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
@@ -162,8 +162,8 @@ class State {
       discountRate: 0.06,
       years: 15
     },
-    threshold: 0, // This will be converted to a precentage when sending to the UI
-    preIrrThreshold: 1.0,
+    threshold: 1.0, // This will be converted to a precentage when sending to the UI
+    preIrrThreshold: 0.1,
     budget: 100000,
     customOptimization: null,
     routeGenerationOptions: [
@@ -199,8 +199,8 @@ class State {
     service.OPTIMIZATION_TYPES.UNCONSTRAINED,
     //service.OPTIMIZATION_TYPES.MAX_IRR,
     service.OPTIMIZATION_TYPES.BUDGET,
-    //service.OPTIMIZATION_TYPES.IRR_TARGET,
-    //service.OPTIMIZATION_TYPES.IRR_THRESH,
+    service.OPTIMIZATION_TYPES.IRR_TARGET,
+    service.OPTIMIZATION_TYPES.IRR_THRESH,
     service.OPTIMIZATION_TYPES.COVERAGE
   ]
 
@@ -1249,6 +1249,10 @@ class State {
     // Make the API call that starts optimization calculations on aro-service
     var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
     apiUrl += `?userId=${service.loggedInUser.id}`
+    
+    //console.log(apiUrl)
+    //console.log(optimizationBody)
+    
     $http.post(apiUrl, optimizationBody)
       .then((response) => {
         //console.log(response)
