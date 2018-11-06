@@ -24,7 +24,8 @@ class CoverageInitializerController {
     this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
-
+    this.allowedSelectionModes = angular.copy(state.selectionModes)
+    delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
     this.serviceAreasObserver = state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return

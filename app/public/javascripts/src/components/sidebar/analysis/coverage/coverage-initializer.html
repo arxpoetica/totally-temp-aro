@@ -32,7 +32,7 @@
         <select class="form-control" 
                 ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
                 ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
-          <option ng-repeat="(selectionId, selectionVal) in $ctrl.state.selectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
+          <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
         </select>
       </td>
     </tr>
