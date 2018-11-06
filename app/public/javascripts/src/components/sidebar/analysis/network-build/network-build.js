@@ -46,7 +46,6 @@ class NetworkBuildController {
     state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
-      //console.log(selectedServiceAreas)
       var serviceAreaIds = Array.from(selectedServiceAreas)
       $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
       .then((result) => {
