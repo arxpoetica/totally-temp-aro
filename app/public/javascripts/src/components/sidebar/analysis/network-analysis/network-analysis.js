@@ -32,12 +32,12 @@ class NetworkAnalysisController {
       this.targetsTotal = selectedLocations.size
       var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
       $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-        .then((result) => {
-          if (result.status >= 200 && result.status <= 299) {
-            this.targets = result.data
-          }
-        })
+      .then((result) => {
+        if (result.status >= 200 && result.status <= 299) {
+          this.targets = result.data
+        }
       })
+    })
 
     state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.

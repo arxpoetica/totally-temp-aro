@@ -53,7 +53,7 @@ class NetworkBuildController {
           this.serviceAreas = result.data
         }
       })
-    })  
+    })
     
     state.mapFeaturesSelectedEvent.subscribe((event) => {
       if (state.areaSelectionMode != state.areaSelectionModes.GROUP 

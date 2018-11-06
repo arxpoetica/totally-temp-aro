@@ -39,7 +39,7 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_THRESH'">
-        <td>Segment IRR Floor</td>
+        <td>Segment IRR Floor (%)</td>
         <td>
           <div class="row">
               <div class="col-md-5">
@@ -67,7 +67,7 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'IRR_TARGET'">
-        <td>Plan IRR Floor</td>
+        <td>Plan IRR Floor (%)</td>
         <td> 
           <div class="row">
               <div class="col-md-5">
@@ -108,7 +108,7 @@
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.uiSelectedAlgorithm.id === 'COVERAGE'">
-        <td>Coverage Target(%)</td>
+        <td>Coverage Target (%)</td>
         <td>
           <div class="input-group input-group-sm">
 	          <input type="text"
@@ -195,13 +195,25 @@
         </td>
       </tr>
       <tr>
+        <td>Pruning Strategy</td>
+        <td>
+          <select class="form-control"
+            ng-model="$ctrl.state.optimizationOptions.fronthaulOptimization.optimizationMode"
+            ng-options="item.id as item.label for item in $ctrl.state.pruningStrategyTypes">
+          </select>
+        </td>
+      </tr>
+      <tr>
         <td>Discount Rate (%)</td>
         <td>
-          <input type="number"
-                 ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
-                 class="form-control text-right"
-                 min="0" max="500"
-                 percentage-input>
+          <div class="input-group input-group-sm">
+            <input type="number"
+              ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
+              class="form-control text-right"
+              min="0" max="500"
+              percentage-input>
+            <div class="input-group-addon">%</div>
+          </div>
         </td>
       </tr>
       <tr>

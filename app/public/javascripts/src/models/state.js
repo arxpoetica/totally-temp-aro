@@ -24,6 +24,11 @@ class State {
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
   
+  service.pruningStrategyTypes = {
+    INTER_WIRECENTER: {id: 'INTER_WIRECENTER', label: 'Inter Service Area'}, 
+    INTRA_WIRECENTER: {id: 'INTRA_WIRECENTER', label: 'Intra Service Area'}
+  }
+  
   service.viewFiberOptions = [
     {
       id: 1,
@@ -145,7 +150,7 @@ class State {
     uiAlgorithms: [],
     uiSelectedAlgorithm: null,
     networkConstraints: {
-      routingMode: 'DIRECT_ROUTING',
+      routingMode: 'ODN_3',
       cellNodeConstraints: {
         cellRadius: 300.0,
         cellGranularityRatio: 0.5,
@@ -162,8 +167,11 @@ class State {
       discountRate: 0.06,
       years: 15
     },
-    threshold: 1.0, // This will be converted to a precentage when sending to the UI
-    preIrrThreshold: 0.1,
+    fronthaulOptimization: {
+      optimizationMode: service.pruningStrategyTypes['INTER_WIRECENTER'].id
+    }, 
+    threshold: 0.08, // This will be converted to a percentage when sending to the UI
+    preIrrThreshold: 0.08,
     budget: 100000,
     customOptimization: null,
     routeGenerationOptions: [
@@ -1355,7 +1363,7 @@ class State {
         networkTypes: [
           "Fiber"
         ],
-        routingMode: "DIRECT_ROUTING"
+        routingMode: "ODN_3"
       },
       optimization: {
         algorithmType: "DEFAULT",
