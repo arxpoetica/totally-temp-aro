@@ -24,6 +24,38 @@
         </select>
       </td>
     </tr>
+
+    <!-- The selection type (service areas/analysis areas) -->
+    <tr>
+      <td>Selection Type</td>
+      <td>
+        <select class="form-control" 
+                ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
+                ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
+          <option ng-repeat="(selectionId, selectionVal) in $ctrl.state.selectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
+        </select>
+      </td>
+    </tr>
+    <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
+      <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
+        <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas({target:$ctrl.serviceAreas})"></span>
+      </td>
+      <td style="position: relative"> 
+        <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
+        <show-targets targets="$ctrl.serviceAreas"
+                      remove-target="$ctrl.removeServiceAreas({target:target})"></show-targets>
+      </td>
+    </tr>
+    <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
+      <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
+        <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas({target:$ctrl.analysisAreas})"></span>
+      </td>
+      <td style="position: relative">
+        <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
+        <show-targets targets="$ctrl.analysisAreas"
+                      remove-target="$ctrl.removeAnalysisAreas({target: target})" zoom-target="$ctrl.zoomTarget({target:$ctrl.targets})"></show-targets>
+      </td>
+    </tr>
   </tbody>
 </table>
 
