@@ -99,14 +99,6 @@ class State {
     SELECTED_ANALYSIS_AREAS: 'SELECTED_ANALYSIS_AREAS'
   }
   
-  service.areaSelectionModes = {
-      SINGLE: 'single',
-      GROUP: 'group'
-  }
-  
-  service.areaSelectionMode = service.areaSelectionModes.SINGLE
-  //service.areaSelectionMode = service.areaSelectionModes.GROUP
-  
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',

@@ -116,15 +116,6 @@
                   ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
             <option ng-repeat="(selectionId, selectionVal) in $ctrl.state.selectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
           </select>
-          
-          <div ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
-            <span ng-repeat="(areaSelectionKey, areaSelectionValue) in $ctrl.state.areaSelectionModes">
-              <input type="radio" name="network-build-areaSelectionMode" 
-              ng-model="$ctrl.state.areaSelectionMode" 
-              value="{{areaSelectionValue}}"> {{areaSelectionValue}} &nbsp;&nbsp;&nbsp;
-            </span>
-          </div>
-          
         </td>
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">

@@ -65,33 +65,6 @@ class NetworkBuildController {
       })
       .catch(err => console.error(err))
     })
-    
-    state.mapFeaturesSelectedEvent.subscribe((event) => {
-      if (state.areaSelectionMode != state.areaSelectionModes.GROUP 
-          || state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
-      if (event.analysisAreas){
-        event.analysisAreas.forEach((item, index) => {
-          
-          var filter = `(id eq ${item.id})`
-          $http.get(`/service/odata/analysisarea?$filter=${filter}&$top=1`)
-          .then((results) => {
-            //console.log(results)
-            if (results.data[0].geog && results.data[0].geog.coordinates 
-                && results.data[0].geog.coordinates.length > 0){
-              results.data[0].geog.coordinates.forEach((shapes) => {
-                shapes.forEach((coords) => {
-                  this.state.requestPolygonSelect.next({
-                    'coords': coords
-                  })
-                })
-              })
-            }
-          })      
-        })
-      }
-    })
-    
-    
   }
 
   onSelectionTypeChange(selectionType) {
