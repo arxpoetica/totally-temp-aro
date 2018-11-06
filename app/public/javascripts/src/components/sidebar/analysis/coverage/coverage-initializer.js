@@ -30,22 +30,22 @@ class CoverageInitializerController {
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
       //console.log(selectedServiceAreas)
       var serviceAreaIds = Array.from(selectedServiceAreas)
-      $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-      .then((result) => {
-        this.serviceAreas = result.data
-      })
-      .catch(err => console.error(err))
+      this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+        .then((result) => {
+          this.serviceAreas = result.data
+        })
+        .catch(err => console.error(err))
     })  
     
     this.analysisAreasObserver = state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
       // The selected analysis areas have changed.
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_ANALYSIS_AREAS) return
       var analysisAreaIds = Array.from(selectedAnalysisAreas)
-      $http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
-      .then((result) => {
-        this.analysisAreas = result.data
-      })
-      .catch(err => console.error(err))
+      this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
+        .then((result) => {
+          this.analysisAreas = result.data
+        })
+        .catch(err => console.error(err))
     })
   }
 
@@ -53,16 +53,16 @@ class CoverageInitializerController {
     this.state.selectionTypeChanged.next(selectionType)
   } 
 
-  removeServiceAreas(target) {
-    $http.post(`/service_areas/${this.plan.id}/removeServiceAreaTargets`, { serviceAreaIds: target.map((sa) => sa.id) })
+  removeServiceAreas(targets) {
+    this.$http.post(`/service_areas/${this.planId}/removeServiceAreaTargets`, { serviceAreaIds: targets.map((sa) => sa.id) })
     .then((response) => {
       this.state.reloadSelectedServiceAreas()
     })
     .catch(err => console.error(err))
   }
 
-  removeAnalysisAreas(target) {
-    $http.post(`/analysis_areas/${this.plan.id}/removeAnalysisAreaTargets`, { analysisAreaIds: target.map((sa) => sa.id) })
+  removeAnalysisAreas(targets) {
+    this.$http.post(`/analysis_areas/${this.planId}/removeAnalysisAreaTargets`, { analysisAreaIds: targets.map((sa) => sa.id) })
     .then((response) => {
       this.state.reloadSelectedAnalysisAreas()
     })

@@ -36,24 +36,24 @@
         </select>
       </td>
     </tr>
-    <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
+    <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
-        <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas({target:$ctrl.serviceAreas})"></span>
+        <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>
       </td>
-      <td style="position: relative"> 
+      <td> 
         <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
         <show-targets targets="$ctrl.serviceAreas"
-                      remove-target="$ctrl.removeServiceAreas({target:target})"></show-targets>
+                      remove-target="$ctrl.removeServiceAreas(target)"></show-targets>
       </td>
     </tr>
-    <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
+    <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
       <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
-        <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas({target:$ctrl.analysisAreas})"></span>
+        <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)"></span>
       </td>
-      <td style="position: relative">
+      <td>
         <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
         <show-targets targets="$ctrl.analysisAreas"
-                      remove-target="$ctrl.removeAnalysisAreas({target: target})" zoom-target="$ctrl.zoomTarget({target:$ctrl.targets})"></show-targets>
+                      remove-target="$ctrl.removeAnalysisAreas(target)" zoom-target="$ctrl.zoomTarget({target:$ctrl.targets})"></show-targets>
       </td>
     </tr>
   </tbody>
