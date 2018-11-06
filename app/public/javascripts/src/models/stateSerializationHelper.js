@@ -50,7 +50,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
       analysisSelectionMode: state.optimizationOptions.analysisSelectionMode
     }
-    if (state.optimizationOptions.analysisSelectionMode = state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+    if (state.optimizationOptions.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
       const visibleAnalysisLayers = state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
       if (visibleAnalysisLayers.length !== 1) {
