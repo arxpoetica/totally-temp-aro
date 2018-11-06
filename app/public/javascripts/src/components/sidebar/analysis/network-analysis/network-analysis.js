@@ -7,11 +7,13 @@ class NetworkAnalysisController {
     this.targets = []
     this.targetsTotal = 0
     this.serviceAreas = []
+    this.analysisAreas = []
 
     this.areControlsEnabled = true
     
     this.selectionModeLabels = {}
     this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
+    this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
     
     state.plan.subscribe((newPlan) => {
@@ -33,10 +35,9 @@ class NetworkAnalysisController {
       var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
       $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
         .then((result) => {
-          if (result.status >= 200 && result.status <= 299) {
-            this.targets = result.data
-          }
+          this.targets = result.data
         })
+        .catch(err => console.error(err))
       })
 
     state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
@@ -45,10 +46,20 @@ class NetworkAnalysisController {
       var serviceAreaIds = Array.from(selectedServiceAreas)
       $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          this.serviceAreas = result.data
-        }
+        this.serviceAreas = result.data
       })
+      .catch(err => console.error(err))
+    })
+    
+    state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
+      // The selected analysis areas have changed.
+      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_ANALYSIS_AREAS) return
+      var analysisAreaIds = Array.from(selectedAnalysisAreas)
+      $http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
+      .then((result) => {
+        this.analysisAreas = result.data
+      })
+      .catch(err => console.error(err))
     })
     
     state.mapFeaturesSelectedEvent.subscribe((event) => {
@@ -91,7 +102,8 @@ let networkAnalysis = {
   bindings: {
     removeTarget: '&', 
     zoomTarget: '&',
-    removeServiceArea: '&'
+    removeServiceArea: '&',
+    removeAnalysisAreas: '&'
   },
   controller: NetworkAnalysisController
 }

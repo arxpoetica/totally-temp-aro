@@ -36,6 +36,15 @@ class AnalysisModeController {
       .then((response) => {
         this.state.reloadSelectedServiceAreas()
       })
+      .catch(err => console.error(err))
+    }
+
+    this.removeAnalysisAreas = (target) => {
+      $http.post(`/analysis_areas/${this.plan.id}/removeAnalysisAreaTargets`, { analysisAreaIds: target.map((sa) => sa.id) })
+      .then((response) => {
+        this.state.reloadSelectedAnalysisAreas()
+      })
+      .catch(err => console.error(err))
     }
 
     this.validateRunButton = () => {

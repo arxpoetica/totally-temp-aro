@@ -147,6 +147,16 @@
                         remove-target="$ctrl.removeTarget({target:target})" zoom-target="$ctrl.zoomTarget({target:target})"></show-targets>
         </td>
       </tr>
+      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
+        <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
+          <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisArea({target:$ctrl.analysisAreas})"></span>
+        </td>
+        <td style="position: relative">
+          <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
+          <show-targets targets="$ctrl.analysisAreas"
+                        remove-target="$ctrl.removeAnalysisArea({target: target})" zoom-target="$ctrl.zoomTarget({target:$ctrl.targets})"></show-targets>
+        </td>
+      </tr>
     </tbody>
   </table>
   <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
