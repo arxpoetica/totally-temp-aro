@@ -15,6 +15,22 @@
     .trash {
       cursor: pointer
     }
+    
+    
+    .line-break-item{
+      display: inline-block;
+    }
+    
+    .additional-cell-row{
+      padding-top: 5px;
+    }
+    
+    .input-note{
+      font-size: 0.7em;
+      line-height: normal;
+      text-align: center;
+    }
+    
   </style>
   <div ng-style="!$ctrl.areControlsEnabled && {'position':'relative'}" style="height: 100%">
   <table id="tblNetworkAnalysis" class="table table-condensed table-striped">
@@ -103,10 +119,10 @@
         </td>
       </tr>
       <tr>
-        <td>Discount Rate (%)</td>
+        <td>Discount Rate</td>
         <td>
           <div class="input-group input-group-sm">
-            <input type="number"
+            <input type="number" step="0.1"
               ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
               class="form-control text-right"
               min="0" max="500"
@@ -115,6 +131,51 @@
           </div>
         </td>
       </tr>
+      
+      <tr>
+        <td>
+          Terminal Value
+          
+          <div class="additional-cell-row"
+            ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+            Terminal Multiple
+          </div>
+          
+          <div class="additional-cell-row"
+            ng-if="$ctrl.state.terminalValueStrategyTypes['PERPUTUAL_GROWTH'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+            Growth Rate
+          </div>
+          
+        </td>
+        <td>
+          <select class="form-control"
+            ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType"
+            ng-options="item.id as item.label for item in $ctrl.state.terminalValueStrategyTypes">
+          </select>
+          
+          <div class="additional-cell-row"
+            ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+            <input type="number" step="0.1"
+              ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
+              class="form-control text-right"
+              min="0.0">
+          </div>
+          
+          <div ng-if="$ctrl.state.terminalValueStrategyTypes['PERPUTUAL_GROWTH'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
+            <div class="input-group input-group-sm additional-cell-row">
+              <input type="number" step="0.1"
+                ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
+                class="form-control text-right"
+                max="{{ ($ctrl.state.optimizationOptions.financialConstraints.discountRate * 100) - 0.1 }}" 
+                percentage-input>
+              <div class="input-group-addon">%</div>
+            </div>
+            <div class="input-note">must be < Discount Rate</div>
+          </div>
+            
+        </td>
+      </tr>
+      
       <tr>
         <td>Analysis years</td>
         <td>
