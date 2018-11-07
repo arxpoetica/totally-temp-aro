@@ -29,6 +29,12 @@ class State {
     INTRA_WIRECENTER: {id: 'INTRA_WIRECENTER', label: 'Intra Service Area'}
   }
   
+  service.terminalValueStrategyTypes = {
+    NONE: {id: 'NONE', label: 'None'},
+    FIXED_MULTIPLIER: {id: 'FIXED_MULTIPLIER', label: 'End Year Multiplier'},
+    PERPUTUAL_GROWTH: {id: 'PERPUTUAL_GROWTH', label: 'Perpetual Growth'}
+  }
+  
   service.viewFiberOptions = [
     {
       id: 1,
@@ -137,7 +143,7 @@ class State {
     ODN_2: 'Hub-distribution split',
     ODN_3: 'Hybrid split'
   }
-
+  
   // Optimization options - initialize once
   service.optimizationOptions = {
     uiAlgorithms: [],
@@ -158,7 +164,11 @@ class State {
     financialConstraints: {
       cashFlowStrategyType: 'EXTERNAL',
       discountRate: 0.06,
-      years: 15
+      years: 15, 
+      terminalValueStrategy: {
+        value: 0.0, 
+        terminalValueStrategyType: service.terminalValueStrategyTypes['NONE'].id
+      }
     },
     fronthaulOptimization: {
       optimizationMode: service.pruningStrategyTypes['INTER_WIRECENTER'].id
@@ -204,7 +214,7 @@ class State {
     service.OPTIMIZATION_TYPES.IRR_THRESH,
     service.OPTIMIZATION_TYPES.COVERAGE
   ]
-
+  
   service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
 
   // View Settings layer - define once
@@ -1362,13 +1372,19 @@ class State {
   })
 
   service.getDefaultPlanInputs = () => {
+    // ToDo: there seems to be some repeat code here and in the declaration of optimizationOptions
+    //   but there are also discrepancies 
     return {
       analysis_type: "NETWORK_PLAN",
       financialConstraints: {
         cashFlowStrategyType: "EXTERNAL",
-          discountRate: 0.06,
-            years: 15
-        },
+        discountRate: 0.06,
+        years: 15, 
+        terminalValueStrategy: {
+          value: 0.0, 
+          terminalValueStrategyType: service.terminalValueStrategyTypes['NONE'].id
+        }
+      },
       locationConstraints: {
         locationTypes: [],
         analysisSelectionMode: service.selectionModes.SELECTED_AREAS
