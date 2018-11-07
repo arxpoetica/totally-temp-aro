@@ -21,7 +21,9 @@ function initialize () {
     mapTypeControlOptions: {
       position: google.maps.ControlPosition.TOP_RIGHT
     },
-    styles: styles
+    styles: styles, 
+    clickableIcons: false, 
+    clickableLabels:false
   })
 }
 
