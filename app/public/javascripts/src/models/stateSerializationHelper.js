@@ -279,7 +279,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
     if (postBody.optimization.threshold) {
-      state.optimizationOptions.threshold = +postBody.optimization.threshold * 100
+      state.optimizationOptions.threshold = +postBody.optimization.threshold
     }
     if (postBody.optimization.preIrrThreshold) {
       state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
