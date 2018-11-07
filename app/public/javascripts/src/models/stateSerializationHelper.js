@@ -99,7 +99,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       algorithmType: 'DEFAULT',
       algorithm: state.optimizationOptions.uiSelectedAlgorithm.algorithm,
       uiSelectedAlgorithmId: state.optimizationOptions.uiSelectedAlgorithm.id,
-      threshold: state.optimizationOptions.threshold / 100,
+      threshold: state.optimizationOptions.threshold,
       preIrrThreshold: state.optimizationOptions.preIrrThreshold,
       budget: state.optimizationOptions.budget * 1000
     }
