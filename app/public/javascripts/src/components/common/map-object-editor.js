@@ -152,7 +152,6 @@ class MapObjectEditorController {
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
     this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this)})
-
     
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -213,13 +212,6 @@ class MapObjectEditorController {
   }
   */
   
-  getDataTypeList(feature){
-    var dataTypeList = ['']
-    if (feature.hasOwnProperty('_data_type')) dataTypeList = feature._data_type.split('.')
-    if (feature.hasOwnProperty('dataType')) dataTypeList = feature.dataType.split('.')
-    return dataTypeList
-  }
-  
   filterFeatureForSelection(feature){
     // has it been deleted?
     if (feature.is_deleted && "false" != feature.is_deleted) return false
@@ -236,7 +228,8 @@ class MapObjectEditorController {
     if ('' != objectId && !this.createdMapObjects.hasOwnProperty(objectId)){
       // we have an objectId and the feature is NOT on the edit layer
       // check that the equipment layer is on for that feature
-      var dataTypeList = this.getDataTypeList(feature)
+      var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
+      
       var validFeature = true
       if ('equipment' == dataTypeList[0]){
         validFeature = (dataTypeList.length > 0 && this.state.isFeatureLayerOn(dataTypeList[1]))
@@ -278,7 +271,8 @@ class MapObjectEditorController {
           //populate context menu aray here
           // we may need different behavour for different controllers using this
           var options = []
-          var dataTypeList = this.getDataTypeList(result)
+          var dataTypeList = this.utils.getDataTypeListOfFeature(result)
+          
           if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
           var validFeature = false
           
@@ -306,20 +300,7 @@ class MapObjectEditorController {
               options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
             }
             
-            var name = ''
-            if ('equipment_boundary' == dataTypeList[0]){
-              name = 'Boundary'
-            }else if(feature.hasOwnProperty('networkNodeType')){
-              name = feature.networkNodeType
-            }else{
-              name = dataTypeList[1]
-            }
-            
-            if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
-              name = this.state.configuration.networkEquipment.equipments[name].label
-            }else if(this.state.networkNodeTypesEntity.hasOwnProperty(name)){
-              name = this.state.networkNodeTypesEntity[name]
-            }
+            var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
             
             menuItemsById[result.objectId] = options
             
@@ -360,7 +341,6 @@ class MapObjectEditorController {
 
         if(results.length == 0) {
           var options = []
-          //options.push('add Service Area')
           options.push( this.contextMenuService.makeItemOption('Add Service Area', 'fa-plus', () => {this.startDrawingBoundaryForSA(latLng)}) )
           var data = {
             'latLng': latLng
@@ -372,7 +352,8 @@ class MapObjectEditorController {
             //populate context menu aray here
             // we may need different behavour for different controllers using this
             var options = []
-            var dataTypeList = this.getDataTypeList(result)
+            var dataTypeList = this.utils.getDataTypeListOfFeature(result)
+            
             if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
             var validFeature = false
 
@@ -393,14 +374,9 @@ class MapObjectEditorController {
               } else {
                 options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
               }
-
-              var name = ''
-              if ('service_layer' == dataTypeList[0]) {
-                name = 'Service Area: ' + result.code //'Service Area'
-              } else {
-                name = dataTypeList[1]
-              }
-
+              
+              var name = this.utils.getFeatureDisplayName(result, this.state, dataTypeList)
+              
               menuItemsById[result.objectId] = options
               
               var data = {
@@ -413,7 +389,7 @@ class MapObjectEditorController {
             }
           })
         }
-        //this.menuItems = menuItems
+        
         if (menuItems.length <= 0) {
           this.closeContextMenu()
         } else {

@@ -66,6 +66,58 @@ class Utilities {
   getObjectSize(object) {
     return Object.keys(object).length;
   }
+  
+  // - Below are concerned with displaying information about a feature or equipment. These could be moved into their own utils class if this one gets too large
+  
+  getDataTypeList(dataType){
+    return dataType.split('.')
+  }
+  
+  getDataTypeListOfFeature(feature){
+    var dataTypeList = ['']
+    if (feature.hasOwnProperty('_data_type')) dataTypeList = this.getDataTypeList(feature._data_type)
+    if (feature.hasOwnProperty('dataType')) dataTypeList = this.getDataTypeList(feature.dataType)
+    return dataTypeList
+  }
+  
+  getFeatureDisplayName(feature, state, dataTypeList){
+    if ('undefined' == typeof dataTypeList) dataTypeList = this.getDataTypeListOfFeature(feature)
+    
+    //console.log(dataTypeList)
+    //console.log(feature)
+    
+    var name = ''
+    if ('location' == dataTypeList[0]){
+      name = 'Location'
+    }else if ('equipment_boundary' == dataTypeList[0]){
+      name = 'Boundary'
+    }else if(feature.hasOwnProperty('networkNodeType')){
+      name = feature.networkNodeType
+    }else if ('service_layer' == dataTypeList[0]) {
+      name = 'Service Area'
+    }else{
+      name = dataTypeList[1]
+    }
+    
+    if (feature.hasOwnProperty('code')){
+      if ('' != name) name += ': '
+      name += feature.code
+    }
+    
+    if (state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
+      name = state.configuration.networkEquipment.equipments[name].label
+    }else if(state.networkNodeTypesEntity.hasOwnProperty(name)){
+      name = state.networkNodeTypesEntity[name]
+    }
+    
+    console.log(name)
+    
+    return name
+  }
+  
+  
+  // ---
+  
 }
 
 Utilities.$inject =['$document', '$http'];

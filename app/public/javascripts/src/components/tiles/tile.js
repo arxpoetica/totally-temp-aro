@@ -36,7 +36,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService) {
+  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
@@ -45,6 +45,7 @@ class TileComponentController {
     this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
     this.contextMenuService = contextMenuService
+    this.utils = Utils
     
     this.areControlsEnabled = true
 
@@ -342,7 +343,6 @@ class TileComponentController {
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     
-    // FOR TEST 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
       if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW 
           || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS
@@ -363,7 +363,7 @@ class TileComponentController {
           'equipmentFeatures', 
           'censusFeatures'
         ]
-        
+        console.log(hitFeatures)
         featureCats.forEach((cat) => {
           hitFeatures[cat].forEach((feature) => {
             if (feature.hasOwnProperty('object_id')) feature.objectId = feature.object_id
@@ -389,33 +389,9 @@ class TileComponentController {
               
               //console.log(feature)
               
-              // ToDo: figure out a place to put the name finding logic - this is also in map-object-editor
-              var dataTypeList = ['']
-              if (feature.hasOwnProperty('_data_type')) dataTypeList = feature._data_type.split('.')
-              if (feature.hasOwnProperty('dataType')) dataTypeList = feature.dataType.split('.')
-              
-              var name = ''
-              if ('equipment_boundary' == dataTypeList[0]){
-                name = 'Boundary'
-              }else if(feature.hasOwnProperty('networkNodeType')){
-                name = feature.networkNodeType
-              }else if ('service_layer' == dataTypeList[0]) {
-                name = 'Service Area: ' + feature.code //'Service Area'
-              }else{
-                name = dataTypeList[1]
-              }
-              
-              if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
-                name = this.state.configuration.networkEquipment.equipments[name].label
-              }else if(this.state.networkNodeTypesEntity.hasOwnProperty(name)){
-                name = this.state.networkNodeTypesEntity[name]
-              }
-              
-              // ---
-              
-              
+              var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
+              var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
               menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
-              
             }
           })
         })
@@ -653,7 +629,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService']
+TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
 
 let tile = {
   template: '',
