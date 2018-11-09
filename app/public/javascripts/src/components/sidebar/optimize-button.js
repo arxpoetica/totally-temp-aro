@@ -4,16 +4,19 @@ class OptimizeButtonController {
   }
 
   areInputsComplete() {
-    var isValid = false
-    if ((this.state.selectedLocations.getValue().size > 0 ||
-      this.state.selectedServiceAreas.getValue().size > 0) && (
-        this.state.locationInputSelected('business') ||
-        this.state.locationInputSelected('household') ||
-        this.state.locationInputSelected('celltower'))
-    )
-      isValid = true
+    // First, check if the selected targets are valid. E.g. if the user has selected Service Areas, then at least one service area must be selected.
+    const areLocationsValid = (this.state.selectedLocations.getValue().size > 0)
+                              && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_LOCATIONS)
+    const areServiceAreasValid = (this.state.selectedServiceAreas.getValue().size > 0)
+                                 && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_AREAS)
+    const areAnalysisAreasValid = (this.state.selectedAnalysisAreas.getValue().size > 0)
+                                  && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_ANALYSIS_AREAS)
+    const isTargetSelectionValid = areLocationsValid || areServiceAreasValid || areAnalysisAreasValid
 
-    return isValid
+    // Check if at least one location type is selected for optimization
+    const isLocationInputValid = this.state.locationInputSelected('business') || this.state.locationInputSelected('household') || this.state.locationInputSelected('celltower')
+
+    return isTargetSelectionValid && isLocationInputValid
   }
 
   saveExpertMode(){
