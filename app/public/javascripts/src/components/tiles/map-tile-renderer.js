@@ -168,6 +168,9 @@ class MapTileRenderer {
       if (!mapLayers[oldMapLayerKey]) {
         // Old map layer key does not exist in new map layers, so layers have changed
         layersChanged = true
+      } else if (mapLayers[oldMapLayerKey].featureFilter !== this.mapLayers[oldMapLayerKey].featureFilter) {
+        // The feature filter of this map layer has changed
+        layersChanged = true
       } else if (JSON.stringify(this.mapLayers[oldMapLayerKey]) !== JSON.stringify(mapLayers[oldMapLayerKey])) {
         // The contents of this map layer have changed
         layersChanged = true
