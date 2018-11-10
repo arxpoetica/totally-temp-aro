@@ -363,12 +363,13 @@ class TileComponentController {
           'equipmentFeatures', 
           'censusFeatures'
         ]
-        console.log(hitFeatures)
+        //console.log(hitFeatures)
+        var bounds = []
+        var boundsByNetworkNodeObjectId = {}
         featureCats.forEach((cat) => {
           hitFeatures[cat].forEach((feature) => {
             if (feature.hasOwnProperty('object_id')) feature.objectId = feature.object_id
             if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
-              menuItemsById[feature.objectId] = feature 
               
               // ToDo: formalize this
               var singleHitFeature = {}
@@ -388,20 +389,36 @@ class TileComponentController {
               }))
               
               //console.log(feature)
+              //console.log(this.state.plan.getValue().id)
               
               var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
               var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
-              menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
+              var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
+              menuItems.push( menuItem )
+              menuItemsById[feature.objectId] = menuItem 
+              if (feature.hasOwnProperty('network_node_object_id')){
+                bounds.push(feature)
+                boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
+              }
             }
           })
         })
         
         if (menuItems.length > 0){
-          var eventXY = this.getXYFromEvent(event)
-          this.contextMenuService.populateMenu(menuItems)
-          this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
-          this.contextMenuService.menuOn()
-          this.$timeout()
+          this.utils.getBoundsCLLIs(bounds, this.state)
+          .then((results) => {
+            results.data.forEach((result) => {
+              if (result.clli){
+                boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+              }
+            })
+            
+            var eventXY = this.getXYFromEvent(event)
+            this.contextMenuService.populateMenu(menuItems)
+            this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
+            this.contextMenuService.menuOn()
+            this.$timeout()
+          })
         }else{
           this.contextMenuService.menuOff()
           this.$timeout()

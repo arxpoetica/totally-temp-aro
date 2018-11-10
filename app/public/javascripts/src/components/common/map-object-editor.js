@@ -182,11 +182,29 @@ class MapObjectEditorController {
   }
   
   openContextMenu(x, y, menuItems){
-    this.contextMenuService.populateMenu(menuItems)
-    this.contextMenuService.moveMenu(x, y)
-    this.contextMenuService.menuOn()
+    var bounds = []
+    var boundsByNetworkNodeObjectId = {}
+    menuItems.forEach((menuItem) => {
+      var feature = menuItem.data.feature
+      if (feature.hasOwnProperty('network_node_object_id')){
+        bounds.push(feature)
+        boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
+      }
+    })
     
-    this.$timeout()
+    this.utils.getBoundsCLLIs(bounds, this.state)
+    .then((results) => {
+      results.data.forEach((result) => {
+        if (result.clli){
+          boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+        }
+      })
+    
+      this.contextMenuService.populateMenu(menuItems)
+      this.contextMenuService.moveMenu(x, y)
+      this.contextMenuService.menuOn()
+      this.$timeout()
+    })
   }
   
   editExistingFeature(feature, latLng){

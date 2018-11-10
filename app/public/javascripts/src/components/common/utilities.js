@@ -80,11 +80,9 @@ class Utilities {
     return dataTypeList
   }
   
+  //ToDo: combine display name and CLLIs
   getFeatureDisplayName(feature, state, dataTypeList){
     if ('undefined' == typeof dataTypeList) dataTypeList = this.getDataTypeListOfFeature(feature)
-    
-    //console.log(dataTypeList)
-    //console.log(feature)
     
     var name = ''
     if ('location' == dataTypeList[0]){
@@ -96,12 +94,15 @@ class Utilities {
     }else if ('service_layer' == dataTypeList[0]) {
       name = 'Service Area'
     }else{
-      name = dataTypeList[1]
+      name = dataTypeList[1].split('_').join(' ').replace(/\b\w/g, function(l){return l.toUpperCase()})
     }
     
     if (feature.hasOwnProperty('code')){
       if ('' != name) name += ': '
       name += feature.code
+    }else if (feature.hasOwnProperty('siteClli')){
+      if ('' != name) name += ': '
+      name += feature.siteClli
     }
     
     if (state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
@@ -110,11 +111,25 @@ class Utilities {
       name = state.networkNodeTypesEntity[name]
     }
     
-    console.log(name)
-    
     return name
   }
   
+  getBoundsCLLIs(features, state){
+    var cllisByObjectId = {}
+    var doCall = false
+    var filter = `planId eq ${state.plan.getValue().id} and (`
+    features.forEach((feature) => {
+      filter += `objectId eq guid'${feature.network_node_object_id}' or `
+      doCall = true
+    }) 
+    
+    if (doCall){
+      filter = filter.substring(0, filter.length - 4) + ')'
+      return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,clli&$filter=${filter}`)
+    }else{
+      return Promise.resolve({'data':[]})
+    }
+  }
   
   // ---
   
