@@ -956,6 +956,7 @@ class State {
               serviceAreaIds: []
             }
           }
+          
           planOptions.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
           planOptions.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
           // A parent plan is specified - append it to the POST url
@@ -998,6 +999,7 @@ class State {
         serviceAreaIds: []
       }
     }
+    
     newPlan.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
     newPlan.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
     //newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
@@ -1103,6 +1105,10 @@ class State {
   service.setPlan = (plan) => {
     service.plan.next(plan)
     service.planOptimization.next(plan)
+    
+    service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global,tag.id))
+    service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
+    
     return service.loadPlanInputs(plan.id)
       .then(() => service.recreateTilesAndCache())
       .catch((err) => console.error(err))
