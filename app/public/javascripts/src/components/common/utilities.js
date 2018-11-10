@@ -66,6 +66,73 @@ class Utilities {
   getObjectSize(object) {
     return Object.keys(object).length;
   }
+  
+  // - Below are concerned with displaying information about a feature or equipment. These could be moved into their own utils class if this one gets too large
+  
+  getDataTypeList(dataType){
+    return dataType.split('.')
+  }
+  
+  getDataTypeListOfFeature(feature){
+    var dataTypeList = ['']
+    if (feature.hasOwnProperty('_data_type')) dataTypeList = this.getDataTypeList(feature._data_type)
+    if (feature.hasOwnProperty('dataType')) dataTypeList = this.getDataTypeList(feature.dataType)
+    return dataTypeList
+  }
+  
+  //ToDo: combine display name and CLLIs
+  getFeatureDisplayName(feature, state, dataTypeList){
+    if ('undefined' == typeof dataTypeList) dataTypeList = this.getDataTypeListOfFeature(feature)
+    
+    var name = ''
+    if ('location' == dataTypeList[0]){
+      name = 'Location'
+    }else if ('equipment_boundary' == dataTypeList[0]){
+      name = 'Boundary'
+    }else if(feature.hasOwnProperty('networkNodeType')){
+      name = feature.networkNodeType
+    }else if ('service_layer' == dataTypeList[0]) {
+      name = 'Service Area'
+    }else{
+      name = dataTypeList[1].split('_').join(' ').replace(/\b\w/g, function(l){return l.toUpperCase()})
+    }
+    
+    if (feature.hasOwnProperty('code')){
+      if ('' != name) name += ': '
+      name += feature.code
+    }else if (feature.hasOwnProperty('siteClli')){
+      if ('' != name) name += ': '
+      name += feature.siteClli
+    }
+    
+    if (state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
+      name = state.configuration.networkEquipment.equipments[name].label
+    }else if(state.networkNodeTypesEntity.hasOwnProperty(name)){
+      name = state.networkNodeTypesEntity[name]
+    }
+    
+    return name
+  }
+  
+  getBoundsCLLIs(features, state){
+    var cllisByObjectId = {}
+    var doCall = false
+    var filter = `planId eq ${state.plan.getValue().id} and (`
+    features.forEach((feature) => {
+      filter += `objectId eq guid'${feature.network_node_object_id}' or `
+      doCall = true
+    }) 
+    
+    if (doCall){
+      filter = filter.substring(0, filter.length - 4) + ')'
+      return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,clli&$filter=${filter}`)
+    }else{
+      return Promise.resolve({'data':[]})
+    }
+  }
+  
+  // ---
+  
 }
 
 Utilities.$inject =['$document', '$http'];

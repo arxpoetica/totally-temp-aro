@@ -36,7 +36,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService) {
+  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
@@ -45,6 +45,7 @@ class TileComponentController {
     this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
     this.contextMenuService = contextMenuService
+    this.utils = Utils
     
     this.areControlsEnabled = true
 
@@ -342,7 +343,6 @@ class TileComponentController {
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
     
-    // FOR TEST 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
       if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW 
           || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS
@@ -363,12 +363,13 @@ class TileComponentController {
           'equipmentFeatures', 
           'censusFeatures'
         ]
-        
+        //console.log(hitFeatures)
+        var bounds = []
+        var boundsByNetworkNodeObjectId = {}
         featureCats.forEach((cat) => {
           hitFeatures[cat].forEach((feature) => {
             if (feature.hasOwnProperty('object_id')) feature.objectId = feature.object_id
             if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
-              menuItemsById[feature.objectId] = feature 
               
               // ToDo: formalize this
               var singleHitFeature = {}
@@ -388,44 +389,36 @@ class TileComponentController {
               }))
               
               //console.log(feature)
+              //console.log(this.state.plan.getValue().id)
               
-              // ToDo: figure out a place to put the name finding logic - this is also in map-object-editor
-              var dataTypeList = ['']
-              if (feature.hasOwnProperty('_data_type')) dataTypeList = feature._data_type.split('.')
-              if (feature.hasOwnProperty('dataType')) dataTypeList = feature.dataType.split('.')
-              
-              var name = ''
-              if ('equipment_boundary' == dataTypeList[0]){
-                name = 'Boundary'
-              }else if(feature.hasOwnProperty('networkNodeType')){
-                name = feature.networkNodeType
-              }else if ('service_layer' == dataTypeList[0]) {
-                name = 'Service Area: ' + feature.code //'Service Area'
-              }else{
-                name = dataTypeList[1]
+              var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
+              var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
+              var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
+              menuItems.push( menuItem )
+              menuItemsById[feature.objectId] = menuItem 
+              if (feature.hasOwnProperty('network_node_object_id')){
+                bounds.push(feature)
+                boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
               }
-              
-              if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
-                name = this.state.configuration.networkEquipment.equipments[name].label
-              }else if(this.state.networkNodeTypesEntity.hasOwnProperty(name)){
-                name = this.state.networkNodeTypesEntity[name]
-              }
-              
-              // ---
-              
-              
-              menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
-              
             }
           })
         })
         
         if (menuItems.length > 0){
-          var eventXY = this.getXYFromEvent(event)
-          this.contextMenuService.populateMenu(menuItems)
-          this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
-          this.contextMenuService.menuOn()
-          this.$timeout()
+          this.utils.getBoundsCLLIs(bounds, this.state)
+          .then((results) => {
+            results.data.forEach((result) => {
+              if (result.clli){
+                boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+              }
+            })
+            
+            var eventXY = this.getXYFromEvent(event)
+            this.contextMenuService.populateMenu(menuItems)
+            this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
+            this.contextMenuService.menuOn()
+            this.$timeout()
+          })
         }else{
           this.contextMenuService.menuOff()
           this.$timeout()
@@ -653,7 +646,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService']
+TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
 
 let tile = {
   template: '',
