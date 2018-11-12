@@ -88,7 +88,7 @@
         <td> 
           <select class="form-control"
                   ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
-                  ng-options="key as value for (key, value) in $ctrl.state.routingModes">
+                  ng-options="key as value.label for (key, value) in $ctrl.state.routingModes">
           </select>
         </td>
       </tr>
