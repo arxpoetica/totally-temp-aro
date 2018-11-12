@@ -9,6 +9,7 @@ class PlanSearchController {
     this.searchText = []
     this.searchList = []
     this.allPlans  = false
+    this.systemUsers = []
     this.planOptions = {
       url: '/service/v1/plan',
       method: 'GET',
@@ -19,6 +20,18 @@ class PlanSearchController {
 
   $onInit() {
     this.loadPlans(1)
+  }
+
+  $onChanges(changesObj) {
+    if (changesObj && changesObj.systemActors) {
+      this.systemUsers = this.systemActors
+                          .filter((item) => item.type === 'user')
+                          .map(item => {
+                            var user = angular.copy(item)
+                            user.type = 'created_by'  // Just a lot of legacy stuff that depends upon this
+                            return user
+                          })
+    }
   }
 
   loadServiceAreaInfo(plans) {
@@ -61,38 +74,6 @@ class PlanSearchController {
 
   }
 
-  loadCreatorsInfo(plans) {
-
-    // Load creator ids for all creatorss referenced by the plans
-    // First determine which ids to fetch. We might already have a some or all of them
-    var creatorIdsToFetch = new Set()
-    plans.forEach((plan) => {
-      if (!this.state.listOfCreatorTags.some((creatorTag) => creatorTag.id === plan.createdBy)) {
-        plan.createdBy && creatorIdsToFetch.add(plan.createdBy)
-      }
-    })
-    if (creatorIdsToFetch.size === 0) {
-      return
-    }
-
-    // Get the ids from aro-service
-    var filter = ''
-    Array.from(creatorIdsToFetch).forEach((createdById, index) => {
-      if (index > 0) {
-        filter += ' or '
-      }
-      filter += ` (id eq ${createdById})`
-    })
-
-    // Our $top is high, and should never be hit as we are getting createdBy for a select few ids
-    return this.state.StateViewMode.loadListOfCreatorTagsById(this.$http,this.state,filter)
-      .then((results) => {
-        this.$timeout()
-      })
-      .catch((err) => console.error(err))
-  }
-
-      
   loadPlans(page, callback) {
     this.constructSearch()
     this.currentPage = page || 1
@@ -102,7 +83,6 @@ class PlanSearchController {
       var end = start + this.maxResults;
       this.plans = this.allPlans.slice(start, end);
       this.loadServiceAreaInfo(this.plans)
-      this.loadCreatorsInfo(this.plans)
       return;
     }
 
@@ -131,7 +111,6 @@ class PlanSearchController {
             this.allPlans = _.sortBy(response.data, 'name');
             this.plans = this.allPlans.slice(0, this.maxResults);
             this.loadServiceAreaInfo(this.plans)
-            this.loadCreatorsInfo(this.plans)
             this.pages = [];
             var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
             for (var i = 1; i <= pageSize; i++) {
@@ -150,7 +129,14 @@ class PlanSearchController {
     var selectedFilterPlans = _.filter(this.searchText,(plan) => {
       if(_.isString(plan)) return plan
     })
-    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name || tag.code || tag.fullName).concat("\""))
+    const typeToProperty = {
+      svc: 'code',
+      tag: 'name',
+      created_by: 'fullName'
+    }
+    var selectedFilters = this.searchText
+                            .filter((item) => typeof item !== 'string')
+                            .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.search_text = selectedFilters.join(' ')
   }
@@ -179,27 +165,11 @@ class PlanSearchController {
   getSATagCategories(currentPlanTags) {
     return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
-  
-  applyOwnerSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'created_by'
-      return tag
-    })
-    this.applySearch(filters)
-  }
 
-  applyTagSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'tag'
-      return tag
-    }) 
-    this.applySearch(filters)
-  }
-
-  applySaSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'svc'
-      return tag
+  applySearchFilter(selectedFilters, type) {
+    const filters = selectedFilters.map(item => { 
+      item.type = type
+      return item
     }) 
     this.applySearch(filters)
   }
@@ -242,7 +212,7 @@ class PlanSearchController {
   }
 
   getPlanCreatorName(createdBy) {
-    var creator = this.state.listOfCreatorTags.filter((creator) => creator.id === createdBy)[0]
+    var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
     return creator && creator.fullName
   }
 }
@@ -254,6 +224,7 @@ let planSearch = {
   bindings: {
     showPlanDeleteButton: '<',
     showRefreshPlansOnMapMove: '<',
+    systemActors: '<',
     onPlanSelected: '&',
     onPlanDeleteRequested: '&'
   },

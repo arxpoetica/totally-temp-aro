@@ -500,8 +500,8 @@ module.exports = class User {
   }
 
   static updateSettings (id, firstName, lastName, email) {
-    var sql = 'UPDATE auth.users SET first_name=$1, last_name=$2, email=$3 WHERE id=$4'
-    return database.findOne(sql, [firstName, lastName, email, id])
+    var sql = 'UPDATE auth.users SET first_name=$1, last_name=$2, full_name=$3, email=$4 WHERE id=$5'
+    return database.findOne(sql, [firstName, lastName, `${firstName} ${lastName}`, email, id])
   }
 
   static changePassword (id, old_password, password) {
