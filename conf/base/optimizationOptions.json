@@ -21,7 +21,14 @@
   "financialConstraints": {
     "cashFlowStrategyType": "EXTERNAL",
     "discountRate": 0.06,
-    "years": 15
+    "years": 15,
+    "terminalValueStrategy": {
+      "value": 0.0,
+      "terminalValueStrategyType": "NONE"
+    }
+  },
+  "fronthaulOptimization": {
+    "optimizationMode": "INTER_WIRECENTER"
   },
   "locationConstraints": {
     "locationTypes": [],
