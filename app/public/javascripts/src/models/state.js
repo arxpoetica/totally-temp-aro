@@ -1505,7 +1505,7 @@ class State {
   
   service.systemActors = [] // All the system actors (i.e. users and groups)
   service.reloadSystemActors = () => {
-    service.systemActors = []
+    var newSystemActors = []
     return $http.get('/service/auth/groups')
       .then((result) => {
         result.data.forEach((group) => {
@@ -1513,7 +1513,7 @@ class State {
           group.type = 'group'
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
           group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
-          service.systemActors.push(group)
+          newSystemActors.push(group)
         })
         return $http.get('/service/auth/users')
       })
@@ -1522,8 +1522,10 @@ class State {
           user.type = 'user'
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
           user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`) 
-          service.systemActors.push(user)
+          newSystemActors.push(user)
         })
+        service.systemActors = newSystemActors
+        $timeout()
       })
       .catch((err) => console.error(err))
   }

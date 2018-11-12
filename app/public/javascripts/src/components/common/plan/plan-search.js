@@ -20,13 +20,18 @@ class PlanSearchController {
 
   $onInit() {
     this.loadPlans(1)
-    this.systemUsers = this.state.systemActors
-                         .filter((item) => item.type === 'user')
-                         .map(item => {
-                           var user = angular.copy(item)
-                           user.type = 'created_by'  // Just a lot of legacy stuff that depends upon this
-                           return user
-                         })
+  }
+
+  $onChanges(changesObj) {
+    if (changesObj && changesObj.systemActors) {
+      this.systemUsers = this.systemActors
+                          .filter((item) => item.type === 'user')
+                          .map(item => {
+                            var user = angular.copy(item)
+                            user.type = 'created_by'  // Just a lot of legacy stuff that depends upon this
+                            return user
+                          })
+    }
   }
 
   loadServiceAreaInfo(plans) {
@@ -219,6 +224,7 @@ let planSearch = {
   bindings: {
     showPlanDeleteButton: '<',
     showRefreshPlansOnMapMove: '<',
+    systemActors: '<',
     onPlanSelected: '&',
     onPlanDeleteRequested: '&'
   },

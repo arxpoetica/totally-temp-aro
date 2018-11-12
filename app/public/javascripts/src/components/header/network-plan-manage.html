@@ -65,6 +65,7 @@
   <plan-info-recent ng-if="$ctrl.currentView == $ctrl.views.Recent_plans"></plan-info-recent>
 
   <plan-search ng-if="$ctrl.currentView == $ctrl.views.Search_plans"
+               system-actors="$ctrl.state.systemActors"
                show-refresh-plans-on-map-move="true"
                show-plan-delete-button="true"
                on-plan-selected="$ctrl.loadPlan(plan)"
