@@ -190,7 +190,7 @@ class PlanInfoController {
   }
 
   getPlanCreatorName(createdBy) {
-    var creator = this.state.listOfCreatorTags.filter((creator) => creator.id === createdBy)[0]
+    var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
     return creator && creator.fullName
   }
   
