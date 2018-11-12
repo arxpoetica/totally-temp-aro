@@ -27,7 +27,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
-
+    optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
+    
     addNetworkAnalysisType(state, optimizationBody)    
 
     return optimizationBody
@@ -49,6 +50,21 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
       analysisSelectionMode: state.optimizationOptions.analysisSelectionMode
+    }
+    if (state.optimizationOptions.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+      // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
+      const visibleAnalysisLayers = state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
+      if (visibleAnalysisLayers.length !== 1) {
+        const errorMessage = 'You must have exactly one analysis layer selected to perform this analysis'
+        swal({
+          title: 'Analysis Layer error',
+          text: errorMessage,
+          type: 'error',
+          closeOnConfirm: true
+        })
+        throw errorMessage
+      }
+      postBody.locationConstraints.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
     }
   }
 
@@ -83,7 +99,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       algorithmType: 'DEFAULT',
       algorithm: state.optimizationOptions.uiSelectedAlgorithm.algorithm,
       uiSelectedAlgorithmId: state.optimizationOptions.uiSelectedAlgorithm.id,
-      threshold: state.optimizationOptions.threshold / 100,
+      threshold: state.optimizationOptions.threshold,
       preIrrThreshold: state.optimizationOptions.preIrrThreshold,
       budget: state.optimizationOptions.budget * 1000
     }
@@ -263,7 +279,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.financialConstraints = JSON.parse(JSON.stringify(postBody.financialConstraints))
     }
     if (postBody.optimization.threshold) {
-      state.optimizationOptions.threshold = +postBody.optimization.threshold * 100
+      state.optimizationOptions.threshold = +postBody.optimization.threshold
     }
     if (postBody.optimization.preIrrThreshold) {
       state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
@@ -276,6 +292,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       optimization.setMode('boundaries')
     } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_LOCATIONS) {
       optimization.setMode('targets')
+    } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+      state.boundaries.tileLayers.forEach(layer => {
+        if (layer.type === 'analysis_layer') {
+          layer.visible = (layer.analysisLayerId === postBody.locationConstraints.analysisLayerId)
+        }
+      })
     }
   }
 

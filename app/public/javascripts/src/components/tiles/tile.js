@@ -36,13 +36,17 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, state, tileDataService, uiNotificationService) {
+  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
+    this.$timeout = $timeout
     this.state = state
     this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
+    this.contextMenuService = contextMenuService
+    this.utils = Utils
+    
     this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
@@ -108,6 +112,13 @@ class TileComponentController {
       }
     })
 
+    // If selected Analysis Areas in viewmode change, set that in the tile data service
+    state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedAnalysisAreas(selectedAnalysisAreas)
+      }
+    })
+    
     // If selected Analysis Area in viewmode change, set that in the tile data service
     state.selectedAnalysisArea.subscribe((selectedAnalysisArea) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -316,6 +327,7 @@ class TileComponentController {
                                                          this.state.selectedLocations.getValue(),
                                                          this.state.selectedServiceAreas.getValue(),
                                                          this.state.selectedAnalysisArea.getValue(),
+                                                         this.state.selectedAnalysisAreas.getValue(),
                                                          this.state.selectedCensusBlockId.getValue(),
                                                          this.state.censusCategories.getValue(),
                                                          this.state.selectedCensusCategoryId.getValue(),
@@ -330,12 +342,130 @@ class TileComponentController {
                                                          MapUtilities.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-
+    
+    this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
+      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW 
+          || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS
+          || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
+      ) return
+      
+      this.getFeaturesUnderLatLng(event.latLng)
+      .then((hitFeatures) => {
+        var menuItems = []
+        var menuItemsById = {}
+        
+        // ToDo: this should be formalised 
+        var featureCats = [ 
+          'locations',
+          'serviceAreas',
+          'analysisAreas',
+          'roadSegments',
+          'equipmentFeatures', 
+          'censusFeatures'
+        ]
+        //console.log(hitFeatures)
+        var bounds = []
+        var boundsByNetworkNodeObjectId = {}
+        featureCats.forEach((cat) => {
+          hitFeatures[cat].forEach((feature) => {
+            if (feature.hasOwnProperty('object_id')) feature.objectId = feature.object_id
+            if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
+              
+              // ToDo: formalize this
+              var singleHitFeature = {}
+              singleHitFeature.latLng = hitFeatures.latLng
+              singleHitFeature[cat] = [feature]
+              
+              var data = {
+                'objectId': feature.objectId, 
+                //'dataTypeList': dataTypeList, 
+                'feature': feature, 
+                'latLng': hitFeatures.latLng
+              }
+              
+              var options = []
+              options.push( this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
+                this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
+              }))
+              
+              //console.log(feature)
+              //console.log(this.state.plan.getValue().id)
+              
+              var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
+              var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
+              var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
+              menuItems.push( menuItem )
+              menuItemsById[feature.objectId] = menuItem 
+              if (feature.hasOwnProperty('network_node_object_id')){
+                bounds.push(feature)
+                boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
+              }
+            }
+          })
+        })
+        
+        if (menuItems.length > 0){
+          this.utils.getBoundsCLLIs(bounds, this.state)
+          .then((results) => {
+            results.data.forEach((result) => {
+              if (result.clli){
+                boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+              }
+            })
+            
+            var eventXY = this.getXYFromEvent(event)
+            this.contextMenuService.populateMenu(menuItems)
+            this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
+            this.contextMenuService.menuOn()
+            this.$timeout()
+          })
+        }else{
+          this.contextMenuService.menuOff()
+          this.$timeout()
+        }
+        
+      })
+    })
+    
+    // ToDo: this function should probably be a global utility
+    this.getXYFromEvent = function(event){
+      var mouseEvent = null
+      Object.keys(event).forEach((eventKey) => {
+        if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
+          mouseEvent = event[eventKey]
+        }
+      })
+      var x = mouseEvent.clientX
+      var y = mouseEvent.clientY
+      return {'x':x, 'y':y}
+    }
+    
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
+      if (this.contextMenuService.isMenuVisible.getValue()){
+        this.contextMenuService.menuOff()
+        this.$timeout()
+        return
+      }
+      
+      this.getFeaturesUnderLatLng(event.latLng)
+      .then((hitFeatures) => {
+        //console.log(hitFeatures)
+        if (hitFeatures){
+          if (hitFeatures.locations.length > 0) {
+            this.state.hackRaiseEvent(hitFeatures.locations)
+          }
+          
+          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // ToDo: now that we have types these categories should to be dynamic
+          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        }
+      })
+    })
 
+    this.getFeaturesUnderLatLng = function(latLng){
       // Get latitiude and longitude
-      var lat = event.latLng.lat()
-      var lng = event.latLng.lng()
+      var lat = latLng.lat()
+      var lng = latLng.lng()
 
       // Get zoom
       var zoom = this.mapRef.getZoom()
@@ -344,7 +474,7 @@ class TileComponentController {
 
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
       var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
-      FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
+      return FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
                                           this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
                                           clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
@@ -369,7 +499,6 @@ class TileComponentController {
               canSelectLoc = !canSelectLoc
               break
           }
-          if (this.state.areaSelectionMode == this.state.areaSelectionModes.GROUP) canSelectSA = false
         } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
           canSelectSA = true
         }  
@@ -397,8 +526,9 @@ class TileComponentController {
           }
         })
         
+        // ToDo: formalize this
         var hitFeatures = { 
-          latLng: event.latLng,
+          latLng: latLng,
           locations: locationFeatures,
           serviceAreas: serviceAreaFeatures,
           analysisAreas: analysisAreaFeatures,
@@ -407,6 +537,8 @@ class TileComponentController {
           censusFeatures: censusFeatures
         }
         
+        return hitFeatures
+        /*
         //console.log(hitFeatures)
         
         if (locationFeatures.length > 0) {
@@ -416,9 +548,14 @@ class TileComponentController {
         //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
         // ToDo: now that we have types these categories should to be dynamic
         this.state.mapFeaturesSelectedEvent.next(hitFeatures)
+        // */
       })
-      .catch((err) => console.error(err))
-    })
+      .catch((err) => {
+        console.error(err)
+      })
+    }
+    
+    
     
   }
 
@@ -428,7 +565,12 @@ class TileComponentController {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
     }
-
+    
+    if (this.overlayRightclickListener) {
+      google.maps.event.removeListener(this.overlayRightclickListener)
+      this.overlayRightclickListener = null
+    }
+    
     this.mapRef.overlayMapTypes.clear()
   }
 
@@ -504,7 +646,7 @@ class TileComponentController {
   }
 }
 
-TileComponentController.$inject = ['$document', 'state', 'tileDataService', 'uiNotificationService']
+TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
 
 let tile = {
   template: '',

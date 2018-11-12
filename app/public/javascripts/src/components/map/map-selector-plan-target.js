@@ -69,6 +69,30 @@ class MapSelectorPlanTargetController {
           })
       }
 
+      if (plan && plan.id !== state.INVALID_PLAN_ID && event.analysisAreas && event.analysisAreas.length > 0 
+        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
+        // Get a list of ids to add and remove
+        var existingIds = state.selectedAnalysisAreas.getValue()
+        var idsToAdd = new Set(), idsToRemove = new Set()
+        event.analysisAreas.forEach((analysisArea) => {
+          if (existingIds.has(+analysisArea.id)) {
+            idsToRemove.add(+analysisArea.id)
+          } else {
+            idsToAdd.add(+analysisArea.id)
+          }
+        })
+        // Make these changes to the database, then reload targets from the DB
+        var addRemoveAnalysisTargetPromises = [
+          $http.post(`/analysis_areas/${plan.id}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(idsToAdd) }),
+          $http.post(`/analysis_areas/${plan.id}/removeAnalysisAreaTargets`, { analysisAreaIds: Array.from(idsToRemove) })
+        ]
+        Promise.all(addRemoveAnalysisTargetPromises)
+          .then((response) => {
+            // Reload selected locations from database
+            state.reloadSelectedAnalysisAreas(true)
+          })
+      }
+
       if (event.roadSegments && event.roadSegments.size > 0) {
           state.StateViewMode.reloadSelectedRoadSegments(state,event.roadSegments)
       }

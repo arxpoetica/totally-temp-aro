@@ -7,7 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea,
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedAnalysisAreas,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
@@ -19,6 +19,7 @@ class MapTileRenderer {
     this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
     this.selectedServiceAreas = selectedServiceAreas 
     this.selectedAnalysisArea = selectedAnalysisArea
+    this.selectedAnalysisAreas = selectedAnalysisAreas
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
@@ -97,7 +98,12 @@ class MapTileRenderer {
     this.selectedAnalysisArea = selectedAnalysisArea
     this.tileDataService.markHtmlCacheDirty()
   }
-  
+
+  // Sets the selected analysis area id to view details
+  setselectedAnalysisAreas(selectedAnalysisAreas) {
+    this.selectedAnalysisAreas = selectedAnalysisAreas
+    this.tileDataService.markHtmlCacheDirty()
+  }
   //Sets the selected Census Block ids
   setSelectedCensusBlockId(selectedCensusBlockId) {
     this.selectedCensusBlockId = selectedCensusBlockId
@@ -161,6 +167,9 @@ class MapTileRenderer {
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
       if (!mapLayers[oldMapLayerKey]) {
         // Old map layer key does not exist in new map layers, so layers have changed
+        layersChanged = true
+      } else if (this.mapLayers[oldMapLayerKey].featureFilter !== mapLayers[oldMapLayerKey].featureFilter) {
+        // The feature filter of this map layer has changed
         layersChanged = true
       } else if (JSON.stringify(this.mapLayers[oldMapLayerKey]) !== JSON.stringify(mapLayers[oldMapLayerKey])) {
         // The contents of this map layer have changed
@@ -555,7 +564,7 @@ class MapTileRenderer {
               'tileDataService': this.tileDataService,'styles': this.styles,
               'tileSize': this.tileSize,'selectedServiceArea': this.selectedServiceArea,'selectedServiceAreas': this.selectedServiceAreas, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'selectedAnalysisArea':this.selectedAnalysisArea,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
+              'selectedAnalysisArea':this.selectedAnalysisArea,selectedAnalysisAreas:this.selectedAnalysisAreas,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
               'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0

@@ -209,4 +209,12 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  // Get addresses for the specified analysis areas
+  api.post('/network_plan/analysis_area/addresses', (request, response, next) => {
+    var analysisAreaIds = request.body.analysisAreaIds
+    models.NetworkPlan.getAnalysisAreaAddresses(analysisAreaIds)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

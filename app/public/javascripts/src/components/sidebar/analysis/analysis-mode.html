@@ -53,14 +53,19 @@
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
         <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
-          remove-service-area="$ctrl.removeServiceArea(target)"></network-build>
+          remove-service-area="$ctrl.removeServiceArea(target)"
+          remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-build>
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
-          remove-service-area="$ctrl.removeServiceArea(target)"></network-analysis>
+          remove-service-area="$ctrl.removeServiceArea(target)"
+          remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-analysis>
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'">
         <analysis-expert-mode></analysis-expert-mode>
+      </div>
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'">
+        <coverage-reports plan-id="$ctrl.state.plan.getValue().id"></coverage-reports>
       </div>
     </accordion-panel-contents>
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="'OUTPUT'"></accordion-panel-title>

@@ -1170,6 +1170,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
                     linear-gradient(-45deg, transparent 45%, #919195 50%, transparent 55%, transparent 100%);
   background-size: 8px 8px;
   background-position: 4px 4px;
+  z-index: 9;
 }
 
 .sidebar-header-subinfo{

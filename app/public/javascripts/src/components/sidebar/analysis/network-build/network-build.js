@@ -7,6 +7,7 @@ class NetworkBuildController {
     this.targets = []
     this.targetsTotal = 0
     this.serviceAreas = []
+    this.analysisAreas = []
     this.config = config
 
     this.areControlsEnabled = true
@@ -15,8 +16,8 @@ class NetworkBuildController {
     
     this.selectionModeLabels = {}
     this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
+    this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
-    
     
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
@@ -30,58 +31,39 @@ class NetworkBuildController {
       }
     })
 
-    state.selectedLocations.subscribe((selectedLocations) => {
+    this.locationsObserver = state.selectedLocations.subscribe((selectedLocations) => {
       // The selected locations have changed. Get the count and addresses that we want to show
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_LOCATIONS) return
       this.targetsTotal = selectedLocations.size
       var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
       $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          this.targets = result.data
-        }
+        this.targets = result.data
       })
+      .catch(err => console.error(err))
     })
 
-    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
+    this.serviceAreasObserver = state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
       // The selected SA have changed.
       if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
-      //console.log(selectedServiceAreas)
       var serviceAreaIds = Array.from(selectedServiceAreas)
       $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
       .then((result) => {
-        if (result.status >= 200 && result.status <= 299) {
-          this.serviceAreas = result.data
-        }
+        this.serviceAreas = result.data
       })
+      .catch(err => console.error(err))
     })  
     
-    state.mapFeaturesSelectedEvent.subscribe((event) => {
-      if (state.areaSelectionMode != state.areaSelectionModes.GROUP 
-          || state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
-      if (event.analysisAreas){
-        event.analysisAreas.forEach((item, index) => {
-          
-          var filter = `(id eq ${item.id})`
-          $http.get(`/service/odata/analysisarea?$filter=${filter}&$top=1`)
-          .then((results) => {
-            //console.log(results)
-            if (results.data[0].geog && results.data[0].geog.coordinates 
-                && results.data[0].geog.coordinates.length > 0){
-              results.data[0].geog.coordinates.forEach((shapes) => {
-                shapes.forEach((coords) => {
-                  this.state.requestPolygonSelect.next({
-                    'coords': coords
-                  })
-                })
-              })
-            }
-          })      
-        })
-      }
+    this.analysisAreasObserver = state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
+      // The selected analysis areas have changed.
+      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_ANALYSIS_AREAS) return
+      var analysisAreaIds = Array.from(selectedAnalysisAreas)
+      $http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
+      .then((result) => {
+        this.analysisAreas = result.data
+      })
+      .catch(err => console.error(err))
     })
-    
-    
   }
 
   onSelectionTypeChange(selectionType) {
@@ -92,7 +74,12 @@ class NetworkBuildController {
     //this.state.optimizationOptions.budget = this.budgetDisplay * 1000
     this.state.optimizationOptions.budget = this.budgetDisplay
   }
-  
+
+  $onDestroy() {
+    this.locationsObserver.unsubscribe()
+    this.serviceAreasObserver.unsubscribe()
+    this.analysisAreasObserver.unsubscribe()
+  }
 }
 
 NetworkBuildController.$inject = ['$http', 'state', 'optimization']
@@ -102,7 +89,8 @@ let networkBuild = {
   bindings: {
     removeTarget: '&', 
     zoomTarget: '&',
-    removeServiceArea: '&'
+    removeServiceArea: '&',
+    removeAnalysisAreas: '&'
   },
   controller: NetworkBuildController
 }

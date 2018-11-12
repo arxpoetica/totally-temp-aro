@@ -18,10 +18,21 @@ class State {
     UNCONSTRAINED: { id: 'UNCONSTRAINED', algorithm: 'UNCONSTRAINED', label: 'Full Coverage' },
     MAX_IRR: { id: 'MAX_IRR', algorithm: 'IRR', label: 'Maximum IRR' },
     BUDGET: { id: 'BUDGET', algorithm: 'IRR', label: 'Budget' },
-    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'IRR Target' },
-    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'IRR Threshold' },
+    IRR_TARGET: { id: 'IRR_TARGET', algorithm: 'IRR', label: 'Plan IRR Floor' },
+    IRR_THRESH: { id: 'IRR_THRESH', algorithm: 'IRR', label: 'Segment IRR Floor' },
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
+  }
+  
+  service.pruningStrategyTypes = {
+    INTER_WIRECENTER: {id: 'INTER_WIRECENTER', label: 'Inter Service Area'}, 
+    INTRA_WIRECENTER: {id: 'INTRA_WIRECENTER', label: 'Intra Service Area'}
+  }
+  
+  service.terminalValueStrategyTypes = {
+    NONE: {id: 'NONE', label: 'None'},
+    FIXED_MULTIPLIER: {id: 'FIXED_MULTIPLIER', label: 'End Year Multiplier'},
+    PERPUTUAL_GROWTH: {id: 'PERPUTUAL_GROWTH', label: 'Perpetual Growth'}
   }
   
   service.viewFiberOptions = [
@@ -95,16 +106,9 @@ class State {
   // The selection modes for the application
   service.selectionModes = {
     SELECTED_AREAS: 'SELECTED_AREAS', 
-    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS'
+    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS',
+    SELECTED_ANALYSIS_AREAS: 'SELECTED_ANALYSIS_AREAS'
   }
-  
-  service.areaSelectionModes = {
-      SINGLE: 'single',
-      GROUP: 'group'
-  }
-  
-  service.areaSelectionMode = service.areaSelectionModes.SINGLE
-  //service.areaSelectionMode = service.areaSelectionModes.GROUP
   
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
@@ -139,13 +143,13 @@ class State {
     ODN_2: {id: 'ODN_2', label: 'Hub-distribution split'},
     ODN_3: {id: 'ODN_3', label: 'Hybrid split'}
   }
-
+  
   // Optimization options - initialize once
   // service.optimizationOptions = {
   //   uiAlgorithms: [],
   //   uiSelectedAlgorithm: null,
   //   networkConstraints: {
-  //     routingMode: service.routingModes.DIRECT_ROUTING.id,
+  //     routingMode: 'ODN_3',
   //     cellNodeConstraints: {
   //       cellRadius: 300.0,
   //       cellGranularityRatio: 0.5,
@@ -160,10 +164,17 @@ class State {
   //   financialConstraints: {
   //     cashFlowStrategyType: 'EXTERNAL',
   //     discountRate: 0.06,
-  //     years: 15
+  //     years: 15, 
+  //     terminalValueStrategy: {
+  //       value: 0.0, 
+  //       terminalValueStrategyType: service.terminalValueStrategyTypes['NONE'].id
+  //     }
   //   },
-  //   threshold: 0, // This will be converted to a precentage when sending to the UI
-  //   preIrrThreshold: 1.0,
+  //   fronthaulOptimization: {
+  //     optimizationMode: service.pruningStrategyTypes['INTER_WIRECENTER'].id
+  //   }, 
+  //   threshold: 0.08, // This will be converted to a percentage when sending to the UI
+  //   preIrrThreshold: 0.08,
   //   budget: 100000,
   //   customOptimization: null,
   //   routeGenerationOptions: [
@@ -194,16 +205,16 @@ class State {
   //   service.optimizationOptions.technologies['FiveG'].label = 'Fixed Wireless'
 
   //set default values for uiSelectedAlgorithm & selectedgeographicalLayer
-  // //158954857: disabling some optimization types
+  //158954857: disabling some optimization types
   // service.optimizationOptions.uiAlgorithms = [
   //   service.OPTIMIZATION_TYPES.UNCONSTRAINED,
   //   //service.OPTIMIZATION_TYPES.MAX_IRR,
   //   service.OPTIMIZATION_TYPES.BUDGET,
-  //   //service.OPTIMIZATION_TYPES.IRR_TARGET,
-  //   //service.OPTIMIZATION_TYPES.IRR_THRESH,
+  //   service.OPTIMIZATION_TYPES.IRR_TARGET,
+  //   service.OPTIMIZATION_TYPES.IRR_THRESH,
   //   service.OPTIMIZATION_TYPES.COVERAGE
   // ]
-
+  
   // service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
 
   // View Settings layer - define once
@@ -577,6 +588,27 @@ class State {
     }
   }
 
+  service.selectedAnalysisAreas = new Rx.BehaviorSubject(new Set())
+  service.reloadSelectedAnalysisAreas = (forceMapRefresh = false) => {
+    var plan = service.plan.getValue()
+    if (plan) {
+      $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
+        .then((result) => {
+          var selectedAnalysisAreasSet = new Set()
+          result.data.forEach((analysis_area) => selectedAnalysisAreasSet.add(+analysis_area.analysis_area_id))
+          service.selectedAnalysisAreas.next(selectedAnalysisAreasSet)
+          service.requestMapLayerRefresh.next(null)
+          if (forceMapRefresh) {
+            tileDataService.clearDataCache()
+            tileDataService.markHtmlCacheDirty()
+          }
+          return Promise.resolve()
+        })
+    } else {
+      return Promise.resolve()
+    }
+  }
+
   service.selectedServiceArea = new Rx.BehaviorSubject()
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
@@ -596,7 +628,7 @@ class State {
     service.networkAnalysisTypes = [
       { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
       { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: "NETWORK_ANALYSIS" },
-      { id: 'Coverage_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
+      { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
       { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" },
       { id: 'EXPERT_MODE', label: 'Expert Mode', type: "Expert" }
     ]
@@ -924,6 +956,7 @@ class State {
               serviceAreaIds: []
             }
           }
+          
           planOptions.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
           planOptions.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
           // A parent plan is specified - append it to the POST url
@@ -966,6 +999,7 @@ class State {
         serviceAreaIds: []
       }
     }
+    
     newPlan.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
     newPlan.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
     //newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
@@ -1071,6 +1105,10 @@ class State {
   service.setPlan = (plan) => {
     service.plan.next(plan)
     service.planOptimization.next(plan)
+    
+    service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global,tag.id))
+    service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
+    
     return service.loadPlanInputs(plan.id)
       .then(() => service.recreateTilesAndCache())
       .catch((err) => console.error(err))
@@ -1263,33 +1301,37 @@ class State {
   }
 
   service.runOptimization = () => {
-    
+
     checkToDisplayPopup()
-    .then((result) => {
-      if(result) {
-        service.clearTileCachePlanOutputs()
-        tileDataService.markHtmlCacheDirty()
-        service.requestMapLayerRefresh.next(null)
-    
-        // Get the optimization options that we will pass to the server
-        var optimizationBody = service.getOptimizationBody()
-        // Make the API call that starts optimization calculations on aro-service
-        var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
-        apiUrl += `?userId=${service.loggedInUser.id}`
-        $http.post(apiUrl, optimizationBody)
-          .then((response) => {
-            //console.log(response)
-            if (response.status >= 200 && response.status <= 299) {
-              service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
-              service.startPolling()
-            } else {
-              console.error(response)
-            }
-          })
-      } else {
-        return
-      }
-    })
+      .then((result) => {
+        if (result) {
+          service.clearTileCachePlanOutputs()
+          tileDataService.markHtmlCacheDirty()
+          service.requestMapLayerRefresh.next(null)
+
+          // Get the optimization options that we will pass to the server
+          var optimizationBody = service.getOptimizationBody()
+          // Make the API call that starts optimization calculations on aro-service
+          var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
+          apiUrl += `?userId=${service.loggedInUser.id}`
+
+          //console.log(apiUrl)
+          //console.log(optimizationBody)
+
+          $http.post(apiUrl, optimizationBody)
+            .then((response) => {
+              //console.log(response)
+              if (response.status >= 200 && response.status <= 299) {
+                service.Optimizingplan.optimizationId = response.data.optimizationIdentifier
+                service.startPolling()
+              } else {
+                console.error(response)
+              }
+            })
+        } else {
+          return
+        }
+      })
   }
 
   service.planOptimization = new Rx.BehaviorSubject(null)
@@ -1367,13 +1409,19 @@ class State {
   })
 
   service.getDefaultPlanInputs = () => {
+    // ToDo: there seems to be some repeat code here and in the declaration of optimizationOptions
+    //   but there are also discrepancies 
     // return {
     //   analysis_type: "NETWORK_PLAN",
     //   financialConstraints: {
     //     cashFlowStrategyType: "EXTERNAL",
-    //       discountRate: 0.06,
-    //         years: 15
-    //     },
+    //     discountRate: 0.06,
+    //     years: 15, 
+    //     terminalValueStrategy: {
+    //       value: 0.0, 
+    //       terminalValueStrategyType: service.terminalValueStrategyTypes['NONE'].id
+    //     }
+    //   },
     //   locationConstraints: {
     //     locationTypes: [],
     //     analysisSelectionMode: service.selectionModes.SELECTED_AREAS
@@ -1382,7 +1430,7 @@ class State {
     //     networkTypes: [
     //       "Fiber"
     //     ],
-    //     routingMode: service.routingModes.DIRECT_ROUTING.id
+    //     routingMode: "ODN_3"
     //   },
     //   optimization: {
     //     algorithmType: "DEFAULT",

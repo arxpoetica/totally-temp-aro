@@ -55,7 +55,9 @@
       "zIndex": 3530,
       "highlightStyle": {
         "strokeStyle": "#ff0000", 
-        "lineWidth": 8
+        "lineWidth": 8,
+        "fillStyle": "#c04040",
+        "opacity": 0.3
       },
       "tileDefinition": {
         "dataId": "v1.tiles.analysis_area.{analysisLayerId}.{transform}",
@@ -109,7 +111,9 @@
       "zIndex": 3530,
       "highlightStyle": {
         "strokeStyle": "#ff0000",
-				"lineWidth": 8
+				"lineWidth": 8,
+        "fillStyle": "#c04040",
+        "opacity": 0.3
       }
     }
   }

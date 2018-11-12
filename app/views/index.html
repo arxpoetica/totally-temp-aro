@@ -109,6 +109,8 @@
     <aro-panel></aro-panel>
     <equipment-detail-modal></equipment-detail-modal>
     <plan-inputs-modal></plan-inputs-modal>
+    
+    <context-menu></context-menu>
   </body>
 
   <!-- Angular controllers and services -->
@@ -155,6 +157,8 @@
           enableCloseButton: true
         },
         styles: styles,
+        clickableIcons: false, 
+        clickableLabels:false
       });
       
       mapTypeId === 'SATELLITE' && map.setMapTypeId(google.maps.MapTypeId.HYBRID);
@@ -216,6 +220,7 @@
   
   <!-- Components -->
   <script src="javascripts/lib/components/footer/ui-notification-service.js"></script>
+  <script src="javascripts/lib/components/common/context-menu-service.js"></script>
   <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
   
   <script src="javascripts/lib/controllers/body_controller.js"></script>
