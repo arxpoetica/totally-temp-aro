@@ -72,6 +72,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
       data: data
     }).then((response) => {
       state.showGlobalSettings = false
+      state.reloadSystemActors()  // The name/email may have changed for the current user. Reload all actors
     }).catch((response) => {
       state.showGlobalSettings = false
     })
