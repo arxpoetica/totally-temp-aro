@@ -41,19 +41,19 @@
       object-name="Tag"
       search-property="name"
       search-list="$ctrl.state.listOfTags"
-      apply-search="$ctrl.applyTagSearchFilter(selectedFilters)">
+      apply-search="$ctrl.applySearchFilter(selectedFilters, 'tag')">
     </plan-search-filter>
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Service Area"
       search-property="code"
       search-list="$ctrl.state.listOfServiceAreaTags"
-      apply-search="$ctrl.applySaSearchFilter(selectedFilters)"
+      apply-search="$ctrl.applySearchFilter(selectedFilters, 'svc')"
       refresh-tag-list="$ctrl.state.StateViewMode.loadListOfSAPlanTags($ctrl.$http,$ctrl.state,searchObj)"></plan-search-filter>
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-property="fullName"
       search-list="$ctrl.systemUsers"
-      apply-search="$ctrl.applyOwnerSearchFilter(selectedFilters)"></plan-search-filter>
+      apply-search="$ctrl.applySearchFilter(selectedFilters, 'created_by')"></plan-search-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">

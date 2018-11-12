@@ -160,27 +160,11 @@ class PlanSearchController {
   getSATagCategories(currentPlanTags) {
     return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
-  
-  applyOwnerSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'created_by'
-      return tag
-    })
-    this.applySearch(filters)
-  }
 
-  applyTagSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'tag'
-      return tag
-    }) 
-    this.applySearch(filters)
-  }
-
-  applySaSearchFilter(selectedFilters) {
-    var filters = _.map(selectedFilters, (tag) => { 
-      tag.type = 'svc'
-      return tag
+  applySearchFilter(selectedFilters, type) {
+    const filters = selectedFilters.map(item => { 
+      item.type = type
+      return item
     }) 
     this.applySearch(filters)
   }
