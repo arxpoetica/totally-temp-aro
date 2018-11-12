@@ -9,6 +9,7 @@ class PlanSearchController {
     this.searchText = []
     this.searchList = []
     this.allPlans  = false
+    this.systemUsers = []
     this.planOptions = {
       url: '/service/v1/plan',
       method: 'GET',
@@ -19,6 +20,13 @@ class PlanSearchController {
 
   $onInit() {
     this.loadPlans(1)
+    this.systemUsers = this.state.systemActors
+                         .filter((item) => item.type === 'user')
+                         .map(item => {
+                           var user = angular.copy(item)
+                           user.type = 'created_by'  // Just a lot of legacy stuff that depends upon this
+                           return user
+                         })
   }
 
   loadServiceAreaInfo(plans) {
@@ -116,7 +124,14 @@ class PlanSearchController {
     var selectedFilterPlans = _.filter(this.searchText,(plan) => {
       if(_.isString(plan)) return plan
     })
-    var selectedFilters = _.map(_.filter(this.searchText,(filter) => !_.isString(filter)) ,(tag) => tag.type.concat(":").concat("\"").concat(tag.name || tag.code || tag.fullName).concat("\""))
+    const typeToProperty = {
+      svc: 'code',
+      tag: 'name',
+      created_by: 'fullName'
+    }
+    var selectedFilters = this.searchText
+                            .filter((item) => typeof item !== 'string')
+                            .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
     if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.search_text = selectedFilters.join(' ')
   }

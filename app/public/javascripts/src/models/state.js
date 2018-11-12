@@ -1446,7 +1446,6 @@ class State {
   service.listOfTags = []
   service.currentPlanTags = []
   service.listOfServiceAreaTags = []
-  service.listOfCreatorTags = []
   service.currentPlanServiceAreaTags = []
   service.StateViewMode.loadListOfPlanTags($http,service)
 
@@ -1511,6 +1510,7 @@ class State {
       .then((result) => {
         result.data.forEach((group) => {
           group.originalName = group.name
+          group.type = 'group'
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
           group.name = $sce.trustAsHtml(`<i class="fa fa-users" aria-hidden="true"></i> ${group.name}`)
           service.systemActors.push(group)
@@ -1519,6 +1519,7 @@ class State {
       })
       .then((result) => {
         result.data.forEach((user) => {
+          user.type = 'user'
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
           user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`) 
           service.systemActors.push(user)

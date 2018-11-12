@@ -49,28 +49,6 @@ class StateViewMode {
       })
   }
 
-  static loadListOfCreatorTags($http, state, filterObj) {
-    if (filterObj == '') return
-    var filter = ""
-    filter = filterObj ? filter.concat(` substringof(fullName,'${filterObj}')`) : filter
-    if (filterObj || state.listOfCreatorTags.length == 0) {
-      $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filter}&$orderby=id&$top=10`)
-        .then((results) => {
-          state.listOfCreatorTags = StateViewMode.removeDuplicates(state.listOfCreatorTags.concat(results.data), 'id')
-        })
-    }
-  }
-
-  static loadListOfCreatorTagsById($http, state, filterExp) {
-    if (filterExp) {
-      // Our $top is high, and should never be hit as we are getting createdBy for plans that are visible in "search plans"
-      return $http.get(`/service/odata/UserEntity?$select=id,fullName&$filter=${filterExp}&$orderby=id&$top=10000`)
-        .then((results) => {
-          return state.listOfCreatorTags = StateViewMode.removeDuplicates(state.listOfCreatorTags.concat(results.data), 'id')
-        })
-    }
-  }
-
   static loadListOfSAPlanTags($http, state, filterObj) {
     const MAX_SERVICE_AREAS_FROM_ODATA = 10
     //var filter = "layer/id eq 1"

@@ -24,6 +24,7 @@ class SearchPlanFilterController {
     templateUrl: '/components/common/plan/plan-search-filter.html',
     bindings: {
       objectName : '@',
+      searchProperty: '@',  // The property on the searchList objects that we will search against
       searchList : '<',
       applySearch: '&',
       refreshTagList: '&'
