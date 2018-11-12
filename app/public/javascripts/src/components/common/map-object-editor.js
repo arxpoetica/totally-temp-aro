@@ -186,7 +186,7 @@ class MapObjectEditorController {
     var boundsByNetworkNodeObjectId = {}
     menuItems.forEach((menuItem) => {
       var feature = menuItem.data.feature
-      if (feature.hasOwnProperty('network_node_object_id')){
+      if (feature && feature.hasOwnProperty('network_node_object_id')){
         bounds.push(feature)
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
       }
