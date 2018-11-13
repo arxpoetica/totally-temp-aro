@@ -7,7 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedServiceAreas, selectedAnalysisArea, selectedAnalysisAreas,
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedAnalysisArea, selectedAnalysisAreas,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
@@ -17,7 +17,6 @@ class MapTileRenderer {
     this.mapTileOptions = mapTileOptions
     this.tileVersions = {}
     this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
-    this.selectedServiceAreas = selectedServiceAreas 
     this.selectedAnalysisArea = selectedAnalysisArea
     this.selectedAnalysisAreas = selectedAnalysisAreas
     this.selectedRoadSegment = selectedRoadSegment
@@ -77,18 +76,12 @@ class MapTileRenderer {
 
   // Sets the "selected entities list"
   setSelection(selection) {
-    this.selection = angular.copy(selection)
+    this.selection = selection
   }
 
   // Sets the selected location ids
   setselectedLocations(selectedLocations) {
     this.selectedLocations = selectedLocations
-    this.tileDataService.markHtmlCacheDirty()
-  }
-
-  // Sets the selected service area ids for analysis
-  setselectedServiceAreas(selectedServiceAreas) {
-    this.selectedServiceAreas = selectedServiceAreas
     this.tileDataService.markHtmlCacheDirty()
   }
 
@@ -561,7 +554,7 @@ class MapTileRenderer {
             if (this.state.isFeatureLayerOnForBoundary(feature)){
               var featureObj = {'feature':feature,'shape':shape,'geometryOffset': geometryOffset,'ctx':ctx,'mapLayer': mapLayer,'censusCategories': this.censusCategories, 
               'tileDataService': this.tileDataService,'styles': this.styles,
-              'tileSize': this.tileSize, 'selectedServiceAreas': this.selectedServiceAreas, 
+              'tileSize': this.tileSize, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
               'selectedAnalysisArea':this.selectedAnalysisArea,selectedAnalysisAreas:this.selectedAnalysisAreas,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
               'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}

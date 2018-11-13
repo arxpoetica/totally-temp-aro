@@ -98,13 +98,6 @@ class TileComponentController {
       }
     })
 
-    // If selected service_area ids change, set that in the tile data service
-    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
-      }
-    })
-
     // If selected Analysis Areas in viewmode change, set that in the tile data service
     state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -318,7 +311,6 @@ class TileComponentController {
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.selectedLocations.getValue(),
-                                                         this.state.selectedServiceAreas.getValue(),
                                                          this.state.selectedAnalysisArea.getValue(),
                                                          this.state.selectedAnalysisAreas.getValue(),
                                                          this.state.selectedCensusBlockId.getValue(),

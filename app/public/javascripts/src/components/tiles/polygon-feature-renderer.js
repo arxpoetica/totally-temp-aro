@@ -9,7 +9,7 @@ class PolygonFeatureRenderer {
     var unselectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
       if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != selection.details.boundaryId) {
         return featureObj
-      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !featureObj.selectedServiceAreas.has(featureObj.feature.properties.id)) {
+      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !selection.planTargets.serviceAreaIds.has(featureObj.feature.properties.id)) {
         return featureObj
       } else {
         return featureObj
@@ -19,20 +19,20 @@ class PolygonFeatureRenderer {
     var selectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
       if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id == selection.details.boundaryId) {
         return featureObj
-      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && featureObj.selectedServiceAreas.has(featureObj.feature.properties.id)) {
+      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && selection.planTargets.serviceAreaIds.has(featureObj.feature.properties.id)) {
         return featureObj
       }
     })
   
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
-        Obj.tileSize, selection, Obj.selectedServiceAreas, Obj.selectedDisplayMode, Obj.displayModes,
+        Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.selectedAnalysisArea, Obj.selectedAnalysisAreas, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
-        Obj.tileSize, selection, Obj.selectedServiceAreas, Obj.selectedDisplayMode, Obj.displayModes,
+        Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.selectedAnalysisArea, Obj.selectedAnalysisAreas, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
     })
 
@@ -41,7 +41,7 @@ class PolygonFeatureRenderer {
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
                        selection,
-                       selectedServiceAreas, selectedDisplayMode, displayModes, selectedAnalysisArea, selectedAnalysisAreas,
+                       selectedDisplayMode, displayModes, selectedAnalysisArea, selectedAnalysisAreas,
                        analysisSelectionMode, selectionModes, selectedCensusBlockId, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
@@ -72,7 +72,7 @@ class PolygonFeatureRenderer {
         }
       }
 
-    } else if (selectedServiceAreas.has(feature.properties.id)
+    } else if (selection.planTargets.serviceAreaIds.has(feature.properties.id)
       && selectedDisplayMode == displayModes.ANALYSIS
       && analysisSelectionMode == selectionModes.SELECTED_AREAS) {
       //Highlight the selected SA

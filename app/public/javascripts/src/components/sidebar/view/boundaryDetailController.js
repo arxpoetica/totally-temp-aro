@@ -46,7 +46,7 @@ class BoundaryDetailController {
           && event.serviceAreas.length > 0
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
-            var newSelection = angular.copy(this.state.selection)
+            var newSelection = this.state.cloneSelection(this.state.selection)
             newSelection.details.boundaryId = event.serviceAreas[0].id
             this.state.selection = newSelection
         } else if (event.hasOwnProperty('analysisAreas')
@@ -125,7 +125,7 @@ class BoundaryDetailController {
         this.state.requestSetMapZoom.next(ZOOM_FOR_CB_SEARCH)
       })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
-      var newSelection = angular.copy(this.state.selection)
+      var newSelection = this.state.cloneSelection(this.state.selection)
       newSelection.details.boundaryId = selectedBoundary.id
       this.state.selection = newSelection
       this.viewServiceAreaInfo(selectedBoundary)

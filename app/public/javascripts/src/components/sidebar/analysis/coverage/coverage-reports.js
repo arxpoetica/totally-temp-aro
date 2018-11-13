@@ -2,6 +2,7 @@ class CoverageReportsController {
   constructor($http, $timeout, state, aclManager) {
     this.$http = $http
     this.$timeout = $timeout
+    this.state = state
     this.coverageReport = null
     this.isLoggedInUserSuperUser = false
     aclManager.getEffectivePermissions('SYSTEM', '1', state.loggedInUser)

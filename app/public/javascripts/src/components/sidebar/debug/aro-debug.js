@@ -10,7 +10,7 @@ class AroDebugController {
   getMorphologyTileInfoForSelectedServiceAreas() {
     // For all selected service areas, gets the morphology tile debugging info from aro-service
     var tileInfoPromises = []
-    this.state.selectedServiceAreas.getValue().forEach((serviceAreaId) => {
+    this.state.selection.planTargets.serviceAreaIds.forEach((serviceAreaId) => {
       tileInfoPromises.push(this.$http.get(`/service/v1/tile-system-cmd/check_service_area/${serviceAreaId}`))
     })
 

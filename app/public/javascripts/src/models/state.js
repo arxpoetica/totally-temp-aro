@@ -563,6 +563,16 @@ class State {
     }
   }
 
+  // Why a cloneSelection() function? If we use angular.copy() on service.selection, the Set objects lose their "this" binding.
+  // In that case, calling any function like size() on the Sets gives us an error. Note that we are not doing a deep clone at
+  // this point because everything binds to the "selection" object, so just creating a selection object is sufficient.
+  service.cloneSelection = (selection) => {
+    return {
+      planTargets: selection.planTargets,
+      details: selection.details
+    }
+  }
+
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
   service.selectedLocations = new Rx.BehaviorSubject(new Set())
@@ -582,22 +592,18 @@ class State {
     }
   }
 
-  service.selectedServiceAreas = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedServiceAreas = (forceMapRefresh = false) => {
+  service.reloadSelectedServiceAreas = () => {
     var plan = service.plan.getValue()
     if (plan) {
       $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
         .then((result) => {
-          var selectedSASet = new Set()
-          result.data.forEach((service_area) => selectedSASet.add(+service_area.service_area_id))
-          service.selectedServiceAreas.next(selectedSASet)
-          service.requestMapLayerRefresh.next(null)
-          if (forceMapRefresh) {
-            tileDataService.clearDataCache()
-            tileDataService.markHtmlCacheDirty()
-          }
+          var newSelection = service.cloneSelection(service.selection)
+          newSelection.planTargets.serviceAreaIds = new Set()
+          result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
+          service.selection = newSelection
           return Promise.resolve()
         })
+        .catch(err => console.error(err))
     } else {
       return Promise.resolve()
     }

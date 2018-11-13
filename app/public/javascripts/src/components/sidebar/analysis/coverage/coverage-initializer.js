@@ -26,28 +26,6 @@ class CoverageInitializerController {
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
-    this.serviceAreasObserver = state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
-      // The selected SA have changed.
-      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
-      //console.log(selectedServiceAreas)
-      var serviceAreaIds = Array.from(selectedServiceAreas)
-      this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-        .then((result) => {
-          this.serviceAreas = result.data
-        })
-        .catch(err => console.error(err))
-    })  
-    
-    this.analysisAreasObserver = state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
-      // The selected analysis areas have changed.
-      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_ANALYSIS_AREAS) return
-      var analysisAreaIds = Array.from(selectedAnalysisAreas)
-      this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
-        .then((result) => {
-          this.analysisAreas = result.data
-        })
-        .catch(err => console.error(err))
-    })
   }
 
   onSelectionTypeChange(selectionType) {
@@ -110,9 +88,24 @@ class CoverageInitializerController {
       .catch(err => console.error(err))
   }
 
-  $onDestroy() {
-    this.serviceAreasObserver.unsubscribe()
-    this.analysisAreasObserver.unsubscribe()
+  $onChanges(changesObj) {
+    if (changesObj.selection) {
+      // The selected service areas have changed.
+      var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
+      this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+        .then((result) => {
+          this.serviceAreas = result.data
+        })
+        .catch(err => console.error(err))
+      
+      // The selected analysis areas have changed.
+      var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
+      this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
+        .then((result) => {
+          this.analysisAreas = result.data
+        })
+        .catch(err => console.error(err))
+    }
   }
 }
 
@@ -122,6 +115,7 @@ let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',
   bindings: {
     planId: '<',
+    selection: '<',
     onCoverageInitialized: '&'
   },
   controller: CoverageInitializerController
