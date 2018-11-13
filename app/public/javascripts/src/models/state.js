@@ -548,6 +548,21 @@ class State {
   service.locationTypes = new Rx.BehaviorSubject([])
   service.constructionSites = new Rx.BehaviorSubject([])
 
+  // Hold all the selected tile elements like locations, service areas, etc.
+  service.selection = {
+    planTargets: {
+      locationIds: new Set(),
+      serviceAreaIds: new Set(),
+      analysisAreaIds: new Set()
+    },
+    details: {
+      location: {},
+      boundaryId: null,
+      equipment: {},
+      roadSegment: {}
+    }
+  }
+
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
   service.selectedLocations = new Rx.BehaviorSubject(new Set())
@@ -609,7 +624,6 @@ class State {
     }
   }
 
-  service.selectedServiceArea = new Rx.BehaviorSubject()
   service.selectedAnalysisArea = new Rx.BehaviorSubject()
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.selectedCensusBlockId = new Rx.BehaviorSubject()

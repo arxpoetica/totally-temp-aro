@@ -46,7 +46,9 @@ class BoundaryDetailController {
           && event.serviceAreas.length > 0
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
-            this.state.StateViewMode.reloadSelectedServiceArea(this.state,event.serviceAreas[0].id)
+            var newSelection = angular.copy(this.state.selection)
+            newSelection.details.boundaryId = event.serviceAreas[0].id
+            this.state.selection = newSelection
         } else if (event.hasOwnProperty('analysisAreas')
           && event.analysisAreas.length > 0
           && event.analysisAreas[0].hasOwnProperty('code')
@@ -63,19 +65,12 @@ class BoundaryDetailController {
   viewServiceAreaInfo(serviceArea) {
     this.selectedBoundaryInfo = null
     this.selectedAnalysisAreaInfo = null
-    this.getServiceAreaInfo(serviceArea.id)
-    .then((serviceAreaInfo) => {
-      this.selectedSAInfo = serviceAreaInfo
-    })
-    this.viewBoundaryInfo()
+    this.state.StateViewMode.loadEntityList(this.$http, this.state, 'ServiceAreaView', serviceArea.id, 'id,code,name', 'id')
+      .then((serviceAreaInfos) => {
+        this.selectedSAInfo = serviceAreaInfos[0]
+      })
+      .catch(err => console.error(err))
     this.$timeout()
-  }
-
-  getServiceAreaInfo(serviceAreaId) {
-    return this.state.StateViewMode.loadEntityList(this.$http,this.state,'ServiceAreaView',serviceAreaId,'id,code,name','id')
-    .then((serviceAreaInfo) => {
-      return serviceAreaInfo[0]
-    })
   }
 
   viewAnalysisAreaInfo(analysisArea) {
@@ -129,7 +124,9 @@ class BoundaryDetailController {
         this.state.requestSetMapZoom.next(ZOOM_FOR_CB_SEARCH)
       })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
-      this.state.StateViewMode.reloadSelectedServiceArea(this.state,selectedBoundary.id)
+      var newSelection = angular.copy(this.state.selection)
+      newSelection.details.boundaryId = selectedBoundary.id
+      this.state.selection = newSelection
       this.viewServiceAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {

@@ -75,6 +75,11 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
+  // Sets the "selected entities list"
+  setSelection(selection) {
+    this.selection = angular.copy(selection)
+  }
+
   // Sets the selected location ids
   setselectedLocations(selectedLocations) {
     this.selectedLocations = selectedLocations
@@ -84,12 +89,6 @@ class MapTileRenderer {
   // Sets the selected service area ids for analysis
   setselectedServiceAreas(selectedServiceAreas) {
     this.selectedServiceAreas = selectedServiceAreas
-    this.tileDataService.markHtmlCacheDirty()
-  }
-
-  // Sets the selected service area id to view details
-  setselectedServiceArea(selectedServiceArea) {
-    this.selectedServiceArea = selectedServiceArea
     this.tileDataService.markHtmlCacheDirty()
   }
 
@@ -562,7 +561,7 @@ class MapTileRenderer {
             if (this.state.isFeatureLayerOnForBoundary(feature)){
               var featureObj = {'feature':feature,'shape':shape,'geometryOffset': geometryOffset,'ctx':ctx,'mapLayer': mapLayer,'censusCategories': this.censusCategories, 
               'tileDataService': this.tileDataService,'styles': this.styles,
-              'tileSize': this.tileSize,'selectedServiceArea': this.selectedServiceArea,'selectedServiceAreas': this.selectedServiceAreas, 
+              'tileSize': this.tileSize, 'selectedServiceAreas': this.selectedServiceAreas, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
               'selectedAnalysisArea':this.selectedAnalysisArea,selectedAnalysisAreas:this.selectedAnalysisAreas,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
               'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}
@@ -601,7 +600,7 @@ class MapTileRenderer {
       })
     }
     //render polygon feature
-    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList)
+    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection)
   }
 }
 
