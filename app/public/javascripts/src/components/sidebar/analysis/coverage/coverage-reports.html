@@ -1,8 +1,9 @@
 
 <div ng-if="$ctrl.isLoggedInUserSuperUser">
   <coverage-initializer ng-if="!$ctrl.coverageReport"
-    plan-id="$ctrl.planId"
-    on-coverage-initialized="$ctrl.onCoverageInitialized()">
+                        plan-id="$ctrl.planId"
+                        selection="$ctrl.state.selection"
+                        on-coverage-initialized="$ctrl.onCoverageInitialized()">
   </coverage-initializer>
 
   <coverage-report-downloader ng-if="$ctrl.coverageReport"

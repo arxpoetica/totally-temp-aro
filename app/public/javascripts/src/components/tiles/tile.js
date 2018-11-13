@@ -98,20 +98,6 @@ class TileComponentController {
       }
     })
 
-    // If selected service_area ids change, set that in the tile data service
-    state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceAreas(selectedServiceAreas)
-      }
-    })
-
-    // If selected SA in viewmode change, set that in the tile data service
-    state.selectedServiceArea.subscribe((selectedServiceArea) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedServiceArea(selectedServiceArea)
-      }
-    })
-
     // If selected Analysis Areas in viewmode change, set that in the tile data service
     state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -325,7 +311,6 @@ class TileComponentController {
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.selectedLocations.getValue(),
-                                                         this.state.selectedServiceAreas.getValue(),
                                                          this.state.selectedAnalysisArea.getValue(),
                                                          this.state.selectedAnalysisAreas.getValue(),
                                                          this.state.selectedCensusBlockId.getValue(),
@@ -342,7 +327,12 @@ class TileComponentController {
                                                          MapUtilities.getPixelCoordinatesWithinTile.bind(this)
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
-    
+
+    // Update the selection in the renderer. We should have a bound "this.selection" at this point
+    if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
+    }
+
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
       if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW 
           || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS
@@ -640,6 +630,18 @@ class TileComponentController {
     }
   }
 
+  $onChanges(changesObj) {
+    if (changesObj.selection) {
+      // Update the selection in the renderer
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
+        // If the selection has changed, redraw the tiles
+        this.tileDataService.markHtmlCacheDirty()
+        this.refreshMapTiles()
+      }
+    }
+  }
+
   $onDestroy() {
     this.createMapOverlaySubscription()
     this.destroyMapOverlaySubscription()    
@@ -651,7 +653,8 @@ TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataSe
 let tile = {
   template: '',
   bindings: {
-    mapGlobalObjectName: '@'
+    mapGlobalObjectName: '@',
+    selection: '<'  // An object describing the selected objects in the UI
   },
   controller: TileComponentController
 }

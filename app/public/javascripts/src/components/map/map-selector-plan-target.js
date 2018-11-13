@@ -48,10 +48,9 @@ class MapSelectorPlanTargetController {
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0 
           && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
         // Get a list of ids to add and remove
-        var existingIds = state.selectedServiceAreas.getValue()
         var idsToAdd = new Set(), idsToRemove = new Set()
         event.serviceAreas.forEach((serviceArea) => {
-          if (existingIds.has(+serviceArea.id)) {
+          if (state.selection.planTargets.serviceAreaIds.has(+serviceArea.id)) {
             idsToRemove.add(+serviceArea.id)
           } else {
             idsToAdd.add(+serviceArea.id)
@@ -65,7 +64,7 @@ class MapSelectorPlanTargetController {
         Promise.all(addRemoveTargetPromises)
           .then((response) => {
             // Reload selected locations from database
-            state.reloadSelectedServiceAreas(true)
+            state.reloadSelectedServiceAreas()
           })
       }
 

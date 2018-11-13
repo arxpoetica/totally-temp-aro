@@ -96,13 +96,6 @@ class StateViewMode {
     return StateViewMode.hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
   }
 
-  // Reload view mode selections
-  static reloadSelectedServiceArea(state,serviceAreaId) {
-    //Display only one Selected SA Details in viewMode at a time
-    state.selectedServiceArea.next(serviceAreaId)
-    state.requestMapLayerRefresh.next(null)
-  }
-
   static reloadSelectedAnalysisArea(state,analysisArea) {
     state.selectedAnalysisArea.next(analysisArea)
     state.requestMapLayerRefresh.next(null)

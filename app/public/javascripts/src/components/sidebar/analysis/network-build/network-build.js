@@ -42,28 +42,6 @@ class NetworkBuildController {
       })
       .catch(err => console.error(err))
     })
-
-    this.serviceAreasObserver = state.selectedServiceAreas.subscribe((selectedServiceAreas) => {
-      // The selected SA have changed.
-      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_AREAS) return
-      var serviceAreaIds = Array.from(selectedServiceAreas)
-      $http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-      .then((result) => {
-        this.serviceAreas = result.data
-      })
-      .catch(err => console.error(err))
-    })  
-    
-    this.analysisAreasObserver = state.selectedAnalysisAreas.subscribe((selectedAnalysisAreas) => {
-      // The selected analysis areas have changed.
-      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_ANALYSIS_AREAS) return
-      var analysisAreaIds = Array.from(selectedAnalysisAreas)
-      $http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
-      .then((result) => {
-        this.analysisAreas = result.data
-      })
-      .catch(err => console.error(err))
-    })
   }
 
   onSelectionTypeChange(selectionType) {
@@ -77,8 +55,26 @@ class NetworkBuildController {
 
   $onDestroy() {
     this.locationsObserver.unsubscribe()
-    this.serviceAreasObserver.unsubscribe()
-    this.analysisAreasObserver.unsubscribe()
+  }
+
+  $onChanges(changesObj) {
+    if (changesObj.selection) {
+      // The selected service areas have changed.
+      var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
+      this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+        .then((result) => {
+          this.serviceAreas = result.data
+        })
+        .catch(err => console.error(err))
+      
+      // The selected analysis areas have changed.
+      var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
+      this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
+        .then((result) => {
+          this.analysisAreas = result.data
+        })
+        .catch(err => console.error(err))
+    }
   }
 }
 
@@ -87,6 +83,7 @@ NetworkBuildController.$inject = ['$http', 'state', 'optimization']
 let networkBuild = {
   templateUrl: '/components/sidebar/analysis/network-build/network-build.html',
   bindings: {
+    selection: '<',
     removeTarget: '&', 
     zoomTarget: '&',
     removeServiceArea: '&',

@@ -53,11 +53,13 @@
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
         <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
+          selection="$ctrl.state.selection"
           remove-service-area="$ctrl.removeServiceArea(target)"
           remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-build>
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
+          selection="$ctrl.state.selection"
           remove-service-area="$ctrl.removeServiceArea(target)"
           remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-analysis>
       </div>
