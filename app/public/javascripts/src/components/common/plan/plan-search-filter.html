@@ -14,7 +14,8 @@
     {{$ctrl.objectName}}
   </button>
   <div class="dropdown-menu filter-dropdown" aria-labelledby="dropdownMenu1">
-    <ui-select multiple ng-model="$ctrl.selectedItems"
+    <!-- For now, only allow users to select 1 item. Keeping the "multiple" option as removing it causes a lot more work for now... -->
+    <ui-select multiple limit="1" ng-model="$ctrl.selectedItems"
       theme="bootstrap" close-on-select="false" on-select="onSelectedItemsChanged()" on-remove="onSelectedItemsChanged()">
       <ui-select-match placeholder="Select {{$ctrl.objectName}}...">
         <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.StateViewMode.getTagColour($item), 'margin-right':'5px' }"></span>{{$item[$ctrl.searchProperty]}}
