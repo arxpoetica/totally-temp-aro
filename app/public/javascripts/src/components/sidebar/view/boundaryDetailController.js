@@ -70,6 +70,7 @@ class BoundaryDetailController {
         this.selectedSAInfo = serviceAreaInfos[0]
       })
       .catch(err => console.error(err))
+    this.viewBoundaryInfo()
     this.$timeout()
   }
 
