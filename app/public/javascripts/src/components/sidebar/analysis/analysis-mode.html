@@ -51,18 +51,16 @@
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>
       </div>
-      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN'">
-        <network-build remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)" 
+      
+      <div style="height: 100%;">
+        <network-analysis-build 
+          remove-target="$ctrl.removeTarget(target)" 
+          zoom-target="$ctrl.zoomTarget(target)" 
           selection="$ctrl.state.selection"
           remove-service-area="$ctrl.removeServiceArea(target)"
-          remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-build>
+          remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-analysis-build>
       </div>
-      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
-        <network-analysis remove-target="$ctrl.removeTarget(target)" zoom-target="$ctrl.zoomTarget(target)"
-          selection="$ctrl.state.selection"
-          remove-service-area="$ctrl.removeServiceArea(target)"
-          remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-analysis>
-      </div>
+      
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'">
         <analysis-expert-mode></analysis-expert-mode>
       </div>
