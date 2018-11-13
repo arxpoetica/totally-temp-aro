@@ -55,6 +55,13 @@ class MapObjectEditorController {
       console.warn('map-object-editor: featureType must be defined (currently either "location" or "equipment"')
     }
     
+    this.$timeout(() => {
+      this.dropTargetElement = this.$element.find('.map-object-drop-targets-container')[0]
+      this.$element[0].removeChild(this.dropTargetElement)
+      var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
+      mapCanvas.appendChild(this.dropTargetElement)
+    }, 0)
+
     // Use the cross hair cursor while this control is initialized
     this.mapRef.setOptions({ draggableCursor: 'crosshair' })
 

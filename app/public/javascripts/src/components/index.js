@@ -23,6 +23,7 @@ import showTargets from './sidebar/analysis/show-targets'
 import networkAnalysis from './sidebar/analysis/network-analysis/network-analysis'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
+import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
 import coverageReports from './sidebar/analysis/coverage/coverage-reports'
 import coverageInitializer from './sidebar/analysis/coverage/coverage-initializer'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
@@ -115,6 +116,8 @@ app.component('boundaryDetail', boundaryDetail)
    .component('showTargets', showTargets)
    .component('networkAnalysis', networkAnalysis)
    .component('networkAnalysisOutput', networkAnalysisOutput)
+   .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
+   .component('networkAnalysisModal', networkAnalysisModal)
    .component('coverageReports', coverageReports)
    .component('coverageInitializer', coverageInitializer)
    .component('coverageReportDownloader', coverageReportDownloader)
