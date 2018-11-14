@@ -93,10 +93,12 @@ class ServiceLayerEditorController {
   }
 
   updateSelectedState(selectedFeature){
-    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
-    selectedViewFeaturesByType['serviceAreas'] = {}
-    if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.serviceAreas[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature      
-    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
+    var newSelection = this.state.cloneSelection(this.state.selection)
+    newSelection.editable.serviceArea = {}
+    if ('undefined' != typeof selectedFeature) {
+      newSelection.editable.serviceArea[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
+    }
+    this.state.selection = newSelection
   }
 
   isBoundaryCreationAllowed(mapObject){

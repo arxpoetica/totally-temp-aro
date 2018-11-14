@@ -4,7 +4,7 @@ class PointFeatureRenderer {
 
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
                        selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, selectedViewFeaturesByType) {
+                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
     var selectedListType = null 
@@ -37,21 +37,19 @@ class PointFeatureRenderer {
     }
 
     if (feature.properties.location_id && selection.planTargets.locationIds.has(+feature.properties.location_id)
-      //show selected location icon at analysis mode -> selection type is locations    
-      && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
-      // Draw selected icon
+        //show selected location icon at analysis mode -> selection type is locations    
+        && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
+        // Draw selected icon
       ctx.drawImage(selectedLocationImage[0], x, y)
     } else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) // for edit mode view of existing 
-      && null != selectedListId
-      && null != selectedListType
-      && selectedViewFeaturesByType.hasOwnProperty(selectedListType)
-      && selectedViewFeaturesByType[selectedListType].hasOwnProperty(selectedListId)
-    ) {
+               && null != selectedListId
+               && null != selectedListType
+               && selection.editable.hasOwnProperty(selectedListType)
+               && selection.editable[selectedListType].hasOwnProperty(selectedListId)) {
       // - Highlight this feature - //
       ctx.fillStyle = '#e8ffe8'
       ctx.strokeStyle = '#008000'
       ctx.lineWidth = 2
-      //ctx.fillRect(x,y,entityImage.width,entityImage.height)
       ctx.beginPath();
       var halfWidth = 0.5 * entityImage.width
       ctx.arc(x + halfWidth, y + (0.5 * entityImage.height), halfWidth + 4, 0, 2 * Math.PI);

@@ -537,7 +537,6 @@ class State {
         }
       })
   }
-  //service.reloadCompetitors()
 
   service.locationTypes = new Rx.BehaviorSubject([])
   service.constructionSites = new Rx.BehaviorSubject([])
@@ -555,6 +554,11 @@ class State {
       censusCategoryId: null,
       roadSegments: new Set(),
       serviceAreaId: null
+    },
+    editable: {
+      equipment: {},
+      location: {},
+      serviceArea: {}
     }
   }
 
@@ -564,7 +568,8 @@ class State {
   service.cloneSelection = (selection) => {
     return {
       planTargets: selection.planTargets,
-      details: selection.details
+      details: selection.details,
+      editable: selection.editable
     }
   }
 
@@ -608,8 +613,6 @@ class State {
       })
       .catch(err => console.error(err))
   }
-
-  service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
 
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)

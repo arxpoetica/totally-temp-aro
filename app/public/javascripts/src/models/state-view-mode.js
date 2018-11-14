@@ -96,11 +96,6 @@ class StateViewMode {
     return StateViewMode.hsvToRgb(tag.colourHue,config.hsv_defaults.saturation,config.hsv_defaults.value)
   }
 
-  static reloadSelectedViewFeaturesByType(state,featuresByType) {
-    state.selectedViewFeaturesByType.next(featuresByType)
-    state.requestMapLayerRefresh.next(null)
-  }
-
   // View mode search
   static getSelectedEquipmentIds(flattenDeep,networkNodeTypes,configuration) {
     var selectedEquipmentIds = []

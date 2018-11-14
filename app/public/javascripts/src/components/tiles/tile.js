@@ -95,12 +95,6 @@ class TileComponentController {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setCensusCategories(censusCategories)
       }
     })
-    
-    state.selectedViewFeaturesByType.subscribe((selectedViewFeaturesByType) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedViewFeaturesByType(selectedViewFeaturesByType)
-      }
-    })
 
     // If Display Mode change, set that in the tile data
     state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
@@ -264,7 +258,6 @@ class TileComponentController {
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.censusCategories.getValue(),
-                                                         this.state.selectedViewFeaturesByType.getValue(),
                                                          this.state.selectedDisplayMode.getValue(),
                                                          this.state.optimizationOptions.analysisSelectionMode,
                                                          this.state.displayModes,

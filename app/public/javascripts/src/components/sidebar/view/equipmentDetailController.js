@@ -53,11 +53,12 @@ class EquipmentDetailController {
   }
  
 	updateSelectedState(selectedFeature){
-	  // tell state
-    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
-    selectedViewFeaturesByType.equipment = {}
-	  if ('undefined' != typeof selectedFeature) selectedViewFeaturesByType.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
-    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
+    var newSelection = this.state.cloneSelection(this.state.selection)
+    newSelection.editable.equipment = {}
+	  if ('undefined' != typeof selectedFeature) {
+      newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
+    }
+    this.state.selection = newSelection
 	}
 	
 	displayEquipment(planId, objectId){

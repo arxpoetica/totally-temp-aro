@@ -90,12 +90,12 @@ class LocationDetailController {
   }
   
   updateSelectedState(feature, id){
-    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
-    selectedViewFeaturesByType.location = {}
+    var newSelection = this.state.cloneSelection(this.state.selection)
+    newSelection.editable.location = {}
     if ('undefined' != typeof feature && 'undefined' != typeof id){
-      selectedViewFeaturesByType.location[ id ] = feature
+      newSelection.editable.location[ id ] = feature
     }
-    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
+    this.state.selection = newSelection
   }
   
   showStaticMap(locationInfo) {

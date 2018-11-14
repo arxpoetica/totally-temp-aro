@@ -7,8 +7,8 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedViewFeaturesByType,  
-              selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, analysisSelectionMode, displayModes,
+              viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -18,7 +18,6 @@ class MapTileRenderer {
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
     this.censusCategories = censusCategories
-    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
     this.state = state
@@ -74,11 +73,6 @@ class MapTileRenderer {
 
   setCensusCategories(censusCategories) {
     this.censusCategories = censusCategories
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
-  setSelectedViewFeaturesByType(selectedViewFeaturesByType) {
-    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -491,8 +485,7 @@ class MapTileRenderer {
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
                                                this.selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-                                               this.selectedDisplayMode, this.displayModes,
-                                               this.analysisSelectionMode, this.state.selectionModes, this.selectedViewFeaturesByType)
+                                               this.selectedDisplayMode, this.displayModes, this.analysisSelectionMode, this.state.selectionModes)
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
