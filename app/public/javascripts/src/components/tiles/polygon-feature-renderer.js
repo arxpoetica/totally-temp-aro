@@ -27,13 +27,13 @@ class PolygonFeatureRenderer {
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.selectedAnalysisArea, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.selectedAnalysisArea, Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
     })
 
   }
@@ -41,7 +41,7 @@ class PolygonFeatureRenderer {
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
                        selection,
-                       selectedDisplayMode, displayModes, selectedAnalysisArea,
+                       selectedDisplayMode, displayModes,
                        analysisSelectionMode, selectionModes, selectedCensusBlockId, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
@@ -95,7 +95,7 @@ class PolygonFeatureRenderer {
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
     } else if (feature.properties.hasOwnProperty('_data_type')
       && 'analysis_area' === feature.properties._data_type
-      && selectedAnalysisArea == feature.properties.id
+      && selection.details.analysisAreaId == feature.properties.id
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle

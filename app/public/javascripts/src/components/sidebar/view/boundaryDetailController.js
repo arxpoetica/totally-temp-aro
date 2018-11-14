@@ -54,7 +54,9 @@ class BoundaryDetailController {
           && event.analysisAreas[0].hasOwnProperty('code')
           && event.analysisAreas[0].hasOwnProperty('_data_type') ){
             this.viewAnalysisAreaInfo(event.analysisAreas[0])
-            this.state.StateViewMode.reloadSelectedAnalysisArea(this.state,event.analysisAreas[0].id)
+            var newSelection = this.state.cloneSelection(this.state.selection)
+            newSelection.details.analysisAreaId = event.analysisAreas[0].id
+            this.state.selection = newSelection
         }
       } else {
         return
@@ -131,7 +133,9 @@ class BoundaryDetailController {
       this.viewServiceAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {
-      this.state.StateViewMode.reloadSelectedAnalysisArea(this.state,selectedBoundary.id)
+      var newSelection = this.state.cloneSelection(this.state.selection)
+      newSelection.details.analysisAreaId = selectedBoundary.id
+      this.state.selection = newSelection
       this.viewAnalysisAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     }  

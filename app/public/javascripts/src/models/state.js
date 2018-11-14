@@ -557,6 +557,7 @@ class State {
     },
     details: {
       location: {},
+      analysisAreaId: null,
       boundaryId: null,
       equipment: {},
       roadSegment: {}
@@ -614,7 +615,6 @@ class State {
       .catch(err => console.error(err))
   }
 
-  service.selectedAnalysisArea = new Rx.BehaviorSubject()
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
   service.selectedCensusBlockId = new Rx.BehaviorSubject()
   service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())

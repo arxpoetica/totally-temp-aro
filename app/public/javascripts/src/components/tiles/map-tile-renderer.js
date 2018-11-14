@@ -7,7 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedAnalysisArea,
+  constructor(tileSize, tileDataService, mapTileOptions,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
@@ -16,7 +16,6 @@ class MapTileRenderer {
     this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
     this.tileVersions = {}
-    this.selectedAnalysisArea = selectedAnalysisArea
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
@@ -75,12 +74,6 @@ class MapTileRenderer {
   // Sets the "selected entities list"
   setSelection(selection) {
     this.selection = selection
-  }
-
-  // Sets the selected analysis area id to view details
-  setselectedAnalysisArea(selectedAnalysisArea) {
-    this.selectedAnalysisArea = selectedAnalysisArea
-    this.tileDataService.markHtmlCacheDirty()
   }
 
   //Sets the selected Census Block ids
@@ -544,7 +537,7 @@ class MapTileRenderer {
               'tileDataService': this.tileDataService,'styles': this.styles,
               'tileSize': this.tileSize, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'selectedAnalysisArea':this.selectedAnalysisArea,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
+              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
               'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
