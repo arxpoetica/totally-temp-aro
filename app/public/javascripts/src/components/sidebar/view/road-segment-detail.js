@@ -11,7 +11,7 @@ class RoadSegmentDetailController {
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       if (event.roadSegments && event.roadSegments.size > 0) {
-        var newSelection = state.cloneSelection(state.selection)
+        var newSelection = state.cloneSelection()
         newSelection.details.roadSegments = event.roadSegments
         state.selection = newSelection
         this.isSingleRoad = (event.roadSegments.size == 1)

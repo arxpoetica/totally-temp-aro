@@ -39,7 +39,7 @@ class BoundaryDetailController {
             }
           this.selectedBoundaryTags = tagList
           let censusBlockId = event.censusFeatures[0].id
-          var newSelection = this.state.cloneSelection(this.state.selection)
+          var newSelection = this.state.cloneSelection()
           newSelection.details.censusBlockId = censusBlockId
           this.state.selection = newSelection
           this.viewCensusBlockInfo(censusBlockId)
@@ -47,7 +47,7 @@ class BoundaryDetailController {
           && event.serviceAreas.length > 0
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
-            var newSelection = this.state.cloneSelection(this.state.selection)
+            var newSelection = this.state.cloneSelection()
             newSelection.details.serviceAreaId = event.serviceAreas[0].id
             this.state.selection = newSelection
         } else if (event.hasOwnProperty('analysisAreas')
@@ -55,7 +55,7 @@ class BoundaryDetailController {
           && event.analysisAreas[0].hasOwnProperty('code')
           && event.analysisAreas[0].hasOwnProperty('_data_type') ){
             this.viewAnalysisAreaInfo(event.analysisAreas[0])
-            var newSelection = this.state.cloneSelection(this.state.selection)
+            var newSelection = this.state.cloneSelection()
             newSelection.details.analysisAreaId = event.analysisAreas[0].id
             this.state.selection = newSelection
         }
@@ -120,7 +120,7 @@ class BoundaryDetailController {
   viewSelectedBoundary(selectedBoundary) {
     var visibleBoundaryLayer = this.state.selectedBoundaryTypeforSearch
     if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
-      var newSelection = this.state.cloneSelection(this.state.selection)
+      var newSelection = this.state.cloneSelection()
       newSelection.details.censusBlockId = selectedBoundary.id
       this.state.selection = newSelection
       this.viewCensusBlockInfo(selectedBoundary.id)
@@ -130,13 +130,13 @@ class BoundaryDetailController {
         this.state.requestSetMapZoom.next(ZOOM_FOR_CB_SEARCH)
       })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
-      var newSelection = this.state.cloneSelection(this.state.selection)
+      var newSelection = this.state.cloneSelection()
       newSelection.details.serviceAreaId = selectedBoundary.id
       this.state.selection = newSelection
       this.viewServiceAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'analysis_layer') {
-      var newSelection = this.state.cloneSelection(this.state.selection)
+      var newSelection = this.state.cloneSelection()
       newSelection.details.analysisAreaId = selectedBoundary.id
       this.state.selection = newSelection
       this.viewAnalysisAreaInfo(selectedBoundary)

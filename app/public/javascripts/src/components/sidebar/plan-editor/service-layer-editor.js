@@ -93,7 +93,7 @@ class ServiceLayerEditorController {
   }
 
   updateSelectedState(selectedFeature){
-    var newSelection = this.state.cloneSelection(this.state.selection)
+    var newSelection = this.state.cloneSelection()
     newSelection.editable.serviceArea = {}
     if ('undefined' != typeof selectedFeature) {
       newSelection.editable.serviceArea[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature

@@ -565,11 +565,11 @@ class State {
   // Why a cloneSelection() function? If we use angular.copy() on service.selection, the Set objects lose their "this" binding.
   // In that case, calling any function like size() on the Sets gives us an error. Note that we are not doing a deep clone at
   // this point because everything binds to the "selection" object, so just creating a selection object is sufficient.
-  service.cloneSelection = (selection) => {
+  service.cloneSelection = () => {
     return {
-      planTargets: selection.planTargets,
-      details: selection.details,
-      editable: selection.editable
+      planTargets: service.selection.planTargets,
+      details: service.selection.details,
+      editable: service.selection.editable
     }
   }
 
@@ -579,7 +579,7 @@ class State {
     var plan = service.plan.getValue()
     return $http.get(`/locations/${plan.id}/selectedLocationIds`)
       .then((result) => {
-        var newSelection = service.cloneSelection(service.selection)
+        var newSelection = service.cloneSelection()
         newSelection.planTargets.locationIds = new Set()
         result.data.forEach((selectedLocationId) => newSelection.planTargets.locationIds.add(+selectedLocationId.location_id))
         service.selection = newSelection
@@ -592,7 +592,7 @@ class State {
     var plan = service.plan.getValue()
     return $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
       .then((result) => {
-        var newSelection = service.cloneSelection(service.selection)
+        var newSelection = service.cloneSelection()
         newSelection.planTargets.serviceAreaIds = new Set()
         result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
         service.selection = newSelection
@@ -605,7 +605,7 @@ class State {
     var plan = service.plan.getValue()
     return $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
       .then((result) => {
-        var newSelection = service.cloneSelection(service.selection)
+        var newSelection = service.cloneSelection()
         newSelection.planTargets.analysisAreaIds = new Set()
         result.data.forEach((analsisArea) => newSelection.planTargets.analysisAreaIds.add(+analsisArea.analysis_area_id))
         service.selection = newSelection

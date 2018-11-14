@@ -53,7 +53,7 @@ class EquipmentDetailController {
   }
  
 	updateSelectedState(selectedFeature){
-    var newSelection = this.state.cloneSelection(this.state.selection)
+    var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
 	  if ('undefined' != typeof selectedFeature) {
       newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature

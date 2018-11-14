@@ -902,7 +902,7 @@ class MapObjectEditorController {
         this.displayViewObject({feature:feature})
         this.selectMapObject(null)
         // Update selected feature in state so it is rendered correctly
-        var newSelection = this.state.cloneSelection(this.state.selection)
+        var newSelection = this.state.cloneSelection()
         newSelection.editable.equipment = {}
         newSelection.editable.equipment[feature.objectId] = feature
         this.state.selection = newSelection

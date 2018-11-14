@@ -90,7 +90,7 @@ class LocationDetailController {
   }
   
   updateSelectedState(feature, id){
-    var newSelection = this.state.cloneSelection(this.state.selection)
+    var newSelection = this.state.cloneSelection()
     newSelection.editable.location = {}
     if ('undefined' != typeof feature && 'undefined' != typeof id){
       newSelection.editable.location[ id ] = feature

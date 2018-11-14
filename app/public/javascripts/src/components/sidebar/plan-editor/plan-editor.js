@@ -754,7 +754,7 @@ class PlanEditorController {
   
   updateSelectedState(selectedFeature, featureId){
     // tell state
-    var newSelection = this.state.cloneSelection(this.state.selection)
+    var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
     if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
       newSelection.editable.equipment[ featureId ] = selectedFeature

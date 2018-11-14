@@ -89,7 +89,7 @@ class BoundariesController {
 
   onSelectCensusCat(){
     const id = this.selectedCensusCat && this.selectedCensusCat.id
-    var newSelection = this.state.cloneSelection(this.state.selection)
+    var newSelection = this.state.cloneSelection()
     newSelection.details.censusCategoryId = id
     this.state.selection = newSelection
   }
