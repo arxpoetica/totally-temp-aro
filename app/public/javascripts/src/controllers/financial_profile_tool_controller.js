@@ -167,7 +167,9 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $scope.refreshCurrentTab = refreshCurrentTab
 
   $scope.plan = null
-  //$rootScope.$on('plan_selected', (e, plan) => {
+  state.planOptimization.subscribe((plan) => {
+    if(plan && plan.planState === 'COMPLETED') updateMetadataLabels(plan)
+  })
   state.plan.subscribe((plan) => {
     if (!plan) return
     $scope.plan = plan
