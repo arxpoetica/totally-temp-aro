@@ -3,8 +3,8 @@ import WorkflowState from '../common/workflow-state'
 class PointFeatureRenderer {
 
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
-                       selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, selectedLocations, selectedViewFeaturesByType) {
+                       selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
+                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, selectedViewFeaturesByType) {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
     var selectedListType = null 
@@ -36,7 +36,7 @@ class PointFeatureRenderer {
       }
     }
 
-    if (feature.properties.location_id && selectedLocations.has(+feature.properties.location_id)
+    if (feature.properties.location_id && selection.planTargets.locationIds.has(+feature.properties.location_id)
       //show selected location icon at analysis mode -> selection type is locations    
       && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
       // Draw selected icon

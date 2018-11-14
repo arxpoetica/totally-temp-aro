@@ -24,10 +24,9 @@ class MapSelectorPlanTargetController {
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 
         && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
       // Get a list of ids to add and remove
-      var existingIds = state.selectedLocations.getValue()
       var idsToAdd = new Set(), idsToRemove = new Set()
       event.locations.forEach((location) => {
-        if (existingIds.has(+location.location_id)) {
+        if (state.selection.planTargets.locationIds.has(+location.location_id)) {
           idsToRemove.add(+location.location_id)
         } else {
           idsToAdd.add(+location.location_id)

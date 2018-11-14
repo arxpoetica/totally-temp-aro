@@ -575,21 +575,17 @@ class State {
 
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
-  service.selectedLocations = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedLocations = () => {
     var plan = service.plan.getValue()
-    if (plan) {
-      return $http.get(`/locations/${plan.id}/selectedLocationIds`)
-        .then((result) => {
-          var selectedLocationsSet = new Set()
-          result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
-          service.selectedLocations.next(selectedLocationsSet)
-          service.requestMapLayerRefresh.next(null)
-          return Promise.resolve()
-        })
-    } else {
-      return Promise.resolve()
-    }
+    return $http.get(`/locations/${plan.id}/selectedLocationIds`)
+      .then((result) => {
+        var newSelection = service.cloneSelection(service.selection)
+        newSelection.planTargets.locationIds = new Set()
+        result.data.forEach((selectedLocationId) => newSelection.planTargets.locationIds.add(+selectedLocationId.location_id))
+        service.selection = newSelection
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
   }
 
   service.reloadSelectedServiceAreas = () => {

@@ -46,11 +46,6 @@ class AnalysisModeController {
       })
       .catch(err => console.error(err))
     }
-
-    this.validateRunButton = () => {
-      // yet to check weather serviceArea/locations are selected or not once service area selection is done
-      return state.selectedLocations.getValue().size > 0 ? true : false
-    }
   }
 
   expandAccordion(expandedAccordionIndex) {

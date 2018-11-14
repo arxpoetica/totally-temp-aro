@@ -7,7 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedAnalysisArea,
+  constructor(tileSize, tileDataService, mapTileOptions, selectedAnalysisArea,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
@@ -16,7 +16,6 @@ class MapTileRenderer {
     this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
     this.tileVersions = {}
-    this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
     this.selectedAnalysisArea = selectedAnalysisArea
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
@@ -76,12 +75,6 @@ class MapTileRenderer {
   // Sets the "selected entities list"
   setSelection(selection) {
     this.selection = selection
-  }
-
-  // Sets the selected location ids
-  setselectedLocations(selectedLocations) {
-    this.selectedLocations = selectedLocations
-    this.tileDataService.markHtmlCacheDirty()
   }
 
   // Sets the selected analysis area id to view details
@@ -525,8 +518,9 @@ class MapTileRenderer {
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
-                                               selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, this.selectedDisplayMode, this.displayModes,
-                                               this.analysisSelectionMode, this.state.selectionModes, this.selectedLocations, this.selectedViewFeaturesByType)
+                                               this.selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
+                                               this.selectedDisplayMode, this.displayModes,
+                                               this.analysisSelectionMode, this.state.selectionModes, this.selectedViewFeaturesByType)
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight

@@ -5,7 +5,7 @@ class OptimizeButtonController {
 
   areInputsComplete() {
     // First, check if the selected targets are valid. E.g. if the user has selected Service Areas, then at least one service area must be selected.
-    const areLocationsValid = (this.state.selectedLocations.getValue().size > 0)
+    const areLocationsValid = (this.state.selection.planTargets.locationIds.size > 0)
                               && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_LOCATIONS)
     const areServiceAreasValid = (this.state.selection.planTargets.serviceAreaIds.size > 0)
                                  && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_AREAS)
