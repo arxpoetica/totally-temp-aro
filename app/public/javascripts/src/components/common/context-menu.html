@@ -3,6 +3,8 @@
 <style>
   .map-object-editor-context-menu-container {
     line-height: 22px; /* Any property will do */
+    position: 'absolute';
+    bottom: 20px;
   }
   .map-object-editor-context-menu {
     line-height: 22px; /* Any property will do */
@@ -10,20 +12,23 @@
   .map-object-editor-context-menu-dropdown {
     line-height: 22px; /* Any property will do */
     padding: 5px;
-    /*
-    max-height: 300px;
+    max-height: 100%;
     overflow: scroll;
-    */
+    top: 0;
   }
   .map-object-editor-context-menu-dropdown-section{
     margin-bottom: 6px;
   }
+  .context-menu-dropdown{
+    height: 100%;
+  }
+  
 </style>
 
 
 <div class="map-object-editor-context-menu-container" ng-style="$ctrl.contextMenuCss"> <!-- This ng-style will position the menu -->
   
-  <div class="dropdown open">
+  <div class="dropdown open context-menu-dropdown">
   
     <!-- Have a button but hide it. This markup is from the standard bootstrap dropdown docs.
          The .dropdown() method is called on this hidden button, which in turn shows the menu. -->
