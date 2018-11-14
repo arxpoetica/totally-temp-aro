@@ -53,6 +53,27 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
     }
   ]
 
+  var barChartOptions = {
+    scales: { xAxes: [{ stacked: true }], yAxes: [{ ticks: { callback: function (value, index, values) { 
+      if (value != 0 && value < 10) 
+        return $filter('number')(value, 1)
+      else
+        return $filter('number')(value, 0)
+    }, beginAtZero: true } }] },
+    tooltips: {
+      mode: 'label', callbacks: {
+        label: function (tooltipItems, data) {
+          var label = data.datasets[tooltipItems.datasetIndex].label || ''
+          if (label) {
+            label += ': '
+          }
+          label += $filter('number')(tooltipItems.yLabel, 2)
+          return label
+        }
+      }
+    }
+  }
+
   function refresh () {
     $scope.financialData = {}
     if ($scope.metadata) {
@@ -361,7 +382,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         scales: { xAxes: [{ stacked: true,ticks: { beginAtZero: true } }], yAxes: [{ stacked: true,ticks: { beginAtZero: true } }] }
       }
-      showChart('financial-profile-chart-capex', 'bar', data, options)
+      showChart('financial-profile-chart-capex', 'bar', data, barChartOptions)
     })
   }
 
@@ -374,7 +395,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         scales: { xAxes: [{ stacked: true }], yAxes: [{ stacked: true }] }
       }
-      showChart('financial-profile-chart-revenue', 'bar', data, options)
+      showChart('financial-profile-chart-revenue', 'bar', data, barChartOptions)
     })
   }
 
@@ -391,7 +412,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
-      showChart('financial-profile-chart-arpu', 'bar', data, options)
+      showChart('financial-profile-chart-arpu', 'bar', data, barChartOptions)
     })
   }
   $scope.showArpuChart = showArpuChart
@@ -410,7 +431,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value / 1000, '$', 0) + ' K' %>`, // eslint-disable-line
       }
-      showChart('financial-profile-chart-connect-capex', 'bar', data, options)
+      showChart('financial-profile-chart-connect-capex', 'bar', data, barChartOptions)
     })
   }
   $scope.showConnectCapexChart = showConnectCapexChart
@@ -435,7 +456,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         // scaleStartValue: 0
         scales: { xAxes: [{ stacked: true }], yAxes: [{ stacked: true }] }
       }
-      showChart('financial-profile-chart-premises', 'bar', data, options)
+      showChart('financial-profile-chart-premises', 'bar', data, barChartOptions)
 
       data = buildChartData(premises, [
         { key: 'period', name: 'Premises passed in time period' }
@@ -445,7 +466,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-premises-period', 'bar', data, options)
+      showChart('financial-profile-chart-premises-period', 'bar', data, barChartOptions)
     })
   }
   $scope.showPremisesChart = showPremisesChart
@@ -460,7 +481,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('currency')(value, config.currency_symbol, 0) %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-cost-per-premise', 'bar', data, options)
+      showChart('financial-profile-chart-cost-per-premise', 'bar', data, barChartOptions)
     })
   }
   $scope.showCostPerPremiseChart = showCostPerPremiseChart
@@ -478,7 +499,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 0) %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-subscribers', 'bar', data, options)
+      showChart('financial-profile-chart-subscribers', 'bar', data, barChartOptions)
     })
   }
   $scope.showSubscribersChart = showSubscribersChart
@@ -518,7 +539,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
         tooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value) %>`, // eslint-disable-line
         multiTooltipTemplate: `<%= angular.injector(['ng']).get('$filter')('number')(value, 1) %>` // eslint-disable-line
       }
-      showChart('financial-profile-chart-opex-recurring', 'bar', data, options)
+      showChart('financial-profile-chart-opex-recurring', 'bar', data, barChartOptions)
     })
   }
   $scope.showOpexRecurringChart = showOpexRecurringChart
