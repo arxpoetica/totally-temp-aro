@@ -4,7 +4,7 @@
   .map-object-editor-context-menu-container {
     line-height: 22px; /* Any property will do */
     position: 'absolute';
-    bottom: 20px;
+    bottom: 25px;
   }
   .map-object-editor-context-menu {
     line-height: 22px; /* Any property will do */
@@ -12,9 +12,13 @@
   .map-object-editor-context-menu-dropdown {
     line-height: 22px; /* Any property will do */
     padding: 5px;
+    /*
     max-height: 100%;
+    */
+    max-height: 80vh;
+    
     overflow: scroll;
-    top: 0;
+    top: auto;
   }
   .map-object-editor-context-menu-dropdown-section{
     margin-bottom: 6px;
@@ -38,7 +42,7 @@
       <span class="caret"></span>
     </button>
     -->
-    <ul class="dropdown-menu map-object-editor-context-menu-dropdown" aria-labelledby="dropdownMenu1">
+    <ul class="dropdown-menu map-object-editor-context-menu-dropdown" ng-style="$ctrl.positionCss" aria-labelledby="dropdownMenu1">
       <div class="map-object-editor-context-menu-dropdown-section" ng-repeat="item in $ctrl.menuItems">
         <li>
           {{item.label}}
