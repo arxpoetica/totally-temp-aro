@@ -539,7 +539,6 @@ class State {
   }
 
   service.locationTypes = new Rx.BehaviorSubject([])
-  service.constructionSites = new Rx.BehaviorSubject([])
 
   // Hold all the selected tile elements like locations, service areas, etc.
   service.selection = {
@@ -636,7 +635,6 @@ class State {
     //Upload Data Sources
     service.uploadDataSources = []
     service.dataItems = {}
-
   }
 
   service.reloadLocationTypes = () => {
@@ -651,7 +649,6 @@ class State {
       }
     })
     service.locationTypes.next(locationTypes)
-    service.constructionSites.next(angular.copy(locationTypes))
   }
 
   // Get a POST body that we will send to aro-service for performing optimization
@@ -661,10 +658,8 @@ class State {
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
-    //return Promise.reject('loadOptimizationOptionsFromJSON() no longer supported in the new UI')
-    // // Note that we are NOT returning the state (the state is set after the call), but a promise
-    // // that resolves once all the geographies have been loaded
-    // return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
+    // Note that we are NOT returning the state (the state is set after the call), but a promise
+    // that resolves once all the geographies have been loaded
     return stateSerializationHelper.loadStateFromJSON(service, optimization, json)
   }
 
