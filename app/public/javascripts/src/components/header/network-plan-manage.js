@@ -9,7 +9,7 @@ class NetworkPlanModalController {
       Search_plans: 1,
       Recent_plans: 2
     })
-    this.currentView = this.views.Plan_Info
+    this.currentView = this.views.Search_plans
   }
 
   loadPlan(plan) {
