@@ -89,13 +89,6 @@ class TileComponentController {
       this.refreshMapTiles(tilesToRefresh)
     })
     
-    // If selected census block ids change, set that in the tile data road
-    state.selectedCensusBlockId.subscribe((selectedCensusBlockId) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedCensusBlockId(selectedCensusBlockId)
-      }
-    })
-    
     // If selected census category ids change, set that in the tile data road
     state.selectedCensusCategoryId.subscribe((selectedCensusCategoryId) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -285,7 +278,6 @@ class TileComponentController {
     this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE), 
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
-                                                         this.state.selectedCensusBlockId.getValue(),
                                                          this.state.censusCategories.getValue(),
                                                          this.state.selectedCensusCategoryId.getValue(),
                                                          this.state.selectedRoadSegments.getValue(),

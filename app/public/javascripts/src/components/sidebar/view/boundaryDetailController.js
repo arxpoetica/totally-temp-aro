@@ -38,9 +38,10 @@ class BoundaryDetailController {
             }
             }
           this.selectedBoundaryTags = tagList
-          
           let censusBlockId = event.censusFeatures[0].id
-          this.state.StateViewMode.reloadSelectedCensusBlockId(this.state,censusBlockId)
+          var newSelection = this.state.cloneSelection(this.state.selection)
+          newSelection.details.censusBlockId = censusBlockId
+          this.state.selection = newSelection
           this.viewCensusBlockInfo(censusBlockId)
         } else if (event.hasOwnProperty('serviceAreas')
           && event.serviceAreas.length > 0
@@ -119,7 +120,9 @@ class BoundaryDetailController {
   viewSelectedBoundary(selectedBoundary) {
     var visibleBoundaryLayer = this.state.selectedBoundaryTypeforSearch
     if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'census_blocks') {
-      this.state.StateViewMode.reloadSelectedCensusBlockId(this.state,selectedBoundary.id)
+      var newSelection = this.state.cloneSelection(this.state.selection)
+      newSelection.details.censusBlockId = selectedBoundary.id
+      this.state.selection = newSelection
       this.viewCensusBlockInfo(selectedBoundary.id)
       .then(() => {
         map.setCenter({ lat: this.selectedBoundaryInfo.centroid.coordinates[1], lng: this.selectedBoundaryInfo.centroid.coordinates[0] })

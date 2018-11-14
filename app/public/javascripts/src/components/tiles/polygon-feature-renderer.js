@@ -27,13 +27,13 @@ class PolygonFeatureRenderer {
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusCategoryId)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusBlockId, Obj.selectedCensusCategoryId)
+        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusCategoryId)
     })
 
   }
@@ -42,7 +42,7 @@ class PolygonFeatureRenderer {
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
                        selection,
                        selectedDisplayMode, displayModes,
-                       analysisSelectionMode, selectionModes, selectedCensusBlockId, selectedCensusCategoryId) {
+                       analysisSelectionMode, selectionModes, selectedCensusCategoryId) {
 
     ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon
@@ -54,7 +54,7 @@ class PolygonFeatureRenderer {
     //    a non-selected service area could have the same id as the selected census block
     if (feature.properties.hasOwnProperty('layerType')
       && 'census_block' == feature.properties.layerType) {
-      if (selectedCensusBlockId == feature.properties.id) {
+      if (selection.details.censusBlockId == feature.properties.id) {
         // Hilight selected census block
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
