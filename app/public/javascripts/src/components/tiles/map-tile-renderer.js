@@ -7,7 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedAnalysisArea, selectedAnalysisAreas,
+  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedAnalysisArea,
               selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
@@ -18,7 +18,6 @@ class MapTileRenderer {
     this.tileVersions = {}
     this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
     this.selectedAnalysisArea = selectedAnalysisArea
-    this.selectedAnalysisAreas = selectedAnalysisAreas
     this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
@@ -91,11 +90,6 @@ class MapTileRenderer {
     this.tileDataService.markHtmlCacheDirty()
   }
 
-  // Sets the selected analysis area id to view details
-  setselectedAnalysisAreas(selectedAnalysisAreas) {
-    this.selectedAnalysisAreas = selectedAnalysisAreas
-    this.tileDataService.markHtmlCacheDirty()
-  }
   //Sets the selected Census Block ids
   setSelectedCensusBlockId(selectedCensusBlockId) {
     this.selectedCensusBlockId = selectedCensusBlockId
@@ -556,7 +550,7 @@ class MapTileRenderer {
               'tileDataService': this.tileDataService,'styles': this.styles,
               'tileSize': this.tileSize, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'selectedAnalysisArea':this.selectedAnalysisArea,selectedAnalysisAreas:this.selectedAnalysisAreas,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
+              'selectedAnalysisArea':this.selectedAnalysisArea,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
               'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0

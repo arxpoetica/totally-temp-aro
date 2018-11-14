@@ -9,7 +9,7 @@ class OptimizeButtonController {
                               && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_LOCATIONS)
     const areServiceAreasValid = (this.state.selection.planTargets.serviceAreaIds.size > 0)
                                  && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_AREAS)
-    const areAnalysisAreasValid = (this.state.selectedAnalysisAreas.getValue().size > 0)
+    const areAnalysisAreasValid = (this.state.selection.planTargets.analysisAreaIds.size > 0)
                                   && (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_ANALYSIS_AREAS)
     const isTargetSelectionValid = areLocationsValid || areServiceAreasValid || areAnalysisAreasValid
 

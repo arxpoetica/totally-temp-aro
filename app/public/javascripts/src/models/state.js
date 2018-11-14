@@ -594,40 +594,28 @@ class State {
 
   service.reloadSelectedServiceAreas = () => {
     var plan = service.plan.getValue()
-    if (plan) {
-      $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
-        .then((result) => {
-          var newSelection = service.cloneSelection(service.selection)
-          newSelection.planTargets.serviceAreaIds = new Set()
-          result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
-          service.selection = newSelection
-          return Promise.resolve()
-        })
-        .catch(err => console.error(err))
-    } else {
-      return Promise.resolve()
-    }
+    return $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
+      .then((result) => {
+        var newSelection = service.cloneSelection(service.selection)
+        newSelection.planTargets.serviceAreaIds = new Set()
+        result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
+        service.selection = newSelection
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
   }
 
-  service.selectedAnalysisAreas = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedAnalysisAreas = (forceMapRefresh = false) => {
+  service.reloadSelectedAnalysisAreas = () => {
     var plan = service.plan.getValue()
-    if (plan) {
-      $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
-        .then((result) => {
-          var selectedAnalysisAreasSet = new Set()
-          result.data.forEach((analysis_area) => selectedAnalysisAreasSet.add(+analysis_area.analysis_area_id))
-          service.selectedAnalysisAreas.next(selectedAnalysisAreasSet)
-          service.requestMapLayerRefresh.next(null)
-          if (forceMapRefresh) {
-            tileDataService.clearDataCache()
-            tileDataService.markHtmlCacheDirty()
-          }
-          return Promise.resolve()
-        })
-    } else {
-      return Promise.resolve()
-    }
+    return $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
+      .then((result) => {
+        var newSelection = service.cloneSelection(service.selection)
+        newSelection.planTargets.analysisAreaIds = new Set()
+        result.data.forEach((analsisArea) => newSelection.planTargets.analysisAreaIds.add(+analsisArea.analysis_area_id))
+        service.selection = newSelection
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
   }
 
   service.selectedAnalysisArea = new Rx.BehaviorSubject()

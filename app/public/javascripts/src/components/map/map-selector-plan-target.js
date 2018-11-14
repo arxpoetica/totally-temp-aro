@@ -66,15 +66,15 @@ class MapSelectorPlanTargetController {
             // Reload selected locations from database
             state.reloadSelectedServiceAreas()
           })
+          .catch(err => console.error(err))
       }
 
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.analysisAreas && event.analysisAreas.length > 0 
         && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
         // Get a list of ids to add and remove
-        var existingIds = state.selectedAnalysisAreas.getValue()
         var idsToAdd = new Set(), idsToRemove = new Set()
         event.analysisAreas.forEach((analysisArea) => {
-          if (existingIds.has(+analysisArea.id)) {
+          if (state.selection.planTargets.analysisAreaIds.has(+analysisArea.id)) {
             idsToRemove.add(+analysisArea.id)
           } else {
             idsToAdd.add(+analysisArea.id)
@@ -88,8 +88,9 @@ class MapSelectorPlanTargetController {
         Promise.all(addRemoveAnalysisTargetPromises)
           .then((response) => {
             // Reload selected locations from database
-            state.reloadSelectedAnalysisAreas(true)
+            state.reloadSelectedAnalysisAreas()
           })
+          .catch(err => console.error(err))
       }
 
       if (event.roadSegments && event.roadSegments.size > 0) {
