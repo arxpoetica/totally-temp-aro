@@ -556,11 +556,8 @@ class State {
       analysisAreaIds: new Set()
     },
     details: {
-      location: {},
       analysisAreaId: null,
-      boundaryId: null,
-      equipment: {},
-      roadSegment: {}
+      serviceAreaId: null
     }
   }
 

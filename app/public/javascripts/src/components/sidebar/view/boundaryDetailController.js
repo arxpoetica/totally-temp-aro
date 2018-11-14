@@ -47,7 +47,7 @@ class BoundaryDetailController {
           && event.serviceAreas[0].hasOwnProperty('code') ){
             this.viewServiceAreaInfo(event.serviceAreas[0])
             var newSelection = this.state.cloneSelection(this.state.selection)
-            newSelection.details.boundaryId = event.serviceAreas[0].id
+            newSelection.details.serviceAreaId = event.serviceAreas[0].id
             this.state.selection = newSelection
         } else if (event.hasOwnProperty('analysisAreas')
           && event.analysisAreas.length > 0
@@ -128,7 +128,7 @@ class BoundaryDetailController {
       })
     } else if(visibleBoundaryLayer && visibleBoundaryLayer.type === 'wirecenter') {
       var newSelection = this.state.cloneSelection(this.state.selection)
-      newSelection.details.boundaryId = selectedBoundary.id
+      newSelection.details.serviceAreaId = selectedBoundary.id
       this.state.selection = newSelection
       this.viewServiceAreaInfo(selectedBoundary)
       map.setCenter({ lat: selectedBoundary.centroid.coordinates[1], lng: selectedBoundary.centroid.coordinates[0] })

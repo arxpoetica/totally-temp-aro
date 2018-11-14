@@ -7,7 +7,7 @@ class PolygonFeatureRenderer {
   static renderFeatures(closedPolygonFeatureLayersList, selection){
 
     var unselectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
-      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != selection.details.boundaryId) {
+      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != selection.details.serviceAreaId) {
         return featureObj
       } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !selection.planTargets.serviceAreaIds.has(featureObj.feature.properties.id)) {
         return featureObj
@@ -17,7 +17,7 @@ class PolygonFeatureRenderer {
     })
 
     var selectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
-      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id == selection.details.boundaryId) {
+      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id == selection.details.serviceAreaId) {
         return featureObj
       } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && selection.planTargets.serviceAreaIds.has(featureObj.feature.properties.id)) {
         return featureObj
@@ -88,7 +88,7 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if ((selection.details.boundaryId == feature.properties.id)
+    } else if ((selection.details.serviceAreaId == feature.properties.id)
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
