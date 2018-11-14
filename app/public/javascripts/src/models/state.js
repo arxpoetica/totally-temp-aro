@@ -335,12 +335,6 @@ class State {
     service.requestMapLayerRefresh.next(null)
   }
   
-  service.selectedCensusCategoryId = new Rx.BehaviorSubject()
-  service.reloadSelectedCensusCategoryId = (catId) => {
-    service.selectedCensusCategoryId.next(catId)
-    service.requestMapLayerRefresh.next(null)
-  }
-  
   // The display modes for the application
   service.displayModes = Object.freeze({
     VIEW: 'VIEW',
@@ -558,6 +552,7 @@ class State {
     details: {
       analysisAreaId: null,
       censusBlockId: null,
+      censusCategoryId: null,
       roadSegments: new Set(),
       serviceAreaId: null
     }

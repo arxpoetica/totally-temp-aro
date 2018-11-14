@@ -89,7 +89,9 @@ class BoundariesController {
 
   onSelectCensusCat(){
     const id = this.selectedCensusCat && this.selectedCensusCat.id
-    this.state.reloadSelectedCensusCategoryId(id)
+    var newSelection = this.state.cloneSelection(this.state.selection)
+    newSelection.details.censusCategoryId = id
+    this.state.selection = newSelection
   }
   
   // Replaces any occurrences of searchText by replaceText in the keys of an object

@@ -27,22 +27,20 @@ class PolygonFeatureRenderer {
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusCategoryId)
+        Obj.analysisSelectionMode, Obj.selectionModes)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
-        Obj.analysisSelectionMode, Obj.selectionModes, Obj.selectedCensusCategoryId)
+        Obj.analysisSelectionMode, Obj.selectionModes)
     })
 
   }
 
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
-                       selection,
-                       selectedDisplayMode, displayModes,
-                       analysisSelectionMode, selectionModes, selectedCensusCategoryId) {
+                       selection, selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
 
     ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon
@@ -61,12 +59,12 @@ class PolygonFeatureRenderer {
       }
 
       // check for census filters
-      if ('undefined' != typeof selectedCensusCategoryId
-        && feature.properties.tags.hasOwnProperty(selectedCensusCategoryId)) {
-        let tagId = feature.properties.tags[selectedCensusCategoryId]
+      if ('undefined' != typeof selection.details.censusCategoryId
+        && feature.properties.tags.hasOwnProperty(selection.details.censusCategoryId)) {
+        let tagId = feature.properties.tags[selection.details.censusCategoryId]
 
-        if (censusCategories[selectedCensusCategoryId].tags.hasOwnProperty(tagId)) {
-          let color = censusCategories[selectedCensusCategoryId].tags[tagId].colourHash
+        if (censusCategories[selection.details.censusCategoryId].tags.hasOwnProperty(tagId)) {
+          let color = censusCategories[selection.details.censusCategoryId].tags[tagId].colourHash
           drawingStyles.strokeStyle = color
           drawingStyles.fillStyle = color
         }

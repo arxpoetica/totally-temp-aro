@@ -89,13 +89,6 @@ class TileComponentController {
       this.refreshMapTiles(tilesToRefresh)
     })
     
-    // If selected census category ids change, set that in the tile data road
-    state.selectedCensusCategoryId.subscribe((selectedCensusCategoryId) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedCensusCategoryId(selectedCensusCategoryId)
-      }
-    })
-    
     // If selected census category map changes or gets loaded, set that in the tile data road
     state.censusCategories.subscribe((censusCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -271,7 +264,6 @@ class TileComponentController {
                                                          this.tileDataService,
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.censusCategories.getValue(),
-                                                         this.state.selectedCensusCategoryId.getValue(),
                                                          this.state.selectedViewFeaturesByType.getValue(),
                                                          this.state.selectedDisplayMode.getValue(),
                                                          this.state.optimizationOptions.analysisSelectionMode,

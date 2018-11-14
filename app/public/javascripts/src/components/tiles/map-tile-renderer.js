@@ -7,8 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions,
-              censusCategories, selectedCensusCategoryId, selectedViewFeaturesByType,  
+  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
@@ -19,7 +18,6 @@ class MapTileRenderer {
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
     this.censusCategories = censusCategories
-    this.selectedCensusCategoryId = selectedCensusCategoryId
     this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
@@ -73,12 +71,7 @@ class MapTileRenderer {
   setSelection(selection) {
     this.selection = selection
   }
-  
-  setSelectedCensusCategoryId(selectedCensusCategoryId) {
-    this.selectedCensusCategoryId = selectedCensusCategoryId
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
+
   setCensusCategories(censusCategories) {
     this.censusCategories = censusCategories
     this.tileDataService.markHtmlCacheDirty()
@@ -523,8 +516,7 @@ class MapTileRenderer {
               'tileDataService': this.tileDataService,'styles': this.styles,
               'tileSize': this.tileSize, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
-              'selectedCensusCategoryId': this.selectedCensusCategoryId}
+              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes}
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
             } else {
