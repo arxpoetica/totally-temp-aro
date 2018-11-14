@@ -52,7 +52,7 @@
         </select>
       </div>
       
-      <div style="height: 100%;">
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_PLAN' || $ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis-build 
           remove-target="$ctrl.removeTarget(target)" 
           zoom-target="$ctrl.zoomTarget(target)" 
