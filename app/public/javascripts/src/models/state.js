@@ -558,6 +558,7 @@ class State {
     details: {
       analysisAreaId: null,
       censusBlockId: null,
+      roadSegments: new Set(),
       serviceAreaId: null
     }
   }
@@ -614,7 +615,6 @@ class State {
   }
 
   service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
-  service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
 
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)

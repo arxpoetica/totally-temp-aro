@@ -91,12 +91,7 @@ class MapSelectorPlanTargetController {
           })
           .catch(err => console.error(err))
       }
-
-      if (event.roadSegments && event.roadSegments.size > 0) {
-          state.StateViewMode.reloadSelectedRoadSegments(state,event.roadSegments)
-      }
     })
-
   }
 
   updateDrawingManagerState() {

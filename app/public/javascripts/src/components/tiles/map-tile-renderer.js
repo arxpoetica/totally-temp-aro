@@ -8,7 +8,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 class MapTileRenderer {
 
   constructor(tileSize, tileDataService, mapTileOptions,
-              censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
+              censusCategories, selectedCensusCategoryId, selectedViewFeaturesByType,  
               selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
@@ -16,7 +16,6 @@ class MapTileRenderer {
     this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
     this.tileVersions = {}
-    this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
     this.censusCategories = censusCategories
@@ -82,12 +81,6 @@ class MapTileRenderer {
   
   setCensusCategories(censusCategories) {
     this.censusCategories = censusCategories
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
-  // Sets the selected Road Segment ids
-  setSelectedRoadSegment(selectedRoadSegment) {
-    this.selectedRoadSegment = selectedRoadSegment
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -541,8 +534,8 @@ class MapTileRenderer {
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
-            if (this.selectedRoadSegment.size > 0 && 
-              [...this.selectedRoadSegment].filter(function (road) {
+            if (this.selection.details.roadSegments.size > 0 && 
+              [...this.selection.details.roadSegments].filter(function (road) {
                  return road.gid === feature.properties.gid
               }).length > 0) {
               //Highlight the selected Selected RoadSegments

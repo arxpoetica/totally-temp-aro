@@ -101,11 +101,6 @@ class StateViewMode {
     state.requestMapLayerRefresh.next(null)
   }
 
-  static reloadSelectedRoadSegments(state,road) {
-    state.selectedRoadSegments.next(road)
-    state.requestMapLayerRefresh.next(null)
-  }
-
   // View mode search
   static getSelectedEquipmentIds(flattenDeep,networkNodeTypes,configuration) {
     var selectedEquipmentIds = []

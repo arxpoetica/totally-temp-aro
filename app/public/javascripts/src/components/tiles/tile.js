@@ -108,14 +108,6 @@ class TileComponentController {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedViewFeaturesByType(selectedViewFeaturesByType)
       }
     })
-    
-    
-    // If selected road_segment ids change, set that in the tile data road
-    state.selectedRoadSegments.subscribe((selectedRoadSegment) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelectedRoadSegment(selectedRoadSegment)
-      }
-    })
 
     // If Display Mode change, set that in the tile data
     state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
@@ -280,7 +272,6 @@ class TileComponentController {
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.censusCategories.getValue(),
                                                          this.state.selectedCensusCategoryId.getValue(),
-                                                         this.state.selectedRoadSegments.getValue(),
                                                          this.state.selectedViewFeaturesByType.getValue(),
                                                          this.state.selectedDisplayMode.getValue(),
                                                          this.state.optimizationOptions.analysisSelectionMode,
