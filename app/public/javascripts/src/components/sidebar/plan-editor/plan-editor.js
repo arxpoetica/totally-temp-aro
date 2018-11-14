@@ -737,25 +737,8 @@ class PlanEditorController {
     return mapObject && mapObject.icon
   }
   
-  // ---
-  /*
-  addPlannedEquipment(){
-    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
-    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.plannedEquipment.push( new EquipmentComponent() )
-  }
-  
-  addExistingEquipment(){
-    //console.log( AroFeatureFactory.createObject({'dataType': 'equipment', 'existingEquipment':[{'equipmentName':''}], 'plannedEquipment':[{}]}) )
-    this.objectIdToProperties[this.selectedMapObject.objectId].networkNodeEquipment.existingEquipment.push( new TrackedEquipment() )
-    //console.log(this.objectIdToProperties[this.selectedMapObject.objectId])
-    //console.log(new TrackedEquipment())
-  }
-  */
-  
   // ToDo: change this out for a dynamic version 
   getNewListItem(type){
-    //console.log(type)
-    
     if ('plannedEquipment' == type || 'subComponents' == type){
       return new EquipmentComponent()
     }
@@ -767,19 +750,16 @@ class PlanEditorController {
     if ('marketableEquipments' == type){
       return new MarketableEquipment()
     }
-    
   }
-  
-  // ---
   
   updateSelectedState(selectedFeature, featureId){
     // tell state
-    var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
-    selectedViewFeaturesByType.equipment = {}
+    var newSelection = this.state.cloneSelection()
+    newSelection.editable.equipment = {}
     if ('undefined' != typeof selectedFeature && 'undefined' != typeof featureId){
-      selectedViewFeaturesByType.equipment[ featureId ] = selectedFeature
+      newSelection.editable.equipment[ featureId ] = selectedFeature
     }
-    this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
+    this.state.selection = newSelection
   }
   
   clearViewSelection(){

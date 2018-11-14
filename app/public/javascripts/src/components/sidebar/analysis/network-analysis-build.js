@@ -30,18 +30,6 @@ class NetworkAnalysisBuildController {
         this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
       }
     })
-
-    this.locationsObserver = state.selectedLocations.subscribe((selectedLocations) => {
-      // The selected locations have changed. Get the count and addresses that we want to show
-      if (state.optimizationOptions.analysisSelectionMode != state.selectionModes.SELECTED_LOCATIONS) return
-      this.targetsTotal = selectedLocations.size
-      var locationIds = Array.from(selectedLocations) // Only get addresses for a few locations
-      $http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-      .then((result) => {
-        this.targets = result.data
-      })
-      .catch(err => console.error(err))
-    })
   }
 
   onSelectionTypeChange(selectionType) {
@@ -53,12 +41,17 @@ class NetworkAnalysisBuildController {
     this.state.optimizationOptions.budget = this.budgetDisplay
   }
 
-  $onDestroy() {
-    this.locationsObserver.unsubscribe()
-  }
-
   $onChanges(changesObj) {
     if (changesObj.selection) {
+      // The selected locations have changed. Get the count and addresses that we want to show
+      this.targetsTotal = this.state.selection.planTargets.locationIds.size
+      var locationIds = Array.from(this.state.selection.planTargets.locationIds) // Only get addresses for a few locations
+      this.$http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+        .then((result) => {
+          this.targets = result.data
+        })
+        .catch(err => console.error(err))
+
       // The selected service areas have changed.
       var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
       this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
