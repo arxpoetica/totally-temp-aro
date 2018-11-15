@@ -33,7 +33,7 @@
 
       <accordion-panel-title title="'Road Segment Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO].show"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO].show">
-        <road-segment-detail></road-segment-detail>
+        <road-segment-detail selection="$ctrl.state.selection"></road-segment-detail>
       </accordion-panel-contents>
 
       <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show"></accordion-panel-title>

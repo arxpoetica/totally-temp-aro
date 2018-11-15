@@ -902,10 +902,10 @@ class MapObjectEditorController {
         this.displayViewObject({feature:feature})
         this.selectMapObject(null)
         // Update selected feature in state so it is rendered correctly
-        var selectedViewFeaturesByType = this.state.selectedViewFeaturesByType.getValue()
-        selectedViewFeaturesByType.equipment = {}
-        selectedViewFeaturesByType.equipment[feature.objectId] = feature
-        this.state.StateViewMode.reloadSelectedViewFeaturesByType(this.state,selectedViewFeaturesByType)
+        var newSelection = this.state.cloneSelection()
+        newSelection.editable.equipment = {}
+        newSelection.editable.equipment[feature.objectId] = feature
+        this.state.selection = newSelection
         return
       }
     } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas')

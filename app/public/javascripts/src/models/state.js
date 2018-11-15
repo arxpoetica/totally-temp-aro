@@ -345,12 +345,6 @@ class State {
     service.requestMapLayerRefresh.next(null)
   }
   
-  service.selectedCensusCategoryId = new Rx.BehaviorSubject()
-  service.reloadSelectedCensusCategoryId = (catId) => {
-    service.selectedCensusCategoryId.next(catId)
-    service.requestMapLayerRefresh.next(null)
-  }
-  
   // The display modes for the application
   service.displayModes = Object.freeze({
     VIEW: 'VIEW',
@@ -553,10 +547,8 @@ class State {
         }
       })
   }
-  //service.reloadCompetitors()
 
   service.locationTypes = new Rx.BehaviorSubject([])
-  service.constructionSites = new Rx.BehaviorSubject([])
 
   // Hold all the selected tile elements like locations, service areas, etc.
   service.selection = {
@@ -566,84 +558,70 @@ class State {
       analysisAreaIds: new Set()
     },
     details: {
-      location: {},
-      boundaryId: null,
+      analysisAreaId: null,
+      censusBlockId: null,
+      censusCategoryId: null,
+      roadSegments: new Set(),
+      serviceAreaId: null
+    },
+    editable: {
       equipment: {},
-      roadSegment: {}
+      location: {},
+      serviceArea: {}
     }
   }
 
   // Why a cloneSelection() function? If we use angular.copy() on service.selection, the Set objects lose their "this" binding.
   // In that case, calling any function like size() on the Sets gives us an error. Note that we are not doing a deep clone at
   // this point because everything binds to the "selection" object, so just creating a selection object is sufficient.
-  service.cloneSelection = (selection) => {
+  service.cloneSelection = () => {
     return {
-      planTargets: selection.planTargets,
-      details: selection.details
+      planTargets: service.selection.planTargets,
+      details: service.selection.details,
+      editable: service.selection.editable
     }
   }
 
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
-  service.selectedLocations = new Rx.BehaviorSubject(new Set())
   service.reloadSelectedLocations = () => {
     var plan = service.plan.getValue()
-    if (plan) {
-      return $http.get(`/locations/${plan.id}/selectedLocationIds`)
-        .then((result) => {
-          var selectedLocationsSet = new Set()
-          result.data.forEach((selectedLocationId) => selectedLocationsSet.add(+selectedLocationId.location_id))
-          service.selectedLocations.next(selectedLocationsSet)
-          service.requestMapLayerRefresh.next(null)
-          return Promise.resolve()
-        })
-    } else {
-      return Promise.resolve()
-    }
+    return $http.get(`/locations/${plan.id}/selectedLocationIds`)
+      .then((result) => {
+        var newSelection = service.cloneSelection()
+        newSelection.planTargets.locationIds = new Set()
+        result.data.forEach((selectedLocationId) => newSelection.planTargets.locationIds.add(+selectedLocationId.location_id))
+        service.selection = newSelection
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
   }
 
   service.reloadSelectedServiceAreas = () => {
     var plan = service.plan.getValue()
-    if (plan) {
-      $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
-        .then((result) => {
-          var newSelection = service.cloneSelection(service.selection)
-          newSelection.planTargets.serviceAreaIds = new Set()
-          result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
-          service.selection = newSelection
-          return Promise.resolve()
-        })
-        .catch(err => console.error(err))
-    } else {
-      return Promise.resolve()
-    }
+    return $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
+      .then((result) => {
+        var newSelection = service.cloneSelection()
+        newSelection.planTargets.serviceAreaIds = new Set()
+        result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
+        service.selection = newSelection
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
   }
 
-  service.selectedAnalysisAreas = new Rx.BehaviorSubject(new Set())
-  service.reloadSelectedAnalysisAreas = (forceMapRefresh = false) => {
+  service.reloadSelectedAnalysisAreas = () => {
     var plan = service.plan.getValue()
-    if (plan) {
-      $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
-        .then((result) => {
-          var selectedAnalysisAreasSet = new Set()
-          result.data.forEach((analysis_area) => selectedAnalysisAreasSet.add(+analysis_area.analysis_area_id))
-          service.selectedAnalysisAreas.next(selectedAnalysisAreasSet)
-          service.requestMapLayerRefresh.next(null)
-          if (forceMapRefresh) {
-            tileDataService.clearDataCache()
-            tileDataService.markHtmlCacheDirty()
-          }
-          return Promise.resolve()
-        })
-    } else {
-      return Promise.resolve()
-    }
+    return $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
+      .then((result) => {
+        var newSelection = service.cloneSelection()
+        newSelection.planTargets.analysisAreaIds = new Set()
+        result.data.forEach((analsisArea) => newSelection.planTargets.analysisAreaIds.add(+analsisArea.analysis_area_id))
+        service.selection = newSelection
+        return Promise.resolve()
+      })
+      .catch(err => console.error(err))
   }
-
-  service.selectedAnalysisArea = new Rx.BehaviorSubject()
-  service.selectedViewFeaturesByType = new Rx.BehaviorSubject({})
-  service.selectedCensusBlockId = new Rx.BehaviorSubject()
-  service.selectedRoadSegments = new Rx.BehaviorSubject(new Set())
 
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)
@@ -667,7 +645,6 @@ class State {
     //Upload Data Sources
     service.uploadDataSources = []
     service.dataItems = {}
-
   }
 
   service.reloadLocationTypes = () => {
@@ -682,7 +659,6 @@ class State {
       }
     })
     service.locationTypes.next(locationTypes)
-    service.constructionSites.next(angular.copy(locationTypes))
   }
 
   // Get a POST body that we will send to aro-service for performing optimization
@@ -692,10 +668,8 @@ class State {
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
-    //return Promise.reject('loadOptimizationOptionsFromJSON() no longer supported in the new UI')
-    // // Note that we are NOT returning the state (the state is set after the call), but a promise
-    // // that resolves once all the geographies have been loaded
-    // return stateSerializationHelper.loadStateFromJSON(service, optimization, regions, json)
+    // Note that we are NOT returning the state (the state is set after the call), but a promise
+    // that resolves once all the geographies have been loaded
     return stateSerializationHelper.loadStateFromJSON(service, optimization, json)
   }
 

@@ -23,7 +23,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     addLocationTypesToBody(state, optimization, optimizationBody)
     addDataSelectionsToBody(state,optimizationBody)
-    addConstructionSitesToBody(state,optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
@@ -83,13 +82,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         libraryItems: libraryItems
       })
     })
-  }
-
-  //Add construction sites to a POST body that we will send to aro-service for performing optimization its either locations or construction sites
-  var addConstructionSitesToBody = (state, postBody) => {
-    // To be fixed correctly when we implement construction sites
-    // var selectedConstructionSites = state.constructionSites.filter((item) => item.checked)
-    // postBody.locationTypes = _.pluck(selectedConstructionSites, 'key')
   }
 
   // Add algorithm parameters to a POST body that we will send to aro-service for performing optimization

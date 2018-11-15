@@ -7,25 +7,17 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, selectedLocations, selectedAnalysisArea, selectedAnalysisAreas,
-              selectedCensusBlockId, censusCategories, selectedCensusCategoryId, selectedRoadSegment, selectedViewFeaturesByType,  
-              selectedDisplayMode, analysisSelectionMode, displayModes, viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, analysisSelectionMode, displayModes,
+              viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
     this.mapLayersByZ = []
     this.mapTileOptions = mapTileOptions
     this.tileVersions = {}
-    this.selectedLocations = selectedLocations // ToDo: generalize the selected arrays
-    this.selectedAnalysisArea = selectedAnalysisArea
-    this.selectedAnalysisAreas = selectedAnalysisAreas
-    this.selectedRoadSegment = selectedRoadSegment
     this.selectedDisplayMode = selectedDisplayMode
     this.analysisSelectionMode = analysisSelectionMode
-    this.selectedCensusBlockId = selectedCensusBlockId
     this.censusCategories = censusCategories
-    this.selectedCensusCategoryId = selectedCensusCategoryId
-    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.displayModes = displayModes
     this.viewModePanels = viewModePanels
     this.state = state
@@ -79,47 +71,8 @@ class MapTileRenderer {
     this.selection = selection
   }
 
-  // Sets the selected location ids
-  setselectedLocations(selectedLocations) {
-    this.selectedLocations = selectedLocations
-    this.tileDataService.markHtmlCacheDirty()
-  }
-
-  // Sets the selected analysis area id to view details
-  setselectedAnalysisArea(selectedAnalysisArea) {
-    this.selectedAnalysisArea = selectedAnalysisArea
-    this.tileDataService.markHtmlCacheDirty()
-  }
-
-  // Sets the selected analysis area id to view details
-  setselectedAnalysisAreas(selectedAnalysisAreas) {
-    this.selectedAnalysisAreas = selectedAnalysisAreas
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  //Sets the selected Census Block ids
-  setSelectedCensusBlockId(selectedCensusBlockId) {
-    this.selectedCensusBlockId = selectedCensusBlockId
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
-  setSelectedCensusCategoryId(selectedCensusCategoryId) {
-    this.selectedCensusCategoryId = selectedCensusCategoryId
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
   setCensusCategories(censusCategories) {
     this.censusCategories = censusCategories
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
-  // Sets the selected Road Segment ids
-  setSelectedRoadSegment(selectedRoadSegment) {
-    this.selectedRoadSegment = selectedRoadSegment
-    this.tileDataService.markHtmlCacheDirty()
-  }
-  
-  setSelectedViewFeaturesByType(selectedViewFeaturesByType) {
-    this.selectedViewFeaturesByType = selectedViewFeaturesByType
     this.tileDataService.markHtmlCacheDirty()
   }
   
@@ -531,8 +484,8 @@ class MapTileRenderer {
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
-                                               selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, this.selectedDisplayMode, this.displayModes,
-                                               this.analysisSelectionMode, this.state.selectionModes, this.selectedLocations, this.selectedViewFeaturesByType)
+                                               this.selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
+                                               this.selectedDisplayMode, this.displayModes, this.analysisSelectionMode, this.state.selectionModes)
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
@@ -556,8 +509,7 @@ class MapTileRenderer {
               'tileDataService': this.tileDataService,'styles': this.styles,
               'tileSize': this.tileSize, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'selectedAnalysisArea':this.selectedAnalysisArea,selectedAnalysisAreas:this.selectedAnalysisAreas,'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes, 
-              'selectedCensusBlockId':this.selectedCensusBlockId,'selectedCensusCategoryId': this.selectedCensusCategoryId}
+              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes}
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
             } else {
@@ -567,8 +519,8 @@ class MapTileRenderer {
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
-            if (this.selectedRoadSegment.size > 0 && 
-              [...this.selectedRoadSegment].filter(function (road) {
+            if (this.selection.details.roadSegments.size > 0 && 
+              [...this.selection.details.roadSegments].filter(function (road) {
                  return road.gid === feature.properties.gid
               }).length > 0) {
               //Highlight the selected Selected RoadSegments
