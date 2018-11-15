@@ -11,12 +11,13 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-md-4">
 
+      <!-- On the left, show a list of ARPU models that the user can edit -->
+      <div class="col-md-4">
         <ul class="nav nav-pills nav-stacked" style="max-height: 380px; overflow-y: auto;">
           <li role="presentation"
               ng-class="{ 'active': $ctrl.selectedArpuModelIndex === $index }"
-              ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels"
+              ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels | orderBy: '-id.locationEntityType'"
               ng-click="$ctrl.selectArpuModel($index)">
             <a href="#">
               {{arpuModel.id.locationEntityType}} / {{arpuModel.id.speedCategory}}
@@ -25,6 +26,7 @@
         </ul>
       </div>
 
+      <!-- On the right, show the details of the currently selected ARPU model -->
       <div class="col-md-8">
         <table id="tblArpuModel" class="table table-compressed table-striped">
           <tbody>

@@ -23,7 +23,6 @@ class ArpuEditorController {
     .then((result) => {
       this.arpuManagerConfiguration = result.data
       // Sort the arpu models on locationEntityType so they look good in the UI
-      this.arpuManagerConfiguration.arpuModels.sort((a, b) => (a.id.locationEntityType < b.id.locationEntityType ? -1 : 1))
       this.selectedArpuModelIndex = 0
       this.pristineArpuManagerConfiguration = {}
       var copyOfModels = angular.copy(this.arpuManagerConfiguration.arpuModels)
