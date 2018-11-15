@@ -1797,12 +1797,11 @@ class State {
     .then((result)=>{
       var plan = service.plan.getValue()
       // Get a list of ids to add and remove
-      var existingIds = service.selectedLocations.getValue()
       var idsToAdd = new Set(), idsToRemove = new Set()
       service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_LOCATIONS
       service.selectionTypeChanged.next(service.optimizationOptions.analysisSelectionMode)
       result.data.forEach((location) => {
-        if (existingIds.has(+location)) {
+        if (service.selection.planTargets.locationIds.has(+location)) {
           idsToRemove.add(+location)
         } else {
           idsToAdd.add(+location)
