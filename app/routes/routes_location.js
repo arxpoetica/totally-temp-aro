@@ -238,4 +238,11 @@ exports.configure = (api, middleware) => {
   api.post('/locations/morphology', upload.single('file'), saveMorphology)
   
   api.post('/locations/morphology/:id', upload.single('file'), saveMorphology)
+
+  api.post('/locations/getLocationIds', (request, response, next)=> {
+    let query = request.body.query
+    models.Location.getLocationIds(query)
+    .then(jsonSuccess(response, next))
+    .catch(next)
+  });
 }

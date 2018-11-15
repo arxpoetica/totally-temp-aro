@@ -34,6 +34,13 @@ class State {
     FIXED_MULTIPLIER: {id: 'FIXED_MULTIPLIER', label: 'End Year Multiplier'},
     PERPUTUAL_GROWTH: {id: 'PERPUTUAL_GROWTH', label: 'Perpetual Growth'}
   }
+
+  service.expertModeTypes = {
+    OPTIMIZATION_SETTINGS: {id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings'}, 
+    MANUAL_PLAN_TARGET_ENTRY: {id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Entry'}
+  }
+
+  service.selectedExpertMode = service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id
   
   service.viewFiberOptions = [
     {
@@ -308,7 +315,10 @@ class State {
   service.showPlanResourceEditorModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
-  service.expertModeBody = null
+  service.expertMode = {
+    OPTIMIZATION_SETTINGS: null, 
+    MANUAL_PLAN_TARGET_ENTRY: null
+  }
   //This modal will be used to toogle from report modal to current modal 
   //service.previousModal
 
@@ -1779,6 +1789,36 @@ class State {
   }
 
   service.loadServiceLayers()
+
+  service.executeManualPlanTargetsQuery = () => {
+    //select id from aro.location_entity where data_source_id = 1 and id in 
+    //(239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
+    $http.post('/locations/getLocationIds',{query: service.expertMode.MANUAL_PLAN_TARGET_ENTRY})
+    .then((result)=>{
+      var plan = service.plan.getValue()
+      // Get a list of ids to add and remove
+      var idsToAdd = new Set(), idsToRemove = new Set()
+      service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_LOCATIONS
+      service.selectionTypeChanged.next(service.optimizationOptions.analysisSelectionMode)
+      result.data.forEach((location) => {
+        if (service.selection.planTargets.locationIds.has(+location)) {
+          idsToRemove.add(+location)
+        } else {
+          idsToAdd.add(+location)
+        }
+      })
+      // Make these changes to the database, then reload targets from the DB
+      var addRemoveTargetPromises = [
+        $http.post(`/network_plan/${plan.id}/addTargets`, { locationIds: Array.from(idsToAdd) }),
+        $http.post(`/network_plan/${plan.id}/removeTargets`, { locationIds: Array.from(idsToRemove) })
+      ]
+      Promise.all(addRemoveTargetPromises)
+        .then((response) => {
+          // Reload selected locations from database
+          service.reloadSelectedLocations()
+        })
+    })
+  }
 
   return service
 //}])

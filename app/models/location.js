@@ -947,4 +947,8 @@ module.exports = class Location {
       return json2csv({data:results});
     })
   }
+
+  static getLocationIds(sql) {
+    return database.findValues(sql,null,'id')
+  }
 }

@@ -20,7 +20,7 @@ class OptimizeButtonController {
   }
 
   saveExpertMode(){
-    this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertModeBody))
+    this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertMode.OPTIMIZATION_SETTINGS))
   }
 
 }
