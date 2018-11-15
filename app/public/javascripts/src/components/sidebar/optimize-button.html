@@ -41,9 +41,15 @@
 
 <!-- Show the "Save" button only if the Analysis Type is Expert Mode -->
 <button class="btn btn-block btn-primary"
-  ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'"
+  ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE' && $ctrl.state.selectedExpertMode === $ctrl.state.expertModeTypes['OPTIMIZATION_SETTINGS'].id"
   ng-click="$ctrl.saveExpertMode()">
 <i class="fa fa-save"></i> Save
+</button>
+
+<button class="btn btn-block btn-primary"
+  ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE' && $ctrl.state.selectedExpertMode === $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id"
+  ng-click="$ctrl.state.executeManualPlanTargetsQuery()">
+<i class="fa fa-save"></i> Execute
 </button>
 
 <!-- A spacer div -->
