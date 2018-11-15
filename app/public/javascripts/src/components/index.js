@@ -8,7 +8,6 @@ import roadSegmentDetail from './sidebar/view/road-segment-detail'
 import coverageBoundary from './sidebar/view/coverage-boundary'
 import locationEditor from './sidebar/view/location-editor'
 import viewMode from './sidebar/view/view-mode'
-import equipmentDetailModal from './sidebar/view/equipment-detail-modal'
 import planInfo from './sidebar/view/plan-info'
 import planInfoRecent from './sidebar/view/plan-info-recent'
 import editPlanTag from './sidebar/view/edit-plan-tag'
@@ -20,19 +19,13 @@ import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 import showTargets from './sidebar/analysis/show-targets'
-
 import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
-//import networkAnalysis from './sidebar/analysis/network-analysis/network-analysis'
-
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
 import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
 import coverageReports from './sidebar/analysis/coverage/coverage-reports'
 import coverageInitializer from './sidebar/analysis/coverage/coverage-initializer'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
-
-//import networkBuild from './sidebar/analysis/network-build/network-build'
-
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
 import viewSettings from './sidebar/debug/view-settings'
@@ -107,7 +100,6 @@ app.component('boundaryDetail', boundaryDetail)
    .component('coverageBoundary', coverageBoundary)
    .component('locationEditor', locationEditor)
    .component('viewMode', viewMode)
-   .component('equipmentDetailModal', equipmentDetailModal)
    .component('planInfo', planInfo)
    .component('planInfoRecent', planInfoRecent)
    .component('editPlanTag', editPlanTag)
@@ -119,16 +111,13 @@ app.component('boundaryDetail', boundaryDetail)
    .component('analysisExpertMode', analysisExpertMode)
    .component('analysisMode', analysisMode)
    .component('showTargets', showTargets)
-   
    .component('networkAnalysisBuild', networkAnalysisBuild)
-   //.component('networkAnalysis', networkAnalysis)
    .component('networkAnalysisOutput', networkAnalysisOutput)
    .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
    .component('networkAnalysisModal', networkAnalysisModal)
    .component('coverageReports', coverageReports)
    .component('coverageInitializer', coverageInitializer)
    .component('coverageReportDownloader', coverageReportDownloader)
-   //.component('networkBuild', networkBuild)
    .component('networkBuildOutput', networkBuildOutput)
    .component('aroDebug', aroDebug)
    .component('viewSettings', viewSettings)

@@ -22,6 +22,8 @@ class ArpuEditorController {
     this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`)
     .then((result) => {
       this.arpuManagerConfiguration = result.data
+      // Sort the arpu models on locationEntityType so they look good in the UI
+      this.selectedArpuModelIndex = 0
       this.pristineArpuManagerConfiguration = {}
       var copyOfModels = angular.copy(this.arpuManagerConfiguration.arpuModels)
       copyOfModels.forEach((arpuModel) => {
@@ -31,6 +33,10 @@ class ArpuEditorController {
       })
     })
     .catch((err) => console.error(err))
+  }
+
+  selectArpuModel(index) {
+    this.selectedArpuModelIndex = index
   }
 
   saveConfigurationToServer() {

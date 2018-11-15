@@ -1,20 +1,55 @@
 <style scoped>
-    .action-button-icon {
-      padding-right: 10px;
-    }
-  </style>
-  
-  <div style="max-height: 500px; overflow-y: auto;">
-    <aro-object-editor object-to-edit="$ctrl.arpuManagerConfiguration">
-    </aro-object-editor>
+  .action-button-icon {
+    padding-right: 10px;
+  }
+  #tblArpuModel td {
+    line-height: 33px; /* To vertically align text */
+  }
+</style>
+
+<div style="max-height: 500px; overflow-y: auto;">
+
+  <div class="container">
+    <div class="row">
+
+      <!-- On the left, show a list of ARPU models that the user can edit -->
+      <div class="col-md-4">
+        <ul class="nav nav-pills nav-stacked" style="max-height: 380px; overflow-y: auto;">
+          <li role="presentation"
+              ng-class="{ 'active': $ctrl.selectedArpuModelIndex === $index }"
+              ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels | orderBy: '-id.locationEntityType'"
+              ng-click="$ctrl.selectArpuModel($index)">
+            <a href="#">
+              {{arpuModel.id.locationEntityType}} / {{arpuModel.id.speedCategory}}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- On the right, show the details of the currently selected ARPU model -->
+      <div class="col-md-8">
+        <table id="tblArpuModel" class="table table-compressed table-striped">
+          <tbody>
+            <tr>
+              <td>ARPU Strategy</td>
+              <td><input class="form-control" ng-model="$ctrl.arpuManagerConfiguration.arpuModels[$ctrl.selectedArpuModelIndex].arpuStrategy"></td>
+            </tr>
+            <tr>
+              <td>Revenue</td>
+              <td><input class="form-control" ng-model="$ctrl.arpuManagerConfiguration.arpuModels[$ctrl.selectedArpuModelIndex].revenue"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  
-  <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
-    <button class="btn btn-default" ng-click="$ctrl.exitEditingMode()">
-      <i class="fa fa-undo action-button-icon"></i>Discard changes
-    </button>
-    <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
-      <i class="fa fa-save action-button-icon"></i>Save
-    </button>
-  </div>
-  
+</div>
+
+<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+  <button class="btn btn-default" ng-click="$ctrl.exitEditingMode()">
+    <i class="fa fa-undo action-button-icon"></i>Discard changes
+  </button>
+  <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+    <i class="fa fa-save action-button-icon"></i>Save
+  </button>
+</div>

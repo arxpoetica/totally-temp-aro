@@ -856,15 +856,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   border-radius:0px;
 }
 
-.nav-pills>li>a {
-	background-color:#999;
-	border-radius:0
-}
-
-.nav-pills>li+li {
-	margin-left:1px
-}
-
 .nav>li>a:focus {
 	color:#222;
 }
