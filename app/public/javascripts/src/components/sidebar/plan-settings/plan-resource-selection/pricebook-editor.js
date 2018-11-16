@@ -40,7 +40,7 @@ class PriceBookEditorController {
       .then((results) => {
         this.statesForStrategy = [this.DEFAULT_STATE_CODE].concat(results[0].data)
         // We want unique values in this.statesForStrategy (morphology returns '*' from the server)
-        this.statesForStrategy = [...new Set(this.statesForStrategy)] // array --> set --> back to array
+        this.statesForStrategy = [...new Set(this.statesForStrategy)].sort() // array --> set --> back to array
         this.selectedStateForStrategy = this.statesForStrategy[0]
         this.priceBookDefinitions = results[1].data
         var assignmentResult = results[2].data

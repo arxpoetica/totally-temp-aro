@@ -432,7 +432,7 @@ class MapObjectEditorController {
         'latLng': latLng
       }
       menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
-      this.openContextMenu(x, y, menuItems)
+        this.openContextMenu(x, y, menuItems)
     }
   }
   
@@ -1035,6 +1035,7 @@ class MapObjectEditorController {
       delete this.createdMapObjects[objectId]
       this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
     }
+    this.closeContextMenu()
   }
 
   startDrawingBoundaryFor(mapObject) {

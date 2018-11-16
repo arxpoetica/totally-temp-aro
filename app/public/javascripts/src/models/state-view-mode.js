@@ -49,7 +49,7 @@ class StateViewMode {
       })
   }
 
-  static loadListOfSAPlanTags($http, state, filterObj) {
+  static loadListOfSAPlanTags($http, state, filterObj, ishardreload) {
     const MAX_SERVICE_AREAS_FROM_ODATA = 10
     //var filter = "layer/id eq 1"
     var libraryItems = []
@@ -64,6 +64,8 @@ class StateViewMode {
     }
 
     filter = filterObj ? filter.concat(` and (substringof(code,'${filterObj}') or substringof(name,'${filterObj}'))`) : filter
+    if (ishardreload)
+      state.listOfServiceAreaTags = []
     if (filterObj || state.listOfServiceAreaTags.length == 0) {
       $http.get(`/service/odata/ServiceAreaView?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
         .then((results) => {
