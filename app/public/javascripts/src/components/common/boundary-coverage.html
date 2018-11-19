@@ -1,0 +1,46 @@
+<style>
+  .bounds-coverage-header{
+    cursor: auto;
+  }
+  
+  .bounds-coverage-census-cat{
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  
+  .bounds-coverage-census-tag{
+    padding-left: 20px;
+  }
+  
+  .bounds-coverage-census-tag-count{
+    margin-left: 10px;
+    font-weight: bold;
+  }
+  
+</style>
+
+
+ <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
+   <div class="ei-header bounds-coverage-header">
+     Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].totalCount}} 
+     <!-- 
+      {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
+     -->
+   </div>
+   <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
+   <div style="margin-bottom: 20px;">
+     <div class="ei-header bounds-coverage-header">
+       Locations by Census Block Tag
+     </div>
+     <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
+     <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
+       <div class="ei-property-item bounds-coverage-census-cat">
+         {{cat.description}}
+       </div>
+       <div class="bounds-coverage-census-tag" ng-repeat="tag in cat.tags">
+         <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div>
+         {{tag.description}}: <span class="bounds-coverage-census-tag-count">{{tag.count}}</span>
+       </div>
+     </div>
+   </div>
+ </div>

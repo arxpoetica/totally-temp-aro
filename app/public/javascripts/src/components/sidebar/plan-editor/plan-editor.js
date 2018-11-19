@@ -322,6 +322,9 @@ class PlanEditorController {
   }
   
   
+  
+  
+  
   //Note: similar code as calculateAutoBoundary(), not sure we can combine them
   calculateCoverage(mapObject, equipmentPoint, directed) {
     // Get the POST body for optimization based on the current application state
@@ -356,9 +359,6 @@ class PlanEditorController {
       this.isWorkingOnCoverage = false
     })
   }
-  
-  
-  
   
   digestBoundaryCoverage(objectId, boundaryData){
     var boundsCoverage = {}
@@ -546,7 +546,12 @@ class PlanEditorController {
     if ('undefined' == typeof obj) obj = {}
     return Object.keys(obj)
   }
-
+  
+  
+  
+  
+  
+  
   commitTransaction() {
     if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')

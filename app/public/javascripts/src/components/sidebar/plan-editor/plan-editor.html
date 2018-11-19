@@ -20,6 +20,7 @@
     margin-bottom: 10px;
   }
   
+  /*
   .plan-editor-coverage-header{
     cursor: auto;
   }
@@ -37,7 +38,7 @@
     margin-left: 10px;
     font-weight: bold;
   }
-  
+  */
 </style>
 
 <div class="edit-plan-container">
@@ -274,6 +275,11 @@
           </button>
         </div>
 
+        
+        
+        
+        
+        
         <!-- Section to show properties when the selected map object is an equipment boundary -->
         <div ng-if="$ctrl.isWorkingOnCoverage">
           <p>Calculating coverage area...</p>
@@ -285,6 +291,7 @@
             <div class="rect5"></div>
           </div>
         </div>
+        
         <div ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)" style="margin-top: 10px; position: absolute;">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
@@ -352,12 +359,13 @@
             calculate coverage
           </button>
           
+          
+          
+          
+          <!-- moved to bounds-coverage -->
           <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
             <div class="ei-header plan-editor-coverage-header">
               Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].totalCount}} 
-              <!-- 
-              | {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].boundaryData.coverageInfo.length}}
-              -->
             </div>
             <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
             <div style="margin-bottom: 20px;">
@@ -376,7 +384,14 @@
               </div>
             </div>
           </div>
+          
+          
         </div>
+        
+        
+        
+        
+        
         <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
         <div class="disable-sibling-controls"
              ng-hide="$ctrl.currentTransaction">
