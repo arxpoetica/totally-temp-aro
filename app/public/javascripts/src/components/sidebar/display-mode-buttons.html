@@ -22,7 +22,7 @@
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.ANALYSIS)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'">
-            <div class="fa fa-2x fa-gavel fa-rotate-90"
+            <div class="fa fa-2x fa-gavel"
                 data-toggle="tooltip"
                 data-placement="bottom"
                 title="Analysis Mode"></div>
@@ -35,7 +35,7 @@
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'" 
           ng-disabled="!$ctrl.plan || $ctrl.plan.ephemeral">
-            <div class="fa fa-2x fa-pencil"
+            <div class="fa fa-2x fa-pencil-alt"
                 data-toggle="tooltip"
                 data-placement="bottom"
                 title="Edit Plan"></div>
