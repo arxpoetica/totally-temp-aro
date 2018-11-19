@@ -1,32 +1,26 @@
 <div ng-controller="locations_controller">
-  <div id="map-extras">
-    <!-- <span data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Measuring Stick. Click points on the map to draw a line segments to be measured. Double click to finish the line segment and see the distance.">
-      <button class="btn" ng-class="{'btn-selected': measuringStickEnabled, 'btn-primary': !measuringStickEnabled}" ng-click="toggleMeasuringStick()" style="width: 39px">
-        <span class="fa fa-arrows-h"></span>
-      </button>
-    </span> -->
-  </div>
   <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
     <div class="panel-heading">
       Measured distance: {{ measuredDistance * 0.000621371 | number: 2 }} mi
     </div>
   </div>
 
-<div class="map-tool-wrapper">
-  <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary">
-    <div class="panel-heading" ng-bind="map_tools.get_tool_name('locations')">
-      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-    </div>
-    <div id="map_tools_locations_panel_body" class="panel-body map-tool-panel-body" ng-show="map_tools.is_expanded('locations')">
-      <% include controller_locations.html %>
+  <div class="map-tool-wrapper">
+    <div ng-show="map_tools.is_visible('locations')" class="card map-tool">
+      <div class="card-header map-tools-card-header bg-primary text-white" ng-bind="map_tools.get_tool_name('locations')">
+        <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
+          <span style="color:white" class="fa fa-chevron-up"></span>
+        </a>
+        <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
+          <span style="color:white" class="fa fa-chevron-down"></span>
+        </a>
+        Locations
+      </div>
+      <div class="card-body map-tools-card-body" ng-show="map_tools.is_expanded('locations')">
+        <% include controller_locations.html %>
+      </div>
     </div>
   </div>
-</div>
 </div>
 
 <div class="map-tool-wrapper wrapper_csites_controller" ng-controller="construction_sites_controller">

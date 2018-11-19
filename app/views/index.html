@@ -323,6 +323,11 @@
         escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
         minimumInputLength: 1,
       })
+
+      // Required for fontawesome icons to show up correctly when using the css "content" property (e.g. for our checkboxes)
+      window.FontAwesomeConfig = {
+        searchPseudoElements: true
+      }
     </script>
   </body>
 </html>

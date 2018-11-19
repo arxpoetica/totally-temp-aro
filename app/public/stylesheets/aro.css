@@ -543,6 +543,14 @@ footer nav {
 	padding: 1px 8px;
 }
 
+.customer-type {
+  padding-left: 0px;
+}
+
+ul.customer-type {
+  margin-bottom: 0px;
+}
+
 ul.customer-type li{
   list-style: none;
   display: flex;
@@ -559,8 +567,12 @@ ul.customer-type .ctype-checkbox {
 ul.customer-type .ctype-name {
   flex:1;
 }
-
-
+.map-tools-card-header {
+  padding: 10px 20px;
+}
+.map-tools-card-body {
+  padding: 0.75rem;
+}
 
 [ng-controller=locations_controller] .panel-body {
   padding-left: 0;
@@ -1106,8 +1118,10 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 }
 .checkboxfill:checked:after {
     /* Heres your symbol replacement - this is a tick in Unicode. */
-    font-family: "Glyphicons Halflings";
-    content: "\e013";
+    font-family: Font Awesome\ 5 Free;
+    content: "\f00c";
+    font-weight: 900;
+    line-height: 18px;
     color: #fff;
     font-size: 10px;
     line-height: 1.5;
