@@ -173,17 +173,6 @@
     <i class="fa fa-folder-open"></i>
   </button>
 
-  <button ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
-            $ctrl.state.configuration.perspective.toolbar.showExportSelection.show &&
-            $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
-          ng-click="$ctrl.setSelectionExport()"
-          ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET }"
-          data-toggle="tooltip"
-          data-placement="bottom"
-          title="Export selected polygon">
-    <i class="fa fa-cube"></i>
-  </button>
-
   <div class="separator"></div>
 
   <div class="rulerDropdown" ng-show="$ctrl.state.configuration.perspective.toolbar.measuringStick.show">
@@ -315,6 +304,14 @@
           data-placement="bottom"
           title="Calculate coverage boundary">
     <i class="fa fa-crosshairs fa-rotate-180"></i>
+  </button>
+
+  <button ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
+    $ctrl.state.configuration.perspective.toolbar.showExportSelection.show &&
+    $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS" ng-click="$ctrl.setSelectionExport()" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET }"
+    data-toggle="tooltip" data-placement="bottom" 
+    title="Export selected polygon">
+      <i class="fa fa-cube"></i>
   </button>
 
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">

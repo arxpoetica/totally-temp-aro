@@ -780,6 +780,8 @@ class State {
 
         service.dataItems = newDataItems
         service.dataItemsChanged.next(service.dataItems)
+        //get the service area for selected service layer datasource
+        service.StateViewMode.loadListOfSAPlanTags($http,service,'',true)
         return Promise.resolve()
       })
   }
