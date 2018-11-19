@@ -6,41 +6,45 @@
 </style>
 
 <div class="map-tool-wrapper">
-  <div ng-show="$ctrl.map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
-    <div class="panel-heading" ng-bind="$ctrl.map_tools.get_tool_name('boundaries')"></div>
-    <div class="panel-body map-tool-panel-body" ng-show="$ctrl.map_tools.is_expanded('boundaries')">
-
-      <div>
-        <div ng-repeat="layer in $ctrl.state.boundaries.tileLayers" ng-if="$ctrl.state.configuration.perspective.boundaries[layer.type].show">
-          <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
-            <div class="float-right">
-              <input type="checkbox" class="checkboxfill" ng-model="layer.visible" name="ctype-name" ng-change="$ctrl.updateMapLayers()"
-                ng-disabled="layer.disabled">
-            </div>
-            <div class="float-right" style="margin-right: 30px">
-              <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
-            </div>
-            <label>
-              {{layer.description}}
-              
-              <div ng-if="'census_blocks' == layer.type && layer.visible" style="padding-left: 0.5em;">
-                <select class="form-control" style="margin-bottom: 0.5em;"
-                  ng-model="$ctrl.selectedCensusCat"
-                  ng-options="item as item.description for item in $ctrl.censusCategories"
-                  ng-change="$ctrl.onSelectCensusCat()">
-                  <option value="">None</option>
-                </select>
-                
-                <div ng-if="$ctrl.selectedCensusCat" ng-repeat="tag in $ctrl.selectedCensusCat.tags">
-                  <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div> {{tag.description}}
-                </div>
-              </div>
-              
-            </label>
+  <div ng-show="$ctrl.map_tools.is_visible('boundaries')" class="card map-tool">
+    <div class="card-header map-tools-card-header bg-primary text-white" ng-bind="$ctrl.map_tools.get_tool_name('boundaries')">
+      <a href="javascript:void(0)" class="float-right" ng-show="$ctrl.map_tools.is_expanded('boundaries')" ng-click="$ctrl.map_tools.collapse('boundaries')">
+        <span style="color:white" class="fa fa-chevron-up"></span>
+      </a>
+      <a href="javascript:void(0)" class="float-right" ng-show="!$ctrl.map_tools.is_expanded('boundaries')" ng-click="$ctrl.map_tools.expand('boundaries')">
+        <span style="color:white" class="fa fa-chevron-down"></span>
+      </a>
+      <h5 class="map-tool-title-text">Boundaries</h5>
+    </div>
+    <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('boundaries')">
+      <div ng-repeat="layer in $ctrl.state.boundaries.tileLayers" ng-if="$ctrl.state.configuration.perspective.boundaries[layer.type].show">
+        <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
+          <div class="float-right">
+            <input type="checkbox" class="checkboxfill" ng-model="layer.visible" name="ctype-name" ng-change="$ctrl.updateMapLayers()"
+              ng-disabled="layer.disabled">
           </div>
+          <div class="float-right" style="margin-right: 30px">
+            <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
+          </div>
+          <label>
+            {{layer.description}}
+            
+            <div ng-if="'census_blocks' == layer.type && layer.visible" style="padding-left: 0.5em;">
+              <select class="form-control" style="margin-bottom: 0.5em;"
+                ng-model="$ctrl.selectedCensusCat"
+                ng-options="item as item.description for item in $ctrl.censusCategories"
+                ng-change="$ctrl.onSelectCensusCat()">
+                <option value="">None</option>
+              </select>
+              
+              <div ng-if="$ctrl.selectedCensusCat" ng-repeat="tag in $ctrl.selectedCensusCat.tags">
+                <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div> {{tag.description}}
+              </div>
+            </div>
+            
+          </label>
         </div>
       </div>
-
     </div>
   </div>
 </div>
