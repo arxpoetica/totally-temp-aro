@@ -5,6 +5,10 @@ body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
   font-size: 14px;
 }
 
+.btn-light {
+  border: 1px solid #c0c0c0;
+}
+
 /* -- */
 
 html, body {
@@ -91,15 +95,6 @@ html, body {
 .map-tool.ng-hide-add {
     animation: fadeOutLeft 0.5s;
 }
-/*
-.btn-success:active, .btn-success.active, .open>.dropdown-toggle.btn-success {
-  background-color: rgb(0, 117, 109);
-  border: none;
-}
-
-.btn-success:active:hover, .btn-success.active:hover, .open>.dropdown-toggle.btn-success:hover, .btn-success:active:focus, .btn-success.active:focus, .open>.dropdown-toggle.btn-success:focus, .btn-success:active.focus, .btn-success.active.focus, .open>.dropdown-toggle.btn-success.focus {
-  background-color: rgb(0, 117, 109);
-}*/
 
 .loader {
   margin: 60px auto;
