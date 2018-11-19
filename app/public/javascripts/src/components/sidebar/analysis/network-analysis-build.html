@@ -146,7 +146,7 @@
         <td>
           <div class="btn-group btn-group-sm">
             <button ng-repeat="technology in $ctrl.state.optimizationOptions.technologies"
-                    ng-class="{'btn': true, 'btn-default': !technology.checked, 'btn-primary': technology.checked}"
+                    ng-class="{'btn': true, 'btn-light': !technology.checked, 'btn-primary': technology.checked}"
                     ng-click="technology.checked = !technology.checked">
               {{technology.label}}
             </button>

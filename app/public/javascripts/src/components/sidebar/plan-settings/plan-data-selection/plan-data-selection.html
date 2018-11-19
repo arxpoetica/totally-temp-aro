@@ -12,12 +12,12 @@
                               style="flex: 1 1 auto;">
             </aro-multi-select>
             <div class="btn-group" style="flex: 0 0 auto;">
-              <button class="btn btn btn-default"
+              <button class="btn btn btn-light"
                       ng-if="$ctrl.isDataSourceEditable[itemKey]" 
                       ng-click="$ctrl.editDataSource(itemKey)">
                 <span class="fa fa-edit"></span>
               </button>
-              <button class="btn btn btn-default" ng-disabled="!itemValue.uploadSupported" ng-click="$ctrl.uploadDataSource(itemValue.id)">
+              <button class="btn btn btn-light" ng-disabled="!itemValue.uploadSupported" ng-click="$ctrl.uploadDataSource(itemValue.id)">
                 <span class="fa fa-upload"></span>
               </button>
             </div>
