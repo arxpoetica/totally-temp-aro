@@ -5,7 +5,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css?family=Exo:400,700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap-multiselect.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/select2.css">
@@ -110,230 +110,231 @@
     <plan-inputs-modal></plan-inputs-modal>
     
     <context-menu></context-menu>
-  </body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-  <!-- Angular controllers and services -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.min.js"></script>
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
-  <script>
-    var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select', 'ng-currency']);
-    app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
-      NotificationProvider.setOptions({
-        maxCount : 1
-      });
-      $qProvider.errorOnUnhandledRejections(false);
-    }]);
-    var map;
-    var panorama;
-
-    function initialize() {
-
-      var styles = [];
-      styles.push({
-        featureType: 'poi',
-        elementType: 'labels.icon',
-        stylers: [ { visibility: 'off' } ],
-      });
-
-      map = new google.maps.Map(document.getElementById('map-canvas'), {
-        zoom: 12,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        panControl: false,
-        mapTypeControl: false,
-        mapTypeControlOptions: {
-          position: google.maps.ControlPosition.BOTTOM_RIGHT
-        },
-        zoomControlOptions: {
-          style: google.maps.ZoomControlStyle.SMALL,
-          position: google.maps.ControlPosition.RIGHT_BOTTOM
-        },
-        streetViewControl: true,
-        streetViewControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_BOTTOM,
-          enableCloseButton: true
-        },
-        styles: styles,
-        clickableIcons: false, 
-        clickableLabels:false
-      });
-      
-      mapTypeId === 'SATELLITE' && map.setMapTypeId(google.maps.MapTypeId.HYBRID);
-
-      var splitterInitialized = false
-      map.ready = function(callback) {
-
-        if (map.getBounds()) {
-          callback();
-        } else {
-          var listener = google.maps.event.addListener(map, 'bounds_changed', function() {
-            callback();
-            google.maps.event.removeListener(listener);
-          });
-        }
-      }
-
-      var panorama = new google.maps.StreetViewPanorama(
-        document.getElementById('map-canvas'), {
-          addressControlOptions: {
-            position: google.maps.ControlPosition.BOTTOM_CENTER, // <- change position
-          },
-          enableCloseButton: true,
-          visible: false
+    <!-- Angular controllers and services -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.min.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+      var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select', 'ng-currency']);
+      app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
+        NotificationProvider.setOptions({
+          maxCount : 1
         });
-      // rewrite default options  
-      map.setStreetView(panorama);
+        $qProvider.errorOnUnhandledRejections(false);
+      }]);
+      var map;
+      var panorama;
 
-      // At this point, our angular app and the document is initialized. Take the "logged in user" that we have on the
-      // server side, use EJS to expand it and then set that in our "state" service. This is done so that we don't
-      // have to rely on a global user object (like we did before this change)
-      angular.element(document.body).injector().get('state').initializeAppConfiguration(<%- JSON.stringify(user) %>,
-                                                                                        <%- JSON.stringify(appConfiguration) %>,
-                                                                                        <%- JSON.stringify(googleMapsLicensing) %>);
-    }
+      function initialize() {
 
-    var user_id = <%= user.id %>;
-    var config = <%- JSON.stringify(config) %>;
-    var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
-    var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
-    var mapTypeId = <%- JSON.stringify(mapType) %>;
+        var styles = [];
+        styles.push({
+          featureType: 'poi',
+          elementType: 'labels.icon',
+          stylers: [ { visibility: 'off' } ],
+        });
 
-    $(document).ready(initialize);
-  </script>
-  <script src="javascripts/vendors/bootstrap.min.js"></script>
-  <script src="javascripts/vendors/bootstrap-multiselect.js"></script>
-  <script src="javascripts/vendors/underscore.js"></script>
-  <script src="javascripts/vendors/sweetalert.min.js"></script>
-  <script src="javascripts/vendors/Chart.min.js"></script>
-  <script src="javascripts/vendors/select2.min.js"></script>
-  <script src="javascripts/vendors/angular-ui-select.min.js"></script>
-  <script src="javascripts/vendors/tinycolor.js"></script>
-  <script src="javascripts/vendors/randomColor.min.js"></script>
-  <script src="javascripts/vendors/nouislider.min.js"></script>
-  <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
-  <script src="javascripts/vendors/ng-currency.js"></script>
-  <script src="javascripts/vendors/simpleheat.js"></script>
-  <script src="javascripts/vendors/split.min.js"></script>
-  
-  <!-- Components -->
-  <script src="javascripts/lib/components/footer/ui-notification-service.js"></script>
-  <script src="javascripts/lib/components/common/context-menu-service.js"></script>
-  <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
-  
-  <script src="javascripts/lib/controllers/body_controller.js"></script>
-  <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
-  <script src="javascripts/lib/controllers/locations_controller.js"></script>
-  <script src="javascripts/lib/controllers/equipment_nodes_controller.js"></script>
-  <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
-  <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
-  <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
-  <script src="javascripts/lib/controllers/global_search_controller.js"></script>
-  <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
-  <script src="javascripts/lib/controllers/settings_controller.js"></script>
-  <script src="javascripts/lib/controllers/data_management_controller.js"></script>
-  <script src="javascripts/lib/controllers/construction_sites_controller.js"></script>
-  <script src="javascripts/lib/models/tracker.js"></script>
-  <script src="javascripts/lib/models/map_utils.js"></script>
-  <script src="javascripts/lib/models/map_layer.js"></script>
-  <script src="javascripts/lib/models/selection.js"></script>
-  <script src="javascripts/lib/models/regions.js"></script>
-  <script src="javascripts/lib/models/loader.js"></script>
-  <script src="javascripts/lib/models/map_tools.js"></script>
-  <script src="javascripts/lib/models/custom_overlay.js"></script>
-  <script src="javascripts/lib/models/map_layers.js"></script>
-  <script src="javascripts/lib/models/stateSerializationHelper.js"></script>
-  <script src="javascripts/lib/models/optimization.js"></script>
-  <script src="javascripts/lib/models/globalSettingsService.js"></script>
-  <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
-  <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
-  <script src="javascripts/lib/directives/percentageInput.js"></script>
-  <script src="javascripts/lib/directives/dialogs.js"></script>
-  <script src="javascripts/lib/directives/modal.js"></script>
-  <script src="javascripts/lib/directives/tagonblur.js"></script>
-  <script src="javascripts/lib/filters/orderObjectBy.js"></script>
-  
-  <!-- models -->
-  <script src="javascripts/bundle.js"></script>
-  
-  <script>app.run(function($rootScope,loader){$rootScope.appTitle = "<%= config.ui.title %>"})</script>
-  <script>
-    $(function () {
-      var tooltips = $('[data-toggle="tooltip"]')
-      tooltips.tooltip({ container: 'body' })
-      tooltips.on('click mouseout', function () {
-        $(this).tooltip('hide')
+        map = new google.maps.Map(document.getElementById('map-canvas'), {
+          zoom: 12,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          panControl: false,
+          mapTypeControl: false,
+          mapTypeControlOptions: {
+            position: google.maps.ControlPosition.BOTTOM_RIGHT
+          },
+          zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.SMALL,
+            position: google.maps.ControlPosition.RIGHT_BOTTOM
+          },
+          streetViewControl: true,
+          streetViewControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_BOTTOM,
+            enableCloseButton: true
+          },
+          styles: styles,
+          clickableIcons: false, 
+          clickableLabels:false
+        });
+        
+        mapTypeId === 'SATELLITE' && map.setMapTypeId(google.maps.MapTypeId.HYBRID);
+
+        var splitterInitialized = false
+        map.ready = function(callback) {
+
+          if (map.getBounds()) {
+            callback();
+          } else {
+            var listener = google.maps.event.addListener(map, 'bounds_changed', function() {
+              callback();
+              google.maps.event.removeListener(listener);
+            });
+          }
+        }
+
+        var panorama = new google.maps.StreetViewPanorama(
+          document.getElementById('map-canvas'), {
+            addressControlOptions: {
+              position: google.maps.ControlPosition.BOTTOM_CENTER, // <- change position
+            },
+            enableCloseButton: true,
+            visible: false
+          });
+        // rewrite default options  
+        map.setStreetView(panorama);
+
+        // At this point, our angular app and the document is initialized. Take the "logged in user" that we have on the
+        // server side, use EJS to expand it and then set that in our "state" service. This is done so that we don't
+        // have to rely on a global user object (like we did before this change)
+        angular.element(document.body).injector().get('state').initializeAppConfiguration(<%- JSON.stringify(user) %>,
+                                                                                          <%- JSON.stringify(appConfiguration) %>,
+                                                                                          <%- JSON.stringify(googleMapsLicensing) %>);
+      }
+
+      var user_id = <%= user.id %>;
+      var config = <%- JSON.stringify(config) %>;
+      var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
+      var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
+      var mapTypeId = <%- JSON.stringify(mapType) %>;
+
+      $(document).ready(initialize);
+    </script>
+    <script src="javascripts/vendors/bootstrap-multiselect.js"></script>
+    <script src="javascripts/vendors/underscore.js"></script>
+    <script src="javascripts/vendors/sweetalert.min.js"></script>
+    <script src="javascripts/vendors/Chart.min.js"></script>
+    <script src="javascripts/vendors/select2.min.js"></script>
+    <script src="javascripts/vendors/angular-ui-select.min.js"></script>
+    <script src="javascripts/vendors/tinycolor.js"></script>
+    <script src="javascripts/vendors/randomColor.min.js"></script>
+    <script src="javascripts/vendors/nouislider.min.js"></script>
+    <script src="javascripts/vendors/angular-ui-notification.min.js"></script>
+    <script src="javascripts/vendors/ng-currency.js"></script>
+    <script src="javascripts/vendors/simpleheat.js"></script>
+    <script src="javascripts/vendors/split.min.js"></script>
+    
+    <!-- Components -->
+    <script src="javascripts/lib/components/footer/ui-notification-service.js"></script>
+    <script src="javascripts/lib/components/common/context-menu-service.js"></script>
+    <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
+    
+    <script src="javascripts/lib/controllers/body_controller.js"></script>
+    <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
+    <script src="javascripts/lib/controllers/locations_controller.js"></script>
+    <script src="javascripts/lib/controllers/equipment_nodes_controller.js"></script>
+    <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
+    <script src="javascripts/lib/controllers/selected_location_controller.js"></script>
+    <script src="javascripts/lib/controllers/financial_profile_tool_controller.js"></script>
+    <script src="javascripts/lib/controllers/global_search_controller.js"></script>
+    <script src="javascripts/lib/controllers/map_tools_controller.js"></script>
+    <script src="javascripts/lib/controllers/settings_controller.js"></script>
+    <script src="javascripts/lib/controllers/data_management_controller.js"></script>
+    <script src="javascripts/lib/controllers/construction_sites_controller.js"></script>
+    <script src="javascripts/lib/models/tracker.js"></script>
+    <script src="javascripts/lib/models/map_utils.js"></script>
+    <script src="javascripts/lib/models/map_layer.js"></script>
+    <script src="javascripts/lib/models/selection.js"></script>
+    <script src="javascripts/lib/models/regions.js"></script>
+    <script src="javascripts/lib/models/loader.js"></script>
+    <script src="javascripts/lib/models/map_tools.js"></script>
+    <script src="javascripts/lib/models/custom_overlay.js"></script>
+    <script src="javascripts/lib/models/map_layers.js"></script>
+    <script src="javascripts/lib/models/stateSerializationHelper.js"></script>
+    <script src="javascripts/lib/models/optimization.js"></script>
+    <script src="javascripts/lib/models/globalSettingsService.js"></script>
+    <script src="javascripts/lib/interceptors/http_error_handler.js"></script>
+    <script src="javascripts/lib/interceptors/saving_plan_handler.js"></script>
+    <script src="javascripts/lib/directives/percentageInput.js"></script>
+    <script src="javascripts/lib/directives/dialogs.js"></script>
+    <script src="javascripts/lib/directives/modal.js"></script>
+    <script src="javascripts/lib/directives/tagonblur.js"></script>
+    <script src="javascripts/lib/filters/orderObjectBy.js"></script>
+    
+    <!-- models -->
+    <script src="javascripts/bundle.js"></script>
+    
+    <script>app.run(function($rootScope,loader){$rootScope.appTitle = "<%= config.ui.title %>"})</script>
+    <script>
+      $(function () {
+        var tooltips = $('[data-toggle="tooltip"]')
+        tooltips.tooltip({ container: 'body' })
+        tooltips.on('click mouseout', function () {
+          $(this).tooltip('hide')
+        })
       })
-    })
 
-    $(function () {
-      var popovers = $('#left-col [data-toggle="popover"]')
-      popovers.popover({container: 'body'})
-    })
+      $(function () {
+        var popovers = $('#left-col [data-toggle="popover"]')
+        popovers.popover({container: 'body'})
+      })
 
-    var expander = $('#expander')
-    var icon = $('#expander .fa')
-    var leftcol = $('#left-col')
-    expander.on('click', function () {
-      if (leftcol.hasClass('left-col-expanded')) {
-        $('#map-tools-accordion .collapse.in').removeClass('in')
-        icon.removeClass('fa-chevron-left')
-        icon.addClass('fa-chevron-right')
-        leftcol.removeClass('left-col-expanded')
-        leftcol.addClass('left-col-collapsed')
-      } else {
-        icon.addClass('fa-chevron-left')
-        icon.removeClass('fa-chevron-right')
-        leftcol.removeClass('left-col-collapsed')
-        leftcol.addClass('left-col-expanded')
+      var expander = $('#expander')
+      var icon = $('#expander .fa')
+      var leftcol = $('#left-col')
+      expander.on('click', function () {
+        if (leftcol.hasClass('left-col-expanded')) {
+          $('#map-tools-accordion .collapse.in').removeClass('in')
+          icon.removeClass('fa-chevron-left')
+          icon.addClass('fa-chevron-right')
+          leftcol.removeClass('left-col-expanded')
+          leftcol.addClass('left-col-collapsed')
+        } else {
+          icon.addClass('fa-chevron-left')
+          icon.removeClass('fa-chevron-right')
+          leftcol.removeClass('left-col-collapsed')
+          leftcol.addClass('left-col-expanded')
+        }
+      })
+
+      swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
+
+      // prevent tabs from changing the URL
+      $('.nav-tabs a').click((e) => {
+        e.preventDefault()
+        $(this).tab('show')
+      })
+
+      if ($('#map-tools-accordion').size() > 0) {
+        var heightDiff = $('#map-tools-accordion').offset().top + $('#map-tools-accordion').height() + 100
+        function calculatePanelHeight () {
+          var maxHeight = $(document).height() - heightDiff
+          $('#map-tools-accordion .panel-collapse > .panel-body').css('max-height', maxHeight)
+        }
+
+        $(document).ready(calculatePanelHeight)
+        $(window).resize(calculatePanelHeight)
       }
-    })
 
-    swal.setDefaults({ animation: <%- env_is_test ? 'null' : 'true' %> })
-
-    // prevent tabs from changing the URL
-    $('.nav-tabs a').click((e) => {
-      e.preventDefault()
-      $(this).tab('show')
-    })
-
-    if ($('#map-tools-accordion').size() > 0) {
-      var heightDiff = $('#map-tools-accordion').offset().top + $('#map-tools-accordion').height() + 100
-      function calculatePanelHeight () {
-        var maxHeight = $(document).height() - heightDiff
-        $('#map-tools-accordion .panel-collapse > .panel-body').css('max-height', maxHeight)
-      }
-
-      $(document).ready(calculatePanelHeight)
-      $(window).resize(calculatePanelHeight)
-    }
-
-    $("#share-plan-search").select2({
-      ajax: {
-        url: "/user/find",
-        dataType: 'json',
-        delay: 250,
-        data: function (text) {
-          return {
-            text: text,
-          };
+      $("#share-plan-search").select2({
+        ajax: {
+          url: "/user/find",
+          dataType: 'json',
+          delay: 250,
+          data: function (text) {
+            return {
+              text: text,
+            };
+          },
+          processResults: function (data, page) {
+            // parse the results into the format expected by Select2.
+            // since we are using custom formatting functions we do not need to
+            // alter the remote JSON data
+            data.forEach(function(row) {
+              row.text = row.first_name+' '+row.last_name+' &lt;'+row.email+'&gt;';
+            })
+            return {
+              results: data,
+            };
+          },
+          cache: true
         },
-        processResults: function (data, page) {
-          // parse the results into the format expected by Select2.
-          // since we are using custom formatting functions we do not need to
-          // alter the remote JSON data
-          data.forEach(function(row) {
-            row.text = row.first_name+' '+row.last_name+' &lt;'+row.email+'&gt;';
-          })
-          return {
-            results: data,
-          };
-        },
-        cache: true
-      },
-      escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-      minimumInputLength: 1,
-    })
-  </script>
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 1,
+      })
+    </script>
+  </body>
 </html>
