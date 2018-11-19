@@ -15,10 +15,10 @@
 <div class="map-tool-wrapper">
   <div ng-show="map_tools.is_visible('locations')" class="map-tool panel panel-primary">
     <div class="panel-heading" ng-bind="map_tools.get_tool_name('locations')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
+      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
         <span style="color:white" class="fa fa-chevron-up"></span>
       </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
+      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
         <span style="color:white" class="fa fa-chevron-down"></span>
       </a>
     </div>
@@ -32,10 +32,10 @@
 <div class="map-tool-wrapper wrapper_csites_controller" ng-controller="construction_sites_controller">
     <div ng-show="map_tools.is_visible('construction_sites')" class="map-tool panel panel-primary">
         <div class="panel-heading" ng-bind="map_tools.get_tool_name('construction_sites')">
-            <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('construction_sites')" ng-click="map_tools.collapse('construction_sites')">
+            <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('construction_sites')" ng-click="map_tools.collapse('construction_sites')">
                 <span style="color:white" class="fa fa-chevron-up"></span>
             </a>
-            <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('construction_sites')" ng-click="map_tools.expand('construction_sites')">
+            <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('construction_sites')" ng-click="map_tools.expand('construction_sites')">
                 <span style="color:white" class="fa fa-chevron-down"></span>
             </a>
         </div>
@@ -48,10 +48,10 @@
 <!-- <div class="map-tool-wrapper" ng-controller="boundaries_controller">
   <div ng-show="map_tools.is_visible('boundaries')" class="map-tool panel panel-primary">
     <div class="panel-heading" ng-bind="map_tools.get_tool_name('boundaries')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('boundaries')" ng-click="map_tools.collapse('boundaries')">
+      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('boundaries')" ng-click="map_tools.collapse('boundaries')">
         <span style="color:white" class="fa fa-chevron-up"></span>
       </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
+      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('boundaries')" ng-click="map_tools.expand('boundaries')">
         <span style="color:white" class="fa fa-chevron-down"></span>
       </a>
     </div>
@@ -65,10 +65,10 @@
 <div class="map-tool-wrapper" ng-controller="fiber_plant_controller">
   <div ng-show="map_tools.is_visible('fiber_plant')" class="map-tool panel panel-primary">
     <div class="panel-heading" ng-bind="map_tools.get_tool_name('fiber_plant')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
+      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('fiber_plant')" ng-click="map_tools.collapse('fiber_plant')">
         <span style="color:white" class="fa fa-chevron-up"></span>
       </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
+      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('fiber_plant')" ng-click="map_tools.expand('fiber_plant')">
         <span style="color:white" class="fa fa-chevron-down"></span>
       </a>
     </div>
@@ -81,10 +81,10 @@
 <div class="map-tool-wrapper" ng-controller="equipment_nodes_controller">
   <div ng-show="map_tools.is_visible('network_nodes')" class="map-tool panel panel-primary">
     <div class="panel-heading" ng-bind="map_tools.get_tool_name('network_nodes')">
-      <a href="javascript:void(0)" class="pull-right" ng-show="map_tools.is_expanded('network_nodes')" ng-click="map_tools.collapse('network_nodes')">
+      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('network_nodes')" ng-click="map_tools.collapse('network_nodes')">
         <span style="color:white" class="fa fa-chevron-up"></span>
       </a>
-      <a href="javascript:void(0)" class="pull-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
+      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('network_nodes')" ng-click="map_tools.expand('network_nodes')">
         <span style="color:white" class="fa fa-chevron-down"></span>
       </a>
     </div>
@@ -100,7 +100,7 @@
       Financial Profile
       <!-- {{ map_tools.get_tool_name('financial_profile') }} -->
       {{ selectedArea ? ' · '+selectedArea.name : '' }}
-      <span class="pull-right">
+      <span class="float-right">
         <a href="javascript:void(0)" ng-click="download()">
           <span style="color:white;margin-left: 1em;" class="fa fa-download"></span>
         </a>

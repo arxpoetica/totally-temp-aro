@@ -402,7 +402,7 @@
             this.$ul = $(this.options.templates.ul);
 
             if (this.options.dropRight) {
-                this.$ul.addClass('pull-right');
+                this.$ul.addClass('float-right');
             }
 
             // Set max height of dropdown menu to activate auto scrollbar.
@@ -1182,7 +1182,7 @@
             }
             
             if (this.options.dropRight) {
-                this.$ul.addClass('pull-right');
+                this.$ul.addClass('float-right');
             }
         },
 

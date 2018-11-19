@@ -208,7 +208,7 @@
           
 
           <button ng-if="$ctrl.isEditFeatureProps"
-                  ng-class="{ 'btn btn-sm pull-right': true,
+                  ng-class="{ 'btn btn-sm float-right': true,
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
@@ -264,7 +264,7 @@
                               get-new-list-item="$ctrl.getNewListItem"
                               ></editor-interface-tree>
 
-          <button ng-class="{ 'btn btn-sm pull-right': true,
+          <button ng-class="{ 'btn btn-sm float-right': true,
                               'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
@@ -329,7 +329,7 @@
             </tbody>
           </table>
           <div class="clearfix">
-	          <button ng-class="{ 'btn btn-sm pull-right': true,
+	          <button ng-class="{ 'btn btn-sm float-right': true,
 	                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
 	                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
 	                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
