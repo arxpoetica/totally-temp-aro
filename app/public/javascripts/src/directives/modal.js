@@ -9,7 +9,6 @@ app.directive('modal', function () {
 
       $(element).modal({
         show: false,
-        keyboard: attrs.keyboard,
         backdrop: attrs.backdrop
       });
 

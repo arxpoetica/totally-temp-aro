@@ -3,7 +3,7 @@
   <modal-body id="data_source_upload_modal" style="max-height: 550px; overflow-y: auto;">
     <form class="form-horizontal">
       <div class="form-group">
-        <a class="btn pull-right" style="margin-right:15px"  ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]" ng-click="$ctrl.toggleView()">{{!$ctrl.isDataManagementView && 'Data Management' || 'File Upload'}}</a>
+        <a class="btn float-right" style="margin-right:15px"  ng-class="{true: 'btn-primary', false: 'btn-danger'}[!patient.archived]" ng-click="$ctrl.toggleView()">{{!$ctrl.isDataManagementView && 'Data Management' || 'File Upload'}}</a>
       </div>
 
       <div class="form-group">
@@ -83,14 +83,14 @@
                     ng-repeat="dataSource in $ctrl.dataSources">
                   <strong ng-if="dataSource.isExpanded">{{dataSource.name}}</strong>
                   <span ng-if="!dataSource.isExpanded">{{dataSource.name}}</span>
-                  <div class="btn-group pull-right" ng-if="dataSource.isEditableByUser">
+                  <div class="btn-group float-right" ng-if="dataSource.isEditableByUser">
                     <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
                       <i class="fa fa-trash"></i>
                     </button>
-                    <button ng-if="dataSource.isExpanded" class="btn btn-default" ng-click="$ctrl.saveAccessSettings(dataSource)">
+                    <button ng-if="dataSource.isExpanded" class="btn btn-light" ng-click="$ctrl.saveAccessSettings(dataSource)">
                       <i class="fa fa-save"></i>&nbsp; Save
                     </button>
-                    <button class="btn btn-default"
+                    <button class="btn btn-light"
                             ng-click="$ctrl.toggleDataSourceExpanded(dataSource)">
                       <i ng-class="{ 'fa': true, 'fa-user-plus': !dataSource.isExpanded, 'fa-times': dataSource.isExpanded }"></i>
                     </button>

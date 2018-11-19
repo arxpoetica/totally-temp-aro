@@ -88,8 +88,8 @@ let reportModal = {
         </table>
       </modal-body>
     <modal-footer>
-      <button type="button" class="btn btn-default" disabled>Download all reports</button>
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-light" disabled>Download all reports</button>
+      <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
     </modal-footer>
   </modal>
   `,

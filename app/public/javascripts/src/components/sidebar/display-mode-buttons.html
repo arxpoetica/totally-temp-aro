@@ -7,7 +7,7 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.displayModeButtons['VIEW'].show"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.VIEW,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.VIEW,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.VIEW)">
             <div class="fa fa-2x fa-eye"
@@ -18,11 +18,11 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.displayModeButtons['ANALYSIS'].show"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.ANALYSIS)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'">
-            <div class="fa fa-2x fa-gavel fa-rotate-90"
+            <div class="fa fa-2x fa-gavel"
                 data-toggle="tooltip"
                 data-placement="bottom"
                 title="Analysis Mode"></div>
@@ -30,22 +30,22 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.displayModeButtons['EDIT_PLAN'].show"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.EDIT_PLAN)"
           ng-if="$ctrl.currentUser.perspective !== 'sales'" 
           ng-disabled="!$ctrl.plan || $ctrl.plan.ephemeral">
-            <div class="fa fa-2x fa-pencil"
+            <div class="fa fa-2x fa-pencil-alt"
                 data-toggle="tooltip"
                 data-placement="bottom"
                 title="Edit Plan"></div>
   </button>
 </div>
-<div class="btn-group pull-right">
+<div class="btn-group float-right">
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.displayModeButtons['DEBUG'].show && $ctrl.state.loggedInUser.isAdministrator"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.DEBUG }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.DEBUG)">
             <div class="fa fa-2x fa-bug"
@@ -56,7 +56,7 @@
   <button type="button"
           ng-if="$ctrl.state.configuration.perspective.displayModeButtons['PLAN_SETTINGS'].show"
           ng-class="{ 'btn display-mode-button': true,
-                      'btn-default': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
+                      'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"
           ng-click="$ctrl.setSelectedDisplayMode($ctrl.displayModes.PLAN_SETTINGS)">
             <div class="fa fa-2x fa-cog"

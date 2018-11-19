@@ -35,18 +35,18 @@
     <div class="row">
       <div class="col-md-12" style="padding-bottom: 15px">
         Library <span class="label label-default">{{$ctrl.currentTransaction.libraryName}}</span>
-        <div class="pull-right">transaction ID <span class="label label-default">{{$ctrl.currentTransaction.id}}</span></div>
+        <div class="float-right">transaction ID <span class="label label-default">{{$ctrl.currentTransaction.id}}</span></div>
       </div>
     </div>
     <div class="text-center">
       <div class="btn-group ">
-        <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-        <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+        <button class="btn btn-light" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+        <button class="btn btn-light" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
       </div>
     </div>
     <br>
     <div ng-if="$ctrl.selectedMapObject" style="position: relative;">
-      <table id="tblLocationProperties" class="table table-condensed table-striped" style="margin-bottom: 10px">
+      <table id="tblLocationProperties" class="table table-sm table-striped" style="margin-bottom: 10px">
         <tr>
           <td>Location type:</td>
           <td>
@@ -67,7 +67,7 @@
         </tr>
       </table>
       <button ng-class="{ 'btn btn-block': true,
-                          'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                          'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                           'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
               ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
               ng-click="$ctrl.saveSelectedLocationAndProperties()">

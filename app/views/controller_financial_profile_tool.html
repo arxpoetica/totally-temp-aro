@@ -5,15 +5,13 @@
     </p>
     <div  ng-show="showData">
     <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#financialProfileSummary" role="tab" data-toggle="tab">Summary</a></li>
-      <!-- <li role="presentation"><a href="#financialProfileFiberDetails" role="tab" data-toggle="tab">Fiber Details</a></li> -->
-      <li role="presentation"><a href="#financialProfilePremises" role="tab" data-toggle="tab">Premises</a></li>
-      <li role="presentation"><a href="#financialProfileSubscribers" role="tab" data-toggle="tab">Subscribers</a></li>
-      <li role="presentation"><a href="#financialProfileRevenue" role="tab" data-toggle="tab">Revenue</a></li>
-      <li role="presentation"><a href="#financialProfileOpex" role="tab" data-toggle="tab">Opex</a></li>
-      <li role="presentation"><a href="#financialProfileCapex" role="tab" data-toggle="tab">Capex</a></li>
-      <li role="presentation"><a href="#financialProfileCashFlow" role="tab" data-toggle="tab">Cash Flow</a></li>
-      <!-- <li role="presentation"><a href="#financialProfileRouteOpportunities" role="tab" data-toggle="tab">Route Opportunities</a></li> -->
+      <li role="presentation" class="nav-item"><a href="#financialProfileSummary" class="nav-link active" role="tab" data-toggle="tab">Summary</a></li>
+      <li role="presentation" class="nav-item"><a href="#financialProfilePremises" class="nav-link" role="tab" data-toggle="tab">Premises</a></li>
+      <li role="presentation" class="nav-item"><a href="#financialProfileSubscribers" class="nav-link" role="tab" data-toggle="tab">Subscribers</a></li>
+      <li role="presentation" class="nav-item"><a href="#financialProfileRevenue" class="nav-link" role="tab" data-toggle="tab">Revenue</a></li>
+      <li role="presentation" class="nav-item"><a href="#financialProfileOpex" class="nav-link" role="tab" data-toggle="tab">Opex</a></li>
+      <li role="presentation" class="nav-item"><a href="#financialProfileCapex" class="nav-link" role="tab" data-toggle="tab">Capex</a></li>
+      <li role="presentation" class="nav-item"><a href="#financialProfileCashFlow" class="nav-link" role="tab" data-toggle="tab">Cash Flow</a></li>
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="financialProfileSummary" style="margin-top: 20px">
@@ -79,7 +77,7 @@
         <div>
           <p class="text-center"><strong>Cash Flow Summary</strong></p>
           <canvas id="financial-profile-chart-cash-flow" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-cash-flow')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-cash-flow')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-cash-flow-legend"></div>
@@ -115,7 +113,7 @@
             -->
           </form>
           <canvas id="financial-profile-chart-capex" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-capex')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-capex')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-capex-legend"></div>
@@ -147,7 +145,7 @@
             </form>
           </form>
           <canvas id="financial-profile-chart-connect-capex" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-connect-capex')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-connect-capex')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-connect-capex-legend"></div>
@@ -166,7 +164,7 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-revenue" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-revenue')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-revenue')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-revenue-legend"></div>
@@ -180,7 +178,7 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-arpu" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-arpu')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-arpu')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-arpu-legend"></div>
@@ -189,7 +187,7 @@
       <div role="tabpanel" class="tab-pane" id="financialProfilePremises" style="margin-top: 20px">
         <div>
           <p class="text-center"><strong>Cumulative Premises Passed</strong></p>
-          <div class="pull-right">
+          <div class="float-right">
             <form class="form-inline">
               <div class="radio">
                   <input id="radio-count" type="radio" name="percentage" value="false" ng-model="premisesPercentage" ng-change="showPremisesChart(true)">
@@ -224,20 +222,20 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-premises" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-premises')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-premises')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-premises-legend"></div>
           <p class="text-center"><strong>New Premises Passed</strong></p>
           <canvas id="financial-profile-chart-premises-period" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-premises-period')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-premises-period')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-premises-period-legend"></div>
           <br>
           <p class="text-center"><strong>Cost per Premise Passed</strong></p>
           <canvas id="financial-profile-chart-cost-per-premise" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-cost-per-premise')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-cost-per-premise')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-cost-per-premise-legend" style="display:none"></div>
@@ -258,7 +256,7 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-subscribers" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-subscribers')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-subscribers')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-subscribers-legend"></div>
@@ -272,7 +270,7 @@
             </div>
           </form>
           <canvas id="financial-profile-chart-penetration" style="width:100%; height:200px"></canvas>
-          <button ng-click="downloadChart('financial-profile-chart-penetration')" class="pull-right btn btn-default btn-sm">
+          <button ng-click="downloadChart('financial-profile-chart-penetration')" class="float-right btn btn-light btn-sm">
             <span style="color:white" class="fa fa-download"></span>
           </button>
           <div id="financial-profile-chart-penetration-legend"></div>
@@ -292,7 +290,7 @@
           </div>
         </form>
         <canvas id="financial-profile-chart-opex-recurring" style="width:100%; height:200px"></canvas>
-        <button ng-click="downloadChart('financial-profile-chart-opex-recurring')" class="pull-right btn btn-default btn-sm">
+        <button ng-click="downloadChart('financial-profile-chart-opex-recurring')" class="float-right btn btn-light btn-sm">
           <span style="color:white" class="fa fa-download"></span>
         </button>
         <div id="financial-profile-chart-opex-recurring-legend"></div>
@@ -306,7 +304,7 @@
           </div>
         </form>
         <canvas id="financial-profile-chart-opex-cost" style="width:100%; height:200px"></canvas>
-        <button ng-click="downloadChart('financial-profile-chart-opex-cost')" class="pull-right btn btn-default btn-sm">
+        <button ng-click="downloadChart('financial-profile-chart-opex-cost')" class="float-right btn btn-light btn-sm">
           <span style="color:white" class="fa fa-download"></span>
         </button>
         <div id="financial-profile-chart-opex-cost-legend"></div>

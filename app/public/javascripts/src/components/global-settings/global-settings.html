@@ -67,11 +67,11 @@
     <button ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.save()">Update settings</button>
 
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"\
-       type="button" class="btn btn-default" ng-href='/admin/users/csv'>Download CSV</a>
+       type="button" class="btn btn-light" ng-href='/admin/users/csv'>Download CSV</a>
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"
-       type="button" class="btn btn-default" ng-click="$ctrl.globalSettingsService.openSendMailView()">Send email to all users</a>
+       type="button" class="btn btn-light" ng-click="$ctrl.globalSettingsService.openSendMailView()">Send email to all users</a>
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users && $ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
-       type="button" class="btn btn-default" ng-if="$ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
+       type="button" class="btn btn-light" ng-if="$ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
        ng-click="$ctrl.globalSettingsService.openNewUserView()">Register a new user</a>
 
     <button ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.SendEmail" type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.sendMail()">Send mail</button>
@@ -82,9 +82,9 @@
     <button ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
 
     <!-- Back button - show when we are in any mode other than "Global Settings" -->
-    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS && !$ctrl.isManageUsersView()" class="btn btn-primary pull-right" 
+    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS && !$ctrl.isManageUsersView()" class="btn btn-primary float-right" 
       ng-click="$ctrl.backToGlobalSettings()">Back</button>
-    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS && $ctrl.isManageUsersView()" class="btn btn-primary pull-right" 
+    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS && $ctrl.isManageUsersView()" class="btn btn-primary float-right" 
       ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
   </modal-footer>
 </modal>

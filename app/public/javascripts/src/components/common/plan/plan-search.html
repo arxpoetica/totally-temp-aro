@@ -61,7 +61,7 @@
   </p>
 
   <div ng-if="$ctrl.plans.length > 0">
-    <table id="tblSelectPlans" class="table table-condensed table-striped">
+    <table id="tblSelectPlans" class="table table-sm table-striped">
       <tbody>
         <tr ng-repeat="plan in $ctrl.plans | orderBy:$ctrl.sortField:$ctrl.descending">
           <td>
