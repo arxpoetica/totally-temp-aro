@@ -1283,3 +1283,11 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .select2-no-results {
   color: black;
 }
+
+/* 
+  After migrating to Bootstrap4, the <ui-select> component was not showing dropdown items. The following CSS fixes that (temporarily)
+  until ui-select supports Bootstrap4. Workaround from https://stackoverflow.com/questions/48803798/angular-ui-select-component-broken-after-migrating-to-bootstrap-4
+*/
+.open > .dropdown-menu {
+  display: block;
+}
