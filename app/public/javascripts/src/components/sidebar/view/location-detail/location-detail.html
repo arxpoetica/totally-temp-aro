@@ -37,6 +37,13 @@
   #tblLocationInfo {
     margin-bottom: 0px !important;
   }
+
+  .table-wrapper-scroll-y {
+    display: block;
+    max-height: 50%;
+    overflow-y: auto;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
 </style>
 
 <div class="mb-5 mt-2">
@@ -170,6 +177,7 @@
                            is-edit="false">
     </editor-interface-tree>
   </div>
+
   <div style="width: 100%; margin-top: 2px; margin-bottom: 6px;" ng-if="$ctrl.state.configuration.perspective.locationDetails.showAuditLog">
     <div class="ei-header" style="padding-top: 0px;" ng-click="$ctrl.toggleAuditLog = !$ctrl.toggleAuditLog">
       <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.toggleAuditLog"></i>
@@ -187,7 +195,30 @@
     </location-audit-log>
   </span>
 
+  <!-- Show attributes for "default" or non-sales users-->
+  <div style="width: 100%; margin-top: 2px; margin-bottom: 6px;" ng-if="$ctrl.state.configuration.perspective.locationDetails.showAuditLog">
+    <div class="ei-header" style="padding-top: 0px;" ng-click="$ctrl.toggleOtherAttributes = !$ctrl.toggleOtherAttributes">
+      <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.toggleOtherAttributes"></i>
+      <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.toggleOtherAttributes"></i>
+      Other Attributes
+    </div>  
+  </div>
+  <span ng-if="$ctrl.toggleOtherAttributes
+    && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO">
+    <div class="table-wrapper-scroll-y">
+      <table class="table table-condensed table-striped">
+        <tbody>
+          <tr ng-repeat="attribute in $ctrl.selectedLocationInfo.attributes">
+            <td>{{ attribute.key }}</td>
+            <td>{{ attribute.value }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </span>
+
   <div ng-if="$ctrl.state.configuration.perspective.locationDetails.showMoreInfoButton">
     <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
   </div>
+
 </div>
