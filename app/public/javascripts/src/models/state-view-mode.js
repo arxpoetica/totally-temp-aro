@@ -191,7 +191,7 @@ class StateViewMode {
       }
     }
 
-    entityListUrl = filter ? entityListUrl.concat(`&$filter=${filter}`) : entityListUrl
+    entityListUrl = filter ? entityListUrl.concat(`&$filter=${encodeURIComponent(filter)}`) : entityListUrl
 
     return $http.get(entityListUrl)
     .then((results) => {
