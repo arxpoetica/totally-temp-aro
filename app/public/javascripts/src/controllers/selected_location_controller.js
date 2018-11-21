@@ -255,7 +255,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   }
 
   function showCurrentChart () {
-    var href = $('#selected_location_controller .nav-pills > .active a').attr('href')
+    var href = $('#selected_location_controller .nav-pills .active').attr('href')
     if (href === '#selected_location_fair_share') {
       showFairShareCharts()
     } else if (href === '#selected_location_market_profile') {
