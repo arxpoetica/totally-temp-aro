@@ -4,7 +4,7 @@
       <div class="modal-header">
         <div class="selected-locations-header">
           <!-- The map that is shown in the header -->
-          <img ng-attr-src="{{map_url}}">
+          <img ng-attr-src="{{map_url}}" style="width: 766px;">
           <!-- A div that is overlaid on the map image to make it appear darker -->
           <div class="selected-locations-map-overlay">
             <div class="selected-location-address">
@@ -37,29 +37,25 @@
         </div>
       </div>
       <div class="modal-body">
-
         <div style="width: 100%; text-align: center">
           <!-- Note: if you changed "nav-pills" back to "nav-tabs" you also have to make the same change in the controller JS. Leaving it this way for now -->
-          <ul class="nav nav-pills" style="display: inline-block;" role="tablist">
-            <!-- <li role="presentation">
-              <a href="#selected_location_customer_profile" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Customer profile</a>
-            </li> -->
+          <ul class="nav nav-pills" role="tablist">
             <% if (config.ui.locations_modal && config.ui.locations_modal.market_profile) { %>
-            <li role="presentation" class="active">
-              <a href="#selected_location_market_profile" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Business Spend</a>
+            <li role="presentation" class="nav-item">
+              <a href="#selected_location_market_profile" class="selected-location-pill-padding nav-link active" aria-controls="profile" role="tab" data-toggle="pill">Business Spend</a>
             </li>
             <% } %>
-            <li role="presentation">
-              <a href="#selected_location_fair_share" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Fair Share</a>
+            <li role="presentation" class="nav-item">
+              <a href="#selected_location_fair_share" class="selected-location-pill-padding nav-link" aria-controls="profile" role="tab" data-toggle="pill">Fair Share</a>
             </li>
-            <li role="presentation">
-              <a href="#selected_location_businesses" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Businesses</a>
+            <li role="presentation" class="nav-item">
+              <a href="#selected_location_businesses" class="selected-location-pill-padding nav-link" aria-controls="profile" role="tab" data-toggle="pill">Businesses</a>
             </li>
-            <li role="presentation">
-              <a href="#selected_location_households" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">Households</a>
+            <li role="presentation" class="nav-item">
+              <a href="#selected_location_households" class="selected-location-pill-padding nav-link" aria-controls="profile" role="tab" data-toggle="pill">Households</a>
             </li>
-            <li role="presentation">
-              <a href="#selected_location_towers" class="selected-location-pill-padding" aria-controls="profile" role="tab" data-toggle="pill">{{state.configuration.locationCategories.celltower.label}}</a>
+            <li role="presentation" class="nav-item">
+              <a href="#selected_location_towers" class="selected-location-pill-padding nav-link" aria-controls="profile" role="tab" data-toggle="pill">{{state.configuration.locationCategories.celltower.label}}</a>
             </li>
           </ul>
         </div>
