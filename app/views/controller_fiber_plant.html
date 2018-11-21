@@ -27,7 +27,7 @@
         <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $item.fillStyle, opacity: 0.7, 'margin-right':'5px' }"></span>
         {{$item.name}}
       </ui-select-match>
-      <ui-select-choices class="ui-select-width-300" repeat="competitor in state.competition.allCompetitors | filter: $select.search">
+      <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="competitor in state.competition.allCompetitors | filter: $select.search">
         <div>
           {{competitor.name}}
         </div>

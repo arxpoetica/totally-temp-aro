@@ -1306,3 +1306,15 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .open > .dropdown-menu {
   display: block;
 }
+
+ui-select-font {
+  font-size: 14px;
+}
+
+.ui-select-container input {
+  font-size: 14px;
+}
+
+.ui-select-match span {
+  font-size: 14px;
+}
