@@ -37,7 +37,7 @@ class State {
 
   service.expertModeTypes = {
     OPTIMIZATION_SETTINGS: {id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings'}, 
-    MANUAL_PLAN_TARGET_ENTRY: {id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Entry'}
+    MANUAL_PLAN_TARGET_ENTRY: {id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Entry', isQueryValid: false}
   }
 
   service.selectedExpertMode = service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id
@@ -780,6 +780,8 @@ class State {
 
         service.dataItems = newDataItems
         service.dataItemsChanged.next(service.dataItems)
+        //get the service area for selected service layer datasource
+        service.StateViewMode.loadListOfSAPlanTags($http,service,'',true)
         return Promise.resolve()
       })
   }

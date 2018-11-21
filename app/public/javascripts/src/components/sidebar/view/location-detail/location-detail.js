@@ -10,6 +10,7 @@ class LocationDetailController {
     this.map_url = null
     this.currentUser = state.loggedInUser
     this.selectedLocation = null
+    this.toggleOtherAttributes = false
 
     this.planSubscription = state.plan.subscribe((plan) => {
       this.plan = plan

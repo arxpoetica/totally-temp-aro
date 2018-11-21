@@ -8,6 +8,16 @@ class AnalysisExpertModeController {
     saveExpertmode() {
       this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertMode.OPTIMIZATION_SETTINGS))
     }
+
+    validateExpertModeQuery() {
+      var hasExcludeTerm = false
+      var excludeTerms = ['delete','drop','update','alter','insert']
+      excludeTerms.forEach((term) => {
+        if(this.state.expertMode.MANUAL_PLAN_TARGET_ENTRY.toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
+      })
+      this.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid = this.state.expertMode.MANUAL_PLAN_TARGET_ENTRY.toLowerCase().indexOf("select") > -1 
+        && !hasExcludeTerm
+    }
   }
   
   AnalysisExpertModeController.$inject = ['state']

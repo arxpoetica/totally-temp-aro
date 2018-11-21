@@ -241,8 +241,18 @@ exports.configure = (api, middleware) => {
 
   api.post('/locations/getLocationIds', (request, response, next)=> {
     let query = request.body.query
-    models.Location.getLocationIds(query)
-    .then(jsonSuccess(response, next))
-    .catch(next)
+    var hasExcludeTerm = false
+    var excludeTerms = ['delete','drop','update','alter','insert']
+    excludeTerms.forEach((term) => {
+      if(query.toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
+    })
+
+    if(!hasExcludeTerm && query.toLowerCase().indexOf("select") > -1 ) {
+      models.Location.getLocationIds(query)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+    } else {
+      next
+    }
   });
 }

@@ -426,8 +426,8 @@ module.exports = class Location {
       .then(()=> {
 
         var attributeQuery = `
-          SELECT attributes FROM businesses
-          WHERE location_id=$1
+          SELECT attributes FROM location_entity
+          WHERE id=$1
         `
         return database.findOne(attributeQuery, [location_id])
       })

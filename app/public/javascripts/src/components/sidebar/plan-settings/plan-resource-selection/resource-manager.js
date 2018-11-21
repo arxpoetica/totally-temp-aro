@@ -154,8 +154,6 @@ class ResourceManagerController {
   }
 
   getNewResourceDetailsFromUser() {
-    this.state.planInputsModal.next(true)
-    return Promise.resolve('asdf')
     // Get the name for a new plan from the user
     this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
     return new Promise((resolve, reject) => {

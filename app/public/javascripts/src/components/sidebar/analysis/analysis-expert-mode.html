@@ -5,9 +5,11 @@
       ng-options="item.id as item.label for item in $ctrl.state.expertModeTypes">
     </select>
 
-    <textarea maxlength="80000" style="font-family: 'Courier'; width:100%; height:100%" 
+    <textarea maxlength="75000" style="font-family: 'Courier'; width:100%; height:100%" 
       ng-if="$ctrl.state.selectedExpertMode === $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id" 
       ng-model="$ctrl.state.expertMode.MANUAL_PLAN_TARGET_ENTRY"
+      ng-model-options="{ debounce: 500 }"
+      ng-change="$ctrl.validateExpertModeQuery()"
       spellcheck="false"> 
     </textarea>
 
