@@ -52,7 +52,13 @@ app.directive('modal', function () {
 
 app.directive('modalHeader', function () {
   return {
-    template: '<div class="modal-header" ng-transclude><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">{{title}}</h4></div>',
+    template: `
+      <div class="modal-header" ng-transclude>
+        <h5 class="modal-title">{{title}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>`,
     replace: true,
     restrict: 'E',
     scope: { title: '@' },
