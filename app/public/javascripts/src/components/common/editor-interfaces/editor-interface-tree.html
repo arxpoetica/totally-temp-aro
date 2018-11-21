@@ -20,8 +20,8 @@
 	    <div class="ei-foldout" ng-if="prop.displayDataType.startsWith('object') || prop.displayDataType.startsWith('array')" style="width: 100%;">
 	      {{summeryCount = $ctrl.getSummeryCount(propVal);""}}
 	      <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
-	        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
-	        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
+	        <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
+	        <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
 	        {{prop.displayName}} <span class="ei-header-info" ng-if="prop.displayDataType.startsWith('array')">{{propVal.length}} item<span ng-if="1 != propVal.length">s</span></span>
 	        
 	        
@@ -112,8 +112,8 @@
       <div class="ei-foldout" ng-if="$ctrl.hasChildren(propVal) && prop.displayDataType.startsWith('object') || prop.displayDataType.startsWith('array')" style="width: 100%;">
         {{summeryCount = $ctrl.getSummeryCount(propVal.getDisplayProperties());""}}
         <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
-          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
-          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
+          <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
+          <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>
           <span ng-if="prop.displayDataType.startsWith('array')">{{$index+1}}: </span>{{prop.displayName}} 
           
           
