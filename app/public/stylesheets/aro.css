@@ -1317,3 +1317,14 @@ ui-select-font {
 .ui-select-match span {
   font-size: 14px;
 }
+
+.ui-select-match > span .tag {
+  font-size: 12px;
+}
+
+.ui-select-match > span .badge {
+  font-size: 12px;
+}
+.ui-select-match-item {
+  padding: 1px 12px;
+}
