@@ -21,11 +21,11 @@
 		}
   </style>
   <!-- 
-  <div class="equipment-detail" ng-if="$ctrl.selectedEquipmentInfo !== null">
-    <div>id: {{$ctrl.selectedEquipmentInfo.id}}</div>
-    <div>Type: {{$ctrl.selectedEquipmentInfo.description}}</div>
-    <div>Latitude: {{$ctrl.selectedEquipmentInfo.geog.coordinates[1] | number:5}}</div>
-    <div>Longitude: {{$ctrl.selectedEquipmentInfo.geog.coordinates[0] | number:5}}</div>
+  <div class="equipment-detail" ng-if="$ctrl.equipmentFeature !== null">
+    <div>id: {{$ctrl.equipmentFeature.id}}</div>
+    <div>Type: {{$ctrl.equipmentFeature.description}}</div>
+    <div>Latitude: {{$ctrl.equipmentFeature.geog.coordinates[1] | number:5}}</div>
+    <div>Longitude: {{$ctrl.equipmentFeature.geog.coordinates[0] | number:5}}</div>
     <div>
       <button class="btn btn-primary" ng-click="$ctrl.showDetailEquipmentInfo()">More Information</button>
     </div>
@@ -63,10 +63,10 @@
 	  </div>
 	  <div class="equipment-detail ei-panel-content" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
 	    <!-- 
-	    <editor-interface-tree object-to-view="$ctrl.selectedEquipmentInfo" display-props="$ctrl.selectedEquipmentInfoDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
+	    <editor-interface-tree object-to-view="$ctrl.equipmentFeature" display-props="$ctrl.equipmentFeatureDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
 	    -->
 	    <editor-interface-tree 
-	      object-to-view="$ctrl.selectedEquipmentInfo" 
+	      object-to-view="$ctrl.equipmentFeature" 
 	      root-meta-data="{'networkNodeType':$ctrl.networkNodeType}"
 				is-edit="false">
 			</editor-interface-tree>
@@ -80,15 +80,15 @@
 			</equipment-detail-list>
 		</span>
 		
-		<div ng-if="$ctrl.boundsFeature">
+		<div ng-if="$ctrl.boundsObjectId">
 		  <button class="btn btn-primary btn-sm" 
               ng-click="$ctrl.onRequestCalculateCoverage()">
         calculate coverage
       </button>
       
       <boundary-coverage 
-        bounds-input="$ctrl.boundsData"
-        parent-selected-feature="$ctrl.selectedMapObject"
+        bounds-input="$ctrl.coverageOutput"
+        parent-selected-object-id="$ctrl.boundsObjectId"
         is-working-override="$ctrl.isWorkingOnCoverage">
       </boundary-coverage>
 		</div>

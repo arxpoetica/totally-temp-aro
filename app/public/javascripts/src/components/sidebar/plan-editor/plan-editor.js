@@ -80,7 +80,7 @@ class PlanEditorController {
     */
     // ---
     
-    this.boundsData = {}
+    this.coverageOutput = {}
     
   }
 
@@ -319,7 +319,7 @@ class PlanEditorController {
       this.createMapObjects && this.createMapObjects([feature])
       
       //this.digestBoundaryCoverage(feature.objectId, result.data)
-      //this.boundsData = {'feature': feature, 'data': result.data}
+      //this.coverageOutput = {'feature': feature, 'data': result.data}
       this.digestBoundaryCoverage(feature, result.data, true)
       
       this.isWorkingOnCoverage = false
@@ -361,7 +361,7 @@ class PlanEditorController {
       }
       this.computedBoundaries.add(mapObject.feature.objectId)
       //this.digestBoundaryCoverage(mapObject.feature.objectId, result.data)
-      //this.boundsData = {'feature': mapObject.feature, 'data': result.data}
+      //this.coverageOutput = {'feature': mapObject.feature, 'data': result.data}
       this.digestBoundaryCoverage(mapObject.feature, result.data, true)
       
       this.isWorkingOnCoverage = false
@@ -373,9 +373,9 @@ class PlanEditorController {
   }
   
   // --- snip here?  <---------------------------------------------------------------------------------<<<
-  digestBoundaryCoverage(feature, boundaryData, forceUpdate){
+  digestBoundaryCoverage(feature, coverageData, forceUpdate){
     if ('undefined' == typeof forceUpdate) forceUpdate = false
-    this.boundsData = {'feature': feature, 'data': boundaryData, 'forceUpdate': forceUpdate}
+    this.coverageOutput = {'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate}
   }
   
   /*
@@ -982,9 +982,13 @@ class PlanEditorController {
     if (null != mapObject){
       this.updateSelectedState()
       this.isEditFeatureProps = true
+      this.selectedObjectId = mapObject.objectId || mapObject.object_id
+    }else{
+      this.selectedObjectId = null
     }
     
     this.selectedMapObject = mapObject
+    
     var lat = mapObject && mapObject.position && mapObject.position.lat()
     var lng = mapObject && mapObject.position && mapObject.position.lng()
     this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)

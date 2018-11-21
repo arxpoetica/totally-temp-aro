@@ -8,14 +8,20 @@ class EquipmentDetailController {
     this.$timeout = $timeout
     this.state = state
     this.networkNodeType = ''
-    this.selectedEquipmentInfo = {}
     this.selectedEquipment = ''
-    this.boundsFeature = null
+    
+    this.equipmentFeature = {} 
+      
+    this.equipmentData = null 
+    this.boundsObjectId = null 
+    
+    this.coverageOutput = {}
     this.isWorkingOnCoverage = false
-    this.boundsData = {}
+    this.boundsData = null
     this.headerIcon = ''
     this.networkNodeLabel = ''
-
+    this.isComponentDestroyed = false  
+    
     this.EquipmentDetailView = Object.freeze({
       List: 0,
       Detail: 1
@@ -37,6 +43,9 @@ class EquipmentDetailController {
         this.updateSelectedState(equipment)
         const plan = state.plan.getValue()
         this.displayEquipment(plan.id, equipment.object_id)
+        .then((equipmentInfo) => {
+          this.checkForBounds(equipment.object_id)
+        })
       }
     })
     
@@ -45,11 +54,20 @@ class EquipmentDetailController {
         this.clearSelection()
       }
     })
+    /*
+    this.viewSeetingsSubscription = this.state.viewSettingsChanged.subscribe((change) => {
+      console.log(change)
+      this.checkForBounds()
+    })
+    */
   }
 
 	clearSelection(){
     this.networkNodeType = ''
-    this.selectedEquipmentInfo = {}
+    this.equipmentFeature = {}
+    this.equipmentData = null
+    this.boundsData = null
+    this.isWorkingOnCoverage = false
     this.updateSelectedState()
     this.currentEquipmentDetailView = this.EquipmentDetailView.List
   }
@@ -68,6 +86,9 @@ class EquipmentDetailController {
     .then((result) => {
       const equipmentInfo = result.data
       console.log(result)
+      // rootPlanId eq 527 and networkNodeObjectId eq guid'ff65c2ba-798c-11e8-8886-0f5547e635c1'
+      // /odata/NetworkBoundaryEntity?$filter=rootPlanId%20eq%20527%20and%20networkNodeObjectId%20eq%20guid'ff65c2ba-798c-11e8-8886-0f5547e635c1'
+      // select objectId
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.state.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl
@@ -78,10 +99,12 @@ class EquipmentDetailController {
           this.networkNodeLabel = equipmentInfo.networkNodeType
         }
         
+        this.equipmentData = equipmentInfo
+        
         this.networkNodeType = equipmentInfo.networkNodeType
         this.selectedEquipmentGeog = equipmentInfo.geometry.coordinates
         
-        this.selectedEquipmentInfo = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
+        this.equipmentFeature = AroFeatureFactory.createObject(equipmentInfo).networkNodeEquipment
         this.currentEquipmentDetailView = this.EquipmentDetailView.Detail
         
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
@@ -105,11 +128,97 @@ class EquipmentDetailController {
         const ZOOM_FOR_EQUIPMENT_SEARCH = 14
         isZoom && this.state.requestSetMapZoom.next(ZOOM_FOR_EQUIPMENT_SEARCH)
       }
+      this.checkForBounds(objectId)
     })
   }
-
+  
+  // on view settings changed 
+  checkForBounds(objectId){
+    console.log(this.equipmentData)
+    //if (!this.state.showSiteBoundary || !this.equipmentData.hasOwnProperty('objectId')){
+    if (!this.equipmentData.hasOwnProperty('objectId')){
+      this.boundsData = null
+      return
+    }
+    var planId = this.state.plan.getValue().id
+    var equipmentId = this.equipmentData.objectId
+    var filter = `rootPlanId eq ${planId} and networkNodeObjectId eq guid'${equipmentId}'`
+    this.$http.get(`/service//odata/NetworkBoundaryEntity?$filter=${filter}`)
+    .then((result) => {
+      console.log(result)
+      if (result.data.length < 1){
+        this.boundsObjectId = null
+        this.boundsData = null
+      }else{
+        this.boundsObjectId = result.data[0].objectId
+        this.boundsData = result.data[0]
+      } 
+    })
+  }
+  
+  
+  
+  onRequestCalculateCoverage(){
+    if (this.equipmentData && this.boundsData){
+      this.calculateCoverage(this.boundsData, this.equipmentData.geometry)
+    }
+  }
+  
+  // ToDo: very similar function to the one in plan-editor.js combine those
+  calculateCoverage(boundsData, equipmentPoint, directed) {
+    if ('undefined' == typeof directed) directed = false
+    // Get the POST body for optimization based on the current application state
+    var optimizationBody = this.state.getOptimizationBody()
+    // Replace analysis_type and add a point and radius
+    optimizationBody.boundaryCalculationType = 'FIXED_POLYGON'
+    optimizationBody.analysis_type = 'COVERAGE'
+    
+    optimizationBody.point = equipmentPoint
+    // Get the polygon from the mapObject, not mapObject.feature.geometry, as the user may have edited the map object
+    //optimizationBody.polygon = this.polygonPathsToWKT(mapObject.getPaths())
+    
+    optimizationBody.polygon = boundsData.geom
+    
+    //optimizationBody.spatialEdgeType = spatialEdgeType;
+    optimizationBody.directed = directed  // directed analysis if thats what the user wants
+    
+    var equipmentObjectId = boundsData.objectId
+    this.isWorkingOnCoverage = true
+    this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
+    .then((result) => {
+      // The user may have destroyed the component before we get here. In that case, just return
+      if (this.isComponentDestroyed) {
+        console.warn('Plan editor was closed while a boundary was being calculated')
+        return
+      }
+      //this.computedBoundaries.add(mapObject.feature.objectId)
+      //this.digestBoundaryCoverage(mapObject.feature.objectId, result.data)
+      //this.coverageOutput = {'feature': mapObject.feature, 'data': result.data}
+      this.digestBoundaryCoverage(boundsData, result.data, true)
+      
+      this.isWorkingOnCoverage = false
+    })
+    .catch((err) => {
+      console.error(err)
+      this.isWorkingOnCoverage = false
+    })
+  }
+  
+  // --- snip here?  <---------------------------------------------------------------------------------<<<
+  digestBoundaryCoverage(feature, coverageData, forceUpdate){
+    if ('undefined' == typeof forceUpdate) forceUpdate = false
+    this.coverageOutput = {'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate}
+  }
+  
+  
+  
+  
+  
+  
+  
   $onDestroy() {
     // Cleanup subscriptions
+    this.isComponentDestroyed = true
     this.mapFeatureSelectedSubscriber.unsubscribe()
     this.clearViewModeSubscription.unsubscribe()
   }

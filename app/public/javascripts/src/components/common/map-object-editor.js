@@ -148,6 +148,7 @@ class MapObjectEditorController {
       // ToDo: this should be in plan-editor 
       if ('equipment' == this.featureType || 'serviceArea' == this.featureType){// we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
+        if (!eventXY) return
         this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
       }
     })
@@ -178,6 +179,7 @@ class MapObjectEditorController {
         mouseEvent = event[eventKey]
       }
     })
+    if (!mouseEvent) return
     var x = mouseEvent.clientX
     var y = mouseEvent.clientY
     return {'x':x, 'y':y}
@@ -797,7 +799,7 @@ class MapObjectEditorController {
     
     
     mapObject.addListener('rightclick', (event) => {
-      
+      if ('undefined' == typeof event) return
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
       
@@ -805,6 +807,7 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       }
       var eventXY = this.getXYFromEvent(event)
+      if (!eventXY) return
       this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
     

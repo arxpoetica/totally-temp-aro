@@ -25,7 +25,7 @@ class BoundaryCoverageController{
   
   
   $onChanges(changesObj){
-    if (changesObj.hasOwnProperty('parentSelectedFeature')){
+    if (changesObj.hasOwnProperty('parentSelectedObjectId')){
       if (this.isChartInit) this.showCoverageChart()
     }
     if (changesObj.hasOwnProperty('boundsInput')){
@@ -173,10 +173,11 @@ class BoundaryCoverageController{
   }
   
   showCoverageChart(){
+    //ToDo: check for previous chart
     //var objectId = this.feature.objectId
-    var objectId = this.parentSelectedFeature.objectId
+    var objectId = this.parentSelectedObjectId
     
-    if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedFeature.objectId)) return
+    if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedObjectId)) return
     
     var ele = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0]
     if ('undefined' == typeof ele) return
@@ -259,7 +260,7 @@ let boundaryCoverage = {
   templateUrl: '/components/common/boundary-coverage.html',
   bindings: {
     boundsInput: '<', 
-    parentSelectedFeature: '<', 
+    parentSelectedObjectId: '<', 
     isWorkingOverride: '<'
   },
   controller: BoundaryCoverageController
