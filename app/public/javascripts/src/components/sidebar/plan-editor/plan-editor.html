@@ -238,7 +238,7 @@
                     <input type="number" class="form-control" id="selectedMapObjectLat"
                       placeholder="lat" 
                       ng-model="$ctrl.selectedMapObjectLat"
-                      ng-model-options="{ debounce: 500 }"
+                      ng-model-options="{ debounce: 100 }"
                       step="0.00001"
                       ng-change="$ctrl.setSelectedMapObjectLoc()">
                   </div>
@@ -247,7 +247,7 @@
                     <input type="number" class="form-control" id="selectedMapObjectLng"
                       placeholder="long" 
                       ng-model="$ctrl.selectedMapObjectLng"
-                      ng-model-options="{ debounce: 500 }"
+                      ng-model-options="{ debounce: 100 }"
                       step="0.00001"
                       ng-change="$ctrl.setSelectedMapObjectLoc()">
                   </div>
