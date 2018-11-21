@@ -191,12 +191,12 @@
 @input-border:                   #ccc;
 
 // TODO: Rename `@input-border-radius` to `@input-border-radius-base` in v4
-//** Default `.form-control` border radius
+//** Default `.form-control form-control-sm` border radius
 // This has no effect on `<select>`s in some browsers, due to the limited stylability of `<select>`s in CSS.
 @input-border-radius:            @border-radius-base;
-//** Large `.form-control` border radius
+//** Large `.form-control form-control-sm` border radius
 @input-border-radius-large:      @border-radius-large;
-//** Small `.form-control` border radius
+//** Small `.form-control form-control-sm` border radius
 @input-border-radius-small:      @border-radius-small;
 
 //** Border color for inputs on focus
@@ -205,11 +205,11 @@
 //** Placeholder text color
 @input-color-placeholder:        #999;
 
-//** Default `.form-control` height
+//** Default `.form-control form-control-sm` height
 @input-height-base:              (@line-height-computed + (@padding-base-vertical * 2) + 2);
-//** Large `.form-control` height
+//** Large `.form-control form-control-sm` height
 @input-height-large:             (ceil(@font-size-large * @line-height-large) + (@padding-large-vertical * 2) + 2);
-//** Small `.form-control` height
+//** Small `.form-control form-control-sm` height
 @input-height-small:             (floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) + 2);
 
 //** `.form-group` margin

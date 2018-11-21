@@ -41,12 +41,12 @@
                   <div class="col-sm-5">
                     <div class="input-group">
                       <div class="input-group-addon"><%- config.currency_symbol %></div>
-                      <input type="text" class="form-control format-currency"
+                      <input type="text" class="form-control form-control-sm format-currency"
                         data-id="{{setting.id}}" value="{{setting.cost | number:2}}"
                         data-tab="networkCosts" data-field="cost">
                     </div>
                   </div>
-                  <p class="col-sm-3 form-control-static">{{ setting.unit }}</p>
+                  <p class="col-sm-3 form-control form-control-sm-static">{{ setting.unit }}</p>
                 </div>
               </form>
             </div>
@@ -67,7 +67,7 @@
                     <td>{{ setting.product_type }}</td>
                     <td>{{ setting.product_name }}</td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="businessProducts" data-field="arpu_weight"
                         data-id="{{setting.dimension_id}}" value="{{setting.arpu_weight | number:2}}">
                     </td>
@@ -94,32 +94,32 @@
                     <td>{{ setting.entity_description }}</td>
                     <td>{{ setting.product }}</td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="arpu"
                         data-id="{{setting.id}}" value="{{setting.arpu | number:2}}">
                     </td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="entity_growth"
                         data-id="{{setting.id}}" value="{{setting.entity_growth | number:2}}">
                     </td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="churn_rate"
                         data-id="{{setting.id}}" value="{{setting.churn_rate | number:2}}">
                     </td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="opex_percent"
                         data-id="{{setting.id}}" value="{{setting.opex_percent | number:2}}">
                     </td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="maintenance_expenses"
                         data-id="{{setting.id}}" value="{{setting.maintenance_expenses | number:2}}">
                     </td>
                     <td>
-                      <input type="text" class="form-control input-sm format-currency text-right"
+                      <input type="text" class="form-control form-control-sm input-sm format-currency text-right"
                         data-tab="financialAssumptions" data-field="connection_cost"
                         data-id="{{setting.id}}" value="{{setting.connection_cost | number:2}}">
                     </td>
@@ -139,7 +139,7 @@
                   <tr ng-repeat="setting in applicationSettings.serviceLayerPriorities">
                     <td>{{ setting.service_layer_description }}</td>
                     <td>
-                      <input type="number" class="form-control input-sm text-right"
+                      <input type="number" class="form-control form-control-sm input-sm text-right"
                         data-tab="serviceLayerPriorities" data-field="default_priority"
                         data-id="{{setting.id}}" ng-model="setting.default_priority"
                         style="width: 50px">
@@ -160,7 +160,7 @@
                   <tr ng-repeat="setting in applicationSettings.serviceLayerEntityCategories">
                     <td>{{ setting.entity_description }}</td>
                     <td>
-                      <select class="form-control"
+                      <select class="form-control form-control-sm"
                         data-tab="serviceLayerEntityCategories" data-field="service_layer_id"
                         data-id="{{setting.id}}">
                         <option ng-repeat="layer in serviceLayers"
@@ -196,7 +196,7 @@
                   <tr ng-repeat="property in applicationSettings.systemProperties">
                     <td>{{ property.description }}</td>
                     <td>
-                      <input class="form-control" type="text"
+                      <input class="form-control form-control-sm" type="text"
                         data-tab="systemProperties" data-field="string_value"
                         data-id="{{ property.id }}"
                         ng-model="property.string_value">

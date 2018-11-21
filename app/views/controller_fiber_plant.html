@@ -4,7 +4,7 @@
 
     <div ng-if="state.configuration.perspective.competitorNetworks.showCompetitorTypes">
       <p><strong>Competitor Types</strong></p>
-      <select class="form-control"
+      <select class="form-control form-control-sm"
               ng-model="state.competition.selectedCompetitorType"
               ng-options="item as item.label for item in state.competition.allCompetitorTypes"
               ng-change="onCompetitorTypeChanged()">
@@ -65,7 +65,7 @@
     <br>
     <br>
     <p><strong>Rendering</strong></p>
-    <select class="form-control"
+    <select class="form-control form-control-sm"
             ng-model="state.competition.selectedRenderingOption"
             ng-options="item as item.label for item in state.competition.allRenderingOptions"
             ng-change="onRenderingChanged()">

@@ -52,7 +52,7 @@
       <tr class="liteStripe">
         <td>Optimization Type</td>
         <td> 
-          <select class="form-control"
+          <select class="form-control form-control-sm"
             ng-model="$ctrl.state.optimizationOptions.uiSelectedAlgorithm"
             ng-options="item as item.label for item in $ctrl.state.optimizationOptions.uiAlgorithms">
           </select>
@@ -66,7 +66,7 @@
               <input
                 type="number" step="0.1"
                 ng-model="$ctrl.state.optimizationOptions.preIrrThreshold"
-                class="form-control text-right"
+                class="form-control form-control-sm text-right"
                 percentage-input>
               <div class="input-group-addon">%</div>
             </div>
@@ -81,7 +81,7 @@
               <input
                 type="number" step="0.1"
                 ng-model="$ctrl.state.optimizationOptions.threshold"
-                class="form-control text-right"
+                class="form-control form-control-sm text-right"
                 percentage-input>
               <div class="input-group-addon">%</div>
             </div>
@@ -92,7 +92,7 @@
         <td>Target Capital <div class="line-break-item">({{ $ctrl.config.currency_symbol }} thousands)</div></td>
         <td> 
           <div class="input-group input-group-sm">
-            <input type="text" class="form-control text-right" placeholder="Amount"
+            <input type="text" class="form-control form-control-sm text-right" placeholder="Amount"
               ng-model="$ctrl.budgetDisplay"
               ng-change="$ctrl.onBudgetChange()"
               ng-model-options="{ debounce: 500 }"
@@ -120,7 +120,7 @@
                    <input
                      type="number" step="0.1"
                      ng-model="$ctrl.state.optimizationOptions.threshold"
-                     class="form-control text-right"
+                     class="form-control form-control-sm text-right"
                      percentage-input>
                    <div class="input-group-addon">%</div>
                  </div>
@@ -156,7 +156,7 @@
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
         <td class="indent-1">Polygon Type</td>
         <td> 
-          <select class="form-control"
+          <select class="form-control form-control-sm"
                   ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy">
             <option value="FIXED_RADIUS">Fixed Radius</option>
             <option value="AVERAGE_RADIUS">Average Radius</option>
@@ -167,28 +167,28 @@
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
         <td class="indent-1">Radius (m)</td>
         <td> 
-          <input type="text" class="form-control text-right" placeholder="Cell Radius"
+          <input type="text" class="form-control form-control-sm text-right" placeholder="Cell Radius"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
         <td class="indent-1">Granularity Ratio</td>
         <td>
-          <input type="text" class="form-control text-right" placeholder="Granularity Ratio"
+          <input type="text" class="form-control form-control-sm text-right" placeholder="Granularity Ratio"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio">
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
         <td class="indent-1">Minimum Ray Length</td>
         <td>
-          <input type="text" class="form-control text-right" placeholder="Minimum Ray Length"
+          <input type="text" class="form-control form-control-sm text-right" placeholder="Minimum Ray Length"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength">
         </td>
       </tr>
       <tr>
         <td width="48%">Network Construction</td>
         <td> 
-          <select class="form-control"
+          <select class="form-control form-control-sm"
                   ng-model="$ctrl.state.optimizationOptions.networkConstraints.routingMode"
                   ng-options="key as value.label for (key, value) in $ctrl.state.routingModes">
           </select>
@@ -214,7 +214,7 @@
       <tr>
         <td>Pruning Strategy</td>
         <td>
-          <select class="form-control"
+          <select class="form-control form-control-sm"
             ng-model="$ctrl.state.optimizationOptions.fronthaulOptimization.optimizationMode"
             ng-options="item.id as item.label for item in $ctrl.state.pruningStrategyTypes">
           </select>
@@ -226,7 +226,7 @@
           <div class="input-group input-group-sm">
             <input type="number" step="0.1"
               ng-model="$ctrl.state.optimizationOptions.financialConstraints.discountRate"
-              class="form-control text-right"
+              class="form-control form-control-sm text-right"
               min="0" max="500"
               percentage-input>
             <div class="input-group-addon">%</div>
@@ -250,7 +250,7 @@
           
         </td>
         <td>
-          <select class="form-control"
+          <select class="form-control form-control-sm"
             ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType"
             ng-options="item.id as item.label for item in $ctrl.state.terminalValueStrategyTypes">
           </select>
@@ -259,7 +259,7 @@
             ng-if="$ctrl.state.terminalValueStrategyTypes['FIXED_MULTIPLIER'].id === $ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.terminalValueStrategyType">
             <input type="number" step="0.1"
               ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
-              class="form-control text-right"
+              class="form-control form-control-sm text-right"
               min="0.0">
           </div>
           
@@ -267,7 +267,7 @@
             <div class="input-group input-group-sm additional-cell-row">
               <input type="number" step="0.1"
                 ng-model="$ctrl.state.optimizationOptions.financialConstraints.terminalValueStrategy.value"
-                class="form-control text-right"
+                class="form-control form-control-sm text-right"
                 max="{{ ($ctrl.state.optimizationOptions.financialConstraints.discountRate * 100) - 0.1 }}" 
                 percentage-input>
               <div class="input-group-addon">%</div>
@@ -283,14 +283,14 @@
         <td>
           <input type="number"
                  ng-model="$ctrl.state.optimizationOptions.financialConstraints.years"
-                 class="form-control text-right"
+                 class="form-control form-control-sm text-right"
                  min="0" max="100">
         </td>
       </tr>
       <tr>
         <td>Selection Type</td>
         <td>
-          <select class="form-control" 
+          <select class="form-control form-control-sm" 
                   ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
                   ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
             <option ng-repeat="(selectionId, selectionVal) in $ctrl.state.selectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>

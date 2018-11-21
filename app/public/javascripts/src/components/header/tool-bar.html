@@ -128,7 +128,7 @@
   <img ng-if="!$ctrl.switchIcon" src="images/logos/aro/logo_navbar.png" class="no-collapse" style="align-self: center; padding-left: 10px; padding-right: 10px">
   <span ng-if="$ctrl.switchIcon" style="align-self: center; padding-left: 10px; padding-right: 10px"><b>NPM BSA</b></span>
   <div ng-controller="global-search-controller" class="no-collapse" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
-    <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
+    <input class="form-control form-control-sm select2" type="text" placeholder="Search cities, states or wirecenters">
   </div>
 
   <div class="fa fa-search no-collapse" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
@@ -195,12 +195,12 @@
     </button>
     <div class="dropdown-menu dropdown-menu-right ruler-dropdown">
       <div class="ruler-container">
-        <select class="form-control"
+        <select class="form-control form-control-sm"
           ng-model="$ctrl.state.currentRulerAction"
           ng-options="item as item.label for item in $ctrl.state.rulerActions track by item.id"
           ng-change="$ctrl.onChangeRulerAction()">
         </select>
-        <button type="button" class="btn btn-primary btn-sm ruler-undo-btn form-control" ng-if="$ctrl.showRemoveRulerButton()"
+        <button type="button" class="btn btn-primary btn-sm ruler-undo-btn form-control form-control-sm" ng-if="$ctrl.showRemoveRulerButton()"
           ng-click="$ctrl.removeLastRulerMarker()"><i class="fa fa-minus"></i>
         </button>
       </div>
@@ -230,7 +230,7 @@
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
                style="margin-left: 2px;">
         <font>Site Boundaries</font>
-        <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
+        <select ng-if="$ctrl.state.showSiteBoundary" class="form-control form-control-sm" style="margin-top: 10px"
                 ng-model="$ctrl.state.selectedBoundaryType"
                 ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
                 ng-change="$ctrl.toggleSiteBoundary()">
@@ -257,7 +257,7 @@
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
           style="margin-left: 2px;">
         <font>Fiber Size</font>
-        <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
+        <select ng-if="$ctrl.state.showFiberSize" class="form-control form-control-sm" style="margin-top: 10px"
           ng-model="$ctrl.state.viewSetting.selectedFiberOption"
           ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
           ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">

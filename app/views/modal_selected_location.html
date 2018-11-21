@@ -73,7 +73,7 @@
               <div class="col-md-3">
                 <div class="form-group form-group-sm">
                   <label class="control-label">Entity Type</label>
-                  <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control">
+                  <select ng-model="entityType" ng-change="calculateMarketSize()" class="form-control form-control-sm">
                     <option value="businesses">Businesses</option>
                     <option value="households">Households</option>
                     <option value="towers">{{state.configuration.locationCategories.celltower.label}}</option>
@@ -85,7 +85,7 @@
               <div class="col-md-3">
                 <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
                   <label class="control-label">Industry</label>
-                  <select class="form-control" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculateMarketSize()" multiple data-placeholder="All industries">
+                  <select class="form-control form-control-sm" ng-options="industry.industry_name for industry in filters.industries" ng-model="industry" ng-change="calculateMarketSize()" multiple data-placeholder="All industries">
                   </select>
                 </div>
               </div>
@@ -94,7 +94,7 @@
               <div class="col-md-3">
                 <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
                   <label class="control-label">Product</label>
-                  <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculateMarketSize()" multiple data-placeholder="All products">
+                  <select class="form-control form-control-sm" ng-options="product.product_name group by product.product_type for product in filters.products" ng-model="product" ng-change="calculateMarketSize()" multiple data-placeholder="All products">
                   </select>
                 </div>
               </div>
@@ -103,7 +103,7 @@
               <div class="col-md-3">
                 <div class="form-group form-group-sm" ng-show="entityType === 'businesses'">
                   <label class="control-label">Business size</label>
-                  <select class="form-control" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculateMarketSize()" multiple data-placeholder="All business sizes">
+                  <select class="form-control form-control-sm" ng-options="range.value_range for range in filters.employees_by_location" ng-model="employees_range" ng-change="calculateMarketSize()" multiple data-placeholder="All business sizes">
                   </select>
                 </div>
               </div>
@@ -111,12 +111,12 @@
             <div class="row">
               <div class="col-md-12">
                 <canvas id="location_market_size_chart" style="width:100%; height:200px"></canvas>
-                <p class="form-control-static"
+                <p class="form-control form-control-sm-static"
                    ng-show="!loading && market_size.length === 0"
                    style="position:relative;top:-100px; text-align:center">
                    No data available for this location with the selected filters
                 </p>
-                <p class="form-control-static" ng-show="loading">Loading...</p>
+                <p class="form-control form-control-sm-static" ng-show="loading">Loading...</p>
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@
                       <div class="col-md-4">
                       <div class="form-group">
                         <label class="control-label">Product</label>
-                        <select class="form-control" ng-options="product.product_name group by product.product_type for product in filters.products"
+                        <select class="form-control form-control-sm" ng-options="product.product_name group by product.product_type for product in filters.products"
                           ng-model="product" ng-change="calculate_business_market_size()" multiple data-placeholder="All products">
                         </select>
                       </div>

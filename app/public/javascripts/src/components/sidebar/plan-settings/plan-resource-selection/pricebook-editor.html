@@ -9,7 +9,7 @@
   <div class="form-group">
     <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
     <div class="col-sm-4">
-      <select class="form-control"
+      <select class="form-control form-control-sm"
               ng-model="$ctrl.selectedStateForStrategy"
               ng-options="item for item in $ctrl.statesForStrategy"
               ng-change="$ctrl.definePriceBookForSelectedState()">
@@ -52,7 +52,7 @@
               <tr>
                 <td style="vertical-align: middle">Cost:</td>
                 <td style="width: 100px; border-right: none;">
-                  <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
+                  <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control form-control-sm">
                 </td>
                 <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
               </tr>
@@ -71,7 +71,7 @@
                 <!-- START TD block for sub-items with detailType === 'reference' -->
                 <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
                 <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
-                  <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control">
+                  <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control form-control-sm">
                 </td>
                 <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
                   <!-- "UnitPerHour" becomes "Hours", etc. -->
@@ -82,7 +82,7 @@
                 <!-- START TD block for sub-items with detailType === 'value' -->
                 <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
                 <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
-                  <input type="text" ng-model="subItem.costAssignment.cost" class="form-control">
+                  <input type="text" ng-model="subItem.costAssignment.cost" class="form-control form-control-sm">
                 </td>
                 <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
                   {{subItem.item.unitOfMeasure}}
