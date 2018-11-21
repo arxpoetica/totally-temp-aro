@@ -31,7 +31,7 @@ let showTargets = {
           <li class="item" ng-repeat="target in $ctrl.targets track by $index"
             ng-click="$ctrl.zoomLocation(target)">
             <a href="javascript:void(0)" class="text-danger" ng-click="$ctrl.removeLocation([target]); $event.stopPropagation()" style="margin-right: 5px">
-              <span class="fa fa-trash-o"></span>
+              <span class="far fa-trash-alt"></span>
             </a> {{ target.address || target.code || target.name }}
           </li>
         </ul>

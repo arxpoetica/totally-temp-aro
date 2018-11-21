@@ -4,8 +4,7 @@
     <title><%= config.ui.title %></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
@@ -66,14 +65,14 @@
               <form action="/login" method="post">
                 <div class="form-group">
                   <label>Username</label>
-                  <input id="txtEmail" name="email" class="form-control" placeholder="Username">
+                  <input id="txtEmail" name="email" class="form-control form-control-sm" placeholder="Username">
                 </div>
                 <div class="form-group">
                   <label>Password</label>
-                  <input id="txtPassword" type="password" name="password" class="form-control" placeholder="Password">
+                  <input id="txtPassword" type="password" name="password" class="form-control form-control-sm" placeholder="Password">
                 </div>
-                <button id="btnLogin" type="submit" class="btn btn-default">Log In</button>
-                <p class="pull-right"><small><a href="/forgot_password">Forgot password?</a></small></p>
+                <button id="btnLogin" type="submit" class="btn btn-light">Log In</button>
+                <p class="float-right"><small><a href="/forgot_password">Forgot password?</a></small></p>
               </form>
             </div>
           </div>

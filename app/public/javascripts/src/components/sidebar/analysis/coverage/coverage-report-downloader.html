@@ -4,13 +4,13 @@
   }
 </style>
 
-<table id="table-coverage-report-generator" class="table table-condensed table-striped">
+<table id="table-coverage-report-generator" class="table table-sm table-striped">
   <tbody>
     <!-- The rate reach matrix to be used for generating the report -->
     <tr>
       <td>Rate Reach</td>
       <td>
-        <select class="form-control"
+        <select class="form-control form-control-sm"
                 ng-model="$ctrl.selectedRateReachMatrix"
                 ng-options="item as item.name for item in $ctrl.rateReachMatrices">
         </select>

@@ -1,5 +1,5 @@
 <div style="position: relative;">
-  <table class="table table-condensed table-striped">
+  <table class="table table-sm table-striped">
     <tbody>
       <tr ng-repeat="(itemKey, itemValue) in $ctrl.allDataItems" ng-if="!itemValue.hidden">
         <td style="vertical-align: middle">{{itemValue.description}}</td>
@@ -11,13 +11,13 @@
                               selection-changed="$ctrl.onSelectionChanged(dataSource)"
                               style="flex: 1 1 auto;">
             </aro-multi-select>
-            <div class="btn-group" style="flex: 0 0 auto;">
-              <button class="btn btn btn-default"
+            <div class="btn-group btn-group-sm" style="flex: 0 0 auto;">
+              <button class="btn btn-light"
                       ng-if="$ctrl.isDataSourceEditable[itemKey]" 
                       ng-click="$ctrl.editDataSource(itemKey)">
                 <span class="fa fa-edit"></span>
               </button>
-              <button class="btn btn btn-default" ng-disabled="!itemValue.uploadSupported" ng-click="$ctrl.uploadDataSource(itemValue.id)">
+              <button class="btn btn-light" ng-disabled="!itemValue.uploadSupported" ng-click="$ctrl.uploadDataSource(itemValue.id)">
                 <span class="fa fa-upload"></span>
               </button>
             </div>

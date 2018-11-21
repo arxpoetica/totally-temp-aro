@@ -73,8 +73,8 @@
         <!-- Buttons to commit or discard a transaction -->
         <div class="text-center">
           <div class="btn-group ">
-            <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-            <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+            <button class="btn btn-light" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+            <button class="btn btn-light" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
           </div>
         </div>
         <br>
@@ -103,7 +103,7 @@
 				        style="margin: 0px;">
 				        Site Boundaries
 				    </div>
-			      <select class="form-control" style="flex: 1 1 auto"
+			      <select class="form-control form-control-sm" style="flex: 1 1 auto"
 			        ng-if="$ctrl.state.showSiteBoundary" 
 			        ng-model="$ctrl.state.selectedBoundaryType"
 			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
@@ -137,14 +137,14 @@
               Distance ({{$ctrl.state.configuration.units.length_units}})
             </div>
             <div style="flex: 1 1 auto; margin-top: 5px; padding-left: 5px; padding-right: 5px;">
-              <input class="form-control"
+              <input class="form-control form-control-sm"
                       ng-model="$ctrl.lastUsedBoundaryDistance">
             </div>
           </div>
         </div>
 
         <!-- Section to show subnet calculation options -->
-        <table id="tblPlanInfo" class="table table-condensed table-striped" style="margin-top: 15px;">
+        <table id="tblPlanInfo" class="table table-sm table-striped" style="margin-top: 15px;">
           <tbody>
             <tr>
               <td>Fiber routing logic</td>
@@ -208,8 +208,8 @@
           
 
           <button ng-if="$ctrl.isEditFeatureProps"
-                  ng-class="{ 'btn btn-sm pull-right': true,
-                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                  ng-class="{ 'btn btn-sm float-right': true,
+                              'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
                   ng-click="$ctrl.saveSelectedEquipmentProperties()"
@@ -235,7 +235,7 @@
                 <form class="form-inline">
                   <div class="form-group" style="margin-bottom: 2px;">
                     <label for="selectedMapObjectLat">lat: </label>
-                    <input type="number" class="form-control" id="selectedMapObjectLat"
+                    <input type="number" class="form-control form-control-sm" id="selectedMapObjectLat"
                       placeholder="lat" 
                       ng-model="$ctrl.selectedMapObjectLat"
                       ng-model-options="{ debounce: 100 }"
@@ -244,7 +244,7 @@
                   </div>
                   <div class="form-group" style="margin-bottom: 2px;">
                     <label for="selectedMapObjectLng">long: </label>
-                    <input type="number" class="form-control" id="selectedMapObjectLng"
+                    <input type="number" class="form-control form-control-sm" id="selectedMapObjectLng"
                       placeholder="long" 
                       ng-model="$ctrl.selectedMapObjectLng"
                       ng-model-options="{ debounce: 100 }"
@@ -264,8 +264,8 @@
                               get-new-list-item="$ctrl.getNewListItem"
                               ></editor-interface-tree>
 
-          <button ng-class="{ 'btn btn-sm pull-right': true,
-                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+          <button ng-class="{ 'btn btn-sm float-right': true,
+                              'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                               'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
                   ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
                   ng-click="$ctrl.saveSelectedEquipmentProperties()"
@@ -293,13 +293,13 @@
           </div>
           <!-- A table containing the editable properties of the selected object -->
           <table id="tblBoundaryProperties"
-                 class="table table-condensed table-striped sidebar-table"
+                 class="table table-sm table-striped sidebar-table"
                  style="margin-bottom: 10px">
             <tbody>
               <tr>
                 <td>Site boundary type</td>
                 <td>
-                  <select class="form-control"
+                  <select class="form-control form-control-sm"
                           ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryTypeId"
                           ng-options="item.id as item.description for item in $ctrl.state.boundaryTypes"
                           ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.handleSiteBoundaryTypeChanged();">
@@ -309,7 +309,7 @@
               <tr>
                 <td>Site move update</td>
                 <td>
-                  <select class="form-control"
+                  <select class="form-control form-control-sm"
                           ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteMoveUpdate"
                           ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteMoveUpdates"
                           ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
@@ -319,7 +319,7 @@
               <tr>
                 <td>Site boundary generation</td>
                 <td>
-                  <select class="form-control"
+                  <select class="form-control form-control-sm"
                           ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryGeneration"
                           ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteBoundaryGenerations"
                           ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
@@ -329,8 +329,8 @@
             </tbody>
           </table>
           <div class="clearfix">
-	          <button ng-class="{ 'btn btn-sm pull-right': true,
-	                              'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+	          <button ng-class="{ 'btn btn-sm float-right': true,
+	                              'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
 	                              'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
 	                  ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
 	                  ng-click="$ctrl.saveSelectedBoundaryProperties()"

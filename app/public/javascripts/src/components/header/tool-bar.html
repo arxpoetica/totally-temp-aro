@@ -50,6 +50,9 @@
   }
   
   /* http://jsfiddle.net/JnrvG/1/ */
+  .myDropdown1,.rulerDropdown {
+    position: relative;
+  }
   .myDropdown1 input[type="range"]{
     -webkit-appearance: none;
     -moz-apperance: none;
@@ -74,6 +77,7 @@
 
   .myDropdown1 font {
     color: #1f7de6;
+    font-size: 14px;
   }
 
   .ruler-container {
@@ -94,7 +98,7 @@
   #global-search-toolbutton .select2-choice {
     padding-left: 0px;
     color: white;
-    border-radius: 0px;
+    border: none;
   }
   #global-search-toolbutton .select2-chosen {
     background-color: #1f7de6;
@@ -128,7 +132,7 @@
   <img ng-if="!$ctrl.switchIcon" src="images/logos/aro/logo_navbar.png" class="no-collapse" style="align-self: center; padding-left: 10px; padding-right: 10px">
   <span ng-if="$ctrl.switchIcon" style="align-self: center; padding-left: 10px; padding-right: 10px"><b>NPM BSA</b></span>
   <div ng-controller="global-search-controller" class="no-collapse" id="global-search-toolbutton" style="flex: 0 0 250px; margin: auto; width: 250px;">
-    <input class="form-control select2" type="text" placeholder="Search cities, states or wirecenters">
+    <input class="form-control form-control-sm select2" style="padding:0px; border-radius: 0px;" type="text" placeholder="Search cities, states or wirecenters">
   </div>
 
   <div class="fa fa-search no-collapse" style="padding-left: 10px; padding-right: 10px; margin: auto;"></div>
@@ -161,7 +165,7 @@
           data-toggle="tooltip"
           data-placement="bottom"
           title="Save plan as...">
-    <i class="fa fa-floppy-o"></i>
+    <i class="far fa-save"></i>
   </button>
 
   <button class="btn"
@@ -180,16 +184,16 @@
       ng-click="$ctrl.rulerAction()"
       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
       title="Ruler">
-      <i class="fa fa-arrows-h"></i>
+      <i class="fa fa-ruler"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right ruler-dropdown">
       <div class="ruler-container">
-        <select class="form-control"
+        <select class="form-control form-control-sm"
           ng-model="$ctrl.state.currentRulerAction"
           ng-options="item as item.label for item in $ctrl.state.rulerActions track by item.id"
           ng-change="$ctrl.onChangeRulerAction()">
         </select>
-        <button type="button" class="btn btn-primary btn-sm ruler-undo-btn form-control" ng-if="$ctrl.showRemoveRulerButton()"
+        <button type="button" class="btn btn-primary btn-sm ruler-undo-btn form-control form-control-sm" ng-if="$ctrl.showRemoveRulerButton()"
           ng-click="$ctrl.removeLastRulerMarker()"><i class="fa fa-minus"></i>
         </button>
       </div>
@@ -212,14 +216,14 @@
       <div class="dropdown-divider" ng-if="$ctrl.heatMapOption"></div>
       <font ng-if="$ctrl.heatMapOption">Heatmap Intensity</font>
       <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
-        style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">
+        style="margin-top: 10px; width: calc(100% - 20px); margin: 10px 10px;" ng-change="$ctrl.changeHeatMapOptions()">
 
       <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteBoundaries">
         <div class="dropdown-divider"></div>
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
                style="margin-left: 2px;">
         <font>Site Boundaries</font>
-        <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
+        <select ng-if="$ctrl.state.showSiteBoundary" class="form-control form-control-sm" style="margin-top: 10px"
                 ng-model="$ctrl.state.selectedBoundaryType"
                 ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
                 ng-change="$ctrl.toggleSiteBoundary()">
@@ -246,7 +250,7 @@
         <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
           style="margin-left: 2px;">
         <font>Fiber Size</font>
-        <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
+        <select ng-if="$ctrl.state.showFiberSize" class="form-control form-control-sm" style="margin-top: 10px"
           ng-model="$ctrl.state.viewSetting.selectedFiberOption"
           ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
           ng-change="$ctrl.state.requestMapLayerRefresh.next(null)">
@@ -278,7 +282,7 @@
           data-toggle="tooltip"
           data-placement="bottom"
           title="Select multiple locations">
-    <i class="fa fa-bookmark-o fa-rotate-180"></i>
+    <i class="fa fa-draw-polygon"></i>
   </button>
 
   <aro-drawing-manager
@@ -315,7 +319,7 @@
   </button>
 
   <div class="dropdown" ng-hide="!$ctrl.showDropDown" ng-style="{ 'border-left': '#eee 1px dotted', width: $ctrl.dropdownWidthPixels }">
-    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <button class="btn btn-light" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
       <i class="fa fa-angle-double-down"></i>
     </button>
     <!-- Override some styles on the dropdown-menu UL below to remove margins, padding, etc -->

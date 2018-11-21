@@ -5,12 +5,12 @@
 }
 
 </style>  
-<table class="table table-condensed table-striped view-settings">
+<table class="table table-sm table-striped view-settings">
   <tbody>
     <!-- <tr>
       <td>HeatMap Options</td>
       <td>
-        <select class="form-control" ng-model="$ctrl.mapTileOptions.selectedHeatmapOption" ng-options="item as item.label for item in $ctrl.state.viewSetting.heatmapOptions track by item.id"
+        <select class="form-control form-control-sm" ng-model="$ctrl.mapTileOptions.selectedHeatmapOption" ng-options="item as item.label for item in $ctrl.state.viewSetting.heatmapOptions track by item.id"
           ng-change="$ctrl.updateState()">
         </select>
       </td>
@@ -18,7 +18,7 @@
     <tr>
       <td>Fiber Width</td>
       <td>
-        <select class="form-control" ng-model="$ctrl.state.viewSetting.selectedFiberOption" ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
+        <select class="form-control form-control-sm" ng-model="$ctrl.state.viewSetting.selectedFiberOption" ng-options="option as option.name for option in $ctrl.state.viewFiberOptions track by option.id"
           ng-change="$ctrl.fiberOptionChanged()">
         </select>
       </td>
@@ -27,7 +27,7 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
       <td>Max Pixel Width</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.max" 
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.max" 
           ng-change="$ctrl.fiberOptionChanged()" placeholder="Max Pixel Width">
       </td>
     </tr>
@@ -35,7 +35,7 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
       <td>Min Pixel Width</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.min" 
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.min" 
           ng-change="$ctrl.fiberOptionChanged()" placeholder="Min Pixel Width">
       </td>
     </tr>
@@ -43,7 +43,7 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.opacity">
       <td>Max Opacity</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.max" 
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.max" 
           ng-change="$ctrl.fiberOptionChanged()" placeholder="Max Opacity">
       </td>
     </tr>
@@ -51,7 +51,7 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.opacity">
       <td>Min Opacity</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.min" 
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.opacity.min" 
           ng-change="$ctrl.fiberOptionChanged()" placeholder="Min Opacity">
       </td>
     </tr>
@@ -59,7 +59,7 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth">
       <td>Exponent</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.divisor" 
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.divisor" 
           ng-change="$ctrl.fiberOptionChanged()" placeholder="Exponent">
       </td>
     </tr>
@@ -67,7 +67,7 @@
     <tr ng-if="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth &&  $ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor">
       <td>Atomic Divisor</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" 
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.state.viewSetting.selectedFiberOption.pixelWidth.atomicDivisor" 
           ng-change="$ctrl.fiberOptionChanged()" placeholder="Atomic Divisor">
       </td>
     </tr>
@@ -83,9 +83,9 @@
       <td>Show equipment properties (csv)</td>
       <td>
         <div class="input-group">
-          <input class="form-control" type="text" ng-model="$ctrl.equipmentPropertiesToRender">
+          <input class="form-control form-control-sm" type="text" ng-model="$ctrl.equipmentPropertiesToRender">
           <span class="input-group-btn">
-            <button class="btn btn-default" ng-click="$ctrl.saveEquipmentPropertiesToRender()">Save</button>
+            <button class="btn btn-light" ng-click="$ctrl.saveEquipmentPropertiesToRender()">Save</button>
           </div>
         </span>
       </td>
@@ -98,7 +98,7 @@
     <tr>
       <td>Power</td>
       <td>
-        <input class="form-control" type="text" ng-model="$ctrl.mapTileOptions.heatMap.powerExponent" ng-change="$ctrl.updateState()">
+        <input class="form-control form-control-sm" type="text" ng-model="$ctrl.mapTileOptions.heatMap.powerExponent" ng-change="$ctrl.updateState()">
       </td>
     </tr>
   </tbody>
