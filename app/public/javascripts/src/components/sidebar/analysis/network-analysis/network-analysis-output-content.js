@@ -74,7 +74,7 @@ class NetworkAnalysisOutputContentController {
         }
 
         if (this.selectedOption.key === 'irr') {
-          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value * 100, 0, yAxisCategory, false, '%') },beginAtZero:  true } }] }
+          options.scales = { yAxes: [{ ticks: { callback: (value, index, values) => { return this.buildLabel(value * 100, 0, yAxisCategory, false, '%') },suggestedMin:  1 } }] }
           tooltips = {
             callbacks: {
               label: (tooltipItems, data) => {

@@ -42,7 +42,7 @@
 	      refresh-tag-list="$ctrl.state.StateViewMode.loadEntityList($ctrl.$http,$ctrl.state,'NetworkEquipmentEntity',searchObj,'id,clli,objectId','clli',$ctrl.state.configuration)"
 	      on-selection-changed="$ctrl.viewSelectedEquipment(selectedObj,isZoom)">
 	    </aro-search>
-	  </div>
+		</div>
 	  
 		<div class="ei-panel-header clearfix" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
 	    
@@ -57,8 +57,8 @@
 	    </div>
 	    -->
 	    <div class="sidebar-header-subinfo">
-        <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedEquipmentGeog[1] | number:6}}</div>
-        <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedEquipmentGeog[0] | number:6}}</div>
+        <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedEquipmentGeog[1] | number:5}}</div>
+        <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedEquipmentGeog[0] | number:5}}</div>
       </div>
 	  </div>
 	  <div class="equipment-detail ei-panel-content" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
