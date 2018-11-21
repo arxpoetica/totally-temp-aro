@@ -1332,3 +1332,31 @@ ui-select-font {
 .ui-select-choices-row-inner {
   font-size: 14px;
 }
+
+.multiselect {
+  font-size: 14px;
+}
+
+.multiselect-container {
+  font-size: 14px;
+}
+
+.multiselect-container li a {
+  color: black;
+}
+
+.multiselect-container li a label {
+  padding-left: 20px;
+}
+
+.multiselect-container.dropdown-menu>.active,
+.multiselect-container.dropdown-menu>.active:focus,
+.multiselect-container.dropdown-menu>.active:hover {
+  background-color: #1f7de6;
+}
+
+.multiselect-container.dropdown-menu>.active>a,
+.multiselect-container.dropdown-menu>.active:focus>a,
+.multiselect-container.dropdown-menu>.active:hover>a {
+  color: white;
+}
