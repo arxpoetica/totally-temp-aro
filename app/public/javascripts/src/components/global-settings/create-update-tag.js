@@ -50,23 +50,23 @@ let createUpdateTag = {
     }
     </style>
     <div>
-      <form class="form-horizontal">
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Name</label>
+      <form>
+        <div class="form-group row">
+          <label class="col-sm-4 col-form-label">Name</label>
           <div class="col-sm-8">
             <input type="text" class="form-control form-control-sm" ng-model="$ctrl.tag.name">
           </div>
         </div>
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Description</label>
+        <div class="form-group row">
+          <label class="col-sm-4 col-form-label">Description</label>
           <div class="col-sm-8">
             <input type="text" class="form-control form-control-sm" ng-model="$ctrl.tag.description">
           </div>
         </div>
-        <div class="form-group">
-          <label class="col-sm-4 control-label">Color Hue</label>
+        <div class="form-group row">
+          <label class="col-sm-4 col-form-label">Color Hue</label>
           <div class="col-sm-8">
-            <div class="hue"><input name="hue" type="range" min="0" max="1" step="0.01" ng-model="$ctrl.tag.colourHue"></div>
+            <div class="hue"><input name="hue" type="range" min="0" max="1" step="0.01" ng-model="$ctrl.tag.colourHue" style="width:100%"></div>
           </div>  
         </div>  
       </form>

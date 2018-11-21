@@ -40,19 +40,19 @@
             </aro-multi-select>
           </td>
           <td style="min-width: 100px;">
-            <div class="float-right">
-              <a class="btn btn-xs btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"
+            <div class="btn-group btn-group-sm float-right">
+              <button class="btn btn-xs btn-primary" ng-click="$ctrl.resendLink(user)" ng-show="user.id !== $ctrl.user_id"
                  data-toggle="tooltip" data-placement="bottom" title="Resend email">
-                <span class="glyphicon glyphicon-send"></span>
-              </a>
-              <a class="btn btn-xs btn-primary" ng-click="$ctrl.openUserSettingsForUserId({userId: user.id})"
+                <span class="fa fa-envelope"></span>
+              </button>
+              <button class="btn btn-xs btn-primary" ng-click="$ctrl.openUserSettingsForUserId({userId: user.id})"
                  data-toggle="tooltip" data-placement="bottom" title="Open User Settings">
                 <span class="fa fa-cog"></span>
-              </a>
-              <a class="btn btn-xs btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"
+              </button>
+              <button class="btn btn-xs btn-danger" ng-click="$ctrl.deleteUser(user)" ng-show="user.id !== $ctrl.user_id"
                  data-toggle="tooltip" data-placement="bottom" title="Delete user">
-                <span class="glyphicon glyphicon-trash"></span>
-              </a>
+                <span class="fa fa-trash"></span>
+              </button>
             </div>
           </td>
         </tr>
@@ -62,18 +62,18 @@
   <div style="flex: 0 0 auto;">
     <div class="float-right">
       <nav aria-label="Page navigation">
-        <ul class="pagination pagination-sm" style="display: inline; padding-right: 20px;">
-          <li>
-            <a href="#" aria-label="Previous" ng-click="$ctrl.selectPreviousPage()">
+        <ul class="pagination pagination-sm">
+          <li class="page-item">
+            <a href="#" aria-label="Previous" ng-click="$ctrl.selectPreviousPage()" class="page-link">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
           <li ng-repeat="page in $ctrl.pagination.visiblePages"
-              ng-class="{ 'active': $ctrl.pagination.currentPage === page }">
-            <a href="#" ng-click="$ctrl.selectPage(page)">{{page}}</a>
+              ng-class="{ 'page-item': true, 'active': $ctrl.pagination.currentPage === page }">
+            <a href="#" ng-click="$ctrl.selectPage(page)" class="page-link">{{page}}</a>
           </li>
-          <li>
-            <a href="#" aria-label="Next" ng-click="$ctrl.selectNextPage()">
+          <li class="page-item">
+            <a href="#" aria-label="Next" ng-click="$ctrl.selectNextPage()" class="page-link">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
