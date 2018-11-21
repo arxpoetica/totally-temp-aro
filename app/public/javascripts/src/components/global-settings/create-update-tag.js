@@ -66,7 +66,7 @@ let createUpdateTag = {
         <div class="form-group row">
           <label class="col-sm-4 col-form-label">Color Hue</label>
           <div class="col-sm-8">
-            <div class="hue"><input name="hue" type="range" min="0" max="1" step="0.01" ng-model="$ctrl.tag.colourHue" style="width:100%"></div>
+            <div class="hue"><input name="hue" type="range" min="0" max="1" step="0.01" ng-model="$ctrl.tag.colourHue" style="width:100%; margin-top: 5px;"></div>
           </div>  
         </div>  
       </form>
