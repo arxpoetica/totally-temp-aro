@@ -1328,3 +1328,7 @@ ui-select-font {
 .ui-select-match-item {
   padding: 1px 12px;
 }
+
+.ui-select-choices-row-inner {
+  font-size: 14px;
+}
