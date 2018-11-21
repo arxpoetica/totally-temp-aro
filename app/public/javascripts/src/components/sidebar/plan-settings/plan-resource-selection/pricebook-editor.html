@@ -22,8 +22,8 @@
 <ul class="nav nav-tabs" role="tablist">
   <li ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
       role="presentation"
-      ng-class="{ 'active': $index === 0 }">
-    <a href="#{{priceBookDefinition.id}}" role="tab" data-toggle="tab">
+      ng-class="{ 'nav-item': true, 'active': $index === 0 }">
+    <a href="#{{priceBookDefinition.id}}" class="nav-link" role="tab" data-toggle="tab">
       {{priceBookDefinition.description}}
     </a>
   </li>
