@@ -5,18 +5,18 @@
 </style>
 <div class="no-collapse" id="set-default-location" style="display: flex; flex-direction: column; height: 100%;">
   <div style="flex: 1 1 auto;">
-    <table id="tblUserSettings" class="table table-condensed table-striped">
+    <table id="tblUserSettings" class="table table-sm table-striped">
       <tbody>
         <tr>
           <td>Map Start Location</td>
           <td> 
-            <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
+            <input class="form-control form-control-sm select2" type="text" placeholder="Set cities, states or wirecenters">
           </td>
         </tr>
         <tr>
           <td>Default template</td>
           <td>
-            <select class="form-control"
+            <select class="form-control form-control-sm"
                     ng-model="$ctrl.userConfiguration.projectTemplateId"
                     ng-options="item.id as item.name for item in $ctrl.allProjectTemplates">
             </select>
@@ -25,7 +25,7 @@
         <tr>
           <td>Perspective</td>
           <td>
-            <select class="form-control"
+            <select class="form-control form-control-sm"
                     ng-model="$ctrl.userConfiguration.perspective"
                     ng-options="item.perspective as item.name for item in $ctrl.perspectives">
             </select>
@@ -35,6 +35,6 @@
     </table>
   </div>
   <div style="flex: 0 0 auto;">
-    <button class="btn btn-primary pull-right" ng-click="$ctrl.saveSettings()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save Settings</button>
+    <button class="btn btn-primary float-right" ng-click="$ctrl.saveSettings()"><i class="fa fa-save"></i>&nbsp;&nbsp;Save Settings</button>
   </div>
 </div>

@@ -3,7 +3,7 @@
   <ui-select-match placeholder="Select or search a {{$ctrl.objectName}} in the list...">
     {{ $select.selected[$ctrl.labelId] || $select.selected.tabblockId}}
   </ui-select-match>
-  <ui-select-choices class="ui-select-width-300" 
+  <ui-select-choices class="ui-select-width-300 ui-select-font" 
     repeat="item in $ctrl.searchList | filter: $select.search" 
     refresh="$ctrl.refreshTagList({searchObj:$select.search})"
     refresh-delay="100">

@@ -10,7 +10,7 @@
       cursor: pointer;
     }
   </style>
-  <table id="tblPlanSummary" class="table table-condensed table-striped">
+  <table id="tblPlanSummary" class="table table-sm table-striped">
     <thead>
       <tr>
         <th></th>
@@ -24,8 +24,8 @@
       <!-- Display total summary of a category -->
       <tr>
         <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded(categoryType)">
-          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[categoryType]"></i>
-          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[categoryType]"></i>
+          <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[categoryType]"></i>
+          <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[categoryType]"></i>
           {{categoryType}}
         </th>
 
@@ -70,8 +70,8 @@
       <!-- coverage total summary -->
       <tr>
         <th id="pointer" ng-click="$ctrl.toggleIsKeyExpanded('Coverage')">
-          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Coverage']"></i>
-          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Coverage']"></i>
+          <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded['Coverage']"></i>
+          <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isKeyExpanded['Coverage']"></i>
           Coverage
         </th>
         <td>{{ $ctrl.summaryCategoryTypes['Coverage']['totalSummary'][$ctrl.summaryInstallationTypes['INSTALLED'].id][0].count }}</td>
@@ -90,8 +90,8 @@
     <tbody ng-if="$ctrl.isKeyExpanded['Coverage']" ng-repeat="(locationEntityType, coverageinfo) in $ctrl.summaryCategoryTypes['Coverage']['summaryData']">
       <tr>
         <td id="pointer" class="indent-1" ng-click="$ctrl.togglelocationTagCoverage(locationEntityType)">
-          <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isLocKeyExpanded[locationEntityType]"></i>
-          <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isLocKeyExpanded[locationEntityType]"></i>
+          <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isLocKeyExpanded[locationEntityType]"></i>
+          <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isLocKeyExpanded[locationEntityType]"></i>
           {{locationEntityType}}
         </td>
         <!-- <td ng-repeat="(type,info) in $ctrl.summaryInstallationTypes">

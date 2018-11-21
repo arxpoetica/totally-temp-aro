@@ -7,7 +7,7 @@
       padding-left: 30px !important;
     }
   </style>
-  <table id="tblNetworkBuildOutput" class="table table-condensed table-striped">
+  <table id="tblNetworkBuildOutput" class="table table-sm table-striped">
     <tbody>
 
       <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics"
@@ -58,5 +58,5 @@
     </tbody>
   </table>
   <button class="btn btn-primary pull-left" ng-click="$ctrl.state.reportModal.next(true)">Reports</button>
-  <button class="btn btn-primary pull-right" ng-click="$ctrl.showDetailedOutput()">Expand Results</button>
+  <button class="btn btn-primary float-right" ng-click="$ctrl.showDetailedOutput()">Expand Results</button>
 </div>

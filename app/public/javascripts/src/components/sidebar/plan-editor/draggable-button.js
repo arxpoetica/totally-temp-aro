@@ -47,7 +47,7 @@ DraggableButtonController.$inject = ['$element', 'state']
   
 let draggableButton = {
   template: `
-    <button class="btn btn-default draggable-item-button"
+    <button class="btn btn-light draggable-item-button"
             ng-disabled="$ctrl.isDisabled">
       <img ng-src="{{$ctrl.icon}}">
     </button>

@@ -26,7 +26,7 @@ let accordionPanelTitle = {
         flex: 0 0 auto;
       }
     </style>
-    <button class="btn btn-default btn-block accordion-title" ng-click="$ctrl.parentAccordion.setExpandedAccordionId($ctrl.panelId)">
+    <button class="btn btn-light btn-block accordion-title" ng-click="$ctrl.parentAccordion.setExpandedAccordionId($ctrl.panelId)">
       {{$ctrl.title}}
     </button>
   `,

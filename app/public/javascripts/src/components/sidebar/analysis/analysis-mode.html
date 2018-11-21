@@ -39,14 +39,14 @@
 </style>
 <div class="analysis-mode-container">
   <div class="analysis-type">
-    <h4 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
+    <h5 style="text-align: center;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h5>
     <optimize-button></optimize-button>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'INPUT'">
     <accordion-panel-title title="'Input'" panel-id="'INPUT'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'INPUT'">
       <div class="col-xs-7" style="left: 20%;border: 10px solid white;">
-        <select class="form-control"
+        <select class="form-control form-control-sm"
           ng-model="$ctrl.state.networkAnalysisType"
           ng-options="item as item.label for item in $ctrl.state.networkAnalysisTypes">
         </select>

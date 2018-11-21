@@ -24,13 +24,13 @@
 </style>
 <div class="plan-details-container" ng-if="!$ctrl.currentPlanInfo.ephemeral">
   <div style="position: relative;">
-    <table id="tblPlanInfo" class="table table-condensed table-striped">
+    <table id="tblPlanInfo" class="table table-sm table-striped">
       <tbody>
         <tr>
           <td>Plan Name</td>
           <td>
             <span ng-if="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.name}}</span>
-            <input ng-if="$ctrl.isEditMode" type="text" class="form-control text-left"
+            <input ng-if="$ctrl.isEditMode" type="text" class="form-control form-control-sm text-left"
                   placeholder="Plan Name" ng-model="$ctrl.currentPlanInfo.name">
           </td>
         </tr>
@@ -39,7 +39,7 @@
           <td> 
             <span ng-show="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.areaName}}</span>
             <span ng-show="$ctrl.isEditMode">
-              <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
+              <input class="form-control form-control-sm select2" type="text" placeholder="Set cities, states or wirecenters">
             </span>
           </td>
         </tr>
@@ -52,8 +52,8 @@
           <td>
             <span class="tags">
               <div ng-if="!$ctrl.addGeneralTags" ng-repeat="tag in $ctrl.getTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.global}) track by tag.id" 
-                class="tag label" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
-                <span class="label"> {{tag.name}} 
+                class="badge badge-primary" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
+                <span> {{tag.name}} 
                   <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('general',tag)"></i>
                 </span>
               </div>
@@ -70,8 +70,8 @@
           <td>
             <span class="tags">
               <div ng-if="!$ctrl.addSATags" ng-repeat="tag in $ctrl.getSaTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.linkTags.serviceAreaIds}) track by tag.id" 
-                class="tag label satags">
-                <span class="label satag"> {{tag.code}} 
+                class="badge satags">
+                <span> {{tag.code}} 
                   <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('svc',tag)"></i>
                 </span>
               </div>
@@ -110,7 +110,7 @@
       <i class="fa fa-save"></i>&nbsp;&nbsp;Save Changes
     </button>
     <button class="btn btn-danger" ng-disabled="!$ctrl.currentUserCanEdit" ng-click="$ctrl.deletePlan({plan:$ctrl.currentPlanInfo})">
-      <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete Plan
+      <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete Plan
     </button>
   </div>
 

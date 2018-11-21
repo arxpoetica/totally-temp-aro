@@ -1,16 +1,16 @@
 <div style="position: relative; height: 100%;">
-  <table class="table table-condensed table-striped">
+  <table class="table table-sm table-striped">
     <tbody>
       <tr ng-repeat="(itemKey, itemValue) in $ctrl.state.resourceItems">
         <td style="vertical-align: middle">{{itemValue.description}}</td>
         <td>
           <div style="display:flex">
-            <select class="form-control"
+            <select class="form-control form-control-sm"
                     ng-model="itemValue.selectedManager"
                     ng-options="item.description for item in itemValue.allManagers"
                     style="flex: 1 1 auto;">
             </select>
-            <button class="btn btn-sm btn-default" style="flex: 0 0 auto;" ng-click="$ctrl.state.showPlanResourceEditor(itemKey)">
+            <button class="btn btn-sm btn-light" style="flex: 0 0 auto;" ng-click="$ctrl.state.showPlanResourceEditor(itemKey)">
               <span class="fa fa-upload"></span>
             </button>
           </div>

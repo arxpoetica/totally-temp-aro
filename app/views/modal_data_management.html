@@ -29,8 +29,8 @@
                     {{entities.name}}
                   </td>
                   <td>
-                    <p class="pull-right">
-                      <button class="btn btn-primary btn-sm" ng-click="deleteUserEntities(entities)"><span class="fa fa-trash"></span></button>
+                    <p class="float-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserEntities(entities)"><span class="far fa-trash-alt"></span></button>
                     </p>
                   </td>
                 </tr>
@@ -53,8 +53,8 @@
                     {{boundaries.name}}
                   </td>
                   <td>
-                    <p class="pull-right">
-                      <button class="btn btn-primary btn-sm" ng-click="deleteUserBoundaries(boundaries)"><span class="fa fa-trash"></span></button>
+                    <p class="float-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserBoundaries(boundaries)"><span class="far fa-trash-alt"></span></button>
                     </p>
                   </td>
                 </tr>
@@ -77,8 +77,8 @@
                     {{fiber.name}}
                   </td>
                   <td>
-                    <p class="pull-right">
-                      <button class="btn btn-primary btn-sm" ng-click="deleteUserFiber(fiber)"><span class="fa fa-trash"></span></button>
+                    <p class="float-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserFiber(fiber)"><span class="far fa-trash-alt"></span></button>
                     </p>
                   </td>
                 </tr>
@@ -99,7 +99,7 @@
               <div class="modal-body">
           		<form class="form-horizontal">
           		<div>
-          		<label class="pull-right">
+          		<label class="float-right">
           			<input type="checkbox" class="checkboxfill" ng-model="showMorphology">
         		</label>
         		<label style="margin-left:25px">Upload Morphology</label>
@@ -108,7 +108,7 @@
 	          </div>
 	          
 	          <div ng-show="showMorphology" style="padding:10px; margin-left:25px; margin-right:30px">
-			      <!-- <input class="form-control uploadedCustomersSelect" id="uploadedMorphology"
+			      <!-- <input class="form-control form-control-sm uploadedCustomersSelect" id="uploadedMorphology"
 			          ng-model="selectedDatasource"> -->
 			      <button class="btn btn-sm btn-primary btn-block" style="margin: 5px 0" ng-click="addMorphology()">
 			        <span class="fa fa-plus"></span> Add Morphology
@@ -119,8 +119,8 @@
                     {{fiber.name}}
                   </td>
                   <td>
-                    <p class="pull-right">
-                      <button class="btn btn-primary btn-sm" ng-click="deleteUserFiber(fiber)"><span class="fa fa-trash"></span></button>
+                    <p class="float-right">
+                      <button class="btn btn-primary btn-sm" ng-click="deleteUserFiber(fiber)"><span class="far fa-trash-alt"></span></button>
                     </p>
                   </td>
                 </tr> -->
@@ -130,7 +130,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

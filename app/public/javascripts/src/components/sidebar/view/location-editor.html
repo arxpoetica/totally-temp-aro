@@ -35,22 +35,22 @@
     <div class="row">
       <div class="col-md-12" style="padding-bottom: 15px">
         Library <span class="label label-default">{{$ctrl.currentTransaction.libraryName}}</span>
-        <div class="pull-right">transaction ID <span class="label label-default">{{$ctrl.currentTransaction.id}}</span></div>
+        <div class="float-right">transaction ID <span class="label label-default">{{$ctrl.currentTransaction.id}}</span></div>
       </div>
     </div>
     <div class="text-center">
       <div class="btn-group ">
-        <button class="btn btn-default" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-        <button class="btn btn-default" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+        <button class="btn btn-light" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+        <button class="btn btn-light" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
       </div>
     </div>
     <br>
     <div ng-if="$ctrl.selectedMapObject" style="position: relative;">
-      <table id="tblLocationProperties" class="table table-condensed table-striped" style="margin-bottom: 10px">
+      <table id="tblLocationProperties" class="table table-sm table-striped" style="margin-bottom: 10px">
         <tr>
           <td>Location type:</td>
           <td>
-            <select class="form-control"
+            <select class="form-control form-control-sm"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
                     ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
                     ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
@@ -60,14 +60,14 @@
         <tr>
           <td>Number of locations:</td>
           <td>
-            <input class="form-control"
+            <input class="form-control form-control-sm"
                   ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
                   ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
           </td>
         </tr>
       </table>
       <button ng-class="{ 'btn btn-block': true,
-                          'btn-default': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
+                          'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                           'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
               ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
               ng-click="$ctrl.saveSelectedLocationAndProperties()">
@@ -75,7 +75,7 @@
       </button>
       <!-- Show a delete button if a map object is selected -->
       <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
-        <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
+        <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete selected location
       </button>
 
       <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->

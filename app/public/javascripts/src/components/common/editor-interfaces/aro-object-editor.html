@@ -9,8 +9,8 @@
          RECURSIVELY show the object editor for the sub-object -->
     <div class="ei-foldout" ng-if="$ctrl.isExpandable(value)" style="width: 100%;">
       <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded($index)">
-        <i class="fa fa-plus-square-o ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
-        <i class="fa fa-minus-square-o ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
+        <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[$index]"></i>
+        <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[$index]"></i>
         {{key}}
       </div>
       <!-- RECURSIVE call to aro-object-editor. Not creating object if indentation level is too high -->
@@ -25,7 +25,7 @@
     <div class="ei-property-item" ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
       <div style="flex: 1 1 auto;">{{key}}</div>
       <!-- Note that our ng-model is "$ctrl.objectToEdit[key]" and not "value" so the two way binding updates the actual object -->
-      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToEdit[key]" class="form-control input-sm" style="flex: 0 0 100px">
+      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToEdit[key]" class="form-control form-control-sm input-sm" style="flex: 0 0 100px">
     </div>
   </div>
 </div>
