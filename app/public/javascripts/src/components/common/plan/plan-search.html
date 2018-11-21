@@ -4,35 +4,33 @@
   </div>
 
   <div class="input-group">
-    <div class="form-group has-feedback has-clear">
-      <!-- (tagging) paste not working if tagging-label="false" and tagging-tokens are set -->
-      <!-- http://plnkr.co/edit/kauNS7YjckRfi616k4PT?p=preview -->
-      <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.searchText"
-        theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
-        <ui-select-match placeholder="Search for Plan Names">
-          <span class="tag" ng-if=$item.type>
-            {{$item.type}}:
-            <span class="label" ng-if="$item.type === 'tag'" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour($item)}">{{$item.name}}</span>
-            <span class="label satags satag" ng-if="$item.type=='svc'">{{$item.code}}</span>
-            <span class="label satags satag" ng-if="$item.type=='created_by'">{{$item.fullName}}</span>
-          </span>
-          <span class="tag" ng-if=!$item.type>
-            {{$item}}
-          </span>
-        </ui-select-match>
-        <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
-          <div>
-            <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.StateViewMode.getTagColour(item), 'margin-right':'5px' }"></span>
-            <span ng-if="item.type === 'tag'">{{item.name}}</span>
-            <span ng-if="item.type === 'svc'">{{item.code}}</span>
-            <span ng-if="item.type === 'created_by'">{{item.fullName}}</span>
-          </div>
-        </ui-select-choices>
-      </ui-select>
-    </div>
-    <span class="input-group-addon" ng-click="$ctrl.loadPlans()" style="cursor:pointer">
-      <span class="glyphicon glyphicon-search"></span>
-    </span>
+    <!-- (tagging) paste not working if tagging-label="false" and tagging-tokens are set -->
+    <!-- http://plnkr.co/edit/kauNS7YjckRfi616k4PT?p=preview -->
+    <ui-select tag-on-blur tagging tagging-label="false" multiple ng-model="$ctrl.searchText"
+      theme="bootstrap" close-on-select="true" on-select="$ctrl.loadPlans()" on-remove="$ctrl.loadPlans()">
+      <ui-select-match placeholder="Search for Plan Names">
+        <span class="tag" ng-if=$item.type>
+          {{$item.type}}:
+          <span class="badge badge-primary" ng-if="$item.type === 'tag'" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour($item)}">{{$item.name}}</span>
+          <span class="badge badge-primary satags" ng-if="$item.type=='svc'">{{$item.code}}</span>
+          <span class="badge badge-primary satags" ng-if="$item.type=='created_by'">{{$item.fullName}}</span>
+        </span>
+        <span class="tag" ng-if=!$item.type>
+          {{$item}}
+        </span>
+      </ui-select-match>
+      <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="item in $ctrl.searchList | filter: $select.search" group-by="'type'">
+        <div>
+          <span ng-style="{ display:'inline-block', width:'10px', height:'10px', 'background-color': $ctrl.state.StateViewMode.getTagColour(item), 'margin-right':'5px' }"></span>
+          <span ng-if="item.type === 'tag'">{{item.name}}</span>
+          <span ng-if="item.type === 'svc'">{{item.code}}</span>
+          <span ng-if="item.type === 'created_by'">{{item.fullName}}</span>
+        </div>
+      </ui-select-choices>
+    </ui-select>
+    <button class="btn btn-light input-group-append" ng-click="$ctrl.loadPlans()" style="cursor:pointer">
+      <span class="fa fa-search"></span>
+    </button>
   </div>
 
   <div class="plan-info" style="display: flex;">
@@ -69,15 +67,15 @@
             <div ng-if="plan.createdBy"><i>{{$ctrl.getPlanCreatorName(plan.createdBy) || 'loading...'}}</i></div>
             <div class="tags">
               <div ng-repeat="tag in $ctrl.getTagCategories(plan.tagMapping.global) track by tag.id" 
-                class="tag label" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
-              <span class="label"> {{tag.name}} 
+                class="badge badge-primary" ng-style="{'background-color': $ctrl.state.StateViewMode.getTagColour(tag)}">
+              <span> {{tag.name}} 
                 <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'general',tag:tag})"></i>
               </span>
             </div>
             <div class="tags">
               <div ng-repeat="serviceAreaId in plan.tagMapping.linkTags.serviceAreaIds" 
-                   class="tag label satags">
-                <span class="label satag">
+                   class="badge satags">
+                <span>
                   {{$ctrl.idToServiceAreaCode[serviceAreaId] || 'loading...'}} 
                 <i class="fa fa-times pointer" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.updateTag(plan,{type:'svc',tag:tag})"></i>
               </span>
@@ -85,23 +83,25 @@
           </td>
           <td>
             <a ng-if="plan.progress" class="btn btn-sm btn-success" ng-click="$ctrl.stopOptimization(plan)"><span class="fa fa-stop"></span></a>
-            <a ng-if="!plan.progress && $ctrl.showPlanDeleteButton" class="btn btn-sm btn-danger" ng-click="$ctrl.onPlanDeleteClicked(plan)"><span class="glyphicon glyphicon-trash"></span></a>
+            <a ng-if="!plan.progress && $ctrl.showPlanDeleteButton" class="btn btn-sm btn-danger" ng-click="$ctrl.onPlanDeleteClicked(plan)">
+              <span class="fa fa-trash text-white"></span>
+            </a>
           </td>
         </tr>
       </tbody>
     </table>
     <nav class="text-center" style="max-height: 35px">
       <ul class="pagination" style="margin: 0px">
-        <li ng-class="{ disabled: $ctrl.currentPage === 1 }">
-          <a href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
+        <li ng-class="{ 'page-item': true, disabled: $ctrl.currentPage === 1 }">
+          <a class="page-link" href="javascript:void(0)" aria-label="Previous" ng-click="$ctrl.loadPlans($ctrl.currentPage - 1)">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
-        <li ng-repeat="page in $ctrl.pages" ng-class="{ active: page === $ctrl.currentPage }">
-          <a href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
+        <li ng-repeat="page in $ctrl.pages" ng-class="{ 'page-item': true, active: page === $ctrl.currentPage }">
+          <a class="page-link"  href="javascript:void(0)" ng-click="$ctrl.loadPlans(page)">{{ page }}</a>
         </li>
-        <li ng-class="{ disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
-          <a href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
+        <li ng-class="{ 'page-item': true, disabled: $ctrl.currentPage === $ctrl.pages[$ctrl.pages.length - 1] }">
+          <a class="page-link"  href="javascript:void(0)" aria-label="Next" ng-click="$ctrl.loadPlans($ctrl.pages[$ctrl.pages.length - 1])">
             <span aria-hidden="true">&raquo;</span>
           </a>
         </li>

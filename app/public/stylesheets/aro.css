@@ -1207,9 +1207,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   border-style:solid;
   border-radius:0.50em;
   border-width:2px;
-}
-.satag {
-  font-size: xx-small;
+  font-size: 10px;
+  padding: 5px;
   color:#1f7de6;
 }
 
