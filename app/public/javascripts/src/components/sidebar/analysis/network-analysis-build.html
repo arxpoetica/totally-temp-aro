@@ -299,7 +299,7 @@
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
         <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
-          <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
+          <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
         </td>
         <td style="position: relative">
           <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
@@ -309,7 +309,7 @@
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_LOCATIONS">
         <td>Selected Locations({{$ctrl.targets.length || 0}})
-          <span class="fa fa-trash-o trash" ng-if="$ctrl.targets.length > 0" ng-click="$ctrl.removeTarget({target:$ctrl.targets})"></span>
+          <span class="far fa-trash-alt trash" ng-if="$ctrl.targets.length > 0" ng-click="$ctrl.removeTarget({target:$ctrl.targets})"></span>
         </td>
         <td style="position: relative">
           <p ng-hide="$ctrl.targets.length > 0"><em>No locations selected</em></p>
@@ -319,7 +319,7 @@
       </tr>
       <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
         <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
-          <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas({target:$ctrl.analysisAreas})"></span>
+          <span class="far fa-trash-alt trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas({target:$ctrl.analysisAreas})"></span>
         </td>
         <td style="position: relative">
           <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>

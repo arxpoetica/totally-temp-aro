@@ -320,7 +320,7 @@ class MapObjectEditorController {
               }else if('equipment_boundary' == dataTypeList[0]){
                 //options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
               }
-              options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(result.objectId)}) )
+              options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(result.objectId)}) )
             }else{
               options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
             }
@@ -395,7 +395,7 @@ class MapObjectEditorController {
                 feature = this.createdMapObjects[result.objectId].feature
                 options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
                 //options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
-                options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(result.objectId)}) )
+                options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(result.objectId)}) )
               } else {
                 options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
               }
@@ -423,7 +423,7 @@ class MapObjectEditorController {
       })
     } else if('location' == this.featureType){
       var name = 'Location'
-      var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash', () => {this.deleteObjectWithId(this.selectedMapObject.objectId)}) ]
+      var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(this.selectedMapObject.objectId)}) ]
       var menuItems = []
       var data = {
         'objectId': this.selectedMapObject.objectId, 
