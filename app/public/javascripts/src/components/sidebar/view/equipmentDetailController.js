@@ -10,7 +10,9 @@ class EquipmentDetailController {
     this.networkNodeType = ''
     this.selectedEquipmentInfo = {}
     this.selectedEquipment = ''
-    
+    this.boundsFeature = null
+    this.isWorkingOnCoverage = false
+    this.boundsData = {}
     this.headerIcon = ''
     this.networkNodeLabel = ''
 
@@ -65,6 +67,7 @@ class EquipmentDetailController {
 	  return this.$http.get(`/service/plan-feature/${planId}/equipment/${objectId}?userId=${this.state.loggedInUser.id}`)
     .then((result) => {
       const equipmentInfo = result.data
+      console.log(result)
       if (equipmentInfo.hasOwnProperty('dataType') && equipmentInfo.hasOwnProperty('objectId')){
         if (this.state.configuration.networkEquipment.equipments.hasOwnProperty(equipmentInfo.networkNodeType)){
           this.headerIcon = this.state.configuration.networkEquipment.equipments[equipmentInfo.networkNodeType].iconUrl

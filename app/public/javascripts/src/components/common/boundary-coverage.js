@@ -12,7 +12,7 @@ class BoundaryCoverageController{
     
     this.isWorking = false
     this.isChartInit = false
-    this.feature = null
+    //this.feature = null
     
     
     this.censusCategories = this.state.censusCategories.getValue()
@@ -25,11 +25,14 @@ class BoundaryCoverageController{
   
   
   $onChanges(changesObj){
+    if (changesObj.hasOwnProperty('parentSelectedFeature')){
+      if (this.isChartInit) this.showCoverageChart()
+    }
     if (changesObj.hasOwnProperty('boundsInput')){
       var newBoundsInput = changesObj.boundsInput.currentValue
-      this.feature = newBoundsInput.feature
-      if (this.feature && this.feature.hasOwnProperty('objectId') && (newBoundsInput.forceUpdate || !this.boundaryCoverageById.hasOwnProperty(this.feature.objectId) )){
-        this.digestBoundaryCoverage(this.feature.objectId, newBoundsInput.data)
+      //this.feature = newBoundsInput.feature
+      if (newBoundsInput.feature && newBoundsInput.feature.hasOwnProperty('objectId') && (newBoundsInput.forceUpdate || !this.boundaryCoverageById.hasOwnProperty(newBoundsInput.feature.objectId) )){
+        this.digestBoundaryCoverage(newBoundsInput.feature.objectId, newBoundsInput.data)
       }
     }
   }
@@ -170,9 +173,15 @@ class BoundaryCoverageController{
   }
   
   showCoverageChart(){
-    var objectId = this.feature.objectId
-    //this.boundaryCoverageById[objectId]
-    var ctx = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0].getContext('2d')
+    //var objectId = this.feature.objectId
+    var objectId = this.parentSelectedFeature.objectId
+    
+    if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedFeature.objectId)) return
+    
+    var ele = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0]
+    if ('undefined' == typeof ele) return
+    
+    var ctx = ele.getContext('2d')
     
     var data = this.boundaryCoverageById[objectId].barChartData
     var labels = []
@@ -250,6 +259,7 @@ let boundaryCoverage = {
   templateUrl: '/components/common/boundary-coverage.html',
   bindings: {
     boundsInput: '<', 
+    parentSelectedFeature: '<', 
     isWorkingOverride: '<'
   },
   controller: BoundaryCoverageController

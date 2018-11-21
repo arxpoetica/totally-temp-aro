@@ -79,4 +79,18 @@
 				on-click-object="$ctrl.viewSelectedEquipment(selectedEquipment,isZoom)">
 			</equipment-detail-list>
 		</span>
+		
+		<div ng-if="$ctrl.boundsFeature">
+		  <button class="btn btn-primary btn-sm" 
+              ng-click="$ctrl.onRequestCalculateCoverage()">
+        calculate coverage
+      </button>
+      
+      <boundary-coverage 
+        bounds-input="$ctrl.boundsData"
+        parent-selected-feature="$ctrl.selectedMapObject"
+        is-working-override="$ctrl.isWorkingOnCoverage">
+      </boundary-coverage>
+		</div>
+		
 	</div>
