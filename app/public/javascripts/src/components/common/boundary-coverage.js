@@ -10,6 +10,10 @@ class BoundaryCoverageController{
     
     this.boundaryCoverageById = {}
     
+    this.isWorking = false
+    this.isChartInit = false
+    this.feature = null
+    
     
     this.censusCategories = this.state.censusCategories.getValue()
     this.state.censusCategories.subscribe((newValue) => {
@@ -20,7 +24,15 @@ class BoundaryCoverageController{
   
   
   
-  
+  $onChanges(changesObj){
+    if (changesObj.hasOwnProperty('boundsInput')){
+      var newBoundsInput = changesObj.boundsInput.currentValue
+      this.feature = newBoundsInput.feature
+      if (this.feature && this.feature.hasOwnProperty('objectId') && (newBoundsInput.forceUpdate || !this.boundaryCoverageById.hasOwnProperty(this.feature.objectId) )){
+        this.digestBoundaryCoverage(this.feature.objectId, newBoundsInput.data)
+      }
+    }
+  }
   
   
   
@@ -59,6 +71,7 @@ class BoundaryCoverageController{
     boundsCoverage.barChartData = barChartData
     
     this.boundaryCoverageById[objectId] = boundsCoverage
+    if (this.isChartInit) this.showCoverageChart()
     this.getCensusTagsForBoundaryCoverage(objectId)
   }
   
@@ -85,6 +98,9 @@ class BoundaryCoverageController{
         var entityListUrl = `/service/odata/censusBlocksEntity?$select=id,tagInfo&$filter=${filterSets[promiseI]}`
         censusBlockPromises.push(this.$http.get(entityListUrl))
       }
+      
+      this.isWorking = true
+      
       Promise.all(censusBlockPromises).then((results) => {
         var rows = []
         for (var resultI=0; resultI<results.length; resultI++){
@@ -130,6 +146,7 @@ class BoundaryCoverageController{
           })
         }
         this.boundaryCoverageById[objectId].censusTagsByCat = censusTagsByCat
+        this.isWorking = false
         this.$timeout()
       })
       
@@ -153,7 +170,7 @@ class BoundaryCoverageController{
   }
   
   showCoverageChart(){
-    var objectId = this.selectedMapObject.objectId
+    var objectId = this.feature.objectId
     //this.boundaryCoverageById[objectId]
     var ctx = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0].getContext('2d')
     
@@ -206,6 +223,8 @@ class BoundaryCoverageController{
       data: settingsData,
       options: options
     });
+    
+    this.isChartInit = true
   }
 
   objKeys(obj){
@@ -224,12 +243,14 @@ class BoundaryCoverageController{
   
 }
 
+
 BoundaryCoverageController.$inject = ['$timeout', '$http', '$element', 'state', 'Utils']
 
 let boundaryCoverage = {
   templateUrl: '/components/common/boundary-coverage.html',
   bindings: {
-    boundsInput: '<'
+    boundsInput: '<', 
+    isWorkingOverride: '<'
   },
   controller: BoundaryCoverageController
 }

@@ -20,23 +20,35 @@
 </style>
 
 
-<div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
-  <div class="ei-header plan-editor-coverage-header">
-    Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].totalCount}} 
+<div ng-if="$ctrl.isWorking || $ctrl.isWorkingOverride">
+  <p>Calculating coverage area...</p>
+  <div class="spinner">
+    <div class="rect1"></div>
+    <div class="rect2"></div>
+    <div class="rect3"></div>
+    <div class="rect4"></div>
+    <div class="rect5"></div>
+  </div>
+</div>
+
+
+<div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.feature.objectId)">
+  <div class="ei-header bounds-coverage-header">
+    Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.feature.objectId].totalCount}} 
   </div>
   <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
   <div style="margin-bottom: 20px;">
-    <div class="ei-header plan-editor-coverage-header">
+    <div class="ei-header bounds-coverage-header">
       Locations by Census Block Tag
     </div>
-    <div class="plan-editor-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
-    <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
-      <div class="ei-property-item plan-editor-census-cat">
+    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.feature.objectId].censusTagsByCat).length < 1">none</div>
+    <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.feature.objectId].censusTagsByCat">
+      <div class="ei-property-item bounds-coverage-census-cat">
         {{cat.description}}
       </div>
-      <div class="plan-editor-census-tag" ng-repeat="tag in cat.tags">
+      <div class="bounds-coverage-census-tag" ng-repeat="tag in cat.tags">
         <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div>
-        {{tag.description}}: <span class="plan-editor-census-tag-count">{{tag.count}}</span>
+        {{tag.description}}: <span class="bounds-coverage-census-tag-count">{{tag.count}}</span>
       </div>
     </div>
   </div>

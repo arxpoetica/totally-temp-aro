@@ -319,7 +319,8 @@ class PlanEditorController {
       this.createMapObjects && this.createMapObjects([feature])
       
       //this.digestBoundaryCoverage(feature.objectId, result.data)
-      this.boundsData = {'feature': feature, 'data': result.data}
+      //this.boundsData = {'feature': feature, 'data': result.data}
+      this.digestBoundaryCoverage(feature, result.data, true)
       
       this.isWorkingOnCoverage = false
       this.state.planEditorChanged.next(true) //recaluculate plansummary
@@ -351,7 +352,6 @@ class PlanEditorController {
     
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-    console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
     .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -359,10 +359,10 @@ class PlanEditorController {
         console.warn('Plan editor was closed while a boundary was being calculated')
         return
       }
-      console.log(result)
       this.computedBoundaries.add(mapObject.feature.objectId)
       //this.digestBoundaryCoverage(mapObject.feature.objectId, result.data)
-      this.boundsData = {'feature': mapObject.feature, 'data': result.data}
+      //this.boundsData = {'feature': mapObject.feature, 'data': result.data}
+      this.digestBoundaryCoverage(mapObject.feature, result.data, true)
       
       this.isWorkingOnCoverage = false
     })
@@ -373,6 +373,11 @@ class PlanEditorController {
   }
   
   // --- snip here?  <---------------------------------------------------------------------------------<<<
+  digestBoundaryCoverage(feature, boundaryData, forceUpdate){
+    if ('undefined' == typeof forceUpdate) forceUpdate = false
+    this.boundsData = {'feature': feature, 'data': boundaryData, 'forceUpdate': forceUpdate}
+  }
+  
   /*
   digestBoundaryCoverage(objectId, boundaryData){
     var boundsCoverage = {}
