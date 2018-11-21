@@ -252,7 +252,9 @@ exports.configure = (api, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
     } else {
-      next
+      response.status(400).json({
+        error: 'Query Not Supported'
+      })
     }
   });
 }

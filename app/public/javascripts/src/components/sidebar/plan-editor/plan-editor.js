@@ -963,8 +963,8 @@ class PlanEditorController {
     this.selectedMapObject = mapObject
     var lat = mapObject && mapObject.position && mapObject.position.lat()
     var lng = mapObject && mapObject.position && mapObject.position.lng()
-    this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
-    this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
+    this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 5)
+    this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 5)
     
     // debug
     //console.log(this.selectedMapObject)
@@ -984,8 +984,8 @@ class PlanEditorController {
       if(!isManualEdit) {
         var lat = mapObject && mapObject.position && mapObject.position.lat()
         var lng = mapObject && mapObject.position && mapObject.position.lng()
-        this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
-        this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
+        this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 5)
+        this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 5)
       }
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)

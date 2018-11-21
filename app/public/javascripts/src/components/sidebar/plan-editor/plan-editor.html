@@ -193,8 +193,8 @@
                   ng-click="$ctrl.editViewObject()"
                   >edit</button>
               <div class="sidebar-header-subinfo">
-                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 6}}</div>
-                <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 6}}</div>
+                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 5}}</div>
+                <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 5}}</div>
               </div>
           </div>
           
@@ -238,7 +238,7 @@
                     <input type="number" class="form-control form-control-sm" id="selectedMapObjectLat"
                       placeholder="lat" 
                       ng-model="$ctrl.selectedMapObjectLat"
-                      ng-model-options="{ debounce: 500 }"
+                      ng-model-options="{ debounce: 100 }"
                       step="0.00001"
                       ng-change="$ctrl.setSelectedMapObjectLoc()">
                   </div>
@@ -247,7 +247,7 @@
                     <input type="number" class="form-control form-control-sm" id="selectedMapObjectLng"
                       placeholder="long" 
                       ng-model="$ctrl.selectedMapObjectLng"
-                      ng-model-options="{ debounce: 500 }"
+                      ng-model-options="{ debounce: 100 }"
                       step="0.00001"
                       ng-change="$ctrl.setSelectedMapObjectLoc()">
                   </div>
