@@ -50,6 +50,9 @@
   }
   
   /* http://jsfiddle.net/JnrvG/1/ */
+  .myDropdown1,.rulerDropdown {
+    position: relative;
+  }
   .myDropdown1 input[type="range"]{
     -webkit-appearance: none;
     -moz-apperance: none;
@@ -74,6 +77,7 @@
 
   .myDropdown1 font {
     color: #1f7de6;
+    font-size: 14px;
   }
 
   .ruler-container {
@@ -212,7 +216,7 @@
       <div class="dropdown-divider" ng-if="$ctrl.heatMapOption"></div>
       <font ng-if="$ctrl.heatMapOption">Heatmap Intensity</font>
       <input type="range" ng-if="$ctrl.heatMapOption" min= {{$ctrl.min}} max= {{$ctrl.max}} ng-model="$ctrl.sliderValue"
-        style="margin-top: 10px" ng-change="$ctrl.changeHeatMapOptions()">
+        style="margin-top: 10px; width: calc(100% - 20px); margin: 10px 10px;" ng-change="$ctrl.changeHeatMapOptions()">
 
       <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteBoundaries">
         <div class="dropdown-divider"></div>
