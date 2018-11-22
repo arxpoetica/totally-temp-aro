@@ -101,6 +101,7 @@ class LocationDetailController {
   
   showStaticMap(locationInfo) {
     this.selectedLocationInfo = locationInfo
+    this.selectedLocationInfo.attributes = this.selectedLocationInfo.attributes.filter(val => val != null)
     this.showAttributes = (this.currentUser.perspective === 'sales_engineer' || this.currentUser.perspective === 'account_exec') && !angular.equals(locationInfo.attributes, {})
     
     var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
