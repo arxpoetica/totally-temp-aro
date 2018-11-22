@@ -47,7 +47,8 @@ function loadConfiguration() {
     'mapType',
     'locationDetailProperties',
     'uiVisibility',
-    'optimizationOptions'
+    'optimizationOptions',
+    'resourceEditors'
   ]
 
   exports.configuration = {}

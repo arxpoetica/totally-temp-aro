@@ -1,0 +1,8 @@
+{
+  "speedCategoryHelp": {
+    "default": "The speed category describes the maximum rated speed (e.g. 100 Mbps) for a fiber/cable type",
+    "cat3": "Category 3 cable, commonly known as Cat 3 or station wire, and less commonly known as VG or voice-grade (as, for example, in 100BaseVG), is an unshielded twisted pair (UTP) cable used in telephone wiring. It is part of a family of copper cabling standards defined jointly by the Electronic Industries Alliance (EIA) and the Telecommunications Industry Association (TIA) and published in TIA/EIA-568-B.",
+    "cat5": "Category 5 cable, commonly referred to as Cat 5, is a twisted pair cable for computer networks. The cable standard provides performance of up to 100 Mbps and is suitable for most varieties of Ethernet over twisted pair. Cat 5 is also used to carry other signals such as telephony and video.",
+    "cat7": "The Category 7 cable standard was ratified in 2002 to allow 10 Gigabit Ethernet over 100 m of copper cabling. The cable contains four twisted copper wire pairs, just like the earlier standards. Category 7 cable can be terminated either with 8P8C compatible GG45 electrical connectors which incorporate the 8P8C standard or with TERA connectors. When combined with GG-45 or TERA connectors, Category 7 cable is rated for transmission frequencies of up to 600 MHz."
+  }
+}

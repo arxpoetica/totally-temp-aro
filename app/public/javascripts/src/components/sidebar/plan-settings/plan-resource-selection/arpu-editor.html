@@ -2,26 +2,37 @@
   .action-button-icon {
     padding-right: 10px;
   }
+  /* Display the span within the pill-parent only when it is hovered */
+  .pill-parent span {
+    display: none;
+  }
+  .pill-parent:hover span {
+    display: block;
+  }
   #tblArpuModel td {
     line-height: 33px; /* To vertically align text */
   }
 </style>
 
 <div style="max-height: 500px; overflow-y: auto;">
-
   <div class="container">
     <div class="row">
-
       <!-- On the left, show a list of ARPU models that the user can edit -->
       <div class="col-md-4">
         <ul class="nav nav-pills flex-column" style="max-height: 380px; overflow-y: auto;">
           <li role="presentation"
-              ng-class="{ 'nav-item': true, 'active': $ctrl.selectedArpuModelIndex === $index }"
+              class="nav-item"
               ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels | orderBy: '-id.locationEntityType'"
               ng-click="$ctrl.selectArpuModel($index)">
-            <a href="#" class="nav-link">
+            <!-- Show the entity type and speed category -->
+            <div ng-class="{ 'nav-link pill-parent': true, 'active': $ctrl.selectedArpuModelIndex === $index }">
               {{arpuModel.id.locationEntityType}} / {{arpuModel.id.speedCategory}}
-            </a>
+              <span class="badge badge-light float-right"
+                    style="margin-top: 2px; cursor: pointer;"
+                    ng-click="$ctrl.showSpeedCategoryHelp(arpuModel.id.speedCategory)">
+                <i class="fa fa-question"></i>
+              </span>
+           </div>
           </li>
         </ul>
       </div>
@@ -40,6 +51,12 @@
             </tr>
           </tbody>
         </table>
+        <div ng-if="$ctrl.speedCategoryHelp" class="alert alert-info alert-dismissible fade show" role="alert">
+          {{$ctrl.speedCategoryHelp}}
+          <button type="button" class="close" ng-click="$ctrl.hideSpeedCategoryHelp()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -1,9 +1,11 @@
 class ArpuEditorController {
-  constructor($http) {
+  constructor($http, state) {
     this.$http = $http
+    this.state = state
     this.arpuManagerConfiguration = []
     this.pristineArpuManagerConfiguration = {}
     this.arpuManagerName = ''
+    this.speedCategoryHelp = null
   }
 
   $onChanges(changesObj) {
@@ -63,12 +65,20 @@ class ArpuEditorController {
     }
   }
 
+  showSpeedCategoryHelp(category) {
+    this.speedCategoryHelp = this.state.configuration.resourceEditors.speedCategoryHelp[category] || this.state.configuration.resourceEditors.speedCategoryHelp.default
+  }
+
+  hideSpeedCategoryHelp() {
+    this.speedCategoryHelp = null
+  }
+
   exitEditingMode() {
     this.setEditingMode({ mode: this.listMode })
   }
 }
 
-ArpuEditorController.$inject = ['$http']
+ArpuEditorController.$inject = ['$http', 'state']
 
 let arpuEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/arpu-editor.html',
