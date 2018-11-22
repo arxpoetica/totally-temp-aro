@@ -5,7 +5,7 @@ body {
   font-size: 14px;
 }
 
-.btn-light {
+.btn-light,.btn-light:disabled,.btn-light:hover {
   border: 1px solid #c0c0c0;
 }
 
@@ -791,8 +791,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 
 /* Selected locations */
 .selected-locations-header {
-  width:868px;
-  height:220px;
+  width: 766px;
+  height: 194px;
 }
 
 .selected-locations-map-overlay {
@@ -800,7 +800,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   background: rgba(0, 0, 0, 0.7);
   position:relative;
   left:0px;
-  top:-220px;
+  top:-194px;
   width: 100%;
   height: 100%;
   padding: 10px;
@@ -832,8 +832,7 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 }
 
 .selected-location-pill-padding {
-  padding: 4px 10px!important;
-  color:white;
+  padding: 4px 10px;
 }
 
 .selected-modal-table-header {
@@ -849,9 +848,11 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 /* Override Select2 css */
 .select2-container {
   border: solid 1px #e0e0e0;
+  padding: 0px;
 }
 
 .select2-container-multi .select2-choices {
+  border: none;
   background: #ffffff;
 }
 
@@ -1206,9 +1207,8 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   border-style:solid;
   border-radius:0.50em;
   border-width:2px;
-}
-.satag {
-  font-size: xx-small;
+  font-size: 10px;
+  padding: 5px;
   color:#1f7de6;
 }
 
@@ -1304,4 +1304,59 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 */
 .open > .dropdown-menu {
   display: block;
+}
+
+ui-select-font {
+  font-size: 14px;
+}
+
+.ui-select-container input {
+  font-size: 14px;
+}
+
+.ui-select-match span {
+  font-size: 14px;
+}
+
+.ui-select-match > span .tag {
+  font-size: 12px;
+}
+
+.ui-select-match > span .badge {
+  font-size: 12px;
+}
+.ui-select-match-item {
+  padding: 1px 12px;
+}
+
+.ui-select-choices-row-inner {
+  font-size: 14px;
+}
+
+.multiselect {
+  font-size: 14px;
+}
+
+.multiselect-container {
+  font-size: 14px;
+}
+
+.multiselect-container li a {
+  color: black;
+}
+
+.multiselect-container li a label {
+  padding-left: 20px;
+}
+
+.multiselect-container.dropdown-menu>.active,
+.multiselect-container.dropdown-menu>.active:focus,
+.multiselect-container.dropdown-menu>.active:hover {
+  background-color: #1f7de6;
+}
+
+.multiselect-container.dropdown-menu>.active>a,
+.multiselect-container.dropdown-menu>.active:focus>a,
+.multiselect-container.dropdown-menu>.active:hover>a {
+  color: white;
 }

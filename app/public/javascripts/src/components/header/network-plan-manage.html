@@ -32,7 +32,7 @@
     font-size: 14px;
     margin-left: 5px;
   }
-  .form-control-clear {
+  .form-control form-control-sm-clear {
     z-index: 10;
     pointer-events: auto;
     cursor: pointer;
@@ -43,16 +43,15 @@
   }
 </style>    
 <div class="plan-info-container">
-
   <ul class="nav nav-tabs">
-    <li role="presentation" ng-class="{ 'active': $ctrl.currentView === $ctrl.views.Plan_Info }" ng-click="$ctrl.currentView = $ctrl.views.Plan_Info">
-      <a href="#">Plan Info</a>
+    <li role="presentation" class="nav-item" ng-click="$ctrl.currentView = $ctrl.views.Plan_Info">
+      <a href="#" ng-class="{ 'nav-link': true, 'active': $ctrl.currentView === $ctrl.views.Plan_Info }">Plan Info</a>
     </li>
-    <li role="presentation" ng-class="{ 'active': $ctrl.currentView === $ctrl.views.Search_plans }" ng-click="$ctrl.currentView = $ctrl.views.Search_plans">
-      <a href="#">Search Plans</a>
+    <li role="presentation" class="nav-item" ng-click="$ctrl.currentView = $ctrl.views.Search_plans">
+      <a href="#" ng-class="{ 'nav-link': true, 'active': $ctrl.currentView === $ctrl.views.Search_plans }">Search Plans</a>
     </li>
-    <li role="presentation" ng-class="{ 'active': $ctrl.currentView === $ctrl.views.Recent_plans }" ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">
-      <a href="#">Recent Plans</a>
+    <li role="presentation" class="nav-item" ng-click="$ctrl.currentView = $ctrl.views.Recent_plans">
+      <a href="#" ng-class="{ 'nav-link': true, 'active': $ctrl.currentView === $ctrl.views.Recent_plans }">Recent Plans</a>
     </li>
   </ul>
 

@@ -21,11 +21,11 @@
       </div>
     </div>
     <!-- A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! -->
-    <div style="position:relative; top:-47px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 120px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
+    <div style="position:relative; top:-28px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 120px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
       {{$ctrl.state.progressMessage}}
     </div>
   </div>
-  <button class="btn btn-danger"
+  <button class="btn btn-sm btn-danger"
           style="flex: 0 0 auto;"
           ng-click="$ctrl.state.cancelOptimization()">
             {{$ctrl.state.isCanceling ? 'Canceling' : 'Cancel'}}
@@ -46,8 +46,11 @@
 <i class="fa fa-save"></i> Save
 </button>
 
-<button class="btn btn-block btn-primary"
+<button
   ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE' && $ctrl.state.selectedExpertMode === $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id"
+  ng-class="{ 'btn btn-block': true, 'btn-default': !$ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid, 
+  'btn-primary': $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid }"
+  ng-disabled="!$ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid"
   ng-click="$ctrl.state.executeManualPlanTargetsQuery()">
 <i class="fa fa-save"></i> Execute
 </button>

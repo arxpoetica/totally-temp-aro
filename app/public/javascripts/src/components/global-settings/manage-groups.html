@@ -13,11 +13,11 @@
         <tr ng-repeat="group in $ctrl.groups">
           <td style="max-width: 160px">
             <span ng-if="!group.isEditing" style="line-height: 23px;">{{group.name}}</span>
-            <input ng-if="group.isEditing" type="text" class="form-control" ng-model="group.name">
+            <input ng-if="group.isEditing" type="text" class="form-control form-control-sm" ng-model="group.name">
           </td>
           <td>
             <span ng-if="!group.isEditing" style="line-height: 23px;">{{group.description}}</span>
-            <textarea ng-if="group.isEditing" type="text" class="form-control" style="resize: none" ng-model="group.description"></textarea>
+            <textarea ng-if="group.isEditing" type="text" class="form-control form-control-sm" style="resize: none" ng-model="group.description"></textarea>
           </td>
           <td style="text-align: center; padding-top: 6px;">
             <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
@@ -25,9 +25,9 @@
                   ng-disabled="!group.isEditing">
           </td>
           <td>
-            <button ng-if="!group.isEditing" class="btn btn-primary btn-xs" ng-click="group.isEditing = true"><i class="fa fa-pencil"></i></button>
-            <button ng-if="group.isEditing" class="btn btn-primary btn-xs" ng-click="$ctrl.saveGroup(group)"><i class="fa fa-save"></i></button>
-            <button class='btn btn-danger btn-xs' ng-click="$ctrl.deleteGroup(group)"><i class="fa fa-trash"></i></button>
+            <button ng-if="!group.isEditing" class="btn btn-sm btn-primary btn-xs" ng-click="group.isEditing = true"><i class="fa fa-pencil-alt"></i></button>
+            <button ng-if="group.isEditing" class="btn btn-sm btn-primary btn-xs" ng-click="$ctrl.saveGroup(group)"><i class="fa fa-save"></i></button>
+            <button class='btn btn-danger btn-sm' ng-click="$ctrl.deleteGroup(group)"><i class="fa fa-trash-alt"></i></button>
           </td>
         </tr>
       </tbody>

@@ -50,7 +50,7 @@
         <tr>
           <td>Location type:</td>
           <td>
-            <select class="form-control"
+            <select class="form-control form-control-sm"
                     ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
                     ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
                     ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
@@ -60,7 +60,7 @@
         <tr>
           <td>Number of locations:</td>
           <td>
-            <input class="form-control"
+            <input class="form-control form-control-sm"
                   ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
                   ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
           </td>
@@ -75,7 +75,7 @@
       </button>
       <!-- Show a delete button if a map object is selected -->
       <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
-        <i class="fa fa-trash"></i>&nbsp;&nbsp;Delete selected location
+        <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete selected location
       </button>
 
       <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->

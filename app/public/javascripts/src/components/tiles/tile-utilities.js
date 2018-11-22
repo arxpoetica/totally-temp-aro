@@ -37,9 +37,8 @@ class TileUtilities {
     if(!lat || !lng) return false
     var latLng = lat + ',' + lng
     var matches = latLng.match(/[+-]?([0-9]*[.])?[0-9]+.[\s,]+[+-]?([0-9]*[.])?[0-9]+/)
-    if (matches && matches.length > 0 && matches[0] == latLng && 
-      lat > -90 && lat < 90 && lng > -180 && lng < 180) {
-        return true
+    if (lat > -90 && lat < 90 && lng > -180 && lng < 180) {
+      return true
     } else {
       return false
     }

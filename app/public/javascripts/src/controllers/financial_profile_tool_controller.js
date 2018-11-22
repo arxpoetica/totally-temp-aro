@@ -138,7 +138,7 @@ app.controller('financial-profile-tool-controller', ['$scope', '$rootScope', '$h
   $('#financial_profile_controller .nav-tabs').on('shown.bs.tab', (e) => refreshCurrentTab())
 
   function refreshCurrentTab (force) {
-    var href = $('#financial_profile_controller .nav-tabs li.active a').attr('href')
+    var href = $('#financial_profile_controller .nav-tabs li a.active').attr('href')
     if (href === '#financialProfileSummary') {
     } else if (href === '#financialProfileCashFlow') {
       showCashFlowChart(force)

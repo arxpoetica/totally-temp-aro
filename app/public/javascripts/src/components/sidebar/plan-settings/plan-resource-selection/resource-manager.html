@@ -9,7 +9,7 @@
   <div class="form-group">
     <label class="col-sm-4 control-label">Resource Type</label>
     <div class="col-sm-8">
-      <select class="form-control"
+      <select class="form-control form-control-sm"
               ng-model="$ctrl.selectedResourceKey"
               ng-change="$ctrl.onSelectedResourceKeyChanged()"
               ng-options="key as value.description for (key, value) in $ctrl.resourceItems">
@@ -20,7 +20,7 @@
   <div class="form-group">
     <label class="col-sm-4 control-label">Resource Managers</label>
     <div class="col-sm-8">
-      <select class="form-control"
+      <select class="form-control form-control-sm"
         ng-model="$ctrl.selectedResourceManager"
         ng-options="manager as manager.description for manager in $ctrl.resourceItems[$ctrl.selectedResourceKey].allManagers">
       </select>
@@ -42,7 +42,7 @@
         <i class="fa fa-copy action-button-icon"></i>Clone the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
       <button class="btn btn-danger btn-block" ng-click="$ctrl.deleteSelectedResourceManager($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
-        <i class="fa fa-trash action-button-icon"></i>Delete the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
+        <i class="far fa-trash-alt action-button-icon"></i>Delete the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
     </div>
   </div>

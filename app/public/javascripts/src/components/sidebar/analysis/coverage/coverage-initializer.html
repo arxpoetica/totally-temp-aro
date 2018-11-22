@@ -10,7 +10,7 @@
     <!-- The distance threshold of the coverage report -->
     <tr>
       <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
-      <td><input class="form-control" ng-model="$ctrl.coveragePlan.distanceThreshold"></td>
+      <td><input class="form-control form-control-sm" ng-model="$ctrl.coveragePlan.distanceThreshold"></td>
     </tr>
 
 
@@ -18,7 +18,7 @@
     <tr>
       <td>Edge type</td>
       <td>
-        <select class="form-control"
+        <select class="form-control form-control-sm"
                 ng-model="$ctrl.coveragePlan.spatialEdgeType"
                 ng-options="item.id as item.name for item in $ctrl.spatialEdgeTypes">
         </select>
@@ -29,7 +29,7 @@
     <tr>
       <td>Selection Type</td>
       <td>
-        <select class="form-control" 
+        <select class="form-control form-control-sm" 
                 ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
                 ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
           <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
@@ -38,7 +38,7 @@
     </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
-        <span class="fa fa-trash-o trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>
+        <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>
       </td>
       <td> 
         <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
@@ -48,7 +48,7 @@
     </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
       <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
-        <span class="fa fa-trash-o trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)"></span>
+        <span class="far fa-trash-alt trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)"></span>
       </td>
       <td>
         <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
