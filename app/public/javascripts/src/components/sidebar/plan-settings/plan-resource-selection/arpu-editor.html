@@ -22,7 +22,7 @@
         <ul class="nav nav-pills flex-column" style="max-height: 380px; overflow-y: auto;">
           <li role="presentation"
               class="nav-item"
-              ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels | orderBy: '-id.locationEntityType'"
+              ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels"
               ng-click="$ctrl.selectArpuModel($index)">
             <!-- Show the entity type and speed category -->
             <div ng-class="{ 'nav-link pill-parent': true, 'active': $ctrl.selectedArpuModelIndex === $index }">

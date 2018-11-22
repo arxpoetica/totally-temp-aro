@@ -23,8 +23,16 @@ class ArpuEditorController {
 
     this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`)
     .then((result) => {
-      this.arpuManagerConfiguration = result.data
-      // Sort the arpu models on locationEntityType so they look good in the UI
+      var arpuModels = []
+      // Sort the arpu models based on the locationTypeEntity
+      const locationEntityOrder = ['household', 'small', 'medium', 'large', 'celltower']
+      locationEntityOrder.forEach(locationEntity => {
+        const filteredModels = result.data.arpuModels
+                                .filter(item => item.id.locationEntityType === locationEntity)
+                                .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+        arpuModels = arpuModels.concat(filteredModels)
+      })
+      this.arpuManagerConfiguration = { arpuModels: arpuModels }
       this.selectedArpuModelIndex = 0
       this.pristineArpuManagerConfiguration = {}
       var copyOfModels = angular.copy(this.arpuManagerConfiguration.arpuModels)
