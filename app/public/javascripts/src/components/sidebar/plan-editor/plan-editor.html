@@ -27,26 +27,6 @@
     padding-right: 20px;
   }
   
-  /* move */
-  /*
-  .plan-editor-coverage-header{
-    cursor: auto;
-  }
-  
-  .plan-editor-census-cat{
-    margin-top: 10px;
-    margin-bottom: 4px;
-  }
-  
-  .plan-editor-census-tag{
-    padding-left: 20px;
-  }
-  
-  .plan-editor-census-tag-count{
-    margin-left: 10px;
-    font-weight: bold;
-  }
-  /* --- */
 </style>
 
 <div class="edit-plan-container">
@@ -185,12 +165,6 @@
         </table>
         
         
-        
-        
-        
-        
-        
-        
         <!-- Section to show properties when the selected map object is an equipment node -->
         <div class="clearfix" ng-if="!$ctrl.isEditFeatureProps && $ctrl.viewFeature" style="margin-top: 10px">
           <!-- Section header showing the type of the selected object -->
@@ -226,10 +200,6 @@
             <i class="fa fa-save"></i>&nbsp;&nbsp;Save equipment properties
           </button>
         </div>
-        
-        
-        
-        
         
         
         <!-- Section to show properties when the selected map object is an equipment node -->
@@ -283,25 +253,8 @@
           </button>
         </div>
 
-        
-        
-        
-        
-        
+
         <!-- Section to show properties when the selected map object is an equipment boundary -->
-        <!-- 
-        <div ng-if="$ctrl.isWorkingOnCoverage">
-          <p>Calculating coverage area...</p>
-          <div class="spinner">
-            <div class="rect1"></div>
-            <div class="rect2"></div>
-            <div class="rect3"></div>
-            <div class="rect4"></div>
-            <div class="rect5"></div>
-          </div>
-        </div>
-        -->
-        
         <div class="plan-editor-bounds-contain" ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
@@ -357,45 +310,12 @@
           </div>
           
           <hr class="plan-editor-hr">
-          <!-- 
-          <button class="btn btn-primary btn-sm" 
-                  ng-if="!$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)"
-                  ng-click="$ctrl.onRequestCalculateAutoBoundary()">
-            calculate coverage
-          </button>
-          -->
+          
           <button class="btn btn-primary btn-sm" 
                   ng-click="$ctrl.onRequestCalculateCoverage()">
             calculate coverage
           </button>
           
-          
-          
-          
-          <!-- moved to bounds-coverage -->
-          <!-- 
-          <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.selectedMapObject.objectId)">
-            <div class="ei-header plan-editor-coverage-header">
-              Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].totalCount}} 
-            </div>
-            <canvas ng-init="$ctrl.showCoverageChart()" class="plan-editor-bounds-dist-chart" width="300" height="300"></canvas>
-            <div style="margin-bottom: 20px;">
-              <div class="ei-header plan-editor-coverage-header">
-                Locations by Census Block Tag
-              </div>
-              <div class="plan-editor-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat).length < 1">none</div>
-              <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.selectedMapObject.objectId].censusTagsByCat">
-                <div class="ei-property-item plan-editor-census-cat">
-                  {{cat.description}}
-                </div>
-                <div class="plan-editor-census-tag" ng-repeat="tag in cat.tags">
-                  <div class="outlineLegendIcon" style="border-color: {{tag.colourHash}}; background-color: {{tag.colourHash}}33;"></div>
-                  {{tag.description}}: <span class="plan-editor-census-tag-count">{{tag.count}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          -->
           <boundary-coverage 
             bounds-input="$ctrl.coverageOutput"
             parent-selected-object-id="$ctrl.selectedObjectId"
@@ -403,9 +323,6 @@
           </boundary-coverage>
           
         </div>
-        
-        
-        
         
         
         <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->

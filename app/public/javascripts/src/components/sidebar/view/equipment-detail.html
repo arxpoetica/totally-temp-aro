@@ -19,18 +19,17 @@
     	height: 100%;
 			overflow-y: auto;
 		}
+		
+		.equipment-detail-bounds, .equipment-detail .equipment-detail-bounds{
+		  margin-top: 40px;
+		}
+		
+		.equipment-detail-hr {
+	    margin-top: 10px;
+	    margin-bottom: 10px;
+	  }
+		
   </style>
-  <!-- 
-  <div class="equipment-detail" ng-if="$ctrl.equipmentFeature !== null">
-    <div>id: {{$ctrl.equipmentFeature.id}}</div>
-    <div>Type: {{$ctrl.equipmentFeature.description}}</div>
-    <div>Latitude: {{$ctrl.equipmentFeature.geog.coordinates[1] | number:5}}</div>
-    <div>Longitude: {{$ctrl.equipmentFeature.geog.coordinates[0] | number:5}}</div>
-    <div>
-      <button class="btn btn-primary" ng-click="$ctrl.showDetailEquipmentInfo()">More Information</button>
-    </div>
-  </div>
-  -->
   
 	<div class="ei-panel">
 	  <div class="mb-5 mt-2">
@@ -49,27 +48,34 @@
 	    <img class="ei-panel-header-icon" ng-if=" '' != $ctrl.headerIcon" ng-src="{{$ctrl.headerIcon}}">
 	    
 	    <div class="ei-panel-header-title">{{$ctrl.networkNodeLabel}}</div>
-	    <!-- 
-	    <div class="ei-panel-header-btn-set">
-	      <button class="btn btn-light ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.cancelEdit()">Cancel</button>
-	      <button class="btn btn-primary ei-panel-header-btn" ng-if="$ctrl.isEdit" ng-click="$ctrl.commitEdit()">Save</button>
-	      <button class="btn btn-primary ei-panel-header-btn" ng-if="!$ctrl.isEdit" ng-click="$ctrl.beginEdit()">Edit</button>
-	    </div>
-	    -->
+	    
 	    <div class="sidebar-header-subinfo">
         <div class="sidebar-header-subinfo-item">lat: {{$ctrl.selectedEquipmentGeog[1] | number:6}}</div>
         <div class="sidebar-header-subinfo-item">long: {{$ctrl.selectedEquipmentGeog[0] | number:6}}</div>
       </div>
 	  </div>
 	  <div class="equipment-detail ei-panel-content" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Detail">
-	    <!-- 
-	    <editor-interface-tree object-to-view="$ctrl.equipmentFeature" display-props="$ctrl.equipmentFeatureDispProps" is-edit="$ctrl.isEdit"></editor-interface-tree>
-	    -->
+	    
 	    <editor-interface-tree 
 	      object-to-view="$ctrl.equipmentFeature" 
 	      root-meta-data="{'networkNodeType':$ctrl.networkNodeType}"
 				is-edit="false">
 			</editor-interface-tree>
+			
+			<div class="equipment-detail-bounds" 
+			  ng-if="$ctrl.boundsObjectId && $ctrl.state.showSiteBoundary">
+			  <hr class="equipment-detail-hr">
+	      <button class="btn btn-primary btn-sm" 
+	              ng-click="$ctrl.onRequestCalculateCoverage()">
+	        calculate coverage
+	      </button>
+	      
+	      <boundary-coverage 
+	        bounds-input="$ctrl.coverageOutput"
+	        parent-selected-object-id="$ctrl.boundsObjectId"
+	        is-working-override="$ctrl.isWorkingOnCoverage">
+	      </boundary-coverage>
+	    </div>
 		</div>
 		
 		<span class="equipment-list" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.List &&
@@ -79,18 +85,5 @@
 				on-click-object="$ctrl.viewSelectedEquipment(selectedEquipment,isZoom)">
 			</equipment-detail-list>
 		</span>
-		
-		<div ng-if="$ctrl.boundsObjectId">
-		  <button class="btn btn-primary btn-sm" 
-              ng-click="$ctrl.onRequestCalculateCoverage()">
-        calculate coverage
-      </button>
-      
-      <boundary-coverage 
-        bounds-input="$ctrl.coverageOutput"
-        parent-selected-object-id="$ctrl.boundsObjectId"
-        is-working-override="$ctrl.isWorkingOnCoverage">
-      </boundary-coverage>
-		</div>
 		
 	</div>

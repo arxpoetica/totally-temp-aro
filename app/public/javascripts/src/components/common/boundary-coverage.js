@@ -12,7 +12,7 @@ class BoundaryCoverageController{
     
     this.isWorking = false
     this.isChartInit = false
-    //this.feature = null
+    this.coverageChart = null
     
     
     this.censusCategories = this.state.censusCategories.getValue()
@@ -20,8 +20,6 @@ class BoundaryCoverageController{
       this.censusCategories = newValue
     })
   }
-  
-  
   
   
   $onChanges(changesObj){
@@ -36,9 +34,6 @@ class BoundaryCoverageController{
       }
     }
   }
-  
-  
-  
   
   
   digestBoundaryCoverage(objectId, boundaryData){
@@ -179,6 +174,11 @@ class BoundaryCoverageController{
     
     if (!this.boundaryCoverageById.hasOwnProperty(this.parentSelectedObjectId)) return
     
+    if (!!this.coverageChart){
+      this.coverageChart.destroy()
+      this.coverageChart = null
+    }
+    
     var ele = this.$element.find('canvas.plan-editor-bounds-dist-chart')[0]
     if ('undefined' == typeof ele) return
     
@@ -228,7 +228,7 @@ class BoundaryCoverageController{
       }     
     }
     
-    var coverageChart = new Chart(ctx, {
+    this.coverageChart = new Chart(ctx, {
       type: 'bar',
       data: settingsData,
       options: options
