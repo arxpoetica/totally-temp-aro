@@ -69,6 +69,7 @@ import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
 import mapObjectEditor from './common/map-object-editor'
 import contextMenu from './common/context-menu'
+import boundaryCoverage from './common/boundary-coverage'
 import dropTarget from './common/drop-target'
 import planSearch from './common/plan/plan-search'
 import planSearchFilter from './common/plan/plan-search-filter'
@@ -159,6 +160,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroMultiSelect', aroMultiSelect)
    .component('mapObjectEditor', mapObjectEditor)
    .component('contextMenu', contextMenu)
+   .component('boundaryCoverage', boundaryCoverage)
    .component('dropTarget', dropTarget)
    .component('planSearch', planSearch)
    .component('planSearchFilter', planSearchFilter)

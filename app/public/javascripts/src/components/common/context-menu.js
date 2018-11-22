@@ -23,11 +23,6 @@ class ContextMenuController {
   }
   
   $onInit(){
-    /*
-    this.$timeout(() => {
-      console.log('on time out')
-    }, 0)
-    */
     this.contextMenuService.isMenuVisible.subscribe((isMenuVisible) => {
       if (isMenuVisible){
         this.openMenu()
@@ -78,10 +73,11 @@ class ContextMenuController {
     
     var parentH = this.$element.find('.context-menu-dropdown')[0].offsetHeight
     var contentH = this.$element.find('.map-object-editor-context-menu-dropdown')[0].offsetHeight
-    if (contentH >= parentH) {
-      this.positionCss.bottom = '0'
-    }else{
+    //console.log({'contentH': contentH, 'parentH': parentH})
+    if (contentH < parentH) {
       this.positionCss.bottom = 'auto'
+    }else{
+      this.positionCss.bottom = '0'
     }
   }
   
