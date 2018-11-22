@@ -206,9 +206,9 @@
   <span ng-if="$ctrl.toggleOtherAttributes
     && $ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.LOCATION_INFO">
     <div class="table-wrapper-scroll-y">
-      <table class="table table-condensed table-striped">
+      <table class="table table-sm table-striped">
         <tbody>
-          <tr ng-repeat="attribute in $ctrl.selectedLocationInfo.attributes">
+          <tr ng-repeat="attribute in $ctrl.selectedLocationInfo.attributes track by $index">
             <td>{{ attribute.key }}</td>
             <td>{{ attribute.value }}</td>
           </tr>
