@@ -849,6 +849,13 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
 .select2-container {
   border: solid 1px #e0e0e0;
   padding: 0px;
+  background: none;
+}
+
+.select2-container .select2-choice {
+  height: 29px;
+  line-height: 29px;
+  background: none;
 }
 
 .select2-container-multi .select2-choices {
