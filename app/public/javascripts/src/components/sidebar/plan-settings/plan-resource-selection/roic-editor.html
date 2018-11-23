@@ -2,11 +2,66 @@
   .action-button-icon {
     padding-right: 10px;
   }
+  #tblRoicModel td {
+    line-height: 30px;
+  }
+  /* Display the span within the pill-parent only when it is hovered */
+  .pill-parent span {
+    display: none;
+  }
+  .pill-parent:hover span {
+    display: block;
+  }
 </style>
 
-<div style="max-height: 500px; overflow-y: auto;">
-  <aro-object-editor object-to-edit="$ctrl.roicManagerConfiguration">
-  </aro-object-editor>
+<div class="container" style="max-height: 500px;">
+  <div class="row">
+    <!-- On the left, show a list of ROIC models that the user can edit -->
+    <div class="col-md-4">
+      <ul class="nav nav-pills flex-column" style="max-height: 380px; overflow-y: auto;">
+        <li role="presentation"
+            class="nav-item"
+            ng-repeat="roicModel in $ctrl.roicManagerConfiguration.inputs"
+            ng-click="$ctrl.selectRoicModel($index)">
+          <!-- Show the entity type and speed category -->
+          <div ng-class="{ 'nav-link pill-parent': true, 'active': $ctrl.selectedRoicModelIndex === $index }" style="cursor: pointer;">
+            {{roicModel.id.entityType}} / {{roicModel.id.speedCategory}}
+            <span class="badge badge-light float-right"
+                  style="margin-top: 2px; cursor: pointer;"
+                  ng-click="$ctrl.showSpeedCategoryHelp(roicModel.id.speedCategory)">
+              <i class="fa fa-question"></i>
+            </span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- On the right, show the details of the currently selected ROIC model -->
+    <div class="col-md-8">
+      <!-- We will create a flexbox that will show the speed category help only if it is displayed -->
+      <div style="display: flex; flex-direction: column; height: 100%;">
+        <div style="flex: 1 1 auto; overflow-y: auto;">
+          <table id="tblRoicModel" class="table table-sm table-striped">
+            <tbody>
+              <tr ng-repeat="(itemKey, itemValue) in $ctrl.roicManagerConfiguration.inputs[$ctrl.selectedRoicModelIndex]"
+                  ng-show="itemKey !== 'id'">
+                <td>{{itemKey}}</td>
+                <td><input class="form-control form-control-sm" ng-model="$ctrl.roicManagerConfiguration.inputs[$ctrl.selectedRoicModelIndex][itemKey]"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="flex: 0 0 auto; padding-top: 10px;">
+          <div ng-if="$ctrl.speedCategoryHelp" class="alert alert-info alert-dismissible fade show" role="alert">
+            {{$ctrl.speedCategoryHelp}}
+            <button type="button" class="close" ng-click="$ctrl.hideSpeedCategoryHelp()" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
