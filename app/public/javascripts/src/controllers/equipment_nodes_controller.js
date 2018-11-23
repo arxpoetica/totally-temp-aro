@@ -97,7 +97,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       drawingOptions: drawingOptions,
       selectable: true,
       zIndex: networkEquipment.zIndex,
-      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable //Showing Direction
+      showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable, //Showing Direction
+      highlightStyle: networkEquipment.highlightStyle
     }
   }
 

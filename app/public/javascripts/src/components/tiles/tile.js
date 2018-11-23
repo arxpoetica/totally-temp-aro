@@ -416,6 +416,7 @@ class TileComponentController {
         var roadSegments = new Set()
         var equipmentFeatures = []
         var censusFeatures = []
+        var fiberFeatures = new Set()
         
         var canSelectLoc  = false
         var canSelectSA   = false
@@ -453,6 +454,9 @@ class TileComponentController {
               censusFeatures.push(result)
           } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
             equipmentFeatures = equipmentFeatures.concat(result)
+          } else if ( (result.id || result.link_id ) && (result._data_type.indexOf('fiber') >= 0)) {
+            //fiberFeatures = fiberFeatures.concat(result)
+            fiberFeatures.add(result)
           }
         })
         
@@ -464,7 +468,8 @@ class TileComponentController {
           analysisAreas: analysisAreaFeatures,
           roadSegments: roadSegments,
           equipmentFeatures: equipmentFeatures, 
-          censusFeatures: censusFeatures
+          censusFeatures: censusFeatures,
+          fiberFeatures: fiberFeatures
         }
         
         return hitFeatures

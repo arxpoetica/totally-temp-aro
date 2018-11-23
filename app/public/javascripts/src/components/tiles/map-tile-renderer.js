@@ -519,11 +519,9 @@ class MapTileRenderer {
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
-            if (this.selection.details.roadSegments.size > 0 && 
-              [...this.selection.details.roadSegments].filter(function (road) {
-                 return road.gid === feature.properties.gid
-              }).length > 0) {
-              //Highlight the selected Selected RoadSegments
+            if ( (this.selection.details.roadSegments.size > 0 && this.highlightPolyline(feature,this.selection.details.roadSegments)) 
+              || (this.selection.details.fiberSegments.size > 0 && this.highlightPolyline(feature,this.selection.details.fiberSegments))) {
+              //Highlight the Selected Polyline
               var drawingStyles = {
                 lineWidth: mapLayer.highlightStyle.lineWidth,
                 strokeStyle: mapLayer.highlightStyle.strokeStyle
@@ -546,6 +544,21 @@ class MapTileRenderer {
     }
     //render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection)
+  }
+
+  highlightPolyline(feature,polylines) {
+    var ishighlight = false
+
+    var ishighlight = [...polylines].filter(function (polyline) {
+      if(feature.properties && feature.properties._data_type && feature.properties._data_type == "fiber")
+        return polyline.link_id === feature.properties.link_id
+      else if (feature.properties && feature.properties._data_type && feature.properties._data_type == "existing_fiber.") 
+        return polyline.id === feature.properties.id
+      else if (feature.properties && feature.properties._data_type && feature.properties._data_type == "edge") 
+        return polyline.gid === feature.properties.gid
+    }).length > 0
+
+    return ishighlight
   }
 }
 

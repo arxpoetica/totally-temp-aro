@@ -18,10 +18,12 @@ class EquipmentDetailController {
     this.headerIcon = ''
     this.networkNodeLabel = ''
     this.isComponentDestroyed = false  
+    this.selectedFiber = {}
     
     this.EquipmentDetailView = Object.freeze({
       List: 0,
-      Detail: 1
+      Detail: 1,
+      Fiber: 2
     })
     this.currentEquipmentDetailView = this.EquipmentDetailView.List
     
@@ -30,20 +32,36 @@ class EquipmentDetailController {
       // most of this function is assuring the properties we need exist. 
       // In ruler mode click should not perform any view action's
       if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
-      if (!options.hasOwnProperty('equipmentFeatures')) return
-      if (0 == options.equipmentFeatures.length) return
-      
-      this.selectedEquipment = ''
-      var equipmentList = options.equipmentFeatures
-      if (equipmentList.length > 0) {
-        const equipment = equipmentList[0]
-        this.updateSelectedState(equipment)
-        const plan = state.plan.getValue()
-        this.displayEquipment(plan.id, equipment.object_id)
-        .then((equipmentInfo) => {
-          this.checkForBounds(equipment.object_id)
-        })
+      if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
+      if (!options.hasOwnProperty('equipmentFeatures') || !options.hasOwnProperty('fiberFeatures')) return
+      if (options.equipmentFeatures.length > 0) {
+        this.selectedEquipment = ''
+        var equipmentList = options.equipmentFeatures
+        if (equipmentList.length > 0) {
+          const equipment = equipmentList[0]
+          this.updateSelectedState(equipment)
+          const plan = state.plan.getValue()
+          this.displayEquipment(plan.id, equipment.object_id)
+          .then((equipmentInfo) => {
+            this.checkForBounds(equipment.object_id)
+          })
+        }
+      } else if (options.fiberFeatures.size > 0){
+        this.selectedFiber = {}
+        var fiberList = options.fiberFeatures
+        const fiber = [...fiberList][0]
+        //const plan = state.plan.getValue()
+        //this.displayFiber(plan.id, fiber.link_id)
+        var newSelection = state.cloneSelection()
+        newSelection.details.fiberSegments = options.fiberFeatures
+        state.selection = newSelection
+
+        this.selectedFiber = fiber
+        this.currentEquipmentDetailView = this.EquipmentDetailView.Fiber
+        this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
+        this.$timeout()
       }
+
     })
     
     this.clearViewModeSubscription = state.clearViewMode.subscribe((clear) => {
@@ -62,6 +80,7 @@ class EquipmentDetailController {
 	clearSelection(){
     this.networkNodeType = ''
     this.equipmentFeature = {}
+    this.selectedFiber = {}
     this.equipmentData = null
     this.boundsData = null
     this.isWorkingOnCoverage = false
@@ -72,8 +91,10 @@ class EquipmentDetailController {
 	updateSelectedState(selectedFeature){
     var newSelection = this.state.cloneSelection()
     newSelection.editable.equipment = {}
+    newSelection.details.fiberSegments = new Set()
 	  if ('undefined' != typeof selectedFeature) {
-      newSelection.editable.equipment[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
+      newSelection.editable.equipment[selectedFeature
+        .object_id || selectedFeature.objectId] = selectedFeature
     }
     this.state.selection = newSelection
 	}

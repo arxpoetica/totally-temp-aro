@@ -131,10 +131,10 @@ class FeatureSelector {
     return this.selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId)
   }
   
-  static selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY) {
+  static selectPolyline(feature, xWithinTile, yWithinTile, minPointToPolylineDistance, deltaX, deltaY) {
 
     var geometry = feature.loadGeometry()
-    var distance
+    var distance //,distanceTolineX1Y1,distanceTolineX2Y2
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
     var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
@@ -152,10 +152,16 @@ class FeatureSelector {
       pointY = yWithinTile
 
       distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY)       //calling function to find the shortest distance
-
-      if(distance <= minimumRoadDistance) {
+      // distanceTolineX1Y1 = findDistanceToPoint(lineX1, lineY1, pointX, pointY)
+      // distanceTolineX2Y2 = findDistanceToPoint(lineX2, lineY2, pointX, pointY)
+      // console.log(distance + ' , ' + distanceTolineX1Y1 + ' , '+ distanceTolineX2Y2)
+      if(distance <= minPointToPolylineDistance) {
         return true
       }
+    }
+
+    function findDistanceToPoint(x1, y1, pointX, pointY) {
+      return Math.sqrt( (Math.pow((pointX-x1), 2)) + (Math.pow((pointY-y1), 2)) )
     }
 
     function findDistanceToSegment(x1, y1, x2, y2, pointX, pointY)
@@ -198,7 +204,8 @@ class FeatureSelector {
   // Perform hit detection on features and get the first one (if any) under the mouse
   static performHitDetection(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, xWithinTile, yWithinTile, selectedBoundaryLayerId) {
 
-    var minimumRoadDistance = 10;
+    var minimumPointToRoadDistance = 10;
+    var minimumPointToFiberDistance = 50;
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
       var selectFeature = false
@@ -224,8 +231,14 @@ class FeatureSelector {
         }
       })
 
+      //Select Roadsegments
       if(feature.properties.gid) {
-        selectFeature = this.selectRoadSegment(feature, xWithinTile, yWithinTile, minimumRoadDistance, deltaX, deltaY)
+        selectFeature = this.selectPolyline(feature, xWithinTile, yWithinTile, minimumPointToRoadDistance, deltaX, deltaY)
+      }
+
+      //Select Existing/planned fiber
+      if(feature.properties._data_type.indexOf('fiber') > -1) {
+        selectFeature = this.selectPolyline(feature, xWithinTile, yWithinTile, minimumPointToFiberDistance, deltaX, deltaY)
       }
 
       //Load the selected service area 
