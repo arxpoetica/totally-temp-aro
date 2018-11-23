@@ -29,3 +29,9 @@ Math.cosh = Math.cosh || function(x) {
   var y = Math.exp(x);
   return (y + 1 / y) / 2;
 };
+
+// Fix missing Number.isFinite() in Internet Explorer.
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite
+if (Number.isFinite === undefined) Number.isFinite = function(value) {
+  return typeof value === 'number' && isFinite(value);
+}
