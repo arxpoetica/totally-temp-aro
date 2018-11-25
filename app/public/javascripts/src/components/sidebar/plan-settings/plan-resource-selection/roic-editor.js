@@ -1,6 +1,7 @@
 class RoicEditorController {
-  constructor($http) {
+  constructor($http, state) {
     this.$http = $http
+    this.state = state
     this.roicManagerConfiguration = []
     this.roicManagerName = ''
   }
@@ -19,8 +20,24 @@ class RoicEditorController {
     })
 
     this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}/configuration`)
-    .then((result) => this.roicManagerConfiguration = result.data)
+    .then((result) => {
+      var roicModels = []
+      // Sort the roic models based on the locationTypeEntity
+      const locationEntityOrder = ['household', 'smallBusiness', 'mediumBusiness', 'largeBusiness', 'cellTower']
+      locationEntityOrder.forEach(locationEntity => {
+        const filteredModels = result.data.inputs
+                                .filter(item => item.id.entityType === locationEntity)
+                                .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+        roicModels = roicModels.concat(filteredModels)
+      })
+      this.roicManagerConfiguration = { inputs: roicModels }
+      this.selectedRoicModelIndex = 0
+    })
     .catch((err) => console.error(err))
+  }
+
+  selectRoicModel(index) {
+    this.selectedRoicModelIndex = index
   }
 
   saveConfigurationToServer() {
@@ -32,9 +49,17 @@ class RoicEditorController {
   exitEditingMode() {
     this.setEditingMode({ mode: this.listMode })
   }
+
+  showSpeedCategoryHelp(category) {
+    this.speedCategoryHelp = this.state.configuration.resourceEditors.speedCategoryHelp[category] || this.state.configuration.resourceEditors.speedCategoryHelp.default
+  }
+
+  hideSpeedCategoryHelp() {
+    this.speedCategoryHelp = null
+  }
 }
 
-RoicEditorController.$inject = ['$http']
+RoicEditorController.$inject = ['$http', 'state']
 
 let roicEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/roic-editor.html',

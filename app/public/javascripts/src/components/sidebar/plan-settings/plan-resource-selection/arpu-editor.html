@@ -25,7 +25,7 @@
               ng-repeat="arpuModel in $ctrl.arpuManagerConfiguration.arpuModels"
               ng-click="$ctrl.selectArpuModel($index)">
             <!-- Show the entity type and speed category -->
-            <div ng-class="{ 'nav-link pill-parent': true, 'active': $ctrl.selectedArpuModelIndex === $index }">
+            <div ng-class="{ 'nav-link pill-parent': true, 'active': $ctrl.selectedArpuModelIndex === $index }" style="cursor: pointer;">
               {{arpuModel.id.locationEntityType}} / {{arpuModel.id.speedCategory}}
               <span class="badge badge-light float-right"
                     style="margin-top: 2px; cursor: pointer;"
