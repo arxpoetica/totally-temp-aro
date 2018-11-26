@@ -21,12 +21,11 @@
     <!-- The impedance mapping -->
     <table id="tblImpedanceMapping" class="table table-sm table-striped">
       <tbody>
-        <tr ng-repeat="impedanceMapping in $ctrl.impedanceManagerConfiguration.impedanceMapArray">
-          <td>{{impedanceMapping.key}}</td>
-          <td>{{$ctrl.mappingLabels[impedanceMapping.key]}}</td>
+        <tr ng-repeat="impedanceMappingKey in $ctrl.orderedImpedanceMapKeys">
+          <td>{{impedanceMappingKey}}</td>
+          <td>{{$ctrl.mappingLabels[impedanceMappingKey]}}</td>
           <td>
-            <input type="text" class="form-control" id="inputMapping{{impedanceMapping.key}}"
-                    ng-model="$ctrl.impedanceManagerConfiguration.impedanceMapArray[$index].value">
+            <input type="text" class="form-control" ng-model="$ctrl.impedanceManagerConfiguration.map[impedanceMappingKey]">
           </td>
         </div>
       </tbody>

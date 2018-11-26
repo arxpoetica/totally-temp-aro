@@ -13,6 +13,7 @@ class ImpedanceEditorController {
       4: 'Mapping 4',
       5: 'Mapping 5'
     }
+    this.orderedImpedanceMapKeys = []
   }
 
   $onChanges(changesObj) {
@@ -32,24 +33,16 @@ class ImpedanceEditorController {
     .then((result) => {
       this.impedanceManagerConfiguration = result.data
       // The map is a set of key value pairs, we convert it to a sorted array
-      var impedanceMapArray = Object.keys(this.impedanceManagerConfiguration.map)
-                                .map(impKey => { return { key: impKey, value: this.impedanceManagerConfiguration.map[impKey] } })
-                                .sort((a, b) => (a.key < b.key) ? -1 : 1)
-      delete this.impedanceManagerConfiguration.map
-      this.impedanceManagerConfiguration.impedanceMapArray = impedanceMapArray
+      this.orderedImpedanceMapKeys = Object.keys(this.impedanceManagerConfiguration.map)
+      this.orderedImpedanceMapKeys.sort((a, b) => (a < b) ? -1 : 1)
     })
     .catch((err) => console.error(err))
   }
 
   saveConfigurationToServer() {
-    // Convert the impedance array to an object that aro-service can use
-    var serviceConfiguration = angular.copy(this.impedanceManagerConfiguration)
-    serviceConfiguration.map = {}
-    this.impedanceManagerConfiguration.impedanceMapArray.forEach((item) => serviceConfiguration.map[item.key] = item.value)
-    delete serviceConfiguration.impedanceMapArray
-    this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`, serviceConfiguration)
-    .then((result) => this.exitEditingMode())
-    .catch((err) => console.error(err))
+    this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`, this.impedanceManagerConfiguration)
+      .then((result) => this.exitEditingMode())
+      .catch((err) => console.error(err))
   }
 
   exitEditingMode() {
