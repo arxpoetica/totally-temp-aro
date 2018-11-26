@@ -127,7 +127,7 @@ class MapObjectEditorController {
         .catch((err) => console.error(err))
       } else {
         var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng());
-        var radius = 1000; //radius in meters
+        var radius = (40000/Math.pow(2,this.mapRef.getZoom())) * 2 * 256 //radius in meters
         var path = this.generateHexagonPath(position,radius)
         var feature = {
           objectId: this.utils.getUUID(),

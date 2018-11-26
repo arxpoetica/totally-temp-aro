@@ -562,7 +562,8 @@ class State {
       censusBlockId: null,
       censusCategoryId: null,
       roadSegments: new Set(),
-      serviceAreaId: null
+      serviceAreaId: null,
+      fiberSegments: new Set()
     },
     editable: {
       equipment: {},

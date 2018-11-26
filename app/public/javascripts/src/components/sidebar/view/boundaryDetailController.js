@@ -19,6 +19,9 @@ class BoundaryDetailController {
       //160712271: On click of equipment or location dont show boundary details
       if (event.hasOwnProperty('equipmentFeatures') && event.equipmentFeatures.length > 0) return
       if (event.hasOwnProperty('locations') && event.locations.length > 0) return
+      if (event.hasOwnProperty('fiberFeatures') && event.fiberFeatures.size > 0) return
+      if (event.hasOwnProperty('roadSegments') && event.roadSegments.size > 0) return
+      
       //In ruler mode click should not enable boundary view action
       if(this.state.StateViewMode.allowViewModeClickAction(this.state)) {
         this.selectedBoundary = null
