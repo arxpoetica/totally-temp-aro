@@ -2,11 +2,35 @@
   .action-button-icon {
     padding-right: 10px;
   }
+  #tblImpedanceMapping td {
+    line-height: 38px;
+  }
 </style>
 
-<div style="max-height: 500px; overflow-y: auto;">
-  <aro-object-editor object-to-edit="$ctrl.impedanceManagerConfiguration">
-  </aro-object-editor>
+<div style="max-height: 500px; overflow-y: auto; overflow-x: hidden;">
+
+  <form>
+    <!-- The scale factor in meters -->
+    <div class="form-group row">
+      <label for="inputScaleFactor" class="col-sm-2 col-form-label">Scale Factor (meters)</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputScaleFactor" ng-model="$ctrl.impedanceManagerConfiguration.scaleFactorMeters">
+      </div>
+    </div>
+
+    <!-- The impedance mapping -->
+    <table id="tblImpedanceMapping" class="table table-sm table-striped">
+      <tbody>
+        <tr ng-repeat="impedanceMappingKey in $ctrl.orderedImpedanceMapKeys">
+          <td>{{impedanceMappingKey}}</td>
+          <td>{{$ctrl.mappingLabels[impedanceMappingKey]}}</td>
+          <td>
+            <input type="text" class="form-control" ng-model="$ctrl.impedanceManagerConfiguration.map[impedanceMappingKey]">
+          </td>
+        </div>
+      </tbody>
+    </table>
+  </form>
 </div>
 
 <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
