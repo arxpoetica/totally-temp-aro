@@ -41,6 +41,13 @@
                  arpu-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
     </arpu-editor>
 
+    <tsm-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'tsm_manager'"
+                tsm-manager-id="$ctrl.editingManagerId"
+                list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                set-editing-mode="$ctrl.setEditingMode(mode)"
+                tsm-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
+    </tsm-editor>
+
     <impedance-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'impedance_mapping_manager'"
                  impedance-manager-id="$ctrl.editingManagerId"
                  list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"

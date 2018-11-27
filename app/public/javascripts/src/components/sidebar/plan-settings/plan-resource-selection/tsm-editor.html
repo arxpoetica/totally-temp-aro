@@ -1,0 +1,35 @@
+<style scoped>
+  #tblTsmModel td {
+    line-height: 33px; /* To vertically align text */
+  }
+</style>
+
+<div style="max-height: 500px; overflow-y: auto;">
+  <table id="tblTsmModel" class="table table-sm table-striped">
+    <thead class="thead-light">
+      <tr>
+        <th>Dimension ID</th>
+        <th>Name</th>
+        <th>Type</th>
+        <th>ARPU Weight</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration">
+        <td class="text-center">{{tsmModel.dimensionId}}</td>
+        <td>{{tsmModel.dimensionName}}</td>
+        <td>{{tsmModel.dimensionType}}</td>
+        <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+  <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
+    <i class="fa fa-undo action-button-icon"></i> Discard changes
+  </button>
+  <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+    <i class="fa fa-save action-button-icon"></i> Save
+  </button>
+</div>
