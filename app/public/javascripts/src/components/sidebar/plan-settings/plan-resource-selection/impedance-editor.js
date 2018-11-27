@@ -5,13 +5,13 @@ class ImpedanceEditorController {
     this.impedanceManagerName = ''
     // "mappingLabels" should map from a impedance mapping key (e.g. 0) to a text description of the mapping
     this.mappingLabels = {
-      '-1': 'Mapping -1',
-      0: 'Mapping 0',
-      1: 'Mapping 1',
+      '-1': 'Unknown tile',
+      0: 'Missing tile',
+      1: 'Line of sight tile',
       2: 'Mapping 2',
-      3: 'Mapping 3',
-      4: 'Mapping 4',
-      5: 'Mapping 5'
+      3: 'Light foliage/building clutter tile',
+      4: 'Dense foliage tile',
+      5: 'Building blocker tile'
     }
     this.orderedImpedanceMapKeys = []
   }
