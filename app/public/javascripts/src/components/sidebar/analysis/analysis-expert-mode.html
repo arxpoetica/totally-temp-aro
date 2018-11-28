@@ -6,8 +6,8 @@
     </select>
 
     <textarea maxlength="75000" style="font-family: 'Courier'; width:100%; height:100%" 
-      ng-if="$ctrl.state.selectedExpertMode === $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id" 
-      ng-model="$ctrl.state.expertMode.MANUAL_PLAN_TARGET_ENTRY"
+      ng-if="$ctrl.state.selectedExpertMode !== $ctrl.state.expertModeTypes['OPTIMIZATION_SETTINGS'].id" 
+      ng-model="$ctrl.state.expertMode[$ctrl.state.selectedExpertMode]"
       ng-model-options="{ debounce: 500 }"
       ng-change="$ctrl.validateExpertModeQuery()"
       spellcheck="false"> 

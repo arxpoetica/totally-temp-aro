@@ -1,5 +1,8 @@
 {
   "networkConstraints": {
     "routingMode": "ODN_3"
+  },
+  "financialConstraints": {
+    "years": 30
   }
 }
