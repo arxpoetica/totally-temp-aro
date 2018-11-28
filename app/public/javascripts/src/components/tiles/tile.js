@@ -370,6 +370,14 @@ class TileComponentController {
       return {'x':x, 'y':y}
     }
     
+    //mousedown
+    this.overlayDragstartListener = this.mapRef.addListener('dragstart', (event) => {
+      if (this.contextMenuService.isMenuVisible.getValue()){
+        this.contextMenuService.menuOff()
+        this.$timeout()
+      }
+    })
+    
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
       if (this.contextMenuService.isMenuVisible.getValue()){
         this.contextMenuService.menuOff()
@@ -504,6 +512,11 @@ class TileComponentController {
     if (this.overlayRightclickListener) {
       google.maps.event.removeListener(this.overlayRightclickListener)
       this.overlayRightclickListener = null
+    }
+    
+    if (this.overlayDragstartListener) {
+      google.maps.event.removeListener(this.overlayDragstartListener)
+      this.overlayDragstartListener = null
     }
     
     this.mapRef.overlayMapTypes.clear()
