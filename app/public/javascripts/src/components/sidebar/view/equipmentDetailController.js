@@ -33,8 +33,8 @@ class EquipmentDetailController {
       // In ruler mode click should not perform any view action's
       if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
       if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
-      if (!options.hasOwnProperty('equipmentFeatures') || !options.hasOwnProperty('fiberFeatures')) return
-      if (options.equipmentFeatures.length > 0) {
+      
+      if (options.hasOwnProperty('equipmentFeatures') && options.equipmentFeatures.length > 0) {
         this.selectedEquipment = ''
         var equipmentList = options.equipmentFeatures
         if (equipmentList.length > 0) {
@@ -46,7 +46,7 @@ class EquipmentDetailController {
             this.checkForBounds(equipment.object_id)
           })
         }
-      } else if (options.fiberFeatures.size > 0){
+      } else if (options.hasOwnProperty('fiberFeatures') && options.fiberFeatures.size > 0){
         this.selectedFiber = {}
         var fiberList = options.fiberFeatures
         const fiber = [...fiberList][0]
