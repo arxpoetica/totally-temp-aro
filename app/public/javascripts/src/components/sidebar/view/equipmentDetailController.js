@@ -156,7 +156,7 @@ class EquipmentDetailController {
     var planId = this.state.plan.getValue().id
     var equipmentId = this.equipmentData.objectId
     var filter = `rootPlanId eq ${planId} and networkNodeObjectId eq guid'${equipmentId}'`
-    this.$http.get(`/service//odata/NetworkBoundaryEntity?$filter=${filter}`)
+    this.$http.get(`/service/odata/NetworkBoundaryEntity?$filter=${filter}`)
     .then((result) => {
       if (result.data.length < 1){
         this.boundsObjectId = null
