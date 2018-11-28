@@ -11,11 +11,11 @@ class AnalysisExpertModeController {
 
     validateExpertModeQuery() {
       var hasExcludeTerm = false
-      var excludeTerms = ['delete','drop','update','alter','insert']
+      var excludeTerms = ['delete','drop','update','alter','insert','call','commit','create']
       excludeTerms.forEach((term) => {
-        if(this.state.expertMode.MANUAL_PLAN_TARGET_ENTRY.toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
+        if(this.state.expertMode[this.state.selectedExpertMode].toLowerCase().indexOf(term) > -1) hasExcludeTerm = true
       })
-      this.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid = this.state.expertMode.MANUAL_PLAN_TARGET_ENTRY.toLowerCase().indexOf("select") > -1 
+      this.state.expertModeTypes[this.state.selectedExpertMode].isQueryValid = this.state.expertMode[this.state.selectedExpertMode].toLowerCase().indexOf("select") > -1 
         && !hasExcludeTerm
     }
   }

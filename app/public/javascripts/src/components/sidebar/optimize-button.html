@@ -47,10 +47,10 @@
 </button>
 
 <button
-  ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE' && $ctrl.state.selectedExpertMode === $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id"
-  ng-class="{ 'btn btn-block': true, 'btn-default': !$ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid, 
-  'btn-primary': $ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid }"
-  ng-disabled="!$ctrl.state.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].isQueryValid"
+  ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE' && $ctrl.state.selectedExpertMode !== $ctrl.state.expertModeTypes['OPTIMIZATION_SETTINGS'].id"
+  ng-class="{ 'btn btn-block': true, 'btn-default': !$ctrl.state.expertModeTypes[$ctrl.state.selectedExpertMode].isQueryValid, 
+  'btn-primary': $ctrl.state.expertModeTypes[$ctrl.state.selectedExpertMode].isQueryValid }"
+  ng-disabled="!$ctrl.state.expertModeTypes[$ctrl.state.selectedExpertMode].isQueryValid"
   ng-click="$ctrl.state.executeManualPlanTargetsQuery()">
 <i class="fa fa-save"></i> Execute
 </button>
