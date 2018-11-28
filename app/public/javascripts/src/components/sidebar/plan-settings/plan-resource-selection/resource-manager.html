@@ -6,8 +6,8 @@
 
 <form class="form-horizontal">
 
-  <div class="form-group">
-    <label class="col-sm-4 control-label">Resource Type</label>
+  <div class="form-group row">
+    <label class="col-sm-4 col-form-label">Resource Type</label>
     <div class="col-sm-8">
       <select class="form-control form-control-sm"
               ng-model="$ctrl.selectedResourceKey"
@@ -17,8 +17,8 @@
     </div>
   </div>
 
-  <div class="form-group">
-    <label class="col-sm-4 control-label">Resource Managers</label>
+  <div class="form-group row">
+    <label class="col-sm-4 col-form-label">Resource Managers</label>
     <div class="col-sm-8">
       <select class="form-control form-control-sm"
         ng-model="$ctrl.selectedResourceManager"
@@ -27,21 +27,21 @@
     </div>
   </div>
 
-  <div class="form-group">
-    <label class="col-sm-4 control-label">Actions</label>
+  <div class="form-group row">
+    <label class="col-sm-4 col-form-label">Actions</label>
     <div class="col-sm-8">
-      <button class="btn btn-primary btn-block"
+      <button class="btn btn-primary btn-sm btn-block"
               ng-click="$ctrl.createBlankPriceBook()"
               ng-if="$ctrl.selectedResourceKey === 'price_book'">
         <i class="fa fa-file action-button-icon"></i>Create a new blank {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
-      <button class="btn btn-primary btn-block" ng-click="$ctrl.editSelectedManager()">
+      <button class="btn btn-primary btn-sm btn-block" ng-click="$ctrl.editSelectedManager()">
         <i class="fa fa-edit action-button-icon"></i>Edit the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
-      <button class="btn btn-primary btn-block" ng-click="$ctrl.cloneSelectedManagerFromSource($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
+      <button class="btn btn-primary btn-sm btn-block" ng-click="$ctrl.cloneSelectedManagerFromSource($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
         <i class="fa fa-copy action-button-icon"></i>Clone the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
-      <button class="btn btn-danger btn-block" ng-click="$ctrl.deleteSelectedResourceManager($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
+      <button class="btn btn-danger btn-sm btn-block" ng-click="$ctrl.deleteSelectedResourceManager($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
         <i class="far fa-trash-alt action-button-icon"></i>Delete the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
       </button>
     </div>
