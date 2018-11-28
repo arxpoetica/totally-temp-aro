@@ -326,7 +326,7 @@ class MapObjectEditorController {
               }
               options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(result.objectId)}) )
             }else{
-              options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+              options.push( this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
             }
             
             var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)

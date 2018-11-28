@@ -370,7 +370,7 @@ class TileComponentController {
       return {'x':x, 'y':y}
     }
     
-    //mousedown
+    
     this.overlayDragstartListener = this.mapRef.addListener('dragstart', (event) => {
       if (this.contextMenuService.isMenuVisible.getValue()){
         this.contextMenuService.menuOff()

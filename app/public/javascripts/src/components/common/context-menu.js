@@ -58,7 +58,7 @@ class ContextMenuController {
   }
   
   onOptionClick(callback, data){
-    this.closeMenu()
+    this.contextMenuService.menuOff()
     callback(data)
   }
   

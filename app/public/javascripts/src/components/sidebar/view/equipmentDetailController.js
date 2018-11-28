@@ -33,8 +33,8 @@ class EquipmentDetailController {
       // In ruler mode click should not perform any view action's
       if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
       if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
-      if (!options.hasOwnProperty('equipmentFeatures') || !options.hasOwnProperty('fiberFeatures')) return
-      if (options.equipmentFeatures.length > 0) {
+      
+      if (options.hasOwnProperty('equipmentFeatures') && options.equipmentFeatures.length > 0) {
         this.selectedEquipment = ''
         var equipmentList = options.equipmentFeatures
         if (equipmentList.length > 0) {
@@ -46,7 +46,7 @@ class EquipmentDetailController {
             this.checkForBounds(equipment.object_id)
           })
         }
-      } else if (options.fiberFeatures.size > 0){
+      } else if (options.hasOwnProperty('fiberFeatures') && options.fiberFeatures.size > 0){
         this.selectedFiber = {}
         var fiberList = options.fiberFeatures
         const fiber = [...fiberList][0]
@@ -156,7 +156,7 @@ class EquipmentDetailController {
     var planId = this.state.plan.getValue().id
     var equipmentId = this.equipmentData.objectId
     var filter = `rootPlanId eq ${planId} and networkNodeObjectId eq guid'${equipmentId}'`
-    this.$http.get(`/service//odata/NetworkBoundaryEntity?$filter=${filter}`)
+    this.$http.get(`/service/odata/NetworkBoundaryEntity?$filter=${filter}`)
     .then((result) => {
       if (result.data.length < 1){
         this.boundsObjectId = null
@@ -193,8 +193,10 @@ class EquipmentDetailController {
     
     var equipmentObjectId = boundsData.objectId
     this.isWorkingOnCoverage = true
+    //console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
     .then((result) => {
+      //console.log(result)
       // The user may have destroyed the component before we get here. In that case, just return
       if (this.isComponentDestroyed) {
         console.warn('Plan editor was closed while a boundary was being calculated')
