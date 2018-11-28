@@ -280,6 +280,8 @@ class MapObjectEditorController {
       
       this.getFeaturesAtPoint(latLng)
       .then((results) => {
+        //console.log(clickedMapObject)
+        //console.log(results)
         // We may have come here when the user clicked an existing map object. For now, just add it to the list.
         // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
         if (clickedMapObject) {
