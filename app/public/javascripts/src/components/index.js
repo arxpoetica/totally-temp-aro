@@ -41,6 +41,7 @@ import planProjectConfiguration from './sidebar/plan-settings/plan-project-confi
 import planSettings from './sidebar/plan-settings/plan-settings'
 import arpuEditor from './sidebar/plan-settings/plan-resource-selection/arpu-editor'
 import tsmEditor from './sidebar/plan-settings/plan-resource-selection/tsm-editor'
+import competitorEditor from './sidebar/plan-settings/plan-resource-selection/competitor-editor'
 import impedanceEditor from './sidebar/plan-settings/plan-resource-selection/impedance-editor'
 import planResourceEditorModal from './sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal'
 import planResourceSelection from './sidebar/plan-settings/plan-resource-selection/plan-resource-selection'
@@ -135,6 +136,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('planSettings', planSettings)
    .component('arpuEditor', arpuEditor)
    .component('tsmEditor', tsmEditor)
+   .component('competitorEditor', competitorEditor)
    .component('impedanceEditor', impedanceEditor)
    .component('planResourceEditorModal', planResourceEditorModal)
    .component('planResourceSelection', planResourceSelection)

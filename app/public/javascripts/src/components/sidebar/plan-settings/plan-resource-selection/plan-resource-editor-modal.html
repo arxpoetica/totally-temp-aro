@@ -1,4 +1,5 @@
-<modal visible="$ctrl.state.showPlanResourceEditorModal" backdrop="static" on-hide="$ctrl.modalHide()" >
+<modal visible="$ctrl.state.showPlanResourceEditorModal" backdrop="static" on-hide="$ctrl.modalHide()"
+       modal-size="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS ? 'modal-md' : 'modal-lg'">
   <modal-header title="{{$ctrl.modalTitle}}"></modal-header>
   <modal-body>
     <resource-manager ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS"
@@ -47,6 +48,13 @@
                 set-editing-mode="$ctrl.setEditingMode(mode)"
                 tsm-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
     </tsm-editor>
+
+    <competitor-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'competition_manager'"
+                competitor-manager-id="$ctrl.editingManagerId"
+                list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                set-editing-mode="$ctrl.setEditingMode(mode)"
+                competitor-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
+    </competitor-editor>
 
     <impedance-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'impedance_mapping_manager'"
                  impedance-manager-id="$ctrl.editingManagerId"
