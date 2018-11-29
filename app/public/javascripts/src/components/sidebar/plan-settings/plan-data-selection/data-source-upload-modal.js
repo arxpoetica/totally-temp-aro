@@ -252,17 +252,16 @@ class DataSourceUploadController {
       this.dataSources.forEach((item, index) => {
         this.dataSources[index].isExpanded = false
         this.dataSources[index].isEditableByUser = false
-        aclPromises.push(
-          this.aclManager.getEffectivePermissions('LIBRARY', this.dataSources[index].identifier, this.state.loggedInUser)
-            .then(permissions => {
-              this.dataSources[index].isEditableByUser = permissions && (permissions.ADMIN || permissions.IS_SUPERUSER)
-              return Promise.resolve()
-            })
-            .catch(err => console.error(err))
-        )
+        aclPromises.push(this.aclManager.getEffectivePermissions('LIBRARY', this.dataSources[index].identifier, this.state.loggedInUser))
       })
       Promise.all(aclPromises)
-        .then(res => this.$timeout())
+        .then(results => {
+          // We have permissions for all data sources. Now set the editable flag so that the permissions show up all at once.
+          results.forEach((dataSourcePermissions, index) => {
+            this.dataSources[index].isEditableByUser = dataSourcePermissions && (dataSourcePermissions.ADMIN || dataSourcePermissions.IS_SUPERUSER)
+          })
+          this.$timeout()
+        })
         .catch(err => console.error(err))
     }
   }
