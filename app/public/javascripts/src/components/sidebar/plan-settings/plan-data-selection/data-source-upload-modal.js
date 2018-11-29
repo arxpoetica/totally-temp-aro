@@ -12,7 +12,7 @@ class DataSourceUploadController {
     }
     this.isUpLoad = false
     this.isUpLoading = false
-    this.dataSources
+    this.dataSourceMeta = {}  // Metadata for a data source (e.g. isLoading)
 
     this.saCreationTypes = [
       {id:"upload_file",label:"Upload From File"},
@@ -83,6 +83,7 @@ class DataSourceUploadController {
           this.state.loadNetworkConfigurationFromServer(),
           this.toggleDataSourceExpanded(dataSource)
         ]))
+        .then(() => this.state.uploadDataSource = this.state.uploadDataSources.filter(item => item.name === dataSource.dataType)[0])
         .catch((err) => console.error(err))
     }
   }
@@ -234,7 +235,6 @@ class DataSourceUploadController {
     this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.state.loggedInUser.id}`)
       .then(() => {
         this.state.dataItems[dataSource.dataType].allLibraryItems = this.state.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
-        this.dataSources = this.dataSources.filter(item => item.identifier !== dataSource.identifier)
         this.$timeout()
       })
   }
@@ -244,19 +244,26 @@ class DataSourceUploadController {
   }
 
   loadDataSources() {
+    if (!this.state.uploadDataSource) {
+      return  // When items in state.js are being refreshed, this may be null as the combobox has a two-way binding to the model.
+    }
     if(this.isDataManagementView) {
       var aclPromises = []  // For each data source, get the effective ACL permissions and then allow/disallow editing
-      this.dataSources = angular.copy(this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems)
-      this.dataSources.forEach((item, index) => {
-        this.dataSources[index].isExpanded = false
-        this.dataSources[index].isEditableByUser = false
-        aclPromises.push(this.aclManager.getEffectivePermissions('LIBRARY', this.dataSources[index].identifier, this.state.loggedInUser))
+      this.dataSourceMeta = {}
+      var indexToIdentifier = {}
+      this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => {
+        this.dataSourceMeta[item.identifier] = {
+          isExpanded: false,
+          isEditableByUser: false
+        }
+        indexToIdentifier[index] = item.identifier
+        aclPromises.push(this.aclManager.getEffectivePermissions('LIBRARY', item.identifier, this.state.loggedInUser))
       })
       Promise.all(aclPromises)
         .then(results => {
           // We have permissions for all data sources. Now set the editable flag so that the permissions show up all at once.
           results.forEach((dataSourcePermissions, index) => {
-            this.dataSources[index].isEditableByUser = dataSourcePermissions && (dataSourcePermissions.ADMIN || dataSourcePermissions.IS_SUPERUSER)
+            this.dataSourceMeta[indexToIdentifier[index]].isEditableByUser = dataSourcePermissions && (dataSourcePermissions.ADMIN || dataSourcePermissions.IS_SUPERUSER)
           })
           this.$timeout()
         })
@@ -265,10 +272,10 @@ class DataSourceUploadController {
   }
 
   toggleDataSourceExpanded(dataSource) {
-    const newValue = !dataSource.isExpanded
+    const newValue = !this.dataSourceMeta[dataSource.identifier].isExpanded
     // Collapse all datasources, then expand/collapse the selected one
-    this.dataSources.forEach((item, index) => this.dataSources[index].isExpanded = false)
-    dataSource.isExpanded = newValue
+    this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => this.dataSourceMeta[item.identifier].isExpanded = false)
+    this.dataSourceMeta[dataSource.identifier].isExpanded = newValue
   }
 
   toggleView() {
