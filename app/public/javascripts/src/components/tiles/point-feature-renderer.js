@@ -2,6 +2,33 @@ import WorkflowState from '../common/workflow-state'
 
 class PointFeatureRenderer {
 
+  static renderFeatures(pointFeatureRendererList) {
+    var deletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
+      if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) === PointFeatureRenderer.modificationTypes.DELETED) {
+        return featureObj
+      }
+    })
+
+    var unDeletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
+      if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) !== PointFeatureRenderer.modificationTypes.DELETED) {
+        return featureObj
+      }
+    })
+
+    deletedPointFeatureRendererList.forEach((Obj) => {
+      PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
+        Obj.selection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes)
+    })
+
+    unDeletedPointFeatureRendererList.forEach((Obj) => {
+      PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
+        Obj.selection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes)
+    })
+
+  }
+
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
                        selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
                        selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
@@ -34,6 +61,19 @@ class PointFeatureRenderer {
       if (mapLayers.hasOwnProperty(equipmentType + '_planned')) {
         return
       }
+    }
+
+    // dont show deleted when existing view is on
+    if (modificationType === PointFeatureRenderer.modificationTypes.DELETED && feature.properties.hasOwnProperty('data_source_id')) {
+      var equipmentType = feature.properties._data_type.substring(feature.properties._data_type.lastIndexOf('.') + 1)
+      var hideExisitingDeletedEqu = false
+      var mapLayerKeys = Object.keys(mapLayers)
+      mapLayerKeys.forEach((mapLayerKey) => {
+        if(mapLayerKey.indexOf(equipmentType + '_existing_') > -1) {
+          hideExisitingDeletedEqu = true
+        }
+      })
+      if(hideExisitingDeletedEqu) return
     }
 
     if (feature.properties.location_id && selection.planTargets.locationIds.has(+feature.properties.location_id)

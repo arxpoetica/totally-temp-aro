@@ -422,6 +422,7 @@ class MapTileRenderer {
     */
 
     var closedPolygonFeatureLayersList = []
+    var pointFeatureRendererList = []
     for (var iFeature = 0; iFeature < filteredFeatures.length; ++iFeature) {
       // Parse the geometry out.
       var feature = filteredFeatures[iFeature]
@@ -483,9 +484,15 @@ class MapTileRenderer {
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
-            PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
-                                               this.selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-                                               this.selectedDisplayMode, this.displayModes, this.analysisSelectionMode, this.state.selectionModes)
+            // PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
+            //                                    this.selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
+            //                                    this.selectedDisplayMode, this.displayModes, this.analysisSelectionMode, this.state.selectionModes)
+            var featureObj = {
+              'ctx': ctx, 'shape': shape, 'feature': feature, 'featureData': featureData, 'geometryOffset': geometryOffset, 'mapLayer': mapLayer, 'mapLayers': this.mapLayers, 'tileDataService': this.tileDataService,
+              'selection': this.selection, 'selectedLocationImage': selectedLocationImage, 'lockOverlayImage': lockOverlayImage, 'invalidatedOverlayImage': invalidatedOverlayImage,
+              'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.state.selectionModes
+            }
+            pointFeatureRendererList.push(featureObj)
   	      } else {
   	        // Display heatmap
   	        var aggregationProperty = feature.properties.entity_count || feature.properties.weight
@@ -542,6 +549,8 @@ class MapTileRenderer {
         }
       })
     }
+    //render point feature
+    PointFeatureRenderer.renderFeatures(pointFeatureRendererList)
     //render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection)
   }

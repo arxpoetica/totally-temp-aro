@@ -6,14 +6,16 @@
         "vtlType": "EquipmentPointLayer",
         "rootPlanId": "{rootPlanId}",
         "networkNodeType": "{networkNodeType}",
-        "pointTransform": "{pointTransform}"
+        "pointTransform": "{pointTransform}",
+      	"zIndex": 5
       },
       "existing": {
         "dataId": "v1.tiles.summary.{libraryId}.{networkNodeType}.point.{pointTransform}.entity",
         "vtlType": "LibraryEquipmentPointLayer",
         "libraryId": "{libraryId}",
         "networkNodeType": "{networkNodeType}",
-        "pointTransform": "{pointTransform}"
+        "pointTransform": "{pointTransform}",
+      	"zIndex": 0
       }
     },
     "cable": {
@@ -22,14 +24,16 @@
         "vtlType": "PlannedFiberLayer",
         "rootPlanId": "{rootPlanId}",
         "fiberType": "{fiberType}",
-        "lineTransform": "{lineTransform}"
+        "lineTransform": "{lineTransform}",
+      	"zIndex": 5
       },
       "existing": {
         "dataId": "v1.tiles.fiber.competitive.{libraryId}.{lineTransform}.{fiberType}",
         "vtlType": "ExistingFiberLayer",
         "libraryId": "{libraryId}",
         "fiberType": "{fiberType}",
-        "lineTransform": "{lineTransform}"
+        "lineTransform": "{lineTransform}",
+      	"zIndex": 0
       }
     },
     "boundaries": {
@@ -37,13 +41,15 @@
         "dataId": "v1.plan.{rootPlanId}.tiles.boundary.point.{polygonTransform}.{polygonTransform}",
         "vtlType": "BoundaryPointLayer",
         "rootPlanId": "{rootPlanId}",
-        "transform": "{polygonTransform}"
+        "transform": "{polygonTransform}",
+      	"zIndex": 5
       },
       "existing": {
         "dataId": "v1.library.{libraryId}.tiles.boundary.point.{polygonTransform}.{polygonTransform}",
         "vtlType": "ExistingBoundaryPointLayer",
         "transform": "{polygonTransform}",
-        "libraryId": "{libraryId}"
+        "libraryId": "{libraryId}",
+      	"zIndex": 0
       }
     }
   },
@@ -70,7 +76,7 @@
       "selectedIconUrl": "/images/map_icons/aro/central_office_selected.png",
       "aggregateZoomThreshold": "8",
       "equipmentType": "point",
-      "zIndex": 7590, 
+      "zIndex": 7580, 
       "drawingOptions": {
         "strokeStyle": "#0000ff"
       },
@@ -84,7 +90,7 @@
       "selectedIconUrl": "/images/map_icons/aro/remote_terminal.png",
       "aggregateZoomThreshold": "10",
       "equipmentType": "point",
-      "zIndex": 7580,
+      "zIndex": 7590,
       "drawingOptions": {
         "strokeStyle": "#0000ff",
         "lineWidth": 3,

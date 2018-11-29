@@ -2,11 +2,12 @@ import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 
 class EquipmentDetailController {
   
-	constructor($http, $timeout, state) {
+	constructor($http, $timeout, state, tileDataService) {
     this.angular = angular
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+    this.tileDataService = tileDataService
     this.networkNodeType = ''
     this.selectedEquipment = ''
     this.equipmentFeature = {} 
@@ -36,7 +37,13 @@ class EquipmentDetailController {
       
       if (options.hasOwnProperty('equipmentFeatures') && options.equipmentFeatures.length > 0) {
         this.selectedEquipment = ''
-        var equipmentList = options.equipmentFeatures
+        var equipmentList = options.equipmentFeatures.filter((equipment) => {
+          if (this.tileDataService.modifiedFeatures.hasOwnProperty(equipment.object_id)) {
+            if (!this.tileDataService.modifiedFeatures[equipment.object_id].deleted) return equipment
+          } else {
+            return equipment
+          }
+        })
         if (equipmentList.length > 0) {
           const equipment = equipmentList[0]
           this.updateSelectedState(equipment)
@@ -226,6 +233,6 @@ class EquipmentDetailController {
   }
 }
 
-EquipmentDetailController.$inject = ['$http', '$timeout', 'state']
+EquipmentDetailController.$inject = ['$http', '$timeout', 'state', 'tileDataService']
 
 export default EquipmentDetailController
