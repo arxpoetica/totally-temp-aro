@@ -233,10 +233,8 @@ class DataSourceUploadController {
   deleteDatasource(dataSource) {
     this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.state.loggedInUser.id}`)
       .then(() => {
-        var index = this.state.dataItems[dataSource.dataType].allLibraryItems.indexOf(dataSource)
-        if(index > -1) {
-          this.state.dataItems[dataSource.dataType].allLibraryItems.splice(index, 1)
-        }
+        this.state.dataItems[dataSource.dataType].allLibraryItems = this.state.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
+        this.dataSources = this.dataSources.filter(item => item.identifier !== dataSource.identifier)
         this.$timeout()
       })
   }
