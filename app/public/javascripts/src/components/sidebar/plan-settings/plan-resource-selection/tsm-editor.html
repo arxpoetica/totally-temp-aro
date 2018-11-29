@@ -2,25 +2,44 @@
   #tblTsmModel td {
     line-height: 33px; /* To vertically align text */
   }
+  .sub-table-header {
+    background-color: darkgray;
+    color: black;
+    font-weight: 700;
+  }
 </style>
 
 <div style="max-height: 500px; overflow-y: auto;">
   <table id="tblTsmModel" class="table table-sm table-striped">
     <thead class="thead-dark">
       <tr>
-        <th>Dimension ID</th>
         <th>Name</th>
-        <th>Type</th>
         <th>ARPU Weight</th>
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration">
-        <td class="text-center">{{tsmModel.dimensionId}}</td>
+
+      <!-- Only show the items with dimensionType === 'employee_count' -->
+      <tr><td colspan=2 class="sub-table-header">Employee Count</td></tr>
+      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'employee_count'}">
         <td>{{tsmModel.dimensionName}}</td>
-        <td>{{tsmModel.dimensionType}}</td>
         <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
       </tr>
+
+      <!-- Only show the items with dimensionType === 'industry' -->
+      <tr><td colspan=2 class="sub-table-header">Industry</td></tr>
+      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'industry'}">
+        <td>{{tsmModel.dimensionName}}</td>
+        <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
+      </tr>
+
+      <!-- Only show the items with dimensionType === 'employee_count' -->
+      <tr><td colspan=2 class="sub-table-header">Product</td></tr>
+      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'product'}">
+        <td>{{tsmModel.dimensionName}}</td>
+        <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
+      </tr>
+
     </tbody>
   </table>
 </div>
