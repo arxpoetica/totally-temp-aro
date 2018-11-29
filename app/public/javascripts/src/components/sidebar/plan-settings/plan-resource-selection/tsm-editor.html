@@ -6,42 +6,65 @@
     background-color: darkgray;
     color: black;
     font-weight: 700;
+    cursor: pointer;
   }
 </style>
 
-<div style="max-height: 500px; overflow-y: auto;">
-  <table id="tblTsmModel" class="table table-sm table-striped">
-    <thead class="thead-dark">
-      <tr>
-        <th>Name</th>
-        <th>ARPU Weight</th>
-      </tr>
-    </thead>
-    <tbody>
+<div style="display: flex; flex-direction: column; max-height: 500px;">
 
-      <!-- Only show the items with dimensionType === 'employee_count' -->
-      <tr><td colspan=2 class="sub-table-header">Employee Count</td></tr>
-      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'employee_count'}">
-        <td>{{tsmModel.dimensionName}}</td>
-        <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
-      </tr>
+  <!-- A table so the user can edit model values -->
+  <div style="flex: 1 1 auto; overflow-y: auto;">
+    <table id="tblTsmModel" class="table table-sm table-striped" style="margin-bottom: 0px;">
+      <thead class="thead-dark">
+        <tr>
+          <th>Name</th>
+          <th style="width: 200px;">ARPU Weight</th>
+        </tr>
+      </thead>
+      <tbody>
 
-      <!-- Only show the items with dimensionType === 'industry' -->
-      <tr><td colspan=2 class="sub-table-header">Industry</td></tr>
-      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'industry'}">
-        <td>{{tsmModel.dimensionName}}</td>
-        <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
-      </tr>
+        <!-- Only show the items with dimensionType === 'employee_count' -->
+        <tr ng-click="$ctrl.expandDimension.employee_count = !$ctrl.expandDimension.employee_count">
+          <td colspan=2 class="sub-table-header">
+            Employee Count
+            <span class="float-right"><i ng-class="$ctrl.expandDimension.employee_count ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.expandDimension.employee_count" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'employee_count'}">
+          <td>{{tsmModel.dimensionName}}</td>
+          <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
+        </tr>
 
-      <!-- Only show the items with dimensionType === 'employee_count' -->
-      <tr><td colspan=2 class="sub-table-header">Product</td></tr>
-      <tr ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'product'}">
-        <td>{{tsmModel.dimensionName}}</td>
-        <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
-      </tr>
+        <!-- Only show the items with dimensionType === 'industry' -->
+        <tr ng-click="$ctrl.expandDimension.industry = !$ctrl.expandDimension.industry">
+          <td colspan=2 class="sub-table-header">
+            Industry
+            <span class="float-right"><i ng-class="$ctrl.expandDimension.industry ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.expandDimension.industry" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'industry'}">
+          <td>{{tsmModel.dimensionName}}</td>
+          <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
+        </tr>
 
-    </tbody>
-  </table>
+        <!-- Only show the items with dimensionType === 'product' -->
+        <tr ng-click="$ctrl.expandDimension.product = !$ctrl.expandDimension.product">
+          <td colspan=2 class="sub-table-header">
+            Product
+            <span class="float-right"><i ng-class="$ctrl.expandDimension.product ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.expandDimension.product" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'product'}">
+          <td>{{tsmModel.dimensionName}}</td>
+          <td><input type="text" class="form-control form-control-sm" ng-model="tsmModel.arpuWeight"></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Help text -->
+  <div style="flex: 0 0 auto; font-style: italic; padding: 10px 0px;">Note: The final strength is [Employee Count] x [Industry] x [Product]</div>
 </div>
 
 <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">

@@ -5,6 +5,11 @@ class TsmEditorController {
     this.tsmManagerConfiguration = []
     this.pristineTsmManagerConfiguration = {}
     this.tsmManagerName = ''
+    this.expandDimension = {
+      employee_count: false,
+      industry: false,
+      product: false
+    }
   }
 
   $onChanges(changesObj) {
