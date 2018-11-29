@@ -9,6 +9,7 @@ class NetworkAnalysisBuildController {
     this.serviceAreas = []
     this.analysisAreas = []
     this.config = config
+    this.toggleAdvanceSettings = false
 
     this.areControlsEnabled = true
     //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
