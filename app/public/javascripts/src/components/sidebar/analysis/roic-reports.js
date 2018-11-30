@@ -30,7 +30,7 @@ class RoicReportsController {
     this.selectedNetworkType = this.networkTypes[0]
 
     this.entityTypes = [
-      { id: 'network', description: 'Network' },
+      { id: 'network', description: 'All' },
       { id: 'small', description: 'Small Businesses' },
       { id: 'medium', description: 'Medium Businesses' },
       { id: 'large', description: 'Large Businesses' },
