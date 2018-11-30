@@ -195,6 +195,14 @@
         </td>
       </tr>
       <tr>
+        <th colspan=2 id="pointer" ng-click="$ctrl.toggleAdvanceSettings = !$ctrl.toggleAdvanceSettings"
+          style="cursor: pointer; vertical-align: middle;">
+          <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.toggleAdvanceSettings"></i>
+          <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.toggleAdvanceSettings"></i>
+          Advance Settings
+        </th>
+      </tr>  
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
         <td>Other Settings</td>
         <td> 
           <input type="checkbox"
@@ -211,7 +219,7 @@
                  name="ctype-name"> Route From Existing Fiber                 
         </td>
       </tr>
-      <tr>
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
         <td>Pruning Strategy</td>
         <td>
           <select class="form-control form-control-sm"
@@ -220,7 +228,7 @@
           </select>
         </td>
       </tr>
-      <tr>
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
         <td>Discount Rate</td>
         <td>
           <div class="input-group input-group-sm">
@@ -234,7 +242,7 @@
         </td>
       </tr>
       
-      <tr>
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
         <td>
           Terminal Value
           
@@ -278,7 +286,7 @@
         </td>
       </tr>
       
-      <tr>
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
         <td>Analysis years</td>
         <td>
           <input type="number"

@@ -47,6 +47,8 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Creates a single map layer by substituting tileDefinition parameters
   var createSingleMapLayer = (equipmentOrFiberKey, categoryType, networkEquipment, existingOrPlanned, libraryId, rootPlanId) => {
 
+    var existingOrPlannedzIndex = state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
+    delete state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned].zIndex
     var tileDefinition = angular.copy(state.configuration.networkEquipment.tileDefinitions[categoryType][existingOrPlanned])
     objectKeyReplace(tileDefinition, '{networkNodeType}', equipmentOrFiberKey)
     objectKeyReplace(tileDefinition, '{fiberType}', equipmentOrFiberKey)
@@ -96,7 +98,7 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
       opacity: networkEquipment.drawingOptions.opacity || 0.5,
       drawingOptions: drawingOptions,
       selectable: true,
-      zIndex: networkEquipment.zIndex,
+      zIndex: networkEquipment.zIndex + (existingOrPlannedzIndex ? existingOrPlannedzIndex : 0),
       showPolylineDirection: networkEquipment.drawingOptions.showPolylineDirection && state.showDirectedCable, //Showing Direction
       highlightStyle: networkEquipment.highlightStyle
     }
