@@ -33,16 +33,16 @@
       <button class="btn btn-primary btn-sm btn-block"
               ng-click="$ctrl.createBlankPriceBook()"
               ng-if="$ctrl.selectedResourceKey === 'price_book'">
-        <i class="fa fa-file action-button-icon"></i>Create a new blank {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
+        <i class="fa fa-file action-button-icon"></i>Create a new blank Resource Manager
       </button>
       <button class="btn btn-primary btn-sm btn-block" ng-click="$ctrl.editSelectedManager()">
-        <i class="fa fa-edit action-button-icon"></i>Edit the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
+        <i class="fa fa-edit action-button-icon"></i>Edit the selected Resource Manager
       </button>
       <button class="btn btn-primary btn-sm btn-block" ng-click="$ctrl.cloneSelectedManagerFromSource($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
-        <i class="fa fa-copy action-button-icon"></i>Clone the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
+        <i class="fa fa-copy action-button-icon"></i>Clone the selected Resource Manager
       </button>
       <button class="btn btn-danger btn-sm btn-block" ng-click="$ctrl.deleteSelectedResourceManager($ctrl.resourceKeyToEndpointId[$ctrl.selectedResourceKey])">
-        <i class="far fa-trash-alt action-button-icon"></i>Delete the selected {{$ctrl.resourceItems[$ctrl.selectedResourceKey].description}}
+        <i class="far fa-trash-alt action-button-icon"></i>Delete the selected Resource Manager
       </button>
     </div>
   </div>

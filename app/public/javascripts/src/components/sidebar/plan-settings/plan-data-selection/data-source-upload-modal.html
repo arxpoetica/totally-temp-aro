@@ -83,14 +83,14 @@
               <ul class="list-group">
                 <li class="list-group-item clearfix"
                     style="padding: 0px 0px 0px 15px; line-height: 33px;"
-                    ng-repeat="dataSource in $ctrl.dataSources">
-                  <strong ng-if="dataSource.isExpanded">{{dataSource.name}}</strong>
-                  <span ng-if="!dataSource.isExpanded">{{dataSource.name}}</span>
-                  <div class="btn-group float-right" ng-if="dataSource.isEditableByUser">
+                    ng-repeat="dataSource in $ctrl.state.dataItems[$ctrl.state.uploadDataSource.name].allLibraryItems">
+                  <strong ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</strong>
+                  <span ng-if="!$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</span>
+                  <div class="btn-group float-right" ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser">
                     <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
                       <i class="far fa-trash-alt"></i>
                     </button>
-                    <button ng-if="dataSource.isExpanded" class="btn btn-light" ng-click="$ctrl.saveAccessSettings(dataSource)">
+                    <button ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded" class="btn btn-light" ng-click="$ctrl.saveAccessSettings(dataSource)">
                       <i class="fa fa-save"></i>&nbsp; Save
                     </button>
                     <button class="btn btn-light"
@@ -99,7 +99,7 @@
                     </button>
                   </div>
                   <div style="margin-left: 15px;">
-                    <resource-permissions-editor ng-if="dataSource.isExpanded && dataSource.isEditableByUser"
+                    <resource-permissions-editor ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded && $ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser"
                                                 resource-type="LIBRARY"
                                                 resource-id="{{dataSource.identifier}}"
                                                 system-actors="$ctrl.state.systemActors"
