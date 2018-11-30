@@ -36,7 +36,7 @@ class State {
   }
 
   service.penetrationAnalysisStrategies = [
-    { id: 'SCURVE', label: 'S-Curve' },
+    { id: 'SCURVE', label: 'Curve Based' },
     { id: 'FLOW_SHARE', label: 'Flow Share'}
   ]
 
