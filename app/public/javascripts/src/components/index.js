@@ -19,6 +19,7 @@ import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
 import showTargets from './sidebar/analysis/show-targets'
+import roicReports from './sidebar/analysis/roic-reports'
 import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
@@ -115,6 +116,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('analysisMode', analysisMode)
    .component('showTargets', showTargets)
    .component('networkAnalysisBuild', networkAnalysisBuild)
+   .component('roicReports', roicReports)
    .component('networkAnalysisOutput', networkAnalysisOutput)
    .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
    .component('networkAnalysisModal', networkAnalysisModal)
