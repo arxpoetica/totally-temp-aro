@@ -35,8 +35,84 @@ class BoundaryCoverageController{
     }
   }
   
+  makeCoverageLocationData(){
+    return {
+      locationType: '',
+      totalCount: 0, 
+      barChartData: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  }
   
   digestBoundaryCoverage(objectId, boundaryData){
+    var boundsCoverage = {
+      tagCounts: {}, 
+      locations: {}
+    }
+    
+    var baseCBCount = {}
+    for (const locationType in boundaryData.coverageInfo) {
+      baseCBCount[locationType] = 0
+    }
+    
+    for (const locationType in boundaryData.coverageInfo) {
+      var locData = boundaryData.coverageInfo[locationType]
+      var locCoverage = this.makeCoverageLocationData()
+      locCoverage.locationType = locationType
+      locCoverage.totalCount = locData.length
+      
+      for (var localI=0; localI<locData.length; localI++){
+        var location = locData[localI]
+        
+        //console.log( this.formatCensusBlockData( location.censusBlockTagInfo ) )
+        var tags = this.formatCensusBlockData( location.censusBlockTagInfo )
+        
+        for (const catId in tags){
+          if (!boundsCoverage.tagCounts.hasOwnProperty(catId)){
+            boundsCoverage.tagCounts[catId] = {}
+          }
+          
+          tags[catId].forEach((tagId) => {
+            if (!boundsCoverage.tagCounts[catId].hasOwnProperty(tagId)){
+              // clone baseCBCount
+              boundsCoverage.tagCounts[catId][tagId] = JSON.parse(JSON.stringify( baseCBCount )) 
+            }
+            boundsCoverage.tagCounts[catId][tagId][locationType]++
+          })
+          
+        }
+        
+        /*
+        if (!boundsCoverage.censusBlockCountById.hasOwnProperty(location.censusBlockId)){
+          //boundsCoverage.censusBlockCountById[location.censusBlockId] = 0
+          // clone baseCBCount
+          boundsCoverage.censusBlockCountById[location.censusBlockId] = JSON.parse(JSON.stringify( baseCBCount )) 
+        }
+        */
+        //boundsCoverage.censusBlockCountById[location.censusBlockId][locationType]++
+        
+        if ("number" != typeof location.distance) continue // skip these 
+        if ('feet' == this.state.configuration.units.length_units) location.distance *= 3.28084
+        
+        var dist = location.distance
+        var barIndex = Math.floor(dist / 1000)
+        if (barIndex >= locCoverage.barChartData.length || 'undefined' == typeof locCoverage.barChartData[barIndex]){
+          locCoverage.barChartData[barIndex] = 0
+        }
+        locCoverage.barChartData[barIndex]++
+      }
+      
+      boundsCoverage.locations[locationType] = locCoverage
+    }
+    
+    
+    
+    
+    
+    this.boundaryCoverageById[objectId] = boundsCoverage
+    console.log(this.boundaryCoverageById)
+    //if (this.isChartInit) this.showCoverageChart()
+    
+    /*
     var boundsCoverage = {}
     boundsCoverage.boundaryData = boundaryData
     var locations = []
@@ -71,6 +147,7 @@ class BoundaryCoverageController{
     this.boundaryCoverageById[objectId] = boundsCoverage
     if (this.isChartInit) this.showCoverageChart()
     this.getCensusTagsForBoundaryCoverage(objectId)
+    */
   }
   
   getCensusTagsForBoundaryCoverage(objectId){
@@ -168,6 +245,7 @@ class BoundaryCoverageController{
   }
   
   showCoverageChart(){
+    return
     //ToDo: check for previous chart
     //var objectId = this.feature.objectId
     var objectId = this.parentSelectedObjectId
@@ -189,6 +267,8 @@ class BoundaryCoverageController{
     for (var i=0; i<data.length; i++){
       labels.push((i+1)*1000)
     }
+    
+    // a dataset for each location type
     
     var settingsData = {
       labels: labels,
