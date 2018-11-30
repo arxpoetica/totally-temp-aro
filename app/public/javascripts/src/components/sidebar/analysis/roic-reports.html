@@ -1,0 +1,48 @@
+<div style="display: flex; flex-direction: column; height: 100%;">
+  <div style="flex: 0 0 auto;">
+    <form>
+      <div class="form-group row">
+        <div class="col-sm-5">Network Type</div>
+        <div class="col-sm-7">
+          <select class="form-control form-control-sm"
+                  ng-model="$ctrl.selectedNetworkType"
+                  ng-options="item as item.description for item in $ctrl.networkTypes">
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-sm-5">Entity Type</div>
+        <div class="col-sm-7">
+          <select class="form-control form-control-sm"
+                  ng-model="$ctrl.selectedEntityType"
+                  ng-options="item as item.description for item in $ctrl.entityTypes">
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-sm-5">Calculation Type</div>
+        <div class="col-sm-7">
+          <select class="form-control form-control-sm"
+                  ng-model="$ctrl.selectedCalcType"
+                  ng-options="item as item.description for item in $ctrl.calcTypes">
+          </select>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+  <div style="flex: 1 1 auto;">
+    <canvas id="line"
+            class="chart chart-line"
+            chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase() + '_INDEXED']
+              [$ctrl.selectedNetworkType.id + '.' + $ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
+            chart-labels="$ctrl.xAxisLabels"
+            chart-series="$ctrl.series"
+            chart-options="$ctrl.options"
+            chart-dataset-override="$ctrl.datasetOverride"
+            chart-click="$ctrl.onClick()">
+    </canvas>
+  </div>
+</div>

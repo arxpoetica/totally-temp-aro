@@ -119,7 +119,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.min.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-      var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select', 'ng-currency']);
+      var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select', 'ng-currency', 'chart.js']);
       app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
         NotificationProvider.setOptions({
           maxCount : 1
@@ -206,6 +206,7 @@
     <script src="javascripts/vendors/underscore.js"></script>
     <script src="javascripts/vendors/sweetalert.min.js"></script>
     <script src="javascripts/vendors/Chart.min.js"></script>
+    <script src="javascripts/vendors/angular-chart.min.js"></script>
     <script src="javascripts/vendors/select2.min.js"></script>
     <script src="javascripts/vendors/angular-ui-select.min.js"></script>
     <script src="javascripts/vendors/tinycolor.js"></script>

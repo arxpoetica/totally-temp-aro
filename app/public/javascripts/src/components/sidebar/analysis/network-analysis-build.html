@@ -1,8 +1,5 @@
 <div style="height: 100%">
   <style scoped>
-    #tblNetworkAnalysisBuild {
-      height: 83%;
-    }
     #tblNetworkAnalysisBuild tr {
       height: 45px;
     }
@@ -199,7 +196,7 @@
           style="cursor: pointer; vertical-align: middle;">
           <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.toggleAdvanceSettings"></i>
           <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.toggleAdvanceSettings"></i>
-          Advance Settings
+          Advanced Settings
         </th>
       </tr>  
       <tr ng-if="$ctrl.toggleAdvanceSettings">
@@ -295,6 +292,27 @@
                  min="0" max="100">
         </td>
       </tr>
+
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
+        <td>Penetration Analysis</td>
+        <td>
+          <select class="form-control form-control-sm"
+            ng-model="$ctrl.state.optimizationOptions.financialConstraints.penetrationAnalysisStrategy"
+            ng-options="item.id as item.label for item in $ctrl.state.penetrationAnalysisStrategies">
+          </select>
+        </td>
+      </tr>
+
+      <tr ng-if="$ctrl.toggleAdvanceSettings">
+        <td>Connection Cost</td>
+        <td>
+          <select class="form-control form-control-sm"
+            ng-model="$ctrl.state.optimizationOptions.financialConstraints.connectionCostStrategy"
+            ng-options="item.id as item.label for item in $ctrl.state.connectionCostStrategies">
+          </select>
+        </td>
+      </tr>
+
       <tr>
         <td>Selection Type</td>
         <td>

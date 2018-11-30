@@ -25,7 +25,9 @@
     "terminalValueStrategy": {
       "value": 0.0,
       "terminalValueStrategyType": "NONE"
-    }
+    },
+    "penetrationAnalysisStrategy": "SCURVE",
+    "connectionCostStrategy": "NEW_CONNECTION"
   },
   "fronthaulOptimization": {
     "optimizationMode": "INTER_WIRECENTER"
