@@ -19,6 +19,37 @@ class BoundaryCoverageController{
     this.state.censusCategories.subscribe((newValue) => {
       this.censusCategories = newValue
     })
+    
+    
+    this.chartSettings = {
+      'household':{
+        label: "residential",
+        backgroundColor: '#76c793',
+        borderColor: '#76c793',
+        data: []
+      }, 
+      'small':{
+        label: "small",
+        backgroundColor: '#ee96e8',
+        borderColor: '#ee96e8',
+        data: []
+      }, 
+      'medium':{
+        label: "medium",
+        backgroundColor: '#fd7c4d',
+        borderColor: '#fd7c4d',
+        data: []
+      }, 
+      'large':{
+        label: "large",
+        backgroundColor: '#07b9f2',
+        borderColor: '#07b9f2',
+        data: []
+      } 
+    }
+    
+    
+    
   }
   
   
@@ -45,6 +76,7 @@ class BoundaryCoverageController{
   
   digestBoundaryCoverage(objectId, boundaryData){
     var boundsCoverage = {
+      totalLocations: 0, 
       tagCounts: {}, 
       locations: {}
     }
@@ -59,6 +91,7 @@ class BoundaryCoverageController{
       var locCoverage = this.makeCoverageLocationData()
       locCoverage.locationType = locationType
       locCoverage.totalCount = locData.length
+      boundsCoverage.totalLocations += locData.length
       
       for (var localI=0; localI<locData.length; localI++){
         var location = locData[localI]
@@ -67,18 +100,29 @@ class BoundaryCoverageController{
         var tags = this.formatCensusBlockData( location.censusBlockTagInfo )
         
         for (const catId in tags){
-          if (!boundsCoverage.tagCounts.hasOwnProperty(catId)){
-            boundsCoverage.tagCounts[catId] = {}
-          }
-          
-          tags[catId].forEach((tagId) => {
-            if (!boundsCoverage.tagCounts[catId].hasOwnProperty(tagId)){
-              // clone baseCBCount
-              boundsCoverage.tagCounts[catId][tagId] = JSON.parse(JSON.stringify( baseCBCount )) 
-            }
-            boundsCoverage.tagCounts[catId][tagId][locationType]++
-          })
-          
+          if ( this.censusCategories.hasOwnProperty(catId) ){
+            
+            tags[catId].forEach((tagId) => {
+              if( this.censusCategories[catId].tags.hasOwnProperty(tagId) ){
+                
+                if (!boundsCoverage.tagCounts.hasOwnProperty(catId)){
+                  boundsCoverage.tagCounts[catId] = {}
+                  boundsCoverage.tagCounts[catId].description = this.censusCategories[catId].description
+                  boundsCoverage.tagCounts[catId].tags = {}
+                }
+                
+                if (!boundsCoverage.tagCounts[catId].tags.hasOwnProperty(tagId)){
+                  
+                  boundsCoverage.tagCounts[catId].tags[tagId] = {}
+                  boundsCoverage.tagCounts[catId].tags[tagId].description = this.censusCategories[catId].tags[tagId].description
+                  boundsCoverage.tagCounts[catId].tags[tagId].colourHash = this.censusCategories[catId].tags[tagId].colourHash
+                  // clone baseCBCount
+                  boundsCoverage.tagCounts[catId].tags[tagId].count = JSON.parse(JSON.stringify( baseCBCount )) 
+                }
+                boundsCoverage.tagCounts[catId].tags[tagId].count[locationType]++
+              }// else report that we don't have data for that tag? 
+            })
+          }// else report that we don't have data for that category? 
         }
         
         /*
@@ -110,7 +154,7 @@ class BoundaryCoverageController{
     
     this.boundaryCoverageById[objectId] = boundsCoverage
     console.log(this.boundaryCoverageById)
-    //if (this.isChartInit) this.showCoverageChart()
+    if (this.isChartInit) this.showCoverageChart()
     
     /*
     var boundsCoverage = {}
@@ -149,7 +193,7 @@ class BoundaryCoverageController{
     this.getCensusTagsForBoundaryCoverage(objectId)
     */
   }
-  
+  /*
   getCensusTagsForBoundaryCoverage(objectId){
     var censusBlockIds = Object.keys(this.boundaryCoverageById[objectId].censusBlockCountById)
     
@@ -229,7 +273,7 @@ class BoundaryCoverageController{
       this.boundaryCoverageById[objectId].censusTagsByCat = {}
     }
   }
-  
+  */
   // ToDo: very similar to the code in tile-data-service.js
   formatCensusBlockData(tagData){
     var sepA = ';'
@@ -262,22 +306,35 @@ class BoundaryCoverageController{
     
     var ctx = ele.getContext('2d')
     
-    var data = this.boundaryCoverageById[objectId].barChartData
+    // a dataset for each location type
+    var datasets = []
+    var colCount = 0
+    for (const locationType in this.boundaryCoverageById[objectId].locations){
+      var locCoverage = this.boundaryCoverageById[objectId].locations[locationType]
+      if (locCoverage.barChartData.length > colCount) colCount = locCoverage.barChartData.length
+      if (this.chartSettings.hasOwnProperty(locationType)){
+        var locDataset = JSON.parse(JSON.stringify( this.chartSettings[locationType] ))
+        locDataset.barChartData = locCoverage.barChartData
+        datasets.push(locDataset)
+      }
+    }
+    
+    
+    
+    
+    
+    //var data = this.boundaryCoverageById[objectId].barChartData
+    
     var labels = []
-    for (var i=0; i<data.length; i++){
+    for (var i=0; i<colCount; i++){
       labels.push((i+1)*1000)
     }
     
-    // a dataset for each location type
+    
     
     var settingsData = {
       labels: labels,
-      datasets: [{
-          label: "residential",
-          backgroundColor: '#76c793',
-          borderColor: '#76c793',
-          data: data
-      }]
+      datasets: datasets
     }
     
     var options = {
@@ -321,14 +378,6 @@ class BoundaryCoverageController{
     if ('undefined' == typeof obj) obj = {}
     return Object.keys(obj)
   }
-  
-  
-  
-  
-  
-  
-  
-  
   
   
 }
