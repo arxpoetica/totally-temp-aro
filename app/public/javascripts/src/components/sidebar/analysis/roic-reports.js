@@ -84,10 +84,12 @@ class RoicReportsController {
       { zeroes: 3, suffix: 'K' }    // Thousands
     ]
     const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
+    // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
+    // without these two spaces.
     if (threshold) {
-      return `${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}`
+      return `  ${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}`
     } else {
-      return `${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}` // For values less than 1000
+      return `  ${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}` // For values less than 1000
     }
   }
 
