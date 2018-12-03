@@ -18,6 +18,7 @@ class RoicReportsController {
         ]
       }
     }
+    this.datasetOverride = { fill: false }
 
     this.networkTypes = [
       { id: 'new_network', description: 'New Network' },
