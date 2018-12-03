@@ -490,7 +490,8 @@ class MapTileRenderer {
             var featureObj = {
               'ctx': ctx, 'shape': shape, 'feature': feature, 'featureData': featureData, 'geometryOffset': geometryOffset, 'mapLayer': mapLayer, 'mapLayers': this.mapLayers, 'tileDataService': this.tileDataService,
               'selection': this.selection, 'selectedLocationImage': selectedLocationImage, 'lockOverlayImage': lockOverlayImage, 'invalidatedOverlayImage': invalidatedOverlayImage,
-              'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.state.selectionModes
+              'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.state.selectionModes,
+              'equipmentLayerTypeVisibility' : this.state.equipmentLayerTypeVisibility
             }
             pointFeatureRendererList.push(featureObj)
   	      } else {
