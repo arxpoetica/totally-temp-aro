@@ -37,13 +37,7 @@ class EquipmentDetailController {
       
       if (options.hasOwnProperty('equipmentFeatures') && options.equipmentFeatures.length > 0) {
         this.selectedEquipment = ''
-        var equipmentList = options.equipmentFeatures.filter((equipment) => {
-          if (this.tileDataService.modifiedFeatures.hasOwnProperty(equipment.object_id)) {
-            if (!this.tileDataService.modifiedFeatures[equipment.object_id].deleted) return equipment
-          } else {
-            return equipment
-          }
-        })
+        var equipmentList = this.state.getValidEquipmentFeaturesList(options.equipmentFeatures) //Filter Deleted equipment features
         if (equipmentList.length > 0) {
           const equipment = equipmentList[0]
           this.updateSelectedState(equipment)

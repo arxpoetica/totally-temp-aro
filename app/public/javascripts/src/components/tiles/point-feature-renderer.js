@@ -18,20 +18,20 @@ class PointFeatureRenderer {
     deletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
-        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes)
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes,Obj.equipmentLayerTypeVisibility)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
-        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes)
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes,Obj.equipmentLayerTypeVisibility)
     })
 
   }
 
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
                        selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
+                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility) {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
     var selectedListType = null 
@@ -55,25 +55,17 @@ class PointFeatureRenderer {
 
     // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
     const modificationType = this.getModificationTypeForFeature(feature, mapLayer, tileDataService)
-    // we dont show originals when planned view is on
-    if (modificationType === PointFeatureRenderer.modificationTypes.ORIGINAL && feature.properties.hasOwnProperty('_data_type')) {
+    
+
+    if ( !(equipmentLayerTypeVisibility.existing && equipmentLayerTypeVisibility.planned)
+        // When both exisiting and planned are turnned on show deleted,original,modified and exisiting
+        && (modificationType === PointFeatureRenderer.modificationTypes.ORIGINAL || modificationType === PointFeatureRenderer.modificationTypes.DELETED) 
+        // we dont show originals/deleted when only planned view is on
+        && feature.properties.hasOwnProperty('_data_type')) {
       var equipmentType = feature.properties._data_type.substring(feature.properties._data_type.lastIndexOf('.') + 1)
       if (mapLayers.hasOwnProperty(equipmentType + '_planned')) {
         return
       }
-    }
-
-    // dont show deleted when existing view is on
-    if (modificationType === PointFeatureRenderer.modificationTypes.DELETED && feature.properties.hasOwnProperty('data_source_id')) {
-      var equipmentType = feature.properties._data_type.substring(feature.properties._data_type.lastIndexOf('.') + 1)
-      var hideExisitingDeletedEqu = false
-      var mapLayerKeys = Object.keys(mapLayers)
-      mapLayerKeys.forEach((mapLayerKey) => {
-        if(mapLayerKey.indexOf(equipmentType + '_existing_') > -1) {
-          hideExisitingDeletedEqu = true
-        }
-      })
-      if(hideExisitingDeletedEqu) return
     }
 
     if (feature.properties.location_id && selection.planTargets.locationIds.has(+feature.properties.location_id)

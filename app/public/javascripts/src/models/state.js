@@ -617,6 +617,7 @@ class State {
       })
       map.addListener('zoom_changed', () => {
         service.defaultPlanCoordinates.zoom = map.getZoom()
+        $rootScope.$broadcast('map_zoom_changed')
       })
     } else {
       console.warn('Map object not found. Plan coordinates and zoom will not be updated when the user pans or zooms the map')
@@ -1752,6 +1753,18 @@ class State {
       }
 
     })
+  }
+
+  service.getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
+    var validEquipments = []
+    equipmentFeaturesList.filter((equipment) => {
+      if (tileDataService.modifiedFeatures.hasOwnProperty(equipment.object_id)) {
+        if (!tileDataService.modifiedFeatures[equipment.object_id].deleted) validEquipments.push(equipment)
+      } else {
+        validEquipments.push(equipment)
+      }
+    })
+    return validEquipments
   }
 
   return service

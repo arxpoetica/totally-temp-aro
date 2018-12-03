@@ -881,7 +881,7 @@ class MapObjectEditorController {
       })
     } else if (this.featureType === 'equipment' && equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
-      const clickedObject = equipmentFeatures[0]
+      const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] //Filter Deleted equipments
       feature.objectId = clickedObject.object_id 
       feature.isExistingObject = true
       if (clickedObject._data_type === 'equipment_boundary.select') {
