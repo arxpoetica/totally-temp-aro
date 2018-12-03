@@ -76,18 +76,7 @@ class RoicReportsController {
       this.xAxisLabels.push(currentYear + i)
     }
     this.$http.get(`/service/report/plan/${this.planId}`)
-      .then(result => {
-        this.roicResults = result.data
-        // A little bit of processing - The components (e.g. roicResults.roicAnalysis.components.NEW_NETWORK) are in the
-        // form of an array. We will add roicResults.roicAnalysis.components.NEW_NETWORK_KEYED that will key the array items
-        // based on the curveName, so that we can bind to the values easily from our HTML.
-        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-          this.roicResults.roicAnalysis.components[`${componentKey}_INDEXED`] = {}
-          this.roicResults.roicAnalysis.components[componentKey].forEach(component => {
-            this.roicResults.roicAnalysis.components[`${componentKey}_INDEXED`][component.curveName] = component
-          })
-        })
-      })
+      .then(result => this.roicResults = result.data)
       .catch(err => console.error(err))
   }
 }

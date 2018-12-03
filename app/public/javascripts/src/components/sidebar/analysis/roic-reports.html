@@ -36,8 +36,8 @@
   <div style="flex: 1 1 auto;">
     <canvas id="line"
             class="chart chart-line"
-            chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase() + '_INDEXED']
-              [$ctrl.selectedNetworkType.id + '.' + $ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
+            chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
+                        [$ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
             chart-labels="$ctrl.xAxisLabels"
             chart-series="$ctrl.series"
             chart-options="$ctrl.options"
