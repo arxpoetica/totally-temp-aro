@@ -7,6 +7,11 @@ class RoicReportsController {
     this.series = ['Series A', 'Series B'];
     this.options = {
       maintainAspectRatio: false,
+      tooltips: {
+        callbacks: {
+          label: (tooltipItem, data) => this.formatYAxisValue(+tooltipItem.yLabel, [+tooltipItem.yLabel], 3)
+        }
+      },
       scales: {
         yAxes: [
           {
@@ -15,22 +20,7 @@ class RoicReportsController {
             display: true,
             position: 'left',
             ticks: {
-              callback: (value, index, values) => {
-                // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
-                // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
-                const maxValue = Math.max.apply(Math, values) // Inefficient to do this every time, but 'values' length will be small
-                const thresholds = [
-                  { zeroes: 9, suffix: 'B' },   // Billions
-                  { zeroes: 6, suffix: 'M' },   // Millions
-                  { zeroes: 3, suffix: 'K' }    // Thousands
-                ]
-                const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
-                if (threshold) {
-                  return `${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(1)} ${threshold.suffix}`
-                } else {
-                  return `${this.selectedCalcType.tickPrefix}${value.toFixed(2)}` // For values less than 1000
-                }
-              }
+              callback: (value, index, values) => this.formatYAxisValue(value, values)
             }
           }
         ]
@@ -80,6 +70,24 @@ class RoicReportsController {
   $onChanges(changesObj) {
     if (changesObj.planId) {
       this.refreshData()
+    }
+  }
+
+  formatYAxisValue(value, allValues, precision) {
+    precision = precision || 1
+    // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
+    // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
+    const maxValue = Math.max.apply(Math, allValues) // Inefficient to do this every time, but 'values' length will be small
+    const thresholds = [
+      { zeroes: 9, suffix: 'B' },   // Billions
+      { zeroes: 6, suffix: 'M' },   // Millions
+      { zeroes: 3, suffix: 'K' }    // Thousands
+    ]
+    const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
+    if (threshold) {
+      return `${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}`
+    } else {
+      return `${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}` // For values less than 1000
     }
   }
 
