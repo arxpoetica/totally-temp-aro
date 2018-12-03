@@ -10,10 +10,28 @@ class RoicReportsController {
       scales: {
         yAxes: [
           {
-            id: 'y-axis-1',
+            id: 'yAxis',
             type: 'linear',
             display: true,
-            position: 'left'
+            position: 'left',
+            ticks: {
+              callback: (value, index, values) => {
+                // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
+                // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
+                const maxValue = Math.max.apply(Math, values) // Inefficient to do this every time, but 'values' length will be small
+                const thresholds = [
+                  { zeroes: 9, suffix: 'B' },   // Billions
+                  { zeroes: 6, suffix: 'M' },   // Millions
+                  { zeroes: 3, suffix: 'K' }    // Thousands
+                ]
+                const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
+                if (threshold) {
+                  return `${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(1)} ${threshold.suffix}`
+                } else {
+                  return `${this.selectedCalcType.tickPrefix}${value.toFixed(2)}` // For values less than 1000
+                }
+              }
+            }
           }
         ]
       }
@@ -41,16 +59,16 @@ class RoicReportsController {
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]  // Because "medium" is the only thing supported in service right now
 
     this.calcTypes = [
-      { id: 'opex_expenses', description: 'Operating Expenses' },
-      { id: 'arpu_curve', description: 'ARPU Curve' },
-      { id: 'premises', description: 'Premises' },
-      { id: 'customers', description: 'Customers' },
-      { id: 'cashFlow', description: 'Cash Flow' },
-      { id: 'penetration', description: 'Penetration' },
-      { id: 'new_connections_cost', description: 'Cost of new connections' },
-      { id: 'new_connections', description: 'Number of new connections' },
-      { id: 'revenue', description: 'Revenue' },
-      { id: 'maintenance_expenses', description: 'Maintenance Expenses' }
+      { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ' },
+      { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ' },
+      { id: 'premises', description: 'Premises', tickPrefix: '' },
+      { id: 'customers', description: 'Customers', tickPrefix: '' },
+      { id: 'cashFlow', description: 'Cash Flow', tickPrefix: '$ ' },
+      { id: 'penetration', description: 'Penetration', tickPrefix: '' },
+      { id: 'new_connections_cost', description: 'Cost of new connections', tickPrefix: '$ ' },
+      { id: 'new_connections', description: 'Number of new connections', tickPrefix: '' },
+      { id: 'revenue', description: 'Revenue', tickPrefix: '$ ' },
+      { id: 'maintenance_expenses', description: 'Maintenance Expenses', tickPrefix: '$ ' }
     ]
     this.selectedCalcType = this.calcTypes[0]
   }
