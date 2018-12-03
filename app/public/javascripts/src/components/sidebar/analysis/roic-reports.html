@@ -34,15 +34,24 @@
     </form>
   </div>
   <div style="flex: 1 1 auto;">
+    <!-- If we have chart data, show it -->
     <canvas id="line"
+            ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
+                   [$ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
             class="chart chart-line"
-            chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase() + '_INDEXED']
-              [$ctrl.selectedNetworkType.id + '.' + $ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
+            chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
+                        [$ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
             chart-labels="$ctrl.xAxisLabels"
             chart-series="$ctrl.series"
             chart-options="$ctrl.options"
-            chart-dataset-override="$ctrl.datasetOverride"
-            chart-click="$ctrl.onClick()">
+            chart-dataset-override="$ctrl.datasetOverride">
     </canvas>
+
+    <!-- If we do not have chart data, display a warning -->
+    <div ng-if="!$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
+                 [$ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
+         class="alert alert-warning" role="alert">
+      No data available for the selected combination of Network Type, Entity Type and Calculation Type.
+    </div>
   </div>
 </div>

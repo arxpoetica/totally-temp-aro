@@ -7,17 +7,26 @@ class RoicReportsController {
     this.series = ['Series A', 'Series B'];
     this.options = {
       maintainAspectRatio: false,
+      tooltips: {
+        callbacks: {
+          label: (tooltipItem, data) => this.formatYAxisValue(+tooltipItem.yLabel, [+tooltipItem.yLabel], 3)
+        }
+      },
       scales: {
         yAxes: [
           {
-            id: 'y-axis-1',
+            id: 'yAxis',
             type: 'linear',
             display: true,
-            position: 'left'
+            position: 'left',
+            ticks: {
+              callback: (value, index, values) => this.formatYAxisValue(value, values)
+            }
           }
         ]
       }
     }
+    this.datasetOverride = { fill: false }
 
     this.networkTypes = [
       { id: 'new_network', description: 'New Network' },
@@ -40,16 +49,16 @@ class RoicReportsController {
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]  // Because "medium" is the only thing supported in service right now
 
     this.calcTypes = [
-      { id: 'opex_expenses', description: 'Operating Expenses' },
-      { id: 'arpu_curve', description: 'ARPU Curve' },
-      { id: 'premises', description: 'Premises' },
-      { id: 'customers', description: 'Customers' },
-      { id: 'cashFlow', description: 'Cash Flow' },
-      { id: 'penetration', description: 'Penetration' },
-      { id: 'new_connections_cost', description: 'Cost of new connections' },
-      { id: 'new_connections', description: 'Number of new connections' },
-      { id: 'revenue', description: 'Revenue' },
-      { id: 'maintenance_expenses', description: 'Maintenance Expenses' }
+      { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ' },
+      { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ' },
+      { id: 'premises', description: 'Premises', tickPrefix: '' },
+      { id: 'customers', description: 'Customers', tickPrefix: '' },
+      { id: 'cashFlow', description: 'Cash Flow', tickPrefix: '$ ' },
+      { id: 'penetration', description: 'Penetration', tickPrefix: '' },
+      { id: 'new_connections_cost', description: 'Cost of new connections', tickPrefix: '$ ' },
+      { id: 'new_connections', description: 'Number of new connections', tickPrefix: '' },
+      { id: 'revenue', description: 'Revenue', tickPrefix: '$ ' },
+      { id: 'maintenance_expenses', description: 'Maintenance Expenses', tickPrefix: '$ ' }
     ]
     this.selectedCalcType = this.calcTypes[0]
   }
@@ -61,6 +70,26 @@ class RoicReportsController {
   $onChanges(changesObj) {
     if (changesObj.planId) {
       this.refreshData()
+    }
+  }
+
+  formatYAxisValue(value, allValues, precision) {
+    precision = precision || 1
+    // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
+    // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
+    const maxValue = Math.max.apply(Math, allValues) // Inefficient to do this every time, but 'values' length will be small
+    const thresholds = [
+      { zeroes: 9, suffix: 'B' },   // Billions
+      { zeroes: 6, suffix: 'M' },   // Millions
+      { zeroes: 3, suffix: 'K' }    // Thousands
+    ]
+    const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
+    // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
+    // without these two spaces.
+    if (threshold) {
+      return `  ${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}`
+    } else {
+      return `  ${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}` // For values less than 1000
     }
   }
 
@@ -76,18 +105,7 @@ class RoicReportsController {
       this.xAxisLabels.push(currentYear + i)
     }
     this.$http.get(`/service/report/plan/${this.planId}`)
-      .then(result => {
-        this.roicResults = result.data
-        // A little bit of processing - The components (e.g. roicResults.roicAnalysis.components.NEW_NETWORK) are in the
-        // form of an array. We will add roicResults.roicAnalysis.components.NEW_NETWORK_KEYED that will key the array items
-        // based on the curveName, so that we can bind to the values easily from our HTML.
-        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-          this.roicResults.roicAnalysis.components[`${componentKey}_INDEXED`] = {}
-          this.roicResults.roicAnalysis.components[componentKey].forEach(component => {
-            this.roicResults.roicAnalysis.components[`${componentKey}_INDEXED`][component.curveName] = component
-          })
-        })
-      })
+      .then(result => this.roicResults = result.data)
       .catch(err => console.error(err))
   }
 }
