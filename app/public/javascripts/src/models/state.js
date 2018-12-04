@@ -1,4 +1,5 @@
 import StateViewMode from './state-view-mode'
+import Constants from '../components/common/constants'
 
 /* global app localStorage map */
 class State {
@@ -1321,13 +1322,11 @@ class State {
       })
       .then((response) => {
         service.isCanceling = false
-        if (response.status >= 200 && response.status <= 299) {
-          service.Optimizingplan.planState = response.data.planState
-          delete service.Optimizingplan.optimizationId
-          service.clearTileCachePlanOutputs()
-          tileDataService.markHtmlCacheDirty()
-          service.requestMapLayerRefresh.next(null)
-        }
+        service.Optimizingplan.planState = response.data.planState  // Note that this should match with Constants.PLAN_STATE
+        delete service.Optimizingplan.optimizationId
+        service.clearTileCachePlanOutputs()
+        tileDataService.markHtmlCacheDirty()
+        service.requestMapLayerRefresh.next(null)
       })
       .catch((err) => {
         console.error(err)
@@ -1339,7 +1338,7 @@ class State {
     service.stopPolling()
     service.Optimizingplan = newPlan
     service.isCanceling = false
-    if (service.Optimizingplan && service.Optimizingplan.planState === 'STARTED') {
+    if (service.Optimizingplan && service.Optimizingplan.planState === Constants.PLAN_STATE.STARTED) {
       // Optimization is in progress. We can start polling for the results
       service.startPolling()
     }

@@ -59,7 +59,9 @@
 
   <!-- The ROIC Reports component-->
   <div style="position: relative; width: 100%; height: 400px;">
-    <roic-reports plan-id="$ctrl.state.plan.getValue().id"></roic-reports>
+    <roic-reports plan-id="$ctrl.state.plan.getValue().id"
+                  optimization-state="$ctrl.state.Optimizingplan.planState">
+    </roic-reports>
   </div>
   <button class="btn btn-primary pull-left" ng-click="$ctrl.state.reportModal.next(true)">Reports</button>
   <button class="btn btn-primary pull-right" ng-click="$ctrl.showDetailedOutput()">Expand Results</button>

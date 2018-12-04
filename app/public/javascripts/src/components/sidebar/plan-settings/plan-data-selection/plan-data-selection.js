@@ -1,3 +1,5 @@
+import Constants from '../../../common/constants'
+
 class DataSelectionController {
   constructor($http, $timeout, $rootScope, state, aclManager) {
     this.$http = $http
@@ -10,13 +12,13 @@ class DataSelectionController {
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
 
     state.planOptimization.subscribe((newPlan) => {
       if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
     this.isDataSourceEditable = {}

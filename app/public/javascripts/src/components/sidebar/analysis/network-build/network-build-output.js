@@ -1,3 +1,4 @@
+import Constants from '../../../common/constants'
 class NetworkBuildOutputController {
 
   constructor($http, state, map_tools) {
@@ -11,11 +12,11 @@ class NetworkBuildOutputController {
 
     state.plan.subscribe((plan) => {
       this.plan = plan
-      if(plan.planState === 'COMPLETED') this.getNetworkBuildReport()
+      if(plan.planState === Constants.PLAN_STATE.COMPLETED) this.getNetworkBuildReport()
     })
 
     state.planOptimization.subscribe((plan) => {
-      if(plan && plan.planState === 'COMPLETED') this.getNetworkBuildReport()
+      if(plan && plan.planState === Constants.PLAN_STATE.COMPLETED) this.getNetworkBuildReport()
     })
     
   }

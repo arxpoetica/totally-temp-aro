@@ -1,3 +1,5 @@
+import Constants from '../../../common/constants'
+
 class ResourceSelectionController {
   constructor($http, $timeout, state) {
     this.$http = $http
@@ -7,13 +9,13 @@ class ResourceSelectionController {
     this.isDirty = false
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
 
     state.planOptimization.subscribe((newPlan) => {
       if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
   }

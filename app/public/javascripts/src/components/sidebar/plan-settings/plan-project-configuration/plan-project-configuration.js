@@ -1,3 +1,4 @@
+import Constants from '../../../common/constants'
 class PlanProjectConfigurationController {
   constructor($http, $timeout, state) {
     this.$http = $http
@@ -5,13 +6,13 @@ class PlanProjectConfigurationController {
     this.state = state
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
 
     state.planOptimization.subscribe((newPlan) => {
       if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === 'START_STATE') || (newPlan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
     this.allProjects = []
