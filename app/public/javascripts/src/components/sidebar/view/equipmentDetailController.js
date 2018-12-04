@@ -194,10 +194,13 @@ class EquipmentDetailController {
     
     var equipmentObjectId = boundsData.objectId
     this.isWorkingOnCoverage = true
+    
     //console.log(optimizationBody)
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
     .then((result) => {
       //console.log(result)
+      //console.log(this.state.censusCategories.getValue())
+      
       // The user may have destroyed the component before we get here. In that case, just return
       if (this.isComponentDestroyed) {
         console.warn('Plan editor was closed while a boundary was being calculated')
