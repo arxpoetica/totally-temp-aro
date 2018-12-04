@@ -1,3 +1,5 @@
+import Constants from '../../common/constants'
+
 class RoicReportsController {
 
   constructor($http, state) {
@@ -63,12 +65,8 @@ class RoicReportsController {
     this.selectedCalcType = this.calcTypes[0]
   }
 
-  $onInit() {
-    this.refreshData()
-  }
-
   $onChanges(changesObj) {
-    if (changesObj.planId) {
+    if (changesObj.planId || changesObj.optimizationState) {
       this.refreshData()
     }
   }
@@ -115,7 +113,8 @@ RoicReportsController.$inject = ['$http', 'state']
 let roicReports = {
   templateUrl: '/components/sidebar/analysis/roic-reports.html',
   bindings: {
-    planId: '<'
+    planId: '<',
+    optimizationState: '<'
   },
   controller: RoicReportsController
 }
