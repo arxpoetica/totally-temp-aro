@@ -14,7 +14,7 @@
     <div class="form-group row">
       <label for="inputScaleFactor" class="col-sm-3 col-form-label">Scale Factor (meters)</label>
       <div class="col-sm-9">
-        <input type="text" class="form-control form-control-sm" id="inputScaleFactor" ng-model="$ctrl.impedanceManagerConfiguration.scaleFactorMeters">
+        <input type="text" class="form-control" id="inputScaleFactor" ng-model="$ctrl.impedanceManagerConfiguration.scaleFactorMeters">
       </div>
     </div>
 
@@ -32,7 +32,7 @@
           <td>{{impedanceMappingKey}}</td>
           <td>{{$ctrl.mappingLabels[impedanceMappingKey]}}</td>
           <td>
-            <input type="text" class="form-control form-control-sm" ng-model="$ctrl.impedanceManagerConfiguration.map[impedanceMappingKey]">
+            <input type="text" class="form-control" ng-model="$ctrl.impedanceManagerConfiguration.map[impedanceMappingKey]">
           </td>
         </div>
       </tbody>

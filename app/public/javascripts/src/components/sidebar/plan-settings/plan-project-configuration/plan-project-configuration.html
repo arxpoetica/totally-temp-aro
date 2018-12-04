@@ -18,7 +18,7 @@
       <tr>
         <td>Projects:</td>
         <td>
-          <select class="form-control form-control-sm"
+          <select class="form-control"
                   ng-model="$ctrl.selectedProjectId"
                   ng-options="item.id as item.name for item in $ctrl.allProjects">
           </select>
@@ -27,7 +27,7 @@
       <tr>
         <td></td>
         <td>
-          <button class="btn btn-sm btn-block btn-light" ng-click="$ctrl.copySelectedProjectSettingsToPlan()">
+          <button class="btn btn-block btn-light" ng-click="$ctrl.copySelectedProjectSettingsToPlan()">
             <i class="fa fa-download"></i>&nbsp;&nbsp;Copy project settings to current plan
           </button>
         </td>
@@ -35,7 +35,7 @@
       <tr>
         <td></td>
         <td>
-          <button class="btn btn-sm btn-block btn-light" ng-click="$ctrl.planSettingsToProject()">
+          <button class="btn btn-block btn-light" ng-click="$ctrl.planSettingsToProject()">
             <i class="fa fa-upload"></i>&nbsp;&nbsp;Save plan settings to selected project
           </button>
         </td>

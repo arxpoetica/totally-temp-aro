@@ -4,15 +4,15 @@
     <fieldset>
       <div class="form-group">
         <label>First name *</label>
-        <input type="text" name="first_name" class="form-control form-control-sm" ng-model="$ctrl.globalSettingsService.user.first_name">
+        <input type="text" name="first_name" class="form-control" ng-model="$ctrl.globalSettingsService.user.first_name">
       </div>
       <div class="form-group">
         <label>Last name *</label>
-        <input type="text" name="last_name" class="form-control form-control-sm" ng-model="$ctrl.globalSettingsService.user.last_name">
+        <input type="text" name="last_name" class="form-control" ng-model="$ctrl.globalSettingsService.user.last_name">
       </div>
       <div class="form-group">
         <label>Email *</label>
-        <input type="email" name="email" class="form-control form-control-sm" ng-model="$ctrl.globalSettingsService.user.email">
+        <input type="email" name="email" class="form-control" ng-model="$ctrl.globalSettingsService.user.email">
       </div>
     </fieldset>
 
@@ -22,15 +22,15 @@
       <legend>Optionally change your password</legend>
       <div class="form-group">
         <label>Current password</label>
-        <input type="password" name="old_password" ng-model=$ctrl.globalSettingsService.old_password class="form-control form-control-sm" placeholder="Your current password">
+        <input type="password" name="old_password" ng-model=$ctrl.globalSettingsService.old_password class="form-control" placeholder="Your current password">
       </div>
       <div class="form-group">
         <label>New password</label>
-        <input type="password" name="password" ng-model=$ctrl.globalSettingsService.password class="form-control form-control-sm" placeholder="The new password">
+        <input type="password" name="password" ng-model=$ctrl.globalSettingsService.password class="form-control" placeholder="The new password">
       </div>
       <div class="form-group">
         <label>Confirm new password</label>
-        <input type="password" name="password_confirm" ng-model=$ctrl.globalSettingsService.password_confirm class="form-control form-control-sm"
+        <input type="password" name="password_confirm" ng-model=$ctrl.globalSettingsService.password_confirm class="form-control"
           placeholder="Confirm the new password">
       </div>
     </fieldset>

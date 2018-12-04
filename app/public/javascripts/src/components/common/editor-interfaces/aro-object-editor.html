@@ -25,7 +25,7 @@
     <div class="ei-property-item" ng-if="!$ctrl.isExpandable(value) && $ctrl.isEditable(value)" ng-class-odd="'ei-row-odd'" ng-class-even="'ei-row-even'">
       <div style="flex: 1 1 auto;">{{key}}</div>
       <!-- Note that our ng-model is "$ctrl.objectToEdit[key]" and not "value" so the two way binding updates the actual object -->
-      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToEdit[key]" class="form-control form-control-sm input-sm" style="flex: 0 0 100px">
+      <input ng-if="$ctrl.isEditable(value)" type="text" ng-model="$ctrl.objectToEdit[key]" class="form-control input-sm" style="flex: 0 0 100px">
     </div>
   </div>
 </div>
