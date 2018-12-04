@@ -54,13 +54,13 @@ let createUpdateTag = {
         <div class="form-group row">
           <label class="col-sm-4 col-form-label">Name</label>
           <div class="col-sm-8">
-            <input type="text" class="form-control form-control-sm" ng-model="$ctrl.tag.name">
+            <input type="text" class="form-control" ng-model="$ctrl.tag.name">
           </div>
         </div>
         <div class="form-group row">
           <label class="col-sm-4 col-form-label">Description</label>
           <div class="col-sm-8">
-            <input type="text" class="form-control form-control-sm" ng-model="$ctrl.tag.description">
+            <input type="text" class="form-control" ng-model="$ctrl.tag.description">
           </div>
         </div>
         <div class="form-group row">

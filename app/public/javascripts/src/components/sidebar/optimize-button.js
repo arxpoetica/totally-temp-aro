@@ -1,6 +1,9 @@
+import Constants from '../common/constants'
+
 class OptimizeButtonController {
   constructor(state) {
     this.state = state
+    this.Constants = Constants
   }
 
   areInputsComplete() {

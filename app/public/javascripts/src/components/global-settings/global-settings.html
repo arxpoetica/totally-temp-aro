@@ -1,7 +1,6 @@
 <style scoped>
   #global-settings {
     display: flex;
-    min-height: 100%;
     flex-wrap: wrap
   }
 
@@ -16,27 +15,27 @@
   <modal-body style="height: 500px;overflow: auto;">
 
     <div id="global-settings" ng-if="$ctrl.currentView === $ctrl.views.GLOBAL_SETTINGS">
-      <button class="btn btn-sm settings-btn" ng-click="$ctrl.currentView = $ctrl.views.MY_ACCOUNT">
+      <button class="btn btn-light settings-btn" ng-click="$ctrl.currentView = $ctrl.views.MY_ACCOUNT">
         <i class="fa fa-2x fa-user"></i>
         <br>My Account
       </button>
 
-      <button class="btn btn-sm settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.MANAGE_USERS">
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.MANAGE_USERS">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Users
       </button>
 
-      <button class="btn btn-sm settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.MANAGE_GROUPS">
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.MANAGE_GROUPS">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Groups
       </button>
 
-      <button class="btn btn-sm settings-btn" ng-click="$ctrl.openUserSettingsForUserId($ctrl.state.loggedInUser.id)">
+      <button class="btn btn-light settings-btn" ng-click="$ctrl.openUserSettingsForUserId($ctrl.state.loggedInUser.id)">
         <i class="fa fa-2x fa-cogs"></i>
         <br>User Settings
       </button>
 
-      <button class="btn btn-sm settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.TAG_MANAGER">
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.TAG_MANAGER">
         <i class="fa fa-2x fa-tags"></i>
         <br>Tag Manager
       </button>

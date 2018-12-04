@@ -68,7 +68,7 @@ class TileComponentController {
       }
 
       if (plan) {
-        this.areControlsEnabled = (plan.planState === 'START_STATE') || (plan.planState === 'INITIALIZED')
+        this.areControlsEnabled = (plan.planState === Constants.PLAN_STATE.START_STATE) || (plan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
 

@@ -30,7 +30,7 @@
             {{layer.description}}
             
             <div ng-if="'census_blocks' == layer.type && layer.visible" style="padding-left: 0.5em;">
-              <select class="form-control form-control-sm" style="margin-bottom: 0.5em;"
+              <select class="form-control" style="margin-bottom: 0.5em;"
                 ng-model="$ctrl.selectedCensusCat"
                 ng-options="item as item.description for item in $ctrl.censusCategories"
                 ng-change="$ctrl.onSelectCensusCat()">

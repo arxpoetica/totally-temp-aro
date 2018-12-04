@@ -8,6 +8,16 @@ var Constants = Object.freeze({
   // Permissions bits for super users
   SUPER_USER_PERMISSIONS: 31,
 
+  // Plan states
+  PLAN_STATE: Object.freeze({
+    INITIALIZED: 'INITIALIZED',
+    START_STATE: 'START_STATE',
+    STARTED: 'STARTED',
+    COMPLETED: 'COMPLETED',
+    FAILED: 'FAILED',
+    CANCELED: 'CANCELED'
+  }),
+
   // Drag-and-drop editing on map
   DRAG_DROP_ENTITY_KEY: 'entity_type',
   DRAG_DROP_ENTITY_DETAILS_KEY: 'entity_details',

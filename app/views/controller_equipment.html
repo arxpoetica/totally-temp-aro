@@ -49,7 +49,7 @@
           <tr ng-repeat="(layerKey, equipmentLayer) in state.configuration.networkEquipment.equipments" ng-if="state.configuration.perspective.networkEquipment[layerKey].show">
             <td><img ng-src="{{equipmentLayer.iconUrl}}" style="width: 16px; margin-right: 15px">{{equipmentLayer.label}}
               
-              <button type="button" class="btn btn-primary btn-sm btn-thin label-message"
+              <button type="button" class="btn btn-primary btn-thin label-message"
                 ng-if="mapZoom <= equipmentLayer.aggregateZoomThreshold && 'point' === equipmentLayer.equipmentType"
                 ng-click="zoomTo(equipmentLayer.aggregateZoomThreshold)"
                 data-toggle="tooltip" title="Zoom To"

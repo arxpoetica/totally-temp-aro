@@ -6,7 +6,7 @@
 <div ng-if="$ctrl.managerView === $ctrl.globalSettingsService.ManageUserViews.Users" style="display: flex; flex-direction: column; height: 100%;">
   <div style="flex: 0 0 auto;">
     <div class="float-right input-group" style="max-width: 250px;">
-      <input class="form-control form-control-sm" type="text" ng-model="$ctrl.searchText" ng-keyup="$ctrl.onSearchKeyUp($event)">
+      <input class="form-control" type="text" ng-model="$ctrl.searchText" ng-keyup="$ctrl.onSearchKeyUp($event)">
       <span class="input-group-btn">
         <button class="btn btn-light" type="button" ng-click="$ctrl.filterUsers(true)"><i class="fa fa-search"></i></button>
       </span>
@@ -93,11 +93,11 @@
   <form>
     <div class="form-group">
       <label>Subject</label>
-      <input type="text" class="form-control form-control-sm" ng-model="$ctrl.globalSettingsService.mailSubject">
+      <input type="text" class="form-control" ng-model="$ctrl.globalSettingsService.mailSubject">
     </div>
     <div class="form-group">
       <label>Text</label>
-      <textarea class="form-control form-control-sm" rows="10" ng-model="$ctrl.globalSettingsService.mailBody"></textarea>
+      <textarea class="form-control" rows="10" ng-model="$ctrl.globalSettingsService.mailBody"></textarea>
     </div>
   </form>
 </div>  
@@ -108,31 +108,31 @@
     <div class="form-group">
       <label class="col-sm-4 control-label">First name</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control form-control-sm" ng-model="$ctrl.newUser.firstName">
+        <input type="text" class="form-control" ng-model="$ctrl.newUser.firstName">
       </div>
     </div>
     <div class="form-group">
       <label class="col-sm-4 control-label">Last name</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control form-control-sm" ng-model="$ctrl.newUser.lastName">
+        <input type="text" class="form-control" ng-model="$ctrl.newUser.lastName">
       </div>
     </div>
     <div class="form-group">
       <label class="col-sm-4 control-label">Email</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control form-control-sm" ng-model="$ctrl.newUser.email">
+        <input type="text" class="form-control" ng-model="$ctrl.newUser.email">
       </div>
     </div>
     <div class="form-group">
       <label class="col-sm-4 control-label">Confirm email</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control form-control-sm" ng-model="$ctrl.newUser.confirmEmail">
+        <input type="text" class="form-control" ng-model="$ctrl.newUser.confirmEmail">
       </div>
     </div>
     <div class="form-group">
       <label class="col-sm-4 control-label">Company name</label>
       <div class="col-sm-8">
-        <input type="text" class="form-control form-control-sm" ng-model="$ctrl.newUser.companyName">
+        <input type="text" class="form-control" ng-model="$ctrl.newUser.companyName">
       </div>
     </div>
 

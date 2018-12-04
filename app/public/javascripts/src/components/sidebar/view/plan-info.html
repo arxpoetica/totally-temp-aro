@@ -30,7 +30,7 @@
           <td>Plan Name</td>
           <td>
             <span ng-if="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.name}}</span>
-            <input ng-if="$ctrl.isEditMode" type="text" class="form-control form-control-sm text-left"
+            <input ng-if="$ctrl.isEditMode" type="text" class="form-control text-left"
                   placeholder="Plan Name" ng-model="$ctrl.currentPlanInfo.name">
           </td>
         </tr>
@@ -39,7 +39,7 @@
           <td> 
             <span ng-show="!$ctrl.isEditMode">{{$ctrl.currentPlanInfo.areaName}}</span>
             <span ng-show="$ctrl.isEditMode">
-              <input class="form-control form-control-sm select2" type="text" placeholder="Set cities, states or wirecenters">
+              <input class="form-control select2" type="text" placeholder="Set cities, states or wirecenters">
             </span>
           </td>
         </tr>

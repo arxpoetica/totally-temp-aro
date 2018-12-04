@@ -28,7 +28,7 @@
 	        <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">summary</div>
 	        <div class="ei-foldout-state-label" ng-if="$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">detail</div>
 	        
-	        <button class="btn btn-primary btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
+	        <button class="btn btn-primary ei-panel-header-btn-set ei-foldout-header-btn" 
 	                ng-click="$ctrl.addItem(propVal, prop); $event.stopPropagation();"
 	                ng-if="$ctrl.isEdit && prop.displayDataType.startsWith('array')"
 	                >add item</button>
@@ -120,7 +120,7 @@
           <div class="ei-foldout-state-label" ng-if="!$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">summary</div>
           <div class="ei-foldout-state-label" ng-if="$ctrl.isKeyExpanded[foldoutIndex] && summeryCount>0">detail</div>
           
-          <button class="btn btn-danger btn-sm ei-panel-header-btn-set ei-foldout-header-btn" 
+          <button class="btn btn-danger ei-panel-header-btn-set ei-foldout-header-btn" 
                   ng-click="$ctrl.deleteItem($ctrl.objectToView, $index, prop); $event.stopPropagation();"
                   ng-if="$ctrl.isEdit && prop.displayDataType.startsWith('array')"
                   >delete</button>

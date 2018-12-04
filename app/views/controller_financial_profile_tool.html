@@ -88,7 +88,7 @@
           <p class="text-center"><strong>Capex</strong></p>
           <form class="form-inline">
             <div class="form-group">
-              <select class="form-control form-control-sm" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
+              <select class="form-control" ng-model="capexFilter" ng-change="refreshCurrentTab(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
                 <option value="incremental">Incremental</option>
@@ -127,7 +127,7 @@
           <p class="text-center"><strong>Connect Capex</strong></p>
           <form class="form-inline">
             <div class="form-group">
-              <select class="form-control form-control-sm" ng-model="connectCapexFilter" ng-change="showConnectCapexChart(true)">
+              <select class="form-control" ng-model="connectCapexFilter" ng-change="showConnectCapexChart(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
                 <option value="incremental">Incremental</option>
@@ -156,7 +156,7 @@
           <p class="text-center"><strong>Revenue</strong></p>
           <form class="form-inline">
             <div class="form-group">
-              <select class="form-control form-control-sm" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
+              <select class="form-control" ng-model="revenueFilter" ng-change="refreshCurrentTab(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
                 <option value="incremental">Incremental</option>
@@ -172,7 +172,7 @@
           <p class="text-center"><strong>ARPU</strong></p>
           <form class="form-inline">
             <div class="form-group">
-              <select class="form-control form-control-sm" ng-model="arpuFilter" ng-change="showArpuChart(true)"
+              <select class="form-control" ng-model="arpuFilter" ng-change="showArpuChart(true)"
                 ng-options="entity.key as entity.name for entity in entityTypesArray">
               </select>
             </div>
@@ -201,7 +201,7 @@
           </div>
           <form class="form-inline" ng-show="aboveWirecenter">
             <div class="form-group">
-              <select class="form-control form-control-sm" ng-model="capexFilter" ng-change="showPremisesChart(true)">
+              <select class="form-control" ng-model="capexFilter" ng-change="showPremisesChart(true)">
                 <option value="bau">BAU</option>
                 <option value="plan">Plan</option>
                 <option value="incremental">Incremental</option>
@@ -296,7 +296,7 @@
         <p class="text-center"><strong>Cost %</strong></p>
         <form class="form-inline">
           <div class="form-group">
-            <select class="form-control form-control-sm" ng-model="opexCostFilter" ng-change="showOpexCostChart(true)"
+            <select class="form-control" ng-model="opexCostFilter" ng-change="showOpexCostChart(true)"
               ng-options="entity.key as entity.name for entity in entityTypesArray">
             </select>
           </div>
