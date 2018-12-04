@@ -24,9 +24,9 @@
                   ng-model="group.isAdministrator"
                   ng-disabled="!group.isEditing">
           </td>
-          <td>
-            <button ng-if="!group.isEditing" class="btn btn-primary btn-xs" ng-click="group.isEditing = true"><i class="fa fa-pencil-alt"></i></button>
-            <button ng-if="group.isEditing" class="btn btn-primary btn-xs" ng-click="$ctrl.saveGroup(group)"><i class="fa fa-save"></i></button>
+          <td style="width: 88px;">
+            <button ng-if="!group.isEditing" class="btn btn-primary btn-sm" ng-click="group.isEditing = true"><i class="fa fa-pencil-alt"></i></button>
+            <button ng-if="group.isEditing" class="btn btn-primary btn-sm" ng-click="$ctrl.saveGroup(group)"><i class="fa fa-save"></i></button>
             <button class='btn btn-danger btn-sm' ng-click="$ctrl.deleteGroup(group)"><i class="fa fa-trash-alt"></i></button>
           </td>
         </tr>
