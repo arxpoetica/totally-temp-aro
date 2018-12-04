@@ -3,6 +3,10 @@
     cursor: auto;
   }
   
+  .bounds-coverage-header-sub{
+    padding-left: 10px;
+  }
+  
   .bounds-coverage-census-cat{
     margin-top: 10px;
     margin-bottom: 4px;
@@ -10,10 +14,11 @@
   
   .bounds-coverage-census-tag{
     padding-left: 20px;
+    margin-bottom: 10px;
   }
   
   .bounds-coverage-census-tag-count{
-    margin-left: 10px;
+    margin-left: 20px;
     font-weight: bold;
   }
   
@@ -35,7 +40,7 @@
 <div ng-if="$ctrl.boundaryCoverageById.hasOwnProperty($ctrl.parentSelectedObjectId)">
   <div class="ei-header bounds-coverage-header">
     Site boundary coverage: {{$ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].totalLocations}} 
-    <div ng-repeat="(locationType, locationData) in $ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].locations">
+    <div class="bounds-coverage-header-sub" ng-repeat="(locationType, locationData) in $ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].locations">
       {{locationData.locationType}}: {{locationData.totalCount}}
     </div>
   </div>
@@ -44,8 +49,8 @@
     <div class="ei-header bounds-coverage-header">
       Locations by Census Block Tag
     </div>
-    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].censusTagsByCat).length < 1">none</div>
-    <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].censusTagsByCat">
+    <div class="bounds-coverage-census-tag" ng-if="$ctrl.objKeys($ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].tagCounts).length < 1">none</div>
+    <div ng-repeat="cat in $ctrl.boundaryCoverageById[$ctrl.parentSelectedObjectId].tagCounts">
       <div class="ei-property-item bounds-coverage-census-cat">
         {{cat.description}}
       </div>
@@ -54,6 +59,7 @@
         {{tag.description}}: 
         <div class="bounds-coverage-census-tag-count"
              ng-repeat="(locationType, locationCount) in tag.count"
+             ng-if="locationCount != 0"
              >{{locationType}}: {{locationCount}}</div>
       </div>
     </div>
