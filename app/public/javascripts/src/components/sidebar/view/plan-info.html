@@ -69,7 +69,7 @@
           <td>Service area tags</td>
           <td>
             <span class="tags">
-              <div ng-if="!$ctrl.addSATags" ng-repeat="tag in $ctrl.getSaTagDetails({tagObject:$ctrl.currentPlanInfo.tagMapping.linkTags.serviceAreaIds}) track by tag.id" 
+              <div ng-if="!$ctrl.addSATags" ng-repeat="tag in $ctrl.saPlanTags track by tag.id" 
                 class="badge satags">
                 <span> {{tag.code}} 
                   <i class="fa fa-times pointer" ng-if="$ctrl.isEditMode" ng-click="$ctrl.removeTag('svc',tag)"></i>
