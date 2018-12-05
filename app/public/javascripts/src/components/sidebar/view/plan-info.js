@@ -104,7 +104,6 @@ class PlanInfoController {
       this.getSaTagDetails({tagObject:this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds})
       .then((serviceAreaIds) => {
         this.saPlanTags = serviceAreaIds
-        console.log(this.saPlanTags)
       })
     }
   }
