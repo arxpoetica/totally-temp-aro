@@ -51,8 +51,33 @@ class NetworkPlanModalController {
     return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
   }
 
-  getSATagCategories(currentPlanTags) {
-    return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  getSATagCategories(currentSATags) {
+    var serviceAreaIdsToFetch = []
+    var promises = []
+    var listOfServiceAreaTagIds = _.pluck(this.state.listOfServiceAreaTags, 'id')
+    serviceAreaIdsToFetch = currentSATags.filter((n) => listOfServiceAreaTagIds.indexOf(n) < 0)
+
+    if (serviceAreaIdsToFetch.length === 0) {
+      return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags,tag.id)))
+    }
+
+    while(serviceAreaIdsToFetch.length) {
+      var filter = ''
+      serviceAreaIdsToFetch.splice(0,100).forEach((serviceAreaId, index) => {
+        if (index > 0) {
+          filter += ' or '
+        }
+        filter += ` (id eq ${serviceAreaId})`
+      })
+
+      promises.push(this.$http.get(`/service/odata/ServiceAreaView?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
+    }
+
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http,this.state,promises)
+    .then((result) => {
+      return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags,tag.id)))
+    })
+    .catch((err) => console.error(err))
   }
 
   updateTag(plan,removeTag) {

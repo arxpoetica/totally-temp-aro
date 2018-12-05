@@ -100,7 +100,12 @@ class PlanInfoController {
 
   getPlanTagDetails() {
     this.generalPlanTags = this.getTagDetails && this.getTagDetails({tagObject:this.currentPlanInfo.tagMapping.global})
-    this.saPlanTags = this.getSaTagDetails && this.getSaTagDetails({tagObject:this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds})
+    if(this.getSaTagDetails) {
+      this.getSaTagDetails({tagObject:this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds})
+      .then((serviceAreaIds) => {
+        this.saPlanTags = serviceAreaIds
+      })
+    }
   }
 
   removeTag(type,tag) {
