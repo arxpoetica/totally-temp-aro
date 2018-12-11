@@ -15,8 +15,29 @@ class CoverageInitializerController {
     this.coveragePlan = {
       coverageType: 'census_block',
       distanceThreshold: 20000,
-      spatialEdgeType: 'road'
+      spatialEdgeType: 'road', 
+      useMarketableTechnologies: true,
+      useMaxSpeed: true
     }
+    
+    /*
+    {
+      "coverageAnalysisRequest": {
+        "analysisLayerId": 0,
+        "analysisSelectionMode": "UNDEFINED",
+        "coverageType": "census_block",
+        "distanceThreshold": 0,
+        "planId": 0,
+        "projectTemplateId": 0,
+        "reportDate": "2018-12-07T20:15:04.259Z",
+        "spatialEdgeType": "road",
+        "useMarketableTechnologies": true,
+        "useMaxSpeed": true
+      },
+      "reportId": 0
+    }
+    */
+    
     this.isInitializingReport = false
     this.serviceAreas = []
     this.analysisAreas = []
@@ -24,6 +45,10 @@ class CoverageInitializerController {
     this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
+    
+    //useMarketableTechnologies": true,
+    //"useMaxSpeed": true
+    
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
   }
@@ -57,6 +82,9 @@ class CoverageInitializerController {
     serviceCoveragePlan.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
     serviceCoveragePlan.coverageAnalysisRequest.distanceThreshold = this.coveragePlan.distanceThreshold * this.state.configuration.units.length_units_to_meters
     serviceCoveragePlan.coverageAnalysisRequest.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
+    //serviceCoveragePlan.coverageAnalysisRequest.useMarketableTechnologies = 
+    //serviceCoveragePlan.coverageAnalysisRequest.useMaxSpeed = 
+      
     if (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_ANALYSIS_AREAS) {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
       const visibleAnalysisLayers = this.state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
@@ -74,6 +102,7 @@ class CoverageInitializerController {
     }
     var createdCoveragePlan = null
     this.isInitializingReport = true
+    console.log(serviceCoveragePlan)
     this.$http.post(`/service/coverage/report`, serviceCoveragePlan)
       .then((result) => {
         createdCoveragePlan = result.data

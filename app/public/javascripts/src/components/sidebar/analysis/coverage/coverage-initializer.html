@@ -36,6 +36,27 @@
         </select>
       </td>
     </tr>
+    
+    <!-- Use Marketable Technologies -->
+    <tr>
+      <td>Use Marketable Technologies</td>
+      <td>
+        <input type="checkbox"
+                 class="checkboxfill"
+                 ng-model="$ctrl.coveragePlan.useMarketableTechnologies">
+      </td>
+    </tr>
+    
+    <!-- Use Max Speed -->
+    <tr>
+      <td>Use Max Speed</td>
+      <td>
+        <input type="checkbox"
+                 class="checkboxfill"
+                 ng-model="$ctrl.coveragePlan.useMaxSpeed">
+      </td>
+    </tr>
+    
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
         <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>
