@@ -7,6 +7,10 @@ class Utilities {
     this.getUUIDsFromServer()
   }
 
+  static displayErrorMessage(errorMsg) {
+    swal({ title: errorMsg.title, text: errorMsg.text, type: 'error' })
+  }
+
   downloadCSV(data, fileName) {
     // Blob is not supported in older browsers, but we need it for downloading larger files in Chrome.
     // Without this, we get a generic "Failed - network error" in Chrome only.

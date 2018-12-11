@@ -2,6 +2,7 @@ import Constants from './constants'
 import WorkflowState from './workflow-state'
 import MapUtilities from './plan/map-utilities'
 import FeatureSelector from '../tiles/feature-selector'
+import Utilities from './utilities'
 
 class MapObjectEditorController {
 
@@ -21,7 +22,10 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
     this.selectedMapObject = null
     this.iconAnchors = {}
-    
+    this.polygonInvalidMsg = {
+      title: "Invalid Polygon",
+      text: "Unable to commit changes because one of the polygons is not valid"
+    }
     
     this.drawing = {
       drawingManager: null,
@@ -735,10 +739,10 @@ class MapObjectEditorController {
       var self = this
       mapObject.getPaths().forEach(function(path, index){
         google.maps.event.addListener(path, 'insert_at', function(){
-          self.onModifyObject && self.onModifyObject({mapObject})
+          self.modifyObject(mapObject)
         });
         google.maps.event.addListener(path, 'remove_at', function(){
-          self.onModifyObject && self.onModifyObject({mapObject})
+          self.modifyObject(mapObject)
         });
         google.maps.event.addListener(path, 'set_at', function(){
           if (!self.isClosedPath(path)) {
@@ -746,19 +750,20 @@ class MapObjectEditorController {
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
               path.setAt(0, path.getAt(path.length - 1))
-              self.onModifyObject && self.onModifyObject({mapObject})
+              self.modifyObject(mapObject)
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
               path.setAt(path.length - 1, path.getAt(0))
-              self.onModifyObject && self.onModifyObject({mapObject})
+              self.modifyObject(mapObject)
             }
           } else {
-            self.onModifyObject && self.onModifyObject({mapObject})
+            self.modifyObject(mapObject)
           }
         });
       });
       google.maps.event.addListener(mapObject, 'dragend', function(){
-        self.onModifyObject && self.onModifyObject({mapObject})
+        //self.onModifyObject && self.onModifyObject({mapObject})
+        self.modifyObject(mapObject)
       });
     } else if (feature.geometry.type === 'MultiPolygon') {
       mapObject = this.createMultiPolygonMapObject(feature)
@@ -770,10 +775,10 @@ class MapObjectEditorController {
       var self = this
       mapObject.getPaths().forEach(function(path, index){
         google.maps.event.addListener(path, 'insert_at', function(){
-          self.onModifyObject && self.onModifyObject({mapObject})
+          self.modifyObject(mapObject)
         });
         google.maps.event.addListener(path, 'remove_at', function(){
-          self.onModifyObject && self.onModifyObject({mapObject})
+          self.modifyObject(mapObject)
         });
         google.maps.event.addListener(path, 'set_at', function(){
           if (!self.isClosedPath(path)) {
@@ -781,14 +786,14 @@ class MapObjectEditorController {
             if (index === 0) {
               // The first point has been moved, move the last point of the polygon (to keep it a valid, closed polygon)
               path.setAt(0, path.getAt(path.length - 1))
-              self.onModifyObject && self.onModifyObject({mapObject})
+              self.modifyObject(mapObject)
             } else if (index === path.length - 1) {
               // The last point has been moved, move the first point of the polygon (to keep it a valid, closed polygon)
               path.setAt(path.length - 1, path.getAt(0))
-              self.onModifyObject && self.onModifyObject({mapObject})
+              self.modifyObject(mapObject)
             }
           } else {
-            self.onModifyObject && self.onModifyObject({mapObject})
+            self.modifyObject(mapObject)
           }
         });
       });
@@ -1083,7 +1088,11 @@ class MapObjectEditorController {
         pathPoints.push(pathPoints[0])  // Close the polygon
         feature.geometry.coordinates.push(pathPoints)
       })
-      self.createMapObject(feature, null ,true)
+
+      //Check if polygon is valid, if valid create a map object
+      var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: feature.geometry})
+      isValidPolygon ? self.createMapObject(feature, null ,true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
+
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
       // Kill the drawing manager
@@ -1127,7 +1136,11 @@ class MapObjectEditorController {
         pathPoints.push(pathPoints[0])  // Close the polygon
         feature.geometry.coordinates[0].push(pathPoints)
       })
-      self.createMapObject(feature, null ,true)
+
+      //Check if polygon is valid, if valid create a map object
+      var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: {type: 'Polygon', coordinates: feature.geometry.coordinates[0]} })
+      isValidPolygon ? self.createMapObject(feature, null ,true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
+
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
       // Kill the drawing manager
@@ -1146,6 +1159,18 @@ class MapObjectEditorController {
     pathPoints.push(pathPoints[0])  // Close the polygon
 
     return pathPoints
+  }
+
+  modifyObject(mapObject) {
+    //Check if polygon is valid, if valid modify a map object
+    var polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
+    var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: polygonGeoJsonPath})
+
+    if(isValidPolygon) {
+      this.onModifyObject && this.onModifyObject({mapObject})
+    } else {
+      Utilities.displayErrorMessage(this.polygonInvalidMsg)
+    }
   }
 
   $onChanges(changesObj) {

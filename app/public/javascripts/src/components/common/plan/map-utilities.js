@@ -1,4 +1,7 @@
 import Constants from '../constants'
+
+var gpsi = require('geojson-polygon-self-intersections')
+
 class MapUtilities {
 
   // Returns the tile coordinates (x, y) for a given lat/long and zoom level
@@ -86,6 +89,30 @@ class MapUtilities {
     return {
       x: Math.floor(xUnscaled * scale),
       y: Math.floor(yUnscaled * scale)
+    }
+  }
+
+  // https://www.npmjs.com/package/geojson-polygon-self-intersections
+  // check for self Intersection of a polygon
+  static isPolygonValid(polygon) {
+    var options = {
+      useSpatialIndex: false
+    }
+    var selfIntersectingPoints = gpsi(polygon, function filterFn(unique) { return [unique] }, options)
+    return selfIntersectingPoints.length === 0 ? true : false
+  }
+
+  // Convert the paths in a Google Maps object into a Polygon WKT
+  static polygonPathsToWKT(paths) {
+    var allPaths = []
+    paths.forEach((path) => {
+      var pathPoints = []
+      path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
+      allPaths.push(pathPoints)
+    })
+    return {
+      type: 'Polygon',
+      coordinates: allPaths
     }
   }
 }
