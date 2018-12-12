@@ -90,7 +90,8 @@ exports.configure = (app, middleware) => {
         })
         .catch(err => {
           console.error(err)
-          callback(err, null)
+          const message = 'The OTP code was invalid. If you are using an authenticator app, please ensure that your device time is correct'
+          callback(null, false, { message: message })
         })
     }
   ))
@@ -149,7 +150,7 @@ exports.configure = (app, middleware) => {
   app.post('/verify-otp',
     passport.authenticate('custom-totp', {
       successRedirect: '/',
-      failureRedirect: '/login',
+      failureRedirect: '/verify-otp',
       failureFlash: true
     })
   )
