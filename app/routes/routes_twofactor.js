@@ -19,4 +19,11 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
+  app.post('/auth/verify-totp', (request, response, next) => {
+    const userId = request.user.id
+    const verificationCode = request.body.verificationCode
+    models.TwoFactor.verifyTotp(userId, verificationCode)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }

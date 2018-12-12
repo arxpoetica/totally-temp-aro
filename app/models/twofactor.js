@@ -24,7 +24,6 @@ module.exports = class TwoFactor {
     const userSecret = otplib.authenticator.generateSecret()
     return database.query('SELECT first_name, last_name FROM auth.users WHERE id = $1', [userId])
       .then(result => {
-        console.log(process.env.ARO_CLIENT)
         const userName = `${result[0].first_name} ${result[0].last_name}`
         const authClient = `ARO - ${process.env.ARO_CLIENT}`  // This string will show up in authenticator apps like Google Authenticator
         const uriForQRCode = otplib.authenticator.keyuri(userName, authClient, userSecret)
@@ -46,5 +45,15 @@ module.exports = class TwoFactor {
   static getTotpStatus(userId) {
     const sql = 'SELECT is_totp_verified, is_totp_enabled FROM auth.users WHERE id = $1'
     return database.query(sql, [userId])
+  }
+
+  // Verifies the TOTP for a given user
+  static verifyTotp(userId, verificationCode) {
+    return database.query('SELECT totp_secret FROM auth.users WHERE id = $1', [userId])
+      .then(res => {
+        const totpSecret = res[0].totp_secret
+        const isValid = otplib.authenticator.check(verificationCode, totpSecret)
+        return isValid ? Promise.resolve() : Promise.reject('OTP code was invalid')
+      })
   }
 }
