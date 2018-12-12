@@ -407,7 +407,11 @@ module.exports = class User {
         user.perspective = 'admin'
         return Promise.resolve(user)
       })
-}
+  }
+
+  static doesUserNeedTwoFactor(id) {
+    return database.findOne('SELECT is_totp_enabled FROM auth.users WHERE id = $1', [id])
+  }
 
   static find_by_text (text) {
     text = '%' + text + '%'

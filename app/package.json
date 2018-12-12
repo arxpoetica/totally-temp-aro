@@ -74,6 +74,7 @@
     "nodemailer-ses-transport": "^1.3.0",
     "otplib": "^10.0.1",
     "passport": "^0.3.0",
+    "passport-custom": "^1.0.5",
     "passport-local": "^1.0.0",
     "passport-stub": "^1.0.1",
     "pbf": "^3.0.5",

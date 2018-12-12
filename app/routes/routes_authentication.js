@@ -8,9 +8,10 @@ const authenticationConfigPromise = models.Authentication.getConfig('ldap')
 
 exports.configure = (app, middleware) => {
   var LocalStrategy = require('passport-local').Strategy
+  var CustomStrategy = require('passport-custom').Strategy
   var mapUserIdToProjectId = {}
 
-  passport.use(new LocalStrategy({
+  passport.use('local-username-password', new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
   },
@@ -23,14 +24,23 @@ exports.configure = (app, middleware) => {
             .then((user) => {
               console.log(`Successfully logged in user ${email} with LDAP`)
               console.log(user)
+              user.twoFactorAuthenticationDone = true   // For now, no two-factor for ldap
               return callback(null, user)
             })
             .catch((err) => {
               console.warn(`LDAP login failed for user ${email}. Trying local login`)
+              var loggedInUser = null
               models.User.login(email, password)
                 .then((user) => { 
                   console.log(`Logged in user ${email} with local cached login (fallback from LDAP login)`)
-                  return callback(null, user) 
+                  loggedInUser = {
+                    id: user.id
+                  }
+                  return models.User.doesUserNeedTwoFactor(loggedInUser.id)
+                })
+                .then(result => {
+                  loggedInUser.twoFactorAuthenticationDone = !result.is_totp_enabled
+                  return callback(null, loggedInUser) 
                 })
                 .catch((err) => {
                   console.error(`Could not log in user ${email} with either LDAP or local login`)
@@ -40,10 +50,18 @@ exports.configure = (app, middleware) => {
           })
         } else {
           // Regular login, not LDAP
+          var loggedInUser = null
           models.User.login(email, password)
           .then((user) => {
             console.log(`Logged in user ${email} with local login`)
-            return callback(null, user)
+            loggedInUser = {
+              id: user.id
+            }
+            return models.User.doesUserNeedTwoFactor(loggedInUser.id)
+          })
+          .then(result => {
+            loggedInUser.twoFactorAuthenticationDone = !result.is_totp_enabled
+            return callback(null, loggedInUser)
           })
           .catch((err) => {
             console.error(`Could not log in user ${email} with local login`)
@@ -61,39 +79,80 @@ exports.configure = (app, middleware) => {
       })
   }))
 
+  passport.use('custom-totp', new CustomStrategy(
+    function(req, callback) {
+      const verificationCode = req.body.verificationCode
+      models.TwoFactor.verifyTotp(req.user.id, verificationCode)
+        .then(result => {
+          console.log(`Successfully verified OTP for user with id ${req.user.id}`)
+          req.user.twoFactorAuthenticationDone = true
+          callback(null, req.user)
+        })
+        .catch(err => {
+          console.error(err)
+          callback(err, null)
+        })
+    }
+  ))
+
   passport.serializeUser((user, callback) => {
-    callback(null, user.id)
+    callback(null, {
+      id: user.id,
+      twoFactorAuthenticationDone: user.twoFactorAuthenticationDone
+    })
   })
 
-  passport.deserializeUser((id, callback) => {
-    models.User.find_by_id(id)
-      .then((user) => {
-        if (!user) {
+  passport.deserializeUser((user, callback) => {
+    if (!user.id) {
+      // This can happen if a user has logged in with an earlier version of ARO and has a cookie with just the user id
+      callback(null, null)
+    }
+    models.User.find_by_id(user.id)
+      .then((dbUser) => {
+        if (!dbUser) {
           callback(null, null)
         }
-        if (!mapUserIdToProjectId[user.id]) {
+        dbUser.twoFactorAuthenticationDone = user.twoFactorAuthenticationDone
+        if (!mapUserIdToProjectId[dbUser.id]) {
           // We don't have the project ID for this user yet. Get it
           var req = {
             method: 'GET',
             url: `${config.aro_service_url}/v1/user-project`,
             qs: {
-              user_id: user.id
+              user_id: dbUser.id
             },
             json: true
           }
           models.AROService.request(req)
             .then((result) => {
-              user.projectId = result.id
-              mapUserIdToProjectId[user.id] = user.projectId
-              callback(null, user || null)
+              dbUser.projectId = result.id
+              mapUserIdToProjectId[dbUser.id] = dbUser.projectId
+              callback(null, dbUser || null)
           })
         } else {
-          user.projectId = mapUserIdToProjectId[user.id]  // This will have been saved on a successful login
-          callback(null, user || null)
+          dbUser.projectId = mapUserIdToProjectId[dbUser.id]  // This will have been saved on a successful login
+          callback(null, dbUser || null)
         }
       })
       .catch(callback)
   })
+
+  app.get('/verify-otp', (request, response, next) => {
+    response.render('verify-otp.html', {
+      error: request.flash('error'),
+      info: request.flash('info'),
+      success: request.flash('success'),
+      config: public_config
+    })
+  })
+
+  app.post('/verify-otp',
+    passport.authenticate('custom-totp', {
+      successRedirect: '/',
+      failureRedirect: '/login',
+      failureFlash: true
+    })
+  )
 
   app.get('/login', (request, response, next) => {
     response.render('login.html', {
@@ -105,7 +164,7 @@ exports.configure = (app, middleware) => {
   })
 
   app.post('/login',
-    passport.authenticate('local', { successRedirect: '/',
+    passport.authenticate('local-username-password', { successRedirect: '/',
                                      failureRedirect: '/login',
                                      failureFlash: true })
   )

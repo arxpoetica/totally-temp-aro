@@ -59,4 +59,21 @@ module.exports = class TwoFactor {
         return isValid ? Promise.resolve() : Promise.reject('OTP code was invalid')
       })
   }
+
+  // Sets the TOTP verified flag = true for a given user
+  static setTotpVerifiedFlag(userId, value) {
+    return database.query('UPDATE auth.users SET is_totp_verified = $2 WHERE id = $1', [userId, value])
+  }
+
+  // Sets the TOTP enabled flag = true for a given user
+  static enableTotp(userId) {
+    return database.findOne('SELECT is_totp_verified FROM auth.users WHERE id = $1', [userId])
+      .then(result => {
+        if (!result.is_totp_verified) {
+          return Promise.reject(`TOTP is not verified for user id ${userId}, so we cannot enable it.`)
+        } else {
+          return database.query('UPDATE auth.users SET is_totp_enabled = true WHERE id = $1', [userId])
+        }
+      })
+  }
 }
