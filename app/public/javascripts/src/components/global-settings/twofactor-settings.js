@@ -68,6 +68,23 @@ class TwofactorSettingsController {
         console.error(err)
       })
   }
+
+  // Disable two factor authentication for the user
+  disableTwoFactorForUser() {
+    this.isWaitingForResponse = true
+    this.$http.post(`/auth/delete-totp-settings`, { verificationCode: this.verificationCode })
+      .then(res => {
+        this.isWaitingForResponse = false
+        this.currentState = this.tfaStates.UNINITIALIZED
+        this.totpSecret = null
+        this.verificationCode = null
+        this.$timeout()
+      })
+      .catch(err => {
+        this.currentState = this.tfaStates.UNDEFINED
+        console.error(err)
+      })
+  }
 }
 
 TwofactorSettingsController.$inject = ['$http', '$timeout']

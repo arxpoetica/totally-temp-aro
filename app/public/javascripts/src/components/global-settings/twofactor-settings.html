@@ -1,7 +1,20 @@
 <div style="height: 100%; width: 100%;">
   
   <!-- Control state = TWOFACTOR_ALREADY_SETUP. This is when the user already has twofactor set up for their account -->
-  
+  <div ng-if="$ctrl.currentState === $ctrl.tfaStates.TWOFACTOR_ALREADY_SETUP">
+    <p>
+      Two factor authentication is already set up for your account. You can either disable it
+      (not recommended) or reset it. If you click on Reset, you will have to reconfigure the any
+      OTP apps that you have installed on your phone.
+    </p>
+    <p>
+      In order to overwrite existing two-factor settings, you have to enter a valid OTP below:
+    </p>
+    <input class="form-control" ng-model="$ctrl.verificationCode" placeholder="Enter verification code from app">
+    <button class="btn btn-danger" ng-click="$ctrl.disableTwoFactorForUser()">Disable</button>
+    <button class="btn btn-danger" ng-click="$ctrl.overwriteSecretForUser()">Reset</button>
+  </div>
+ 
   <!-- Control state = UNINITIALIZED. This is when the user does not have twofactor set up for their account -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.UNINITIALIZED">
     <p>

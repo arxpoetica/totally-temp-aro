@@ -78,4 +78,11 @@ module.exports = class TwoFactor {
         }
       })
   }
+
+  // Deletes the TOTP settings for a user
+  static deleteTotpSettingsForUser(userId, verificationCode) {
+    // Make sure we have a current valid code before disabling two factor
+    return TwoFactor.verifyTotp(userId, verificationCode)
+      .then(() => database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId]))
+  }
 }

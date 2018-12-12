@@ -34,4 +34,12 @@ exports.configure = (app, middleware) => {
       .then(jsonSuccess(response, next))
       .catch(next)
   })
+
+  app.post('/auth/delete-totp-settings', (request, response, next) => {
+    const userId = request.user.id
+    const verificationCode = request.body.verificationCode
+    models.TwoFactor.deleteTotpSettingsForUser(userId, verificationCode)
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 }
