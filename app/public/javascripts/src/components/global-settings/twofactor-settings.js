@@ -3,7 +3,7 @@ class TwofactorSettingsController {
   constructor($http) {
     this.$http = $http
 
-    this.allStates = {
+    this.tfaStates = {
       UNDEFINED: 'UNDEFINED',
       TWOFACTOR_ALREADY_SETUP: 'TWOFACTOR_ALREADY_SETUP',
       UNINITIALIZED: 'UNINITIALIZED',
