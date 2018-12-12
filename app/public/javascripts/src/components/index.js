@@ -66,6 +66,7 @@ import uiNotification from './footer/ui-notification'
 
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
+import twofactorSettings from './global-settings/twofactor-settings'
 import manageGroups from './global-settings/manage-groups'
 import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
@@ -160,6 +161,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('uiNotification', uiNotification)
    .component('userAccountSettings', userAccountSettings)
    .component('manageUsers', manageUsers)
+   .component('twofactorSettings', twofactorSettings)
    .component('manageGroups', manageGroups)
    .component('globalSettings', globalSettings)
    .component('aroPanel', aroPanel)

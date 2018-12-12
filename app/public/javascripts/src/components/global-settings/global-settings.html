@@ -20,6 +20,11 @@
         <br>My Account
       </button>
 
+      <button class="btn btn-light settings-btn" ng-click="$ctrl.currentView = $ctrl.views.TWOFACTOR_AUTHENTICATION">
+        <i class="fa fa-2x fa-cog"></i>
+        <br>Two Factor Authentication
+      </button>
+
       <button class="btn btn-light settings-btn" ng-if="$ctrl.state.loggedInUser.isAdministrator" ng-click="$ctrl.currentView = $ctrl.views.MANAGE_USERS">
         <i class="fa fa-2x fa-users"></i>
         <br>Manage Users
@@ -42,6 +47,8 @@
     </div>
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
+
+    <twofactor-settings ng-if="$ctrl.currentView === $ctrl.views.TWOFACTOR_AUTHENTICATION"></twofactor-settings>
 
     <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
                   manager-view="$ctrl.globalSettingsService.currentManageUserView"
