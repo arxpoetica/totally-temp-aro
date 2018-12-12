@@ -2,6 +2,8 @@ var helpers = require('../helpers')
 var database = helpers.database
 const otplib = require('otplib')
 const qrcode = require('qrcode')
+const crypto = require('crypto')
+const base32Encode = require('base32-encode')
 
 module.exports = class TwoFactor {
 
@@ -19,9 +21,10 @@ module.exports = class TwoFactor {
 
   // Generates a TOTP secret for a given user and saves it in the database
   static overwriteTOTPSecretForUser(userId) {
-    // Generate a secret for the logged in user, save it in the db
-    // otplib.authenticator.options = { encoding: 'ascii' }
-    const userSecret = otplib.authenticator.generateSecret()
+    // Generate a secret for the logged in user. RFC6238 has a length of 20 bytes in the sample implementation.
+    // This is also the recommended length in the Google Authenticator app, so we will go with this for now.
+    const SECRET_KEY_LENGTH_BYTES = 20
+    const userSecret = base32Encode(crypto.randomBytes(SECRET_KEY_LENGTH_BYTES), 'RFC4648')
     return database.query('SELECT first_name, last_name FROM auth.users WHERE id = $1', [userId])
       .then(result => {
         const userName = `${result[0].first_name} ${result[0].last_name}`
