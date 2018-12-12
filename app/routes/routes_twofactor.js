@@ -6,7 +6,6 @@ exports.configure = (app, middleware) => {
 
   app.get('/auth/overwrite-totp-secret', (request, response, next) => {
     const userId = request.user.id
-
     models.TwoFactor.overwriteTOTPSecretForUser(userId)    
       .then(jsonSuccess(response, next))
       .catch(next)
@@ -19,18 +18,12 @@ exports.configure = (app, middleware) => {
       .catch(next)
   })
 
-  app.post('/auth/verify-totp', (request, response, next) => {
+  app.post('/auth/verify-totp-secret', (request, response, next) => {
     const userId = request.user.id
     const verificationCode = request.body.verificationCode
     models.TwoFactor.verifyTotp(userId, verificationCode)
       .then(res => models.TwoFactor.setTotpVerifiedFlag(userId, true))  // OTP is verified, update the DB.
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  app.post('/auth/enable-totp', (request, response, next) => {
-    const userId = request.user.id
-    models.TwoFactor.enableTotp(userId)
+      .then(res => models.TwoFactor.enableTotp(userId))
       .then(jsonSuccess(response, next))
       .catch(next)
   })

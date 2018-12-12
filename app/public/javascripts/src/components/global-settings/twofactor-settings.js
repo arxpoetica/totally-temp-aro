@@ -54,8 +54,7 @@ class TwofactorSettingsController {
   // Verify the TOTP secret for the user
   verifySecretForUser() {
     this.isWaitingForResponse = true
-    this.$http.post('/auth/verify-totp', { verificationCode: this.verificationCode })
-      .then(res => this.$http.post('/auth/enable-totp'))
+    this.$http.post('/auth/verify-totp-secret', { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
         this.currentState = this.tfaStates.SETUP_COMPLETE

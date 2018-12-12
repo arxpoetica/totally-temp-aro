@@ -1,18 +1,20 @@
-<div style="height: 100%; width: 100%;">
+<div class="container" style="height: 100%; width: 100%;">
   
   <!-- Control state = TWOFACTOR_ALREADY_SETUP. This is when the user already has twofactor set up for their account -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.TWOFACTOR_ALREADY_SETUP">
     <p>
       Two factor authentication is already set up for your account. You can either disable it
-      (not recommended) or reset it. If you click on Reset, you will have to reconfigure the any
+      (not recommended) or reset it. If you click on Reset, you will have to reconfigure any
       OTP apps that you have installed on your phone.
     </p>
     <p>
       In order to overwrite existing two-factor settings, you have to enter a valid OTP below:
     </p>
-    <input class="form-control" ng-model="$ctrl.verificationCode" placeholder="Enter verification code from app">
-    <button class="btn btn-danger" ng-click="$ctrl.disableTwoFactorForUser()">Disable</button>
-    <button class="btn btn-danger" ng-click="$ctrl.overwriteSecretForUser()">Reset</button>
+    <input class="form-control mb-2" ng-model="$ctrl.verificationCode" placeholder="Enter verification code from app">
+    <div class="text-center">
+      <button class="btn btn-danger" ng-click="$ctrl.disableTwoFactorForUser()">Disable</button>
+      <button class="btn btn-danger" ng-click="$ctrl.overwriteSecretForUser()">Reset</button>
+    </div>
   </div>
  
   <!-- Control state = UNINITIALIZED. This is when the user does not have twofactor set up for their account -->
@@ -22,26 +24,41 @@
       to log in (along with your regular account password). You can get the OTP via email, SMS
       or using an authenticator app like Google Authenticator or Authy.
     </p>
-    <button class="btn btn-primary" ng-click="$ctrl.overwriteSecretForUser()">Get Started</button>
+    <div class="text-center">
+      <button class="btn btn-primary" ng-click="$ctrl.overwriteSecretForUser()">Get Started</button>
+    </div>
   </div>
   
   <!-- Control state = SECRET_GENERATED. This is when the user has generated a secret but has not synced it with their app -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.SECRET_GENERATED">
-    <p>
+    <h2 class="mb-3">Step 1: Set up authenticator app</h2>
+    <p class="mb-0">
       A secret key has been generated for your account. You can now use an app like Google Authenticator or Authy
       to sync the secret key with your account. Simply scan the QR code with the app and then enter the validation
       code that shows up on the app.
     </p>
-    <img ng-src="{{$ctrl.totpSecret.qrCode}}">
-    <div ng-if="$ctrl.showSecretText">Secret: {{$ctrl.totpSecret.secret}}</div>
-    <button class="btn btn-light" ng-if="!$ctrl.showSecretText" ng-click="$ctrl.showSecretText = true">Enter manually</button>
-    <input class="form-control" ng-model="$ctrl.verificationCode" placeholder="Enter verification code from app">
-    <button class="btn btn-primary" ng-click="$ctrl.verifySecretForUser()">Verify</button>
+    <div class="text-center">
+      <img ng-src="{{$ctrl.totpSecret.qrCode}}">
+    </div>
+    <div class="text-center mb-3">
+      <div ng-if="$ctrl.showSecretText">Secret: {{$ctrl.totpSecret.secret}}</div>
+      <button class="btn btn-sm btn-light" ng-if="!$ctrl.showSecretText" ng-click="$ctrl.showSecretText = true">Camera not working?</button>
+    </div>
+    <h2 class="mb-3">Step 2: Enter current 6-digit OTP</h2>
+    <div class="text-center">
+      <div class="input-group mb-3">
+        <input type="text" class="form-control"  ng-model="$ctrl.verificationCode" placeholder="6-digit OTP" aria-label="6-digit OTP" aria-describedby="btnVerifyOTP">
+        <div class="input-group-append">
+          <button class="btn btn-primary" type="button" id="btnVerifyOTP" ng-click="$ctrl.verifySecretForUser()">Next</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Control state = SETUP_COMPLETE. This is when the user has generated a secret but has not synced it with their app -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.SETUP_COMPLETE">
-    <p>Congratulations! Two-factor authentication has been successfully set up for your account. In the future, you will
+    <h2 class="mb-3">Two-factor authentication complete</h2>
+      <p>Congratulations! Two-factor authentication has been successfully set up for your account. In the future, you will
       require a One-Time Password (OTP) to log in to your account (in addition to your account password).
     </p>
   </div>
