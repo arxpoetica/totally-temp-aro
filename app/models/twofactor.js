@@ -4,7 +4,9 @@ const otplib = require('otplib')
 const qrcode = require('qrcode')
 const crypto = require('crypto')
 const base32Encode = require('base32-encode')
-
+otplib.authenticator.options = {
+  window: [1, 0]  // Allow OTP from one previous timestep, in case it changes just as the user is typing it
+}
 module.exports = class TwoFactor {
 
   // Generates a QR code from an input string
