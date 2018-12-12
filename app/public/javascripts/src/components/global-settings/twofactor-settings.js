@@ -68,6 +68,13 @@ class TwofactorSettingsController {
       })
   }
 
+  // Reset two factor authentication for the user
+  resetTwoFactorForUser() {
+    this.verifySecretForUser()
+      .then(() => this.overwriteSecretForUser())
+      .catch(err => console.error(err))
+  }
+
   // Disable two factor authentication for the user
   disableTwoFactorForUser() {
     this.isWaitingForResponse = true
