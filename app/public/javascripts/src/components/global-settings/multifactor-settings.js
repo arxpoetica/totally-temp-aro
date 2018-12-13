@@ -38,7 +38,7 @@ class MultifactorSettingsController {
   // Note that this will overwrite any existing TOTP secret that the user has.
   overwriteSecretForUser() {
     this.isWaitingForResponse = true
-    this.$http.get('/multifactor/overwrite-totp-secret')
+    return this.$http.get('/multifactor/overwrite-totp-secret')
       .then(res => {
         this.isWaitingForResponse = false
         this.totpSecret = res.data
@@ -57,7 +57,7 @@ class MultifactorSettingsController {
   verifySecretForUser() {
     this.isWaitingForResponse = true
     this.errorMessage = null
-    this.$http.post('/multifactor/verify-totp-secret', { verificationCode: this.verificationCode })
+    return this.$http.post('/multifactor/verify-totp-secret', { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
         if (res.data.result === 'failure') {
@@ -69,6 +69,7 @@ class MultifactorSettingsController {
           this.verificationCode = null
           this.$timeout()
         }
+        return Promise.resolve(res)
       })
       .catch(err => {
         this.currentState = this.tfaStates.UNDEFINED
@@ -89,10 +90,16 @@ class MultifactorSettingsController {
     this.$http.post(`/multifactor/delete-totp-settings`, { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
-        this.currentState = this.tfaStates.UNINITIALIZED
-        this.totpSecret = null
-        this.verificationCode = null
-        this.$timeout()
+        if (res.data.result === 'failure') {
+          this.errorMessage = res.data.message
+          this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
+        } else {
+          this.currentState = this.tfaStates.UNINITIALIZED
+          this.totpSecret = null
+          this.verificationCode = null
+          this.$timeout()
+        }
+        return Promise.resolve()
       })
       .catch(err => {
         this.currentState = this.tfaStates.UNDEFINED

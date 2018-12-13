@@ -94,7 +94,14 @@ module.exports = class MultiFactor {
   static deleteTotpSettingsForUser(userId, verificationCode) {
     // Make sure we have a current valid code before disabling multi-factor
     return MultiFactor.verifyTotp(userId, verificationCode)
-      .then(() => database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId]))
+      .then(result => {
+        if (result.result === 'success') {
+          return database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId])
+            .then(() => Promise.resolve({ result: 'success', message: 'OTP settings successfully deleted for user'}))
+        } else {
+          return Promise.resolve(result)
+        }
+      })
   }
 
   // Sends an email to a user with the currently valid totp
