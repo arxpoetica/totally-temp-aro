@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= config.ARO_CLIENT %>.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   </head>
   <body>
     <nav class="navbar navbar-default" id="top-navbar">
@@ -53,26 +54,45 @@
           </div>
           <div class="col-sm-6">
             <div class="well">
-              <% if (error && error.length > 0) { %>
-                <div class="alert alert-danger" role="alert"><%= error %></div>
-              <% } %>
-              <% if (info && info.length > 0) { %>
-                <div class="alert alert-info" role="alert"><%= info %></div>
-              <% } %>
-              <% if (success && success.length > 0) { %>
-                <div class="alert alert-success" role="alert"><%= success %></div>
-              <% } %>
               <form action="/verify-otp" method="post">
                 <div class="form-group">
                   <label>One-time password</label>
                   <input id="txtOtp" name="verificationCode" class="form-control" placeholder="6-digit OTP">
                 </div>
-                <button id="btnVerifyOtp" type="submit" class="btn btn-light">Verify</button>
+                <button id="btnVerifyOtp" type="submit" class="btn btn-primary">Verify OTP</button>
+                <br>
+                <a id="linkSendEmail" href="#" onclick="sendOTPByEmail()">I don't have an app, email the OTP to me</a>
+                <div id="txtEmailSent" class="alert alert-success mt-2">An email with the current OTP has been sent to your registered email.
+                  Please check your email and enter the OTP in the field above, then click Verify OTP.
+                </div>
+                <% if (error && error.length > 0) { %>
+                  <div class="alert alert-danger" role="alert"><%= error %></div>
+                <% } %>
+                <% if (info && info.length > 0) { %>
+                  <div class="alert alert-info" role="alert"><%= info %></div>
+                <% } %>
+                <% if (success && success.length > 0) { %>
+                  <div class="alert alert-success" role="alert"><%= success %></div>
+                <% } %>
               </form>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <script>
+      $("#txtEmailSent").hide()
+      function sendOTPByEmail() {
+        $.ajax({
+          url: '/send-totp-by-email',
+          type: 'POST',
+          data: {},
+          success: function(msg) {
+              $("#linkSendEmail").hide()
+              $("#txtEmailSent").show()
+          }               
+        });
+      }
+    </script>
   </body>
 </html>

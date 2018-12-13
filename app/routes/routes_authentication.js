@@ -10,6 +10,7 @@ exports.configure = (app, middleware) => {
   var LocalStrategy = require('passport-local').Strategy
   var CustomStrategy = require('passport-custom').Strategy
   var mapUserIdToProjectId = {}
+  const jsonSuccess = middleware.jsonSuccess
 
   passport.use('local-username-password', new LocalStrategy({
     usernameField: 'email',
@@ -82,16 +83,21 @@ exports.configure = (app, middleware) => {
   passport.use('custom-totp', new CustomStrategy(
     function(req, callback) {
       const verificationCode = req.body.verificationCode
+      const errorMessage = 'The OTP code was invalid. If you are using an authenticator app, please ensure that your device time is correct'
       models.MultiFactor.verifyTotp(req.user.id, verificationCode)
         .then(result => {
-          console.log(`Successfully verified OTP for user with id ${req.user.id}`)
-          req.user.multiFactorAuthenticationDone = true
-          callback(null, req.user)
+          if (result.result === 'success') {
+            console.log(`Successfully verified OTP for user with id ${req.user.id}`)
+            req.user.multiFactorAuthenticationDone = true
+            callback(null, req.user)
+          } else {
+            console.error(result)
+            callback(null, false, { message: errorMessage })
+          }
         })
         .catch(err => {
           console.error(err)
-          const message = 'The OTP code was invalid. If you are using an authenticator app, please ensure that your device time is correct'
-          callback(null, false, { message: message })
+          callback(null, false, { message: errorMessage })
         })
     }
   ))
@@ -154,6 +160,20 @@ exports.configure = (app, middleware) => {
       failureFlash: true
     })
   )
+
+  // Putting this API here because we need to be able to email an OTP after being logged in with username/password only
+  app.post('/send-totp-by-email', (request, response, next) => {
+    var totpPromise = null
+    if (!request.user || !request.user.id) {
+      totpPromise = Promise.reject('User ID not found, cannot send OTP')
+    } else {
+      const userId = request.user.id
+      totpPromise = models.MultiFactor.sendTotpByEmail(userId)
+    }
+    totpPromise
+      .then(jsonSuccess(response, next))
+      .catch(next)
+  })
 
   app.get('/login', (request, response, next) => {
     response.render('login.html', {
