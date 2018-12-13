@@ -55,7 +55,7 @@ class AroFeatureFactory {
       this.initializeUrnToEnumSet()
     }
     return new Promise((resolve, reject) => {
-      if (!this.urnToEnumSet[urn]) {
+      if (!this.urnToEnumSet.hasOwnProperty(urn)) {
         // call API
         let request = new XMLHttpRequest()
         request.onreadystatechange = function(){
