@@ -240,7 +240,7 @@ module.exports = class User {
       .then((_user) => {
         user = _user
         if (!user) {
-          return Promise.reject(errors.request('No user found with that email (%s)', email))
+          return Promise.reject(errors.request('Invalid username or password'))
         }
         if (!user.password) return false
         return this.checkPassword(password, user.password)
