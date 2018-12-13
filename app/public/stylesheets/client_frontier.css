@@ -1,20 +1,5 @@
 /* Override some bootstrap styles */
 
-#home_screen {
-  position: fixed;
-  height: 100%;
-  width: 100%;
-  margin-top: 50px;
-  top: 0;
-  left: 0;
-  z-index: 4;
-  background-color: white;
-}
-
-#home_screen h1 {
-  color: white;
-}
-
 .btn-primary,
 .btn-success,
 .btn-primary.active {
