@@ -1,8 +1,9 @@
 class MultifactorSettingsController {
 
-  constructor($http, $timeout) {
+  constructor($http, $timeout, $anchorScroll) {
     this.$http = $http
     this.$timeout = $timeout
+    this.$anchorScroll = $anchorScroll
 
     this.tfaStates = {
       UNDEFINED: 'UNDEFINED',
@@ -15,6 +16,7 @@ class MultifactorSettingsController {
     this.showSecretText = false
     this.verificationCode = null
     this.isWaitingForResponse = true
+    this.errorMessage = null
     this.$http.get('/multifactor/get-totp-status')
       .then(res => {
         this.isWaitingForResponse = false
@@ -54,13 +56,19 @@ class MultifactorSettingsController {
   // Verify the TOTP secret for the user
   verifySecretForUser() {
     this.isWaitingForResponse = true
+    this.errorMessage = null
     this.$http.post('/multifactor/verify-totp-secret', { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
-        this.currentState = this.tfaStates.SETUP_COMPLETE
-        this.totpSecret = null
-        this.verificationCode = null
-        this.$timeout()
+        if (res.data.result === 'failure') {
+          this.errorMessage = res.data.message
+          this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
+        } else {
+          this.currentState = this.tfaStates.SETUP_COMPLETE
+          this.totpSecret = null
+          this.verificationCode = null
+          this.$timeout()
+        }
       })
       .catch(err => {
         this.currentState = this.tfaStates.UNDEFINED
@@ -93,7 +101,7 @@ class MultifactorSettingsController {
   }
 }
 
-MultifactorSettingsController.$inject = ['$http', '$timeout']
+MultifactorSettingsController.$inject = ['$http', '$timeout', '$anchorScroll']
 
 let multifactorSettings = {
   templateUrl: '/components/global-settings/multifactor-settings.html',

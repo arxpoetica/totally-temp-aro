@@ -15,6 +15,8 @@
       <button class="btn btn-danger" ng-click="$ctrl.disableMultiFactorForUser()">Disable</button>
       <button class="btn btn-danger" ng-click="$ctrl.resetMultiFactorForUser()">Reset</button>
     </div>
+    <!-- Duplicate anchor #totpVerifyError - But fine because only one of them will be displayed at a given time -->
+    <div id="#totpVerifyError" ng-if="$ctrl.errorMessage" class="alert alert-danger mt-2">{{$ctrl.errorMessage}}</div>
   </div>
  
   <!-- Control state = UNINITIALIZED. This is when the user does not have multifactor set up for their account -->
@@ -31,7 +33,7 @@
   
   <!-- Control state = SECRET_GENERATED. This is when the user has generated a secret but has not synced it with their app -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.SECRET_GENERATED">
-    <h2 class="mb-3">Step 1: Set up authenticator app</h2>
+    <h3 class="mb-3">Step 1: Set up authenticator app</h3>
     <p class="mb-0">
       A secret key has been generated for your account. You can now use an app like Google Authenticator or Authy
       to sync the secret key with your account. Simply scan the QR code with the app and then enter the validation
@@ -44,7 +46,7 @@
       <div ng-if="$ctrl.showSecretText">Secret: {{$ctrl.totpSecret.secret}}</div>
       <button class="btn btn-sm btn-light" ng-if="!$ctrl.showSecretText" ng-click="$ctrl.showSecretText = true">Camera not working?</button>
     </div>
-    <h2 class="mb-3">Step 2: Enter current 6-digit OTP</h2>
+    <h3 class="mb-3">Step 2: Enter current 6-digit OTP</h3>
     <div class="text-center">
       <div class="input-group mb-3">
         <input type="text" class="form-control"  ng-model="$ctrl.verificationCode" placeholder="6-digit OTP" aria-label="6-digit OTP" aria-describedby="btnVerifyOTP">
@@ -52,12 +54,14 @@
           <button class="btn btn-primary" type="button" id="btnVerifyOTP" ng-click="$ctrl.verifySecretForUser()">Next</button>
         </div>
       </div>
+      <!-- Duplicate anchor #totpVerifyError - But fine because only one of them will be displayed at a given time -->
+      <div id="#totpVerifyError" ng-if="$ctrl.errorMessage" class="alert alert-danger">{{$ctrl.errorMessage}}</div>
     </div>
   </div>
 
   <!-- Control state = SETUP_COMPLETE. This is when the user has generated a secret but has not synced it with their app -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.SETUP_COMPLETE">
-    <h2 class="mb-3">Multi-factor authentication complete</h2>
+    <h3 class="mb-3">Multi-factor authentication complete</h3>
       <p>Congratulations! Multi-factor authentication has been successfully set up for your account. In the future, you will
       require a One-Time Password (OTP) to log in to your account (in addition to your account password).
     </p>

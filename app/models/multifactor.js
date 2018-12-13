@@ -58,7 +58,17 @@ module.exports = class MultiFactor {
       .then(res => {
         const totpSecret = res[0].totp_secret
         const isValid = otplib.authenticator.check(verificationCode, totpSecret)
-        return isValid ? Promise.resolve() : Promise.reject('OTP code was invalid')
+        if (isValid) {
+          return Promise.resolve({
+            result: 'success',
+            message: 'OTP code was verified successfully'
+          })
+        } else {
+          return Promise.resolve({
+            result: 'failure',
+            message: 'Incorrect OTP code. If you are using an authenticator app, please make sure the time on your device is correct'
+          })
+        }
       })
   }
 

@@ -22,9 +22,16 @@ exports.configure = (app, middleware) => {
     const userId = request.user.id
     const verificationCode = request.body.verificationCode
     models.MultiFactor.verifyTotp(userId, verificationCode)
-      .then(res => models.MultiFactor.setTotpVerifiedFlag(userId, true))  // OTP is verified, update the DB.
-      .then(res => models.MultiFactor.enableTotp(userId))
-      .then(jsonSuccess(response, next))
+      .then(res => {
+        if (res.result === 'failure') {
+          jsonSuccess(response, next)(res)
+        } else {
+          models.MultiFactor.setTotpVerifiedFlag(userId, true)
+            .then(res => models.MultiFactor.enableTotp(userId))
+            .then(jsonSuccess(response, next))
+            .catch(next)
+        }
+      })  // OTP is verified, update the DB.
       .catch(next)
   })
 
