@@ -249,7 +249,7 @@ module.exports = class User {
         if (!res) {
           sessionDetails.login_status_id = LoginStatus.INCORRECT_PASSWORD
           this.saveLoginAudit(user.id, sessionDetails)
-          return Promise.reject(errors.forbidden('Invalid password'))
+          return Promise.reject(errors.forbidden('Invalid username or password'))
         }
         delete user.password
         sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_CACHED_PASSWORD
