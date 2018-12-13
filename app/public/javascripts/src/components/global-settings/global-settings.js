@@ -8,6 +8,7 @@ class GlobalSettingsController {
     this.views = Object.freeze({
       GLOBAL_SETTINGS: 'Global Settings',
       MY_ACCOUNT: 'My Account',
+      TWOFACTOR_AUTHENTICATION: 'Two Factor Authentication',
       MANAGE_USERS: 'Manage Users',
       MANAGE_GROUPS: 'Manage Groups',
       USER_SETTINGS: 'User Settings',
