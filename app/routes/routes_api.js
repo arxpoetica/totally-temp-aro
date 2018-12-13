@@ -11,9 +11,9 @@ exports.configure = (api, middleware) => {
       return response.redirect('/login')
     } else {
       // The user is logged in. Check if two-factor authentication is required. If yes, redirect to verification page.
-      // We have named the variable "twoFactorAuthenticationDone" so that in case the variable disappears from the
-      // request.user (e.g. during a refactor) then we will still keep going to the two factor verification page.
-      if (request.user.twoFactorAuthenticationDone) {
+      // We have named the variable "multiFactorAuthenticationDone" so that in case the variable disappears from the
+      // request.user (e.g. during a refactor) then we will still keep going to the multi factor verification page.
+      if (request.user.multiFactorAuthenticationDone) {
         next()
       } else {
         return response.redirect('/verify-otp')

@@ -1,26 +1,26 @@
 <div class="container" style="height: 100%; width: 100%;">
   
-  <!-- Control state = TWOFACTOR_ALREADY_SETUP. This is when the user already has twofactor set up for their account -->
-  <div ng-if="$ctrl.currentState === $ctrl.tfaStates.TWOFACTOR_ALREADY_SETUP">
+  <!-- Control state = MULTIFACTOR_ALREADY_SETUP. This is when the user already has multifactor set up for their account -->
+  <div ng-if="$ctrl.currentState === $ctrl.tfaStates.MULTIFACTOR_ALREADY_SETUP">
     <p>
-      Two factor authentication is already set up for your account. You can either disable it
+      Multi-factor authentication is already set up for your account. You can either disable it
       (not recommended) or reset it. If you click on Reset, you will have to reconfigure any
       OTP apps that you have installed on your phone.
     </p>
     <p>
-      In order to overwrite existing two-factor settings, you have to enter a valid OTP below:
+      In order to overwrite existing multi-factor settings, you have to enter a valid OTP below:
     </p>
-    <input class="form-control mb-2" ng-model="$ctrl.verificationCode" placeholder="Enter verification code from app">
+    <input class="form-control mb-2" ng-model="$ctrl.verificationCode" placeholder="6-digit OTP">
     <div class="text-center">
-      <button class="btn btn-danger" ng-click="$ctrl.disableTwoFactorForUser()">Disable</button>
-      <button class="btn btn-danger" ng-click="$ctrl.resetTwoFactorForUser()">Reset</button>
+      <button class="btn btn-danger" ng-click="$ctrl.disableMultiFactorForUser()">Disable</button>
+      <button class="btn btn-danger" ng-click="$ctrl.resetMultiFactorForUser()">Reset</button>
     </div>
   </div>
  
-  <!-- Control state = UNINITIALIZED. This is when the user does not have twofactor set up for their account -->
+  <!-- Control state = UNINITIALIZED. This is when the user does not have multifactor set up for their account -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.UNINITIALIZED">
     <p>
-      Two factor authentication secures your account by requiring a one-time password (OTP)
+      Multi-factor authentication secures your account by requiring a one-time password (OTP)
       to log in (along with your regular account password). You can get the OTP via email, SMS
       or using an authenticator app like Google Authenticator or Authy.
     </p>
@@ -57,8 +57,8 @@
 
   <!-- Control state = SETUP_COMPLETE. This is when the user has generated a secret but has not synced it with their app -->
   <div ng-if="$ctrl.currentState === $ctrl.tfaStates.SETUP_COMPLETE">
-    <h2 class="mb-3">Two-factor authentication complete</h2>
-      <p>Congratulations! Two-factor authentication has been successfully set up for your account. In the future, you will
+    <h2 class="mb-3">Multi-factor authentication complete</h2>
+      <p>Congratulations! Multi-factor authentication has been successfully set up for your account. In the future, you will
       require a One-Time Password (OTP) to log in to your account (in addition to your account password).
     </p>
   </div>

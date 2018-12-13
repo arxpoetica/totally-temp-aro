@@ -24,7 +24,7 @@ exports.configure = (app, middleware) => {
             .then((user) => {
               console.log(`Successfully logged in user ${email} with LDAP`)
               console.log(user)
-              user.twoFactorAuthenticationDone = true   // For now, no two-factor for ldap
+              user.multiFactorAuthenticationDone = true   // For now, no two-factor for ldap
               return callback(null, user)
             })
             .catch((err) => {
@@ -36,10 +36,10 @@ exports.configure = (app, middleware) => {
                   loggedInUser = {
                     id: user.id
                   }
-                  return models.User.doesUserNeedTwoFactor(loggedInUser.id)
+                  return models.User.doesUserNeedMultiFactor(loggedInUser.id)
                 })
                 .then(result => {
-                  loggedInUser.twoFactorAuthenticationDone = !result.is_totp_enabled
+                  loggedInUser.multiFactorAuthenticationDone = !result.is_totp_enabled
                   return callback(null, loggedInUser) 
                 })
                 .catch((err) => {
@@ -57,10 +57,10 @@ exports.configure = (app, middleware) => {
             loggedInUser = {
               id: user.id
             }
-            return models.User.doesUserNeedTwoFactor(loggedInUser.id)
+            return models.User.doesUserNeedMultiFactor(loggedInUser.id)
           })
           .then(result => {
-            loggedInUser.twoFactorAuthenticationDone = !result.is_totp_enabled
+            loggedInUser.multiFactorAuthenticationDone = !result.is_totp_enabled
             return callback(null, loggedInUser)
           })
           .catch((err) => {
@@ -82,10 +82,10 @@ exports.configure = (app, middleware) => {
   passport.use('custom-totp', new CustomStrategy(
     function(req, callback) {
       const verificationCode = req.body.verificationCode
-      models.TwoFactor.verifyTotp(req.user.id, verificationCode)
+      models.MultiFactor.verifyTotp(req.user.id, verificationCode)
         .then(result => {
           console.log(`Successfully verified OTP for user with id ${req.user.id}`)
-          req.user.twoFactorAuthenticationDone = true
+          req.user.multiFactorAuthenticationDone = true
           callback(null, req.user)
         })
         .catch(err => {
@@ -99,7 +99,7 @@ exports.configure = (app, middleware) => {
   passport.serializeUser((user, callback) => {
     callback(null, {
       id: user.id,
-      twoFactorAuthenticationDone: user.twoFactorAuthenticationDone
+      multiFactorAuthenticationDone: user.multiFactorAuthenticationDone
     })
   })
 
@@ -113,7 +113,7 @@ exports.configure = (app, middleware) => {
         if (!dbUser) {
           callback(null, null)
         }
-        dbUser.twoFactorAuthenticationDone = user.twoFactorAuthenticationDone
+        dbUser.multiFactorAuthenticationDone = user.multiFactorAuthenticationDone
         if (!mapUserIdToProjectId[dbUser.id]) {
           // We don't have the project ID for this user yet. Get it
           var req = {

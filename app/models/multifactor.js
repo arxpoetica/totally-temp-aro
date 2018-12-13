@@ -7,7 +7,7 @@ const base32Encode = require('base32-encode')
 otplib.authenticator.options = {
   window: [1, 0]  // Allow OTP from one previous timestep, in case it changes just as the user is typing it
 }
-module.exports = class TwoFactor {
+module.exports = class MultiFactor {
 
   // Generates a QR code from an input string
   static getQrCodeForKeyUri(keyUri) {
@@ -81,8 +81,8 @@ module.exports = class TwoFactor {
 
   // Deletes the TOTP settings for a user
   static deleteTotpSettingsForUser(userId, verificationCode) {
-    // Make sure we have a current valid code before disabling two factor
-    return TwoFactor.verifyTotp(userId, verificationCode)
+    // Make sure we have a current valid code before disabling multi-factor
+    return MultiFactor.verifyTotp(userId, verificationCode)
       .then(() => database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId]))
   }
 }

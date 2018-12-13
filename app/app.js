@@ -33,6 +33,7 @@ var routes = [
   'competitors',
   'user',
   'map',
+  'multifactor',
   'wirecenter',
   'county_subdivision',
   'census_block',
@@ -48,8 +49,7 @@ var routes = [
   'admin_settings',
   'settings',
   'financial_profile',
-  'reports',
-  'twofactor'
+  'reports'
 ]
 routes.forEach((route) => {
   require('./routes/routes_' + route).configure(api, middleware)

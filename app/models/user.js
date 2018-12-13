@@ -409,7 +409,7 @@ module.exports = class User {
       })
   }
 
-  static doesUserNeedTwoFactor(id) {
+  static doesUserNeedMultiFactor(id) {
     return database.findOne('SELECT is_totp_enabled FROM auth.users WHERE id = $1', [id])
   }
 
