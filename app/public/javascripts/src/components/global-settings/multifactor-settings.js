@@ -1,12 +1,13 @@
-class TwofactorSettingsController {
+class MultifactorSettingsController {
 
-  constructor($http, $timeout) {
+  constructor($http, $timeout, $anchorScroll) {
     this.$http = $http
     this.$timeout = $timeout
+    this.$anchorScroll = $anchorScroll
 
     this.tfaStates = {
       UNDEFINED: 'UNDEFINED',
-      TWOFACTOR_ALREADY_SETUP: 'TWOFACTOR_ALREADY_SETUP',
+      MULTIFACTOR_ALREADY_SETUP: 'MULTIFACTOR_ALREADY_SETUP',
       UNINITIALIZED: 'UNINITIALIZED',
       SECRET_GENERATED: 'SECRET_GENERATED',
       SETUP_COMPLETE: 'SETUP_COMPLETE'
@@ -15,7 +16,8 @@ class TwofactorSettingsController {
     this.showSecretText = false
     this.verificationCode = null
     this.isWaitingForResponse = true
-    this.$http.get('/auth/get-totp-status')
+    this.errorMessage = null
+    this.$http.get('/multifactor/get-totp-status')
       .then(res => {
         this.isWaitingForResponse = false
         const status = res.data[0]
@@ -23,7 +25,7 @@ class TwofactorSettingsController {
           this.currentState = this.tfaStates.UNINITIALIZED
         } else {
           // TOTP is enabled. If it is not verified, then something went wrong with the verification. Set it to uninitialized.
-          this.currentState = status.is_totp_verified ? this.tfaStates.TWOFACTOR_ALREADY_SETUP : this.tfaStates.UNINITIALIZED
+          this.currentState = status.is_totp_verified ? this.tfaStates.MULTIFACTOR_ALREADY_SETUP : this.tfaStates.UNINITIALIZED
         }
         this.$timeout()
       })
@@ -36,7 +38,7 @@ class TwofactorSettingsController {
   // Note that this will overwrite any existing TOTP secret that the user has.
   overwriteSecretForUser() {
     this.isWaitingForResponse = true
-    this.$http.get('/auth/overwrite-totp-secret')
+    return this.$http.get('/multifactor/overwrite-totp-secret')
       .then(res => {
         this.isWaitingForResponse = false
         this.totpSecret = res.data
@@ -54,13 +56,20 @@ class TwofactorSettingsController {
   // Verify the TOTP secret for the user
   verifySecretForUser() {
     this.isWaitingForResponse = true
-    this.$http.post('/auth/verify-totp-secret', { verificationCode: this.verificationCode })
+    this.errorMessage = null
+    return this.$http.post('/multifactor/verify-totp-secret', { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
-        this.currentState = this.tfaStates.SETUP_COMPLETE
-        this.totpSecret = null
-        this.verificationCode = null
-        this.$timeout()
+        if (res.data.result === 'failure') {
+          this.errorMessage = res.data.message
+          this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
+        } else {
+          this.currentState = this.tfaStates.SETUP_COMPLETE
+          this.totpSecret = null
+          this.verificationCode = null
+          this.$timeout()
+        }
+        return Promise.resolve(res)
       })
       .catch(err => {
         this.currentState = this.tfaStates.UNDEFINED
@@ -68,23 +77,29 @@ class TwofactorSettingsController {
       })
   }
 
-  // Reset two factor authentication for the user
-  resetTwoFactorForUser() {
+  // Reset multi-factor authentication for the user
+  resetMultiFactorForUser() {
     this.verifySecretForUser()
       .then(() => this.overwriteSecretForUser())
       .catch(err => console.error(err))
   }
 
-  // Disable two factor authentication for the user
-  disableTwoFactorForUser() {
+  // Disable multi-factor authentication for the user
+  disableMultiFactorForUser() {
     this.isWaitingForResponse = true
-    this.$http.post(`/auth/delete-totp-settings`, { verificationCode: this.verificationCode })
+    this.$http.post(`/multifactor/delete-totp-settings`, { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
-        this.currentState = this.tfaStates.UNINITIALIZED
-        this.totpSecret = null
-        this.verificationCode = null
-        this.$timeout()
+        if (res.data.result === 'failure') {
+          this.errorMessage = res.data.message
+          this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
+        } else {
+          this.currentState = this.tfaStates.UNINITIALIZED
+          this.totpSecret = null
+          this.verificationCode = null
+          this.$timeout()
+        }
+        return Promise.resolve()
       })
       .catch(err => {
         this.currentState = this.tfaStates.UNDEFINED
@@ -93,14 +108,14 @@ class TwofactorSettingsController {
   }
 }
 
-TwofactorSettingsController.$inject = ['$http', '$timeout']
+MultifactorSettingsController.$inject = ['$http', '$timeout', '$anchorScroll']
 
-let twofactorSettings = {
-  templateUrl: '/components/global-settings/twofactor-settings.html',
+let multifactorSettings = {
+  templateUrl: '/components/global-settings/multifactor-settings.html',
   bindings: {
     managerView: '='
   },
-  controller: TwofactorSettingsController
+  controller: MultifactorSettingsController
 }
 
-export default twofactorSettings
+export default multifactorSettings

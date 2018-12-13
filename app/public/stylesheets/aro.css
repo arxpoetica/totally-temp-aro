@@ -204,23 +204,22 @@ footer nav {
   margin-bottom: 0 !important;
 }
 
-#home_screen {
+.login-page-bg {
   position: fixed;
   height: 100%;
   width: 100%;
-  margin-top: 50px;
+  padding-top: 100px;
   top: 0;
   left: 0;
   z-index: 4;
-  background-color: black;
-  background: url(/images/backgrounds/reliance/fiber_1_reverse.jpg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-color: #ececec;
 }
 
-#home_screen h1 {
-  color: white;
+.login-box {
+  background-color: white;
+  width: 500px;
+  padding: 0px 50px 50px 50px;
+  border: solid 1px #a0a0a0;
 }
 
 #aro_logo {
@@ -229,11 +228,6 @@ footer nav {
   margin-bottom: 10px;
   /*width: 500px;*/
   height:100px;
-}
-
-#home_screen_logo {
-  font-size: 30px;
-  color: white;
 }
 
 #new_route_map_canvas {

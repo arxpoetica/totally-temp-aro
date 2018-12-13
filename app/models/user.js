@@ -240,7 +240,7 @@ module.exports = class User {
       .then((_user) => {
         user = _user
         if (!user) {
-          return Promise.reject(errors.request('No user found with that email (%s)', email))
+          return Promise.reject(errors.request('Invalid username or password'))
         }
         if (!user.password) return false
         return this.checkPassword(password, user.password)
@@ -249,7 +249,7 @@ module.exports = class User {
         if (!res) {
           sessionDetails.login_status_id = LoginStatus.INCORRECT_PASSWORD
           this.saveLoginAudit(user.id, sessionDetails)
-          return Promise.reject(errors.forbidden('Invalid password'))
+          return Promise.reject(errors.forbidden('Invalid username or password'))
         }
         delete user.password
         sessionDetails.login_status_id = LoginStatus.LOGIN_SUCCESSFUL_CACHED_PASSWORD
@@ -409,7 +409,7 @@ module.exports = class User {
       })
   }
 
-  static doesUserNeedTwoFactor(id) {
+  static doesUserNeedMultiFactor(id) {
     return database.findOne('SELECT is_totp_enabled FROM auth.users WHERE id = $1', [id])
   }
 

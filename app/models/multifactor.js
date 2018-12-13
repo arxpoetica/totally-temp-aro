@@ -4,10 +4,11 @@ const otplib = require('otplib')
 const qrcode = require('qrcode')
 const crypto = require('crypto')
 const base32Encode = require('base32-encode')
+const dedent = require('dedent')
 otplib.authenticator.options = {
   window: [1, 0]  // Allow OTP from one previous timestep, in case it changes just as the user is typing it
 }
-module.exports = class TwoFactor {
+module.exports = class MultiFactor {
 
   // Generates a QR code from an input string
   static getQrCodeForKeyUri(keyUri) {
@@ -58,7 +59,17 @@ module.exports = class TwoFactor {
       .then(res => {
         const totpSecret = res[0].totp_secret
         const isValid = otplib.authenticator.check(verificationCode, totpSecret)
-        return isValid ? Promise.resolve() : Promise.reject('OTP code was invalid')
+        if (isValid) {
+          return Promise.resolve({
+            result: 'success',
+            message: 'OTP code was verified successfully'
+          })
+        } else {
+          return Promise.resolve({
+            result: 'failure',
+            message: 'Incorrect OTP code. If you are using an authenticator app, please make sure the time on your device is correct'
+          })
+        }
       })
   }
 
@@ -81,8 +92,43 @@ module.exports = class TwoFactor {
 
   // Deletes the TOTP settings for a user
   static deleteTotpSettingsForUser(userId, verificationCode) {
-    // Make sure we have a current valid code before disabling two factor
-    return TwoFactor.verifyTotp(userId, verificationCode)
-      .then(() => database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId]))
+    // Make sure we have a current valid code before disabling multi-factor
+    return MultiFactor.verifyTotp(userId, verificationCode)
+      .then(result => {
+        if (result.result === 'success') {
+          return database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId])
+            .then(() => Promise.resolve({ result: 'success', message: 'OTP settings successfully deleted for user'}))
+        } else {
+          return Promise.resolve(result)
+        }
+      })
+  }
+
+  // Sends an email to a user with the currently valid totp
+  static sendTotpByEmail(userId) {
+    return database.findOne('SELECT email, totp_secret FROM auth.users WHERE id = $1', [userId])
+      .then(user => {
+        const currentToken = otplib.authenticator.generate(user.totp_secret)
+        var text = dedent`
+          You're receiving this email because someone (hopefully you) requested a One-Time Password (OTP) to
+          be sent to this email address.
+
+          Your One-Time Password (OTP) to access the ARO application is: ${currentToken}
+          This OTP is valid for 30 seconds.
+
+          If you did not request this OTP, you do not need to do anything. If you want, you can
+          reset your password by logging into the ARO application.
+
+          Please do not reply to this email. It was automatically generated.
+        `
+        helpers.mail.sendMail({
+          subject: 'One time password (OTP): ARO Application',
+          to: user.email,
+          text: text
+        })
+        console.log('************************************** OTP email **************************************')
+        console.log(`Sent to: ${user.email}`)
+        console.log(text)
+      })
   }
 }
