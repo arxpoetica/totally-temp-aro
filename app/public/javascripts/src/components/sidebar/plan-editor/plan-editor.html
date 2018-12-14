@@ -45,7 +45,7 @@
                          is-boundary-creation-allowed="$ctrl.isBoundaryCreationAllowed(mapObject)"
                          hide-object-ids="$ctrl.objectIdsToHide"
                          feature-type="equipment"
-                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
+                         on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature, deleteExistingBoundary)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
@@ -176,8 +176,8 @@
                   ng-click="$ctrl.editViewObject()"
                   >edit</button>
               <div class="sidebar-header-subinfo">
-                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 5}}</div>
-                <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 5}}</div>
+                <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 6}}</div>
+                <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 6}}</div>
               </div>
           </div>
           
@@ -218,8 +218,8 @@
                       placeholder="lat" 
                       ng-model="$ctrl.selectedMapObjectLat"
                       ng-model-options="{ debounce: 100 }"
-                      step="0.00001"
-                      ng-change="$ctrl.setSelectedMapObjectLoc()">
+                      step="0.000001"
+                      ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                   </div>
                   <div class="form-group" style="margin-bottom: 2px;">
                     <label for="selectedMapObjectLng">long: </label>
@@ -227,8 +227,8 @@
                       placeholder="long" 
                       ng-model="$ctrl.selectedMapObjectLng"
                       ng-model-options="{ debounce: 100 }"
-                      step="0.00001"
-                      ng-change="$ctrl.setSelectedMapObjectLoc()">
+                      step="0.000001"
+                      ng-change="$ctrl.markSelectedEquipmentPropertiesDirty()">
                   </div>
                 </form>
               </div>

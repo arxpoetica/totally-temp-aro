@@ -449,7 +449,7 @@ class PlanEditorController {
       objectId: objectId,
       geometry: {
         type: 'Point',
-        coordinates: [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
+        coordinates: [mapObject.position.lng().toFixed(6), mapObject.position.lat().toFixed(6)] // Note - longitude, then latitude
       },
       networkNodeType: objectProperties.siteNetworkNodeType,
       attributes: {
@@ -518,6 +518,14 @@ class PlanEditorController {
     if (this.selectedMapObject && this.isMarker(this.selectedMapObject)) {
       var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
       var equipmentObjectForService = this.formatEquipmentForService(selectedMapObject.objectId)
+      this.setSelectedMapObjectLoc()
+      //save the mapobject location if changed
+      if (this.selectedMapObjectLat && this.selectedMapObjectLat > -90 && this.selectedMapObjectLat < 90) {
+        equipmentObjectForService.geometry.coordinates[1] = this.selectedMapObjectLat
+      }
+      if(this.selectedMapObjectLng && this.selectedMapObjectLng > -180 && this.selectedMapObjectLng < 180) {
+        equipmentObjectForService.geometry.coordinates[0] = this.selectedMapObjectLng
+      }
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
       .then((result) => {
         this.objectIdToProperties[selectedMapObject.objectId].isDirty = false
@@ -664,7 +672,7 @@ class PlanEditorController {
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
   }
   
-  handleObjectCreated(mapObject, usingMapClick, feature) {
+  handleObjectCreated(mapObject, usingMapClick, feature, deleteExistingBoundary) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     if (usingMapClick && this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
@@ -754,7 +762,7 @@ class PlanEditorController {
       if (usingMapClick && feature && feature.attributes && feature.attributes.network_node_object_id) {
         // If the associated equipment has a boundary associated with it, first delete *that* boundary
         var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
-        this.deleteBoundary(existingBoundaryId)
+        deleteExistingBoundary && this.deleteBoundary(existingBoundaryId)
         existingBoundaryId = null
         
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance', 
@@ -799,8 +807,8 @@ class PlanEditorController {
     
     var lat = mapObject && mapObject.position && mapObject.position.lat()
     var lng = mapObject && mapObject.position && mapObject.position.lng()
-    this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 5)
-    this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 5)
+    this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
+    this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
     
     // debug
     //console.log(this.selectedMapObject)
@@ -820,14 +828,14 @@ class PlanEditorController {
       if(!isManualEdit) {
         var lat = mapObject && mapObject.position && mapObject.position.lat()
         var lng = mapObject && mapObject.position && mapObject.position.lng()
-        this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 5)
-        this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 5)
+        this.selectedMapObjectLat = mapObject && mapObject.position && +this.$filter('number')(+lat, 6)
+        this.selectedMapObjectLng = mapObject && mapObject.position && +this.$filter('number')(+lng, 6)
       }
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
       this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
       .then((result) => {
         var equipmentObject = result.data.filter((item) => item.objectId === mapObject.objectId)[0]
-        equipmentObject.geometry.coordinates = [mapObject.position.lng(), mapObject.position.lat()] // Note - longitude, then latitude
+        equipmentObject.geometry.coordinates = [mapObject.position.lng().toFixed(6), mapObject.position.lat().toFixed(6)] // Note - longitude, then latitude
         return this.$http.post(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObject)
       })
       .then((result) => {
@@ -1088,7 +1096,7 @@ class PlanEditorController {
     //this.selectedMapObject.setPosition({ lat: this.selectedMapObjectLat, lng: this.selectedMapObjectLng })
     var position = new google.maps.LatLng(this.selectedMapObjectLat,this.selectedMapObjectLng)
     this.selectedMapObject.setPosition(position)
-    this.handleObjectModified(this.selectedMapObject,true) 
+    //this.handleObjectModified(this.selectedMapObject,true) 
   }
 
   $doCheck() {
