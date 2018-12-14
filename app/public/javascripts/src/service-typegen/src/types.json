@@ -124,13 +124,13 @@
           "hsiEnabled": {
             "type": "boolean"
           },
+          "physicallyLinked": {
+            "type": "boolean"
+          },
           "t1": {
             "type": "boolean"
           },
           "fiberAvailable": {
-            "type": "boolean"
-          },
-          "physicallyLinked": {
             "type": "boolean"
           }
         }
@@ -183,6 +183,9 @@
             },
             "maxTechnology": {
               "type": "integer"
+            },
+            "marketableTechnology": {
+              "type": "integer"
             }
           }
         }
@@ -229,12 +232,6 @@
                 "type": "object",
                 "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
               }
-            },
-            "maxSpeed": {
-              "type": "integer"
-            },
-            "maxTechnology": {
-              "type": "integer"
             },
             "oneTimeCost": {
               "type": "boolean"
@@ -441,13 +438,13 @@
               "hsiEnabled": {
                 "type": "boolean"
               },
+              "physicallyLinked": {
+                "type": "boolean"
+              },
               "t1": {
                 "type": "boolean"
               },
               "fiberAvailable": {
-                "type": "boolean"
-              },
-              "physicallyLinked": {
                 "type": "boolean"
               }
             }
@@ -500,6 +497,9 @@
                 },
                 "maxTechnology": {
                   "type": "integer"
+                },
+                "marketableTechnology": {
+                  "type": "integer"
                 }
               }
             }
@@ -546,12 +546,6 @@
                     "type": "object",
                     "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
                   }
-                },
-                "maxSpeed": {
-                  "type": "integer"
-                },
-                "maxTechnology": {
-                  "type": "integer"
                 },
                 "oneTimeCost": {
                   "type": "boolean"
@@ -717,13 +711,13 @@
       "hsiEnabled": {
         "type": "boolean"
       },
+      "physicallyLinked": {
+        "type": "boolean"
+      },
       "t1": {
         "type": "boolean"
       },
       "fiberAvailable": {
-        "type": "boolean"
-      },
-      "physicallyLinked": {
         "type": "boolean"
       }
     }
@@ -815,12 +809,6 @@
           "$ref": "urn:jsonschema:com:altvil:aro:service:price:EquipmentComponent"
         }
       },
-      "maxSpeed": {
-        "type": "integer"
-      },
-      "maxTechnology": {
-        "type": "integer"
-      },
       "oneTimeCost": {
         "type": "boolean"
       }
@@ -871,6 +859,9 @@
         "type": "integer"
       },
       "maxTechnology": {
+        "type": "integer"
+      },
+      "marketableTechnology": {
         "type": "integer"
       }
     }
