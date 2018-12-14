@@ -100,7 +100,7 @@ class RoicReportsController {
 
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
-    for (var i = 0; i < this.state.configuration.optimizationOptions.financialConstraints.years; ++i) {
+    for (var i = 0; i < this.state.getOptimizationBody().financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
     this.$http.get(`/service/report/plan/${this.planId}`)
