@@ -20,7 +20,8 @@
         <br>My Account
       </button>
 
-      <button class="btn btn-light settings-btn" ng-click="$ctrl.currentView = $ctrl.views.MULTIFACTOR_AUTHENTICATION">
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.configuration.perspective.toolbar.globalSettings.showMultiFactorAuthentication"
+              ng-click="$ctrl.currentView = $ctrl.views.MULTIFACTOR_AUTHENTICATION">
         <i class="fa fa-2x fa-user-shield"></i>
         <br>Multi Factor Authentication
       </button>
@@ -48,7 +49,8 @@
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
 
-    <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION"></multifactor-settings>
+    <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION && $ctrl.state.configuration.perspective.toolbar.globalSettings.showMultiFactorAuthentication">
+    </multifactor-settings>
 
     <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
                   manager-view="$ctrl.globalSettingsService.currentManageUserView"

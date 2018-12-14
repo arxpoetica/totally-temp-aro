@@ -22,6 +22,7 @@ class RoicReportsController {
             display: true,
             position: 'left',
             ticks: {
+              beginAtZero: true,
               callback: (value, index, values) => this.formatYAxisValue(value, values)
             }
           }
@@ -51,16 +52,19 @@ class RoicReportsController {
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]  // Because "medium" is the only thing supported in service right now
 
     this.calcTypes = [
-      { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ' },
-      { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ' },
-      { id: 'premises', description: 'Premises', tickPrefix: '' },
-      { id: 'customers', description: 'Customers', tickPrefix: '' },
-      { id: 'cashFlow', description: 'Cash Flow', tickPrefix: '$ ' },
-      { id: 'penetration', description: 'Penetration', tickPrefix: '' },
-      { id: 'new_connections_cost', description: 'Cost of new connections', tickPrefix: '$ ' },
-      { id: 'new_connections', description: 'Number of new connections', tickPrefix: '' },
-      { id: 'revenue', description: 'Revenue', tickPrefix: '$ ' },
-      { id: 'maintenance_expenses', description: 'Maintenance Expenses', tickPrefix: '$ ' }
+      { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'premises', description: 'Premises', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
+      { id: 'customers', description: 'Customers', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
+      { id: 'cashFlow', description: 'Cash Flow', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'penetration', description: 'Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
+      { id: 'new_connections_cost', description: 'Cost of new connections', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'new_connections', description: 'Number of new connections', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
+      { id: 'revenue', description: 'Revenue', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'maintenance_expenses', description: 'Maintenance Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'customer_penetration', description: 'Customer Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
+      { id: 'tam_curve', description: 'Total Addressable Market', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+      { id: 'build_cost', description: 'Build Cost', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 }
     ]
     this.selectedCalcType = this.calcTypes[0]
   }
@@ -85,9 +89,9 @@ class RoicReportsController {
     // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
     // without these two spaces.
     if (threshold) {
-      return `  ${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}`
+      return `  ${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}${this.selectedCalcType.tickSuffix}`
     } else {
-      return `  ${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}` // For values less than 1000
+      return `  ${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}${this.selectedCalcType.tickSuffix}` // For values less than 1000
     }
   }
 
@@ -99,11 +103,23 @@ class RoicReportsController {
 
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
-    for (var i = 0; i < this.state.configuration.optimizationOptions.financialConstraints.years; ++i) {
+    for (var i = 0; i < this.state.getOptimizationBody().financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
     this.$http.get(`/service/report/plan/${this.planId}`)
-      .then(result => this.roicResults = result.data)
+      .then(result => {
+        this.roicResults = result.data
+        // Some of the values have to be scaled (e.g. penetration should be in %)
+        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
+          const component = this.roicResults.roicAnalysis.components[componentKey]
+          Object.keys(component).forEach(curveKey => {
+            const curve = component[curveKey]
+            const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
+            const multiplier = calcType ? calcType.multiplier : 1.0
+            curve.values = curve.values.map(item => item * multiplier)
+          })
+        })
+      })
       .catch(err => console.error(err))
   }
 }

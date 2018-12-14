@@ -105,7 +105,8 @@ exports.configure = (app, middleware) => {
   passport.serializeUser((user, callback) => {
     callback(null, {
       id: user.id,
-      multiFactorAuthenticationDone: user.multiFactorAuthenticationDone
+      multiFactorAuthenticationDone: user.multiFactorAuthenticationDone,
+      version: '1'
     })
   })
 
@@ -120,6 +121,7 @@ exports.configure = (app, middleware) => {
           callback(null, null)
         }
         dbUser.multiFactorAuthenticationDone = user.multiFactorAuthenticationDone
+        dbUser.version = user.version
         if (!mapUserIdToProjectId[dbUser.id]) {
           // We don't have the project ID for this user yet. Get it
           var req = {
