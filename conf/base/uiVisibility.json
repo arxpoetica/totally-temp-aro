@@ -185,7 +185,8 @@
           "registerUser": {
             "show": true
           }
-        }
+        },
+        "showMultiFactorAuthentication": true
       },
       "emphericalPlan": {
         "show": true
@@ -428,7 +429,8 @@
           "registerUser": {
             "show": true
           }
-        }
+        },
+        "showMultiFactorAuthentication": true
       },
       "emphericalPlan": {
         "show": false
@@ -670,7 +672,8 @@
           "registerUser": {
             "show": true
           }
-        }
+        },
+        "showMultiFactorAuthentication": true
       },
       "emphericalPlan": {
         "show": false
