@@ -21,10 +21,11 @@ class MapObjectEditorController {
     this.createObjectOnClick = true
     this.createdMapObjects = {}
     this.selectedMapObject = null
+    this.selectedMapObjectPreviousShape = {}
     this.iconAnchors = {}
     this.polygonInvalidMsg = {
       title: "Invalid Polygon",
-      text: "Unable to commit changes because one of the polygons is not valid"
+      text: "Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting."
     }
     
     this.drawing = {
@@ -709,7 +710,7 @@ class MapObjectEditorController {
     this.createMapObject(feature, iconUrl, true, true)
   }
   
-  createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride) {
+  createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride,deleteExistingBoundary) {
     if ('undefined' == typeof existingObjectOverride) {
       existingObjectOverride = false
     }
@@ -819,7 +820,7 @@ class MapObjectEditorController {
     })
     
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature})
+    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary})
     
     if (usingMapClick) this.selectMapObject(mapObject)
   }
@@ -1006,6 +1007,10 @@ class MapObjectEditorController {
     }
     
     this.selectedMapObject = mapObject
+    if(mapObject && !this.isMarker(mapObject)) { //If selected mapobject is boundary store the geom
+      this.selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry 
+    }
+
     this.onSelectObject && this.onSelectObject({mapObject})
   }
   
@@ -1167,9 +1172,16 @@ class MapObjectEditorController {
     var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: polygonGeoJsonPath})
 
     if(isValidPolygon) {
+      this.selectedMapObjectPreviousShape[mapObject.objectId] = polygonGeoJsonPath
       this.onModifyObject && this.onModifyObject({mapObject})
     } else {
+      //display error message & undo last invalid change 
       Utilities.displayErrorMessage(this.polygonInvalidMsg)
+      mapObject.setMap(null)
+
+      mapObject.feature.geometry = this.selectedMapObjectPreviousShape[mapObject.objectId]
+
+      this.createMapObject(mapObject.feature,null,true,null,true)
     }
   }
 
