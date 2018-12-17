@@ -44,7 +44,7 @@
           <table id="tblRoicModel" class="table table-sm table-striped">
             <tbody>
               <tr ng-repeat="(itemKey, itemValue) in $ctrl.roicManagerConfiguration.inputs[$ctrl.selectedRoicModelIndex]"
-                  ng-show="itemKey !== 'id'">
+                  ng-if="itemKey !== 'id' && itemKey !== 'penetrationEnd' && itemKey !== 'churnRateDecrease'">
                 <td>{{itemKey}}</td>
                 <td><input class="form-control" ng-model="$ctrl.roicManagerConfiguration.inputs[$ctrl.selectedRoicModelIndex][itemKey]"></td>
               </tr>

@@ -19,6 +19,7 @@
         </div>
       </div>
       
+      <!-- File upload View -->
       <!-- For all data sources other than 'conic_tile_system', just upload a file --> 
       <div ng-if="$ctrl.state.uploadDataSource.name !== 'tile_system'">
         <div ng-show="!$ctrl.isDataManagementView">   
@@ -75,43 +76,6 @@
           </div>
 
         </div>
-
-        <div ng-show="$ctrl.isDataManagementView">
-          <div class="form-group row">
-            <label class="col-sm-4 col-form-label">Data Sources</label>
-            <div class="col-sm-8" style="min-height: 100px; width: 63%; max-height: 400px; overflow-y: auto;">
-              <ul class="list-group">
-                <li class="list-group-item clearfix"
-                    style="padding: 0px 0px 0px 15px; line-height: 33px;"
-                    ng-repeat="dataSource in $ctrl.state.dataItems[$ctrl.state.uploadDataSource.name].allLibraryItems">
-                  <strong ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</strong>
-                  <span ng-if="!$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</span>
-                  <div class="btn-group float-right" ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser">
-                    <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                    <button ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded" class="btn btn-light" ng-click="$ctrl.saveAccessSettings(dataSource)">
-                      <i class="fa fa-save"></i>&nbsp; Save
-                    </button>
-                    <button class="btn btn-light"
-                            ng-click="$ctrl.toggleDataSourceExpanded(dataSource)">
-                      <i ng-class="{ 'fa': true, 'fa-user-plus': !dataSource.isExpanded, 'fa-times': dataSource.isExpanded }"></i>
-                    </button>
-                  </div>
-                  <div style="margin-left: 15px;">
-                    <resource-permissions-editor ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded && $ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser"
-                                                resource-type="LIBRARY"
-                                                resource-id="{{dataSource.identifier}}"
-                                                system-actors="$ctrl.state.systemActors"
-                                                register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
-                                                style="margin-left: 10px;">
-                    </resource-permissions-editor>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- For conic tile system, show a custom control -->
@@ -121,6 +85,46 @@
                                   on-init-control="$ctrl.onInitConicUploader(api)"
                                   on-destroy-control="$ctrl.onDestroyConicUploader()">
       </conic-tile-system-uploader>
+      <!-- End File upload View -->
+
+      <!-- Data Management view -->
+      <div ng-show="$ctrl.isDataManagementView">
+        <div class="form-group row">
+          <label class="col-sm-4 col-form-label">Data Sources</label>
+          <div class="col-sm-8" style="min-height: 100px; width: 63%; max-height: 400px; overflow-y: auto;">
+            <ul class="list-group">
+              <li class="list-group-item clearfix"
+                  style="padding: 0px 0px 0px 15px; line-height: 33px;"
+                  ng-repeat="dataSource in $ctrl.state.dataItems[$ctrl.state.uploadDataSource.name].allLibraryItems">
+                <strong ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</strong>
+                <span ng-if="!$ctrl.dataSourceMeta[dataSource.identifier].isExpanded">{{dataSource.name}}</span>
+                <div class="btn-group float-right" ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser">
+                  <button class="btn btn-danger" ng-click="$ctrl.deleteDatasource(dataSource)">
+                    <i class="far fa-trash-alt"></i>
+                  </button>
+                  <button ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded" class="btn btn-light" ng-click="$ctrl.saveAccessSettings(dataSource)">
+                    <i class="fa fa-save"></i>&nbsp; Save
+                  </button>
+                  <button class="btn btn-light"
+                          ng-click="$ctrl.toggleDataSourceExpanded(dataSource)">
+                    <i ng-class="{ 'fa': true, 'fa-user-plus': !dataSource.isExpanded, 'fa-times': dataSource.isExpanded }"></i>
+                  </button>
+                </div>
+                <div style="margin-left: 15px;">
+                  <resource-permissions-editor ng-if="$ctrl.dataSourceMeta[dataSource.identifier].isExpanded && $ctrl.dataSourceMeta[dataSource.identifier].isEditableByUser"
+                                              resource-type="LIBRARY"
+                                              resource-id="{{dataSource.identifier}}"
+                                              system-actors="$ctrl.state.systemActors"
+                                              register-save-access-callback="$ctrl.registerSaveAccessCallback(saveResourceAccess)"
+                                              style="margin-left: 10px;">
+                  </resource-permissions-editor>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
     </form>
   </modal-body>
   <modal-footer ng-show="!$ctrl.isDataManagementView">
