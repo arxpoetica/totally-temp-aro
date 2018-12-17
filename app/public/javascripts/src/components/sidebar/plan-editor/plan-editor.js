@@ -5,7 +5,7 @@ import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
-import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
+//import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
 
 
@@ -579,6 +579,7 @@ class PlanEditorController {
   
   // ToDo: change this out for a dynamic version 
   getNewListItem(type){
+    console.log(type)
     if ('plannedEquipment' == type || 'subComponents' == type){
       return new EquipmentComponent()
     }
@@ -588,7 +589,8 @@ class PlanEditorController {
     }
     
     if ('marketableEquipments' == type){
-      return new MarketableEquipment()
+      console.log('marketableEquipments is no more')
+      //return new MarketableEquipment()
     }
   }
   

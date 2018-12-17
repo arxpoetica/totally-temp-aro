@@ -37,7 +37,11 @@ class EditorInterfaceValueController {
       AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
         //console.log('get Enum: '+this.displayProps.enumTypeURL)
         this.enumSet = enumSet
-        
+        /*
+        console.log(this.displayProps.enumTypeURL)
+        console.log(enumSet)
+        console.log(" - ")
+        */
         var isInSet = false
         for (let i=0; i<this.enumSet.length; i++){
           if (this.enumSet[i].id == this.model){
