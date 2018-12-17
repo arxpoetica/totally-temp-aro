@@ -44,7 +44,8 @@
   </div>
   <div style="flex: 1 1 auto;">
     <!-- If we have chart data, show it -->
-    <canvas id="line"
+    <canvas style="position: absolute;height:50%"
+            id="line"
             ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                    [$ctrl.selectedEntityType.id + '.' + $ctrl.selectedCalcType.id].values"
             class="chart chart-line"
