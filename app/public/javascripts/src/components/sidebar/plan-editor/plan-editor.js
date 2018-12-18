@@ -579,7 +579,6 @@ class PlanEditorController {
   
   // ToDo: change this out for a dynamic version 
   getNewListItem(type){
-    console.log(type)
     if ('plannedEquipment' == type || 'subComponents' == type){
       return new EquipmentComponent()
     }

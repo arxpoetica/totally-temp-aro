@@ -2,8 +2,8 @@ import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 // === editable value === //
 
 class EditorInterfaceValueController {
-  constructor() {
-    //
+  constructor($timeout) {
+    this.$timeout = $timeout
   }
   
   $onInit(){
@@ -35,13 +35,11 @@ class EditorInterfaceValueController {
   getEnumSet(){
     if ("enum" == this.displayProps.displayDataType && this.displayProps.enumTypeURL){
       AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
-        //console.log('get Enum: '+this.displayProps.enumTypeURL)
+        var oldEnumText = JSON.stringify(this.enumSet)
+        var isEnumSame = (JSON.stringify(enumSet) == oldEnumText)
+        
         this.enumSet = enumSet
-        /*
-        console.log(this.displayProps.enumTypeURL)
-        console.log(enumSet)
-        console.log(" - ")
-        */
+        
         var isInSet = false
         for (let i=0; i<this.enumSet.length; i++){
           if (this.enumSet[i].id == this.model){
@@ -58,6 +56,9 @@ class EditorInterfaceValueController {
             this.enumVal = this.model
           }
           this.onChange()
+        }else if(!isEnumSame){
+          //need to refresh the local view
+          this.$timeout()
         }
       }, (errorText) => {
         console.log(errorText)
@@ -92,6 +93,8 @@ class EditorInterfaceValueController {
   }
   
 }
+
+EditorInterfaceValueController.$inject = ['$timeout']
 
 let editorInterfaceValue = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-value.html',
