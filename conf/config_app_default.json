@@ -31,7 +31,7 @@
       },
       "target_builder": {}
     },
-    "top_bar_tools": ["market_profile", "customer_profile", "financial_profile"],
+    "top_bar_tools": ["market_profile", "customer_profile"],
     "project_menu": ["share", "export_kml"],
     "icons": {
       "market_profile": "fa fa-briefcase"

@@ -48,9 +48,3 @@
   overflow: hidden;
   white-space: nowrap;
 }
-
-#financial_profile_controller {
-  position: absolute;
-  left: 10px;
-  top: 0;
-}
