@@ -31,6 +31,62 @@ class RoicReportsController {
     }
     this.datasetOverride = { fill: false }
 
+    this.categories = [
+      {
+        id: 'summary',
+        description: 'Summary'
+      },
+      {
+        id: 'premises',
+        description: 'Premises',
+        metrics: ['premises', 'tam_curve'],
+        selectedMetric: 'premises',
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'subscribers',
+        description: 'Subscribers',
+        metrics: ['customer_penetration', 'customers'],
+        selectedMetric: 'customer_penetration',
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'revenue',
+        description: 'Revenue',
+        metrics: ['arpu_curve', 'penetration', 'revenue'],
+        selectedMetric: 'arpu_curve',
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'opex',
+        description: 'Opex',
+        metrics: ['opex_expenses'],
+        selectedMetric: 'opex_expenses',
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'capex',
+        description: 'Capex',
+        metrics: ['build_cost', 'maintenance_expenses', 'new_connections', 'new_connections_cost'],
+        selectedMetric: 'build_cost',
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'cashFlow',
+        description: 'Cash Flow',
+        metrics: ['cashFlow'],
+        selectedMetric: 'cashFlow',
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      }
+    ]
+    this.selectCategory(this.categories[1])
+
     this.networkTypes = [
       { id: 'new_network', description: 'New Network' },
       { id: 'planned_network', description: 'Planned Network' },
@@ -50,23 +106,11 @@ class RoicReportsController {
       { id: 'celltower', description: 'Cell Towers' }
     ]
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]  // Because "medium" is the only thing supported in service right now
+    this.selectedCalcType = this.state.calcTypes[0]
+  }
 
-    this.calcTypes = [
-      { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'premises', description: 'Premises', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
-      { id: 'customers', description: 'Customers', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
-      { id: 'cashFlow', description: 'Cash Flow', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'penetration', description: 'Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
-      { id: 'new_connections_cost', description: 'Cost of new connections', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'new_connections', description: 'Number of new connections', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
-      { id: 'revenue', description: 'Revenue', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'maintenance_expenses', description: 'Maintenance Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'customer_penetration', description: 'Customer Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
-      { id: 'tam_curve', description: 'Total Addressable Market', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
-      { id: 'build_cost', description: 'Build Cost', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 }
-    ]
-    this.selectedCalcType = this.calcTypes[0]
+  selectCategory(category) {
+    this.selectedCategory = category
   }
 
   $onChanges(changesObj) {
@@ -106,21 +150,7 @@ class RoicReportsController {
     for (var i = 0; i < this.state.getOptimizationBody().financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
-    this.$http.get(`/service/report/plan/${this.planId}`)
-      .then(result => {
-        this.roicResults = result.data
-        // Some of the values have to be scaled (e.g. penetration should be in %)
-        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-          const component = this.roicResults.roicAnalysis.components[componentKey]
-          Object.keys(component).forEach(curveKey => {
-            const curve = component[curveKey]
-            const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
-            const multiplier = calcType ? calcType.multiplier : 1.0
-            curve.values = curve.values.map(item => item * multiplier)
-          })
-        })
-      })
-      .catch(err => console.error(err))
+    this.state.loadROICResultsForPlan(this.planId)
   }
 }
 

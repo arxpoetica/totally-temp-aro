@@ -253,8 +253,7 @@ class State {
     MANUAL_PLAN_TARGET_ENTRY: null,
     MANUAL_PLAN_SA_ENTRY: null
   }
-  //This modal will be used to toogle from report modal to current modal 
-  //service.previousModal
+  service.roicResults = null
 
   service.selectionTypeChanged.next(service.selectionModes.SELECTED_AREAS)
 
@@ -1346,10 +1345,45 @@ class State {
 
   service.plan.subscribe((newPlan) => {
     service.checkPollingStatus(newPlan)
+    service.roicResults = null  // Plan ID has changed. Invalidate ROIC results
   })
 
   service.getDefaultPlanInputs = () => {
     return angular.copy(service.configuration.optimizationOptions)
+  }
+
+  service.calcTypes = [
+    { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'premises', description: 'Premises', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
+    { id: 'customers', description: 'Customers', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
+    { id: 'cashFlow', description: 'Cash Flow', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'penetration', description: 'Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
+    { id: 'new_connections_cost', description: 'Cost of new connections', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'new_connections', description: 'Number of new connections', tickPrefix: '', tickSuffix: '', multiplier: 1.0 },
+    { id: 'revenue', description: 'Revenue', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'maintenance_expenses', description: 'Maintenance Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'customer_penetration', description: 'Customer Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
+    { id: 'tam_curve', description: 'Total Addressable Market', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
+    { id: 'build_cost', description: 'Build Cost', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 }
+  ]
+
+  service.loadROICResultsForPlan = (planId) => {
+    $http.get(`/service/report/plan/${planId}`)
+      .then(result => {
+        service.roicResults = result.data
+        // Some of the values have to be scaled (e.g. penetration should be in %)
+        Object.keys(service.roicResults.roicAnalysis.components).forEach(componentKey => {
+          const component = service.roicResults.roicAnalysis.components[componentKey]
+          Object.keys(component).forEach(curveKey => {
+            const curve = component[curveKey]
+            const calcType = service.calcTypes.filter(item => item.id === curve.calcType)[0]
+            const multiplier = calcType ? calcType.multiplier : 1.0
+            curve.values = curve.values.map(item => item * multiplier)
+          })
+        })
+      })
+      .catch(err => console.error(err))
   }
 
   service.showDirectedCable = false
