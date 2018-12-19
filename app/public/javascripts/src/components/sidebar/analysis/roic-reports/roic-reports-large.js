@@ -1,6 +1,7 @@
 class RoicReportsLargeController {
 
-  constructor() {
+  constructor(state) {
+    this.state = state
     this.series = ['Series A', 'Series B'];
     this.config = config  // Ugh - A global from a time long ago!
   }
@@ -74,6 +75,8 @@ class RoicReportsLargeController {
     this.selectedCategory = category
   }
 }
+
+RoicReportsLargeController.$inject = ['state']
 
 let roicReportsLarge = {
   templateUrl: '/components/sidebar/analysis/roic-reports/roic-reports-large.html',
