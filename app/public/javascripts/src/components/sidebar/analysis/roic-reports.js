@@ -7,28 +7,8 @@ class RoicReportsController {
     this.state = state
 
     this.series = ['Series A', 'Series B'];
-    this.options = {
-      maintainAspectRatio: false,
-      tooltips: {
-        callbacks: {
-          label: (tooltipItem, data) => this.formatYAxisValue(+tooltipItem.yLabel, [+tooltipItem.yLabel], 3)
-        }
-      },
-      scales: {
-        yAxes: [
-          {
-            id: 'yAxis',
-            type: 'linear',
-            display: true,
-            position: 'left',
-            ticks: {
-              beginAtZero: true,
-              callback: (value, index, values) => this.formatYAxisValue(value, values)
-            }
-          }
-        ]
-      }
-    }
+    this.options = {}
+    this.state.calcTypes.forEach(calcType => this.options[calcType.id] = this.getOptionsForCalcType(calcType))
     this.datasetOverride = { fill: false }
 
     this.categories = [
@@ -39,48 +19,54 @@ class RoicReportsController {
       {
         id: 'premises',
         description: 'Premises',
-        metrics: ['premises', 'tam_curve'],
-        selectedMetric: 'premises',
+        calcTypes: [
+          this.state.calcTypes.filter(item => item.id === 'premises')[0],
+          this.state.calcTypes.filter(item => item.id === 'tam_curve')[0]],
         networkTypes: ['new_network'],
         selectedNetworkType: 'new_network'
       },
       {
         id: 'subscribers',
         description: 'Subscribers',
-        metrics: ['customer_penetration', 'customers'],
-        selectedMetric: 'customer_penetration',
+        calcTypes: [
+          this.state.calcTypes.filter(item => item.id === 'customer_penetration')[0],
+          this.state.calcTypes.filter(item => item.id === 'customers')[0]],
         networkTypes: ['new_network'],
         selectedNetworkType: 'new_network'
       },
       {
         id: 'revenue',
         description: 'Revenue',
-        metrics: ['arpu_curve', 'penetration', 'revenue'],
-        selectedMetric: 'arpu_curve',
+        calcTypes: [
+          this.state.calcTypes.filter(item => item.id === 'arpu_curve')[0],
+          this.state.calcTypes.filter(item => item.id === 'penetration')[0],
+          this.state.calcTypes.filter(item => item.id === 'revenue')[0]
+        ],
         networkTypes: ['new_network'],
         selectedNetworkType: 'new_network'
       },
       {
         id: 'opex',
         description: 'Opex',
-        metrics: ['opex_expenses'],
-        selectedMetric: 'opex_expenses',
+        calcTypes: [this.state.calcTypes.filter(item => item.id === 'opex_expenses')[0]],
         networkTypes: ['new_network'],
         selectedNetworkType: 'new_network'
       },
       {
         id: 'capex',
         description: 'Capex',
-        metrics: ['build_cost', 'maintenance_expenses', 'new_connections', 'new_connections_cost'],
-        selectedMetric: 'build_cost',
+        calcTypes: [
+          this.state.calcTypes.filter(item => item.id === 'build_cost')[0],
+          this.state.calcTypes.filter(item => item.id === 'maintenance_expenses')[0],
+          this.state.calcTypes.filter(item => item.id === 'new_connections')[0],
+          this.state.calcTypes.filter(item => item.id === 'new_connections_cost')[0]],
         networkTypes: ['new_network'],
         selectedNetworkType: 'new_network'
       },
       {
         id: 'cashFlow',
         description: 'Cash Flow',
-        metrics: ['cashFlow'],
-        selectedMetric: 'cashFlow',
+        calcTypes: [this.state.calcTypes.filter(item => item.id === 'cashFlow')[0]],
         networkTypes: ['new_network'],
         selectedNetworkType: 'new_network'
       }
@@ -113,13 +99,38 @@ class RoicReportsController {
     this.selectedCategory = category
   }
 
+  getOptionsForCalcType(calcType) {
+    return {
+      maintainAspectRatio: false,
+      tooltips: {
+        callbacks: {
+          label: (tooltipItem, data) => this.formatYAxisValue(+tooltipItem.yLabel, [+tooltipItem.yLabel], calcType, 3)
+        }
+      },
+      scales: {
+        yAxes: [
+          {
+            id: 'yAxis',
+            type: 'linear',
+            display: true,
+            position: 'left',
+            ticks: {
+              beginAtZero: true,
+              callback: (value, index, values) => this.formatYAxisValue(value, values, calcType)
+            }
+          }
+        ]
+      }
+    }
+  }
+
   $onChanges(changesObj) {
     if (changesObj.planId || changesObj.optimizationState) {
       this.refreshData()
     }
   }
 
-  formatYAxisValue(value, allValues, precision) {
+  formatYAxisValue(value, allValues, calcType, precision) {
     precision = precision || 1
     // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
     // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
@@ -133,9 +144,9 @@ class RoicReportsController {
     // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
     // without these two spaces.
     if (threshold) {
-      return `  ${this.selectedCalcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}${this.selectedCalcType.tickSuffix}`
+      return `  ${calcType.tickPrefix}${(value / Math.pow(10, threshold.zeroes)).toFixed(precision)} ${threshold.suffix}${calcType.tickSuffix}`
     } else {
-      return `  ${this.selectedCalcType.tickPrefix}${value.toFixed(precision)}${this.selectedCalcType.tickSuffix}` // For values less than 1000
+      return `  ${calcType.tickPrefix}${value.toFixed(precision)}${calcType.tickSuffix}` // For values less than 1000
     }
   }
 
