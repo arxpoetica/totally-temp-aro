@@ -76,38 +76,6 @@
   </div>
 </div>
 
-<div class="map-tool-wrapper" ng-controller="financial-profile-tool-controller">
-  <div ng-show="map_tools.is_visible('financial_profile')" class="card map-tool" id="financial_profile_controller" style="width: 1000px;">
-    <div class="card-header map-tools-card-header bg-primary text-white">
-      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('financial_profile')" ng-click="map_tools.collapse('financial_profile')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('financial_profile')" ng-click="map_tools.expand('financial_profile')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-      <h5 class="map-tool-title-text">
-        Financial Profile {{ selectedArea ? ' · '+selectedArea.name : '' }}
-        <span class="float-right">
-          <a href="javascript:void(0)" ng-click="download()">
-            <span style="color:white;margin-left: 1em;" class="fa fa-download"></span>
-          </a>
-          <button class="btn btn-primary-us" style="margin-left: 1em;padding: initial;"
-            ng-class="{'btn-success-us': mode === 'area'}" ng-click="setMode('area')">Area</button>
-          <button class="btn btn-primary-us" style="margin-left: 1em;padding: initial;"
-            ng-class="{'btn-success-us': mode === 'global'}" ng-click="setMode('global')">Global</button>
-          <button type="button" class="close" ng-click="map_tools.toggle({'id':'financial_profile'})" 
-            style="padding-left: 5px;" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </span>      
-      </h5>
-    </div>
-    <div class="card-body map-tools-card-body" ng-show="map_tools.is_expanded('financial_profile')">
-      <% include controller_financial_profile_tool.html %>
-    </div>
-  </div>
-</div>
-
 <div class="map-tools-buttons-container">
   <div ng-controller="map_tools_controller"
        ng-class="{ 'map_tools_container': true, 'map-tools-vertical-center': state.configuration.perspective.mapTools.centerVertically }">

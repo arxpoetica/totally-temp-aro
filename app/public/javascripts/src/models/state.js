@@ -246,6 +246,7 @@ class State {
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
   service.showPlanResourceEditorModal = false
+  service.showRoicReportsModal = false
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
   service.expertMode = {
@@ -253,8 +254,6 @@ class State {
     MANUAL_PLAN_TARGET_ENTRY: null,
     MANUAL_PLAN_SA_ENTRY: null
   }
-  //This modal will be used to toogle from report modal to current modal 
-  //service.previousModal
 
   service.selectionTypeChanged.next(service.selectionModes.SELECTED_AREAS)
 

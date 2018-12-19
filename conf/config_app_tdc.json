@@ -49,12 +49,9 @@
       "area_planning":{
         "coverage_threshold":95,
         "cell_radius":300
-      },
-      "financial_profile":{
-      	"per_wirecenter":true
       }
     },
-    "top_bar_tools": ["customer_profile", "financial_profile"],
+    "top_bar_tools": ["customer_profile"],
     "project_menu": ["share", "export_kml"],
     "defaults" : {
       "impedence":[{
