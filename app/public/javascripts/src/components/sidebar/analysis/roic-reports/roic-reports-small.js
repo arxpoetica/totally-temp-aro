@@ -7,10 +7,19 @@ class RoicReportsSmallController {
   }
 
   $onInit() {
-
+    
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]  // Because "medium" is the only thing supported in service right now
-    this.selectedNetworkType = this.networkTypes[0]
-    this.selectedCalcType = this.calcTypes[0]
+    this.selectedNetworkType = this.networkTypes.filter(item => item.id === 'new_network')[0]
+    this.selectCategory(this.categories[1])
+    this.selectedCalcType = this.selectedCategory.calcTypes[0]
+  }
+
+  selectCategory(category) {
+    this.selectedCategory = category
+  }
+
+  selectedCategoryChanged() {
+    this.selectedCalcType = this.selectedCategory.calcTypes[0]
   }
 }
 
@@ -19,6 +28,7 @@ RoicReportsSmallController.$inject = ['state']
 let roicReportsSmall = {
   templateUrl: '/components/sidebar/analysis/roic-reports/roic-reports-small.html',
   bindings: {
+    categories: '<',
     entityTypes: '<',
     calcTypes: '<',
     networkTypes: '<',

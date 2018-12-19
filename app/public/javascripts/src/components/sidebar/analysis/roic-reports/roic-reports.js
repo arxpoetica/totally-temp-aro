@@ -10,8 +10,6 @@ class RoicReportsController {
     this.datasetOverride = { fill: false }
     this.roicResults = null
 
-    this.xAxisLabels = []
-
     this.calcTypes = [
       { id: 'opex_expenses', description: 'Operating Expenses', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
       { id: 'arpu_curve', description: 'ARPU Curve', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
@@ -26,6 +24,68 @@ class RoicReportsController {
       { id: 'customer_penetration', description: 'Customer Penetration', tickPrefix: '', tickSuffix: ' %', multiplier: 100.0 },
       { id: 'tam_curve', description: 'Total Addressable Market', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 },
       { id: 'build_cost', description: 'Build Cost', tickPrefix: '$ ', tickSuffix: '', multiplier: 1.0 }
+    ]
+
+    this.xAxisLabels = []
+    this.categories = [
+      {
+        id: 'summary',
+        description: 'Summary'
+      },
+      {
+        id: 'premises',
+        description: 'Premises',
+        calcTypes: [
+          this.calcTypes.filter(item => item.id === 'premises')[0],
+          this.calcTypes.filter(item => item.id === 'tam_curve')[0]],
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'subscribers',
+        description: 'Subscribers',
+        calcTypes: [
+          this.calcTypes.filter(item => item.id === 'customer_penetration')[0],
+          this.calcTypes.filter(item => item.id === 'customers')[0]],
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'revenue',
+        description: 'Revenue',
+        calcTypes: [
+          this.calcTypes.filter(item => item.id === 'arpu_curve')[0],
+          this.calcTypes.filter(item => item.id === 'penetration')[0],
+          this.calcTypes.filter(item => item.id === 'revenue')[0]
+        ],
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'opex',
+        description: 'Opex',
+        calcTypes: [this.calcTypes.filter(item => item.id === 'opex_expenses')[0]],
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'capex',
+        description: 'Capex',
+        calcTypes: [
+          this.calcTypes.filter(item => item.id === 'build_cost')[0],
+          this.calcTypes.filter(item => item.id === 'maintenance_expenses')[0],
+          this.calcTypes.filter(item => item.id === 'new_connections')[0],
+          this.calcTypes.filter(item => item.id === 'new_connections_cost')[0]],
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      },
+      {
+        id: 'cashFlow',
+        description: 'Cash Flow',
+        calcTypes: [this.calcTypes.filter(item => item.id === 'cashFlow')[0]],
+        networkTypes: ['new_network'],
+        selectedNetworkType: 'new_network'
+      }
     ]
     this.graphOptions = {}
     this.calcTypes.forEach(calcType => this.graphOptions[calcType.id] = this.getOptionsForCalcType(calcType))

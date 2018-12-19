@@ -5,6 +5,7 @@
 </style>
 
 <roic-reports-large ng-if="$ctrl.reportSize === 'large'"
+                    categories="$ctrl.categories"
                     entity-types="$ctrl.entityTypes"
                     calc-types="$ctrl.calcTypes"
                     roic-results="$ctrl.roicResults"
@@ -14,6 +15,7 @@
 </roic-reports-large>
 
 <roic-reports-small ng-if="$ctrl.reportSize === 'small'"
+                    categories="$ctrl.categories"
                     entity-types="$ctrl.entityTypes"
                     network-types="$ctrl.networkTypes"
                     calc-types="$ctrl.calcTypes"

@@ -65,18 +65,33 @@
       </tbody>
     </table>
   </div>
+
+  <div style="flex: 0 0 auto;">
+    <h3 class="pb-3 pt-3" style="border-top: 1px solid lightgray;">ROIC Analysis</h3>
+  </div>
   <div style="flex: 0 0 auto;">
     <form>
       <div class="form-group row">
-        <div class="col-sm-4 roic-report-label">Network Type</div>
+        <div class="col-sm-4 roic-report-label">Group</div>
         <div class="col-sm-8">
           <select class="form-control"
-                  ng-model="$ctrl.selectedNetworkType"
-                  ng-options="item as item.description for item in $ctrl.networkTypes">
+                  ng-model="$ctrl.selectedCategory"
+                  ng-options="item as item.description for item in $ctrl.categories | filter: { id: '!summary' }"
+                  ng-change="$ctrl.selectedCategoryChanged()">
           </select>
         </div>
       </div>
 
+      <div class="form-group row">
+        <div class="col-sm-4 roic-report-label">Metric</div>
+        <div class="col-sm-8">
+          <select class="form-control"
+                  ng-model="$ctrl.selectedCalcType"
+                  ng-options="item as item.description for item in $ctrl.selectedCategory.calcTypes">
+          </select>
+        </div>
+      </div>
+  
       <div class="form-group row">
         <div class="col-sm-4 roic-report-label">Entity Type</div>
         <div class="col-sm-8">
@@ -87,20 +102,7 @@
         </div>
       </div>
 
-      <div class="form-group row">
-        <div class="col-sm-4 roic-report-label">Calculation Type</div>
-        <div class="col-sm-8">
-          <select class="form-control"
-                  ng-model="$ctrl.selectedCalcType"
-                  ng-options="item as item.description for item in $ctrl.calcTypes">
-          </select>
-        </div>
-      </div>
     </form>
-  </div>
-
-  <div style="flex: 0 0 auto;">
-    <h3 class="pb-3 pt-3" style="border-top: 1px solid lightgray;">ROIC Analysis</h3>
   </div>
   <div style="flex: 1 1 auto;">
     <!-- If we have chart data, show it -->
