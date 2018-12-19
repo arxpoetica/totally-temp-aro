@@ -1,66 +1,6 @@
 <div>
-  <style scoped>
-    #tblNetworkBuildOutput td {
-      line-height: 33px; /* To vertically align text */
-    }
-    .indent-1 {
-      padding-left: 30px !important;
-    }
-  </style>
-  <h3 class="mb-3 mt-3">Summary</h3>
-  <table id="tblNetworkBuildOutput" class="table table-sm table-striped">
-    <tbody>
-      <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics"
-        ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
-        <th ng-if="networkStatistic.networkStatisticType === 'roic_npv'">NPV</th>
-        <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
-          {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}}K
-        </td>
-      </tr>
-      
-      <tr ng-repeat="networkStatistic in $ctrl.networkBuildSummary.networkStatistics"
-        ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
-        <th ng-if="networkStatistic.networkStatisticType === 'roic_irr'">IRR</th>
-        <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
-          {{(networkStatistic.value * 100) | number : 1}}%
-        </td>
-      </tr>
-
-      <tr>
-        <th>Total Capex</th>
-        <td>{{$ctrl.networkBuildSummary.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-      </tr>
-
-      <tr>
-        <th colspan="2">Fiber Capex</th>
-      </tr>
-      <tr ng-repeat="fiberCost in $ctrl.networkBuildSummary.priceModel.fiberCosts">
-        <td class="indent-1 text-capitalize">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}} {{$ctrl.config.length.length_units}})</td>
-        <td>{{fiberCost.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-      </tr>
-      <tr>
-        <th colspan="2">Equipment Capex</th>
-      </tr>
-      <tr ng-repeat="equipmentCost in $ctrl.networkBuildSummary.priceModel.equipmentCosts">
-        <td class="indent-1 text-capitalize">{{$ctrl.state.configuration.networkEquipment.equipments[equipmentCost.nodeType].label || $ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
-        <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-      </tr>
-
-      <tr>
-        <th>Premises Passed</th>
-        <td> {{$ctrl.plannedNetworkDemand.locationDemand.rawCoverage | number}} </td>
-      </tr>
-      <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
-        <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
-        <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
-        <td> {{value.rawCoverage | number}} </td>
-      </tr>
-    </tbody>
-  </table>
-
   <!-- The ROIC Reports component-->
-  <h3 class="pb-3 pt-3" style="border-top: 1px solid lightgray;">ROIC Analysis</h3>
-  <div style="position: relative; width: 100%; height: 500px;">
+  <div style="position: relative; width: 100%;">
     <roic-reports plan-id="$ctrl.state.plan.getValue().id"
                   optimization-state="$ctrl.state.Optimizingplan.planState"
                   report-size="'small'">

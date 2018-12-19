@@ -2,6 +2,7 @@ class RoicReportsLargeController {
 
   constructor() {
     this.series = ['Series A', 'Series B'];
+    this.config = config  // Ugh - A global from a time long ago!
   }
 
   $onInit() {
@@ -65,7 +66,7 @@ class RoicReportsLargeController {
         selectedNetworkType: 'new_network'
       }
     ]
-    this.selectCategory(this.categories[1])
+    this.selectCategory(this.categories[0])
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]
   }
 
