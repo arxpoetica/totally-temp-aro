@@ -21,6 +21,7 @@ class LocationEditorController {
     this.deletedFeatures = []
     this.currentTransaction = null
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
+    this.isCommiting = false
     this.WorkflowState = WorkflowState
   }
 
@@ -109,16 +110,19 @@ class LocationEditorController {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
 
+    this.isCommiting = true
     // All modifications will already have been saved to the server. Commit the transaction.
     this.tracker.trackEvent(this.tracker.CATEGORIES.COMMIT_LOCATION_TRANSACTION, this.tracker.ACTIONS.CLICK, 'TransactionID', this.currentTransaction.id)
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
       .then((result) => {
         // Transaction has been committed, start a new one
+        this.isCommiting = false
         this.state.recreateTilesAndCache()
         return this.resumeOrCreateTransaction()
       })
       .catch((err) => {
         this.currentTransaction = null
+        this.isCommiting = false
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
         this.$timeout()
