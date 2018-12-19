@@ -164,7 +164,7 @@ class PlanEditorController {
       // If we have at least one transaction feature, do a recalculate subnet on it. Pass in all connected COs in the transaction.
       if (transactionFeatures.length > 0) {
         var allCentralOfficeIds = new Set()
-        transactionFeatures.forEach((item) => allCentralOfficeIds.add(item.subnetId))
+        transactionFeatures.forEach((item) => !!item.subnetId && allCentralOfficeIds.add(item.subnetId))
         this.recalculateSubnetForEquipmentChange(transactionFeatures[0], Array.from(allCentralOfficeIds))
       }
     })

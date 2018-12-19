@@ -11,7 +11,7 @@
 <div class="view-mode-container">
 
   <!-- Add a component to handle map editing -->
-  <map-object-editor ng-if="$ctrl.currentTransaction"
+  <map-object-editor ng-if="$ctrl.currentTransaction && !$ctrl.isCommiting"
                      map-global-object-name="{{$ctrl.mapGlobalObjectName}}"
                      map-container-id="map-canvas-container"
                      get-object-icon-url="$ctrl.getObjectIconUrl({objectKey, objectValue})"
@@ -40,8 +40,12 @@
     </div>
     <div class="text-center">
       <div class="btn-group ">
-        <button class="btn btn-light" ng-click="$ctrl.commitTransaction()"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
-        <button class="btn btn-light" ng-click="$ctrl.discardTransaction()"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+        <button class="btn btn-light" ng-disabled="$ctrl.isCommiting" ng-click="$ctrl.commitTransaction()">
+          <i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit
+        </button>
+        <button class="btn btn-light" ng-click="$ctrl.discardTransaction()">
+          <i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard
+        </button>
       </div>
     </div>
     <br>
