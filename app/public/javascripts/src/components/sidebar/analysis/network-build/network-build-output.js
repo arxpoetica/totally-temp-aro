@@ -36,6 +36,7 @@ class NetworkBuildOutputController {
       icon: 'fa fa-line-chart fa-2x'
     }
     this.map_tools.toggle(financialProfileConfig)
+    this.state.showRoicReportsModal = true
   }
 }
 

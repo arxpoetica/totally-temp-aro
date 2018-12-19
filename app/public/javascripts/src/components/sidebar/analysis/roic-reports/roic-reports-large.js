@@ -66,6 +66,7 @@ class RoicReportsLargeController {
       }
     ]
     this.selectCategory(this.categories[1])
+    this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]
   }
 
   selectCategory(category) {
@@ -76,8 +77,8 @@ class RoicReportsLargeController {
 let roicReportsLarge = {
   templateUrl: '/components/sidebar/analysis/roic-reports/roic-reports-large.html',
   bindings: {
-    selectedEntityType: '=',
     calcTypes: '<',
+    entityTypes: '<',
     roicResults: '<',
     timeLabels: '<',
     datasetOverride: '<',

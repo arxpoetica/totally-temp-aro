@@ -46,8 +46,6 @@ class RoicReportsController {
       { id: 'household', description: 'Households' },
       { id: 'celltower', description: 'Cell Towers' }
     ]
-    this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]  // Because "medium" is the only thing supported in service right now
-
   }
 
   getOptionsForCalcType(calcType) {
