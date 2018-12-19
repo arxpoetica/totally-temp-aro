@@ -1,0 +1,24 @@
+<style scoped>
+  .roic-report-label {
+    line-height: 33px;
+  }
+</style>
+
+<roic-reports-large ng-if="$ctrl.reportSize === 'large'"
+                    selected-entity-type="$ctrl.selectedEntityType"
+                    calc-types="$ctrl.calcTypes"
+                    roic-results="$ctrl.roicResults"
+                    time-labels="$ctrl.xAxisLabels"
+                    dataset-override="$ctrl.datasetOverride"
+                    graph-options="$ctrl.graphOptions">
+</roic-reports-large>
+
+<roic-reports-small ng-if="$ctrl.reportSize === 'small'"
+                    entity-types="$ctrl.entityTypes"
+                    network-types="$ctrl.networkTypes"
+                    calc-types="$ctrl.calcTypes"
+                    roic-results="$ctrl.roicResults"
+                    time-labels="$ctrl.xAxisLabels"
+                    dataset-override="$ctrl.datasetOverride"
+                    graph-options="$ctrl.graphOptions">
+</roic-reports-small>
