@@ -1614,13 +1614,43 @@ class State {
       })
   }
 
+  service.deleteBadTransactionsAndCreateNew = (transactionsForPlan) => {
+    // Sometimes we will get into a state where we have multiple open transactions for the same plan. Ask the
+    // user whether they want to delete all and start a new transaction
+    return new Promise((resolve, reject) => {
+      swal({
+        title: 'Multiple transactions',
+        text: `There are multiple open transactions for this plan. You can only have one open transaction per plan. Delete older open transactions and start a new one?`,
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Yes, delete old',
+        cancelButtonText: 'No',
+        showCancelButton: true,
+        closeOnConfirm: true
+      }, (deleteOldTransactions) => {
+        if (deleteOldTransactions) {
+          var deletePromises = []
+          transactionsForPlan.forEach(transactionForPlan => deletePromises.push($http.delete(`/service/plan-transactions/transaction/${transactionForPlan.id}`)))
+          const currentPlanId = service.plan.getValue().id
+          Promise.all(deletePromises)
+            .then(res => $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId }))
+            .then(res => resolve(res))
+            .catch(err => reject(err))
+        } else {
+          reject('User does not want to delete multiple transactions')
+        }
+      })
+    })
+  }
+
   service.resumeOrCreateTransaction = () => {
 
     // Workflow:
     // 1. If we don't have any transaction for this plan, create one
-    // 2. If we have a transaction for this plan BUT not for the current user
+    // 2. If we have multiple transactions for this plan, we are in a bad state. Ask the user if they want to delete all but one.
+    // 3. If we have a transaction for this plan BUT not for the current user
     //    a. Ask if we want to steal the transaction. If yes, steal it. If not, show error message
-    // 3. If we have a transaction for this plan and for this user, resume it
+    // 4. If we have a transaction for this plan and for this user, resume it
 
     // Get a list of all open transactions in the system (Do NOT send in userId so we get transactions across all users)
     return $http.get(`/service/plan-transaction`)
@@ -1632,6 +1662,10 @@ class State {
           // A transaction does not exist. Create it.
           tracker.trackEvent(tracker.CATEGORIES.NEW_PLAN_TRANSACTION, tracker.ACTIONS.CLICK)
           return $http.post(`/service/plan-transactions`, { userId: service.loggedInUser.id, planId: currentPlanId })
+        } else if (transactionsForPlan > 1) {
+          // We have multiple transactions for this plan. We should never get into this state, but can happen
+          // due to race conditions, network issues, etc.
+          return service.deleteBadTransactionsAndCreateNew(transactionsForPlan)
         } else if (transactionsForUserAndPlan.length === 1) {
           // We have one open transaction for this user and plan combo. Resume it.
           tracker.trackEvent(tracker.CATEGORIES.RESUME_PLAN_TRANSACTION, tracker.ACTIONS.CLICK, 'TransactionID', transactionsForUserAndPlan[0].id)
