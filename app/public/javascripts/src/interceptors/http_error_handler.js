@@ -32,8 +32,11 @@ app.config(($httpProvider) => {
       if (customError) {
         swal({ title: customError.title, text: customError.text, type: 'error' })
       } else {
-        //supressing popup for 412 error
-        rejection.status != 412 && swal({ title: 'Error!', text: `ARO-Service returned status code ${rejection.status}`, type: 'error' })
+        if (rejection.status === 412) {
+          console.error({ title: 'Error!', text: `ARO-Service returned status code ${rejection.status}`, type: 'error' })
+        } else {
+          swal({ title: 'Error!', text: `ARO-Service returned status code ${rejection.status}`, type: 'error' })
+        }
       }
     }
     return $q.reject(rejection)

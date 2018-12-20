@@ -10,13 +10,16 @@
     <p>
       In order to overwrite existing multi-factor settings, you have to enter a valid OTP below:
     </p>
-    <input class="form-control mb-2" ng-model="$ctrl.verificationCode" placeholder="6-digit OTP">
-    <div class="text-center">
+    <input class="form-control" ng-model="$ctrl.verificationCode" placeholder="6-digit OTP">
+    <a ng-if="!$ctrl.totpEmailSent" href="#" ng-click="$ctrl.sendOTPByEmail()">I don't have an app, email the OTP to me</a>
+    <div class="text-center mt-3">
       <button class="btn btn-danger" ng-click="$ctrl.disableMultiFactorForUser()">Disable</button>
       <button class="btn btn-danger" ng-click="$ctrl.resetMultiFactorForUser()">Reset</button>
     </div>
-    <!-- Duplicate anchor #totpVerifyError - But fine because only one of them will be displayed at a given time -->
-    <div id="#totpVerifyError" ng-if="$ctrl.errorMessage" class="alert alert-danger mt-2">{{$ctrl.errorMessage}}</div>
+    <!-- Duplicate anchors #totpVerifyError and #totpEmailSentMessage - But fine because only one of them will be displayed at a given time -->
+    <div id="#totpVerifyError" ng-if="$ctrl.errorMessage" class="alert alert-danger mt-3">{{$ctrl.errorMessage}}</div>
+    <div id="#totpEmailSentMessage" ng-if="$ctrl.totpEmailSent" class="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
+        Please check your email.</div>
   </div>
  
   <!-- Control state = UNINITIALIZED. This is when the user does not have multifactor set up for their account -->
@@ -48,15 +51,18 @@
     </div>
     <h3 class="mb-3">Step 2: Enter current 6-digit OTP</h3>
     <div class="text-center">
-      <div class="input-group mb-3">
+      <div class="input-group">
         <input type="text" class="form-control"  ng-model="$ctrl.verificationCode" placeholder="6-digit OTP" aria-label="6-digit OTP" aria-describedby="btnVerifyOTP">
         <div class="input-group-append">
           <button class="btn btn-primary" type="button" id="btnVerifyOTP" ng-click="$ctrl.verifySecretForUser()">Next</button>
         </div>
       </div>
-      <!-- Duplicate anchor #totpVerifyError - But fine because only one of them will be displayed at a given time -->
-      <div id="#totpVerifyError" ng-if="$ctrl.errorMessage" class="alert alert-danger">{{$ctrl.errorMessage}}</div>
     </div>
+    <!-- Duplicate anchors #totpVerifyError and #totpEmailSentMessage - But fine because only one of them will be displayed at a given time -->
+    <a ng-if="!$ctrl.totpEmailSent" href="#" ng-click="$ctrl.sendOTPByEmail()">I don't have an app, email the OTP to me</a>
+    <div id="#totpVerifyError" ng-if="$ctrl.errorMessage" class="alert alert-danger mt-3">{{$ctrl.errorMessage}}</div>
+    <div id="#totpEmailSentMessage" ng-if="$ctrl.totpEmailSent" class="alert alert-success mt-3">An email with the current OTP has been sent to your registered email.
+      Please check your email.</div>
   </div>
 
   <!-- Control state = SETUP_COMPLETE. This is when the user has generated a secret but has not synced it with their app -->
