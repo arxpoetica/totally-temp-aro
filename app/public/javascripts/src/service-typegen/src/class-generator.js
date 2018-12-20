@@ -165,10 +165,13 @@ class ClassGenerator {
             if (-1 == display[displayI].defaultValue.indexOf('${')){// we're not set up to deal with expressions yet
               defaultVal = display[displayI].defaultValue
             }else{
-              //var ctx = {}
-              //ctx.today = function(){return 'date today'}
-              //console.log( '`' + display[displayI].defaultValue + '`')
-              //console.log( eval('`' + display[displayI].defaultValue  + '`') )
+              /*
+              var ctx = {}
+              ctx.today = function(){return new Date().getTime()}
+              console.log( '`' + display[displayI].defaultValue + '`')
+              console.log( eval('`' + display[displayI].defaultValue  + '`') )
+              defaultVal = eval('`' + display[displayI].defaultValue  + '`')
+              */
             }
             break
           }

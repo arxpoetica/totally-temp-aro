@@ -17,6 +17,7 @@ class EditorInterfaceValueController {
   onRefresh() {
     if ( ("date" == this.displayProps.displayDataType || "datetime" == this.displayProps.displayDataType) && !isNaN(this.model)){
       var newDateVal = new Date(this.model)
+      //if (0 == this.model) newDateVal = new Date()
       if (newDateVal.getTime() != this.dateVal.getTime()){ // interesting fact: new Date(0) != new Date(0)
         this.dateVal = newDateVal
       }
