@@ -12,6 +12,7 @@ class MultifactorSettingsController {
       SECRET_GENERATED: 'SECRET_GENERATED',
       SETUP_COMPLETE: 'SETUP_COMPLETE'
     }
+    this.totpEmailSent = false
     this.currentState = this.tfaStates.UNDEFINED
     this.showSecretText = false
     this.verificationCode = null
@@ -99,6 +100,16 @@ class MultifactorSettingsController {
         console.error(err)
         return Promise.reject(err)
       })
+  }
+
+  // For the currently logged in user, send an email with the current OTP
+  sendOTPByEmail() {
+    this.$http.post('/send-totp-by-email', {})
+      .then(() => {
+        this.totpEmailSent = true
+        this.$timeout(() => this.$anchorScroll('#totpEmailSentMessage'))
+      })
+      .catch(err => console.error(err))
   }
 }
 
