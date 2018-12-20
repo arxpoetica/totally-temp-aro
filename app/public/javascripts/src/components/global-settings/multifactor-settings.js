@@ -60,20 +60,17 @@ class MultifactorSettingsController {
     return this.$http.post('/multifactor/verify-totp-secret', { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
-        if (res.data.result === 'failure') {
-          this.errorMessage = res.data.message
-          this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
-        } else {
-          this.currentState = this.tfaStates.SETUP_COMPLETE
-          this.totpSecret = null
-          this.verificationCode = null
-          this.$timeout()
-        }
-        return Promise.resolve(res)
+        this.currentState = this.tfaStates.SETUP_COMPLETE
+        this.totpSecret = null
+        this.verificationCode = null
+        this.$timeout()
       })
       .catch(err => {
-        this.currentState = this.tfaStates.UNDEFINED
+        this.isWaitingForResponse = false
+        this.errorMessage = err.data
+        this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
         console.error(err)
+        return Promise.reject(err)
       })
   }
 
@@ -90,20 +87,17 @@ class MultifactorSettingsController {
     this.$http.post(`/multifactor/delete-totp-settings`, { verificationCode: this.verificationCode })
       .then(res => {
         this.isWaitingForResponse = false
-        if (res.data.result === 'failure') {
-          this.errorMessage = res.data.message
-          this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
-        } else {
-          this.currentState = this.tfaStates.UNINITIALIZED
-          this.totpSecret = null
-          this.verificationCode = null
-          this.$timeout()
-        }
-        return Promise.resolve()
+        this.currentState = this.tfaStates.UNINITIALIZED
+        this.totpSecret = null
+        this.verificationCode = null
+        this.$timeout()
       })
       .catch(err => {
-        this.currentState = this.tfaStates.UNDEFINED
+        this.isWaitingForResponse = false
+        this.errorMessage = err.data
+        this.$timeout(() => this.$anchorScroll('#totpVerifyError'))
         console.error(err)
+        return Promise.reject(err)
       })
   }
 }
