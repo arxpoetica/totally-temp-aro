@@ -35,7 +35,6 @@ let roicReportsModal = {
     <modal-header title="ROIC Reports">
       <h2 class="mb-0">ROIC Reports</h2>
       <div class="float-right">
-        <button ng-click="$ctrl.downloadReport()" class="btn btn-light"><i class="fa fa-download"></i></button>
         <button class="btn btn-light" ng-click="$ctrl.close()"> X </button></modal-header>
       </div>
     </modal-header>
