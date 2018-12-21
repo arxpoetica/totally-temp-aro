@@ -1,9 +1,11 @@
 class RoicReportsLargeController {
 
-  constructor(state) {
+  constructor(state, $timeout) {
     this.state = state
+    this.$timeout = $timeout
     this.series = ['Series A', 'Series B'];
     this.config = config  // Ugh - A global from a time long ago!
+    this.shouldRenderCharts = false
   }
 
   $onInit() {
@@ -13,10 +15,17 @@ class RoicReportsLargeController {
 
   selectCategory(category) {
     this.selectedCategory = category
+    // Whats the deal with "shouldRenderCharts"? For cases where we have multiple charts in one tab, the
+    // charts sometimes initialize before the HTML flexbox layouts are completed. This leads to charts
+    // overlapping one another. We are using a timeout so that the browser will finish laying out the divs,
+    // and then initialize charts correctly. This is hacky, if there is a better solution feel free to implement it.
+    const RENDER_TIMEOUT_CHARTS = 50  // milliseconds
+    this.shouldRenderCharts = false
+    this.$timeout(() => this.shouldRenderCharts = true, RENDER_TIMEOUT_CHARTS)
   }
 }
 
-RoicReportsLargeController.$inject = ['state']
+RoicReportsLargeController.$inject = ['state', '$timeout']
 
 let roicReportsLarge = {
   templateUrl: '/components/sidebar/analysis/roic-reports/roic-reports-large.html',
