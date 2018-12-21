@@ -299,6 +299,7 @@ class MapTileRenderer {
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.INVALIDATED_ICON_KEY))
     
     this.uiNotificationService.addNotification('main', 'rendering tiles')
+    this.state.areTilesRendering = true
     // Get all the data for this tile
     return Promise.all(singleTilePromises)
       .then((singleTileResults) => {
@@ -333,9 +334,11 @@ class MapTileRenderer {
       .catch((err) => {
         console.error(err)
         this.uiNotificationService.removeNotification('main', 'rendering tiles')
+        this.state.areTilesRendering = false
       })
       .then(() => {
         this.uiNotificationService.removeNotification('main', 'rendering tiles')
+        this.state.areTilesRendering = false
         return Promise.resolve()
       })
   }

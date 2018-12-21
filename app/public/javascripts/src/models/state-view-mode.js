@@ -178,6 +178,7 @@ class StateViewMode {
       //Search for equipments that are selected in NetworkEquipment modal
       if (selectedEquipments == '') return
       filter = selectedEquipments ? filter.concat(` and (${selectedEquipments})`) : filter
+      filter = filter.concat(` and (isDeleted eq false)`) //filter deleted equipment
     }
 
     if(entityType === 'ServiceAreaView') {

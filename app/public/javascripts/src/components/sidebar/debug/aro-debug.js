@@ -1,9 +1,17 @@
+import MapUtilities from '../../common/plan/map-utilities'
+
 class AroDebugController {
   constructor(state, $http, $timeout, tracker) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
     this.morphologyTileInfos = []
+    this.tileInfo = {
+      x: null,
+      y: null,
+      z: null,
+      bounds: null
+    }
     tracker.trackEvent(tracker.CATEGORIES.ENTER_DEBUGGING_MODE, tracker.ACTIONS.CLICK)
   }
 
@@ -36,6 +44,10 @@ class AroDebugController {
         console.log(this.morphologyTileInfos)
         this.$timeout()
       })
+  }
+
+  getTileBoundsInfo() {
+    this.tileInfo.bounds = JSON.stringify(MapUtilities.getTileLatLngBounds(this.tileInfo.z,this.tileInfo.x,this.tileInfo.y),undefined,2)
   }
 }
 

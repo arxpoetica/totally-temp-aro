@@ -74,6 +74,18 @@ class MapUtilities {
     }
   }
 
+  static getTileLatLngBounds(tileZoom, tileX, tileY) {
+    var NELatLng = MapUtilities.getNWTileCornerLatLng(tileZoom, tileX + 1, tileY)
+    var SWLatLng = MapUtilities.getNWTileCornerLatLng(tileZoom, tileX, tileY + 1)
+
+    return {
+      maxY: NELatLng.lat,
+      maxX: NELatLng.lng,
+      minY: SWLatLng.lat,
+      minX: SWLatLng.lng
+    }
+  }
+
   // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
   // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
   static getPixelCoordinatesFromLatLng(latLng, zoom) {

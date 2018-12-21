@@ -270,7 +270,7 @@ class State {
     tileLayers: [],
     areaLayers: []
   }
-  
+  service.areTilesRendering = false
   
   service.censusCategories = new Rx.BehaviorSubject()
   service.reloadCensusCategories = (censusCategories) => {

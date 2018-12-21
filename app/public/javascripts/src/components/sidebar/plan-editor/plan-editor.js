@@ -518,13 +518,15 @@ class PlanEditorController {
     if (this.selectedMapObject && this.isMarker(this.selectedMapObject)) {
       var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
       var equipmentObjectForService = this.formatEquipmentForService(selectedMapObject.objectId)
+      this.selectedMapObjectLat = +this.$element.find('#selectedMapObjectLat')[0].value
+      this.selectedMapObjectLng = +this.$element.find('#selectedMapObjectLng')[0].value
       this.setSelectedMapObjectLoc()
       //save the mapobject location if changed
       if (this.selectedMapObjectLat && this.selectedMapObjectLat > -90 && this.selectedMapObjectLat < 90) {
-        equipmentObjectForService.geometry.coordinates[1] = this.selectedMapObjectLat
+        equipmentObjectForService.geometry.coordinates[1] = this.selectedMapObjectLat.toFixed(6)
       }
       if(this.selectedMapObjectLng && this.selectedMapObjectLng > -180 && this.selectedMapObjectLng < 180) {
-        equipmentObjectForService.geometry.coordinates[0] = this.selectedMapObjectLng
+        equipmentObjectForService.geometry.coordinates[0] = this.selectedMapObjectLng.toFixed(6)
       }
       this.$http.put(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`, equipmentObjectForService)
       .then((result) => {

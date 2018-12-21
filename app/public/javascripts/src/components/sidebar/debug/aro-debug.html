@@ -17,7 +17,33 @@
   </button>
 
   <view-settings></view-settings>
+
+  <table class="table table-sm table-striped">
+    <tbody> 
+      <td>
+        <input class="form-control" type="number" ng-model="$ctrl.tileInfo.z" placeholder="Zoom(Z)">
+      </td>
+      <td>
+        <input class="form-control" type="number" ng-model="$ctrl.tileInfo.x" placeholder="X">
+      </td>
+      <td>
+        <input class="form-control" type="number" ng-model="$ctrl.tileInfo.y" placeholder="Y">
+      </td>
+    </tbody>
+  </table>
+
+  <button class="btn btn-block btn-light" style="flex: 0 0 auto" 
+    ng-click="$ctrl.getTileBoundsInfo()">
+    Get tile Bounds Info
+  </button>
   
+  <div style="flex: 0 0 auto; overflow-y: auto" ng-if="$ctrl.tileInfo.bounds">
+    <!-- Display the array of debugging infos -->
+    <div class="list-group">
+      <div style="white-space: pre; font-family: monospace; font-size: 10px">{{$ctrl.tileInfo.bounds}}</div>
+    </div>
+  </div>
+
   <!-- A container to display all the debugging info on the selected service areas -->
   <div style="flex: 1 1 auto; overflow-y: auto">
     <!-- Display the array of debugging infos -->
