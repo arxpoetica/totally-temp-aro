@@ -12,20 +12,20 @@ class RateReachEditorController {
 
     this.categories = {
       SPEED: [
-        { id: 1, description: '1 Mbps' },
-        { id: 3, description: '3 Mbps' },
-        { id: 4, description: '4 Mbps' },
-        { id: 6, description: '6 Mbps' },
-        { id: 12, description: '12 Mbps' },
-        { id: 15, description: '15 Mbps' },
-        { id: 20, description: '20 Mbps' },
-        { id: 24, description: '24 Mbps' },
-        { id: 25, description: '25 Mbps' }
+        { id: 1, name: '1 Mbps', description: '1 Mbps' },
+        { id: 3, name: '3 Mbps', description: '3 Mbps' },
+        { id: 4, name: '4 Mbps', description: '4 Mbps' },
+        { id: 6, name: '6 Mbps', description: '6 Mbps' },
+        { id: 12, name: '12 Mbps', description: '12 Mbps' },
+        { id: 15, name: '15 Mbps', description: '15 Mbps' },
+        { id: 20, name: '20 Mbps', description: '20 Mbps' },
+        { id: 24, name: '24 Mbps', description: '24 Mbps' },
+        { id: 25, name: '25 Mbps', description: '25 Mbps' }
       ],
       BAND: [
-        { id: 1001, description: 'Far net' },
-        { id: 1002, description: 'Medium net' },
-        { id: 1003, description: 'On net' }
+        { id: 1001, name: 'Far net', description: 'Far net' },
+        { id: 1002, name: 'Medium net', description: 'Medium net' },
+        { id: 1003, name: 'On net', description: 'On net' }
       ]
     }
 
@@ -69,7 +69,8 @@ class RateReachEditorController {
         this.technologies.forEach(technology => {
           this.rateReachValues[technology.id] = {}
           this.categoryTypes.forEach(categoryType => {
-            this.categories[categoryType.id].forEach(category => this.rateReachValues[technology.id][category.id] = 0.0)
+            this.rateReachValues[technology.id][categoryType.id] = {}
+            this.categories[categoryType.id].forEach(category => this.rateReachValues[technology.id][categoryType.id][category.id] = 0.0)
           })
         })
 
@@ -82,6 +83,49 @@ class RateReachEditorController {
     if (changesObj.rateReachManagerId) {
       // this.reloadRoicManagerConfiguration()
     }
+  }
+
+  // Generates a rate reach configuration object that we can send to aro-service, based on the currently selected options.
+  selectionToAroRateReachConfiguration() {
+    var aroRateReachConfiguration = {
+      resourceManagerId: this.rateReachManagerId,
+      categoryType: this.selectedCategoryType.id,
+      categories: angular.toJson(this.categories[this.selectedCategoryType.id])
+    }
+
+    var matrixInMetersMap = {}
+
+    this.technologies.forEach(technology => {
+      var matrixKey = `TechnologyRef(name=${technology.name}, id=${technology.id})`
+      matrixInMetersMap[matrixKey] = []
+      const rrValues = this.rateReachValues[technology.id][this.selectedCategoryType.id]
+      Object.keys(rrValues).forEach(categoryKey => {
+        matrixInMetersMap[matrixKey].push(+rrValues[categoryKey])
+      })
+    })
+    var rateReachGroupMap = {}
+    rateReachGroupMap[this.selectedTechnologyType.id] = {
+      technologyType: this.selectedTechnologyType.id,
+      calculationStrategy: this.selectedCalculationStrategy,
+      matrixInMetersMap: matrixInMetersMap,
+      proximityTypes: ['TODO'],
+      networkStructure: this.selectedNetworkStructure
+    }
+    aroRateReachConfiguration.rateReachGroupMap = rateReachGroupMap
+
+    aroRateReachConfiguration.marketAdjustmentFactorMap = {}
+    this.rateReachRatios.forEach(rateReachRatio => {
+      aroRateReachConfiguration.marketAdjustmentFactorMap[rateReachRatio.id] = rateReachRatio.value
+    })
+    return aroRateReachConfiguration
+  }
+
+  saveConfigurationToServer() {
+    const aroRateReachConfiguration = this.selectionToAroRateReachConfiguration()
+    console.log(aroRateReachConfiguration)
+    // this.$http.put(`/service/v1/rate-reach-matrix/${this.rateReachManagerId}`, aroRateReachConfiguration)
+    //   .then(res => console.log('Configuration saved successfully'))
+    //   .catch(err => console.error(err))
   }
 
   exitEditingMode() {

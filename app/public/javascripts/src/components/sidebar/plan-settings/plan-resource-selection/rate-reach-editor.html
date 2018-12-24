@@ -1,9 +1,9 @@
 <style scoped>
   #tblRateReachValues td {
-    line-height: 30px;
+    line-height: 33px;
   }
   #tblRateReachRatios td {
-    line-height: 30px;
+    line-height: 33px;
   }
   #rateReachSettings label {
     font-weight: 700;
@@ -76,7 +76,7 @@
           <tr ng-repeat="category in $ctrl.categories[$ctrl.selectedCategoryType.id]">
             <td>{{category.description}}</td>
             <td ng-repeat="technology in $ctrl.technologies">
-              <input class="form-control" ng-model="$ctrl.rateReachValues[technology.id][category.id]">
+              <input class="form-control" ng-model="$ctrl.rateReachValues[technology.id][$ctrl.selectedCategoryType.id][category.id]">
             </td>
           </tr>
         </tbody>
