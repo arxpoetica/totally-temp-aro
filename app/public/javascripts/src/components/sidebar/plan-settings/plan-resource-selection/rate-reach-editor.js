@@ -101,7 +101,7 @@ class RateReachEditorController {
     var aroRateReachConfiguration = {
       resourceManagerId: this.rateReachManagerId,
       categoryType: this.selectedCategoryType.id,
-      categories: angular.toJson(this.categories[this.selectedCategoryType.id])
+      categories: JSON.parse(angular.toJson(this.categories[this.selectedCategoryType.id]))
     }
 
     var matrixInMetersMap = {}
