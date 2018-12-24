@@ -35,6 +35,13 @@
                  roic-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
     </roic-editor>
 
+    <rate-reach-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'rate_reach_manager'"
+                 roic-manager-id="$ctrl.editingManagerId"
+                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                 set-editing-mode="$ctrl.setEditingMode(mode)"
+                 roic-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
+    </rate-reach-editor>
+
     <arpu-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'arpu_manager'"
                  arpu-manager-id="$ctrl.editingManagerId"
                  list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"

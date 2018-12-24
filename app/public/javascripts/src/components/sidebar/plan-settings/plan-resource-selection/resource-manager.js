@@ -10,7 +10,8 @@ class ResourceManagerController {
       arpu_manager: 'arpu-manager',
       impedance_mapping_manager: 'impedance-manager',
       tsm_manager: 'tsm-manager',
-      competition_manager: 'competitor-manager'
+      competition_manager: 'competitor-manager',
+      rate_reach_manager: 'rate-reach-matrix'
     }
     // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
