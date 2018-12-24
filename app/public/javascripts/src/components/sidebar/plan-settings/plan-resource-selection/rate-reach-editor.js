@@ -42,6 +42,17 @@ class RateReachEditorController {
     ]
     this.selectedTechnologyType = this.technologyTypes[1]
 
+    this.proximityTypes = [
+      { id: 'ROOT', description: 'Root' },
+      { id: 'BACKBONE', description: 'Backbone' },
+      { id: 'FEEDER', description: 'Feeder' },
+      { id: 'DISTRIBUTION', description: 'Distribution' },
+      { id: 'DROP', description: 'Drop' },
+      { id: 'IOF', description: 'IOF' },
+      { id: 'COPPER', description: 'Copper' }
+    ]
+    this.selectedProximityType = this.proximityTypes.filter(item => item.id === 'FEEDER')[0]
+
     this.onTechnologyTypeChanged()
   }
 
@@ -108,8 +119,10 @@ class RateReachEditorController {
       technologyType: this.selectedTechnologyType.id,
       calculationStrategy: this.selectedCalculationStrategy,
       matrixInMetersMap: matrixInMetersMap,
-      proximityTypes: ['TODO'],
       networkStructure: this.selectedNetworkStructure
+    }
+    if (this.selectedCalculationStrategy === 'CABLE_PROXIMITY') {
+      rateReachGroupMap[this.selectedTechnologyType.id].proximityTypes = [this.selectedProximityType.id]
     }
     aroRateReachConfiguration.rateReachGroupMap = rateReachGroupMap
 
