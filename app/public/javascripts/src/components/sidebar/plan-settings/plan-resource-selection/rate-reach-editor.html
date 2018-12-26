@@ -1,0 +1,105 @@
+<style scoped>
+  #tblRateReachValues td {
+    line-height: 33px;
+  }
+  #tblRateReachRatios td {
+    line-height: 33px;
+  }
+  #rateReachSettings label {
+    font-weight: 700;
+  }
+</style>
+
+<div class="container" style="max-height: 500px;">
+  <div class="row">
+    <!-- On the left, show dropdowns with the options that the user can edit -->
+    <div class="col-md-4" style="overflow-y: auto;">
+      <form id="rateReachSettings">
+        <div class="form-group">
+          <label for="cboCategoryTypes">Category Type</label>
+          <select id="cboCategoryTypes"
+                  class="form-control"
+                  ng-model="$ctrl.selectedCategoryType"
+                  ng-options="item as item.description for item in $ctrl.categoryTypes">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cboTechnologyTypes">Technology Type</label>
+          <select id="cboTechnologyTypes"
+                  class="form-control"
+                  ng-model="$ctrl.selectedTechnologyType"
+                  ng-options="item as item.description for item in $ctrl.technologyTypes"
+                  ng-change="$ctrl.onTechnologyTypeChanged()">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cboCalculationStrategies">Calculation Strategy</label>
+          <select id="cboCalculationStrategies"
+                  class="form-control"
+                  ng-model="$ctrl.selectedCalculationStrategy"
+                  ng-options="item as item for item in $ctrl.calculationStrategies">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cboNetworkStructures">Network Structure</label>
+          <select id="cboNetworkStructures"
+                  class="form-control"
+                  ng-model="$ctrl.selectedNetworkStructure"
+                  ng-options="item as item for item in $ctrl.networkStructures">
+          </select>
+        </div>
+
+        <div class="form-group" ng-if="$ctrl.selectedCalculationStrategy === 'CABLE_PROXIMITY'">
+          <label for="cboProximityTypes">Proximity type</label>
+          <select id="cboProximityTypes"
+                  class="form-control"
+                  ng-model="$ctrl.selectedProximityType"
+                  ng-options="item as item.description for item in $ctrl.proximityTypes">
+          </select>
+        </div>
+      </form>
+
+      <label><strong>Rate Reach ratios</strong></label>
+      <table id="tblRateReachRatios" class="table table-sm table-borderless">
+        <tr ng-repeat="rateReachRatio in $ctrl.rateReachRatios">
+          <td>{{rateReachRatio.description}}</td>
+          <td><input class="form-control" ng-model="rateReachRatio.value"></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- On the right, show the details of the currently selected combination of category type, technology type, etc. -->
+    <div class="col-md-8">
+      <table id="tblRateReachValues" class="table table-sm table-striped" style="table-layout: fixed;">
+        <thead class="thead-dark">
+          <tr>
+            <th>Speed</th>
+            <th ng-repeat="technology in $ctrl.technologies">
+              {{technology.name}}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="category in $ctrl.categories[$ctrl.selectedCategoryType.id]">
+            <td>{{category.description}}</td>
+            <td ng-repeat="technology in $ctrl.technologies">
+              <input class="form-control" ng-model="$ctrl.rateReachValues[technology.id][$ctrl.selectedCategoryType.id][category.id]">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+  <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
+    <i class="fa fa-undo action-button-icon"></i>Discard changes
+  </button>
+  <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+    <i class="fa fa-save action-button-icon"></i>Save
+  </button>
+</div>
