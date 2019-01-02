@@ -1776,6 +1776,7 @@ class State {
           .then((response) => {
             // Reload selected locations from database
             service.reloadSelectedLocations()
+            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]            
           })
       } else {
         result.data.forEach((serviceAreaId) => {
@@ -1793,6 +1794,7 @@ class State {
         Promise.all(addRemoveTargetPromises)
           .then((response) => {
             service.reloadSelectedServiceAreas()
+            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]            
           })
           .catch(err => console.error(err))
       }
