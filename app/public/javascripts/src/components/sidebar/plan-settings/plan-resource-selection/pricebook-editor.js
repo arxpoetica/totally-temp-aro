@@ -30,7 +30,6 @@ class PriceBookEditorController {
     this.$http.get(`/service/v1/pricebook/${this.priceBookId}`)
       .then((result) => {
         this.currentPriceBook = result.data
-        this.priceBookNameChanged({ name: this.currentPriceBook.name })
         return Promise.all([
           this.$http.get(`/service/v1/pricebook-strategies/${result.data.priceStrategy}`),
           this.$http.get(`/service/v1/pricebook/${this.priceBookId}/definition`),
@@ -181,8 +180,7 @@ let pricebookEditor = {
   bindings: {
     priceBookId: '<',
     listMode: '<',
-    setEditingMode: '&',
-    priceBookNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: PriceBookEditorController
 }

@@ -7,103 +7,106 @@
   }
 </style>
 
-<div class="container" style="max-height: 500px;">
-  <div class="row">
-    <div class="col-md-12">
-      <form>
-        <div class="form-group row">
-          <label for="cboTechnologyTypes" class="col-md-4 col-form-label text-right" style="font-weight: 700;">Technology Type</label>
-          <select id="cboTechnologyTypes"
-                  class="form-control col-md-6"
-                  ng-model="$ctrl.selectedTechnologyType"
-                  ng-options="key as key for (key, value) in $ctrl.rateReachValues.rateReachGroupMap">
-          </select>
-        </div>
-      </form>
-    </div>  
-  </div>
-  <div class="row">
-    <!-- On the left, show dropdowns with the options that the user can edit -->
-    <div class="col-md-4" style="overflow-y: auto;">
-      <form id="rateReachSettings">
-        <div class="form-group">
-          <label for="cboCategoryTypes">Category Type</label>
-          <select id="cboCategoryTypes"
-                  class="form-control"
-                  ng-model="$ctrl.selectedCategoryType"
-                  ng-options="item as item.description for item in $ctrl.categoryTypes">
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="cboCalculationStrategies">Calculation Strategy</label>
-          <select id="cboCalculationStrategies"
-                  class="form-control"
-                  ng-model="$ctrl.rateReachValues.rateReachGroupMap[$ctrl.selectedTechnologyType].calculationStrategy"
-                  ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].calculationStrategies">
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="cboNetworkStructures">Network Structure</label>
-          <select id="cboNetworkStructures"
-                  class="form-control"
-                  ng-model="$ctrl.rateReachValues.rateReachGroupMap[$ctrl.selectedTechnologyType].networkStructure"
-                  ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].networkStructures">
-          </select>
-        </div>
-
-        <div class="form-group" ng-if="$ctrl.selectedCalculationStrategy === 'CABLE_PROXIMITY'">
-          <label for="cboProximityTypes">Proximity type</label>
-          <select id="cboProximityTypes"
-                  class="form-control"
-                  ng-model="$ctrl.rateReachValues.rateReachGroupMap[$ctrl.selectedTechnologyType].proximityTypes[0]"
-                  ng-options="item as item.description for item in $ctrl.proximityTypes">
-          </select>
-        </div>
-      </form>
+<modal-header title="{{$ctrl.rateReachManager.name}}"></modal-header>
+<modal-body>
+  <div class="container" style="max-height: 500px;">
+    <div class="row">
+      <div class="col-md-12">
+        <form>
+          <div class="form-group row">
+            <label for="cboTechnologyTypes" class="col-md-4 col-form-label text-right" style="font-weight: 700;">Technology Type</label>
+            <select id="cboTechnologyTypes"
+                    class="form-control col-md-6"
+                    ng-model="$ctrl.selectedTechnologyType"
+                    ng-options="key as key for (key, value) in $ctrl.rateReachValues.rateReachGroupMap">
+            </select>
+          </div>
+        </form>
+      </div>  
     </div>
+    <div class="row">
+      <!-- On the left, show dropdowns with the options that the user can edit -->
+      <div class="col-md-4" style="overflow-y: auto;">
+        <form id="rateReachSettings">
+          <div class="form-group">
+            <label for="cboCategoryTypes">Category Type</label>
+            <select id="cboCategoryTypes"
+                    class="form-control"
+                    ng-model="$ctrl.selectedCategoryType"
+                    ng-options="item as item.description for item in $ctrl.categoryTypes">
+            </select>
+          </div>
 
-    <!-- On the right, show the details of the currently selected combination of category type, technology type, etc. -->
-    <div class="col-md-8" style="overflow-y: auto;">
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS }"
-             href="#"
-             ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.SPEEDS">Speeds</a>
-        </li>
-        <li class="nav-item">
-          <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS }"
-             href="#"
-             ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.RATE_REACH_RATIOS">Rate Reach Ratios</a>
-        </li>
-      </ul>
+          <div class="form-group">
+            <label for="cboCalculationStrategies">Calculation Strategy</label>
+            <select id="cboCalculationStrategies"
+                    class="form-control"
+                    ng-model="$ctrl.rateReachValues.rateReachGroupMap[$ctrl.selectedTechnologyType].calculationStrategy"
+                    ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].calculationStrategies">
+            </select>
+          </div>
 
-      <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS">
-        <rate-reach-distance-editor
-          categories="$ctrl.rateReachValues.categories"
-          rate-reach-group-map="$ctrl.rateReachValues.rateReachGroupMap"
-          selected-technology-type="$ctrl.selectedTechnologyType"
-          allow-editable-categories="$ctrl.rateReachValues.categoryType === 'SPEED'">
-        </rate-reach-distance-editor>
+          <div class="form-group">
+            <label for="cboNetworkStructures">Network Structure</label>
+            <select id="cboNetworkStructures"
+                    class="form-control"
+                    ng-model="$ctrl.rateReachValues.rateReachGroupMap[$ctrl.selectedTechnologyType].networkStructure"
+                    ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].networkStructures">
+            </select>
+          </div>
+
+          <div class="form-group" ng-if="$ctrl.selectedCalculationStrategy === 'CABLE_PROXIMITY'">
+            <label for="cboProximityTypes">Proximity type</label>
+            <select id="cboProximityTypes"
+                    class="form-control"
+                    ng-model="$ctrl.rateReachValues.rateReachGroupMap[$ctrl.selectedTechnologyType].proximityTypes[0]"
+                    ng-options="item as item.description for item in $ctrl.proximityTypes">
+            </select>
+          </div>
+        </form>
       </div>
-      <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS">
-        <table id="tblRateReachRatios" class="table table-sm table-borderless">
-          <tr ng-repeat="(key, value) in $ctrl.rateReachValues.marketAdjustmentFactorMap">
-            <td>{{$ctrl.rateReachRatioDescription[key]}}</td>
-            <td><input class="form-control" ng-model="$ctrl.rateReachValues.marketAdjustmentFactorMap[key]"></td>
-          </tr>
-        </table>
+
+      <!-- On the right, show the details of the currently selected combination of category type, technology type, etc. -->
+      <div class="col-md-8" style="overflow-y: auto;">
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS }"
+              href="#"
+              ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.SPEEDS">Speeds</a>
+          </li>
+          <li class="nav-item">
+            <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS }"
+              href="#"
+              ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.RATE_REACH_RATIOS">Rate Reach Ratios</a>
+          </li>
+        </ul>
+
+        <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS">
+          <rate-reach-distance-editor
+            categories="$ctrl.rateReachValues.categories"
+            rate-reach-group-map="$ctrl.rateReachValues.rateReachGroupMap"
+            selected-technology-type="$ctrl.selectedTechnologyType"
+            allow-editable-categories="$ctrl.rateReachValues.categoryType === 'SPEED'">
+          </rate-reach-distance-editor>
+        </div>
+        <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS">
+          <table id="tblRateReachRatios" class="table table-sm table-borderless">
+            <tr ng-repeat="(key, value) in $ctrl.rateReachValues.marketAdjustmentFactorMap">
+              <td>{{$ctrl.rateReachRatioDescription[key]}}</td>
+              <td><input class="form-control" ng-model="$ctrl.rateReachValues.marketAdjustmentFactorMap[key]"></td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
-  <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
-    <i class="fa fa-undo action-button-icon"></i>Discard changes
-  </button>
-  <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
-    <i class="fa fa-save action-button-icon"></i>Save
-  </button>
-</div>
+  <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+    <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
+      <i class="fa fa-undo action-button-icon"></i>Discard changes
+    </button>
+    <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+      <i class="fa fa-save action-button-icon"></i>Save
+    </button>
+  </div>
+</modal-body>
