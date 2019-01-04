@@ -2,6 +2,13 @@
   #tblRateReachValues td {
     line-height: 33px;
   }
+  .category-edit-button {
+    display: none;
+    margin-top: 4px;
+  }
+  .category-description:hover .category-edit-button, .category-edit-button:hover {
+    display: inline-block;
+  }
 </style>
 
 <table id="tblRateReachValues" class="table table-sm table-striped" style="table-layout: fixed;">
@@ -15,10 +22,20 @@
   </thead>
   <tbody>
     <tr ng-repeat="category in $ctrl.categories">
-      <td>{{category.description}}</td>
-      <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
+        <td ng-if="!$ctrl.isCategoryInEditMode[category.id]" class="category-description">
+          {{category.description}}
+          <button class="btn btn-sm btn-light category-edit-button float-right" ng-click="$ctrl.isCategoryInEditMode[category.id] = true"><i class="fa fa-edit"></i></button>
+        </td>
+        <td ng-if="$ctrl.isCategoryInEditMode[category.id]" class="input-group">
+          <input class="form-control category-description" ng-model="category.description">
+          <div class="input-group-append">
+            <button class="btn btn-light" ng-click="$ctrl.isCategoryInEditMode[category.id] = false"><i class="fa fa-save"></i></span>
+          </div>
+        </td>
+        <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
         <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap[key][$parent.$index]">
       </td>
     </tr>
+    <!-- If the user is allowed to edit categories, show a button to add categories -->
   </tbody>
 </table>

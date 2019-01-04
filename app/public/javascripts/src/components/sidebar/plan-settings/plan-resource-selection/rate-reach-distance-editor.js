@@ -3,6 +3,8 @@ class RateReachDistanceEditorController {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+
+    this.isCategoryInEditMode = {}  // For each category hold a flag that tells us if it is being edited
   }
 }
 
@@ -13,7 +15,8 @@ let rateReachEditor = {
   bindings: {
     categories: '=',
     rateReachGroupMap: '=',
-    selectedTechnologyType: '<'
+    selectedTechnologyType: '<',
+    allowEditableCategory: '<'
   },
   controller: RateReachDistanceEditorController
 }
