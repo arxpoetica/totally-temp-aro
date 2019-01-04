@@ -77,9 +77,13 @@ class RateReachEditorController {
         Copper: {
           technologyType: 'Copper',
           matrixInMetersMap: {
-            'TechnologyRef(name=ADSL, id=1)': [
-              10000,
-              5000
+            ADSL: [
+              10001,
+              5002
+            ],
+            VDSL: [
+              10003,
+              5004
             ]
           },
           calculationStrategy: 'NODE',
@@ -91,9 +95,13 @@ class RateReachEditorController {
         Fiber: {
           technologyType: 'Copper',
           matrixInMetersMap: {
-            'TechnologyRef(name=ADSL, id=1)': [
-              10000,
-              5000
+            ADSL: [
+              10005,
+              5006
+            ],
+            VDSL: [
+              10007,
+              5008
             ]
           },
           calculationStrategy: 'NODE',
@@ -105,7 +113,11 @@ class RateReachEditorController {
         Wireless: {
           technologyType: 'Copper',
           matrixInMetersMap: {
-            'TechnologyRef(name=ADSL, id=1)': [
+            ADSL: [
+              10000,
+              5000
+            ],
+            VDSL: [
               10000,
               5000
             ]
