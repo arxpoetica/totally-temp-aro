@@ -1,0 +1,48 @@
+<style scoped>
+  #tblRateReachValues {
+    margin-bottom: 0px;
+  }
+  #tblRateReachValues td {
+    line-height: 33px;
+  }
+  .category-hover-button {
+    display: none;
+    margin-top: 2px;
+  }
+  .category-description:hover .category-hover-button, .category-hover-button:hover {
+    display: inline-block;
+  }
+</style>
+
+<table id="tblRateReachValues" class="table table-sm table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th style="width: 200px;">Speed</th>
+      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
+        {{key}}
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="category in $ctrl.categories">
+        <td ng-if="!$ctrl.isCategoryInEditMode[category.id]" class="category-description">
+          {{category.description}}
+          <div class="float-right">
+            <button class="btn btn-sm btn-light category-hover-button" ng-click="$ctrl.isCategoryInEditMode[category.id] = true"><i class="fa fa-edit"></i></button>
+            <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.removeCategory(category)"><i class="fa fa-trash-alt"></i></button>
+          </div>
+        </td>
+        <td ng-if="$ctrl.isCategoryInEditMode[category.id]" class="input-group">
+          <input class="form-control category-description" ng-model="category.description">
+          <div class="input-group-append">
+            <button class="btn btn-light" ng-click="$ctrl.isCategoryInEditMode[category.id] = false"><i class="fa fa-save"></i></span>
+          </div>
+        </td>
+        <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
+        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap[key][$parent.$index]">
+      </td>
+    </tr>
+  </tbody>
+</table>
+<!-- If the user is allowed to edit categories, show a button to add categories -->
+<button class="btn btn-light" ng-click="$ctrl.addCategory()">Add</button>

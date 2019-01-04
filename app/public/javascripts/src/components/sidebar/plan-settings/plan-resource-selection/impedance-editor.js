@@ -2,7 +2,6 @@ class ImpedanceEditorController {
   constructor($http) {
     this.$http = $http
     this.impedanceManagerConfiguration = []
-    this.impedanceManagerName = ''
     // "mappingLabels" should map from a impedance mapping key (e.g. 0) to a text description of the mapping
     this.mappingLabels = {
       '-1': 'Unknown tile',
@@ -24,10 +23,10 @@ class ImpedanceEditorController {
 
   reloadImpedanceManagerConfiguration() {
     this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}`)
-    .then((result) => {
-      this.impedanceManagerName = result.data.name
-      this.impedanceManagerNameChanged({ name: this.impedanceManagerName })
-    })
+      .then((result) => {
+        this.impedanceManager = result.data
+      })
+      .catch(err => console.error(err))
 
     this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`)
     .then((result) => {
@@ -58,8 +57,7 @@ let impedanceEditor = {
     impedanceManagerId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&',
-    impedanceManagerNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: ImpedanceEditorController
 }

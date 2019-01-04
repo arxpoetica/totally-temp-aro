@@ -3,106 +3,108 @@
     padding-right: 10px;
   }
 </style>
+<modal-header title="{{$ctrl.currentPriceBook.name}}"></modal-header>
+<modal-body>
+  <!-- Allow the user to select the state for which this strategy will be applied -->
+  <form class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
+      <div class="col-sm-4">
+        <select class="form-control"
+                ng-model="$ctrl.selectedStateForStrategy"
+                ng-options="item for item in $ctrl.statesForStrategy"
+                ng-change="$ctrl.definePriceBookForSelectedState()">
+        </select>
+      </div>
+    </div>
+  </form>
 
-<!-- Allow the user to select the state for which this strategy will be applied -->
-<form class="form-horizontal">
-  <div class="form-group">
-    <label class="col-sm-8 control-label">{{$ctrl.allStrategies[$ctrl.currentPriceBook.priceStrategy].description}} code: </label>
-    <div class="col-sm-4">
-      <select class="form-control"
-              ng-model="$ctrl.selectedStateForStrategy"
-              ng-options="item for item in $ctrl.statesForStrategy"
-              ng-change="$ctrl.definePriceBookForSelectedState()">
-      </select>
+  <!-- Create tabs for each priceBookDefinition -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
+        role="presentation"
+        ng-class="{ 'nav-item': true, 'active': $index === 0 }">
+      <a href="#{{priceBookDefinition.id}}" class="nav-link" role="tab" data-toggle="tab">
+        {{priceBookDefinition.description}}
+      </a>
+    </li>
+  </ul>
+
+  <!-- Create tab contents for each priceBookDefinition -->
+  <div class="tab-content" style="max-height: 500px; overflow-y: auto">
+    <div ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
+        role="tabpanel"
+        ng-class="{ 'tab-pane': true, 'active': $index === 0 }"
+        id="{{priceBookDefinition.id}}">
+
+      <!-- The top-level table for this priceBookDefinition -->
+      <table class="table table-striped">
+
+        <!-- Loop through each item in the priceBookDefinition -->
+        <tr ng-repeat="definitionItem in priceBookDefinition.items">
+
+          <!-- Description of this item -->
+          <td style="padding: 20px;">
+            <div style="font-weight: 700">{{definitionItem.description}}</div>
+
+            <!-- IF a cost assignment is defined for this item, provide the ability to edit it -->
+            <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
+              <table class="table table-bordered" style="margin-bottom: 0px">
+                <tr>
+                  <td style="vertical-align: middle">Cost:</td>
+                  <td style="width: 100px; border-right: none;">
+                    <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
+                  </td>
+                  <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Display details for sub-items if we have at least one sub-item -->
+            <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
+              SubItems:
+            </div>
+            <div style="padding-left: 20px; width: 100%">
+              <table class="table table-bordered" style="margin-bottom: 0px">
+                <!-- Loop through all sub-items in this item -->
+                <tr ng-repeat="subItem in definitionItem.subItems">
+
+                  <!-- START TD block for sub-items with detailType === 'reference' -->
+                  <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
+                  <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
+                    <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control">
+                  </td>
+                  <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
+                    <!-- "UnitPerHour" becomes "Hours", etc. -->
+                    {{subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}}
+                  </td>
+                  <!-- END TD block for sub-items with detailType === 'reference' -->
+
+                  <!-- START TD block for sub-items with detailType === 'value' -->
+                  <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
+                  <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
+                    <input type="text" ng-model="subItem.costAssignment.cost" class="form-control">
+                  </td>
+                  <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
+                    {{subItem.item.unitOfMeasure}}
+                  </td>
+                  <!-- END TD block for sub-items with detailType === 'value' -->
+
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
-</form>
 
-<!-- Create tabs for each priceBookDefinition -->
-<ul class="nav nav-tabs" role="tablist">
-  <li ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
-      role="presentation"
-      ng-class="{ 'nav-item': true, 'active': $index === 0 }">
-    <a href="#{{priceBookDefinition.id}}" class="nav-link" role="tab" data-toggle="tab">
-      {{priceBookDefinition.description}}
-    </a>
-  </li>
-</ul>
-
-<!-- Create tab contents for each priceBookDefinition -->
-<div class="tab-content" style="max-height: 500px; overflow-y: auto">
-  <div ng-repeat="priceBookDefinition in $ctrl.structuredPriceBookDefinitions"
-       role="tabpanel"
-       ng-class="{ 'tab-pane': true, 'active': $index === 0 }"
-       id="{{priceBookDefinition.id}}">
-
-    <!-- The top-level table for this priceBookDefinition -->
-    <table class="table table-striped">
-
-      <!-- Loop through each item in the priceBookDefinition -->
-      <tr ng-repeat="definitionItem in priceBookDefinition.items">
-
-        <!-- Description of this item -->
-        <td style="padding: 20px;">
-          <div style="font-weight: 700">{{definitionItem.description}}</div>
-
-          <!-- IF a cost assignment is defined for this item, provide the ability to edit it -->
-          <div ng-if="definitionItem.costAssignment" class="row" style="width: 100%; margin: 0px;">
-            <table class="table table-bordered" style="margin-bottom: 0px">
-              <tr>
-                <td style="vertical-align: middle">Cost:</td>
-                <td style="width: 100px; border-right: none;">
-                  <input type="text" ng-model="definitionItem.costAssignment.cost" class="form-control">
-                </td>
-                <td style="vertical-align: middle; border-left: none; width: 10px;">{{definitionItem.unitOfMeasure}}</td>
-              </tr>
-            </table>
-          </div>
-
-          <!-- Display details for sub-items if we have at least one sub-item -->
-          <div ng-if="definitionItem.subItems && definitionItem.subItems.length > 0">
-            SubItems:
-          </div>
-          <div style="padding-left: 20px; width: 100%">
-            <table class="table table-bordered" style="margin-bottom: 0px">
-              <!-- Loop through all sub-items in this item -->
-              <tr ng-repeat="subItem in definitionItem.subItems">
-
-                <!-- START TD block for sub-items with detailType === 'reference' -->
-                <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle;">{{subItem.item.description}}</td>
-                <td ng-if="subItem.detailType === 'reference'" style="width: 100px; border-right: none;">
-                  <input type="text" ng-model="subItem.detailAssignment.quantity" class="form-control">
-                </td>
-                <td ng-if="subItem.detailType === 'reference'" style="vertical-align: middle; border-left: none;">
-                  <!-- "UnitPerHour" becomes "Hours", etc. -->
-                  {{subItem.item.unitOfMeasure.replace('UnitPer', '') + 's'}}
-                </td>
-                <!-- END TD block for sub-items with detailType === 'reference' -->
-
-                <!-- START TD block for sub-items with detailType === 'value' -->
-                <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle;">{{subItem.item.description}}</td>
-                <td ng-if="subItem.detailType === 'value'" style="width: 100px; border-right: none;">
-                  <input type="text" ng-model="subItem.costAssignment.cost" class="form-control">
-                </td>
-                <td ng-if="subItem.detailType === 'value'" style="vertical-align: middle; border-left: none;">
-                  {{subItem.item.unitOfMeasure}}
-                </td>
-                <!-- END TD block for sub-items with detailType === 'value' -->
-
-              </tr>
-            </table>
-          </div>
-        </td>
-      </tr>
-    </table>
+  <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+    <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
+      <i class="fa fa-undo action-button-icon"></i>Discard changes
+    </button>
+    <button class="btn btn-primary" ng-click="$ctrl.saveAssignmentsToServer()">
+      <i class="fa fa-save action-button-icon"></i>Save
+    </button>
   </div>
-</div>
-
-<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
-  <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
-    <i class="fa fa-undo action-button-icon"></i>Discard changes
-  </button>
-  <button class="btn btn-primary" ng-click="$ctrl.saveAssignmentsToServer()">
-    <i class="fa fa-save action-button-icon"></i>Save
-  </button>
-</div>
+</modal-body>

@@ -3,7 +3,7 @@ class RateReachEditorController {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-
+    this.rateReachManager = { name: 'Default Rate Reach Manager' }
     this.categoryTypes = [
       { id: 'SPEED', description: 'Speeds' },
       { id: 'BAND', description: 'Speed Bands' }
@@ -29,18 +29,12 @@ class RateReachEditorController {
       ]
     }
 
-    this.rateReachRatios = [
-      { id: 'RETAIL', description: 'Retail', value: 1.0 },
-      { id: 'WHOLESALE', description: 'Wholesale', value: 0.75 },
-      { id: 'TOWER', description: 'Tower', value: 0.5 }
-    ]
-
-    this.technologyTypes = [
-      { id: 'Fiber', description: 'Fiber' },
-      { id: 'Copper', description: 'Copper' },
-      { id: 'Wireless', description: 'Wireless' }
-    ]
-    this.selectedTechnologyType = this.technologyTypes[1]
+    this.rateReachRatioDescription = {
+      RETAIL: 'Retail',
+      WHOLESALE: 'Wholesale',
+      TOWER: 'Tower'
+    }
+    this.selectedTechnologyType = 'Copper'
 
     this.proximityTypes = [
       { id: 'ROOT', description: 'Root' },
@@ -51,41 +45,118 @@ class RateReachEditorController {
       { id: 'IOF', description: 'IOF' },
       { id: 'COPPER', description: 'Copper' }
     ]
-    this.selectedProximityType = this.proximityTypes.filter(item => item.id === 'FEEDER')[0]
 
-    this.onTechnologyTypeChanged()
+    this.editingModes = Object.freeze({
+      SPEEDS: 'SPEEDS',
+      RATE_REACH_RATIOS: 'RATE_REACH_RATIOS'
+    })
+    this.selectedEditingMode = this.editingModes.SPEEDS
+
+    this.rateReachValues = {
+      resourceManagerId: 99,
+      categoryType: 'SPEED',
+      categories: [
+        {
+          id: 1,
+          name: '1 MBps',
+          description: '1 MBps'
+        },
+        {
+          id: 5,
+          name: '5 MBps',
+          description: '5 MBps'
+        }
+      ],
+      rateReachGroupMap: {
+        Copper: {
+          technologyType: 'Copper',
+          matrixInMetersMap: {
+            ADSL: [
+              10001,
+              5002
+            ],
+            VDSL: [
+              10003,
+              5004
+            ]
+          },
+          calculationStrategy: 'NODE',
+          proximityTypes: [
+            'DISTRIBUTION'
+          ],
+          networkStructure: 'COPPER'
+        },
+        Fiber: {
+          technologyType: 'Copper',
+          matrixInMetersMap: {
+            ADSL: [
+              10005,
+              5006
+            ],
+            VDSL: [
+              10007,
+              5008
+            ]
+          },
+          calculationStrategy: 'NODE',
+          proximityTypes: [
+            'DISTRIBUTION'
+          ],
+          networkStructure: 'COPPER'
+        },
+        Wireless: {
+          technologyType: 'Copper',
+          matrixInMetersMap: {
+            ADSL: [
+              10000,
+              5000
+            ],
+            VDSL: [
+              10000,
+              5000
+            ]
+          },
+          calculationStrategy: 'NODE',
+          proximityTypes: [
+            'DISTRIBUTION'
+          ],
+          networkStructure: 'COPPER'
+        }
+      },
+      marketAdjustmentFactorMap: {
+        RETAIL: 1,
+        WHOLESALE: 0.75,
+        TOWER: 0.5
+      }
+    }
+
+    this.loadAllTechnologyTypeDetails()
   }
 
-  onTechnologyTypeChanged() {
-    this.calculationStrategies = []
-    this.selectedCalculationStrategy = null
-    this.networkStructures = []
-    this.selectedNetworkStructure = null
-    this.technologies = []
-    this.selectedTechnology = null
-    this.rateReachValues = {}
+  loadAllTechnologyTypeDetails() {
+    this.technologyTypeDetails = {}
+    var ttPromises = []
+    Object.keys(this.rateReachValues.rateReachGroupMap).forEach(technologyType => {
+      ttPromises.push(this.loadTechnologyTypeDetails(technologyType))
+    })
+    Promise.all(ttPromises)
+      .then(results => this.$timeout())
+      .catch(err => console.error(err))
+  }
+
+  loadTechnologyTypeDetails(technologyType) {
     Promise.all([
-      this.$http.get(`/service/v1/rate-reach-matrix/calc-strategies?technology_type=${this.selectedTechnologyType.id}`),
-      this.$http.get(`/service/v1/rate-reach-matrix/network-structures?technology_type=${this.selectedTechnologyType.id}`),
-      this.$http.get(`/service/v1/rate-reach-matrix/technologies?technology_type=${this.selectedTechnologyType.id}`)
+      this.$http.get(`/service/v1/rate-reach-matrix/calc-strategies?technology_type=${technologyType}`),
+      this.$http.get(`/service/v1/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
+      this.$http.get(`/service/v1/rate-reach-matrix/technologies?technology_type=${technologyType}`)
     ])
       .then(results => {
-        this.calculationStrategies = results[0].data
-        this.selectedCalculationStrategy = this.calculationStrategies[0]
-        this.networkStructures = results[1].data
-        this.selectedNetworkStructure = this.networkStructures[0]
-        this.technologies = results[2].data
-        this.selectedTechnology = this.technologies[0]
-        this.rateReachValues = {}
-        this.technologies.forEach(technology => {
-          this.rateReachValues[technology.id] = {}
-          this.categoryTypes.forEach(categoryType => {
-            this.rateReachValues[technology.id][categoryType.id] = {}
-            this.categories[categoryType.id].forEach(category => this.rateReachValues[technology.id][categoryType.id][category.id] = 0.0)
-          })
-        })
-
-        this.$timeout()
+        this.technologyTypeDetails[technologyType] = {
+          calculationStrategies: results[0].data,
+          networkStructures: results[1].data,
+          technologies: results[2].data
+        }
+        return Promise.resolve()
       })
       .catch(err => console.error(err))
   }
@@ -96,46 +167,8 @@ class RateReachEditorController {
     }
   }
 
-  // Generates a rate reach configuration object that we can send to aro-service, based on the currently selected options.
-  selectionToAroRateReachConfiguration() {
-    var aroRateReachConfiguration = {
-      resourceManagerId: this.rateReachManagerId,
-      categoryType: this.selectedCategoryType.id,
-      categories: JSON.parse(angular.toJson(this.categories[this.selectedCategoryType.id]))
-    }
-
-    var matrixInMetersMap = {}
-
-    this.technologies.forEach(technology => {
-      var matrixKey = `TechnologyRef(name=${technology.name}, id=${technology.id})`
-      matrixInMetersMap[matrixKey] = []
-      const rrValues = this.rateReachValues[technology.id][this.selectedCategoryType.id]
-      Object.keys(rrValues).forEach(categoryKey => {
-        matrixInMetersMap[matrixKey].push(+rrValues[categoryKey])
-      })
-    })
-    var rateReachGroupMap = {}
-    rateReachGroupMap[this.selectedTechnologyType.id] = {
-      technologyType: this.selectedTechnologyType.id,
-      calculationStrategy: this.selectedCalculationStrategy,
-      matrixInMetersMap: matrixInMetersMap,
-      networkStructure: this.selectedNetworkStructure
-    }
-    if (this.selectedCalculationStrategy === 'CABLE_PROXIMITY') {
-      rateReachGroupMap[this.selectedTechnologyType.id].proximityTypes = [this.selectedProximityType.id]
-    }
-    aroRateReachConfiguration.rateReachGroupMap = rateReachGroupMap
-
-    aroRateReachConfiguration.marketAdjustmentFactorMap = {}
-    this.rateReachRatios.forEach(rateReachRatio => {
-      aroRateReachConfiguration.marketAdjustmentFactorMap[rateReachRatio.id] = rateReachRatio.value
-    })
-    return aroRateReachConfiguration
-  }
-
   saveConfigurationToServer() {
-    const aroRateReachConfiguration = this.selectionToAroRateReachConfiguration()
-    console.log(aroRateReachConfiguration)
+    console.log(JSON.parse(angular.toJson(this.rateReachValues)))
     // this.$http.put(`/service/v1/rate-reach-matrix/${this.rateReachManagerId}`, aroRateReachConfiguration)
     //   .then(res => console.log('Configuration saved successfully'))
     //   .catch(err => console.error(err))
@@ -154,8 +187,7 @@ let rateReachEditor = {
     rateReachManagerId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&',
-    rateReachManagerNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: RateReachEditorController
 }
