@@ -167,46 +167,8 @@ class RateReachEditorController {
     }
   }
 
-  // Generates a rate reach configuration object that we can send to aro-service, based on the currently selected options.
-  selectionToAroRateReachConfiguration() {
-    var aroRateReachConfiguration = {
-      resourceManagerId: this.rateReachManagerId,
-      categoryType: this.selectedCategoryType.id,
-      categories: JSON.parse(angular.toJson(this.categories[this.selectedCategoryType.id]))
-    }
-
-    var matrixInMetersMap = {}
-
-    this.technologies.forEach(technology => {
-      var matrixKey = `TechnologyRef(name=${technology.name}, id=${technology.id})`
-      matrixInMetersMap[matrixKey] = []
-      const rrValues = this.rateReachValues[technology.id][this.selectedCategoryType.id]
-      Object.keys(rrValues).forEach(categoryKey => {
-        matrixInMetersMap[matrixKey].push(+rrValues[categoryKey])
-      })
-    })
-    var rateReachGroupMap = {}
-    rateReachGroupMap[this.selectedTechnologyType.id] = {
-      technologyType: this.selectedTechnologyType.id,
-      calculationStrategy: this.selectedCalculationStrategy,
-      matrixInMetersMap: matrixInMetersMap,
-      networkStructure: this.selectedNetworkStructure
-    }
-    if (this.selectedCalculationStrategy === 'CABLE_PROXIMITY') {
-      rateReachGroupMap[this.selectedTechnologyType.id].proximityTypes = [this.selectedProximityType.id]
-    }
-    aroRateReachConfiguration.rateReachGroupMap = rateReachGroupMap
-
-    aroRateReachConfiguration.marketAdjustmentFactorMap = {}
-    this.rateReachRatios.forEach(rateReachRatio => {
-      aroRateReachConfiguration.marketAdjustmentFactorMap[rateReachRatio.id] = rateReachRatio.value
-    })
-    return aroRateReachConfiguration
-  }
-
   saveConfigurationToServer() {
-    const aroRateReachConfiguration = this.selectionToAroRateReachConfiguration()
-    console.log(aroRateReachConfiguration)
+    console.log(JSON.parse(angular.toJson(this.rateReachValues)))
     // this.$http.put(`/service/v1/rate-reach-matrix/${this.rateReachManagerId}`, aroRateReachConfiguration)
     //   .then(res => console.log('Configuration saved successfully'))
     //   .catch(err => console.error(err))
