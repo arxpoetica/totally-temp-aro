@@ -29,22 +29,11 @@ class RateReachEditorController {
       ]
     }
 
-    // this.rateReachRatios = [
-    //   { id: 'RETAIL', description: 'Retail', value: 1.0 },
-    //   { id: 'WHOLESALE', description: 'Wholesale', value: 0.75 },
-    //   { id: 'TOWER', description: 'Tower', value: 0.5 }
-    // ]
     this.rateReachRatioDescription = {
       RETAIL: 'Retail',
       WHOLESALE: 'Wholesale',
       TOWER: 'Tower'
     }
-
-    // this.technologyTypes = [
-    //   { id: 'Fiber', description: 'Fiber' },
-    //   { id: 'Copper', description: 'Copper' },
-    //   { id: 'Wireless', description: 'Wireless' }
-    // ]
     this.selectedTechnologyType = 'Copper'
 
     this.proximityTypes = [
@@ -56,7 +45,12 @@ class RateReachEditorController {
       { id: 'IOF', description: 'IOF' },
       { id: 'COPPER', description: 'Copper' }
     ]
-    // this.selectedProximityType = this.proximityTypes.filter(item => item.id === 'FEEDER')[0]
+
+    this.editingModes = Object.freeze({
+      SPEEDS: 'SPEEDS',
+      RATE_REACH_RATIOS: 'RATE_REACH_RATIOS'
+    })
+    this.selectedEditingMode = this.editingModes.SPEEDS
 
     this.rateReachValues = {
       resourceManagerId: 99,

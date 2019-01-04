@@ -62,23 +62,39 @@
           </select>
         </div>
       </form>
-
-      <label><strong>Rate Reach ratios</strong></label>
-      <table id="tblRateReachRatios" class="table table-sm table-borderless">
-        <tr ng-repeat="(key, value) in $ctrl.rateReachValues.marketAdjustmentFactorMap">
-          <td>{{$ctrl.rateReachRatioDescription[key]}}</td>
-          <td><input class="form-control" ng-model="$ctrl.rateReachValues.marketAdjustmentFactorMap[key]"></td>
-        </tr>
-      </table>
     </div>
 
     <!-- On the right, show the details of the currently selected combination of category type, technology type, etc. -->
-    <div class="col-md-8">
-      <rate-reach-distance-editor categories="$ctrl.rateReachValues.categories"
-        rate-reach-group-map="$ctrl.rateReachValues.rateReachGroupMap"
-        selected-technology-type="$ctrl.selectedTechnologyType"
-        allow-editable-categories="$ctrl.rateReachValues.categoryType === 'SPEED'">
-      </rate-reach-distance-editor>
+    <div class="col-md-8" style="overflow-y: auto;">
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS }"
+             href="#"
+             ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.SPEEDS">Speeds</a>
+        </li>
+        <li class="nav-item">
+          <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS }"
+             href="#"
+             ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.RATE_REACH_RATIOS">Rate Reach Ratios</a>
+        </li>
+      </ul>
+
+      <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS">
+        <rate-reach-distance-editor
+          categories="$ctrl.rateReachValues.categories"
+          rate-reach-group-map="$ctrl.rateReachValues.rateReachGroupMap"
+          selected-technology-type="$ctrl.selectedTechnologyType"
+          allow-editable-categories="$ctrl.rateReachValues.categoryType === 'SPEED'">
+        </rate-reach-distance-editor>
+      </div>
+      <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS">
+        <table id="tblRateReachRatios" class="table table-sm table-borderless">
+          <tr ng-repeat="(key, value) in $ctrl.rateReachValues.marketAdjustmentFactorMap">
+            <td>{{$ctrl.rateReachRatioDescription[key]}}</td>
+            <td><input class="form-control" ng-model="$ctrl.rateReachValues.marketAdjustmentFactorMap[key]"></td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 </div>
