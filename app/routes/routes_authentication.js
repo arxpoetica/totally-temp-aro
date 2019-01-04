@@ -138,7 +138,11 @@ exports.configure = (app, middleware) => {
           callback(null, dbUser || null)
         }
       })
-      .catch(callback)
+      .catch(() => {
+        // Something went wrong when deserializing the user. This can happen if the session cookie is from an earlier version
+        // of ARO, or if the user has been deleted, or some other reason.
+        callback(null, null)
+      })
   })
 
   app.get('/verify-otp', (request, response, next) => {
