@@ -16,6 +16,7 @@ class RoadSegmentDetailController {
       //On click of equipment or location dont show road segment details
       if (event.hasOwnProperty('equipmentFeatures') && event.equipmentFeatures.length > 0) return
       if (event.hasOwnProperty('locations') && event.locations.length > 0) return
+      if (this.state.activeViewModePanel === this.state.viewModePanels.EDIT_LOCATIONS) return
 
       if (event.roadSegments && event.roadSegments.size > 0) {
         var newSelection = state.cloneSelection()

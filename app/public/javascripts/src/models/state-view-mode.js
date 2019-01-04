@@ -67,7 +67,7 @@ class StateViewMode {
     if (ishardreload)
       state.listOfServiceAreaTags = []
     if (filterObj || state.listOfServiceAreaTags.length == 0) {
-      $http.get(`/service/odata/ServiceAreaView?$select=id,code&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
+      $http.get(`/service/odata/ServiceAreaView?$select=id,code,name&$filter=${filter}&$orderby=id&$top=${MAX_SERVICE_AREAS_FROM_ODATA}`)
         .then((results) => {
           state.listOfServiceAreaTags = StateViewMode.removeDuplicates(state.listOfServiceAreaTags.concat(results.data), 'id')
         })

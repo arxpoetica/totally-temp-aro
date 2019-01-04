@@ -70,7 +70,7 @@ class NetworkPlanModalController {
         filter += ` (id eq ${serviceAreaId})`
       })
 
-      promises.push(this.$http.get(`/service/odata/ServiceAreaView?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
+      promises.push(this.$http.get(`/service/odata/ServiceAreaView?$select=id,code,name&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
     return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http,this.state,promises)

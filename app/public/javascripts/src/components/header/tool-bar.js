@@ -121,6 +121,7 @@ class ToolBarController {
 
   savePlanAs() {
     this.state.planInputsModal.next(true)
+    if(config.ARO_CLIENT === 'frontier') this.state.currentPlanTags = []
   }
 
   toggleMeasuringStick() {
