@@ -32,7 +32,10 @@ class PlanInputsModalController {
   }
 
   savePlanAs() {
-    this.checkIfPlanNameExists()
+    this.checkIfSATagExists()
+    .then((saTagExists) => {
+      if(saTagExists) return this.checkIfPlanNameExists()
+    })
     .then((planNameExists) => {
       if (!planNameExists) {
         if (this.parentPlan) {
@@ -57,6 +60,25 @@ class PlanInputsModalController {
           }
         }
         this.close()
+      }
+    })
+  }
+
+  checkIfSATagExists() {
+    return new Promise((resolve, reject) => {
+      // For frontier client check for atleast one SA tag selected
+      if (config.ARO_CLIENT === 'frontier') {
+        if (this.state.currentPlanServiceAreaTags.length <= 0) {
+          swal({
+            title:'Service Area Tag is Required',
+            text: 'Select Atleast One Service Area Tag',
+            type: 'error'
+          })
+        } else {
+          resolve(true)
+        }
+      } else {
+        resolve(true)
       }
     })
   }
