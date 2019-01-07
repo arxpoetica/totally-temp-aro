@@ -61,11 +61,22 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
-  cloneSelectedManagerFromSource(managerId) {
+  createBlankRateReachManager() {
+    this.setEditingManagerId({ newId: null })
+    this.setEditingMode({ mode: this.createRateReachManagerMode })
+  }
 
+  cloneSelectedRateReachManager() {
+    this.setEditingManagerId({ newId: this.selectedResourceManager.id })
+    this.setEditingMode({ mode: this.createRateReachManagerMode })
+  }
+
+  cloneSelectedManagerFromSource(managerId) {
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
       this.cloneSelectedPriceBook()
+    } else if (managerId === 'rate_reach_manager') {
+      this.cloneSelectedRateReachManager()
     } else {
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
@@ -190,6 +201,7 @@ let resourceManager = {
     listMode: '<',
     editMode: '<',
     createPriceBookMode: '<',
+    createRateReachManagerMode: '<',
     setEditingMode: '&',
     setEditingManagerId: '&',
     onManagersChanged: '&',
