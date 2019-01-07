@@ -23,7 +23,7 @@
       <label class="col-sm-4 col-form-label">Resource Managers</label>
       <div class="col-sm-8">
         <select class="form-control"
-          ng-model="$ctrl.selectedResourceManager"
+          ng-model="$ctrl.resourceItems[$ctrl.selectedResourceKey].selectedManager"
           ng-options="manager as manager.description for manager in $ctrl.resourceItems[$ctrl.selectedResourceKey].allManagers">
         </select>
       </div>
