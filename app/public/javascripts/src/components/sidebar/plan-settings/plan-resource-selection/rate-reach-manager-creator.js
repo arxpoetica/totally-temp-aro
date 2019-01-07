@@ -3,6 +3,12 @@ class RateReachManagerCreatorController {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
+
+    this.categoryTypes = [
+      { id: 'SPEED', description: 'Speeds' },
+      { id: 'BAND', description: 'Speed Bands' }
+    ]
+    this.selectedCategoryType = this.categoryTypes[0]
     this.newRateReachManagerName = 'New Rate Reach Manager'
     this.newRateReachManagerDescription = 'New Rate Reach Manager Description'
     this.sourceRateReachManager = null

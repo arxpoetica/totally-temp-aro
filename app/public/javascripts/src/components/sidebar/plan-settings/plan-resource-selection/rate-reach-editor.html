@@ -7,7 +7,7 @@
   }
 </style>
 
-<modal-header title="{{$ctrl.rateReachManager.name}}"></modal-header>
+<modal-header title="{{$ctrl.rateReachManager.name + '  [' + $ctrl.categoryDescription[$ctrl.rateReachValues.categoryType] + ']'}}"></modal-header>
 <modal-body>
   <div class="container" style="max-height: 500px;">
     <div class="row">
@@ -28,15 +28,6 @@
       <!-- On the left, show dropdowns with the options that the user can edit -->
       <div class="col-md-4" style="overflow-y: auto;">
         <form id="rateReachSettings">
-          <div class="form-group">
-            <label for="cboCategoryTypes">Category Type</label>
-            <select id="cboCategoryTypes"
-                    class="form-control"
-                    ng-model="$ctrl.selectedCategoryType"
-                    ng-options="item as item.description for item in $ctrl.categoryTypes">
-            </select>
-          </div>
-
           <div class="form-group">
             <label for="cboCalculationStrategies">Calculation Strategy</label>
             <select id="cboCalculationStrategies"

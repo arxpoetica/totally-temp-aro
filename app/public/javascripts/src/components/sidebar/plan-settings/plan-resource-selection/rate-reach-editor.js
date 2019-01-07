@@ -4,11 +4,10 @@ class RateReachEditorController {
     this.$timeout = $timeout
     this.state = state
     this.rateReachManager = { name: 'Default Rate Reach Manager' }
-    this.categoryTypes = [
-      { id: 'SPEED', description: 'Speeds' },
-      { id: 'BAND', description: 'Speed Bands' }
-    ]
-    this.selectedCategoryType = this.categoryTypes[0]
+    this.categoryDescription = {
+      SPEED: 'Speeds',
+      BAND: 'Speed Bands'
+    }
 
     this.categories = {
       SPEED: [
