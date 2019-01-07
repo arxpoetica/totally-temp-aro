@@ -23,7 +23,7 @@
       <label class="col-sm-4 col-form-label">Resource Managers</label>
       <div class="col-sm-8">
         <select class="form-control"
-          ng-model="$ctrl.selectedResourceManager"
+          ng-model="$ctrl.resourceItems[$ctrl.selectedResourceKey].selectedManager"
           ng-options="manager as manager.description for manager in $ctrl.resourceItems[$ctrl.selectedResourceKey].allManagers">
         </select>
       </div>
@@ -35,6 +35,11 @@
         <button class="btn btn-primary btn-block"
                 ng-click="$ctrl.createBlankPriceBook()"
                 ng-if="$ctrl.selectedResourceKey === 'price_book'">
+          <i class="fa fa-file action-button-icon"></i>Create a new blank Resource Manager
+        </button>
+        <button class="btn btn-primary btn-block"
+                ng-click="$ctrl.createBlankRateReachManager()"
+                ng-if="$ctrl.selectedResourceKey === 'rate_reach_manager'">
           <i class="fa fa-file action-button-icon"></i>Create a new blank Resource Manager
         </button>
         <button class="btn btn-primary btn-block" ng-click="$ctrl.editSelectedManager()">

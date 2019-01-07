@@ -6,6 +6,7 @@
                     list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
                     edit-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
                     create-price-book-mode="$ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
+                    create-rate-reach-manager-mode="$ctrl.editingModes.SHOW_RATE_REACH_MANAGER_CREATOR"
                     set-editing-mode="$ctrl.setEditingMode(mode)"
                     set-editing-manager-id="$ctrl.setEditingManagerId(newId)"
                     on-managers-changed="$ctrl.onManagersChanged()"
@@ -42,6 +43,13 @@
                     list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
                     set-editing-mode="$ctrl.setEditingMode(mode)">
   </pricebook-editor>
+
+  <rate-reach-manager-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_RATE_REACH_MANAGER_CREATOR"
+                      source-price-book-id="$ctrl.editingManagerId"
+                      list-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
+                      set-editing-mode="$ctrl.setEditingMode(mode)"
+                      on-managers-changed="$ctrl.onManagersChanged()">
+  </rate-reach-manager-creator>
 
   <rate-reach-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'rate_reach_manager'"
                 rate-reach-manager-id="$ctrl.editingManagerId"

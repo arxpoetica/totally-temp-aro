@@ -4,7 +4,8 @@ class PlanResourceEditorController {
     this.editingModes = Object.freeze({
       LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
       EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
-      SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR'
+      SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR',
+      SHOW_RATE_REACH_MANAGER_CREATOR: 'SHOW_RATE_REACH_MANAGER_CREATOR'
     })
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.editingManagerId = 1

@@ -1,0 +1,60 @@
+<style scoped>
+  .with-margin {
+    margin-bottom: 5px;
+  }
+  .action-button-icon {
+    padding-right: 10px;
+  }
+  .form-rr-creator label {
+    font-weight: 700;
+  }
+</style>
+<modal-header title="Create Rate Reach Manager"></modal-header>
+<modal-body>
+  <form class="form-horizontal form-rr-creator">
+    <!-- The source rate reach manager used when cloning -->
+    <div ng-if="$ctrl.sourceRateReachManagerId" class="form-group row">
+      <label class="col-sm-4 control-label">Rate Reach Manager to clone</label>
+      <div class="col-sm-8">
+        <input class="form-control" ng-disabled="true" ng-model="$ctrl.sourceRateReachManager.name">
+      </div>
+    </div>
+
+    <!-- The name of the new rate reach manager -->
+    <div class="form-group row">
+      <label class="col-sm-4 control-label">Name</label>
+      <div class="col-sm-8">
+        <input class="form-control" ng-model="$ctrl.newRateReachManagerName">
+      </div>
+    </div>
+
+    <!-- The description of the new rate reach manager -->
+    <div class="form-group row">
+      <label class="col-sm-4 control-label">Description</label>
+      <div class="col-sm-8">
+        <input class="form-control" ng-model="$ctrl.newRateReachManagerDescription">
+      </div>
+    </div>
+
+    <!-- The category type of the new rate reach manager -->
+    <div class="form-group row">
+      <label class="col-sm-4 control-label" for="cboCategoryTypes">Category Type</label>
+      <div class="col-sm-8">
+        <select id="cboCategoryTypes"
+                class="form-control"
+                ng-model="$ctrl.selectedCategoryType"
+                ng-options="item as item.description for item in $ctrl.categoryTypes">
+        </select>
+      </div>
+    </div>
+</form>
+    
+  <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+    <button class="btn btn-light" ng-click="$ctrl.closeDialog()">
+      <i class="fa fa-undo action-button-icon"></i>Back
+    </button>
+    <button class="btn btn-primary" ng-click="$ctrl.createRateReachManager()">
+      <i class="fa fa-save action-button-icon"></i>Create
+    </button>
+  </div>
+</modal-body>
