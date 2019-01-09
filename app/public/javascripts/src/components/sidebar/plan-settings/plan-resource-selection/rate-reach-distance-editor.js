@@ -4,14 +4,19 @@ class RateReachDistanceEditorController {
     this.$timeout = $timeout
     this.state = state
 
-    this.isCategoryInEditMode = {}  // For each category hold a flag that tells us if it is being edited
+    this.isCategoryInEditMode = []  // For each category hold a flag that tells us if it is being edited
+  }
+
+  $onChanges(changesObj) {
+    if (changesObj.categories) {
+      this.isCategoryInEditMode = []
+      changesObj.categories.forEach(item => this.isCategoryInEditMode.push(false))
+    }
   }
 
   addCategory() {
     // Add a new category and also add placeholder values for the categories
-    const MAX_ID = Math.max.apply(Math, this.categories.map(item => item.id))
     const newCategory = {
-      id: MAX_ID + 1,
       name: 'New category',
       description: 'New category'
     }
@@ -26,6 +31,7 @@ class RateReachDistanceEditorController {
   removeCategory(category) {
     const categoryIndex = this.categories.findIndex(item => item.id === category.id)
     this.categories.splice(categoryIndex, 1)
+    this.isCategoryInEditMode.splice(categoryIndex, 1)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
       Object.keys(this.rateReachGroupMap[technology].matrixInMetersMap).forEach(technologyRef => {
         this.rateReachGroupMap[technology].matrixInMetersMap[technologyRef].splice(categoryIndex, 1)
@@ -41,6 +47,7 @@ let rateReachEditor = {
   bindings: {
     categories: '=',
     rateReachGroupMap: '=',
+    technologies: '<',
     selectedTechnologyType: '<',
     allowEditableCategories: '<'
   },

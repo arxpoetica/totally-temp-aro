@@ -13,12 +13,15 @@ class ResourceManagerController {
       competition_manager: 'competitor-manager',
       rate_reach_manager: 'rate-reach-matrix'
     }
-    // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
-    this.managerEndpoints = {
-      price_book: {
-        deleteManager: `/service/v1/pricebook/${this.managerIdString}`
-      }
+    this.managerDeleteUrl = {
+      price_book: `/service/v1/price_book/${this.managerIdString}`,
+      roic_manager: `/service/v1/roic_manager/${this.managerIdString}`,
+      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}`,
+      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}`,
+      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}`,
+      competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
+      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
     }
   }
 
@@ -52,7 +55,7 @@ class ResourceManagerController {
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
       this.cloneSelectedPriceBook()
-    } else if (managerId === 'rate_reach_manager') {
+    } else if (managerId === 'rate-reach-matrix') {
       this.cloneSelectedRateReachManager()
     } else {
       // Create a resource manager
@@ -109,11 +112,13 @@ class ResourceManagerController {
       .catch((err) => console.error(err))
   }
 
-  deleteSelectedResourceManager(managerId) {
+  deleteSelectedResourceManager() {
     this.askUserToConfirmManagerDelete(this.resourceItems[this.selectedResourceKey].selectedManager.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          this.deleteManager(`/service/v1/${managerId}/${this.resourceItems[this.selectedResourceKey].selectedManager.id}`)
+          const managerIdToDelete = this.resourceItems[this.selectedResourceKey].selectedManager.id
+          const deleteUrl = this.managerDeleteUrl[this.selectedResourceKey].replace(this.managerIdString, managerIdToDelete)
+          this.deleteManager(deleteUrl)
         }
       })
       .catch((err) => console.error(err))

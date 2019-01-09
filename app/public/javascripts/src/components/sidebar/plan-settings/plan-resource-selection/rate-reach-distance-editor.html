@@ -1,8 +1,8 @@
 <style scoped>
-  #tblRateReachValues {
+  #tblrateReachConfig {
     margin-bottom: 0px;
   }
-  #tblRateReachValues td {
+  #tblrateReachConfig td {
     line-height: 33px;
   }
   .category-hover-button {
@@ -14,28 +14,32 @@
   }
 </style>
 
-<table id="tblRateReachValues" class="table table-sm table-striped">
+<table id="tblrateReachConfig" class="table table-sm table-striped">
   <thead class="thead-dark">
     <tr>
-      <th style="width: 200px;">Speed</th>
-      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
-        {{key}}
+      <th style="min-width: 200px;">Speed</th>
+      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap"
+          style="white-space: nowrap;">
+        {{$ctrl.technologies[key].name}}
       </th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="category in $ctrl.categories">
-        <td ng-if="!$ctrl.isCategoryInEditMode[category.id]" class="category-description">
+        <td ng-if="!$ctrl.isCategoryInEditMode[$index]" class="category-description">
           {{category.description}}
           <div class="float-right">
-            <button class="btn btn-sm btn-light category-hover-button" ng-click="$ctrl.isCategoryInEditMode[category.id] = true"><i class="fa fa-edit"></i></button>
+            <button class="btn btn-sm btn-light category-hover-button" ng-click="$ctrl.isCategoryInEditMode[$index] = true"><i class="fa fa-edit"></i></button>
             <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.removeCategory(category)"><i class="fa fa-trash-alt"></i></button>
           </div>
         </td>
-        <td ng-if="$ctrl.isCategoryInEditMode[category.id]" class="input-group">
-          <input class="form-control category-description" ng-model="category.description">
-          <div class="input-group-append">
-            <button class="btn btn-light" ng-click="$ctrl.isCategoryInEditMode[category.id] = false"><i class="fa fa-save"></i></span>
+        <td ng-if="$ctrl.isCategoryInEditMode[$index]" class="input-group">
+          <div>
+            <small>Name:</small>
+            <input class="form-control form-control-sm category-description" ng-model="category.name">
+            <small>Description:</small>
+            <input class="form-control form-control-sm category-description" ng-model="category.description">
+            <button class="btn btn-light" ng-click="$ctrl.isCategoryInEditMode[$index] = false"><i class="fa fa-save"></i></span>
           </div>
         </td>
         <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">

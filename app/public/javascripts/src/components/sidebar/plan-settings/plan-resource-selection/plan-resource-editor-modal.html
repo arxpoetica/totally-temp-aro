@@ -45,9 +45,10 @@
   </pricebook-editor>
 
   <rate-reach-manager-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_RATE_REACH_MANAGER_CREATOR"
-                      source-price-book-id="$ctrl.editingManagerId"
+                      source-rate-reach-manager-id="$ctrl.editingManagerId"
                       list-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
                       set-editing-mode="$ctrl.setEditingMode(mode)"
+                      on-manager-created="$ctrl.setEditingManagerId(newId)"
                       on-managers-changed="$ctrl.onManagersChanged()">
   </rate-reach-manager-creator>
 
