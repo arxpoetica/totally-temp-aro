@@ -23,7 +23,12 @@ class AroMultiSelectController {
         maxHeight: this.maxHeight ? this.maxHeight : 200,
         includeSelectAllOption: this.enableSearch ? true : false,
         enableFiltering: this.enableSearch ? true : false,
-        nonSelectedText: this.placeholder ? this.placeholder : 'None Selected'
+        nonSelectedText: this.placeholder ? this.placeholder : 'None Selected',
+        onDropdownShow: (event) => {
+          var menu = $(event.currentTarget).find(".dropdown-menu");     
+          menu.css("overflow-x", "auto");
+          menu.css("width", "100%");
+        }
       }), 0);
   }
 
