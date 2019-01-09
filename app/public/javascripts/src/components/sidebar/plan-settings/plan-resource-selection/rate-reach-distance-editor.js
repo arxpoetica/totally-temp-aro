@@ -41,6 +41,7 @@ let rateReachEditor = {
   bindings: {
     categories: '=',
     rateReachGroupMap: '=',
+    technologies: '<',
     selectedTechnologyType: '<',
     allowEditableCategories: '<'
   },

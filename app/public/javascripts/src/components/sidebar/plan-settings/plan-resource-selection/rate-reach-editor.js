@@ -50,92 +50,21 @@ class RateReachEditorController {
       RATE_REACH_RATIOS: 'RATE_REACH_RATIOS'
     })
     this.selectedEditingMode = this.editingModes.SPEEDS
+  }
 
-    this.rateReachValues = {
-      resourceManagerId: 99,
-      categoryType: 'SPEED',
-      categories: [
-        {
-          id: 1,
-          name: '1 MBps',
-          description: '1 MBps'
-        },
-        {
-          id: 5,
-          name: '5 MBps',
-          description: '5 MBps'
-        }
-      ],
-      rateReachGroupMap: {
-        Copper: {
-          technologyType: 'Copper',
-          matrixInMetersMap: {
-            ADSL: [
-              10001,
-              5002
-            ],
-            VDSL: [
-              10003,
-              5004
-            ]
-          },
-          calculationStrategy: 'NODE',
-          proximityTypes: [
-            'DISTRIBUTION'
-          ],
-          networkStructure: 'COPPER'
-        },
-        Fiber: {
-          technologyType: 'Copper',
-          matrixInMetersMap: {
-            ADSL: [
-              10005,
-              5006
-            ],
-            VDSL: [
-              10007,
-              5008
-            ]
-          },
-          calculationStrategy: 'NODE',
-          proximityTypes: [
-            'DISTRIBUTION'
-          ],
-          networkStructure: 'COPPER'
-        },
-        Wireless: {
-          technologyType: 'Copper',
-          matrixInMetersMap: {
-            ADSL: [
-              10000,
-              5000
-            ],
-            VDSL: [
-              10000,
-              5000
-            ]
-          },
-          calculationStrategy: 'NODE',
-          proximityTypes: [
-            'DISTRIBUTION'
-          ],
-          networkStructure: 'COPPER'
-        }
-      },
-      marketAdjustmentFactorMap: {
-        RETAIL: 1,
-        WHOLESALE: 0.75,
-        TOWER: 0.5
-      }
-    }
-
-    this.loadAllTechnologyTypeDetails()
+  $onInit() {
+    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`)
+      .then(result => {
+        this.rateReachConfig = result.data
+        this.loadAllTechnologyTypeDetails()
+      })
+      .catch(err => console.error(err))
   }
 
   loadAllTechnologyTypeDetails() {
     this.technologyTypeDetails = {}
     var ttPromises = []
-    Object.keys(this.rateReachValues.rateReachGroupMap).forEach(technologyType => {
+    Object.keys(this.rateReachConfig.rateReachGroupMap).forEach(technologyType => {
       ttPromises.push(this.loadTechnologyTypeDetails(technologyType))
     })
     Promise.all(ttPromises)
@@ -145,16 +74,19 @@ class RateReachEditorController {
 
   loadTechnologyTypeDetails(technologyType) {
     Promise.all([
-      this.$http.get(`/service/v1/rate-reach-matrix/calc-strategies?technology_type=${technologyType}`),
-      this.$http.get(`/service/v1/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
-      this.$http.get(`/service/v1/rate-reach-matrix/technologies?technology_type=${technologyType}`)
+      this.$http.get(`/service/rate-reach-matrix/calc-strategies?technology_type=${technologyType}`),
+      this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
+      this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}`)
     ])
       .then(results => {
         this.technologyTypeDetails[technologyType] = {
           calculationStrategies: results[0].data,
           networkStructures: results[1].data,
-          technologies: results[2].data
+          technologies: {}
         }
+        results[2].data.forEach(technology => {
+          this.technologyTypeDetails[technologyType].technologies[technology.id] = technology
+        })
         return Promise.resolve()
       })
       .catch(err => console.error(err))
@@ -167,7 +99,7 @@ class RateReachEditorController {
   }
 
   saveConfigurationToServer() {
-    console.log(JSON.parse(angular.toJson(this.rateReachValues)))
+    console.log(JSON.parse(angular.toJson(this.rateReachConfig)))
     // this.$http.put(`/service/v1/rate-reach-matrix/${this.rateReachManagerId}`, aroRateReachConfiguration)
     //   .then(res => console.log('Configuration saved successfully'))
     //   .catch(err => console.error(err))

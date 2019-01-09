@@ -1,8 +1,8 @@
 <style scoped>
-  #tblRateReachValues {
+  #tblrateReachConfig {
     margin-bottom: 0px;
   }
-  #tblRateReachValues td {
+  #tblrateReachConfig td {
     line-height: 33px;
   }
   .category-hover-button {
@@ -14,12 +14,12 @@
   }
 </style>
 
-<table id="tblRateReachValues" class="table table-sm table-striped">
+<table id="tblrateReachConfig" class="table table-sm table-striped">
   <thead class="thead-dark">
     <tr>
       <th style="width: 200px;">Speed</th>
       <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
-        {{key}}
+        {{$ctrl.technologies[key].name}}
       </th>
     </tr>
   </thead>
