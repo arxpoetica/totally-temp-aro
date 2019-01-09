@@ -46,7 +46,7 @@
             </select>
           </div>
 
-          <div class="form-group" ng-if="$ctrl.selectedCalculationStrategy === 'CABLE_PROXIMITY'">
+          <div class="form-group" ng-if="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].calculationStrategy === 'CABLE_PROXIMITY'">
             <label for="cboProximityTypes">Proximity type</label>
             <select id="cboProximityTypes"
                     class="form-control"

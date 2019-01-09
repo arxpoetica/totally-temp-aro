@@ -50,7 +50,11 @@ class RateReachManagerCreatorController {
       categoryType: this.selectedCategoryType.id,
       categories: [],
       rateReachGroupMap: {},
-      marketAdjustmentFactorMap: {}
+      marketAdjustmentFactorMap: {
+        RETAIL: 1,
+        WHOLESALE: 0.75,
+        TOWER: 0.5
+      }
     }
 
     var configPromises = []
