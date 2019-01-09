@@ -43,7 +43,8 @@
         <select id="cboCategoryTypes"
                 class="form-control"
                 ng-model="$ctrl.selectedCategoryType"
-                ng-options="item as item.description for item in $ctrl.categoryTypes">
+                ng-options="item as item.description for item in $ctrl.categoryTypes"
+                ng-disabled="$ctrl.sourceRateReachManagerId">
         </select>
       </div>
     </div>

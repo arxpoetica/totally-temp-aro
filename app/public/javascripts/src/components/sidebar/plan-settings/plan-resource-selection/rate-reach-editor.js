@@ -102,7 +102,7 @@ class RateReachEditorController {
   saveConfigurationToServer() {
     const configuration = JSON.parse(angular.toJson(this.rateReachConfig))  // Remove angularjs-specific properties from object
     this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`, configuration)
-      .then(res => console.log('Configuration saved successfully'))
+      .then(result => this.exitEditingMode())
       .catch(err => console.error(err))
   }
 

@@ -55,7 +55,7 @@ class ResourceManagerController {
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
       this.cloneSelectedPriceBook()
-    } else if (managerId === 'rate_reach_manager') {
+    } else if (managerId === 'rate-reach-matrix') {
       this.cloneSelectedRateReachManager()
     } else {
       // Create a resource manager

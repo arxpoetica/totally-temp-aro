@@ -16,7 +16,7 @@ class RateReachManagerCreatorController {
 
   $onInit() {
     if (this.sourceRateReachManagerId) {
-      this.$http.get(`/service/v1/rate-reach-matrix/${this.sourceRateReachManagerId}`)
+      this.$http.get(`/service/rate-reach-matrix/resource/${this.sourceRateReachManagerId}`)
         .then(result => this.sourceRateReachManager = result.data)
         .catch(err => console.error(err))
     }
@@ -37,6 +37,7 @@ class RateReachManagerCreatorController {
       .then((defaultConfiguration) => this.$http.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
       .then(() => {
         this.onManagerCreated && this.onManagerCreated({ newId: createdRateReachManager.id })
+        this.onManagersChanged && this.onManagersChanged()
         this.setEditingMode && this.setEditingMode({ mode: this.listMode })
         this.$timeout()
       })
@@ -102,6 +103,7 @@ let rateReachManagerCreator = {
     sourceRateReachManagerId: '<',
     technologyTypeDetails: '<',
     onManagerCreated: '&',
+    onManagersChanged: '&',
     listMode: '<',
     setEditingMode: '&'
   },
