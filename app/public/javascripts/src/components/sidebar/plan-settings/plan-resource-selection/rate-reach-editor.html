@@ -51,7 +51,7 @@
             <select id="cboProximityTypes"
                     class="form-control"
                     ng-model="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].proximityTypes[0]"
-                    ng-options="item as item.description for item in $ctrl.proximityTypes">
+                    ng-options="item.id as item.description for item in $ctrl.proximityTypes">
             </select>
           </div>
         </form>
