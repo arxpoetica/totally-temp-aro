@@ -74,7 +74,7 @@ class RateReachEditorController {
   }
 
   loadTechnologyTypeDetails(technologyType) {
-    Promise.all([
+    return Promise.all([
       this.$http.get(`/service/rate-reach-matrix/calc-strategies?technology_type=${technologyType}`),
       this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
       this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}`)
