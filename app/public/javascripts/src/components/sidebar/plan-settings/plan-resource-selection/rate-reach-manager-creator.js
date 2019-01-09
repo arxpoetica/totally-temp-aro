@@ -36,7 +36,7 @@ class RateReachManagerCreatorController {
       })
       .then((defaultConfiguration) => this.$http.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
       .then(() => {
-        this.onManagersChanged && this.onManagersChanged()
+        this.onManagerCreated && this.onManagerCreated({ newId: createdRateReachManager.id })
         this.setEditingMode && this.setEditingMode({ mode: this.listMode })
         this.$timeout()
       })
@@ -85,7 +85,6 @@ class RateReachManagerCreatorController {
     })
 
     return Promise.all(configPromises)
-      .then(() => { console.log(configuration); return Promise.resolve()})
       .then(() => Promise.resolve(configuration))
       .catch(err => console.error(err))
   }
@@ -102,7 +101,7 @@ let rateReachManagerCreator = {
   bindings: {
     sourceRateReachManagerId: '<',
     technologyTypeDetails: '<',
-    onManagersChanged: '&',
+    onManagerCreated: '&',
     listMode: '<',
     setEditingMode: '&'
   },

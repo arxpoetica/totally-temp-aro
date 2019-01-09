@@ -48,7 +48,7 @@
                       source-price-book-id="$ctrl.editingManagerId"
                       list-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
                       set-editing-mode="$ctrl.setEditingMode(mode)"
-                      on-managers-changed="$ctrl.onManagersChanged()">
+                      on-manager-created="$ctrl.setEditingManagerId(newId)">
   </rate-reach-manager-creator>
 
   <rate-reach-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'rate_reach_manager'"

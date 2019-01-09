@@ -57,6 +57,7 @@ class RateReachEditorController {
       .then(result => {
         this.rateReachConfig = result.data
         this.loadAllTechnologyTypeDetails()
+        this.$timeout()
       })
       .catch(err => console.error(err))
   }
@@ -99,10 +100,10 @@ class RateReachEditorController {
   }
 
   saveConfigurationToServer() {
-    console.log(JSON.parse(angular.toJson(this.rateReachConfig)))
-    // this.$http.put(`/service/v1/rate-reach-matrix/${this.rateReachManagerId}`, aroRateReachConfiguration)
-    //   .then(res => console.log('Configuration saved successfully'))
-    //   .catch(err => console.error(err))
+    const configuration = JSON.parse(angular.toJson(this.rateReachConfig))  // Remove angularjs-specific properties from object
+    this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`, configuration)
+      .then(res => console.log('Configuration saved successfully'))
+      .catch(err => console.error(err))
   }
 
   exitEditingMode() {
