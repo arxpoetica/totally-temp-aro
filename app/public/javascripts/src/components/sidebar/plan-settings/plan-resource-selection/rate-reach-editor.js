@@ -1,31 +1,10 @@
 class RateReachEditorController {
-  constructor($http, $timeout, state) {
+  constructor($http, $timeout) {
     this.$http = $http
     this.$timeout = $timeout
-    this.state = state
-    this.rateReachManager = { name: 'Default Rate Reach Manager' }
     this.categoryDescription = {
       SPEED: 'Speeds',
       BAND: 'Speed Bands'
-    }
-
-    this.categories = {
-      SPEED: [
-        { id: 1, name: '1 Mbps', description: '1 Mbps' },
-        { id: 3, name: '3 Mbps', description: '3 Mbps' },
-        { id: 4, name: '4 Mbps', description: '4 Mbps' },
-        { id: 6, name: '6 Mbps', description: '6 Mbps' },
-        { id: 12, name: '12 Mbps', description: '12 Mbps' },
-        { id: 15, name: '15 Mbps', description: '15 Mbps' },
-        { id: 20, name: '20 Mbps', description: '20 Mbps' },
-        { id: 24, name: '24 Mbps', description: '24 Mbps' },
-        { id: 25, name: '25 Mbps', description: '25 Mbps' }
-      ],
-      BAND: [
-        { id: 1001, name: 'Far net', description: 'Far net' },
-        { id: 1002, name: 'Medium net', description: 'Medium net' },
-        { id: 1003, name: 'On net', description: 'On net' }
-      ]
     }
 
     this.rateReachRatioDescription = {
@@ -52,7 +31,11 @@ class RateReachEditorController {
     this.selectedEditingMode = this.editingModes.SPEEDS
   }
 
-  $onInit() {
+  reloadRateReachManagerConfiguration() {
+    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}`)
+      .then(result => this.rateReachManager = result.data)
+      .catch(err => console.error(err))
+
     this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`)
       .then(result => {
         this.rateReachConfig = result.data
@@ -95,7 +78,7 @@ class RateReachEditorController {
 
   $onChanges(changesObj) {
     if (changesObj.rateReachManagerId) {
-      // this.reloadRoicManagerConfiguration()
+      this.reloadRateReachManagerConfiguration()
     }
   }
 
@@ -111,7 +94,7 @@ class RateReachEditorController {
   }
 }
 
-RateReachEditorController.$inject = ['$http', '$timeout', 'state']
+RateReachEditorController.$inject = ['$http', '$timeout']
 
 let rateReachEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/rate-reach-editor.html',
