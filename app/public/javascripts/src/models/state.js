@@ -755,19 +755,6 @@ class State {
         }
       })
 
-      // HACKED AND HARDCODED for now:
-      newResourceItems['rate_reach_manager'] = {
-        id: 'rate_reach_manager',
-        description: 'Rate Reach Manager',
-        allManagers: [{
-          id: 99,
-          description: 'Default Rate Reach Manager'
-        }],
-        selectedManager: null
-      }
-      selectedResourceManagers.push({ aroResourceType: 'rate_reach_manager', resourceManagerId: 99 })
-
-
       // Then add all the managers in the system to the appropriate type
       allResourceManagers.forEach((resourceManager) => {
         if (!resourceManager.deleted) {
