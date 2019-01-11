@@ -26,44 +26,35 @@
     </div>
     <div class="row">
       <!-- On the left, show dropdowns with the options that the user can edit -->
-      <div class="col-md-2" style="overflow-y: auto;">
+      <div class="col-md-3" style="overflow-y: auto;">
         <form id="rateReachSettings">
-          <div class="form-group">
-            <label for="cboCalculationStrategies">Calculation Strategy</label>
-            <select id="cboCalculationStrategies"
-                    class="form-control"
-                    ng-model="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].calculationStrategy"
-                    ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].calculationStrategies">
-            </select>
-          </div>
+          <span class="ctype-checkbox" style="margin-right: 5px;">
+            <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
+                   ng-model="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].active">
+          </span>
+          <label class="ctype-name">Enabled</label>
 
-          <div class="form-group">
-            <label for="cboNetworkStructures">Network Structure</label>
-            <select id="cboNetworkStructures"
-                    class="form-control"
-                    ng-model="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].networkStructure"
-                    ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].networkStructures">
-            </select>
-          </div>
-
-          <div class="form-group" ng-if="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].calculationStrategy === 'CABLE_PROXIMITY'">
-            <label for="cboProximityTypes">Proximity type</label>
-            <select id="cboProximityTypes"
-                    class="form-control"
-                    ng-model="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].proximityTypes[0]"
-                    ng-options="item.id as item.description for item in $ctrl.proximityTypes">
-            </select>
+          <div style="position: relative; margin-top: 10px;">
+            <div class="form-group">
+              <label for="cboNetworkStructures">Network Connectivity</label>
+              <select id="cboNetworkStructures"
+                      class="form-control"
+                      ng-model="$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].networkStructure"
+                      ng-options="item as item for item in $ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].networkStructures">
+              </select>
+            </div>
+            <div class="disable-sibling-controls" ng-if="!$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].active"></div>
           </div>
         </form>
       </div>
 
       <!-- On the right, show the details of the currently selected combination of category type, technology type, etc. -->
-      <div class="col-md-10" style="overflow-y: auto;">
+      <div class="col-md-9" style="overflow-y: auto;">
         <ul class="nav nav-tabs">
           <li class="nav-item">
             <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS }"
               href="#"
-              ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.SPEEDS">Speeds</a>
+              ng-click="$ctrl.selectedEditingMode = $ctrl.editingModes.SPEEDS">{{$ctrl.categoryDescription[$ctrl.rateReachConfig.categoryType]}}</a>
           </li>
           <li class="nav-item">
             <a ng-class="{ 'nav-link': true, 'active': $ctrl.selectedEditingMode === $ctrl.editingModes.RATE_REACH_RATIOS }"
@@ -75,6 +66,7 @@
         <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS">
           <rate-reach-distance-editor
             categories="$ctrl.rateReachConfig.categories"
+            category-description="$ctrl.categoryDescription[$ctrl.rateReachConfig.categoryType]"
             rate-reach-group-map="$ctrl.rateReachConfig.rateReachGroupMap"
             technologies="$ctrl.technologyTypeDetails[$ctrl.selectedTechnologyType].technologies"
             selected-technology-type="$ctrl.selectedTechnologyType"
@@ -89,6 +81,7 @@
             </tr>
           </table>
         </div>
+        <div class="disable-sibling-controls" ng-if="!$ctrl.rateReachConfig.rateReachGroupMap[$ctrl.selectedTechnologyType].active"></div>
       </div>
     </div>
   </div>

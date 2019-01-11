@@ -45,7 +45,7 @@ class RateReachManagerCreatorController {
   }
 
   getDefaultConfiguration() {
-    const technologyTypes = ['Copper', 'Fiber', 'FiveG', 'Mixed']
+    const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
     const configuration = {
       managerType: 'rate_reach_manager',
       categoryType: this.selectedCategoryType.id,
@@ -65,18 +65,14 @@ class RateReachManagerCreatorController {
       }
 
       const configPromise = Promise.all([
-        this.$http.get(`/service/rate-reach-matrix/calc-strategies?technology_type=${technologyType}`),
         this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
         this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}`)
       ])
         .then(results => {
-          configuration.rateReachGroupMap[technologyType].calculationStrategy = results[0].data[0]
-          configuration.rateReachGroupMap[technologyType].networkStructure = results[1].data[0]
-          if (configuration.rateReachGroupMap[technologyType].calculationStrategy === 'CABLE_PROXIMITY') {
-            configuration.rateReachGroupMap[technologyType].proximityTypes = ['DISTRIBUTION']
-          }
+          configuration.rateReachGroupMap[technologyType].active = false
+          configuration.rateReachGroupMap[technologyType].networkStructure = results[0].data[0]
           configuration.rateReachGroupMap[technologyType].matrixInMetersMap = {}
-          results[2].data.forEach(technology => {
+          results[1].data.forEach(technology => {
             configuration.rateReachGroupMap[technologyType].matrixInMetersMap[technology.id] = []
           })
         })

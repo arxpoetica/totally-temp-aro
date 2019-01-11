@@ -23,7 +23,7 @@ class RateReachDistanceEditorController {
     this.categories.push(newCategory)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
       Object.keys(this.rateReachGroupMap[technology].matrixInMetersMap).forEach(technologyRef => {
-        this.rateReachGroupMap[technology].matrixInMetersMap[technologyRef].push(1000)
+        this.rateReachGroupMap[technology].matrixInMetersMap[technologyRef].push(0)
       })
     })
   }
@@ -46,6 +46,7 @@ let rateReachEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor.html',
   bindings: {
     categories: '=',
+    categoryDescription: '<',
     rateReachGroupMap: '=',
     technologies: '<',
     selectedTechnologyType: '<',

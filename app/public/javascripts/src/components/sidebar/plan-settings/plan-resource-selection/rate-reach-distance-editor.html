@@ -17,7 +17,7 @@
 <table id="tblrateReachConfig" class="table table-sm table-striped">
   <thead class="thead-dark">
     <tr>
-      <th style="min-width: 200px;">Speed</th>
+      <th style="min-width: 200px;">{{$ctrl.categoryDescription}}</th>
       <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap"
           style="white-space: nowrap;">
         {{$ctrl.technologies[key].name}}
