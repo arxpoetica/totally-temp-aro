@@ -1,13 +1,14 @@
 var marked = require('marked')
-var showdown  = require('showdown') 
 
 class ReleaseNotesController {
 
-  constructor($element, $http, globalSettingsService) {
+  constructor($element, $http, $timeout, globalSettingsService) {
     this.$element = $element
     this.$http = $http
+    this.$timeout = $timeout
     this.globalSettingsService = globalSettingsService
 
+    this.versionToNameInfo = []
     this.markedOptions = {
       "baseUrl": null,
       "breaks": false,
@@ -27,22 +28,41 @@ class ReleaseNotesController {
       "xhtml": false
      }
   }
+
+  onClickVersion(id){
+    this.$http.get(`/reports/releaseNotes/${id}`)
+    .then((result) => {
+      console.log(marked(result.data.description,this.markedOptions))
+      this.globalSettingsService.currentReleaseNotesView = this.globalSettingsService.ReleaseNotesView.Description
+      this.$element.find("#releaseNotes")[0].innerHTML = marked(result.data.description,this.markedOptions)
+      this.$timeout()
+    })
+  }
   
   $onInit() {
     this.$http.get(`/reports/releaseNotes`)
     .then((result) => {
-      //this.$element.find("#releaseNotes")[0].innerHTML = marked(result.data[0].release_notes,this.markedOptions)
-      var converter = new showdown.Converter()
-      var html = converter.makeHtml(result.data[0].release_notes);
-      this.$element.find("#releaseNotes")[0].innerHTML = html
+      result.data.forEach((notes) => {
+        // var versionTable = this.$element.find("#versionTable")[0]
+        // var row = versionTable.insertRow(0)
+        // var column1 = row.insertCell(0);
+        // var column2 = row.insertCell(1);
+        // column1.innerHTML = notes.version;
+        // column2.innerHTML = marked(notes.name,this.markedOptions);
+
+        this.versionToNameInfo.push({'id':notes.id,'version':notes.version,'name': marked(notes.name,this.markedOptions)})
+      })
     })
   }
 }
 
-ReleaseNotesController.$inject = ['$element', '$http', 'globalSettingsService']
+ReleaseNotesController.$inject = ['$element', '$http','$timeout','globalSettingsService']
 
 let releaseNotes = {
   templateUrl: '/components/global-settings/release-notes.html',
+  bindings: {
+    releaseNotesView: '='
+  },
   controller: ReleaseNotesController
 }
 

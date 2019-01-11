@@ -121,10 +121,11 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-animate.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-sanitize.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.10/ngStorage.min.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-      var app = angular.module('aro', ['ngAnimate','ngStorage','ui-notification', 'ui.select', 'ng-currency', 'chart.js']);
+      var app = angular.module('aro', ['ngAnimate','ngStorage','ngSanitize','ui-notification', 'ui.select', 'ng-currency', 'chart.js']);
       app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
         NotificationProvider.setOptions({
           maxCount : 1,

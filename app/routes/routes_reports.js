@@ -713,12 +713,18 @@ exports.configure = (api, middleware) => {
   });
 
   api.get("/reports/releaseNotes", function (request, response, next) {
-    var notes = `select * from client.release_notes`;
-
+    var notes = `select id,version,name from client.release_notes order by id desc`;
     database.query(notes).then((result) => {
       response.send(result)
     })
+  });
 
+  api.get("/reports/releaseNotes/:id", function (request, response, next) {
+    var version_id = request.params.id
+    database.findOne('select id,description from client.release_notes where id =$1', [version_id])
+      .then((result) => {
+        response.send(result)
+      })
   });
 
 }

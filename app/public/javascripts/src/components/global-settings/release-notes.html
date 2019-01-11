@@ -1,3 +1,21 @@
 <div>
-  <p id="releaseNotes"></p>
+
+  <table id="versionTable" class="table table-sm table-striped" 
+    ng-if="$ctrl.releaseNotesView === $ctrl.globalSettingsService.ReleaseNotesView.List">
+    <tbody>
+
+        <tr style="cursor: pointer" 
+          ng-repeat="versionInfo in $ctrl.versionToNameInfo" 
+          ng-click="$ctrl.onClickVersion(versionInfo.id)">
+          <td>{{versionInfo.version}}</td>
+          <td ng-bind-html="versionInfo.name"></td>
+        </tr>
+
+    </tbody>
+  </table>
+
+  <div ng-show="$ctrl.releaseNotesView === $ctrl.globalSettingsService.ReleaseNotesView.Description">
+    <p id="releaseNotes"></p>
+  </div>
+
 </div>

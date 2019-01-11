@@ -83,7 +83,9 @@
     <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER" manager-view="$ctrl.globalSettingsService.currentTagManagerView">
     </tag-manager>
 
-    <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"></release-notes>
+    <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
+      release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
+    </release-notes>
   </modal-body>
 
   <modal-footer>
@@ -107,10 +109,7 @@
     <button ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.UpdateTag" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.updateTag()">Update Tag</button>
     <button ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER && $ctrl.globalSettingsService.currentTagManagerView === $ctrl.globalSettingsService.TagManagerViews.CreateTag" type="submit" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.createTag()">Create Tag</button>
 
-    <!-- Back button - show when we are in any mode other than "Global Settings" -->
-    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS && !$ctrl.isManageUsersView()" class="btn btn-primary float-right" 
-      ng-click="$ctrl.backToGlobalSettings()">Back</button>
-    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS && $ctrl.isManageUsersView()" class="btn btn-primary float-right" 
-      ng-click="$ctrl.globalSettingsService.openUserView()">Back</button>
+    <button ng-if="$ctrl.currentView !== $ctrl.views.GLOBAL_SETTINGS" class="btn btn-primary float-right" ng-click="$ctrl.goBack()">Back</button>
+
   </modal-footer>
 </modal>

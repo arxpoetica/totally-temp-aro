@@ -35,9 +35,23 @@ class GlobalSettingsController {
     this.globalSettingsService.currentManageUserView === this.globalSettingsService.ManageUserViews.RegisterUser
   }
 
+  isReleaseNotesDescriptionView() {
+    return this.globalSettingsService.currentReleaseNotesView === this.globalSettingsService.ReleaseNotesView.Description
+  }
+
   openUserSettingsForUserId(userId) {
     this.userIdForSettingsEdit = userId
     this.currentView = this.views.USER_SETTINGS
+  }
+
+  goBack() {
+    if(!this.isManageUsersView() && !this.isReleaseNotesDescriptionView()) {
+      this.backToGlobalSettings()
+    } else if (this.isManageUsersView() && !this.isReleaseNotesDescriptionView()) {
+      this.globalSettingsService.openUserView()
+    } else if (this.isReleaseNotesDescriptionView()) {
+      this.globalSettingsService.currentReleaseNotesView = this.globalSettingsService.ReleaseNotesView.List
+    }
   }
 }
 
