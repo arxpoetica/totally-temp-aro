@@ -1485,16 +1485,6 @@ class State {
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
 
-    //Check if user is loggedin before, If not show notification
-    if (!localStorage.getItem("loginUsersInfo") ||
-      (localStorage.getItem("loginUsersInfo") && JSON.parse(localStorage.getItem("loginUsersInfo")).indexOf(service.loggedInUser.id) <= -1)) {
-      Notification('New Features are implemented')
-    }
-
-    //Adding LoggedIn users info to Localstorage
-    var loggedInUserList = new Set(JSON.parse(localStorage.getItem("loginUsersInfo"))).add(service.loggedInUser.id)
-    localStorage.setItem("loginUsersInfo",JSON.stringify([...loggedInUserList]))  
-
     service.isUserAdministrator(service.loggedInUser.id)
       .then((isAdministrator) => {
         service.loggedInUser.isAdministrator = isAdministrator
@@ -1572,6 +1562,8 @@ class State {
     service.setOptimizationOptions()
     tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
     tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
+
+    service.getReleaseVersions()
   }
 
   service.setOptimizationOptions = () => {
@@ -1809,6 +1801,29 @@ class State {
       }
     })
     return validEquipments
+  }
+
+  service.listOfAppVersions = []
+  service.getReleaseVersions = () => {
+
+    $http.get(`/reports/releaseNotes/versions`)
+    .then((result) => {
+      service.listOfAppVersions = result.data.versions
+
+      // 
+      if (!localStorage.getItem(service.loggedInUser.id)) {
+        Notification('New Features are implemented')
+      }
+      var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
+      //console.log(_.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)))
+
+      if(_.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
+        Notification('New Features are implemented')
+      }
+      
+      localStorage.setItem(service.loggedInUser.id,JSON.stringify(service.listOfAppVersions))
+    })
+
   }
 
   return service

@@ -712,6 +712,12 @@ exports.configure = (api, middleware) => {
     .catch(next)
   });
 
+  api.get("/reports/releaseNotes/versions", function (request, response, next) {
+    database.findOne('select array_agg(version) as versions from client.release_notes').then((result) => {
+      response.send(result)
+    })
+  });
+
   api.get("/reports/releaseNotes", function (request, response, next) {
     var notes = `select id,version,name from client.release_notes order by id desc`;
     database.query(notes).then((result) => {
