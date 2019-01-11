@@ -12,7 +12,8 @@ class GlobalSettingsController {
       MANAGE_USERS: 'Manage Users',
       MANAGE_GROUPS: 'Manage Groups',
       USER_SETTINGS: 'User Settings',
-      TAG_MANAGER: 'Tag Manager'
+      TAG_MANAGER: 'Tag Manager',
+      RELEASE_NOTES: 'Release Notes'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
     this.userIdForSettingsEdit = this.state.loggedInUser.id

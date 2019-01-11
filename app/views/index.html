@@ -4,7 +4,9 @@
     <title ng-bind="appTitle"></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <% if (config.ARO_CLIENT != 'frontier') { %>
+      <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <% } %>
     <link href="https://fonts.googleapis.com/css?family=Exo:400,700" rel="stylesheet">
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap-multiselect.css">
@@ -119,12 +121,15 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular-animate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.10/ngStorage.min.js"></script>
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-      var app = angular.module('aro', ['ngAnimate','ui-notification', 'ui.select', 'ng-currency', 'chart.js']);
+      var app = angular.module('aro', ['ngAnimate','ngStorage','ui-notification', 'ui.select', 'ng-currency', 'chart.js']);
       app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
         NotificationProvider.setOptions({
-          maxCount : 1
+          maxCount : 1,
+          positionX: 'left',
+          positionY: 'top'
         });
         $qProvider.errorOnUnhandledRejections(false);
       }]);

@@ -5,7 +5,7 @@ import Constants from '../components/common/constants'
 class State {
 //app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
+  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
@@ -1485,6 +1485,16 @@ class State {
     // Set the logged in user, then call all the initialization functions that depend on having a logged in user.
     service.loggedInUser = user
 
+    //Check if user is loggedin before, If not show notification
+    if (!localStorage.getItem("loginUsersInfo") ||
+      (localStorage.getItem("loginUsersInfo") && JSON.parse(localStorage.getItem("loginUsersInfo")).indexOf(service.loggedInUser.id) <= -1)) {
+      Notification('New Features are implemented')
+    }
+
+    //Adding LoggedIn users info to Localstorage
+    var loggedInUserList = new Set(JSON.parse(localStorage.getItem("loginUsersInfo"))).add(service.loggedInUser.id)
+    localStorage.setItem("loginUsersInfo",JSON.stringify([...loggedInUserList]))  
+
     service.isUserAdministrator(service.loggedInUser.id)
       .then((isAdministrator) => {
         service.loggedInUser.isAdministrator = isAdministrator
@@ -1806,6 +1816,6 @@ class State {
 }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State

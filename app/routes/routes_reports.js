@@ -712,4 +712,13 @@ exports.configure = (api, middleware) => {
     .catch(next)
   });
 
+  api.get("/reports/releaseNotes", function (request, response, next) {
+    var notes = `select * from client.release_notes`;
+
+    database.query(notes).then((result) => {
+      response.send(result)
+    })
+
+  });
+
 }

@@ -9,6 +9,16 @@
     margin: 10px;
     height: 100px
   }
+
+  .notification .badge {
+    position: relative;
+    top: -63px;
+    right: -10px;
+    padding: 5px 10px;
+    border-radius: 50%;
+    background-color: red;
+    color: white;
+  }
 </style>
 <modal visible="$ctrl.state.showGlobalSettings" modal-size="$ctrl.currentView === $ctrl.views.MANAGE_USERS ? 'modal-lg' : 'modal-md'" backdrop="static" on-hide="$ctrl.modalHide()">
   <modal-header title="{{$ctrl.currentView}}"></modal-header>
@@ -45,6 +55,12 @@
         <i class="fa fa-2x fa-tags"></i>
         <br>Tag Manager
       </button>
+
+      <button class="btn btn-light settings-btn notification" ng-click="$ctrl.currentView = $ctrl.views.RELEASE_NOTES">
+        <i class="fa fa-2x fa-bell"></i>
+        <br>Release Notes
+        <span class="badge">!</span>
+      </button>
     </div>
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
@@ -66,6 +82,8 @@
 
     <tag-manager ng-if="$ctrl.currentView === $ctrl.views.TAG_MANAGER" manager-view="$ctrl.globalSettingsService.currentTagManagerView">
     </tag-manager>
+
+    <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"></release-notes>
   </modal-body>
 
   <modal-footer>

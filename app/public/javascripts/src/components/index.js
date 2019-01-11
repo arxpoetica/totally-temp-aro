@@ -91,6 +91,7 @@ import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 import userSettings from './global-settings/user-settings'
 import tagManager from './global-settings/tag-manager'
+import releaseNotes from './global-settings/release-notes'
 import createUpdateTag from './global-settings/create-update-tag'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
@@ -192,6 +193,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('tile', tile)
    .component('userSettings', userSettings)
    .component('tagManager', tagManager)
+   .component('releaseNotes', releaseNotes)
    .component('createUpdateTag', createUpdateTag)
    .component('aroObjectEditor', aroObjectEditor)
    .component('editorInterfaceTree', editorInterfaceTree)
