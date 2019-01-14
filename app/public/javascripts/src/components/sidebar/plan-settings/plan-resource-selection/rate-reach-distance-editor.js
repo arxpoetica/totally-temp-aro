@@ -66,11 +66,12 @@ class RateReachDistanceEditorController {
     this.$timeout()
   }
 
-  $onChanges(changesObj) {
-    if (changesObj.categories) {
+  $doCheck() {
+    if (this.oldCategories !== this.categories) {
+      this.oldCategories = this.categories
       this.isCategoryInEditMode = []
       this.editableCategories = []
-      changesObj.categories.forEach(category => {
+      this.categories.forEach(category => {
         this.isCategoryInEditMode.push(false)
         this.editableCategories.push((this.categoryType === 'SPEED') ? SpeedCategory.fromServiceCategory(category) : category)
       })
