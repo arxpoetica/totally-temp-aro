@@ -122,8 +122,10 @@ class RateReachDistanceEditorController {
       const speedMbps = this.editableCategories[index].speed * multiplier
       Object.keys(this.rateReachGroupMap).forEach(technology => {
         Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-          this.rateReachGroupMap[technology].matrixMap[technologyRef].forEach(distanceSpeedPair => {
-            distanceSpeedPair.speed = speedMbps
+          this.rateReachGroupMap[technology].matrixMap[technologyRef].forEach((item, arrIndex) => {
+            if (index === arrIndex) {
+              this.rateReachGroupMap[technology].matrixMap[technologyRef][arrIndex].speed = speedMbps
+            }
           })
         })
       })  
