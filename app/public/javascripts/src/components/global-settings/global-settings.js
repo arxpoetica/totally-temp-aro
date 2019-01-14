@@ -12,15 +12,22 @@ class GlobalSettingsController {
       MANAGE_USERS: 'Manage Users',
       MANAGE_GROUPS: 'Manage Groups',
       USER_SETTINGS: 'User Settings',
-      TAG_MANAGER: 'Tag Manager'
+      TAG_MANAGER: 'Tag Manager',
+      RELEASE_NOTES: 'Release Notes'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
     this.userIdForSettingsEdit = this.state.loggedInUser.id
+
+    state.openGlobalSettingsView.skip(1).subscribe((view) => {
+      this.currentView = this.views[view]
+    })
+    
   }
 
   modalHide() {
     this.state.showGlobalSettings = false
     this.globalSettingsService.currentManageUserView = this.globalSettingsService.ManageUserViews.Users
+    this.globalSettingsService.currentReleaseNotesView = this.globalSettingsService.ReleaseNotesView.List
     this.backToGlobalSettings()
   }
 
@@ -34,9 +41,23 @@ class GlobalSettingsController {
     this.globalSettingsService.currentManageUserView === this.globalSettingsService.ManageUserViews.RegisterUser
   }
 
+  isReleaseNotesDescriptionView() {
+    return this.globalSettingsService.currentReleaseNotesView === this.globalSettingsService.ReleaseNotesView.Description
+  }
+
   openUserSettingsForUserId(userId) {
     this.userIdForSettingsEdit = userId
     this.currentView = this.views.USER_SETTINGS
+  }
+
+  goBack() {
+    if(!this.isManageUsersView() && !this.isReleaseNotesDescriptionView()) {
+      this.backToGlobalSettings()
+    } else if (this.isManageUsersView() && !this.isReleaseNotesDescriptionView()) {
+      this.globalSettingsService.openUserView()
+    } else if (this.isReleaseNotesDescriptionView()) {
+      this.globalSettingsService.currentReleaseNotesView = this.globalSettingsService.ReleaseNotesView.List
+    }
   }
 }
 
