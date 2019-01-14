@@ -727,7 +727,7 @@ exports.configure = (api, middleware) => {
 
   api.get("/reports/releaseNotes/:id", function (request, response, next) {
     var version_id = request.params.id
-    database.findOne('select id,description from client.release_notes where id =$1', [version_id])
+    database.findOne('select id,version,description from client.release_notes where id =$1', [version_id])
       .then((result) => {
         response.send(result)
       })

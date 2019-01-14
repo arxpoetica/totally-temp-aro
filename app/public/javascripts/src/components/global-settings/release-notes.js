@@ -8,6 +8,7 @@ class ReleaseNotesController {
     this.$timeout = $timeout
     this.globalSettingsService = globalSettingsService
 
+    this.releaseVersion = null
     this.versionToNameInfo = []
     this.markedOptions = {
       "baseUrl": null,
@@ -32,8 +33,9 @@ class ReleaseNotesController {
   onClickVersion(id){
     this.$http.get(`/reports/releaseNotes/${id}`)
     .then((result) => {
-      console.log(marked(result.data.description,this.markedOptions))
       this.globalSettingsService.currentReleaseNotesView = this.globalSettingsService.ReleaseNotesView.Description
+
+      this.releaseVersion = result.data.version
       this.$element.find("#releaseNotes")[0].innerHTML = marked(result.data.description,this.markedOptions)
       this.$timeout()
     })

@@ -245,6 +245,7 @@ class State {
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
+  service.openGlobalSettingsView = new Rx.BehaviorSubject({})
   service.showPlanResourceEditorModal = false
   service.showRoicReportsModal = false
   service.editingPlanResourceKey = null
@@ -1809,20 +1810,22 @@ class State {
     $http.get(`/reports/releaseNotes/versions`)
     .then((result) => {
       service.listOfAppVersions = result.data.versions
-
-      // 
-      if (!localStorage.getItem(service.loggedInUser.id)) {
-        Notification('New Features are implemented')
-      }
       var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
-      //console.log(_.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)))
 
-      if(_.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
-        Notification('New Features are implemented')
+      if (!localStorage.getItem(service.loggedInUser.id) ||
+        _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
+        Notification.primary({
+          message: `<a href="#" onClick="openReleaseNotes()">New Features are implemented</a>`
+        })
       }
       
       localStorage.setItem(service.loggedInUser.id,JSON.stringify(service.listOfAppVersions))
     })
+
+    service.openReleaseNotes = () => {
+      service.showGlobalSettings = true
+      service.openGlobalSettingsView.next('RELEASE_NOTES')
+    }
 
   }
 

@@ -17,11 +17,17 @@ class GlobalSettingsController {
     })
     this.currentView = this.views.GLOBAL_SETTINGS
     this.userIdForSettingsEdit = this.state.loggedInUser.id
+
+    state.openGlobalSettingsView.skip(1).subscribe((view) => {
+      this.currentView = this.views[view]
+    })
+    
   }
 
   modalHide() {
     this.state.showGlobalSettings = false
     this.globalSettingsService.currentManageUserView = this.globalSettingsService.ManageUserViews.Users
+    this.globalSettingsService.currentReleaseNotesView = this.globalSettingsService.ReleaseNotesView.List
     this.backToGlobalSettings()
   }
 
