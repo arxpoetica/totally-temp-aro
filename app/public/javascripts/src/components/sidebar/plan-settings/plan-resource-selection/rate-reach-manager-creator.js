@@ -71,9 +71,9 @@ class RateReachManagerCreatorController {
         .then(results => {
           configuration.rateReachGroupMap[technologyType].active = false
           configuration.rateReachGroupMap[technologyType].networkStructure = results[0].data[0]
-          configuration.rateReachGroupMap[technologyType].matrixInMetersMap = {}
+          configuration.rateReachGroupMap[technologyType].matrixMap = {}
           results[1].data.forEach(technology => {
-            configuration.rateReachGroupMap[technologyType].matrixInMetersMap[technology.id] = []
+            configuration.rateReachGroupMap[technologyType].matrixMap[technology.id] = []
           })
         })
         .catch(err => console.error(err))

@@ -65,6 +65,7 @@
 
         <div ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SPEEDS">
           <rate-reach-distance-editor
+            category-type="$ctrl.rateReachConfig.categoryType"
             categories="$ctrl.rateReachConfig.categories"
             category-description="$ctrl.categoryDescription[$ctrl.rateReachConfig.categoryType]"
             rate-reach-group-map="$ctrl.rateReachConfig.rateReachGroupMap"
