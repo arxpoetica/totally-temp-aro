@@ -30,13 +30,40 @@ class SpeedCategory {
 }
 
 class RateReachDistanceEditorController {
-  constructor($http, $timeout, state) {
+  constructor($element, $http, $timeout, state) {
+    this.$element = $element
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
 
     this.isCategoryInEditMode = []  // For each category hold a flag that tells us if it is being edited
     this.editableCategories = []    // For each category, we have a "editable" category that we can copy back-and-forth
+  }
+
+  $onInit() {
+    // Use JQuery-UI Sortable to allow the table rows to be sorted using drag-and-drop
+    const sortableBody = this.$element.find('#rateReachDistanceEditorSortableBody')
+    sortableBody.sortable({
+      handle: '.row-draggable-handle',
+      stop: this.handleSortOrderChanged.bind(this)
+    });
+    sortableBody.disableSelection();
+  }
+
+  handleSortOrderChanged(event, ui) {
+    // The JQuery UI "sortable" widget has sorted the <tr> with the category, but our model has not updated.
+    // We will loop through the <tr>'s in the DOM and create a new model array with the new order, and then 
+    // force angularjs to re-bind to our new model array.
+    const newCategories = []
+    const tableRows = this.$element.find('#rateReachDistanceEditorSortableBody tr')
+    for (var iRow = 0; iRow < tableRows.length; ++iRow) {
+      // The element ID contains the old index of the category
+      const rowId = tableRows[iRow].id
+      const oldIndex = +rowId.substring(rowId.lastIndexOf('_') + 1)
+      newCategories[iRow] = this.categories[oldIndex]
+    }
+    this.categories = newCategories
+    this.$timeout()
   }
 
   $onChanges(changesObj) {
@@ -107,7 +134,7 @@ class RateReachDistanceEditorController {
   }
 }
 
-RateReachDistanceEditorController.$inject = ['$http', '$timeout', 'state']
+RateReachDistanceEditorController.$inject = ['$element', '$http', '$timeout', 'state']
 
 let rateReachEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor.html',
