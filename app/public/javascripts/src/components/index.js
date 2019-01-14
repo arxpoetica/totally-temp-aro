@@ -53,6 +53,9 @@ import pricebookEditor from './sidebar/plan-settings/plan-resource-selection/pri
 import resourceManager from './sidebar/plan-settings/plan-resource-selection/resource-manager'
 import pricebookCreator from './sidebar/plan-settings/plan-resource-selection/pricebook-creator'
 import roicEditor from './sidebar/plan-settings/plan-resource-selection/roic-editor'
+import rateReachEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-editor'
+import rateReachManagerCreator from './sidebar/plan-settings/plan-resource-selection/rate-reach-manager-creator'
+import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor'
 import boundaries from './views/boundaries'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
@@ -153,6 +156,9 @@ app.component('boundaryDetail', boundaryDetail)
    .component('resourceManager', resourceManager)
    .component('pricebookCreator', pricebookCreator)
    .component('roicEditor', roicEditor)
+   .component('rateReachEditor', rateReachEditor)
+   .component('rateReachManagerCreator', rateReachManagerCreator)
+   .component('rateReachDistanceEditor', rateReachDistanceEditor)
    .component('boundaries', boundaries)
    .component('mapSplit', mapSplit)
    .component('mapSelectorPlanTarget', mapSelectorPlanTarget)

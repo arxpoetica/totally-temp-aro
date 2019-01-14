@@ -86,14 +86,9 @@ exports.configure = (app, middleware) => {
       const errorMessage = 'The OTP code was invalid. If you are using an authenticator app, please ensure that your device time is correct'
       models.MultiFactor.verifyTotp(req.user.id, verificationCode)
         .then(result => {
-          if (result.result === 'success') {
-            console.log(`Successfully verified OTP for user with id ${req.user.id}`)
-            req.user.multiFactorAuthenticationDone = true
-            callback(null, req.user)
-          } else {
-            console.error(result)
-            callback(null, false, { message: errorMessage })
-          }
+          console.log(`Successfully verified OTP for user with id ${req.user.id}`)
+          req.user.multiFactorAuthenticationDone = true
+          callback(null, req.user)
         })
         .catch(err => {
           console.error(err)
@@ -143,7 +138,11 @@ exports.configure = (app, middleware) => {
           callback(null, dbUser || null)
         }
       })
-      .catch(callback)
+      .catch(() => {
+        // Something went wrong when deserializing the user. This can happen if the session cookie is from an earlier version
+        // of ARO, or if the user has been deleted, or some other reason.
+        callback(null, null)
+      })
   })
 
   app.get('/verify-otp', (request, response, next) => {

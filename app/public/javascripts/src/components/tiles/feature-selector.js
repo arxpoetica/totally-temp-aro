@@ -237,7 +237,8 @@ class FeatureSelector {
       }
 
       //Select Existing/planned fiber
-      if(feature.properties._data_type.indexOf('fiber') > -1) {
+      // Don't allow FDH equipment which is not a fiber
+      if(feature.properties._data_type.indexOf('fiber') > -1 && feature.properties._data_type.indexOf('equipment.') < 0) {
         selectFeature = this.selectPolyline(feature, xWithinTile, yWithinTile, minimumPointToFiberDistance, deltaX, deltaY)
       }
 

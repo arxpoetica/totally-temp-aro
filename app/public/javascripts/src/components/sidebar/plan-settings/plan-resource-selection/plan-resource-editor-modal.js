@@ -4,10 +4,10 @@ class PlanResourceEditorController {
     this.editingModes = Object.freeze({
       LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
       EDIT_RESOURCE_MANAGER: 'EDIT_RESOURCE_MANAGER',
-      SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR'
+      SHOW_PRICEBOOK_CREATOR: 'SHOW_PRICEBOOK_CREATOR',
+      SHOW_RATE_REACH_MANAGER_CREATOR: 'SHOW_RATE_REACH_MANAGER_CREATOR'
     })
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
-    this.modalTitle = 'Resource Managers'
     this.editingManagerId = 1
   }
 
@@ -17,19 +17,10 @@ class PlanResourceEditorController {
 
   setEditingMode(newEditingMode) {
     this.selectedEditingMode = newEditingMode
-    if (newEditingMode === this.editingModes.LIST_RESOURCE_MANAGERS) {
-      this.modalTitle = 'Resource Managers'
-    } else if (newEditingMode === this.editingModes.SHOW_PRICEBOOK_CREATOR) {
-      this.modalTitle = 'Create PriceBook'
-    }
   }
 
   setEditingManagerId(newId) {
     this.editingManagerId = newId
-  }
-
-  resourceManagerNameChanged(name) {
-    this.modalTitle = name
   }
 
   onManagersChanged() {

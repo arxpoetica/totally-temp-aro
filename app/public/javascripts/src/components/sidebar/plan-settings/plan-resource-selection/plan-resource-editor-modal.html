@@ -1,68 +1,74 @@
 <modal visible="$ctrl.state.showPlanResourceEditorModal" backdrop="static" on-hide="$ctrl.modalHide()"
        modal-size="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS ? 'modal-md' : 'modal-lg'">
-  <modal-header title="{{$ctrl.modalTitle}}"></modal-header>
-  <modal-body>
-    <resource-manager ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                      resource-items="$ctrl.state.resourceItems"
-                      selected-resource-key="$ctrl.selectedResourceKey"
-                      list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                      edit-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
-                      create-price-book-mode="$ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
-                      set-editing-mode="$ctrl.setEditingMode(mode)"
-                      set-editing-manager-id="$ctrl.setEditingManagerId(newId)"
-                      on-managers-changed="$ctrl.onManagersChanged()"
-                      set-current-selected-resource-key="$ctrl.setSelectedResourceKey(resourceKey)">
-    </resource-manager>
+  <resource-manager ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                    resource-items="$ctrl.state.resourceItems"
+                    selected-resource-key="$ctrl.selectedResourceKey"
+                    list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                    edit-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
+                    create-price-book-mode="$ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
+                    create-rate-reach-manager-mode="$ctrl.editingModes.SHOW_RATE_REACH_MANAGER_CREATOR"
+                    set-editing-mode="$ctrl.setEditingMode(mode)"
+                    set-editing-manager-id="$ctrl.setEditingManagerId(newId)"
+                    on-managers-changed="$ctrl.onManagersChanged()"
+                    set-current-selected-resource-key="$ctrl.setSelectedResourceKey(resourceKey)">
+  </resource-manager>
 
-    <pricebook-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
-                       source-price-book-id="$ctrl.editingManagerId"
-                       list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                       set-editing-mode="$ctrl.setEditingMode(mode)"
-                       on-managers-changed="$ctrl.onManagersChanged()">
-    </pricebook-creator>
+  <arpu-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'arpu_manager'"
+               arpu-manager-id="$ctrl.editingManagerId"
+               list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+               set-editing-mode="$ctrl.setEditingMode(mode)">
+  </arpu-editor>
 
-    <pricebook-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'price_book'"
-                      price-book-id="$ctrl.editingManagerId"
-                      list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                      set-editing-mode="$ctrl.setEditingMode(mode)"
-                      price-book-name-changed="$ctrl.resourceManagerNameChanged(name)">
-    </pricebook-editor>
+  <competitor-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'competition_manager'"
+              competitor-manager-id="$ctrl.editingManagerId"
+              list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+              set-editing-mode="$ctrl.setEditingMode(mode)">
+  </competitor-editor>
 
-    <roic-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'roic_manager'"
-                 roic-manager-id="$ctrl.editingManagerId"
-                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                 set-editing-mode="$ctrl.setEditingMode(mode)"
-                 roic-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
-    </roic-editor>
-
-    <arpu-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'arpu_manager'"
-                 arpu-manager-id="$ctrl.editingManagerId"
-                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                 set-editing-mode="$ctrl.setEditingMode(mode)"
-                 arpu-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
-    </arpu-editor>
-
-    <tsm-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'tsm_manager'"
-                tsm-manager-id="$ctrl.editingManagerId"
+  <impedance-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'impedance_mapping_manager'"
+                impedance-manager-id="$ctrl.editingManagerId"
                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                set-editing-mode="$ctrl.setEditingMode(mode)"
-                tsm-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
-    </tsm-editor>
+                set-editing-mode="$ctrl.setEditingMode(mode)">
+  </impedance-editor>
 
-    <competitor-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'competition_manager'"
-                competitor-manager-id="$ctrl.editingManagerId"
+  <pricebook-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_PRICEBOOK_CREATOR"
+                      source-price-book-id="$ctrl.editingManagerId"
+                      list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                      set-editing-mode="$ctrl.setEditingMode(mode)"
+                      on-managers-changed="$ctrl.onManagersChanged()">
+  </pricebook-creator>
+
+  <pricebook-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'price_book'"
+                    price-book-id="$ctrl.editingManagerId"
+                    list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                    set-editing-mode="$ctrl.setEditingMode(mode)">
+  </pricebook-editor>
+
+  <rate-reach-manager-creator ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.SHOW_RATE_REACH_MANAGER_CREATOR"
+                      source-rate-reach-manager-id="$ctrl.editingManagerId"
+                      list-mode="$ctrl.editingModes.EDIT_RESOURCE_MANAGER"
+                      set-editing-mode="$ctrl.setEditingMode(mode)"
+                      on-manager-created="$ctrl.setEditingManagerId(newId)"
+                      on-managers-changed="$ctrl.onManagersChanged()">
+  </rate-reach-manager-creator>
+
+  <rate-reach-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'rate_reach_manager'"
+                rate-reach-manager-id="$ctrl.editingManagerId"
                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                set-editing-mode="$ctrl.setEditingMode(mode)"
-                competitor-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
-    </competitor-editor>
+                set-editing-mode="$ctrl.setEditingMode(mode)">
+  </rate-reach-editor>
 
-    <impedance-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'impedance_mapping_manager'"
-                 impedance-manager-id="$ctrl.editingManagerId"
-                 list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
-                 set-editing-mode="$ctrl.setEditingMode(mode)"
-                 impedance-manager-name-changed="$ctrl.resourceManagerNameChanged(name)">
-    </impedance-editor>
-</modal-body>
+  <roic-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'roic_manager'"
+                roic-manager-id="$ctrl.editingManagerId"
+                list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+                set-editing-mode="$ctrl.setEditingMode(mode)">
+  </roic-editor>
+
+  <tsm-editor ng-if="($ctrl.selectedEditingMode === $ctrl.editingModes.EDIT_RESOURCE_MANAGER) && $ctrl.selectedResourceKey === 'tsm_manager'"
+              tsm-manager-id="$ctrl.editingManagerId"
+              list-mode="$ctrl.editingModes.LIST_RESOURCE_MANAGERS"
+              set-editing-mode="$ctrl.setEditingMode(mode)">
+  </tsm-editor>
   <!-- Show modal footer only if we are listing resource managers. Editors will show their own buttons -->
   <modal-footer ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS">
     <button class="btn btn-primary" ng-click="$ctrl.modalHide()">Close</button>

@@ -4,7 +4,6 @@ class TsmEditorController {
     this.state = state
     this.tsmManagerConfiguration = []
     this.pristineTsmManagerConfiguration = {}
-    this.tsmManagerName = ''
     this.expandDimension = {
       employee_count: false,
       industry: false,
@@ -21,8 +20,7 @@ class TsmEditorController {
   reloadTsmManagerConfiguration() {
     this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}`)
     .then((result) => {
-      this.tsmManagerName = result.data.name
-      this.tsmManagerNameChanged({ name: this.tsmManagerName })
+      this.tsmManager = result.data
     })
 
     this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}/strengths`)
@@ -71,8 +69,7 @@ let tsmEditor = {
     tsmManagerId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&',
-    tsmManagerNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: TsmEditorController
 }

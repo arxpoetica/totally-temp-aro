@@ -4,7 +4,6 @@ class CompetitorEditorController {
     this.state = state
     this.competitorManagerConfiguration = []
     this.pristineCompetitorManagerConfiguration = {}
-    this.competitorManagerName = ''
   }
 
   $onChanges(changesObj) {
@@ -15,10 +14,10 @@ class CompetitorEditorController {
 
   reloadCompetitionManagerConfiguration() {
     this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}`)
-    .then((result) => {
-      this.competitorManagerName = result.data.name
-      this.competitorManagerNameChanged({ name: this.competitorManagerName })
-    })
+      .then((result) => {
+        this.competitorManager = result.data
+      })
+      .catch(err => console.error(err))
 
     this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths`)
     .then((result) => {
@@ -71,8 +70,7 @@ let competitorEditor = {
     competitorManagerId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&',
-    competitorManagerNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: CompetitorEditorController
 }

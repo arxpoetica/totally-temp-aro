@@ -10,42 +10,23 @@ class ResourceManagerController {
       arpu_manager: 'arpu-manager',
       impedance_mapping_manager: 'impedance-manager',
       tsm_manager: 'tsm-manager',
-      competition_manager: 'competitor-manager'
+      competition_manager: 'competitor-manager',
+      rate_reach_manager: 'rate-reach-matrix'
     }
-    // Define endpoints for each manager type ('manager type' maps to the 'selectedResourceKey' member variable)
     this.managerIdString = 'MANAGER_ID'
-    this.managerEndpoints = {
-      price_book: {
-        deleteManager: `/service/v1/pricebook/${this.managerIdString}`
-      }
+    this.managerDeleteUrl = {
+      price_book: `/service/v1/price_book/${this.managerIdString}`,
+      roic_manager: `/service/v1/roic_manager/${this.managerIdString}`,
+      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}`,
+      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}`,
+      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}`,
+      competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
+      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
     }
-  }
-
-  $onInit() {
-    this.selectFirstResourceManager()
-  }
-
-  $onChanges(changesObj) {
-    if (changesObj.selectedResourceKey) {
-      this.selectFirstResourceManager()
-    }
-  }
-
-  selectFirstResourceManager() {
-    if (this.resourceItems
-        && this.resourceItems[this.selectedResourceKey]
-        && this.resourceItems[this.selectedResourceKey].allManagers.length > 0) {
-      this.selectedResourceManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
-    }
-  }
-
-  onSelectedResourceKeyChanged() {
-    this.selectFirstResourceManager()
   }
 
   $doCheck() {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
-      this.selectFirstResourceManager()
       this.oldResourceItems = this.resourceItems
     }
   }
@@ -56,21 +37,32 @@ class ResourceManagerController {
   }
 
   cloneSelectedPriceBook() {
-    this.setEditingManagerId({ newId: this.selectedResourceManager.id })
+    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
-  cloneSelectedManagerFromSource(managerId) {
+  createBlankRateReachManager() {
+    this.setEditingManagerId({ newId: null })
+    this.setEditingMode({ mode: this.createRateReachManagerMode })
+  }
 
+  cloneSelectedRateReachManager() {
+    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+    this.setEditingMode({ mode: this.createRateReachManagerMode })
+  }
+
+  cloneSelectedManagerFromSource(managerId) {
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
       this.cloneSelectedPriceBook()
+    } else if (managerId === 'rate-reach-matrix') {
+      this.cloneSelectedRateReachManager()
     } else {
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
       .then((resourceName) => {
         // Create a new manager with the specified name and description
-        return this.$http.post(`/service/v1/${managerId}?source_manager=${this.selectedResourceManager.id}`,
+        return this.$http.post(`/service/v1/${managerId}?source_manager=${this.resourceItems[this.selectedResourceKey].selectedManager.id}`,
                               { name: resourceName, description: resourceName })
       })
       .then((result) => this.onManagerCreated(result.data.id))
@@ -82,12 +74,11 @@ class ResourceManagerController {
     this.setEditingManagerId({ newId: createdManagerId })
     this.setEditingMode({ mode: this.editMode })
     this.onManagersChanged && this.onManagersChanged()
-    this.selectFirstResourceManager()
     return Promise.resolve()
   }
 
   editSelectedManager() {
-    this.setEditingManagerId({ newId: this.selectedResourceManager.id })
+    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
     this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
   }
@@ -116,16 +107,18 @@ class ResourceManagerController {
     this.$http.delete(deleteUrl)
       .then((result) => {
         this.onManagersChanged && this.onManagersChanged()
-        this.selectFirstResourceManager()
+        this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
       })
       .catch((err) => console.error(err))
   }
 
-  deleteSelectedResourceManager(managerId) {
-    this.askUserToConfirmManagerDelete(this.selectedResourceManager.name)
+  deleteSelectedResourceManager() {
+    this.askUserToConfirmManagerDelete(this.resourceItems[this.selectedResourceKey].selectedManager.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          this.deleteManager(`/service/v1/${managerId}/${this.selectedResourceManager.id}`)
+          const managerIdToDelete = this.resourceItems[this.selectedResourceKey].selectedManager.id
+          const deleteUrl = this.managerDeleteUrl[this.selectedResourceKey].replace(this.managerIdString, managerIdToDelete)
+          this.deleteManager(deleteUrl)
         }
       })
       .catch((err) => console.error(err))
@@ -189,6 +182,7 @@ let resourceManager = {
     listMode: '<',
     editMode: '<',
     createPriceBookMode: '<',
+    createRateReachManagerMode: '<',
     setEditingMode: '&',
     setEditingManagerId: '&',
     onManagersChanged: '&',

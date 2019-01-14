@@ -1338,6 +1338,10 @@ ui-select-font {
   font-size: 14px;
 }
 
+.multiselect .multiselect-selected-text {
+  word-break: break-word;
+}
+
 .multiselect-container {
   font-size: 14px;
 }
@@ -1348,6 +1352,7 @@ ui-select-font {
 
 .multiselect-container li a label {
   padding-left: 20px;
+  word-break: break-word;
 }
 
 .multiselect-container.dropdown-menu>.active,

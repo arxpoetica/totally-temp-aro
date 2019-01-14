@@ -9,69 +9,72 @@
     cursor: pointer;
   }
 </style>
+<modal-header title="{{$ctrl.tsmManager.name}}"></modal-header>
 
-<div style="display: flex; flex-direction: column; max-height: 500px;">
+<modal-body>
+  <div style="display: flex; flex-direction: column; max-height: 500px;">
 
-  <!-- A table so the user can edit model values -->
-  <div style="flex: 1 1 auto; overflow-y: auto;">
-    <table id="tblTsmModel" class="table table-sm table-striped" style="margin-bottom: 0px;">
-      <thead class="thead-dark">
-        <tr>
-          <th>Name</th>
-          <th style="width: 200px;">ARPU Weight</th>
-        </tr>
-      </thead>
-      <tbody>
+    <!-- A table so the user can edit model values -->
+    <div style="flex: 1 1 auto; overflow-y: auto;">
+      <table id="tblTsmModel" class="table table-sm table-striped" style="margin-bottom: 0px;">
+        <thead class="thead-dark">
+          <tr>
+            <th>Name</th>
+            <th style="width: 200px;">ARPU Weight</th>
+          </tr>
+        </thead>
+        <tbody>
 
-        <!-- Only show the items with dimensionType === 'employee_count' -->
-        <tr ng-click="$ctrl.expandDimension.employee_count = !$ctrl.expandDimension.employee_count">
-          <td colspan=2 class="sub-table-header">
-            Employee Count
-            <span class="float-right"><i ng-class="$ctrl.expandDimension.employee_count ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
-          </td>
-        </tr>
-        <tr ng-if="$ctrl.expandDimension.employee_count" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'employee_count'}">
-          <td>{{tsmModel.dimensionName}}</td>
-          <td><input type="text" class="form-control" ng-model="tsmModel.arpuWeight"></td>
-        </tr>
+          <!-- Only show the items with dimensionType === 'employee_count' -->
+          <tr ng-click="$ctrl.expandDimension.employee_count = !$ctrl.expandDimension.employee_count">
+            <td colspan=2 class="sub-table-header">
+              Employee Count
+              <span class="float-right"><i ng-class="$ctrl.expandDimension.employee_count ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
+            </td>
+          </tr>
+          <tr ng-if="$ctrl.expandDimension.employee_count" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'employee_count'}">
+            <td>{{tsmModel.dimensionName}}</td>
+            <td><input type="text" class="form-control" ng-model="tsmModel.arpuWeight"></td>
+          </tr>
 
-        <!-- Only show the items with dimensionType === 'industry' -->
-        <tr ng-click="$ctrl.expandDimension.industry = !$ctrl.expandDimension.industry">
-          <td colspan=2 class="sub-table-header">
-            Industry
-            <span class="float-right"><i ng-class="$ctrl.expandDimension.industry ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
-          </td>
-        </tr>
-        <tr ng-if="$ctrl.expandDimension.industry" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'industry'}">
-          <td>{{tsmModel.dimensionName}}</td>
-          <td><input type="text" class="form-control" ng-model="tsmModel.arpuWeight"></td>
-        </tr>
+          <!-- Only show the items with dimensionType === 'industry' -->
+          <tr ng-click="$ctrl.expandDimension.industry = !$ctrl.expandDimension.industry">
+            <td colspan=2 class="sub-table-header">
+              Industry
+              <span class="float-right"><i ng-class="$ctrl.expandDimension.industry ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
+            </td>
+          </tr>
+          <tr ng-if="$ctrl.expandDimension.industry" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'industry'}">
+            <td>{{tsmModel.dimensionName}}</td>
+            <td><input type="text" class="form-control" ng-model="tsmModel.arpuWeight"></td>
+          </tr>
 
-        <!-- Only show the items with dimensionType === 'product' -->
-        <tr ng-click="$ctrl.expandDimension.product = !$ctrl.expandDimension.product">
-          <td colspan=2 class="sub-table-header">
-            Product
-            <span class="float-right"><i ng-class="$ctrl.expandDimension.product ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
-          </td>
-        </tr>
-        <tr ng-if="$ctrl.expandDimension.product" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'product'}">
-          <td>{{tsmModel.dimensionName}}</td>
-          <td><input type="text" class="form-control" ng-model="tsmModel.arpuWeight"></td>
-        </tr>
+          <!-- Only show the items with dimensionType === 'product' -->
+          <tr ng-click="$ctrl.expandDimension.product = !$ctrl.expandDimension.product">
+            <td colspan=2 class="sub-table-header">
+              Product
+              <span class="float-right"><i ng-class="$ctrl.expandDimension.product ? 'fa fa-minus-circle' : 'fa fa-plus-circle'"></i></span>
+            </td>
+          </tr>
+          <tr ng-if="$ctrl.expandDimension.product" ng-repeat="tsmModel in $ctrl.tsmManagerConfiguration | filter: { dimensionType: 'product'}">
+            <td>{{tsmModel.dimensionName}}</td>
+            <td><input type="text" class="form-control" ng-model="tsmModel.arpuWeight"></td>
+          </tr>
 
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Help text -->
+    <div style="flex: 0 0 auto; font-style: italic; padding: 10px 0px;">Note: The final strength is [Employee Count] x [Industry] x [Product]</div>
   </div>
 
-  <!-- Help text -->
-  <div style="flex: 0 0 auto; font-style: italic; padding: 10px 0px;">Note: The final strength is [Employee Count] x [Industry] x [Product]</div>
-</div>
-
-<div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
-  <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
-    <i class="fa fa-undo action-button-icon"></i> Discard changes
-  </button>
-  <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
-    <i class="fa fa-save action-button-icon"></i> Save
-  </button>
-</div>
+  <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
+    <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
+      <i class="fa fa-undo action-button-icon"></i> Discard changes
+    </button>
+    <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+      <i class="fa fa-save action-button-icon"></i> Save
+    </button>
+  </div>
+</modal-body>

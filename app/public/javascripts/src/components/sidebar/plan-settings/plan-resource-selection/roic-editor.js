@@ -3,7 +3,6 @@ class RoicEditorController {
     this.$http = $http
     this.state = state
     this.roicManagerConfiguration = []
-    this.roicManagerName = ''
   }
 
   $onChanges(changesObj) {
@@ -15,8 +14,7 @@ class RoicEditorController {
   reloadRoicManagerConfiguration() {
     this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}`)
     .then((result) => {
-      this.roicManagerName = result.data.name
-      this.roicManagerNameChanged({ name: this.roicManagerName })
+      this.roicManager = result.data
     })
 
     this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}/configuration`)
@@ -67,8 +65,7 @@ let roicEditor = {
     roicManagerId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&',
-    roicManagerNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: RoicEditorController
 }

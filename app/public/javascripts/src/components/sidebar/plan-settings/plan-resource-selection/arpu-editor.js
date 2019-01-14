@@ -4,7 +4,6 @@ class ArpuEditorController {
     this.state = state
     this.arpuManagerConfiguration = []
     this.pristineArpuManagerConfiguration = {}
-    this.arpuManagerName = ''
     this.speedCategoryHelp = null
   }
 
@@ -16,10 +15,10 @@ class ArpuEditorController {
 
   reloadArpuManagerConfiguration() {
     this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}`)
-    .then((result) => {
-      this.arpuManagerName = result.data.name
-      this.arpuManagerNameChanged({ name: this.arpuManagerName })
-    })
+      .then((result) => {
+        this.arpuManager = result.data
+      })
+      .catch(err => console.error(err))
 
     this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`)
     .then((result) => {
@@ -94,8 +93,7 @@ let arpuEditor = {
     arpuManagerId: '<',
     listMode: '<',
     editMode: '<',
-    setEditingMode: '&',
-    arpuManagerNameChanged: '&'
+    setEditingMode: '&'
   },
   controller: ArpuEditorController
 }

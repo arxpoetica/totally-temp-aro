@@ -60,14 +60,11 @@ module.exports = class MultiFactor {
         const totpSecret = res[0].totp_secret
         const isValid = otplib.authenticator.check(verificationCode, totpSecret)
         if (isValid) {
-          return Promise.resolve({
-            result: 'success',
-            message: 'OTP code was verified successfully'
-          })
+          return Promise.resolve('OTP code was verified successfully')
         } else {
-          return Promise.resolve({
-            result: 'failure',
-            message: 'Incorrect OTP code. If you are using an authenticator app, please make sure the time on your device is correct'
+          return Promise.reject({
+            status: 412,
+            body: 'Incorrect OTP code. If you are using an authenticator app, please make sure the time on your device is correct'
           })
         }
       })
@@ -94,14 +91,8 @@ module.exports = class MultiFactor {
   static deleteTotpSettingsForUser(userId, verificationCode) {
     // Make sure we have a current valid code before disabling multi-factor
     return MultiFactor.verifyTotp(userId, verificationCode)
-      .then(result => {
-        if (result.result === 'success') {
-          return database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId])
-            .then(() => Promise.resolve({ result: 'success', message: 'OTP settings successfully deleted for user'}))
-        } else {
-          return Promise.resolve(result)
-        }
-      })
+      .then(result => database.query('UPDATE auth.users SET totp_secret = \'\', is_totp_enabled = false, is_totp_verified = false WHERE id = $1', [userId]))
+      .then(() => Promise.resolve({ result: 'success', message: 'OTP settings successfully deleted for user'}))
   }
 
   // Sends an email to a user with the currently valid totp
