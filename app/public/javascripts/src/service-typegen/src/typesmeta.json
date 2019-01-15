@@ -1114,8 +1114,8 @@
         "format": "",
         "displayName": "Max Speed",
         "enumTypeURL": "",
-        "displayDataType": "integer",
-        "defaultValue": "0",
+        "displayDataType": "nullable-number",
+        "defaultValue": "",
         "editable": true,
         "visible": true
       },
@@ -1133,7 +1133,7 @@
       },
       {
         "propertyName": "marketableTechnology",
-        "levelOfDetail": 1,
+        "levelOfDetail": 0,
         "format": "",
         "displayName": "Marketable technology",
         "enumEntityName": "",

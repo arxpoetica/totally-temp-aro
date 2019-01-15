@@ -1,0 +1,16 @@
+{{$ctrl.onRefresh();""}}
+<div ng-if="$ctrl.isEdit" ng-class="{'ei-invalid-highlight': !$ctrl.isValid }">
+  
+  <input type="number" ng-model="$ctrl.model" ng-change="$ctrl.onInput()" class="form-control input-sm ei-input-number" placeholder="unlimited">
+  
+</div>
+<div ng-if="$ctrl.isEdit && !$ctrl.isValid" class="ei-invalid-message">required</div>
+
+<div ng-if="!$ctrl.isEdit">
+  <div ng-if="!$ctrl.isEdit == ''">
+    {{ $ctrl.model }}
+  </div>
+  <div ng-if="$ctrl.isEdit == ''">
+    unlimited
+  </div>
+</div>
