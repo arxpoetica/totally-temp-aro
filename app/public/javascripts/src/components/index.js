@@ -67,9 +67,7 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
-
 import uiNotification from './footer/ui-notification'
-
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import multifactorSettings from './global-settings/multifactor-settings'
@@ -98,6 +96,8 @@ import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
 import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
 import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
 import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
+import editorInterfacePrimitive from './common/editor-interfaces/editor-interface-primitive'
+import editorInterfaceNullableNumber from './common/editor-interfaces/editor-interface-nullable-number'
 import utils from './common/utilities'
 
 import state from '../models/state'
@@ -199,6 +199,8 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceTree', editorInterfaceTree)
    .component('editorInterfaceTable', editorInterfaceTable)
    .component('editorInterfaceValue', editorInterfaceValue)
+   .component('editorInterfacePrimitive', editorInterfacePrimitive)
+   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)

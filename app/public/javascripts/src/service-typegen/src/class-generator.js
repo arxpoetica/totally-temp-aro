@@ -176,7 +176,7 @@ class ClassGenerator {
             break
           }
         }
-        
+        /*
         if (null == defaultVal || "" == defaultVal){ // null OR undefined 
           switch(memberObj.type) {
             case 'string':
@@ -196,6 +196,8 @@ class ClassGenerator {
               break
           }
         }
+        */
+        if (null == defaultVal || "" == defaultVal) defaultVal = '\'\''
         
         result += defaultVal
       }else if('any' == memberObj.type){
