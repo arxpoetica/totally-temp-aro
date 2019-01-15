@@ -959,14 +959,15 @@
       "modelNumber",
       "equipmentTypeCategoryId",
       "equipmentItemId",
+      "maxTechnology", 
+      "marketableTechnology", 
+      "maxSpeed",
       "code",
       "manufacturer",
       "serialNumber",
       "switchType",
       "latency",
-      "uplinkSpeed",
-      "maxSpeed",
-      "enabledTechnologies"
+      "uplinkSpeed"
     ],
     "displayProperties": [
       {
@@ -1123,7 +1124,7 @@
         "propertyName": "maxTechnology",
         "levelOfDetail": 1,
         "format": "",
-        "displayName": "Max technology",
+        "displayName": "Max Technology",
         "enumEntityName": "",
         "enumTypeURL": "marketable_technologies?p1=${equipmentItemId}",
         "displayDataType": "enum",
@@ -1135,7 +1136,7 @@
         "propertyName": "marketableTechnology",
         "levelOfDetail": 0,
         "format": "",
-        "displayName": "Marketable technology",
+        "displayName": "Marketable Technology",
         "enumEntityName": "",
         "enumTypeURL": "marketable_technologies?p1=${equipmentItemId}",
         "displayDataType": "enum",
