@@ -12,38 +12,59 @@
   .category-description:hover .category-hover-button, .category-hover-button:hover {
     display: inline-block;
   }
+  .row-draggable-handle {
+    height: 100%;
+    min-width: 15px;
+    width: 15px;
+    /* border: solid 1px #c5c5c5; */
+  }
+  .row-draggable-handle:hover {
+    background-color: #c5c5c5;
+    cursor: pointer;
+  }
 </style>
 
 <table id="tblrateReachConfig" class="table table-sm table-striped">
   <thead class="thead-dark">
     <tr>
-      <th style="min-width: 200px;">Speed</th>
-      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap"
+      <th></th> <!-- This is for the draggable handle for each row -->
+      <th style="min-width: 200px;">{{$ctrl.categoryDescription}}</th>
+      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap"
           style="white-space: nowrap;">
         {{$ctrl.technologies[key].name}}
       </th>
     </tr>
   </thead>
-  <tbody>
-    <tr ng-repeat="category in $ctrl.categories">
-        <td ng-if="!$ctrl.isCategoryInEditMode[$index]" class="category-description">
-          {{category.description}}
-          <div class="float-right">
-            <button class="btn btn-sm btn-light category-hover-button" ng-click="$ctrl.isCategoryInEditMode[$index] = true"><i class="fa fa-edit"></i></button>
-            <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.removeCategory(category)"><i class="fa fa-trash-alt"></i></button>
-          </div>
-        </td>
-        <td ng-if="$ctrl.isCategoryInEditMode[$index]" class="input-group">
-          <div>
-            <small>Name:</small>
-            <input class="form-control form-control-sm category-description" ng-model="category.name">
-            <small>Description:</small>
-            <input class="form-control form-control-sm category-description" ng-model="category.description">
-            <button class="btn btn-light" ng-click="$ctrl.isCategoryInEditMode[$index] = false"><i class="fa fa-save"></i></span>
-          </div>
-        </td>
-        <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap">
-        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixInMetersMap[key][$parent.$index]">
+  <tbody id="rateReachDistanceEditorSortableBody">
+    <tr id="rrDistanceEditorRow_{{$index}}" ng-repeat="category in $ctrl.categories">
+      <td class="row-draggable-handle"><i class="fas fa-grip-vertical" style="color: #a0a0a0;"></i></td>
+      <td ng-if="!$ctrl.isCategoryInEditMode[$index]" class="category-description" style="min-width: 200px;">
+        {{category.description}}
+        <div class="float-right">
+          <button class="btn btn-sm btn-light category-hover-button" ng-click="$ctrl.isCategoryInEditMode[$index] = true"><i class="fa fa-edit"></i></button>
+          <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.removeCategory(category)"><i class="fa fa-trash-alt"></i></button>
+        </div>
+      </td>
+      <td ng-if="$ctrl.isCategoryInEditMode[$index]" class="input-group">
+        <div class="row ml-0 mr-0" ng-if="$ctrl.categoryType === 'SPEED'">
+            <input class="form-control col-sm-4 category-description" ng-model="$ctrl.editableCategories[$index].speed">
+            <select class="form-control col-sm-6" ng-model="$ctrl.editableCategories[$index].units">
+              <option>Mbps</option>
+              <option>Gbps</option>
+            </select>
+            <button class="btn btn-light col-sm-2 p-0" ng-click="$ctrl.saveCategory($index)"><i class="fa fa-save"></i></span>
+        </div>
+        <div ng-if="$ctrl.categoryType === 'BAND'">
+          <small>Name:</small>
+          <input class="form-control form-control-sm category-description" ng-model="$ctrl.editableCategories[$index].name">
+          <small>Description:</small>
+          <input class="form-control form-control-sm category-description" ng-model="$ctrl.editableCategories[$index].description">
+          <button class="btn btn-light" ng-click="$ctrl.saveCategory($index)"><i class="fa fa-save"></i></span>
+        </div>
+      </td>
+      <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap" style="min-width: 80px;">
+        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[key][$parent.$index].distance"
+              linear-unit-input>
       </td>
     </tr>
   </tbody>
