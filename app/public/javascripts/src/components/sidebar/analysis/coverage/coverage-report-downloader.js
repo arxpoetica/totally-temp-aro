@@ -16,6 +16,15 @@ class CoverageReportDownloaderController {
         this.$timeout()
       })
       .catch(err => console.error(err))
+
+    this.$http.get('/service/installed/report/meta-data')
+      .then(result => {
+        this.coverageReports = result.data.filter(item => item.reportType === 'COVERAGE')
+        this.coverageReports.forEach((item, index) => {
+          this.coverageReports[index].downloadUrl = `/report-extended/${item.name}/${this.state.plan.getValue().id}/${item.mediaType}`
+        })
+      })
+      .catch(err => console.error(err))
   }
 
   $onChanges(changesObj) {
@@ -30,7 +39,7 @@ class CoverageReportDownloaderController {
     }
   }
 
-  downloadReport() {
+  downloadReportOld() {
     this.$http.get(`/service/coverage/query/form477/${this.coverageReportId}/${this.selectedRateReachMatrix.id}`)
       .then((result) => {
         const isEmptyResponse = (Object.keys(result.data || {}).length === 0)
