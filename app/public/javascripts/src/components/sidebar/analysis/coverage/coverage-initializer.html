@@ -7,33 +7,24 @@
 <table id="table-coverage-initializer" class="table table-sm table-striped">
   <tbody>
 
-    <!-- The distance threshold of the coverage report -->
+    <!-- Coverage type -->
     <tr>
-      <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
-      <td><input class="form-control" ng-model="$ctrl.coveragePlan.distanceThreshold"></td>
-    </tr>
-
-
-    <!-- The edge type of the coverage report -->
-    <tr>
-      <td>Edge type</td>
+      <td>Coverage Type</td>
       <td>
         <select class="form-control"
-                ng-model="$ctrl.coveragePlan.spatialEdgeType"
-                ng-options="item.id as item.name for item in $ctrl.spatialEdgeTypes">
+                ng-model="$ctrl.coveragePlan.coverageType"
+                ng-options="item.id as item.name for item in $ctrl.coverageTypes">
         </select>
       </td>
     </tr>
 
-    <!-- The selection type (service areas/analysis areas) -->
-    <tr>
-      <td>Selection Type</td>
+    <!-- Save site coverage -->
+    <tr ng-if="$ctrl.coveragePlan.coverageType === 'location'">
+      <td>Save site coverage</td>
       <td>
-        <select class="form-control" 
-                ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
-                ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
-          <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
-        </select>
+        <input type="checkbox"
+               class="checkboxfill"
+               ng-model="$ctrl.coveragePlan.saveSiteCoverage">
       </td>
     </tr>
     
@@ -42,21 +33,32 @@
       <td>Use Marketable Technologies</td>
       <td>
         <input type="checkbox"
-                 class="checkboxfill"
-                 ng-model="$ctrl.coveragePlan.useMarketableTechnologies">
+               class="checkboxfill"
+               ng-model="$ctrl.coveragePlan.useMarketableTechnologies">
       </td>
     </tr>
-    
+
     <!-- Use Max Speed -->
     <tr>
       <td>Use Max Speed</td>
       <td>
         <input type="checkbox"
-                 class="checkboxfill"
-                 ng-model="$ctrl.coveragePlan.useMaxSpeed">
+               class="checkboxfill"
+               ng-model="$ctrl.coveragePlan.useMaxSpeed">
       </td>
     </tr>
-    
+
+    <!-- The selection type (service areas/analysis areas) -->
+    <tr>
+        <td>Selection Type</td>
+        <td>
+          <select class="form-control" 
+                  ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
+                  ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
+            <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
+          </select>
+        </td>
+      </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
         <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>

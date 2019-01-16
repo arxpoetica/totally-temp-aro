@@ -4,7 +4,7 @@ class RateReachEditorController {
     this.$timeout = $timeout
     this.categoryDescription = {
       SPEED: 'Speeds',
-      BAND: 'Speed Bands'
+      BAND: 'Bands'
     }
 
     this.rateReachRatioDescription = {
@@ -13,16 +13,6 @@ class RateReachEditorController {
       TOWER: 'Tower'
     }
     this.selectedTechnologyType = 'Copper'
-
-    this.proximityTypes = [
-      { id: 'ROOT', description: 'Root' },
-      { id: 'BACKBONE', description: 'Backbone' },
-      { id: 'FEEDER', description: 'Feeder' },
-      { id: 'DISTRIBUTION', description: 'Distribution' },
-      { id: 'DROP', description: 'Drop' },
-      { id: 'IOF', description: 'IOF' },
-      { id: 'COPPER', description: 'Copper' }
-    ]
 
     this.editingModes = Object.freeze({
       SPEEDS: 'SPEEDS',
@@ -58,17 +48,15 @@ class RateReachEditorController {
 
   loadTechnologyTypeDetails(technologyType) {
     return Promise.all([
-      this.$http.get(`/service/rate-reach-matrix/calc-strategies?technology_type=${technologyType}`),
       this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
       this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}`)
     ])
       .then(results => {
         this.technologyTypeDetails[technologyType] = {
-          calculationStrategies: results[0].data,
-          networkStructures: results[1].data,
+          networkStructures: results[0].data,
           technologies: {}
         }
-        results[2].data.forEach(technology => {
+        results[1].data.forEach(technology => {
           this.technologyTypeDetails[technologyType].technologies[technology.id] = technology
         })
         return Promise.resolve()
