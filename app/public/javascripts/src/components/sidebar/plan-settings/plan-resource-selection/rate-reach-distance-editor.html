@@ -62,9 +62,9 @@
           <button class="btn btn-light" ng-click="$ctrl.saveCategory($index)"><i class="fa fa-save"></i></span>
         </div>
       </td>
-      <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap">
-      <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[key][$parent.$index].distance"
-             linear-unit-input>
+      <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap" style="min-width: 80px;">
+        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[key][$parent.$index].distance"
+              linear-unit-input>
       </td>
     </tr>
   </tbody>
