@@ -15,6 +15,7 @@ import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
+import coverageButton from './sidebar/coverage-button'
 import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
@@ -118,6 +119,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroSearch', aroSearch)
    .component('aroMultiselectSearch', aroMultiselectSearch)
    .component('displayModeButtons', displayModeButtons)
+   .component('coverageButton', coverageButton)
    .component('optimizeButton', optimizeButton)
    .component('summaryReports', summaryReports)
    .component('analysisExpertMode', analysisExpertMode)

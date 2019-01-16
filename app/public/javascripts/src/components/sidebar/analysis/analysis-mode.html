@@ -40,7 +40,8 @@
 <div class="analysis-mode-container">
   <div class="analysis-type">
     <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
-    <optimize-button></optimize-button>
+    <optimize-button ng-if="$ctrl.state.networkAnalysisType.id !== 'COVERAGE_ANALYSIS'"></optimize-button>
+    <coverage-button ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'"></coverage-button>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'INPUT'">
     <accordion-panel-title title="'Input'" panel-id="'INPUT'"></accordion-panel-title>

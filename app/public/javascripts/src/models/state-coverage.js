@@ -1,0 +1,27 @@
+class StateCoverage {
+
+  static initializeCoverage(state, $http, $timeout) {
+    state.coverage = {
+      isInitializingReport: false,
+      initParams: {
+        coverageType: 'census_block',
+        saveSiteCoverage: false,
+        useMarketableTechnologies: true,
+        useMaxSpeed: true
+      }
+    }
+
+    // Get the coverage report
+    const planId = state.plan.getValue().id
+    $http.get(`/service/coverage/report/search/plan_id/${planId}`)
+      .then((result) => {
+        // If we don't find a coverage report for this plan id, we get an empty array back.
+        state.coverage.report = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
+        state.coverage.isInitializingReport = Boolean(state.coverage.report)
+        $timeout()
+      })
+      .catch(err => console.error(err))
+  }
+}
+
+export default StateCoverage

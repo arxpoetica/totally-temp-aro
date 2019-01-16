@@ -12,19 +12,19 @@
       <td>Coverage Type</td>
       <td>
         <select class="form-control"
-                ng-model="$ctrl.coveragePlan.coverageType"
+                ng-model="$ctrl.state.coverage.initParams.coverageType"
                 ng-options="item.id as item.name for item in $ctrl.coverageTypes">
         </select>
       </td>
     </tr>
 
     <!-- Save site coverage -->
-    <tr ng-if="$ctrl.coveragePlan.coverageType === 'location'">
+    <tr ng-if="$ctrl.state.coverage.initParams.coverageType === 'location'">
       <td>Save site coverage</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.saveSiteCoverage">
+               ng-model="$ctrl.state.coverage.initParams.saveSiteCoverage">
       </td>
     </tr>
     
@@ -34,7 +34,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useMarketableTechnologies">
+               ng-model="$ctrl.state.coverage.initParams.useMarketableTechnologies">
       </td>
     </tr>
 
@@ -44,7 +44,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useMaxSpeed">
+               ng-model="$ctrl.state.coverage.initParams.useMaxSpeed">
       </td>
     </tr>
 
@@ -85,6 +85,6 @@
 <button class="btn btn-block btn-primary" ng-click="$ctrl.initializeCoverageReport()">Initialize coverage report</button>
 
 <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-<div ng-show="$ctrl.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
+<div ng-show="$ctrl.state.coverage.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
   <i class="fa fa-spinner fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
 </div>
