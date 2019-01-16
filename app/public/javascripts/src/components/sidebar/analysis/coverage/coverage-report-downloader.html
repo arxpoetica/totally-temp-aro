@@ -43,8 +43,30 @@
   </tbody>  
 </table>
 
+<!-- A list of reports that the user can download -->
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>DisplayName</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="report in $ctrl.coverageReports">
+      <td>{{report.name}}</td>
+      <td>{{report.displayName}}</td>
+      <td>
+        <a href="{{report.downloadUrl}}" class="btn btn-primary btn-xs" download="Coverage{{report.name}}.csv">
+          <span class="fa fa-download"></span> Download
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 <div class="col-md-6">
-  <button class="btn btn-block btn-primary" ng-click="$ctrl.downloadReport()"><i class="fa fa-download"></i>&nbsp;&nbsp;Download</button>
+  <!-- <button class="btn btn-block btn-primary" ng-click="$ctrl.downloadReportOld()"><i class="fa fa-download"></i>&nbsp;&nbsp;Download</button> -->
 </div>
 <div class="col-md-6">
   <button class="btn btn-block btn-danger" ng-click="$ctrl.resetReportSettings()"><i class="fa fa-refresh"></i>&nbsp;&nbsp;Reset settings</button>
