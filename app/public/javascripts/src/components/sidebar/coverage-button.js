@@ -21,7 +21,9 @@ class CoverageButtonController {
     serviceCoveragePlan.coverageAnalysisRequest.planId = this.state.plan.getValue().id
     serviceCoveragePlan.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
     serviceCoveragePlan.coverageAnalysisRequest.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
-    serviceCoveragePlan.coverageAnalysisRequest.locationTypes = this.state.locationTypes.getValue().map(item => item.plannerKey)
+    serviceCoveragePlan.coverageAnalysisRequest.locationTypes = this.state.locationTypes.getValue()
+                                                                                        .filter(item => item.checked)
+                                                                                        .map(item => item.plannerKey)
     if (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_ANALYSIS_AREAS) {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
       const visibleAnalysisLayers = this.state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
