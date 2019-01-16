@@ -23,18 +23,6 @@
       <td>Form 477</td>
     </tr>
 
-    <!-- The distance threshold of the coverage report -->
-    <tr>
-      <td>Distance threshold ({{$ctrl.state.configuration.units.length_units}})</td>
-      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.distanceThreshold * $ctrl.state.configuration.units.meters_to_length_units | number: 0}}</td>
-    </tr>
-
-    <!-- The edge type of the coverage report -->
-    <tr>
-      <td>Edge type</td>
-      <td>{{$ctrl.coverageReport.coverageAnalysisRequest.spatialEdgeType}}</td>
-    </tr>
-
     <!-- The A flag indicating whether we want to use the site boundaries -->
     <tr>
       <td>Use site boundaries</td>
