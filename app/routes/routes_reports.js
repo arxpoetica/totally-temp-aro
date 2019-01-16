@@ -712,4 +712,25 @@ exports.configure = (api, middleware) => {
     .catch(next)
   });
 
+  api.get("/reports/releaseNotes/versions", function (request, response, next) {
+    database.findOne('select array_agg(version) as versions from client.release_notes').then((result) => {
+      response.send(result)
+    })
+  });
+
+  api.get("/reports/releaseNotes", function (request, response, next) {
+    var notes = `select id,version,name from client.release_notes order by id desc`;
+    database.query(notes).then((result) => {
+      response.send(result)
+    })
+  });
+
+  api.get("/reports/releaseNotes/:id", function (request, response, next) {
+    var version_id = request.params.id
+    database.findOne('select id,version,description from client.release_notes where id =$1', [version_id])
+      .then((result) => {
+        response.send(result)
+      })
+  });
+
 }

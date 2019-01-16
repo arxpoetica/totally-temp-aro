@@ -67,9 +67,7 @@ import networkPlanModal from './header/network-plan-modal'
 import planInputsModal from './header/plan-inputs-modal'
 import networkPlanManage from './header/network-plan-manage'
 import networkPlan from './header/network-plan'
-
 import uiNotification from './footer/ui-notification'
-
 import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import multifactorSettings from './global-settings/multifactor-settings'
@@ -91,12 +89,15 @@ import accordionPanelTitle from './accordion/accordion-panel-title'
 import tile from './tiles/tile'
 import userSettings from './global-settings/user-settings'
 import tagManager from './global-settings/tag-manager'
+import releaseNotes from './global-settings/release-notes'
 import createUpdateTag from './global-settings/create-update-tag'
 
 import aroObjectEditor from './common/editor-interfaces/aro-object-editor'
 import editorInterfaceTree from './common/editor-interfaces/editor-interface-tree'
 import editorInterfaceTable from './common/editor-interfaces/editor-interface-table'
 import editorInterfaceValue from './common/editor-interfaces/editor-interface-value'
+import editorInterfacePrimitive from './common/editor-interfaces/editor-interface-primitive'
+import editorInterfaceNullableNumber from './common/editor-interfaces/editor-interface-nullable-number'
 import utils from './common/utilities'
 
 import state from '../models/state'
@@ -192,11 +193,14 @@ app.component('boundaryDetail', boundaryDetail)
    .component('tile', tile)
    .component('userSettings', userSettings)
    .component('tagManager', tagManager)
+   .component('releaseNotes', releaseNotes)
    .component('createUpdateTag', createUpdateTag)
    .component('aroObjectEditor', aroObjectEditor)
    .component('editorInterfaceTree', editorInterfaceTree)
    .component('editorInterfaceTable', editorInterfaceTable)
    .component('editorInterfaceValue', editorInterfaceValue)
+   .component('editorInterfacePrimitive', editorInterfacePrimitive)
+   .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)

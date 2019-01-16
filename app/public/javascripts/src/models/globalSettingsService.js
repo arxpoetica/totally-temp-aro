@@ -19,6 +19,12 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   })
   globalSettings.currentManageUserView = globalSettings.ManageUserViews.Users
 
+  globalSettings.ReleaseNotesView = Object.freeze({
+    List: 0,
+    Description: 1
+  })
+  globalSettings.currentReleaseNotesView = globalSettings.ReleaseNotesView.List
+
   globalSettings.openUserView = () => {
     globalSettings.currentManageUserView = globalSettings.ManageUserViews.Users
   }

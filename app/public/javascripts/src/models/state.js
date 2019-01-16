@@ -5,7 +5,7 @@ import Constants from '../components/common/constants'
 class State {
 //app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) {
+  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
@@ -245,6 +245,7 @@ class State {
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
+  service.openGlobalSettingsView = new Rx.BehaviorSubject({})
   service.showPlanResourceEditorModal = false
   service.showRoicReportsModal = false
   service.editingPlanResourceKey = null
@@ -1562,6 +1563,8 @@ class State {
     service.setOptimizationOptions()
     tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
     tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
+
+    service.getReleaseVersions()
   }
 
   service.setOptimizationOptions = () => {
@@ -1801,11 +1804,36 @@ class State {
     return validEquipments
   }
 
+  service.listOfAppVersions = []
+  service.getReleaseVersions = () => {
+
+    $http.get(`/reports/releaseNotes/versions`)
+    .then((result) => {
+      service.listOfAppVersions = result.data.versions
+      var currentuserAppVersions = localStorage.getItem(service.loggedInUser.id)
+
+      if (!localStorage.getItem(service.loggedInUser.id) ||
+        _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
+        Notification.primary({
+          message: `<a href="#" onClick="openReleaseNotes()">New Features are implemented</a>`
+        })
+      }
+      
+      localStorage.setItem(service.loggedInUser.id,JSON.stringify(service.listOfAppVersions))
+    })
+
+    service.openReleaseNotes = () => {
+      service.showGlobalSettings = true
+      service.openGlobalSettingsView.next('RELEASE_NOTES')
+    }
+
+  }
+
   return service
 //}])
 }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State
