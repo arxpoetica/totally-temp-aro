@@ -3,7 +3,7 @@ class StateCoverage {
   static initializeCoverage(state, $http, $timeout) {
     state.coverage = {
       initializationParams: {
-        coverageType: 'census_block',
+        coverageType: 'location',
         saveSiteCoverage: false,
         useMarketableTechnologies: true,
         useMaxSpeed: true
