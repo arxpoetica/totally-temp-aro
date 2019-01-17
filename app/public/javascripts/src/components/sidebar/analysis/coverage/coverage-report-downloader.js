@@ -1,3 +1,5 @@
+import { timestamp } from "rxjs/operator/timestamp";
+
 class CoverageReportDownloaderController {
   constructor($http, $timeout, state, Utils) {
     this.$http = $http
@@ -22,6 +24,9 @@ class CoverageReportDownloaderController {
         this.coverageReports = result.data.filter(item => item.reportType === 'COVERAGE')
         this.coverageReports.forEach((item, index) => {
           this.coverageReports[index].downloadUrl = `/report-extended/${item.name}/${this.state.plan.getValue().id}/${item.mediaType}`
+          const now = new Date()
+          const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
+          this.coverageReports[index].downloadFilename = `Coverage_${timeStamp}.csv`
         })
       })
       .catch(err => console.error(err))
@@ -56,6 +61,12 @@ class CoverageReportDownloaderController {
           this.Utils.downloadCSV(result.data, 'CoverageReport.csv')
         }
       })
+      .catch(err => console.error(err))
+  }
+
+  downloadReport(report) {
+    this.$http.get(report.downloadUrl)
+      .then(result => this.Utils.downloadCSV(result.data, report.downloadFilename))
       .catch(err => console.error(err))
   }
 
