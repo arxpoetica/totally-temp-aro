@@ -18,7 +18,9 @@ class StateCoverage {
         // If we don't find a coverage report for this plan id, we get an empty array back.
         state.coverage.report = result.data.filter(item => item.coverageAnalysisRequest.planId === planId)[0]
         // Copy over the report params to the initialization params. If no report found, use old params
-        state.coverage.initializationParams = state.coverage.report || state.coverage.initializationParams
+        if (state.coverage.report) {
+          state.coverage.initializationParams = state.coverage.report.coverageAnalysisRequest
+        }
         $timeout()
       })
       .catch(err => console.error(err))
