@@ -1,5 +1,5 @@
 class CoverageInitializerController {
-  constructor(state, $http, $timeout) {
+  constructor(state, aclManager, $http, $timeout) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
@@ -17,6 +17,15 @@ class CoverageInitializerController {
 
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
+
+    this.isLoggedInUserSuperUser = false
+    aclManager.getEffectivePermissions('SYSTEM', '1', state.loggedInUser)
+      .then(permissions => {
+        // Only superusers can see the downloader
+        this.isLoggedInUserSuperUser = permissions && (permissions.IS_SUPERUSER)
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
   }
 
   onSelectionTypeChange(selectionType) {
@@ -60,14 +69,12 @@ class CoverageInitializerController {
   }
 }
 
-CoverageInitializerController.$inject = ['state', '$http', '$timeout']
+CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',
   bindings: {
-    planId: '<',
-    selection: '<',
-    onCoverageInitialized: '&'
+    selection: '<'
   },
   controller: CoverageInitializerController
 }

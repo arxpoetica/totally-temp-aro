@@ -1,17 +1,17 @@
-<!-- Show the "Initialize" button only if the current plans coverage has not been initialized -->
-<button ng-if="$ctrl.buttonState === $ctrl.ButtonStates.READY || $ctrl.buttonState === $ctrl.ButtonStates.INITIALIZING"
+<!-- Show the "Initialize" button only if we don't have a report -->
+<button ng-if="!$ctrl.state.coverage.report"
         class="btn btn-block btn-primary"
-        ng-disabled="$ctrl.buttonState === $ctrl.ButtonStates.INITIALIZING"
+        ng-disabled="$ctrl.isInitializingCoverage"
         ng-click="$ctrl.initializeCoverageReport()">
   <i class="fa fa-bolt"></i> Initialize coverage
 </button>
 
-<!-- Show the "Modify" button only if the current plans coverage has been initialized -->
-<button ng-if="$ctrl.buttonState === $ctrl.ButtonStates.INITIALIZED || $ctrl.buttonState === $ctrl.ButtonStates.DELETING"
+<!-- Show the "Modify" button only if we have a report -->
+<button ng-if="$ctrl.state.coverage.report"
         class="btn btn-block btn-primary modify-coverage-button"
-        ng-disabled="$ctrl.buttonState === $ctrl.ButtonStates.DELETING"
+        ng-disabled="$ctrl.isModifyingCoverage"
         ng-click="$ctrl.modifyCoverageReport()">
-  <i class="fa fa-bolt"></i> Initialize coverage
+  Modify coverage
 </button>
 
 <!-- A spacer div -->

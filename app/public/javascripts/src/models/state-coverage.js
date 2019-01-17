@@ -2,13 +2,13 @@ class StateCoverage {
 
   static initializeCoverage(state, $http, $timeout) {
     state.coverage = {
-      isInitializingReport: false,
-      initParams: {
+      initializationParams: {
         coverageType: 'census_block',
         saveSiteCoverage: false,
         useMarketableTechnologies: true,
         useMaxSpeed: true
-      }
+      },
+      report: null
     }
 
     // Get the coverage report
@@ -17,7 +17,8 @@ class StateCoverage {
       .then((result) => {
         // If we don't find a coverage report for this plan id, we get an empty array back.
         state.coverage.report = result.data.filter(item => item.coverageAnalysisRequest.planId === this.planId)[0]
-        state.coverage.isInitializingReport = Boolean(state.coverage.report)
+        // Copy over the report params to the initialization params. If no report found, use old params
+        state.coverage.initializationParams = state.coverage.report || state.coverage.initializationParams
         $timeout()
       })
       .catch(err => console.error(err))

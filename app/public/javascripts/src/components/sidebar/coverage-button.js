@@ -1,27 +1,23 @@
 import StateCoverage from '../../models/state-coverage'
 
 class CoverageButtonController {
-  constructor(state, $http) {
+  constructor(state, $http, $timeout) {
     this.state = state
     this.$http = $http
-    this.ButtonStates = Object.freeze({
-      READY: 'READY',
-      INITIALIZING: 'INITIALIZING',
-      INITIALIZED: 'INITIALIZED',
-      DELETING: 'DELETING'
-    })
-    this.buttonState = this.ButtonStates.READY
+    this.$timeout = $timeout
+    this.isInitializingCoverage = false
+    this.isModifyingCoverage = false
   }
 
   initializeCoverageReport() {
     // Format the coverage report that so it can be sent over to aro-service
-    var serviceCoveragePlan = {
-      coverageAnalysisRequest: angular.copy(this.state.coverage.initParams)
+    var requestBody = {
+      coverageAnalysisRequest: angular.copy(this.state.coverage.initializationParams)
     }
-    serviceCoveragePlan.coverageAnalysisRequest.planId = this.state.plan.getValue().id
-    serviceCoveragePlan.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
-    serviceCoveragePlan.coverageAnalysisRequest.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
-    serviceCoveragePlan.coverageAnalysisRequest.locationTypes = this.state.locationTypes.getValue()
+    requestBody.coverageAnalysisRequest.planId = this.state.plan.getValue().id
+    requestBody.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
+    requestBody.coverageAnalysisRequest.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
+    requestBody.coverageAnalysisRequest.locationTypes = this.state.locationTypes.getValue()
                                                                                         .filter(item => item.checked)
                                                                                         .map(item => item.plannerKey)
     if (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_ANALYSIS_AREAS) {
@@ -37,39 +33,43 @@ class CoverageButtonController {
         })
         throw errorMessage
       }
-      serviceCoveragePlan.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
+      requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
     }
-    var createdCoveragePlan = null
-    this.buttonState = this.ButtonStates.INITIALIZING
-    this.$http.post(`/service/coverage/report`, serviceCoveragePlan)
+    this.isInitializingCoverage = true
+    this.$http.post(`/service/coverage/report`, requestBody)
       .then((result) => {
-        createdCoveragePlan = result.data
-        return this.$http.post(`/service/coverage/report/${createdCoveragePlan.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
+        this.state.coverage.report = result.data
+        return this.$http.post(`/service/coverage/report/${this.state.coverage.report.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
       })
-      .then(() => this.$http.post(`/service/coverage/report/${createdCoveragePlan.reportId}/process?user_id=${this.state.loggedInUser.id}`, {}))
+      .then(() => this.$http.post(`/service/coverage/report/${this.state.coverage.report.reportId}/process?user_id=${this.state.loggedInUser.id}`, {}))
       .then(() => {
-        this.buttonState = this.ButtonStates.INITIALIZED
+        this.isInitializingCoverage = false
         this.$timeout()
       })
       .catch(err => {
         console.error(err)
-        this.buttonState = this.ButtonStates.READY
+        this.isInitializingCoverage = false
+        this.$timeout()
       })
   }
 
   modifyCoverageReport() {
-    this.buttonState = this.ButtonStates.DELETING
+    this.isModifyingCoverage = true
     this.$http.delete(`/service/coverage/report/${this.state.coverage.report.reportId}`)
       .then(result => {
-        this.buttonState = this.ButtonStates.READY
-        StateCoverage.initializeCoverage(this.state)
+        this.isModifyingCoverage = false
+        StateCoverage.initializeCoverage(this.state, this.$http, this.$timeout)
         this.$timeout()
       })
-      .catch(err => console.error(err))
+      .catch(err => {
+        this.isModifyingCoverage = false
+        console.error(err)
+        this.$timeout()
+      })
   }
 }
 
-CoverageButtonController.$inject = ['state', '$http']
+CoverageButtonController.$inject = ['state', '$http', '$timeout']
 
 let coverageButton = {
   templateUrl: '/components/sidebar/coverage-button.html',
