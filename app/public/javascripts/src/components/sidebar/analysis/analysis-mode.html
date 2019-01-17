@@ -79,7 +79,7 @@
         <network-analysis-output></network-analysis-output>
       </div>
       <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS' && $ctrl.state.coverage.report">
-        <coverage-report-downloader coverage-report-id="$ctrl.state.coverage.report.reportId">
+        <coverage-report-downloader>
         </coverage-report-downloader>
       </div>
     </accordion-panel-contents>
