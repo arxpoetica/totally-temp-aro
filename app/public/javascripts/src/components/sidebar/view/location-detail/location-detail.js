@@ -49,8 +49,6 @@ class LocationDetailController {
           this.selectedLocationObjectId = feature.object_id
           this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
-          console.log('feature select subscribe')
-          console.log(feature)
           this.getLocationInfo(this.plan.id,locationId,feature.object_id)
             .then(locationInfo => this.showStaticMap(locationInfo))
             .catch((err) => console.error(err))
@@ -74,12 +72,8 @@ class LocationDetailController {
 
   // Get the location Information
   getLocationInfo(planId, id, objectId){
-    console.log(objectId)
-    console.log(this.state.user)
-    console.log(this.plan)
     return this.$http.get(`/locations/${planId}/${id}/show`)// note: change this for a service endpoint?
       .then((result) => {
-        console.log(result)
         if (this.state.configuration.perspective.locationDetails.showDefaultDetails) {
           return Promise.resolve(result.data)
         } else if (this.state.configuration.perspective.locationDetails.showSalesDetails) {
@@ -106,7 +100,6 @@ class LocationDetailController {
   }
   
   showStaticMap(locationInfo) {
-    console.log(locationInfo)
     this.selectedLocationInfo = locationInfo
     this.selectedLocationInfo.attributes = this.selectedLocationInfo.attributes.filter(val => val != null)
     this.showAttributes = (this.currentUser.perspective === 'sales_engineer' || this.currentUser.perspective === 'account_exec') && !angular.equals(locationInfo.attributes, {})
@@ -134,8 +127,6 @@ class LocationDetailController {
   }
 
   viewSelectedLocation(selectedLocation) {
-    console.log('viewSelectedLocation')
-    console.log(selectedLocation)
     this.selectedLocationObjectId = selectedLocation.objectId
     this.updateSelectedState(selectedLocation, selectedLocation.id)
     this.getLocationInfo(this.plan.id,selectedLocation.id,selectedLocation.objectId)
