@@ -4,7 +4,7 @@
   }
 </style>
 
-<table id="table-coverage-initializer" class="table table-sm table-striped">
+<table id="table-coverage-initializer"  ng-if="$ctrl.isLoggedInUserSuperUser" class="table table-sm table-striped">
   <tbody>
 
     <!-- Coverage type -->
@@ -12,19 +12,19 @@
       <td>Coverage Type</td>
       <td>
         <select class="form-control"
-                ng-model="$ctrl.coveragePlan.coverageType"
+                ng-model="$ctrl.state.coverage.initializationParams.coverageType"
                 ng-options="item.id as item.name for item in $ctrl.coverageTypes">
         </select>
       </td>
     </tr>
 
     <!-- Save site coverage -->
-    <tr ng-if="$ctrl.coveragePlan.coverageType === 'location'">
+    <tr ng-if="$ctrl.state.coverage.initializationParams.coverageType === 'location'">
       <td>Save site coverage</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.saveSiteCoverage">
+               ng-model="$ctrl.state.coverage.initializationParams.saveSiteCoverage">
       </td>
     </tr>
     
@@ -34,7 +34,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useMarketableTechnologies">
+               ng-model="$ctrl.state.coverage.initializationParams.useMarketableTechnologies">
       </td>
     </tr>
 
@@ -44,7 +44,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useMaxSpeed">
+               ng-model="$ctrl.state.coverage.initializationParams.useMaxSpeed">
       </td>
     </tr>
 
@@ -82,9 +82,16 @@
   </tbody>
 </table>
 
-<button class="btn btn-block btn-primary" ng-click="$ctrl.initializeCoverageReport()">Initialize coverage report</button>
+<!-- If we have a valid report, then disable all controls -->
+<div ng-if="$ctrl.isLoggedInUserSuperUser && $ctrl.state.coverage.report"
+     class="disable-sibling-controls">
 
-<!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-<div ng-show="$ctrl.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
-  <i class="fa fa-spinner fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
 </div>
+        
+<div class="alert alert-danger" ng-if="!$ctrl.isLoggedInUserSuperUser" style="margin-top: 60px;">
+  You must be a system-wide superuser in order to use coverage reports.
+</div>
+<!-- Spinner that will show up if the UI configuration is being loaded from the server -->
+<!-- <div ng-show="$ctrl.state.coverage.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
+  <i class="fa fa-spinner fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
+</div> -->

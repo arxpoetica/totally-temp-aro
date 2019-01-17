@@ -1,25 +1,13 @@
 class CoverageInitializerController {
-  constructor(state, $http, $timeout) {
+  constructor(state, aclManager, $http, $timeout) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
-    this.spatialEdgeTypes = [
-      { id: 'road', name: 'Roads' },
-      { id: 'copper', name: 'Copper' },
-      { id: 'fiber', name: 'Fiber' }
-    ]
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }
     ]
-    this.coveragePlan = {
-      coverageType: 'census_block',
-      saveSiteCoverage: false,
-      useMarketableTechnologies: true,
-      useMaxSpeed: true
-    }
 
-    this.isInitializingReport = false
     this.serviceAreas = []
     this.analysisAreas = []
     this.selectionModeLabels = {}
@@ -29,6 +17,15 @@ class CoverageInitializerController {
 
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
+
+    this.isLoggedInUserSuperUser = false
+    aclManager.getEffectivePermissions('SYSTEM', '1', state.loggedInUser)
+      .then(permissions => {
+        // Only superusers can see the downloader
+        this.isLoggedInUserSuperUser = permissions && (permissions.IS_SUPERUSER)
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
   }
 
   onSelectionTypeChange(selectionType) {
@@ -49,50 +46,6 @@ class CoverageInitializerController {
       this.state.reloadSelectedAnalysisAreas()
     })
     .catch(err => console.error(err))
-  }
-
-  initializeCoverageReport() {
-    // Format the coverage report that so it can be sent over to aro-service
-    var serviceCoveragePlan = {
-      coverageAnalysisRequest: angular.copy(this.coveragePlan)
-    }
-    serviceCoveragePlan.coverageAnalysisRequest.planId = this.planId
-    serviceCoveragePlan.coverageAnalysisRequest.projectTemplateId = this.state.loggedInUser.projectId
-    serviceCoveragePlan.coverageAnalysisRequest.distanceThreshold = this.coveragePlan.distanceThreshold * this.state.configuration.units.length_units_to_meters
-    serviceCoveragePlan.coverageAnalysisRequest.analysisSelectionMode = this.state.optimizationOptions.analysisSelectionMode
-    serviceCoveragePlan.coverageAnalysisRequest.locationTypes = this.state.locationTypes.getValue()
-                                                                                        .filter(item => item.checked)
-                                                                                        .map(item => item.plannerKey)
-    if (this.state.optimizationOptions.analysisSelectionMode === this.state.selectionModes.SELECTED_ANALYSIS_AREAS) {
-      // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
-      const visibleAnalysisLayers = this.state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
-      if (visibleAnalysisLayers.length !== 1) {
-        const errorMessage = 'You must have exactly one analysis layer selected to initialize the coverage report'
-        swal({
-          title: 'Analysis Layer error',
-          text: errorMessage,
-          type: 'error',
-          closeOnConfirm: true
-        })
-        throw errorMessage
-      }
-      serviceCoveragePlan.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
-    }
-    var createdCoveragePlan = null
-    this.isInitializingReport = true
-    console.log(serviceCoveragePlan)
-    this.$http.post(`/service/coverage/report`, serviceCoveragePlan)
-      .then((result) => {
-        createdCoveragePlan = result.data
-        return this.$http.post(`/service/coverage/report/${createdCoveragePlan.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
-      })
-      .then(() => this.$http.post(`/service/coverage/report/${createdCoveragePlan.reportId}/process?user_id=${this.state.loggedInUser.id}`, {}))
-      .then(() => {
-        this.onCoverageInitialized()
-        this.isInitializingReport = false
-        this.$timeout()
-      })
-      .catch(err => console.error(err))
   }
 
   $onChanges(changesObj) {
@@ -116,14 +69,12 @@ class CoverageInitializerController {
   }
 }
 
-CoverageInitializerController.$inject = ['state', '$http', '$timeout']
+CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',
   bindings: {
-    planId: '<',
-    selection: '<',
-    onCoverageInitialized: '&'
+    selection: '<'
   },
   controller: CoverageInitializerController
 }
