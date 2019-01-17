@@ -174,8 +174,43 @@ class RoicReportsController {
   }
 
   loadROICResultsForPlan(planId) {
-    this.$http.get(`/service/report/plan/${planId}`)
+    // for testing
+    // need to generalize this, tie it to this.roicResults.roicAnalysis in the parent
+    var isLocation = true
+    if(isLocation){
+      var userId = 2
+      var planSettings = {
+        "analysis_type": "LOCATION_ROIC",
+        "locationIds": [
+          "5d7be43e-798c-11e8-b1ab-c772e0f1635c"
+        ],
+        "planId": 617,
+        "projectTemplateId": 1
+      }
+      
+      this.$http.post(`/service/location-analysis/roic?userId=${userId}`, planSettings)
       .then(result => {
+        console.log(result.data)
+        this.roicResults = {}
+        this.roicResults.roicAnalysis = result.data
+        // Some of the values have to be scaled (e.g. penetration should be in %)
+        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
+          const component = this.roicResults.roicAnalysis.components[componentKey]
+          Object.keys(component).forEach(curveKey => {
+            const curve = component[curveKey]
+            const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
+            const multiplier = calcType ? calcType.multiplier : 1.0
+            curve.values = curve.values.map(item => item * multiplier)
+          })
+        })
+      })
+      .catch(err => console.error(err))
+    
+    }else{
+    
+      this.$http.get(`/service/report/plan/${planId}`)
+      .then(result => {
+        console.log(result.data)
         this.roicResults = result.data
         // Some of the values have to be scaled (e.g. penetration should be in %)
         Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
@@ -189,6 +224,8 @@ class RoicReportsController {
         })
       })
       .catch(err => console.error(err))
+      
+    }
   }
 }
 

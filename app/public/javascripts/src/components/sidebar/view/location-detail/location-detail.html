@@ -216,9 +216,17 @@
       </table>
     </div>
   </span>
-
+<!-- 
   <div ng-if="$ctrl.state.configuration.perspective.locationDetails.showMoreInfoButton">
     <button class="btn btn-primary" ng-click="$ctrl.showDetailLocationInfo()">More Information</button>
   </div>
-
+-->
+  <!-- The ROIC Reports component-->
+  <div style="position: relative; width: 100%;">
+    <roic-reports plan-id="$ctrl.state.plan.getValue().id"
+                  optimization-state="$ctrl.state.Optimizingplan.planState"
+                  report-size="'small'">
+    </roic-reports>
+  </div>
+  
 </div>
