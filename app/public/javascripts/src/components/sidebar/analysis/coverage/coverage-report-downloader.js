@@ -16,7 +16,7 @@ class CoverageReportDownloaderController {
     this.$http.get('/service/rr/matrix')
     .then((result) => {
       this.rateReachMatrices = result.data
-      this.selectedRateReachMatrix = result.data[0]
+      this.selectedRateReachMatrix = result.data[0]   // Now, this is not being set from the UI. Keeping it this way until the endpoints are stabilized.
       return this.$http.get('/service/installed/report/meta-data')
     })
     .then(result => {
