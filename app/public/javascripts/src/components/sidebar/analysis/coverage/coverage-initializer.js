@@ -33,19 +33,19 @@ class CoverageInitializerController {
   } 
 
   removeServiceAreas(targets) {
-    this.$http.post(`/service_areas/${this.planId}/removeServiceAreaTargets`, { serviceAreaIds: targets.map((sa) => sa.id) })
-    .then((response) => {
-      this.state.reloadSelectedServiceAreas()
-    })
-    .catch(err => console.error(err))
+    this.$http.post(`/service_areas/${this.state.plan.getValue().id}/removeServiceAreaTargets`, { serviceAreaIds: targets.map((sa) => sa.id) })
+      .then((response) => {
+        this.state.reloadSelectedServiceAreas()
+      })
+      .catch(err => console.error(err))
   }
 
   removeAnalysisAreas(targets) {
-    this.$http.post(`/analysis_areas/${this.planId}/removeAnalysisAreaTargets`, { analysisAreaIds: targets.map((sa) => sa.id) })
-    .then((response) => {
-      this.state.reloadSelectedAnalysisAreas()
-    })
-    .catch(err => console.error(err))
+    this.$http.post(`/analysis_areas/${this.state.plan.getValue().id}/removeAnalysisAreaTargets`, { analysisAreaIds: targets.map((sa) => sa.id) })
+      .then((response) => {
+        this.state.reloadSelectedAnalysisAreas()
+      })
+      .catch(err => console.error(err))
   }
 
   $onChanges(changesObj) {
