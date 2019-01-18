@@ -1,4 +1,5 @@
 var login = require('./login')
+const assert = require('assert')
 
 describe('Select a Plan', function() {
   it('select a plan', function() {
@@ -19,7 +20,7 @@ describe('Select a Plan', function() {
     //Select the first plan in the list
     // browser.waitForVisible('//table[contains(@id, "tblSelectPlans")]', 5000)
     // browser.waitForVisible('//table[contains(@id, "tblSelectPlans")]//tbody/tr[1]/td[1]', 5000)
-    // browser.pause(2000)
+    // browser.waitForVisible('//table[contains(@id, "tblSelectPlans")]//tbody/tr[1]/td[1]/b/a', 5000)
     // $('//table[contains(@id, "tblSelectPlans")]//tbody/tr[1]/td[1]/b/a').click()
 
     //Search for a plan in the table
@@ -28,10 +29,9 @@ describe('Select a Plan', function() {
     browser.middleClick('//div[contains(@class, "tool-bar")]//button[@title="Global Settings..."]', 412, 200)
     browser.waitForVisible('//table[contains(@id, "tblSelectPlans")]', 5000)
     browser.waitForVisible('//table[contains(@id, "tblSelectPlans")]//tbody/descendant::td/b/a[contains(text(), ' + planToSearch + ')]', 10000)
-    browser.pause(2000)
     $('//table[contains(@id, "tblSelectPlans")]//tbody/descendant::td/b/a[contains(text(), ' + planToSearch + ')]').click()
 
-    browser.pause(2000)
-    console.log($('//div[contains(@id, "header-bar-container")]/network-plan/div/div').getText())
+    console.log($('#selectedPlan').getText())
+    assert.equal($('#selectedPlan').getText(),planToSearch)
   });
 });

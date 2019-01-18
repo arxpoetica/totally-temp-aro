@@ -5,9 +5,6 @@ describe('Create Plan layer', function() {
 
     var newPlanName = 'PlanForTest' + Math.round(Math.random() * 10000)
 
-    // Log in to the system
-    //browser.login(process.env.USER,process.env.PSWD)
-
     /** Create new plan **/
 
     browser.waitForVisible('//div[contains(@class, "tool-bar")]', 5000)
@@ -19,18 +16,15 @@ describe('Create Plan layer', function() {
       $('//ul[contains(@class, "dropdown-menu")]//li//button[@title="Save plan as..."]').click()
     }
 
-    browser.pause(3000)
-    $('#planName').setValue(newPlanName) //set Plan Name
-    browser.pause(3000)
+    browser.waitForVisible('#planName', 5000)
+    $('#searchPlanName').setValue(newPlanName) //set Plan Name
+
     //Select SA tag
+    browser.waitForVisible('//div[contains(@id, "plan_inputs_modal")]/div/div/*/edit-plan-tag/div/div/*/input[@placeholder="Select Service Area..."]', 5000)
     $('//div[contains(@id, "plan_inputs_modal")]/div/div/*/edit-plan-tag/div/div/*/input[@placeholder="Select Service Area..."]').click()
     $('//div[contains(@id, "plan_inputs_modal")]/div/div/*/edit-plan-tag/div/div/ul').click()
     $('//div[contains(@id, "plan_inputs_modal")]/div/div/*/button[contains(text(), "Create Plan")]').click()
 
-    //browser.debug()
-    browser.waitForVisible('//div[contains(@id, "header-bar-container")]/network-plan/div/div[contains(text(),' + newPlanName + ')]', 5000)
-    browser.pause(3000)
-    console.log($('//div[contains(@id, "header-bar-container")]/network-plan/div/div').getText())
-
+    browser.waitForVisible('//div[contains(@id, "header-bar-container")]/network-plan/div/div[contains(text(),' + newPlanName + ')]', 5000)    
   });
 });
