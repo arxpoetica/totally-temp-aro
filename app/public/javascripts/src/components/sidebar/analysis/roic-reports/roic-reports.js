@@ -161,13 +161,14 @@ class RoicReportsController {
   }
 
   refreshData() {
-    if (!this.planId) {
+    if (!this.isLocation && !this.planId) {
       console.error('Plan ID not available in ROIC Reports component')
       return
     }
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
-    for (var i = 0; i < this.state.getOptimizationBody().financialConstraints.years; ++i) {
+    var optimizationBody = this.state.getOptimizationBody()
+    for (var i = 0; i < optimizationBody.financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
     this.loadROICResultsForPlan(this.planId)
@@ -176,8 +177,8 @@ class RoicReportsController {
   loadROICResultsForPlan(planId) {
     // for testing
     // need to generalize this, tie it to this.roicResults.roicAnalysis in the parent
-    var isLocation = true
-    if(isLocation){
+    
+    if(this.isLocation){
       var userId = 2
       var planSettings = {
         "analysis_type": "LOCATION_ROIC",
@@ -236,7 +237,8 @@ let roicReports = {
   bindings: {
     planId: '<',
     optimizationState: '<',
-    reportSize: '<'
+    reportSize: '<', 
+    isLocation: '<'
   },
   controller: RoicReportsController
 }
