@@ -9,6 +9,17 @@ class CoverageButtonController {
     this.isModifyingCoverage = false
   }
 
+  areInputsComplete() {
+
+    if (this.state.coverage.initializationParams.coverageType === 'census_block') {
+      return true // For census_blocks/Form477 inputs are complete even without selecting locationtypes
+    }
+
+    // Check if at least one location type is selected for optimization
+    const isLocationInputValid = this.state.locationInputSelected('business') || this.state.locationInputSelected('household') || this.state.locationInputSelected('celltower')
+    return isLocationInputValid
+  }
+
   initializeCoverageReport() {
     // Format the coverage report that so it can be sent over to aro-service
     var requestBody = {
