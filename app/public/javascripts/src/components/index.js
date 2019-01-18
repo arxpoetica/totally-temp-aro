@@ -15,6 +15,7 @@ import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
+import coverageButton from './sidebar/coverage-button'
 import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
@@ -27,7 +28,6 @@ import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
 import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
-import coverageReports from './sidebar/analysis/coverage/coverage-reports'
 import coverageInitializer from './sidebar/analysis/coverage/coverage-initializer'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
@@ -118,6 +118,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroSearch', aroSearch)
    .component('aroMultiselectSearch', aroMultiselectSearch)
    .component('displayModeButtons', displayModeButtons)
+   .component('coverageButton', coverageButton)
    .component('optimizeButton', optimizeButton)
    .component('summaryReports', summaryReports)
    .component('analysisExpertMode', analysisExpertMode)
@@ -131,7 +132,6 @@ app.component('boundaryDetail', boundaryDetail)
    .component('networkAnalysisOutput', networkAnalysisOutput)
    .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
    .component('networkAnalysisModal', networkAnalysisModal)
-   .component('coverageReports', coverageReports)
    .component('coverageInitializer', coverageInitializer)
    .component('coverageReportDownloader', coverageReportDownloader)
    .component('networkBuildOutput', networkBuildOutput)

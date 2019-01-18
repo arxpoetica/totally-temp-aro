@@ -1164,6 +1164,11 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   color: white;
 }
 
+.modify-coverage-button, .modify-coverage-button:hover, .modify-coverage-button:focus {
+  background-color: #4cae4c;
+  color: white;
+}
+
 /* Class to disable sibling controls. Use with hatched background */
 .disable-sibling-controls {
   position:absolute;

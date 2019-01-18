@@ -1,0 +1,18 @@
+<!-- Show the "Initialize" button only if we don't have a report -->
+<button ng-if="!$ctrl.state.coverage.report"
+        ng-class="{ 'btn btn-block': true, 'btn-primary': $ctrl.areInputsComplete(), 'btn-light': !$ctrl.areInputsComplete() }"
+        ng-disabled="$ctrl.isInitializingCoverage || !$ctrl.areInputsComplete()"
+        ng-click="$ctrl.initializeCoverageReport()">
+  <i class="fa fa-bolt"></i> Initialize coverage
+</button>
+
+<!-- Show the "Modify" button only if we have a report -->
+<button ng-if="$ctrl.state.coverage.report"
+        class="btn btn-block modify-coverage-button"
+        ng-disabled="$ctrl.isModifyingCoverage"
+        ng-click="$ctrl.modifyCoverageReport()">
+  Modify coverage
+</button>
+
+<!-- A spacer div -->
+<div style="width: 100%; padding-bottom: 20px"></div>

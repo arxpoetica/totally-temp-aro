@@ -4,7 +4,7 @@
   }
 </style>
 
-<table id="table-coverage-initializer" class="table table-sm table-striped">
+<table id="table-coverage-initializer"  ng-if="$ctrl.isLoggedInUserSuperUser" class="table table-sm table-striped">
   <tbody>
 
     <!-- Coverage type -->
@@ -12,19 +12,19 @@
       <td>Coverage Type</td>
       <td>
         <select class="form-control"
-                ng-model="$ctrl.coveragePlan.coverageType"
+                ng-model="$ctrl.state.coverage.initializationParams.coverageType"
                 ng-options="item.id as item.name for item in $ctrl.coverageTypes">
         </select>
       </td>
     </tr>
 
     <!-- Save site coverage -->
-    <tr ng-if="$ctrl.coveragePlan.coverageType === 'location'">
+    <tr ng-if="$ctrl.state.coverage.initializationParams.coverageType === 'location'">
       <td>Save site coverage</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.saveSiteCoverage">
+               ng-model="$ctrl.state.coverage.initializationParams.saveSiteCoverage">
       </td>
     </tr>
     
@@ -34,7 +34,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useMarketableTechnologies">
+               ng-model="$ctrl.state.coverage.initializationParams.useMarketableTechnologies">
       </td>
     </tr>
 
@@ -44,7 +44,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.coveragePlan.useMaxSpeed">
+               ng-model="$ctrl.state.coverage.initializationParams.useMaxSpeed">
       </td>
     </tr>
 
@@ -61,7 +61,9 @@
       </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
-        <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>
+        <a ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)">
+          <span class="far fa-trash-alt trash"></span>
+        </a>
       </td>
       <td> 
         <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
@@ -71,7 +73,9 @@
     </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
       <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
-        <span class="far fa-trash-alt trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)"></span>
+        <a ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)">
+          <span class="far fa-trash-alt trash"></span>
+        </a>
       </td>
       <td>
         <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
@@ -82,9 +86,16 @@
   </tbody>
 </table>
 
-<button class="btn btn-block btn-primary" ng-click="$ctrl.initializeCoverageReport()">Initialize coverage report</button>
+<!-- If we have a valid report, then disable all controls -->
+<div ng-if="$ctrl.isLoggedInUserSuperUser && $ctrl.state.coverage.report"
+     class="disable-sibling-controls">
 
-<!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-<div ng-show="$ctrl.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
-  <i class="fa fa-spinner fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
 </div>
+        
+<div class="alert alert-danger" ng-if="!$ctrl.isLoggedInUserSuperUser" style="margin-top: 60px;">
+  You must be a system-wide superuser in order to use coverage reports.
+</div>
+<!-- Spinner that will show up if the UI configuration is being loaded from the server -->
+<!-- <div ng-show="$ctrl.state.coverage.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
+  <i class="fa fa-spinner fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
+</div> -->

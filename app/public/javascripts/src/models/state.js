@@ -1,9 +1,9 @@
 import StateViewMode from './state-view-mode'
+import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
 
 /* global app localStorage map */
 class State {
-//app.service('state', ['$rootScope', '$http', '$document', '$timeout', '$sce', 'map_layers', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', ($rootScope, $http, $document, $timeout, $sce, map_layers, configuration, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker) => {
 
   constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
@@ -1063,6 +1063,7 @@ class State {
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
         stateSerializationHelper.loadStateFromJSON(service, optimization, planInputs)
+        StateCoverage.initializeCoverage(service, $http, $timeout)
         return Promise.all([
           service.reloadSelectedLocations(),
           service.reloadSelectedServiceAreas(),
