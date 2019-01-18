@@ -16,7 +16,7 @@ describe('Create Plan layer', function() {
       $('//ul[contains(@class, "dropdown-menu")]//li//button[@title="Save plan as..."]').click()
     }
 
-    browser.waitForVisible('#planName', 5000)
+    browser.waitForVisible('#searchPlanName', 5000)
     $('#searchPlanName').setValue(newPlanName) //set Plan Name
 
     //Select SA tag
