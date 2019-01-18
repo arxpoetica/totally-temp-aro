@@ -61,7 +61,9 @@
       </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
-        <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)"></span>
+        <a ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)">
+          <span class="far fa-trash-alt trash"></span>
+        </a>
       </td>
       <td> 
         <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
@@ -71,7 +73,9 @@
     </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
       <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
-        <span class="far fa-trash-alt trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)"></span>
+        <a ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)">
+          <span class="far fa-trash-alt trash"></span>
+        </a>
       </td>
       <td>
         <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
