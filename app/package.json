@@ -10,6 +10,7 @@
     "test-ui": "./node_modules/.bin/karma start",
     "test-integration": "NODE_ENV=test protractor test/integration/conf.js",
     "test-all": "npm test && npm run test-ui && npm run test-integration",
+    "test-wdio": "USER=dileep@metronconsulting.com PSWD=welcome01 ./node_modules/.bin/wdio wdio.conf.js",
     "build-service-types": "cd ./public/javascripts/src/service-typegen/src && node class-generator.js",
     "build-vendor-bundle": "chmod +x ./node_modules/uglify-js/bin/* && ./node_modules/browserify/bin/cmd.js -r vector-tile -r pbf -r rxjs -r async -r point-in-polygon -r geojson-polygon-self-intersections -r marked -p licensify | ./node_modules/uglify-js/bin/uglifyjs --comments > ./public/javascripts/vendors/vendor-bundle.min.js",
     "build-angularjs": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib && cd ./public/javascripts/src/components && find . -name \\*.html -exec cp --parents {} ../../lib/components/ \\;",
