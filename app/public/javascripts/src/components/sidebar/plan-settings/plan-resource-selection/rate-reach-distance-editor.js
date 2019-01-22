@@ -7,9 +7,11 @@ class SpeedCategory {
   toServiceCategory() {
     // Format the category in aro-service format
     const label = `${this.speed} ${this.units}`
+    const multiplier = this.units === 'Mbps' ? 1 : 1000
     return {
       name: label,
-      description: label
+      description: label,
+      speed: (+this.speed) * multiplier
     }
   }
 
@@ -25,7 +27,7 @@ class SpeedCategory {
     if (parts[1] !== 'Mbps' && parts[1] !== 'Gbps') {
       console.warn('Category units should be Mbps or Gbps')
     }
-    return new SpeedCategory(+parts[0], parts[1])
+   return new SpeedCategory(+serviceCategory.speed, parts[1])
   }
 }
 
@@ -102,8 +104,7 @@ class RateReachDistanceEditorController {
     })
   }
 
-  removeCategory(category) {
-    const categoryIndex = this.categories.findIndex(item => item.id === category.id)
+  removeCategory(categoryIndex) {
     this.categories.splice(categoryIndex, 1)
     this.isCategoryInEditMode.splice(categoryIndex, 1)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
