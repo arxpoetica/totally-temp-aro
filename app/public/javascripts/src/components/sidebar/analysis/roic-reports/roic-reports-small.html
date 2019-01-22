@@ -10,61 +10,63 @@
   }
 </style>
 
-<div style="display: flex; flex-direction: column; height: 1000px;">
-  <div style="flex: 0 0 auto;">
-    <h3 class="mb-3 mt-3">Summary</h3>
-  </div>
-  <div style="flex: 0 0 auto;">
-    <table id="tblNetworkBuildOutput" class="table table-sm table-striped">
-      <tbody>
-        <tr ng-repeat="networkStatistic in $ctrl.roicResults.networkStatistics"
-          ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
-          <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'"><strong>NPV</strong></td>
-          <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
-            {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}} K
-          </td>
-        </tr>
-        
-        <tr ng-repeat="networkStatistic in $ctrl.roicResults.networkStatistics"
-          ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
-          <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'"><strong>IRR</strong></td>
-          <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
-            {{(networkStatistic.value * 100) | number : 1}} %
-          </td>
-        </tr>
-  
-        <tr>
-          <td><strong>Total Capex</strong></td>
-          <td>{{$ctrl.roicResults.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-        </tr>
-  
-        <tr>
-          <td colspan="2"><strong>Fiber Capex</strong></td>
-        </tr>
-        <tr ng-repeat="fiberCost in $ctrl.roicResults.priceModel.fiberCosts">
-          <td class="indent-1 text-capitalize">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}} {{$ctrl.config.length.length_units}})</td>
-          <td>{{fiberCost.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-        </tr>
-        <tr>
-          <td colspan="2"><strong>Equipment Capex</strong></td>
-        </tr>
-        <tr ng-repeat="equipmentCost in $ctrl.roicResults.priceModel.equipmentCosts">
-          <td class="indent-1 text-capitalize">{{$ctrl.state.configuration.networkEquipment.equipments[equipmentCost.nodeType].label || $ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
-          <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
-        </tr>
-  
-        <tr>
-          <td><strong>Premises Passed</strong></td>
-          <td> {{$ctrl.plannedNetworkDemand.locationDemand.rawCoverage | number}} </td>
-        </tr>
-        <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
-          <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
-          <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
-          <td> {{value.rawCoverage | number}} </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+<div style="display: flex; flex-direction: column;">
+  <div ng-if="$ctrl.roicResults.networkStatistics || $ctrl.roicResults.networkStatistics.priceModel">
+	  <div style="flex: 0 0 auto;">
+	    <h3 class="mb-3 mt-3">Summary</h3>
+	  </div>
+	  <div style="flex: 0 0 auto;">
+	    <table id="tblNetworkBuildOutput" class="table table-sm table-striped">
+	      <tbody>
+	        <tr ng-repeat="networkStatistic in $ctrl.roicResults.networkStatistics"
+	          ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
+	          <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'"><strong>NPV</strong></td>
+	          <td ng-if="networkStatistic.networkStatisticType === 'roic_npv'">
+	            {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}} K
+	          </td>
+	        </tr>
+	        
+	        <tr ng-repeat="networkStatistic in $ctrl.roicResults.networkStatistics"
+	          ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
+	          <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'"><strong>IRR</strong></td>
+	          <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
+	            {{(networkStatistic.value * 100) | number : 1}} %
+	          </td>
+	        </tr>
+	  
+	        <tr>
+	          <td><strong>Total Capex</strong></td>
+	          <td>{{$ctrl.roicResults.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
+	        </tr>
+	  
+	        <tr>
+	          <td colspan="2"><strong>Fiber Capex</strong></td>
+	        </tr>
+	        <tr ng-repeat="fiberCost in $ctrl.roicResults.priceModel.fiberCosts">
+	          <td class="indent-1 text-capitalize">{{fiberCost.fiberType}} ({{fiberCost.lengthMeters * $ctrl.config.length.meters_to_length_units | number : 0}} {{$ctrl.config.length.length_units}})</td>
+	          <td>{{fiberCost.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
+	        </tr>
+	        <tr>
+	          <td colspan="2"><strong>Equipment Capex</strong></td>
+	        </tr>
+	        <tr ng-repeat="equipmentCost in $ctrl.roicResults.priceModel.equipmentCosts">
+	          <td class="indent-1 text-capitalize">{{$ctrl.state.configuration.networkEquipment.equipments[equipmentCost.nodeType].label || $ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
+	          <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
+	        </tr>
+	  
+	        <tr>
+	          <td><strong>Premises Passed</strong></td>
+	          <td> {{$ctrl.plannedNetworkDemand.locationDemand.rawCoverage | number}} </td>
+	        </tr>
+	        <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
+	          <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
+	          <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
+	          <td> {{value.rawCoverage | number}} </td>
+	        </tr>
+	      </tbody>
+	    </table>
+	  </div>
+	</div>
 
   <div style="flex: 0 0 auto;">
     <h3 class="pb-3 pt-3" style="border-top: 1px solid lightgray;">ROIC Analysis</h3>

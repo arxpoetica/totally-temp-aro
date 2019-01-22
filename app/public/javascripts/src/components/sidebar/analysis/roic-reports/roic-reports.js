@@ -133,13 +133,6 @@ class RoicReportsController {
     }
   }
 
-  $onChanges(changesObj) {
-
-    if (changesObj.planId || changesObj.optimizationState) {
-      this.refreshData()
-    }
-  }
-
   formatYAxisValue(value, allValues, calcType, precision) {
     precision = precision || 1
     // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
@@ -159,75 +152,35 @@ class RoicReportsController {
       return `  ${calcType.tickPrefix}${value.toFixed(precision)}${calcType.tickSuffix}` // For values less than 1000
     }
   }
-
-  refreshData() {
-    if (!this.isLocation && !this.planId) {
-      console.error('Plan ID not available in ROIC Reports component')
-      return
+  
+  $onChanges(changesObj) {
+    if (changesObj.roicResultsData && this.roicResultsData) {
+      this.roicResults = JSON.parse(JSON.stringify(this.roicResultsData))
+      this.digestData()
     }
+  }
+  
+  digestData(){
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
     var optimizationBody = this.state.getOptimizationBody()
     for (var i = 0; i < optimizationBody.financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
-    this.loadROICResultsForPlan(this.planId)
-  }
-
-  loadROICResultsForPlan(planId) {
-    // for testing
-    // need to generalize this, tie it to this.roicResults.roicAnalysis in the parent
     
-    if(this.isLocation){
-      var userId = 2
-      var planSettings = {
-        "analysis_type": "LOCATION_ROIC",
-        "locationIds": [
-          "5d7be43e-798c-11e8-b1ab-c772e0f1635c"
-        ],
-        "planId": 617,
-        "projectTemplateId": 1
-      }
-      
-      this.$http.post(`/service/location-analysis/roic?userId=${userId}`, planSettings)
-      .then(result => {
-        console.log(result.data)
-        this.roicResults = {}
-        this.roicResults.roicAnalysis = result.data
-        // Some of the values have to be scaled (e.g. penetration should be in %)
-        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-          const component = this.roicResults.roicAnalysis.components[componentKey]
-          Object.keys(component).forEach(curveKey => {
-            const curve = component[curveKey]
-            const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
-            const multiplier = calcType ? calcType.multiplier : 1.0
-            curve.values = curve.values.map(item => item * multiplier)
-          })
-        })
+    // Some of the values have to be scaled (e.g. penetration should be in %)
+    Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
+      const component = this.roicResults.roicAnalysis.components[componentKey]
+      Object.keys(component).forEach(curveKey => {
+        const curve = component[curveKey]
+        const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
+        const multiplier = calcType ? calcType.multiplier : 1.0
+        curve.values = curve.values.map(item => item * multiplier)
       })
-      .catch(err => console.error(err))
+    })
     
-    }else{
-    
-      this.$http.get(`/service/report/plan/${planId}`)
-      .then(result => {
-        console.log(result.data)
-        this.roicResults = result.data
-        // Some of the values have to be scaled (e.g. penetration should be in %)
-        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-          const component = this.roicResults.roicAnalysis.components[componentKey]
-          Object.keys(component).forEach(curveKey => {
-            const curve = component[curveKey]
-            const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
-            const multiplier = calcType ? calcType.multiplier : 1.0
-            curve.values = curve.values.map(item => item * multiplier)
-          })
-        })
-      })
-      .catch(err => console.error(err))
-      
-    }
   }
+  
 }
 
 RoicReportsController.$inject = ['$http', 'state']
@@ -235,10 +188,8 @@ RoicReportsController.$inject = ['$http', 'state']
 let roicReports = {
   templateUrl: '/components/sidebar/analysis/roic-reports/roic-reports.html',
   bindings: {
-    planId: '<',
-    optimizationState: '<',
-    reportSize: '<', 
-    isLocation: '<'
+    roicResultsData: '<',
+    reportSize: '<'
   },
   controller: RoicReportsController
 }
