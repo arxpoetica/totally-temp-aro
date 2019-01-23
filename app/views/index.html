@@ -129,8 +129,9 @@
       app.config(['NotificationProvider', '$qProvider', function (NotificationProvider, $qProvider) {
         NotificationProvider.setOptions({
           maxCount : 1,
-          positionX: 'left',
-          positionY: 'top'
+          positionX: 'right',
+          positionY: 'bottom',
+          container: '#map-canvas'
         });
         $qProvider.errorOnUnhandledRejections(false);
       }]);
