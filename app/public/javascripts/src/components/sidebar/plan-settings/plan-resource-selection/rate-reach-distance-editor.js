@@ -73,10 +73,12 @@ class RateReachDistanceEditorController {
       this.oldCategories = this.categories
       this.isCategoryInEditMode = []
       this.editableCategories = []
-      this.categories.forEach(category => {
-        this.isCategoryInEditMode.push(false)
-        this.editableCategories.push((this.categoryType === 'SPEED') ? SpeedCategory.fromServiceCategory(category) : category)
-      })
+      if (this.categories) {
+        this.categories.forEach(category => {
+          this.isCategoryInEditMode.push(false)
+          this.editableCategories.push((this.categoryType === 'SPEED') ? SpeedCategory.fromServiceCategory(category) : category)
+        })
+      }
     }
   }
 
@@ -122,10 +124,10 @@ class RateReachDistanceEditorController {
       const multiplier = this.editableCategories[index].units === 'Gbps' ? 1000 : 1
       const speedMbps = this.editableCategories[index].speed * multiplier
       Object.keys(this.rateReachGroupMap).forEach(technology => {
-        Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-          this.rateReachGroupMap[technology].matrixMap[technologyRef].forEach((item, arrIndex) => {
+        this.rateReachGroupMap[technology].matrixMap.forEach((item, tIndex) => {
+          this.rateReachGroupMap[technology].matrixMap[tIndex].value.forEach((item, arrIndex) => {
             if (index === arrIndex) {
-              this.rateReachGroupMap[technology].matrixMap[technologyRef][arrIndex].speed = speedMbps
+              this.rateReachGroupMap[technology].matrixMap[tIndex].value[arrIndex].speed = speedMbps
             }
           })
         })

@@ -45,9 +45,26 @@
 	</div>
 
 	<div class="equipment-detail" ng-if="$ctrl.currentEquipmentDetailView === $ctrl.EquipmentDetailView.Fiber">
-		<div>id: {{$ctrl.selectedFiber.id || $ctrl.selectedFiber.link_id}}</div>
-		<div>Fiber Strand: {{$ctrl.selectedFiber.fiber_strands}}</div>
-		<div>Atomic Units: {{$ctrl.selectedFiber.atomic_units}}</div>
+		<table class="table table-sm table-striped">
+			<tbody>
+				<tr>
+					<td>id</td>
+					<td>{{$ctrl.selectedFiber.id || $ctrl.selectedFiber.link_id}}</td>
+				</tr>
+				<tr>
+					<td>Fiber Strand</td>
+					<td>{{$ctrl.selectedFiber.fiber_strands}}</td>
+				</tr>
+				<tr>
+					<td>Atomic Units</td>
+					<td>{{$ctrl.selectedFiber.atomic_units}}</td>
+				</tr>
+				<tr ng-repeat="(key, value) in $ctrl.selectedFiber.attributes">
+					<td>{{key}}</td>
+					<td>{{value}}</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 
 	<div class="ei-panel-header clearfix"
