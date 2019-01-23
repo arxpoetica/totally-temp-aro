@@ -19,6 +19,7 @@ class RateReachEditorController {
       RATE_REACH_RATIOS: 'RATE_REACH_RATIOS'
     })
     this.selectedEditingMode = this.editingModes.SPEEDS
+    this.matrixOrders = {}
   }
 
   reloadRateReachManagerConfiguration() {
@@ -29,10 +30,51 @@ class RateReachEditorController {
     this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`)
       .then(result => {
         this.rateReachConfig = result.data
-        this.loadAllTechnologyTypeDetails()
+        return this.loadAllTechnologyTypeDetails()
+      })
+      .then(() => {
+        this.rateReachConfig = this.matrixMapsToOrderedArray(this.rateReachConfig)
         this.$timeout()
       })
       .catch(err => console.error(err))
+  }
+
+  // Replaces matrix maps with ordered arrays and returns a new rate reach configuration. Used to show
+  // matrix maps in the correct order in the UI
+  matrixMapsToOrderedArray(rateReachConfig) {
+    Object.keys(rateReachConfig.rateReachGroupMap).forEach(technologyType => {
+      var matrixMap = rateReachConfig.rateReachGroupMap[technologyType].matrixMap
+      var orderedMatrixMap = []  // Note, we are converting to an array
+      Object.keys(matrixMap).forEach(key => {
+        orderedMatrixMap.push({
+          id: key,
+          value: matrixMap[key]
+        })
+      })
+      // At the point the array is unordered. Order it!
+      orderedMatrixMap.sort((a, b) => {
+        // Slow check for indexOfs, but the array is small
+        const aIndex = this.matrixOrders[technologyType].findIndex(item => item.id === a.id)
+        const bIndex = this.matrixOrders[technologyType].findIndex(item => item.id === b.id)
+        return (aIndex < bIndex) ? -1 : 1
+      })
+      rateReachConfig.rateReachGroupMap[technologyType].matrixMap = orderedMatrixMap
+    })
+    return rateReachConfig
+  }
+
+  // Replaces ordered arrays with matrix maps and returns a new rate reach configuration. Used to convert
+  // from ui-specific arrays to something that aro-service can process.
+  orderedArrayToMatrixMaps(rateReachConfig) {
+    Object.keys(rateReachConfig.rateReachGroupMap).forEach(technologyType => {
+      var matrixMapArray = rateReachConfig.rateReachGroupMap[technologyType].matrixMap
+      var matrixMap = {}
+      matrixMapArray.forEach(item => {
+        matrixMap[item.id] = item.value
+      })
+      rateReachConfig.rateReachGroupMap[technologyType].matrixMap = matrixMap
+    })
+    return rateReachConfig
   }
 
   loadAllTechnologyTypeDetails() {
@@ -41,7 +83,7 @@ class RateReachEditorController {
     Object.keys(this.rateReachConfig.rateReachGroupMap).forEach(technologyType => {
       ttPromises.push(this.loadTechnologyTypeDetails(technologyType))
     })
-    Promise.all(ttPromises)
+    return Promise.all(ttPromises)
       .then(results => this.$timeout())
       .catch(err => console.error(err))
   }
@@ -56,6 +98,7 @@ class RateReachEditorController {
           networkStructures: results[0].data,
           technologies: {}
         }
+        this.matrixOrders[technologyType] = results[1].data
         results[1].data.forEach(technology => {
           this.technologyTypeDetails[technologyType].technologies[technology.id] = technology
         })
@@ -71,7 +114,8 @@ class RateReachEditorController {
   }
 
   saveConfigurationToServer() {
-    const configuration = JSON.parse(angular.toJson(this.rateReachConfig))  // Remove angularjs-specific properties from object
+    var configuration = JSON.parse(angular.toJson(this.rateReachConfig))  // Remove angularjs-specific properties from object
+    configuration = this.orderedArrayToMatrixMaps(configuration)          // Transform object in aro-service format
     this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`, configuration)
       .then(result => this.exitEditingMode())
       .catch(err => console.error(err))

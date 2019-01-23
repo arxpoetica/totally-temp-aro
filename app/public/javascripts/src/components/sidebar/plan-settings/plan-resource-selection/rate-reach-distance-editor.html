@@ -29,9 +29,9 @@
     <tr>
       <th></th> <!-- This is for the draggable handle for each row -->
       <th style="min-width: 200px;">{{$ctrl.categoryDescription}}</th>
-      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap"
+      <th ng-repeat="item in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap"
           style="white-space: nowrap;">
-        {{$ctrl.technologies[key].name}}
+        {{$ctrl.technologies[item.id].name}}
       </th>
     </tr>
   </thead>
@@ -62,8 +62,8 @@
           <button class="btn btn-light" ng-click="$ctrl.saveCategory($index)"><i class="fa fa-save"></i></span>
         </div>
       </td>
-      <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap" style="min-width: 80px;">
-        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[key][$parent.$index].distance"
+      <td ng-repeat="item in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap" style="min-width: 80px;">
+        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[$index].value[$parent.$index].distance"
               linear-unit-input>
       </td>
     </tr>
