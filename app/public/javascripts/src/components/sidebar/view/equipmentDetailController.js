@@ -51,13 +51,18 @@ class EquipmentDetailController {
         this.selectedFiber = {}
         var fiberList = options.fiberFeatures
         const fiber = [...fiberList][0]
-        //const plan = state.plan.getValue()
-        //this.displayFiber(plan.id, fiber.link_id)
         var newSelection = state.cloneSelection()
         newSelection.details.fiberSegments = options.fiberFeatures
         state.selection = newSelection
 
+        fiber.attributes = {}
         this.selectedFiber = fiber
+        // this.$http.get(`/service/getFiberAttributes/${fiber.id}`)
+        //   .then(result => {
+        //     fiber.attributes = result.data.attributes
+        //     this.$timeout()
+        //   })
+        //   .catch(err => console.error(err))
         this.currentEquipmentDetailView = this.EquipmentDetailView.Fiber
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
         this.$timeout()
