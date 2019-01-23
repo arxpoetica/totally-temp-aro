@@ -14,13 +14,13 @@
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="report in $ctrl.coverageReports">
-      <td>{{report.displayName}}</td>
+    <tr>
+      <td>Coverage</td>
       <td>
-        <input class="form-control" ng-model="report.downloadFilename">
+        <input class="form-control" ng-model="$ctrl.downloadFilename">
       </td>
       <td>
-        <button class="btn btn-primary btn-xs" ng-click="$ctrl.downloadReport(report)">
+        <button class="btn btn-primary btn-xs" ng-click="$ctrl.downloadReport()">
           <span class="fa fa-download"></span>
         </button>
       </td>

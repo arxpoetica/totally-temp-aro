@@ -5,43 +5,19 @@ class CoverageReportDownloaderController {
     this.state = state
     this.Utils = Utils
 
-    this.coverageReport = null
     this.rateReachMatrices = []
     this.selectedRateReachMatrix = null
-    this.coverageReports = []
+    
+    const now = new Date()
+    const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
+    this.downloadFilename = `Coverage_${timeStamp}.csv`
   }
 
-  $onInit() {
-    // Get the coverage report details
-    this.$http.get('/service/rr/matrix')
-    .then((result) => {
-      this.rateReachMatrices = result.data
-      this.selectedRateReachMatrix = result.data[0]   // Now, this is not being set from the UI. Keeping it this way until the endpoints are stabilized.
-      return this.$http.get('/service/installed/report/meta-data')
+  downloadReport() {
+    this.$http.get(`/service/coverage/query/${this.state.plan.getValue().id}`, {
+      headers: { 'Accept': 'text/csv' }
     })
-    .then(result => {
-      const now = new Date()
-      const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
-      this.coverageReports = result.data.filter(item => item.reportType === 'COVERAGE')
-      this.coverageReports.forEach((item, index) => {
-        this.coverageReports[index].downloadUrl = `/report-extended/${item.name}/${this.state.plan.getValue().id}/${item.mediaType}`
-        this.coverageReports[index].downloadFilename = `Coverage_${timeStamp}.csv`
-      })
-      // Manually add the "special" Form 477 report to our list of reports
-      this.coverageReports.push({
-        downloadUrl: `/service/coverage/query/form477/${this.state.coverage.report.reportId}/${this.selectedRateReachMatrix.id}`,
-        name: 'form_477',
-        displayName: 'Form 477',
-        downloadFilename: `Form477_${timeStamp}.csv`
-      })
-      this.$timeout()
-    })
-    .catch(err => console.error(err))
-  }
-
-  downloadReport(report) {
-    this.$http.get(report.downloadUrl)
-      .then(result => this.Utils.downloadCSV(result.data, report.downloadFilename))
+      .then(result => this.Utils.downloadCSV(result.data, this.downloadFilename))
       .catch(err => console.error(err))
   }
 }
