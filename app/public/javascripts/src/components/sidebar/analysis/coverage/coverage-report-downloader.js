@@ -14,9 +14,7 @@ class CoverageReportDownloaderController {
   }
 
   downloadReport() {
-    this.$http.get(`/service/coverage/query/${this.state.plan.getValue().id}`, {
-      headers: { 'Accept': 'text/csv' }
-    })
+    this.$http.get(`/service/v1/coverage/${this.state.plan.getValue().id}/report`)
       .then(result => this.Utils.downloadCSV(result.data, this.downloadFilename))
       .catch(err => console.error(err))
   }
