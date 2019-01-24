@@ -410,7 +410,6 @@ class MapTileRenderer {
   
   // Render a set of features on the map
   renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
-    
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
     const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
@@ -422,7 +421,7 @@ class MapTileRenderer {
       console.log(this.tileDataService.featuresToExclude)
       console.log(this.tileDataService.modifiedBoundaries)
     }    
-    */
+    // */
 
     var closedPolygonFeatureLayersList = []
     var pointFeatureRendererList = []
@@ -534,8 +533,14 @@ class MapTileRenderer {
               || (this.selection.details.fiberSegments.size > 0 && this.highlightPolyline(feature,this.selection.details.fiberSegments))) {
               //Highlight the Selected Polyline
               var drawingStyles = {
-                lineWidth: mapLayer.highlightStyle.lineWidth,
-                strokeStyle: mapLayer.highlightStyle.strokeStyle
+                lineWidth: mapLayer.drawingOptions.lineWidth * 2,
+                strokeStyle: mapLayer.drawingOptions.strokeStyle
+              }
+              if (mapLayer.highlightStyle){
+                drawingStyles = {
+                  lineWidth: mapLayer.highlightStyle.lineWidth,
+                  strokeStyle: mapLayer.highlightStyle.strokeStyle
+                }
               }
               PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
             } else if (this.state.showFiberSize && feature.properties._data_type === "fiber" && this.state.viewSetting.selectedFiberOption.id !== 1) {
