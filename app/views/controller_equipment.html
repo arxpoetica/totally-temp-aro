@@ -31,13 +31,13 @@
     <div class="col-md-4" ng-if="state.configuration.perspective.networkEquipment.existing.show">
       <input type="checkbox" class="checkboxfill layer-type-checkboxes"
              ng-model="state.equipmentLayerTypeVisibility.existing"
-             ng-click="updateMapLayers()">
+             ng-change="updateMapLayers()">
         <span>&nbsp;Existing</span>
     </div>
     <div class="col-md-4" ng-if="state.configuration.perspective.networkEquipment.planned.show">
     <input type="checkbox" class="checkboxfill layer-type-checkboxes"
            ng-model="state.equipmentLayerTypeVisibility.planned"
-           ng-click="updateMapLayers()">
+           ng-change="updateMapLayers()">
       <span>&nbsp;Planned</span>
     </div>
   </div>

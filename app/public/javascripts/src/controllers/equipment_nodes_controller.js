@@ -214,10 +214,14 @@ app.controller('equipment_nodes_controller', ['$scope', '$rootScope', '$http', '
   // Update map layers when the dataItems property of state changes
   state.dataItemsChanged
     .skip(1)
-    .subscribe((newValue) => $scope.updateMapLayers())
+    .subscribe((newValue) => {
+      $scope.updateMapLayers()
+    })
 
   // Update map layers when the dataItems property of state changes
   state.viewSettingsChanged
     .skip(1)
-    .subscribe(() => $scope.updateMapLayers())
+    .subscribe(() => {
+      $scope.updateMapLayers()
+    })
 }])
