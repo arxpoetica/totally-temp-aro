@@ -50,36 +50,64 @@
     </div>
     <br>
     <div ng-if="$ctrl.selectedMapObject" style="position: relative;">
-      <table id="tblLocationProperties" class="table table-sm table-striped" style="margin-bottom: 10px">
-        <tr>
-          <td>Location type:</td>
-          <td>
-            <select class="form-control"
-                    ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
-                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
-                    ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Number of locations:</td>
-          <td>
-            <input class="form-control"
-                  ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
-                  ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
-          </td>
-        </tr>
-      </table>
+      <div style="position: relative;">
+        <table id="tblLocationProperties" class="table table-sm table-striped" style="margin-bottom: 10px">
+          <tr>
+            <td>Location type:</td>
+            <td>
+              <select class="form-control"
+                      ng-change="$ctrl.markSelectedLocationPropertiesDirty()"
+                      ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedLocationType"
+                      ng-options="item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].locationTypes">
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Number of locations:</td>
+            <td>
+              <input class="form-control"
+                    ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
+                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
+            </td>
+          </tr>
+          <tr ng-if="val != null && val != 'null' && key != 'number_of_households'" 
+            ng-repeat="(key, val) in $ctrl.objectIdToMapObject[$ctrl.selectedMapObject.objectId].feature.attributes">
+              <td>
+                <input class="form-control"
+                ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.editLocationAttributes($index,key,val)"
+                ng-model="key" ng-model-options="{ debounce: 1000 }">
+              </td>
+              <td>
+                <input class="form-control"
+                ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.editLocationAttributes($index,key,val)"
+                ng-model="val">
+              </td>
+          </tr>
+        </table>
+        <div class="disable-sibling-controls" 
+          ng-hide="$ctrl.isEditMode">
+        </div>
+      </div>
+
       <button ng-class="{ 'btn btn-block': true,
                           'btn-light': !$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty,
                           'btn-primary': $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty }"
               ng-disabled="!$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].isDirty"
+              style="margin-top: 10px"
               ng-click="$ctrl.saveSelectedLocationAndProperties()">
         <i class="fa fa-save"></i>&nbsp;&nbsp;Save properties
       </button>
       <!-- Show a delete button if a map object is selected -->
       <button class="btn btn-block btn-danger" ng-click="$ctrl.deleteSelectedObject()" style="margin-top: 10px">
         <i class="far fa-trash-alt"></i>&nbsp;&nbsp;Delete selected location
+      </button>
+      <button class="btn btn-block btn-primary" ng-if="!$ctrl.isEditMode" 
+        ng-click="$ctrl.editLocationAttributesMode()">
+        <i class="fa fa-pencil"></i>&nbsp;&nbsp;Edit Attributes
+      </button>
+      <button class="btn btn-block btn-primary" ng-if="$ctrl.isEditMode" 
+        ng-click="$ctrl.addLocationAttributes()">
+        <i class="fa fa-pencil"></i>&nbsp;&nbsp;Add Attributes
       </button>
 
       <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
