@@ -47,13 +47,14 @@ class CoverageButtonController {
       requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
     }
     this.isInitializingCoverage = true
+    var coverageReport = null
     this.$http.post(`/service/coverage/report`, requestBody)
       .then((result) => {
-        this.state.coverage.report = result.data
-        return this.$http.post(`/service/coverage/report/${this.state.coverage.report.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
+        coverageReport = result.data
+        return this.$http.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
       })
-      .then(() => this.$http.post(`/service/coverage/report/${this.state.coverage.report.reportId}/process?user_id=${this.state.loggedInUser.id}`, {}))
       .then(() => {
+        this.state.coverage.report = coverageReport
         this.isInitializingCoverage = false
         this.$timeout()
       })
