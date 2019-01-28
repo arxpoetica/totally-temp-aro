@@ -1,13 +1,16 @@
 import StateViewMode from './state-view-mode'
 import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
+import UserActions from '../react/components/user/user-actions'
 
 /* global app localStorage map */
 class State {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor($rootScope, $http, $document, $timeout, $sce, $ngRedux, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
+
+  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
   var service = {}
   service.INVALID_PLAN_ID = -1
@@ -1481,6 +1484,9 @@ class State {
   service.setLoggedInUser = (user) => {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
+    // Set the logged in user in the Redux store
+    this.setLoggedInUser(user)
+
     service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
     service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
 
@@ -1832,9 +1838,20 @@ class State {
 
   return service
 //}])
-}
+  }
+
+  // Which part of the Redux global state does our component want to receive?
+  mapStateToThis(state) {
+    return {}
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return {
+      setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))}
+    }
+  }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State

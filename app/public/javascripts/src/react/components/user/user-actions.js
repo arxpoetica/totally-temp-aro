@@ -90,6 +90,15 @@ function getSuperUserFlag(userId) {
   }
 }
 
+// Set the logged in user
+function setLoggedInUser(loggedInUser) {
+  return {
+    type: Actions.SET_LOGGED_IN_USER,
+    loggedInUser: loggedInUser
+  }
+}
+
 export default {
-  getSuperUserFlag: getSuperUserFlag
+  getSuperUserFlag: getSuperUserFlag,
+  setLoggedInUser: setLoggedInUser
 }
