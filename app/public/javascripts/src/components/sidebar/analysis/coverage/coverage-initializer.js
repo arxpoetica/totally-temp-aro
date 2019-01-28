@@ -4,6 +4,7 @@ class CoverageInitializerController {
     this.$http = $http
     this.$timeout = $timeout
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, {})(this)
+    console.log($ngRedux.getState())
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }

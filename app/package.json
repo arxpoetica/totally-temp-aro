@@ -12,9 +12,9 @@
     "test-all": "npm test && npm run test-ui && npm run test-integration",
     "build-service-types": "cd ./public/javascripts/src/service-typegen/src && node class-generator.js",
     "build-vendor-bundle": "chmod +x ./node_modules/uglify-js/bin/* && ./node_modules/browserify/bin/cmd.js -r vector-tile -r pbf -r rxjs -r async -r point-in-polygon -r geojson-polygon-self-intersections -r marked -r ng-redux -p licensify | ./node_modules/uglify-js/bin/uglifyjs --comments > ./public/javascripts/vendors/vendor-bundle.min.js",
-    "build-angularjs": "./node_modules/babel-cli/bin/babel.js public/javascripts/src -d public/javascripts/lib && cd ./public/javascripts/src/components && find . -name \\*.html -exec cp --parents {} ../../lib/components/ \\;",
+    "build-angularjs": "./node_modules/.bin/babel public/javascripts/src -d public/javascripts/lib --presets=@babel/preset-env --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ && cd ./public/javascripts/src/components && find . -name \\*.html -exec cp --parents {} ../../lib/components/ \\;",
     "build": "npm run build-service-types && npm run build-vendor-bundle && npm run build-angularjs && npm run webpack-deploy",
-    "watch-client": "./node_modules/babel-cli/bin/babel.js public/javascripts/src public/javascripts/src/components -d public/javascripts/lib --ignore public/javascripts/src/service-typegen/** --watch --copy-files --source-maps",
+    "watch-client": "./node_modules/.bin/babel public/javascripts/src -d public/javascripts/lib --presets=@babel/preset-env --ignore public/javascripts/src/service-typegen/,public/javascripts/src/react/ --watch --copy-files --source-maps",
     "watch-server": "./node_modules/.bin/nodemon --inspect ./app.js",
     "webpack-deploy": "webpack",
     "webpack-dev": "webpack --watch",
@@ -23,11 +23,6 @@
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
-  },
   "standard": {
     "ignore": [
       "public/javascripts/lib",
@@ -40,11 +35,6 @@
   "dependencies": {
     "async": "^2.6.1",
     "aws-sdk": "^2.2.22",
-    "babel-cli": "^6.3.17",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.4",
-    "babel-preset-es2015": "^6.6.0",
-    "babel-register": "^6.3.13",
     "base32-encode": "^1.1.0",
     "bcryptjs": "^2.2.1",
     "body-parser": "^1.13.2",
@@ -58,6 +48,7 @@
     "csv-stringify": "0.0.8",
     "dedent": "^0.6.0",
     "ejs": "^2.3.3",
+    "eslint": "5.6.0",
     "express": "^4.13.1",
     "express-flash": "0.0.2",
     "geojson-polygon-self-intersections": "1.1.0",
@@ -84,9 +75,13 @@
     "pg-hstore": "^2.3.2",
     "pify": "^2.3.0",
     "point-in-polygon": "^1.0.1",
+    "prop-types": "^15.6.2",
     "pync": "^1.0.0",
     "q": "^1.4.1",
     "qrcode": "^1.3.2",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "request": "^2.75.0",
     "rimraf": "^2.6.2",
@@ -97,12 +92,17 @@
     "uglify-js": "^3.0.24",
     "underscore": "^1.8.3",
     "vector-tile": "^1.3.0",
-    "webpack": "^3.0.0",
+    "webpack": "^4.19.1",
     "yargs": "^3.24.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
     "angular": "^1.4.3",
     "angular-mocks": "^1.4.3",
+    "babel-loader": "^8.0.5",
     "concurrently": "^3.5.1",
     "istanbul": "^0.3.17",
     "karma": "^0.13.3",
@@ -124,6 +124,7 @@
     "wdio-phantomjs-service": "^0.2.2",
     "wdio-selenium-standalone-service": "0.0.8",
     "webdriverio": "^4.6.2",
+    "webpack-cli": "^3.2.1",
     "xml2js": "^0.4.10"
   }
 }
