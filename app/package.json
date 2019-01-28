@@ -33,8 +33,13 @@
     ]
   },
   "dependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
     "async": "^2.6.1",
     "aws-sdk": "^2.2.22",
+    "babel-loader": "^8.0.5",
     "base32-encode": "^1.1.0",
     "bcryptjs": "^2.2.1",
     "body-parser": "^1.13.2",
@@ -100,13 +105,8 @@
     "yargs": "^3.24.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.2.3",
-    "@babel/preset-react": "^7.0.0",
     "angular": "^1.4.3",
     "angular-mocks": "^1.4.3",
-    "babel-loader": "^8.0.5",
     "concurrently": "^3.5.1",
     "istanbul": "^0.3.17",
     "karma": "^0.13.3",
