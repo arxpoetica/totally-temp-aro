@@ -23,7 +23,7 @@ class CoverageInitializer extends Component {
     console.log('0000000000000000')
     console.log(this.props)
     return<div>
-        <p>Hello world</p>
+        <p>I am a ReactJS component</p>
         <p>Property1: {this.props.property1}</p>
         <button className={'btn btn-primary'} onClick={() => this.props.increment()}>Increment value</button>
       </div>

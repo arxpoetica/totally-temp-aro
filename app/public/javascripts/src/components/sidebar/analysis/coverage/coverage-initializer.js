@@ -5,7 +5,7 @@ class CoverageInitializerController {
     this.$timeout = $timeout
     console.log('AngularJS state')
     console.log($ngRedux.getState())
-    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, {})(this)
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }
@@ -35,6 +35,12 @@ class CoverageInitializerController {
   mapStateToThis(state) {
     return {
       value: state[0].value
+    }
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return {
+      increment: () => {dispatch({ type: 'INCREMENT' })}
     }
   }
 
