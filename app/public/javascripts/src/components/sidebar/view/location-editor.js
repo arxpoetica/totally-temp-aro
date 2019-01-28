@@ -23,7 +23,7 @@ class LocationEditorController {
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isCommiting = false
     this.WorkflowState = WorkflowState
-    this.isEditMode = false
+    this.isExpandLocAttributes = false
   }
 
   registerObjectDeleteCallback(deleteObjectWithIdCallback) {
@@ -118,14 +118,12 @@ class LocationEditorController {
       .then((result) => {
         // Transaction has been committed, start a new one
         this.isCommiting = false
-        this.isEditMode = false
         this.state.recreateTilesAndCache()
         return this.resumeOrCreateTransaction()
       })
       .catch((err) => {
         this.currentTransaction = null
         this.isCommiting = false
-        this.isEditMode = false
         this.state.recreateTilesAndCache()
         this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
         this.$timeout()
@@ -160,13 +158,11 @@ class LocationEditorController {
         this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}`)
           .then((result) => {
             // Transaction has been discarded, start a new one
-            this.isEditMode = false
             this.state.recreateTilesAndCache()
             return this.resumeOrCreateTransaction()
           })
           .catch((err) => {
             this.currentTransaction = null
-            this.isEditMode = false
             this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
             this.$timeout()
             console.error(err)
@@ -220,6 +216,10 @@ class LocationEditorController {
       workflowState: WorkflowState.CREATED.name
     }
 
+    if(!mapObject.feature.hasOwnProperty('attributes')){
+      mapObject.feature.attributes = {}
+    }
+
     //featureObj.attributes = mapObject.feature.attributes
     Object.keys(mapObject.feature.attributes).forEach((key) => {
       if(mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null'
@@ -250,7 +250,7 @@ class LocationEditorController {
   }
 
   handleSelectedObjectChanged(mapObject) {
-    this.selectedMapObject = mapObject
+    if(!this.isExpandLocAttributes) this.selectedMapObject = mapObject
     this.$timeout()
   }
 
@@ -279,26 +279,37 @@ class LocationEditorController {
     return false
   }
 
-  editLocationAttributesMode() {
-    this.isEditMode = true
-  }
-
   editLocationAttributes(index,updatedKey,updatedVal) {
     //attribute key is updated
     if(updatedKey != Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]){
       //delete key and insert updated key,value
       var key = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
-      delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
 
-      this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = updatedVal
+      this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = 
+        this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
+
+      delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
     } else {
       //key is not updated, just update value
       this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = updatedVal
     }
   }
 
+  deleteLocationAttributes(index,key,val) {
+    var keypairToDelete = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
+    delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
+  }
+
   addLocationAttributes() {
     this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes['att'] = 'value'
+  }
+
+  modalShown() {
+    this.isExpandLocAttributes = true
+  }
+
+  modalHide() {
+    this.isExpandLocAttributes = false
   }
 
 }
