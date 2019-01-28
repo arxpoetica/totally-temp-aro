@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Button, Component } from 'react'
 import { Provider, connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
@@ -13,6 +13,7 @@ function connectWithStore(store, WrappedComponent, ...args) {
     // return <ConnectedWrappedComponent {...props} store={store} />
     console.log('store is')
     console.log(store)
+    console.log(props)
     return <Provider store={store}><ConnectedWrappedComponent {...props} /></Provider>
   }
 }
@@ -22,12 +23,13 @@ class CoverageInitializer extends Component {
     return<div>
         <p>Hello world</p>
         <p>Property1: {this.props.property1}</p>
+        <Button onClick={this.props.increment()} />
       </div>
   }
 }
 
 CoverageInitializer.propTypes = {
-  property1: PropTypes.string
+  property1: PropTypes.number
 }
 
 const mapStateToProps = (state, ownProps) => {
@@ -36,5 +38,11 @@ const mapStateToProps = (state, ownProps) => {
   }
 }
 
-const CoverageInitializerComponent = connectWithStore(reduxStore, CoverageInitializer, mapStateToProps, null)
+const mapDispatchToProps = (dispatch) => {
+  return {
+    increment: () => dispatch({ type: 'INCREMENT' })
+  }
+}
+
+const CoverageInitializerComponent = connectWithStore(reduxStore, CoverageInitializer, mapStateToProps, mapDispatchToProps)
 export default CoverageInitializerComponent

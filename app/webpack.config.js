@@ -7,6 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, 'public/javascripts/lib'),
     filename: 'aro-bundle.js'
   },
+  mode: 'development',
   module: {
     rules: [
       {
