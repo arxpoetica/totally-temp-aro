@@ -8,7 +8,13 @@ class CoverageReportDownloaderController {
     this.coverageReport = null
     this.rateReachMatrices = []
     this.selectedRateReachMatrix = null
-    this.coverageReports = []
+    this.csvReports = []
+    this.excelReports = []
+    this.reportTypes = Object.freeze({
+      INDIVIDUAL_CSV: 'INDIVIDUAL_CSV',
+      CLUBBED_EXCEL: 'CLUBBED_EXCEL'
+    })
+    this.selectedReportType = this.reportTypes.INDIVIDUAL_CSV
   }
 
   $onInit() {
@@ -22,21 +28,35 @@ class CoverageReportDownloaderController {
     .then(result => {
       const now = new Date()
       const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
-      this.coverageReports = result.data.filter(item => item.reportType === 'COVERAGE' || item.reportType === 'FORM477')
-      this.coverageReports.forEach((item, index) => {
-        this.coverageReports[index].mediaTypes = item.mediaTypes
-        this.coverageReports[index].selectedMediaType = item.mediaTypes[0]
-        this.coverageReports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
-        this.coverageReports[index].downloadFilenamePrefix = `Coverage_${timeStamp}`
+      this.excelReportFilename = `Consolidated_${timeStamp}.xls`
+      const displayableReports = result.data.filter(item => item.reportType === 'COVERAGE' || item.reportType === 'FORM477')
+      displayableReports.forEach((item, index) => {
+        displayableReports[index].mediaTypes = item.mediaTypes
+        displayableReports[index].selectedMediaType = item.mediaTypes[0]
+        displayableReports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
+        displayableReports[index].downloadFilenamePrefix = `Coverage_${timeStamp}`
+        displayableReports[index].useInExcelDownload = false
       })
+      this.csvReports = displayableReports.filter(item => item.mediaTypes.indexOf('csv') >= 0)
+      this.excelReports = displayableReports.filter(item => item.mediaTypes.indexOf('xls') >= 0)
       this.$timeout()
     })
     .catch(err => console.error(err))
   }
 
-  downloadReport(report) {
-    this.$http.get(`${report.downloadUrlPrefix}/${report.selectedMediaType}`)
-      .then(result => this.Utils.downloadCSV(result.data, `${report.downloadFilenamePrefix}.${report.selectedMediaType}`))
+  downloadReportCsv(report) {
+    this.$http.get(`${report.downloadUrlPrefix}/csv`)
+      .then(result => this.Utils.downloadCSV(result.data, `${report.downloadFilenamePrefix}.csv`))
+      .catch(err => console.error(err))
+  }
+
+  downloadReportsExcel() {
+    // We want a consolidated excel report with all the selected reports (each selected report will be in a new tab in the excel)
+    const reportNames = this.excelReports.filter(item => item.useInExcelDownload)
+                                         .map(item => item.name)
+
+    this.$http.post(`/service/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames)
+      .then(result => this.Utils.downloadCSV(result.data, this.excelReportFilename))
       .catch(err => console.error(err))
   }
 }
