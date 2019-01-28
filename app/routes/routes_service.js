@@ -19,6 +19,7 @@ exports.configure = (api, middleware) => {
       url: `${config.aro_service_url}/${serviceUrl}`,
       method: request.method,
       params: request.params,
+      headers: request.headers,
       json: true
     }
 

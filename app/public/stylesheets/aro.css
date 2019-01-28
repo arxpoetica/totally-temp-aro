@@ -1155,6 +1155,64 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
      */
 }
 
+.radiofill{
+  -webkit-appearance: initial;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  padding: 1px 3px;
+  font-size: 10px;
+  line-height: 1.5;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 5px;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #c0c0c0;
+}
+  
+.radiofill:checked {
+  background:#4d99e5;
+  border: #4d99e5;
+}
+.radiofill:checked:after {
+  /* Heres your symbol replacement - this is a tick in Unicode. */
+  font-family: Font Awesome\ 5 Free;
+  content: "\f00c";
+  font-weight: 900;
+  line-height: 18px;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1.5;
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  /* The following positions my tick in the center, 
+   * but you could just overlay the entire box
+   * with a full after element with a background if you want to */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%,-50%);
+  -moz-transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
+  transform: translate(-50%,-50%);
+  /*
+   * If you want to fully change the check appearance, use the following:
+   * content: " ";
+   * width: 100%;
+   * height: 100%;
+   * background: blue;
+   * top: 0;
+   * left: 0;
+   */
+}
+
 .progress-bar-optimization {
   background-color: #1a79db;
 }
