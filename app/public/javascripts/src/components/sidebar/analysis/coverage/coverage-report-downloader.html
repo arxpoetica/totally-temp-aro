@@ -1,47 +1,8 @@
 <style scoped>
   #tblCoverageReportGenerator td, #tblDownloadReports td {
-    line-height: 33px;  /* To vertically align text */
+    line-height: 28px;  /* To vertically align text */
   }
 </style>
-
-<table id="tblCoverageReportGenerator" class="table table-sm table-striped">
-  <tbody>
-    <!-- The rate reach matrix to be used for generating the report -->
-    <tr>
-      <td>Rate Reach</td>
-      <td>
-        <select class="form-control"
-                ng-model="$ctrl.selectedRateReachMatrix"
-                ng-options="item as item.name for item in $ctrl.rateReachMatrices">
-        </select>
-      </td>
-    </tr>
-
-    <!-- The report type of the coverage report -->
-    <tr>
-      <td>Report type</td>
-      <td>Form 477</td>
-    </tr>
-
-    <!-- The A flag indicating whether we want to use the site boundaries -->
-    <tr>
-      <td>Use site boundaries</td>
-      <td>{{$ctrl.state.coverage.report.coverageAnalysisRequest.useSiteBoundaries ? 'Yes' : 'No'}}</td>
-    </tr>
-    
-    <!-- The A flag indicating whether we want to use the site boundaries -->
-    <tr>
-      <td>Use marketable technologies</td>
-      <td>{{$ctrl.state.coverage.report.coverageAnalysisRequest.useMarketableTechnologies ? 'Yes' : 'No'}}</td>
-    </tr>
-    
-    <!-- The A flag indicating whether we want to use the site boundaries -->
-    <tr>
-      <td>Use max speed</td>
-      <td>{{$ctrl.state.coverage.report.coverageAnalysisRequest.useMaxSpeed ? 'Yes' : 'No'}}</td>
-    </tr>
-  </tbody>  
-</table>
 
 <!-- A list of reports that the user can download -->
 <table id="tblDownloadReports" class="table table-sm">
@@ -50,20 +11,26 @@
       <th>Report</th>
       <th>Save as</th>
       <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr ng-repeat="report in $ctrl.coverageReports">
       <td>{{report.displayName}}</td>
       <td>
-        <input class="form-control" ng-model="report.downloadFilename">
+        <input class="form-control form-control-sm" ng-model="report.downloadFilenamePrefix">
       </td>
       <td>
-        <button class="btn btn-primary btn-xs" ng-click="$ctrl.downloadReport(report)">
+        <select class="form-control form-control-sm"
+                ng-model="report.selectedMediaType"
+                ng-options="item as item for item in report.mediaTypes">
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-primary btn-sm" ng-click="$ctrl.downloadReport(report)">
           <span class="fa fa-download"></span>
         </button>
       </td>
     </tr>
   </tbody>
 </table>
-  

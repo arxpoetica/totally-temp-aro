@@ -24,8 +24,10 @@ class CoverageReportDownloaderController {
       const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
       this.coverageReports = result.data.filter(item => item.reportType === 'COVERAGE' || item.reportType === 'FORM477')
       this.coverageReports.forEach((item, index) => {
-        this.coverageReports[index].downloadUrl = `/report-extended/${item.name}/${this.state.plan.getValue().id}/${item.mediaType}`
-        this.coverageReports[index].downloadFilename = `Coverage_${timeStamp}.csv`
+        this.coverageReports[index].mediaTypes = item.mediaTypes
+        this.coverageReports[index].selectedMediaType = item.mediaTypes[0]
+        this.coverageReports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
+        this.coverageReports[index].downloadFilenamePrefix = `Coverage_${timeStamp}`
       })
       this.$timeout()
     })
@@ -33,8 +35,8 @@ class CoverageReportDownloaderController {
   }
 
   downloadReport(report) {
-    this.$http.get(report.downloadUrl)
-      .then(result => this.Utils.downloadCSV(result.data, report.downloadFilename))
+    this.$http.get(`${report.downloadUrlPrefix}/${report.selectedMediaType}`)
+      .then(result => this.Utils.downloadCSV(result.data, `${report.downloadFilenamePrefix}.${report.selectedMediaType}`))
       .catch(err => console.error(err))
   }
 }
