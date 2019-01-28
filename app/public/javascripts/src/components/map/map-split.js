@@ -186,7 +186,7 @@ let mapSplit = {
           <display-mode-buttons></display-mode-buttons>
         </div>
         <div style="flex: 1 1 auto; position: relative;">
-          <r-coverage-initializer></r-coverage-initializer>
+          <!-- <r-coverage-initializer></r-coverage-initializer> -->
           <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
               when destroyed to ask if settings should be saved -->
           <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"></view-mode>
