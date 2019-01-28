@@ -3,8 +3,6 @@ class CoverageInitializerController {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
-    console.log('AngularJS state')
-    console.log($ngRedux.getState())
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },

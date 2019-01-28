@@ -1,4 +1,4 @@
-import { createStore } from 'redux'
+import { applyMiddleware, createStore } from 'redux'
 import { createLogger } from 'redux-logger'
 import { combineReducers } from 'redux'
 import testReducer from '../reducers/testReducer'
@@ -10,5 +10,5 @@ const logger = createLogger({
 
 let reducer = combineReducers([testReducer])
 
-var store = createStore(reducer)
+var store = createStore(reducer, applyMiddleware(logger))
 export default store
