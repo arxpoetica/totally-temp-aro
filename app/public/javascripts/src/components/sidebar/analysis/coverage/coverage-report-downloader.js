@@ -29,7 +29,8 @@ class CoverageReportDownloaderController {
       const now = new Date()
       const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
       this.excelReportFilename = `Consolidated_${timeStamp}.xls`
-      const displayableReports = result.data.filter(item => item.reportType === 'COVERAGE' || item.reportType === 'FORM477')
+      const allowedReportType = (this.state.coverage.report.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
+      const displayableReports = result.data.filter(item => item.reportType === allowedReportType)
       displayableReports.forEach((item, index) => {
         displayableReports[index].mediaTypes = item.mediaTypes
         displayableReports[index].selectedMediaType = item.mediaTypes[0]
