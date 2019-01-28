@@ -103,6 +103,8 @@ import utils from './common/utilities'
 import state from '../models/state'
 import aclManager from '../models/aclManager'
 
+import reduxConfig from '../redux-config'
+
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
    .component('equipmentDetailList', equipmentDetailList)
@@ -205,3 +207,4 @@ app.component('boundaryDetail', boundaryDetail)
    .service('state', state)
    .service('aclManager', aclManager)
    .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)   
+   .config(reduxConfig)

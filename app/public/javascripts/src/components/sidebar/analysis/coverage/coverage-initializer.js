@@ -1,8 +1,9 @@
 class CoverageInitializerController {
-  constructor(state, aclManager, $http, $timeout) {
+  constructor(state, aclManager, $http, $timeout, $ngRedux) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, {})(this)
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }
@@ -26,6 +27,17 @@ class CoverageInitializerController {
         this.$timeout()
       })
       .catch(err => console.error(err))
+  }
+
+  // Which part of the Redux global state does our component want to receive?
+  mapStateToThis(state) {
+    return {
+      value: state.counter
+    };
+  }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
   }
 
   onSelectionTypeChange(selectionType) {
@@ -69,7 +81,7 @@ class CoverageInitializerController {
   }
 }
 
-CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout']
+CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout', '$ngRedux']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',
