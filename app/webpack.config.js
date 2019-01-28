@@ -1,8 +1,7 @@
 var path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
-  entry: './public/javascripts/src/components/index.js', 
+  entry: path.resolve(__dirname, './public/javascripts/src/components/index.js'), 
   output: {
     path: path.resolve(__dirname, 'public/javascripts/lib'),
     filename: 'aro-bundle.js'
@@ -11,11 +10,8 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js|\.jsx$/,
-        exclude: [
-          '/node_modules/',
-          './public/javascripts/src/service-typegen/**'
-        ],
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
         use:{
           loader: "babel-loader",
           options: {
@@ -25,10 +21,8 @@ module.exports = {
       }
     ]
   },
-  devtool: 'source-map',
-  plugins: [
-    new UglifyJsPlugin({
-      sourceMap: true
-    })
-  ]
+  optimization: {
+    minimize: true
+  },
+  devtool: 'source-map'
 };
