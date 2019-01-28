@@ -1,3 +1,7 @@
+import { react2angular } from 'react2angular'
+
+import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
+
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
 import equipmentDetailList from './sidebar/view/equipment-detail-list'
@@ -203,6 +207,8 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceValue', editorInterfaceValue)
    .component('editorInterfacePrimitive', editorInterfacePrimitive)
    .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
+   // ReactJS components
+   .component('rCoverageInitializer', react2angular(CoverageInitializer))
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)

@@ -1,7 +1,8 @@
+import React from 'react'
 import { Component } from 'react'
 import { PropTypes } from 'prop-types'
 
-class CoverageInitializer extends Component {
+export default class CoverageInitializer extends Component {
   render() {
     return <div>
       <p>Hello world</p>
