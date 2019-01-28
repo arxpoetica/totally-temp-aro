@@ -1,15 +1,7 @@
-import { combineReducers } from 'redux'
-import { createLogger } from 'redux-logger'
-import testReducer from './reducers/testReducer'
-
-const logger = createLogger({
-  level: 'info',
-  collapsed: true
-});
+import reduxStore from './redux-store'
 
 const reduxConfig = ['$ngReduxProvider', ($ngReduxProvider) => {
-  let reducer = combineReducers([testReducer]);
-  $ngReduxProvider.createStoreWith(reducer, [logger]);
+  $ngReduxProvider.provideStore(reduxStore);
 }]
 
 export default reduxConfig

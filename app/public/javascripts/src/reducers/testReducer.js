@@ -1,7 +1,13 @@
 function counter(state, action) {
+
+  console.log(state)
+  console.log(typeof state)
+
   if (typeof state === 'undefined') {
+    console.log('setting state')
     state = { value: 0, test: 'asdf' } // If state is undefined, initialize it with a default value
   }
+  console.log(state)
 
   if (action.type === 'INCREMENT') {
     return Object.assign({}, state, { value: state.value + 1 })

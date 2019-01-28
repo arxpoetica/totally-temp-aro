@@ -3,8 +3,9 @@ class CoverageInitializerController {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
-    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, {})(this)
+    console.log('AngularJS state')
     console.log($ngRedux.getState())
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, {})(this)
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }
@@ -34,7 +35,7 @@ class CoverageInitializerController {
   mapStateToThis(state) {
     return {
       value: state.counter
-    };
+    }
   }
 
   $onDestroy() {
