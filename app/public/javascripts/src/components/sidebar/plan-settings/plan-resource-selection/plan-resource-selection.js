@@ -1,4 +1,3 @@
-import Constants from '../../../common/constants'
 
 class ResourceSelectionController {
   constructor($http, $timeout, state) {
@@ -7,17 +6,7 @@ class ResourceSelectionController {
     this.state = state
     this.pristineResourceItems = angular.copy(this.state.resourceItems)
     this.isDirty = false
-    state.plan.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
-
-    state.planOptimization.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
+    
   }
 
   $onDestroy() {

@@ -1,4 +1,3 @@
-import Constants from '../../../common/constants'
 
 class DataSelectionController {
   constructor($http, $timeout, $rootScope, state, aclManager) {
@@ -10,17 +9,7 @@ class DataSelectionController {
     this.isDirty = false
     this.currentUser = state.loggedInUser
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
-    state.plan.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
-
-    state.planOptimization.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
+    
     this.isDataSourceEditable = {}
   }
 
@@ -53,7 +42,7 @@ class DataSelectionController {
           cancelButtonText: 'No',
           closeOnConfirm: true
         }, (result) => {
-          if (result) {
+          if (result) { //  <--------------------------------------<<<  make a save function
             // Save the changed settings to aro-service
             this.state.saveDataSelectionToServer()
             //Clear the selected Service area when modify the optimization
@@ -83,7 +72,9 @@ class DataSelectionController {
       return Promise.resolve()
     })
   }
-
+  
+  
+  
   onSelectionChanged(dataSource) {
     this.isDirty = true
     this.state.dataItemsChanged.next(this.state.dataItems)

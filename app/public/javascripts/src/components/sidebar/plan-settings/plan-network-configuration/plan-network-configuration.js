@@ -1,21 +1,10 @@
-import Constants from '../../../common/constants'
 
 class PlanNetworkConfigurationController {
   constructor($http, state) {
     this.$http = $http
     this.state = state
     this.selectedRoutingMode = 'DIRECT_ROUTING'
-    state.plan.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
-
-    state.planOptimization.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
+    
   }
 
   $onDestroy() {
