@@ -19,7 +19,6 @@ exports.configure = (api, middleware) => {
       url: `${config.aro_service_url}/${serviceUrl}`,
       method: request.method,
       params: request.params,
-      headers: request.headers,
       json: true
     }
 
@@ -65,21 +64,18 @@ exports.configure = (api, middleware) => {
     var req = {
       url: `${config.aro_service_url}/${serviceUrl}`,
       method: request.method,
-      headers: {
-        "accept": "application/json, text/plain, */*",
-        "content-type": "application/json;charset=UTF-8"
-      },
       encoding: null    // IMPORTANT: We are getting binary data back from aro-service. Do not encode anything.
     }
 
     // Attach request body if required
     if (request.method !== 'GET') {
       req.body = JSON.stringify(request.body)
+      req.headers = {
+        'content-type': 'application/json;charset=UTF-8'
+      }
     }
-    // http://localhost:8000/service-reports/test.xls/report-extended/rate_reach_select/30.xls
     return models.AROService.request(req)
       .then((output) => {
-        fs.writeFileSync('/tmp/t2/new.xls', output)
         response.attachment(fileName)
         response.send(output)
       })
