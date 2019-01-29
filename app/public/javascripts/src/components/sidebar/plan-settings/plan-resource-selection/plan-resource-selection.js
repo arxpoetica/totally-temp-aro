@@ -4,11 +4,11 @@ class ResourceSelectionController {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    this.pristineResourceItems = angular.copy(this.state.resourceItems)
-    this.isDirty = false
-    
+    //this.pristineResourceItems = angular.copy(this.state.resourceItems)
+    //this.isDirty = false
   }
-
+  
+  /*
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
     if (!angular.equals(this.state.resourceItems, this.pristineResourceItems)) {
@@ -30,6 +30,12 @@ class ResourceSelectionController {
       })
     }
   }
+  */
+  
+  onSelectionChanged() {
+    this.onChange({childKey:this.key, isValid:true})
+  }
+  
 }
 
 ResourceSelectionController.$inject = ['$http', '$timeout', 'state']
@@ -39,7 +45,9 @@ let planResourceSelection = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection.html',
   bindings: {
     userId: '<',
-    planId: '<'
+    planId: '<', 
+    key: '<', 
+    onChange: '&'
   },
   controller: ResourceSelectionController
 }

@@ -6,7 +6,8 @@ class PlanNetworkConfigurationController {
     this.selectedRoutingMode = 'DIRECT_ROUTING'
     
   }
-
+  
+  /*
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
     if (!angular.equals(this.state.networkConfigurations, this.state.pristineNetworkConfigurations)) {
@@ -27,6 +28,11 @@ class PlanNetworkConfigurationController {
       })
     }
   }
+  */
+  
+  onSelectionChanged() {
+    this.onChange({childKey:this.key, isValid:true})
+  }
 
 }
 
@@ -36,7 +42,9 @@ let planNetworkConfiguration = {
   templateUrl: '/components/sidebar/plan-settings/plan-network-configuration/plan-network-configuration.html',
   bindings: {
     userId: '<',
-    planId: '<'
+    planId: '<', 
+    key: '<', 
+    onChange: '&'
   },
   controller: PlanNetworkConfigurationController
 }

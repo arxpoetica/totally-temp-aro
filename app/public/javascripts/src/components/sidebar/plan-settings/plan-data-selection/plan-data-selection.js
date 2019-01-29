@@ -6,7 +6,7 @@ class DataSelectionController {
     this.$rootScope = $rootScope
     this.state = state
     this.aclManager = aclManager
-    this.isDirty = false
+    //this.isDirty = false
     this.currentUser = state.loggedInUser
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
     
@@ -27,7 +27,8 @@ class DataSelectionController {
       this.cachedDataItems = this.allDataItems
     }
   }
-
+  
+  /*
   $onDestroy() {
     // If any selections have been changed, ask the user if they want to save them
     if (this.isDirty) {
@@ -62,7 +63,9 @@ class DataSelectionController {
       }
     }
   }
-
+  */
+  
+  /*
   clearAllSelectedSA() {
     var plan = this.state.plan.getValue()
 
@@ -72,14 +75,17 @@ class DataSelectionController {
       return Promise.resolve()
     })
   }
-  
+  */
   
   
   onSelectionChanged(dataSource) {
-    this.isDirty = true
+    //this.isDirty = true
     this.state.dataItemsChanged.next(this.state.dataItems)
     this.updateSelectionValidation()
     this.updateDataSourceEditableStatus(dataSource)
+    
+    var isValid = this.areAllSelectionsValid()
+    this.onChange({childKey:this.key, isValid:isValid})
   }
 
   updateDataSourceEditableStatus(dataSourceKey) {
@@ -159,6 +165,8 @@ let planDataSelection = {
   bindings: {
     userId: '<',
     planId: '<',
+    key: '<', 
+    onChange: '&', 
     allDataItems: '='
   },
   controller: DataSelectionController
