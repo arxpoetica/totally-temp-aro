@@ -5,60 +5,77 @@ class CoverageReportDownloaderController {
     this.state = state
     this.Utils = Utils
 
-    this.coverageReport = null
-    this.rateReachMatrices = []
-    this.selectedRateReachMatrix = null
-    this.csvReports = []
-    this.excelReports = []
-    this.reportTypes = Object.freeze({
-      INDIVIDUAL_CSV: 'INDIVIDUAL_CSV',
-      CLUBBED_EXCEL: 'CLUBBED_EXCEL'
-    })
-    this.selectedReportType = this.reportTypes.INDIVIDUAL_CSV
+    this.reports = []
+    this.reportTypes = [
+      { mediaType: 'xls', description: 'Excel'},
+      { mediaType: 'csv', description: 'CSV' }
+    ]
+    this.selectedReportType = this.reportTypes.filter(item => item.mediaType === 'xls')[0]
+    this.numReportsSelected = 0
   }
 
   $onInit() {
-    // Get the coverage report details
-    this.$http.get('/service/rr/matrix')
-    .then((result) => {
-      this.rateReachMatrices = result.data
-      this.selectedRateReachMatrix = result.data[0]   // Now, this is not being set from the UI. Keeping it this way until the endpoints are stabilized.
-      return this.$http.get('/service/installed/report/meta-data')
-    })
-    .then(result => {
-      const now = new Date()
-      const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
-      this.excelReportFilename = `Consolidated_${timeStamp}.xls`
-      const allowedReportType = (this.state.coverage.report.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
-      const displayableReports = result.data.filter(item => item.reportType === allowedReportType)
-      displayableReports.forEach((item, index) => {
-        displayableReports[index].mediaTypes = item.mediaTypes
-        displayableReports[index].selectedMediaType = item.mediaTypes[0]
-        displayableReports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
-        displayableReports[index].downloadFilenamePrefix = `Coverage_${timeStamp}`
-        displayableReports[index].useInExcelDownload = false
+    // Get the coverage report details0
+    this.$http.get('/service/installed/report/meta-data')
+      .then(result => {
+        const now = new Date()
+        const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
+        this.reportFilename = ''
+        const allowedReportType = (this.state.coverage.report.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
+        this.reports = result.data.filter(item => item.reportType === allowedReportType)
+        this.reports.forEach((item, index) => {
+          this.reports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
+          this.reports[index].selectedForDownload = false
+        })
+        this.updateDownloadFilenameAndMediaType()
+        this.$timeout()
       })
-      this.csvReports = displayableReports.filter(item => item.mediaTypes.indexOf('csv') >= 0)
-      this.excelReports = displayableReports.filter(item => item.mediaTypes.indexOf('xls') >= 0)
-      this.$timeout()
-    })
-    .catch(err => console.error(err))
-  }
-
-  downloadReportCsv(report) {
-    this.$http.get(`${report.downloadUrlPrefix}/csv`)
-      .then(result => this.Utils.downloadCSV(result.data, `${report.downloadFilenamePrefix}.csv`))
       .catch(err => console.error(err))
   }
 
-  downloadReportsExcel() {
-    // We want a consolidated excel report with all the selected reports (each selected report will be in a new tab in the excel)
-    const reportNames = this.excelReports.filter(item => item.useInExcelDownload)
-                                         .map(item => item.name)
+  downloadReport() {
+    // Note that we are not using the cached "this.numReportsSelected" here. That is for disabling buttons in the UI only.
+    const selectedReports = this.reports.filter(item => item.selectedForDownload)
+    const numReportsSelected = selectedReports.length
+    if (numReportsSelected === 1) {
+      // We are downloading an individual report.
+      const downloadUrl = `${selectedReports[0].downloadUrlPrefix}/${this.selectedReportType.mediaType}`
+      this.$http.get(downloadUrl)
+        .then(result => this.Utils.downloadCSV(result.data, `${this.reportFilename}.${this.selectedReportType.mediaType}`))
+        .catch(err => console.error(err))
+    } else {
+      // We are downloading multiple reports
+      const reportNames = this.reports.filter(item => item.selectedForDownload)
+                                      .map(item => item.name)
 
-    this.$http.post(`/service/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames)
-      .then(result => this.Utils.downloadCSV(result.data, this.excelReportFilename))
-      .catch(err => console.error(err))
+      this.$http.post(`/service/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames)
+        .then(result => this.Utils.downloadCSV(result.data, `${this.reportFilename}.${this.selectedReportType.mediaType}`))
+        .catch(err => console.error(err))
+    }
+  }
+
+  updateDownloadFilenameAndMediaType() {
+    const now = new Date()
+    const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
+    this.numReportsSelected = this.reports.filter(item => item.selectedForDownload).length
+    if (this.numReportsSelected === 0) {
+      this.reportFilename = ''
+    } else if (this.numReportsSelected === 1) {
+      const selectedReport = this.reports.filter(item => item.selectedForDownload)[0]
+      this.reportFilename = `${selectedReport.name}_${timeStamp}`
+      this.reportTypes = [
+        { mediaType: 'xls', description: 'Excel'},
+        { mediaType: 'csv', description: 'CSV' }
+      ]
+      this.selectedReportType = this.reportTypes[0]
+    } else if (this.numReportsSelected > 1) {
+      // If multiple reports are selected, then we can only have an Excel download
+      this.reportFilename = `Consolidated_${timeStamp}`
+      this.reportTypes = [
+        { mediaType: 'xls', description: 'Excel'}
+      ]
+      this.selectedReportType = this.reportTypes[0]
+    }
   }
 }
 
