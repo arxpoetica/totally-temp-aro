@@ -40,7 +40,7 @@ class CoverageReportDownloaderController {
       // We are downloading an individual report. We need { responseType: 'arraybuffer' } to receive binary data.
       this.$http.get(`/service-download-file/${fileName}/report-extended/${selectedReports[0].name}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
                      { responseType: 'arraybuffer' })
-        .then(result => this.Utils.downloadCSV(result.data, fileName))
+        .then(result => this.Utils.downloadFile(result.data, fileName))
         .catch(err => console.error(err))
     } else {
       // We are downloading multiple reports. We need { responseType: 'arraybuffer' } to receive binary data.
@@ -49,7 +49,7 @@ class CoverageReportDownloaderController {
 
       this.$http.post(`/service-download-file/${fileName}/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
                       { responseType: 'arraybuffer' })
-        .then(result => this.Utils.downloadCSV(result.data, fileName))
+        .then(result => this.Utils.downloadFile(result.data, fileName))
         .catch(err => console.error(err))
     }
   }

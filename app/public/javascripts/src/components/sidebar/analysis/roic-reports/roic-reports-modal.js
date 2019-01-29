@@ -21,7 +21,7 @@ class RoicReportsModalController {
         })
       }
 
-      this.Utils.downloadCSV(r.data, `financial_profile_${new Date()}.csv`)
+      this.Utils.downloadFile(r.data, `financial_profile_${new Date()}.csv`)
     })
     .catch((err) => console.error(err))
   }

@@ -11,12 +11,12 @@ class Utilities {
     swal({ title: errorMsg.title, text: errorMsg.text, type: 'error' })
   }
 
-  downloadCSV(data, fileName) {
+  downloadFile(data, fileName) {
     // Blob is not supported in older browsers, but we need it for downloading larger files in Chrome.
     // Without this, we get a generic "Failed - network error" in Chrome only.
     let a = this.$document[0].createElement('a');
     this.$document[0].body.appendChild(a);
-    var file = new Blob([data], {type: 'text/csv'});
+    var file = new Blob([data]);
     var fileURL = window.URL.createObjectURL(file);
     a.href = fileURL;
     a.download = fileName;
