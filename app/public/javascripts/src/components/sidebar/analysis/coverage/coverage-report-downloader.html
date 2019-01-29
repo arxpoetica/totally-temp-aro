@@ -12,55 +12,44 @@
 
 <div class="container pt-3">
 
-  <!-- The first option is to download all reports individually, as CSV files -->
+  <!-- Checkboxes to determine which report(s) to download-->
   <div class="row">
-    <input type="radio" class="radiofill" name="reportSchemeGroup" ng-model="$ctrl.selectedReportType" value="{{$ctrl.reportTypes.INDIVIDUAL_CSV}}">
-    <strong class="radio-text">Download individual reports</strong>
-  </div>
-  <div class="row option-indent" style="position: relative;">
-    <table id="tblDownloadReports" class="table table-sm">
-      <thead>
-        <tr>
-          <th>Report</th>
-          <th>Save as</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="report in $ctrl.csvReports">
-          <td>{{report.displayName}}</td>
-          <td>
-            <input class="form-control form-control-sm" ng-model="report.downloadFilenamePrefix">
-          </td>
-          <td>
-            <button class="btn btn-primary btn-sm" ng-click="$ctrl.downloadReportCsv(report)">
-              <span class="fa fa-download"></span>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="disable-sibling-controls" ng-if="$ctrl.selectedReportType !== $ctrl.reportTypes.INDIVIDUAL_CSV"></div>
-  </div>
-
-  <!-- The second option is to download multiple reports into one excel file -->
-  <div class="row">
-    <input type="radio" class="radiofill" name="reportSchemeGroup" ng-model="$ctrl.selectedReportType" value="{{$ctrl.reportTypes.CLUBBED_EXCEL}}">
-    <strong class="radio-text">Download all reports in an Excel file</strong>
-  </div>
-  <div class="row option-indent" style="position: relative;">
     <ul style="padding: 0px; list-style-type: none;">
-      <li ng-repeat="report in $ctrl.excelReports" class="pt-1 pb-1"><input type="checkbox" style="margin-right: 5px;" class="checkboxfill" ng-model="report.useInExcelDownload">{{report.displayName}}</li>
+      <li ng-repeat="report in $ctrl.reports" class="pt-1 pb-1">
+        <input type="checkbox" style="margin-right: 5px;" class="checkboxfill"
+               ng-model="report.selectedForDownload" ng-change="$ctrl.updateDownloadFilenameAndMediaType()">
+          {{report.displayName}}
+      </li>
     </ul>
-    <div class="input-group mb-3">
-      <input type="text" class="form-control" aria-describedby="btnDownloadClubbedExcel" ng-model="$ctrl.excelReportFilename">
-      <div class="input-group-append">
-        <button class="btn btn-primary btn-block" type="button" id="btnDownloadClubbedExcel" ng-click="$ctrl.downloadReportsExcel()">
-          <span class="fa fa-download"></span>
-        </button>
-      </div>
-    </div>
-    <div class="disable-sibling-controls" ng-if="$ctrl.selectedReportType !== $ctrl.reportTypes.CLUBBED_EXCEL"></div>
   </div>
-</div>
 
+  <!-- The media type of the report to download (CSV, Excel) -->
+  <div class="row">
+    <div class="col-md-3">Report type:</div>
+    <div class="col-md-9" ng-disabled="$ctrl.numReportsSelected === 0">
+      <select class="form-control"
+              ng-model="$ctrl.selectedReportType"
+              ng-options="item as item.description for item in $ctrl.reportTypes"
+              ng-disabled="$ctrl.numReportsSelected === 0">
+      </select>
+    </div>
+  </div>
+
+  <!-- The filename of the report to download -->
+  <div class="row">
+    <div class="col-md-3">Filename:</div>
+    <div class="col-md-9">
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" aria-describedby="btnDownloadClubbedExcel"
+               ng-model="$ctrl.reportFilename" ng-disabled="$ctrl.numReportsSelected === 0">
+        <div class="input-group-append">
+          <button class="btn btn-primary btn-block" type="button" id="btnDownloadClubbedExcel" 
+                  ng-disabled="$ctrl.numReportsSelected === 0" ng-click="$ctrl.downloadReport()">
+            <span class="fa fa-download"></span>
+          </button>
+        </div>
+      </div>
+    </div>  
+  </div>
+
+</div>
