@@ -79,6 +79,7 @@ class DataSelectionController {
   
   
   onSelectionChanged(dataSource) {
+    console.log('data change')
     //this.isDirty = true
     this.state.dataItemsChanged.next(this.state.dataItems)
     this.updateSelectionValidation()

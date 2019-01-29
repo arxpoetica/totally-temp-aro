@@ -22,23 +22,8 @@ class PlanSettingsController {
       this.setControlsEnabled(newPlan)
     })
     
-    this.childSettingsPanels = {
-      dataSelection: {
-        displayName: 'Data Selection',  
-        isChanged: false, 
-        isValid: true, 
-      }, 
-      resourceSelection: {
-        displayName: 'Resource Selection',  
-        isChanged: false, 
-        isValid: true, 
-      }, 
-      networkConfiguration: {
-        displayName: 'Network Configuration',  
-        isChanged: false, 
-        isValid: true, 
-      } 
-    }
+    this.childSettingsPanels = {}
+    this.resetChildSettingsPanels()
     
   }
   
@@ -49,12 +34,42 @@ class PlanSettingsController {
     }
   }
   
+  resetChildSettingsPanels(childKey){
+    if ('undefined' == typeof childKey){
+      console.log('reset')
+      // if no child key reset all
+      this.childSettingsPanels = {
+        dataSelection: {
+          displayName: 'Data Selection',  
+          isChanged: false, 
+          isValid: true, 
+        }, 
+        resourceSelection: {
+          displayName: 'Resource Selection',  
+          isChanged: false, 
+          isValid: true, 
+        }, 
+        networkConfiguration: {
+          displayName: 'Network Configuration',  
+          isChanged: false, 
+          isValid: true, 
+        } 
+      }
+      
+    }else{
+      // if child key reset only that one
+      if (!this.childSettingsPanels.hasOwnProperty(childKey)) return
+      this.childSettingsPanels[childKey].isChanged = false
+      this.childSettingsPanels[childKey].isValid = true
+    } 
+  }
+  
   onChange(args){
     if (!args.hasOwnProperty('childKey')) return
     var childKey = args.childKey
     var isValid = true
     if (args.hasOwnProperty('isValid')) isValid = args.isValid
-    
+    console.log('change '+childKey)
     if (this.childSettingsPanels.hasOwnProperty(childKey)){
       this.childSettingsPanels[childKey].isChanged = true
       this.childSettingsPanels[childKey].isValid = isValid
@@ -77,32 +92,44 @@ class PlanSettingsController {
   saveChanges(){
     console.log('save')
     if (!this.isSaveEnabled) return
+    this.isSaveEnabled = false
     //for each child save and on success rest the object
     if (this.childSettingsPanels.dataSelection.isChanged && this.childSettingsPanels.dataSelection.isValid){
       this.state.saveDataSelectionToServer()
-      this.childSettingsPanels.dataSelection.isChanged = false
-      this.childSettingsPanels.dataSelection.isValid = true
+      this.resetChildSettingsPanels('dataSelection')
+      //this.childSettingsPanels.dataSelection.isChanged = false
+      //this.childSettingsPanels.dataSelection.isValid = true
       //Clear the selected Service area when modify the optimization
       this.clearAllSelectedSA()
     }
     
     if (this.childSettingsPanels.resourceSelection.isChanged && this.childSettingsPanels.resourceSelection.isValid){
       this.state.savePlanResourceSelectionToServer()
-      this.childSettingsPanels.resourceSelection.isChanged = false
-      this.childSettingsPanels.resourceSelection.isValid = true
+      this.resetChildSettingsPanels('resourceSelection')
+      //this.childSettingsPanels.resourceSelection.isChanged = false
+      //this.childSettingsPanels.resourceSelection.isValid = true
     }
     
     if (this.childSettingsPanels.networkConfiguration.isChanged && this.childSettingsPanels.networkConfiguration.isValid){
       this.state.saveNetworkConfigurationToDefaultProject()
-      this.childSettingsPanels.networkConfiguration.isChanged = false
-      this.childSettingsPanels.networkConfiguration.isValid = true
+      this.resetChildSettingsPanels('networkConfiguration')
+      //this.childSettingsPanels.networkConfiguration.isChanged = false
+      //this.childSettingsPanels.networkConfiguration.isValid = true
     }
     
-    this.isSaveEnabled = false
   }
   
   discardChanges(){
     console.log('discard changes')
+    
+    this.isSaveEnabled = false
+    this.resetChildSettingsPanels()
+    
+    this.state.networkConfigurations = angular.copy(this.state.pristineNetworkConfigurations)
+    this.state.dataItems = angular.copy(this.state.pristineDataItems)
+    this.state.resourceItems = angular.copy(this.state.pristineResourceItems)
+    this.state.dataItemsChanged.next(this.state.dataItems)
+    
   }
   
   clearAllSelectedSA() {
