@@ -61,6 +61,11 @@
         <br>Release Notes
         <!-- <span class="badge">!</span> -->
       </button>
+      
+      <button class="btn btn-light settings-btn" ng-click="$ctrl.uploadDataSource()">
+        <i class="fa fa-2x fa-file"></i>
+        <br>Data Upload
+      </button>
     </div>
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
