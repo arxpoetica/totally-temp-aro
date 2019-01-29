@@ -9,7 +9,7 @@ class PlanSettingsController {
     this.$timeout = $timeout
     this.areControlsEnabled = true
     this.isSaveEnabled = false
-    this.errorText = " "
+    this.errorText = ""
     
     tracker.trackEvent(tracker.CATEGORIES.ENTER_PLAN_SETTINGS_MODE, tracker.ACTIONS.CLICK)
     
@@ -37,7 +37,7 @@ class PlanSettingsController {
   resetChildSettingsPanels(childKey){
     if ('undefined' == typeof childKey){
       console.log('reset')
-      // if no child key reset all
+      // if no child key, reset all
       this.childSettingsPanels = {
         dataSelection: {
           displayName: 'Data Selection',  
@@ -57,7 +57,7 @@ class PlanSettingsController {
       }
       
     }else{
-      // if child key reset only that one
+      // if child key, reset only that one
       if (!this.childSettingsPanels.hasOwnProperty(childKey)) return
       this.childSettingsPanels[childKey].isChanged = false
       this.childSettingsPanels[childKey].isValid = true
@@ -82,7 +82,7 @@ class PlanSettingsController {
         this.errorText = "Invalid selections for "+errorText+"."
       }else{
         this.isSaveEnabled = true
-        this.errorText = " "
+        this.errorText = ""
       }
       
     }
@@ -97,8 +97,6 @@ class PlanSettingsController {
     if (this.childSettingsPanels.dataSelection.isChanged && this.childSettingsPanels.dataSelection.isValid){
       this.state.saveDataSelectionToServer()
       this.resetChildSettingsPanels('dataSelection')
-      //this.childSettingsPanels.dataSelection.isChanged = false
-      //this.childSettingsPanels.dataSelection.isValid = true
       //Clear the selected Service area when modify the optimization
       this.clearAllSelectedSA()
     }
@@ -106,15 +104,11 @@ class PlanSettingsController {
     if (this.childSettingsPanels.resourceSelection.isChanged && this.childSettingsPanels.resourceSelection.isValid){
       this.state.savePlanResourceSelectionToServer()
       this.resetChildSettingsPanels('resourceSelection')
-      //this.childSettingsPanels.resourceSelection.isChanged = false
-      //this.childSettingsPanels.resourceSelection.isValid = true
     }
     
     if (this.childSettingsPanels.networkConfiguration.isChanged && this.childSettingsPanels.networkConfiguration.isValid){
       this.state.saveNetworkConfigurationToDefaultProject()
       this.resetChildSettingsPanels('networkConfiguration')
-      //this.childSettingsPanels.networkConfiguration.isChanged = false
-      //this.childSettingsPanels.networkConfiguration.isValid = true
     }
     
   }
@@ -126,8 +120,9 @@ class PlanSettingsController {
     this.resetChildSettingsPanels()
     
     this.state.networkConfigurations = angular.copy(this.state.pristineNetworkConfigurations)
-    this.state.dataItems = angular.copy(this.state.pristineDataItems)
     this.state.resourceItems = angular.copy(this.state.pristineResourceItems)
+    
+    this.state.dataItems = angular.copy(this.state.pristineDataItems)
     this.state.dataItemsChanged.next(this.state.dataItems)
     
   }
@@ -190,6 +185,8 @@ class PlanSettingsController {
         }, (result) => {
           if (result) { 
             this.saveChanges()
+          }else{
+            this.discardChanges()
           }
         })
       } else {

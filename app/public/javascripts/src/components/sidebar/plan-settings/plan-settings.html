@@ -7,6 +7,16 @@
     flex-direction: column;
     padding-top: 20px;
   }
+  
+  .plan-settings-error-contain {
+    padding-top: 4px;
+  }
+  
+  .plan-settings-error-message {
+    display:inline-block;
+    padding: 8px;
+  }
+  
   .analysis-type {
     flex: 0 0 auto;
   }
@@ -46,11 +56,11 @@
       <button class="btn btn-light" ng-click="$ctrl.saveChanges()" ng-disabled="!$ctrl.isSaveEnabled"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
       <button class="btn btn-light" ng-click="$ctrl.discardChanges()" ng-disabled="!$ctrl.isSaveEnabled"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
     </div>
-    <div>{{$ctrl.errorText}}</div>
+    <div class="plan-settings-error-contain"> <div ng-if="'' == $ctrl.errorText" class="plan-settings-error-message">&nbsp;</div><div ng-if="'' != $ctrl.errorText" class="alert-danger plan-settings-error-message">{{$ctrl.errorText}}</div> </div>
   </div>
   
   <div class="analysis-type">
-    <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
+    <h4 style="text-align: center; margin-top: 8px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
     <optimize-button></optimize-button>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'DATA_SELECTION'">

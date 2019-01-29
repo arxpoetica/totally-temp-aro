@@ -1030,19 +1030,21 @@ class PlanEditorController {
         const subnetKey = `${centralOfficeObjectId}`
         this.subnetMapObjects[subnetKey] = []
         const result = recalculatedSubnets[centralOfficeObjectId]
-        result.data.subnetLinks.forEach((subnetLink) => {
-          subnetLink.geometry.coordinates.forEach((line) => {
-            var polylineGeometry = []
-            line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
-            var subnetLineMapObject = new google.maps.Polyline({
-              path: polylineGeometry,
-              strokeColor: '#0000FF',
-              strokeWeight: 2,
-              map: this.mapRef
+        if (result.data.hasOwnProperty('subnetLinks')){
+          result.data.subnetLinks.forEach((subnetLink) => {
+            subnetLink.geometry.coordinates.forEach((line) => {
+              var polylineGeometry = []
+              line.forEach((lineCoordinate) => polylineGeometry.push({ lat: lineCoordinate[1], lng: lineCoordinate[0] }))
+              var subnetLineMapObject = new google.maps.Polyline({
+                path: polylineGeometry,
+                strokeColor: '#0000FF',
+                strokeWeight: 2,
+                map: this.mapRef
+              })
+              this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
             })
-            this.subnetMapObjects[subnetKey].push(subnetLineMapObject)
           })
-        })
+        }
       })
     })
     .catch((err) => {
