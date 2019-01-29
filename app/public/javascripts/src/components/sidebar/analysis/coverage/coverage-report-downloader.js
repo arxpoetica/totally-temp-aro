@@ -18,8 +18,6 @@ class CoverageReportDownloaderController {
     // Get the coverage report details0
     this.$http.get('/service/installed/report/meta-data')
       .then(result => {
-        const now = new Date()
-        const timeStamp = `${now.getMonth() + 1}_${now.getDate()}_${now.getFullYear()}_${now.getHours()}_${now.getMinutes()}`
         this.reportFilename = ''
         const allowedReportType = (this.state.coverage.report.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
         this.reports = result.data.filter(item => item.reportType === allowedReportType)
@@ -37,19 +35,21 @@ class CoverageReportDownloaderController {
     // Note that we are not using the cached "this.numReportsSelected" here. That is for disabling buttons in the UI only.
     const selectedReports = this.reports.filter(item => item.selectedForDownload)
     const numReportsSelected = selectedReports.length
+    const fileName = `${this.reportFilename}.${this.selectedReportType.mediaType}`
     if (numReportsSelected === 1) {
-      // We are downloading an individual report.
-      const downloadUrl = `${selectedReports[0].downloadUrlPrefix}/${this.selectedReportType.mediaType}`
-      this.$http.get(downloadUrl)
-        .then(result => this.Utils.downloadCSV(result.data, `${this.reportFilename}.${this.selectedReportType.mediaType}`))
+      // We are downloading an individual report. We need { responseType: 'arraybuffer' } to receive binary data.
+      this.$http.get(`/service-download-file/${fileName}/report-extended/${selectedReports[0].name}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
+                     { responseType: 'arraybuffer' })
+        .then(result => this.Utils.downloadCSV(result.data, fileName))
         .catch(err => console.error(err))
     } else {
-      // We are downloading multiple reports
+      // We are downloading multiple reports. We need { responseType: 'arraybuffer' } to receive binary data.
       const reportNames = this.reports.filter(item => item.selectedForDownload)
                                       .map(item => item.name)
 
-      this.$http.post(`/service/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames)
-        .then(result => this.Utils.downloadCSV(result.data, `${this.reportFilename}.${this.selectedReportType.mediaType}`))
+      this.$http.post(`/service-download-file/${fileName}/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
+                      { responseType: 'arraybuffer' })
+        .then(result => this.Utils.downloadCSV(result.data, fileName))
         .catch(err => console.error(err))
     }
   }

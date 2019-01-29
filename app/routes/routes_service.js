@@ -57,18 +57,29 @@ exports.configure = (api, middleware) => {
   }
   
   // For Reports, we have to send back the result as an attachment.
-  api.get('/service-reports/:fileName/*', (request, response, next) => {
+  api.all('/service-download-file/:fileName/*', (request, response, next) => {
 
     // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
-    var fileName = request.params.fileName || 'UnknownFilename.csv'
-    var serviceUrl = request.url.substring(`/service-reports/${fileName}/`.length)
+    var fileName = request.params.fileName || 'DefaultFileName'
+    var serviceUrl = request.url.substring(`/service-download-file/${fileName}/`.length)
     var req = {
       url: `${config.aro_service_url}/${serviceUrl}`,
-      method: request.method
+      method: request.method,
+      headers: {
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json;charset=UTF-8"
+      },
+      encoding: null    // IMPORTANT: We are getting binary data back from aro-service. Do not encode anything.
     }
 
+    // Attach request body if required
+    if (request.method !== 'GET') {
+      req.body = JSON.stringify(request.body)
+    }
+    // http://localhost:8000/service-reports/test.xls/report-extended/rate_reach_select/30.xls
     return models.AROService.request(req)
       .then((output) => {
+        fs.writeFileSync('/tmp/t2/new.xls', output)
         response.attachment(fileName)
         response.send(output)
       })
