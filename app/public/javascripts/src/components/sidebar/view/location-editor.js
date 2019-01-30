@@ -24,6 +24,9 @@ class LocationEditorController {
     this.isCommiting = false
     this.WorkflowState = WorkflowState
     this.isExpandLocAttributes = false
+
+    this.availableAttributesKeyList = ['loop_extended']
+    this.availableAttributesValueList = ['true','false']
   }
 
   registerObjectDeleteCallback(deleteObjectWithIdCallback) {
@@ -302,6 +305,22 @@ class LocationEditorController {
 
   addLocationAttributes() {
     this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes['att'] = 'value'
+  }
+
+  getAttributes(search, list) {
+    var newAttr = list.slice();
+    if (search && newAttr.indexOf(search) === -1) {
+      newAttr.unshift(search);
+    }
+    return newAttr;
+  }
+
+  getAttributesKey(search) {
+    return this.getAttributes(search, this.availableAttributesKeyList)
+  }
+
+  getAttributesValue(search) {
+    return this.getAttributes(search, this.availableAttributesValueList)
   }
 
   modalShown() {

@@ -1832,6 +1832,7 @@ class State {
     service.openReleaseNotes = () => {
       service.showGlobalSettings = true
       service.openGlobalSettingsView.next('RELEASE_NOTES')
+      $timeout()
     }
 
   }
