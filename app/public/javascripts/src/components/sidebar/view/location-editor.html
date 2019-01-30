@@ -131,24 +131,54 @@
         <tr>
           <td colspan="3"> Other Attributes: </td>
         </tr>
+
         <tr ng-if="val != null && val != 'null' && key != 'number_of_households' && key != 'location_category'" 
           ng-repeat="(key, val) in $ctrl.objectIdToMapObject[$ctrl.selectedMapObject.objectId].feature.attributes">
+
+          <!-- while using tagging can add new attribute but it will not show in a dropdown -->
+          <!-- <td>
+            <ui-select theme="bootstrap" ng-model="key" tagging tagging-label="false" close-on-select="true" on-select="$ctrl.markSelectedLocationPropertiesDirty();
+              $ctrl.editLocationAttributes($index,$select.selected,val)">
+              <ui-select-match placeholder="Create or search a attribute Key">{{ $select.selected}}</ui-select-match>
+              <ui-select-choices class="ui-select-choices-tag-style" repeat="attrKey in $ctrl.availableAttributesKeyList | filter: $select.search">
+                <div> {{attrKey}} </div>
+              </ui-select-choices>
+            </ui-select>
+          </td> -->
+
+            <!-- instead of using tagging adding a search value to list so that can see search value in dropdown list -->
             <td>
-              <input class="form-control"
-              ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.editLocationAttributes($index,key,val)"
-              ng-model="key" ng-model-options="{ debounce: 1000 }">
+              <ui-select theme="bootstrap" ng-model="key" close-on-select="true" on-select="$ctrl.markSelectedLocationPropertiesDirty();
+                $ctrl.editLocationAttributes($index,$select.selected,val)">
+                <ui-select-match placeholder="Create or search a attribute Key">
+                  <span style="color: blue" ng-if="$ctrl.availableAttributesKeyList.indexOf($select.selected) > -1"> {{$select.selected}} </span>
+                  <span ng-if="$ctrl.availableAttributesKeyList.indexOf($select.selected) < 0"> {{$select.selected}} </span>
+                </ui-select-match>
+                <ui-select-choices class="ui-select-choices-tag-style" repeat="attrKey in $ctrl.getAttributesKey($select.search) | filter: $select.search">
+                  <div> {{attrKey}} </div>
+                </ui-select-choices>
+              </ui-select>
             </td>
+
             <td>
-              <input class="form-control"
-              ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.editLocationAttributes($index,key,val)"
-              ng-model="val">
+              <ui-select theme="bootstrap" ng-model="$ctrl.objectIdToMapObject[$ctrl.selectedMapObject.objectId].feature.attributes[key]" 
+                close-on-select="true" on-select="$ctrl.markSelectedLocationPropertiesDirty();
+                $ctrl.editLocationAttributes($index,key,$select.selected)">
+                <ui-select-match placeholder="Create or search a attribute Value">{{ $select.selected}}</ui-select-match>
+                <ui-select-choices class="ui-select-choices-tag-style" repeat="attrVal in $ctrl.getAttributesValue($select.search) | filter: $select.search">
+                  <div> {{attrVal}} </div>
+                </ui-select-choices>
+              </ui-select>
             </td>
+
             <td>
               <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.deleteLocationAttributes($index,key,val)">
                 <i class="fa fa-trash-alt"></i>
               </button>  
             </td>
+
         </tr>
+
         </tbody>
       </table>
       <div>
