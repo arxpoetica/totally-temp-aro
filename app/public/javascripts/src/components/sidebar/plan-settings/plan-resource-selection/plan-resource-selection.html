@@ -8,18 +8,16 @@
             <select class="form-control"
                     ng-model="itemValue.selectedManager"
                     ng-options="item.description for item in itemValue.allManagers"
+                    ng-change="$ctrl.onSelectionChanged()"
                     style="flex: 1 1 auto;">
             </select>
             <button class="btn btn-light" style="flex: 0 0 auto;" ng-click="$ctrl.state.showPlanResourceEditor(itemKey)">
-              <span class="fa fa-upload"></span>
+              <span class="fa fa-edit"></span>
             </button>
           </div>
         </td>
       </tr>
     </tbody>
   </table>
-  <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
-  <div class="disable-sibling-controls"
-      ng-hide="$ctrl.areControlsEnabled">
-  </div>
+  
 </div>

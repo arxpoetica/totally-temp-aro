@@ -582,6 +582,7 @@ class State {
 
     //Upload Data Sources
     service.uploadDataSources = []
+    service.pristineDataItems = {}
     service.dataItems = {}
   }
 
@@ -718,6 +719,7 @@ class State {
         })
 
         service.dataItems = newDataItems
+        service.pristineDataItems = angular.copy(service.dataItems)
         service.dataItemsChanged.next(service.dataItems)
         //get the service area for selected service layer datasource
         service.StateViewMode.loadListOfSAPlanTags($http,service,'',true)
@@ -775,6 +777,7 @@ class State {
         }
       })
       service.resourceItems = newResourceItems
+      service.pristineResourceItems = angular.copy(service.resourceItems)
       $timeout()  // Trigger a digest cycle so that components can update
       return Promise.resolve()
     })
@@ -801,7 +804,7 @@ class State {
 
   // Saves the plan Data Selection configuration to the server
   service.saveDataSelectionToServer = () => {
-
+    service.pristineDataItems = angular.copy(service.dataItems)
     var putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -825,6 +828,8 @@ class State {
 
   // Save the plan resource selections to the server
   service.savePlanResourceSelectionToServer = () => {
+    service.pristineResourceItems = angular.copy(service.resourceItems)
+    
     var putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -853,11 +858,15 @@ class State {
     return service.getDefaultProjectForUser(service.loggedInUser.id)
       .then((projectTemplateId) => {
         // Making parallel calls causes a crash in aro-service. Make sequential calls.
-        var lastResult = Promise.resolve()
+        service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
+        
+        var networkConfigurationsArray = []
         Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
-          lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
+          networkConfigurationsArray.push( service.networkConfigurations[networkConfigurationKey] )
         })
+        var url = `/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`
+        $http.put(url, networkConfigurationsArray)
+        
       })
       .catch((err) => console.error(err))
   }
