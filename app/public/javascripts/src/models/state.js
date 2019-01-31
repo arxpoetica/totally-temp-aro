@@ -856,11 +856,14 @@ class State {
       .then((projectTemplateId) => {
         // Making parallel calls causes a crash in aro-service. Make sequential calls.
         service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
-        var lastResult = Promise.resolve()
+        
+        var networkConfigurationsArray = []
         Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
-          lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
+          networkConfigurationsArray.push( service.networkConfigurations[networkConfigurationKey] )
         })
+        var url = `/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`
+        $http.put(url, networkConfigurationsArray)
+        
       })
       .catch((err) => console.error(err))
   }

@@ -36,7 +36,6 @@ class PlanSettingsController {
   
   resetChildSettingsPanels(childKey){
     if ('undefined' == typeof childKey){
-      console.log('reset')
       // if no child key, reset all
       this.childSettingsPanels = {
         dataSelection: {
@@ -69,7 +68,7 @@ class PlanSettingsController {
     var childKey = args.childKey
     var isValid = true
     if (args.hasOwnProperty('isValid')) isValid = args.isValid
-    console.log('change '+childKey)
+    
     if (this.childSettingsPanels.hasOwnProperty(childKey)){
       this.childSettingsPanels[childKey].isChanged = true
       this.childSettingsPanels[childKey].isValid = isValid
@@ -90,7 +89,6 @@ class PlanSettingsController {
   }
   
   saveChanges(){
-    console.log('save')
     if (!this.isSaveEnabled) return
     this.isSaveEnabled = false
     //for each child save and on success rest the object
@@ -114,8 +112,6 @@ class PlanSettingsController {
   }
   
   discardChanges(){
-    console.log('discard changes')
-    
     this.isSaveEnabled = false
     this.resetChildSettingsPanels()
     
@@ -156,7 +152,7 @@ class PlanSettingsController {
       if (list.length > 1 && list.length-1 == i) text += ' and '
       text += list[i].displayName
     }
-    console.log(text)
+    
     return text
   }
   
