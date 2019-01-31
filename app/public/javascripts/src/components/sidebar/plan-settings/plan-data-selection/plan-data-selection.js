@@ -18,6 +18,9 @@ class DataSelectionController {
       this.isDataSourceEditable[dataSourceKey] = false
       this.updateDataSourceEditableStatus(dataSourceKey)
     })
+    
+    var isValid = this.areAllSelectionsValid()
+    this.onChange({childKey:this.key, isValid:isValid, isInit: true})
   }
 
   $doCheck() {

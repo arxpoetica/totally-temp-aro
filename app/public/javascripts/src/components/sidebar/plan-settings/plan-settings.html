@@ -69,7 +69,7 @@
       <plan-data-selection project-id="$ctrl.state.getProjectId()" 
                            user-id="$ctrl.userId" 
                            plan-id="$ctrl.plan.id" 
-                           on-change="$ctrl.onChange({childKey:childKey, isValid:isValid})"
+                           on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
                            key="'dataSelection'"
                            all-data-items="$ctrl.state.dataItems"></plan-data-selection>
       <div class="disable-sibling-controls"
@@ -80,7 +80,7 @@
     <accordion-panel-contents panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.resourceSelection.show">
       <plan-resource-selection project-id="$ctrl.state.getProjectId()" 
                                user-id="$ctrl.userId" 
-                               on-change="$ctrl.onChange({childKey:childKey, isValid:isValid})"
+                               on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
                                key="'resourceSelection'"
                                plan-id="$ctrl.plan.id"></plan-resource-selection>
       <div class="disable-sibling-controls"
@@ -91,7 +91,7 @@
     <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.networkConfiguration.show">
       <plan-network-configuration project-id="$ctrl.state.getProjectId()" 
                                   user-id="$ctrl.userId" 
-                                  on-change="$ctrl.onChange({childKey:childKey, isValid:isValid})"
+                                  on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
                                   key="'networkConfiguration'"
                                   plan-id="$ctrl.plan.id"></plan-network-configuration>
       <div class="disable-sibling-controls"

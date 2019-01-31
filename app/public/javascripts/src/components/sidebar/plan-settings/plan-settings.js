@@ -27,6 +27,13 @@ class PlanSettingsController {
     
   }
   
+  $onInit() {
+    this.childSettingsPanels.dataSelection.isChanged = !angular.equals(this.state.dataItems, this.state.pristineDataItems)
+    this.childSettingsPanels.resourceSelection.isChanged = !angular.equals(this.state.resourceItems, this.state.pristineResourceItems)
+    this.childSettingsPanels.networkConfiguration.isChanged = !angular.equals(this.state.networkConfigurations, this.state.pristineNetworkConfigurations)
+    
+    this.updateUIState()
+  }
   
   setControlsEnabled(newPlan){
     if (newPlan) {
@@ -68,24 +75,30 @@ class PlanSettingsController {
     var childKey = args.childKey
     var isValid = true
     if (args.hasOwnProperty('isValid')) isValid = args.isValid
+    var isInit = false
+    if (args.hasOwnProperty('isInit')) isInit = args.isInit
     
     if (this.childSettingsPanels.hasOwnProperty(childKey)){
-      this.childSettingsPanels[childKey].isChanged = true
+      if (!isInit) this.childSettingsPanels[childKey].isChanged = true
       this.childSettingsPanels[childKey].isValid = isValid
       
-      // update buttons and error list
-      var childData = this.getChangeList()
-      if (0 < childData.invalidList.length){
-        this.isSaveEnabled = false
-        var errorText = this.childListToText(childData.invalidList)
-        this.errorText = "Invalid selections for "+errorText+"."
-      }else{
-        this.isSaveEnabled = true
-        this.errorText = ""
-      }
-      
+      this.updateUIState()
     }
+  }
+  
+  updateUIState(){
+    // update buttons and error list
+    var childData = this.getChangeList()
     
+    this.isSaveEnabled = (0 < childData.changesList.length)
+    
+    if (0 < childData.invalidList.length){
+      this.isSaveEnabled = false
+      var errorText = this.childListToText(childData.invalidList)
+      this.errorText = "Invalid selections for "+errorText+"."
+    }else{
+      this.errorText = ""
+    }
   }
   
   saveChanges(){
@@ -174,15 +187,15 @@ class PlanSettingsController {
           text: 'Do you want to save your changes to '+saveText+'?',
           type: 'warning',
           confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes',
+          confirmButtonText: 'Save', //'Yes',
           showCancelButton: true,
-          cancelButtonText: 'No',
+          cancelButtonText: 'Keep Unsaved', //'No',
           closeOnConfirm: true
         }, (result) => {
           if (result) { 
             this.saveChanges()
           }else{
-            this.discardChanges()
+            //this.discardChanges()
           }
         })
       } else {
