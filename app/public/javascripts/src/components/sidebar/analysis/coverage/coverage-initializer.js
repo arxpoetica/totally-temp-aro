@@ -15,6 +15,8 @@ class CoverageInitializerController {
     this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
+    this.siteAssignments = ['Proximity', 'Incremental']
+    this.selectedSiteAssignment = 'Proximity'
 
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option

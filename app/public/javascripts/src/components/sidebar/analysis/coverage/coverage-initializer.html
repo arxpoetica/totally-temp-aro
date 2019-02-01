@@ -51,6 +51,17 @@
       </td>
     </tr>
 
+    <!-- Site assignment -->
+    <tr>
+      <td>Site Assignment</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.selectedSiteAssignment"
+                ng-options="item as item for item in $ctrl.siteAssignments">
+        </select>
+      </td>
+    </tr>
+
     <!-- The selection type (service areas/analysis areas) -->
     <tr>
         <td>Selection Type</td>
