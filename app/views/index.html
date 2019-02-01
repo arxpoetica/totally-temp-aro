@@ -100,7 +100,7 @@
     <div growl></div>
     <div class="infobox" desc="shows fiber strand count">0</div>
     <fiber-strand-info></fiber-strand-info>
-    <global-data-source-upload-modal></global-data-source-upload-modal> 
+    <global-data-source-upload-modal></global-data-source-upload-modal>
     <global-settings></global-settings>
     <network-plan-modal></network-plan-modal>
     <report-modal></report-modal>
@@ -111,7 +111,7 @@
     <aro-panel></aro-panel>
     <plan-inputs-modal></plan-inputs-modal>
     <roic-reports-modal></roic-reports-modal>
-    
+
     <context-menu></context-menu>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
@@ -131,7 +131,7 @@
         NotificationProvider.setOptions({
           delay : 60000,
           maxCount : 1,
-          positionX: 'right',
+          positionX: 'left',
           positionY: 'bottom',
           container: '#map-canvas'
         });
@@ -167,10 +167,10 @@
             enableCloseButton: true
           },
           styles: styles,
-          clickableIcons: false, 
+          clickableIcons: false,
           clickableLabels:false
         });
-        
+
         mapTypeId === 'SATELLITE' && map.setMapTypeId(google.maps.MapTypeId.HYBRID);
 
         var splitterInitialized = false
@@ -194,7 +194,7 @@
             enableCloseButton: true,
             visible: false
           });
-        // rewrite default options  
+        // rewrite default options
         map.setStreetView(panorama);
 
         // At this point, our angular app and the document is initialized. Take the "logged in user" that we have on the
@@ -232,12 +232,12 @@
     <script src="javascripts/vendors/simpleheat.js"></script>
     <script src="javascripts/vendors/split.min.js"></script>
     <script src="javascripts/vendors/internet-explorer-compatibility.js"></script>
-    
+
     <!-- Components -->
     <script src="javascripts/lib/components/footer/ui-notification-service.js"></script>
     <script src="javascripts/lib/components/common/context-menu-service.js"></script>
     <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
-    
+
     <script src="javascripts/lib/controllers/body_controller.js"></script>
     <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
     <script src="javascripts/lib/controllers/locations_controller.js"></script>
@@ -269,10 +269,10 @@
     <script src="javascripts/lib/directives/modal.js"></script>
     <script src="javascripts/lib/directives/tagonblur.js"></script>
     <script src="javascripts/lib/filters/orderObjectBy.js"></script>
-    
+
     <!-- models -->
     <script src="javascripts/lib/aro-bundle.js"></script>
-    
+
     <script>app.run(function($rootScope,loader){$rootScope.appTitle = "<%= config.ui.title %>"})</script>
     <script>
       $(function () {
