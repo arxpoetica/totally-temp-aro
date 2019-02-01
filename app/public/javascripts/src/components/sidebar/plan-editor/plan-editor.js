@@ -89,6 +89,10 @@ class PlanEditorController {
   registerCreateEditableExistingMapObject(createEditableExistingMapObject){
     this.createEditableExistingMapObject = createEditableExistingMapObject
   }
+
+  registerDeleteCreatedMapObject(deleteCreatedMapObject){
+    this.deleteCreatedMapObjectWithId = deleteCreatedMapObject
+  }
   
   $onInit() {
     // We should have a map variable at this point
@@ -794,6 +798,7 @@ class PlanEditorController {
     delete this.equipmentIdToBoundaryId[eqId]
     delete this.boundaryIdToEquipmentId[boundaryId]
     this.deleteObjectWithId && this.deleteObjectWithId(boundaryId)
+    this.deleteCreatedMapObjectWithId && this.deleteCreatedMapObjectWithId(boundaryId) //Delete Boundary from map
   }
   
   handleSelectedObjectChanged(mapObject) {
@@ -881,11 +886,29 @@ class PlanEditorController {
   handleObjectDeleted(mapObject) {
     if (this.isMarker(mapObject)) {
       // This is a equipment marker and not a boundary. We should have a better way of detecting this
-      this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
+      this.checkIfBoundaryExists(mapObject)
+        .then((deleteObject) => {
+          if(deleteObject) {
+            this.deleteCreatedMapObjectWithId(mapObject.objectId) //Delete the marker from map
+            this.deleteMarker(mapObject) //Delete the marker
+          }
+        })
+    } else {
+      this.deleteCreatedMapObjectWithId(mapObject.objectId) //Delete the boundary from map
+      this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
+      .then(() => {
+        this.refreshViewObjectSBTypes(mapObject.objectId) //refresh network node SB type
+        this.state.planEditorChanged.next(true) //recaluculate plansummary
+      })
+    }
+  }
+
+  deleteMarker(mapObject) {
+    this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment/${mapObject.objectId}`)
       .then(() => {
         return this.autoRecalculateSubnet
-               ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
-               : Promise.resolve()
+          ? this.$http.get(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment`)
+          : Promise.resolve()
       })
       .then((result) => {
         if (result && result.data.length > 0) {
@@ -898,36 +921,29 @@ class PlanEditorController {
         this.state.planEditorChanged.next(true) //recaluculate plansummary
       })
       .catch((err) => console.error(err))
-      // If this is an equipment, delete its associated boundary (if any)
-      const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
-      if (!boundaryObjectId) {
-        //Get the associated boundary (boundary is not in edit mode)
-        this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${mapObject.objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
-          .then((result) => {
-            if (result.data.length > 0) {
-              //Delete the boundary assocaited to equipment if exists
-              result.data.forEach((boundary) => {
-                var boundaryId = boundary.objectId
-                this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
-                  .then(() => {
-                    //Once commited boundary will be deleted until then it's excluded from showing on the map
-                    this.tileDataService.addFeatureToExclude(boundaryId)
-                    this.state.requestMapLayerRefresh.next(null)
-                    this.refreshViewObjectSBTypes(boundaryId) //refresh network node SB type
-                    this.state.planEditorChanged.next(true) //recaluculate plansummary
-                  })
-              })
-            }
-          })
-      } else {
-        this.deleteBoundary(boundaryObjectId) //boundary is in edit mode
-      }
+    // If this is an equipment, delete its associated boundary (if any)
+    const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
+    if (!boundaryObjectId) {
+      //Get the associated boundary (boundary is not in edit mode)
+      this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${mapObject.objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
+        .then((result) => {
+          if (result.data.length > 0) {
+            //Delete the boundary assocaited to equipment if exists
+            result.data.forEach((boundary) => {
+              var boundaryId = boundary.objectId
+              this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
+                .then(() => {
+                  //Once commited boundary will be deleted until then it's excluded from showing on the map
+                  this.tileDataService.addFeatureToExclude(boundaryId)
+                  this.state.requestMapLayerRefresh.next(null)
+                  this.refreshViewObjectSBTypes(boundaryId) //refresh network node SB type
+                  this.state.planEditorChanged.next(true) //recaluculate plansummary
+                })
+            })
+          }
+        })
     } else {
-      this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${mapObject.objectId}`)
-      .then(() => {
-        this.refreshViewObjectSBTypes(mapObject.objectId) //refresh network node SB type
-        this.state.planEditorChanged.next(true) //recaluculate plansummary
-      })
+      this.deleteBoundary(boundaryObjectId) //boundary is in edit mode
     }
   }
 
@@ -1093,6 +1109,36 @@ class PlanEditorController {
       return Promise.resolve('')
     }
     return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
+  }
+
+  checkIfBoundaryExists(mapObject) {
+    //For frontier if bounudary exists show a warning
+    return new Promise((resolve, reject) => {
+      if(config.ARO_CLIENT === 'frontier'){
+        return this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${mapObject.objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
+        .then((result) => {
+          if(result.data.length > 0){
+            swal({
+              title: 'Warning',
+              text: 'You are attempting to delete a site which has a boundary, do you wish to proceed?',
+              type: 'warning',
+              confirmButtonColor: '#DD6B55',
+              confirmButtonText: 'Yes, delete',
+              cancelButtonText: 'No',
+              showCancelButton: true,
+              closeOnConfirm: true
+            }, (deleteSite) => {
+              // The user has confirmed that the item should be deleted
+              deleteSite && resolve(true)
+            })
+          } else {
+            resolve(true)
+          }
+        })
+      } else {
+        resolve(true)
+      }
+    })
   }
 
   setSelectedMapObjectLoc() {

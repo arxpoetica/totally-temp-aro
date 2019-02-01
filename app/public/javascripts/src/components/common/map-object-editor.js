@@ -165,6 +165,7 @@ class MapObjectEditorController {
     this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
     this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
     this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this)})
+    this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this)})
     
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
@@ -404,7 +405,10 @@ class MapObjectEditorController {
                 feature = this.createdMapObjects[result.objectId].feature
                 options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
                 //options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
-                options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(result.objectId)}) )
+                options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
+                  this.deleteObjectWithId(result.objectId)
+                  this.deleteCreatedMapObject(result.objectId)
+                }) )
               } else {
                 options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
               }
@@ -432,7 +436,10 @@ class MapObjectEditorController {
       })
     } else if('location' == this.featureType){
       var name = 'Location'
-      var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(this.selectedMapObject.objectId)}) ]
+      var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
+        this.deleteObjectWithId(this.selectedMapObject.objectId)
+        this.deleteCreatedMapObject(this.selectedMapObject.objectId)
+      }) ]
       var menuItems = []
       var data = {
         'objectId': this.selectedMapObject.objectId, 
@@ -1036,6 +1043,7 @@ class MapObjectEditorController {
   deleteSelectedObject() {
     if (this.selectedMapObject) {
       this.deleteObjectWithId(this.selectedMapObject.objectId)
+      this.deleteCreatedMapObject(this.selectedMapObject.objectId)
     }
   }
 
@@ -1046,11 +1054,17 @@ class MapObjectEditorController {
     }
     var mapObjectToDelete = this.createdMapObjects[objectId]
     if(mapObjectToDelete) {
-      mapObjectToDelete.setMap(null)
-      delete this.createdMapObjects[objectId]
       this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
     }
     this.closeContextMenu()
+  }
+
+  deleteCreatedMapObject(objectId) {
+    var mapObjectToDelete = this.createdMapObjects[objectId]
+    if (mapObjectToDelete) {
+      mapObjectToDelete.setMap(null)
+      delete this.createdMapObjects[objectId]
+    }
   }
 
   startDrawingBoundaryFor(mapObject) {
@@ -1262,7 +1276,8 @@ let mapObjectEditor = {
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds
     registerRemoveMapObjectsCallback: '&',   // To be called to register a callback, which will remove all created map objects
-    registerCreateEditableExistingMapObject: '&'  // To be called to register a callback, which will create a map object from and existing object
+    registerCreateEditableExistingMapObject: '&',  // To be called to register a callback, which will create a map object from and existing object
+    registerDeleteCreatedMapObject: '&'
   },
   controller: MapObjectEditorController
 }
