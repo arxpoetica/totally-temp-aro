@@ -425,8 +425,6 @@ class TileComponentController {
                                           this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
                                           clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
       .then((results) => {
-        //console.log('map click')
-        //console.log(results)
         var locationFeatures = []
         var analysisAreaFeatures = []
         var serviceAreaFeatures = []

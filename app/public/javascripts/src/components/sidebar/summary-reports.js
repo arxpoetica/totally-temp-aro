@@ -46,7 +46,7 @@ class SummaryReportsController {
       .then((response) => {
         this.downloads[reportType].isDownloading = false
         this.$timeout()
-        this.Utils.downloadCSV(response.data, this.downloads[reportType].fileName)
+        this.Utils.downloadFile(response.data, this.downloads[reportType].fileName)
       })
       .catch((err) => {
         console.error(err)

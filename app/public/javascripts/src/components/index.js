@@ -1,3 +1,7 @@
+import { react2angular } from 'react2angular'
+
+import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
+
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
 import equipmentDetailList from './sidebar/view/equipment-detail-list'
@@ -107,6 +111,8 @@ import utils from './common/utilities'
 import state from '../models/state'
 import aclManager from '../models/aclManager'
 
+import reduxConfig from '../redux-config'
+
 app.component('boundaryDetail', boundaryDetail)
    .component('equipmentDetail', equipmentDetail)
    .component('equipmentDetailList', equipmentDetailList)
@@ -207,7 +213,10 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceValue', editorInterfaceValue)
    .component('editorInterfacePrimitive', editorInterfacePrimitive)
    .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
+   // ReactJS components
+   .component('rCoverageInitializer', react2angular(CoverageInitializer))
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)
    .service('locationDetailPropertiesFactory', locationDetailPropertiesFactory)   
+   .config(reduxConfig)

@@ -85,7 +85,6 @@ class BoundaryCoverageController{
   }
   
   digestBoundaryCoverage(objectId, boundaryData){
-    //console.log(boundaryData)
     var boundsCoverage = {
       totalLocations: 0, 
       tagCounts: {}, 
@@ -101,12 +100,15 @@ class BoundaryCoverageController{
       var locData = boundaryData.coverageInfo[locationType]
       var locCoverage = this.makeCoverageLocationData()
       locCoverage.locationType = locationType
-      locCoverage.totalCount = locData.length
-      boundsCoverage.totalLocations += locData.length
+      //locCoverage.totalCount = locData.length // entityCount
+      locCoverage.totalCount = 0
+      
+      //boundsCoverage.totalLocations += locData.length
       
       for (var localI=0; localI<locData.length; localI++){
         var location = locData[localI]
-        
+        locCoverage.totalCount += location.entityCount
+        boundsCoverage.totalLocations += location.entityCount
         //console.log( this.formatCensusBlockData( location.censusBlockTagInfo ) )
         var tags = this.formatCensusBlockData( location.censusBlockTagInfo )
         
@@ -130,7 +132,8 @@ class BoundaryCoverageController{
                   // clone baseCBCount
                   boundsCoverage.tagCounts[catId].tags[tagId].count = JSON.parse(JSON.stringify( baseCBCount )) 
                 }
-                boundsCoverage.tagCounts[catId].tags[tagId].count[locationType]++
+                //boundsCoverage.tagCounts[catId].tags[tagId].count[locationType]++
+                boundsCoverage.tagCounts[catId].tags[tagId].count[locationType] += location.entityCount
               }// else report that we don't have data for that tag? 
             })
           }// else report that we don't have data for that category? 
@@ -144,7 +147,8 @@ class BoundaryCoverageController{
         if (barIndex >= locCoverage.barChartData.length || 'undefined' == typeof locCoverage.barChartData[barIndex]){
           locCoverage.barChartData[barIndex] = 0
         }
-        locCoverage.barChartData[barIndex]++
+        //locCoverage.barChartData[barIndex]++
+        locCoverage.barChartData[barIndex] += location.entityCount
       }
       
       boundsCoverage.locations[locationType] = locCoverage

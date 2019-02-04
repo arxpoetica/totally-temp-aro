@@ -1,33 +1,28 @@
 var path = require('path');
-var glob = require('glob');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 module.exports = {
-  entry: './public/javascripts/src/components/index.js', 
+  entry: path.resolve(__dirname, './public/javascripts/src/components/index.js'), 
   output: {
-    filename:'./public/javascripts/bundle.js'
+    path: path.resolve(__dirname, 'public/javascripts/lib'),
+    filename: 'aro-bundle.js'
   },
+  mode: 'development',
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.js$/,
-        exclude: [
-          '/node_modules/',
-          './public/javascripts/src/service-typegen/**'
-        ],
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
         use:{
           loader: "babel-loader",
           options: {
-            presets: ['es2015']
+            presets: ["@babel/preset-env", "@babel/preset-react"]
           }
         }
       }
     ]
   },
-  devtool: 'source-map',
-  plugins: [
-    new UglifyJsPlugin({
-      sourceMap: true
-    })
-  ]
+  optimization: {
+    minimize: true
+  },
+  devtool: 'source-map'
 };

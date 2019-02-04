@@ -1,13 +1,16 @@
 import StateViewMode from './state-view-mode'
 import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
+import UserActions from '../react/components/user/user-actions'
 
 /* global app localStorage map */
 class State {
 
-  constructor($rootScope, $http, $document, $timeout, $sce, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor($rootScope, $http, $document, $timeout, $sce, $ngRedux, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
+
+  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
   var service = {}
   service.INVALID_PLAN_ID = -1
@@ -579,6 +582,7 @@ class State {
 
     //Upload Data Sources
     service.uploadDataSources = []
+    service.pristineDataItems = {}
     service.dataItems = {}
   }
 
@@ -715,6 +719,7 @@ class State {
         })
 
         service.dataItems = newDataItems
+        service.pristineDataItems = angular.copy(service.dataItems)
         service.dataItemsChanged.next(service.dataItems)
         //get the service area for selected service layer datasource
         service.StateViewMode.loadListOfSAPlanTags($http,service,'',true)
@@ -772,6 +777,7 @@ class State {
         }
       })
       service.resourceItems = newResourceItems
+      service.pristineResourceItems = angular.copy(service.resourceItems)
       $timeout()  // Trigger a digest cycle so that components can update
       return Promise.resolve()
     })
@@ -798,7 +804,7 @@ class State {
 
   // Saves the plan Data Selection configuration to the server
   service.saveDataSelectionToServer = () => {
-
+    service.pristineDataItems = angular.copy(service.dataItems)
     var putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -822,6 +828,8 @@ class State {
 
   // Save the plan resource selections to the server
   service.savePlanResourceSelectionToServer = () => {
+    service.pristineResourceItems = angular.copy(service.resourceItems)
+    
     var putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -850,11 +858,15 @@ class State {
     return service.getDefaultProjectForUser(service.loggedInUser.id)
       .then((projectTemplateId) => {
         // Making parallel calls causes a crash in aro-service. Make sequential calls.
-        var lastResult = Promise.resolve()
+        service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
+        
+        var networkConfigurationsArray = []
         Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
-          var url = `/service/v1/project-template/${projectTemplateId}/network_configuration/${networkConfigurationKey}?user_id=${service.loggedInUser.id}`
-          lastResult = lastResult.then(() => $http.put(url, service.networkConfigurations[networkConfigurationKey]))
+          networkConfigurationsArray.push( service.networkConfigurations[networkConfigurationKey] )
         })
+        var url = `/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`
+        $http.put(url, networkConfigurationsArray)
+        
       })
       .catch((err) => console.error(err))
   }
@@ -1481,6 +1493,9 @@ class State {
   service.setLoggedInUser = (user) => {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
+    // Set the logged in user in the Redux store
+    this.setLoggedInUser(user)
+
     service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
     service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
 
@@ -1826,15 +1841,27 @@ class State {
     service.openReleaseNotes = () => {
       service.showGlobalSettings = true
       service.openGlobalSettingsView.next('RELEASE_NOTES')
+      $timeout()
     }
 
   }
 
   return service
 //}])
-}
+  }
+
+  // Which part of the Redux global state does our component want to receive?
+  mapStateToThis(state) {
+    return {}
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return {
+      setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))}
+    }
+  }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'optimization', 'stateSerializationHelper', '$filter','tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State

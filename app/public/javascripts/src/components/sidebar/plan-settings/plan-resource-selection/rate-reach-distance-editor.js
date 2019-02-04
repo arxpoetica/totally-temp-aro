@@ -97,8 +97,8 @@ class RateReachDistanceEditorController {
     }
     this.editableCategories.push(newCategory)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
-      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-        this.rateReachGroupMap[technology].matrixMap[technologyRef].push({
+      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach((technologyRef, index) => {
+        this.rateReachGroupMap[technology].matrixMap[index].value.push({
           distance: 0,
           speed: 1
         })
@@ -110,8 +110,8 @@ class RateReachDistanceEditorController {
     this.categories.splice(categoryIndex, 1)
     this.isCategoryInEditMode.splice(categoryIndex, 1)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
-      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-        this.rateReachGroupMap[technology].matrixMap[technologyRef].splice(categoryIndex, 1)
+      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach((technologyRef, index) => {
+        this.rateReachGroupMap[technology].matrixMap[index].value.splice(categoryIndex, 1)
       })
     })
   }

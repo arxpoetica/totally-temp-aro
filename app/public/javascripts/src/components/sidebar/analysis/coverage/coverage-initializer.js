@@ -1,8 +1,9 @@
 class CoverageInitializerController {
-  constructor(state, aclManager, $http, $timeout) {
+  constructor(state, aclManager, $http, $timeout, $ngRedux) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.coverageTypes = [
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }
@@ -14,6 +15,8 @@ class CoverageInitializerController {
     this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
     this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
+    this.siteAssignments = ['Proximity', 'Incremental']
+    this.selectedSiteAssignment = 'Proximity'
 
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
@@ -26,6 +29,23 @@ class CoverageInitializerController {
         this.$timeout()
       })
       .catch(err => console.error(err))
+  }
+
+  // Which part of the Redux global state does our component want to receive?
+  mapStateToThis(state) {
+    return {
+      value: state.test.value
+    }
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return {
+      increment: () => {dispatch({ type: 'INCREMENT' })}
+    }
+  }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
   }
 
   onSelectionTypeChange(selectionType) {
@@ -69,7 +89,7 @@ class CoverageInitializerController {
   }
 }
 
-CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout']
+CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout', '$ngRedux']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',

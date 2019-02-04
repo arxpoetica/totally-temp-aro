@@ -74,7 +74,7 @@ class MapSelectorExportLocationsController {
           })
         }
 
-        this.Utils.downloadCSV(r.data, "exported_locations.csv")
+        this.Utils.downloadFile(r.data, "exported_locations.csv")
       })
       .catch((err) => console.error(err))
   }

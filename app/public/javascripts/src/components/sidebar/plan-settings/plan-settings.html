@@ -5,7 +5,18 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    padding-top: 20px;
   }
+  
+  .plan-settings-error-contain {
+    padding-top: 4px;
+  }
+  
+  .plan-settings-error-message {
+    display:inline-block;
+    padding: 8px;
+  }
+  
   .analysis-type {
     flex: 0 0 auto;
   }
@@ -38,26 +49,60 @@
   }
 </style>
 <div class="plan-settings-container">
+  
+  <!-- Buttons to commit or discard a transaction -->
+  <div class="text-center">
+    <div class="btn-group ">
+      <button class="btn btn-light" ng-click="$ctrl.saveChanges()" ng-disabled="!$ctrl.isSaveEnabled"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;Commit</button>
+      <button class="btn btn-light" ng-click="$ctrl.discardChanges()" ng-disabled="!$ctrl.isSaveEnabled"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;Discard</button>
+    </div>
+    <div class="plan-settings-error-contain"> <div ng-if="'' == $ctrl.errorText" class="plan-settings-error-message">&nbsp;</div><div ng-if="'' != $ctrl.errorText" class="alert-danger plan-settings-error-message">{{$ctrl.errorText}}</div> </div>
+  </div>
+  
   <div class="analysis-type">
-    <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
+    <h4 style="text-align: center; margin-top: 8px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
     <optimize-button></optimize-button>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'DATA_SELECTION'">
     <accordion-panel-title title="'Data Selection'" panel-id="'DATA_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.dataSelection.show"></accordion-panel-title>
     <accordion-panel-contents panel-id="'DATA_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.dataSelection.show">
-      <plan-data-selection project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id" all-data-items="$ctrl.state.dataItems"></plan-data-selection>
+      <plan-data-selection project-id="$ctrl.state.getProjectId()" 
+                           user-id="$ctrl.userId" 
+                           plan-id="$ctrl.plan.id" 
+                           on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
+                           key="'dataSelection'"
+                           all-data-items="$ctrl.state.dataItems"></plan-data-selection>
+      <div class="disable-sibling-controls"
+        ng-hide="$ctrl.areControlsEnabled">
+      </div>
     </accordion-panel-contents>
     <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.resourceSelection.show"></accordion-panel-title>
     <accordion-panel-contents panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.resourceSelection.show">
-      <plan-resource-selection project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-resource-selection>
+      <plan-resource-selection project-id="$ctrl.state.getProjectId()" 
+                               user-id="$ctrl.userId" 
+                               on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
+                               key="'resourceSelection'"
+                               plan-id="$ctrl.plan.id"></plan-resource-selection>
+      <div class="disable-sibling-controls"
+        ng-hide="$ctrl.areControlsEnabled">
+      </div>
     </accordion-panel-contents>
     <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.networkConfiguration.show"></accordion-panel-title>
     <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.networkConfiguration.show">
-      <plan-network-configuration project-id="$ctrl.state.getProjectId()" user-id="$ctrl.userId" plan-id="$ctrl.plan.id"></plan-network-configuration>
+      <plan-network-configuration project-id="$ctrl.state.getProjectId()" 
+                                  user-id="$ctrl.userId" 
+                                  on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
+                                  key="'networkConfiguration'"
+                                  plan-id="$ctrl.plan.id"></plan-network-configuration>
+      <div class="disable-sibling-controls"
+        ng-hide="$ctrl.areControlsEnabled">
+      </div>
     </accordion-panel-contents>
     <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.projectConfiguration.show"></accordion-panel-title>
     <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.projectConfiguration.show">
-      <plan-project-configuration project-id="$ctrl.state.getProjectId()" user-id="$ctrl.currentUser.id" plan-id="$ctrl.plan.id"></plan-project-configuration>
+      <plan-project-configuration project-id="$ctrl.state.getProjectId()" 
+                                  user-id="$ctrl.currentUser.id" 
+                                  plan-id="$ctrl.plan.id"></plan-project-configuration>
     </accordion-panel-contents>
   </accordion>
 </div>
