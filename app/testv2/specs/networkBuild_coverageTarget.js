@@ -1,6 +1,6 @@
 var login = require('./login')
 
-describe('Run Optimization', function() {
+describe('Run Optimization - Coverage Target', function() {
   it('creates and optimize a plan', function() {
 
     browser.waitForVisible('//div[contains(@class, "tool-bar")]', 10000)
@@ -45,17 +45,17 @@ describe('Run Optimization', function() {
     browser.waitForVisible('//display-mode-buttons//div[@title="Analysis Mode"]', 10000)
     $('//display-mode-buttons//div[@title="Analysis Mode"]').click()
 
+    /* Select Hub Only Split Optimization type */
+    browser.waitForVisible('//table[contains(@id, "tblNetworkAnalysisBuild")]', 5000)
+    browser.waitForVisible('//table[contains(@id, "tblNetworkAnalysisBuild")]/tbody/descendant::td[contains(text(), "Optimization Type")]', 5000)
+    $('//*[@id="tblNetworkAnalysisBuild"]/tbody[1]/descendant::td/select/option[@label="Coverage Target"]').click()
+    browser.waitForVisible('//*[@id="coverageTargetValue"]', 5000)
+    $('#coverageTargetValue').setValue(80)
+    browser.waitForVisible('//table[contains(@id, "tblNetworkAnalysisBuild")]/tbody/descendant::td[contains(text(), "Network Construction")]', 5000)
+    $('//*[@id="tblNetworkAnalysisBuild"]/tbody/descendant::td/select/option[@value="string:ODN_1"]').click()
+
+
     /* Click on tiles to select SA */
-    // browser.middleClick('//div[@id="map-canvas"]//div[1]/canvas', 50, -50)
-    // browser.moveToObject('//div[contains(@class, "tool-bar")]//button[@title="Global Settings..."]', 412, 200)
-    // browser.middleClick('//div[contains(@class, "tool-bar")]//button[@title="Global Settings..."]', 412, 200)
-    
-    // browser.middleClick('//div[contains(@id, "map-canvas")]/div/div/div[1]/div[2]', 412, 200)
-    // browser.middleClick('//div[contains(@id, "map-canvas")]/div/div/div[1]/div[3]', 412, 200)
-
-    // console.log($('//div[contains(@class, "tool-bar")]//button[@title="Global Settings..."]').getLocation())
-    // console.log($('//div[contains(@id, "map-canvas")]/div/div/div[1]/div[2]').getLocation())
-
     browser.waitForVisible('//*[@id="map-canvas"]/div/div/div[1]/div[3]', 10000)
     $('//*[@id="map-canvas"]/div/div/div[1]/div[3]').click()
 
