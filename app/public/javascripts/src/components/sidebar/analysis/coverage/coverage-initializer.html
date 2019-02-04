@@ -3,7 +3,10 @@
     line-height: 33px;  /* To vertically align text */
   }
 </style>
-
+<!-- <p>
+  I am an AngularJS component. Value from Redux: {{$ctrl.value}}
+  <button class="btn btn-light" ng-click="$ctrl.increment()">Update from AngularJS</button>
+</p> -->
 <table id="table-coverage-initializer"  ng-if="$ctrl.isLoggedInUserSuperUser" class="table table-sm table-striped">
   <tbody>
 
@@ -28,9 +31,9 @@
       </td>
     </tr>
     
-    <!-- Use Marketable Technologies -->
+    <!-- Limit To Marketable Technology -->
     <tr>
-      <td>Use Marketable Technologies</td>
+      <td>Limit To Marketable Technology</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
@@ -38,13 +41,24 @@
       </td>
     </tr>
 
-    <!-- Use Max Speed -->
+    <!-- Limit To Max Equipment Speed -->
     <tr>
-      <td>Use Max Speed</td>
+      <td>Limit To Max Equipment Speed</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
                ng-model="$ctrl.state.coverage.initializationParams.useMaxSpeed">
+      </td>
+    </tr>
+
+    <!-- Site assignment -->
+    <tr>
+      <td>Site Assignment</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.selectedSiteAssignment"
+                ng-options="item as item for item in $ctrl.siteAssignments">
+        </select>
       </td>
     </tr>
 

@@ -23,6 +23,10 @@ class LocationEditorController {
     this.deleteObjectWithId = null // A function into the child map object editor, requesting the specified map object to be deleted
     this.isCommiting = false
     this.WorkflowState = WorkflowState
+    this.isExpandLocAttributes = false
+
+    this.availableAttributesKeyList = ['loop_extended']
+    this.availableAttributesValueList = ['true','false']
   }
 
   registerObjectDeleteCallback(deleteObjectWithIdCallback) {
@@ -214,6 +218,18 @@ class LocationEditorController {
       dataType: 'location',
       workflowState: WorkflowState.CREATED.name
     }
+
+    if(!mapObject.feature.hasOwnProperty('attributes')){
+      mapObject.feature.attributes = {}
+    }
+
+    //featureObj.attributes = mapObject.feature.attributes
+    Object.keys(mapObject.feature.attributes).forEach((key) => {
+      if(mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null'
+        && key != 'number_of_households') {
+        featureObj.attributes[key] = mapObject.feature.attributes[key]
+      }
+    })
     
     return featureObj
   }
@@ -237,7 +253,7 @@ class LocationEditorController {
   }
 
   handleSelectedObjectChanged(mapObject) {
-    this.selectedMapObject = mapObject
+    if(!this.isExpandLocAttributes) this.selectedMapObject = mapObject
     this.$timeout()
   }
 
@@ -265,6 +281,56 @@ class LocationEditorController {
   isBoundaryCreationAllowed(mapObject){
     return false
   }
+
+  editLocationAttributes(index,updatedKey,updatedVal) {
+    //attribute key is updated
+    if(updatedKey != Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]){
+      //delete key and insert updated key,value
+      var key = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
+
+      this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = 
+        this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
+
+      delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
+    } else {
+      //key is not updated, just update value
+      this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = updatedVal
+    }
+  }
+
+  deleteLocationAttributes(index,key,val) {
+    var keypairToDelete = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
+    delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
+  }
+
+  addLocationAttributes() {
+    this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes['att'] = 'value'
+  }
+
+  getAttributes(search, list) {
+    var newAttr = list.slice();
+    if (search && newAttr.indexOf(search) === -1) {
+      newAttr.unshift(search);
+    }
+    return newAttr;
+  }
+
+  getAttributesKey(search) {
+    return this.getAttributes(search, this.availableAttributesKeyList)
+  }
+
+  getAttributesValue(search) {
+    return this.getAttributes(search, this.availableAttributesValueList)
+  }
+
+  modalShown() {
+    this.isExpandLocAttributes = true
+  }
+
+  modalHide() {
+    this.isExpandLocAttributes = false
+  }
+
 }
 
 LocationEditorController.$inject = ['$timeout', '$http', 'state', 'tracker']

@@ -1,9 +1,9 @@
 <!-- Show the "Initialize" button only if we don't have a report -->
 <button ng-if="!$ctrl.state.coverage.report"
-        class="btn btn-block btn-primary"
-        ng-disabled="$ctrl.isInitializingCoverage"
+        ng-class="{ 'btn btn-block': true, 'btn-primary': $ctrl.areInputsComplete(), 'btn-light': !$ctrl.areInputsComplete() }"
+        ng-disabled="$ctrl.isInitializingCoverage || !$ctrl.areInputsComplete()"
         ng-click="$ctrl.initializeCoverageReport()">
-  <i class="fa fa-bolt"></i> Initialize coverage
+  <i class="fa fa-bolt"></i> Run
 </button>
 
 <!-- Show the "Modify" button only if we have a report -->

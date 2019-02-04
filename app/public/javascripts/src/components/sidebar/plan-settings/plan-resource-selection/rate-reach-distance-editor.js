@@ -7,9 +7,11 @@ class SpeedCategory {
   toServiceCategory() {
     // Format the category in aro-service format
     const label = `${this.speed} ${this.units}`
+    const multiplier = this.units === 'Mbps' ? 1 : 1000
     return {
       name: label,
-      description: label
+      description: label,
+      speed: (+this.speed) * multiplier
     }
   }
 
@@ -25,7 +27,7 @@ class SpeedCategory {
     if (parts[1] !== 'Mbps' && parts[1] !== 'Gbps') {
       console.warn('Category units should be Mbps or Gbps')
     }
-    return new SpeedCategory(+parts[0], parts[1])
+   return new SpeedCategory(+serviceCategory.speed, parts[1])
   }
 }
 
@@ -71,10 +73,12 @@ class RateReachDistanceEditorController {
       this.oldCategories = this.categories
       this.isCategoryInEditMode = []
       this.editableCategories = []
-      this.categories.forEach(category => {
-        this.isCategoryInEditMode.push(false)
-        this.editableCategories.push((this.categoryType === 'SPEED') ? SpeedCategory.fromServiceCategory(category) : category)
-      })
+      if (this.categories) {
+        this.categories.forEach(category => {
+          this.isCategoryInEditMode.push(false)
+          this.editableCategories.push((this.categoryType === 'SPEED') ? SpeedCategory.fromServiceCategory(category) : category)
+        })
+      }
     }
   }
 
@@ -93,8 +97,8 @@ class RateReachDistanceEditorController {
     }
     this.editableCategories.push(newCategory)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
-      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-        this.rateReachGroupMap[technology].matrixMap[technologyRef].push({
+      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach((technologyRef, index) => {
+        this.rateReachGroupMap[technology].matrixMap[index].value.push({
           distance: 0,
           speed: 1
         })
@@ -102,13 +106,12 @@ class RateReachDistanceEditorController {
     })
   }
 
-  removeCategory(category) {
-    const categoryIndex = this.categories.findIndex(item => item.id === category.id)
+  removeCategory(categoryIndex) {
     this.categories.splice(categoryIndex, 1)
     this.isCategoryInEditMode.splice(categoryIndex, 1)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
-      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-        this.rateReachGroupMap[technology].matrixMap[technologyRef].splice(categoryIndex, 1)
+      Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach((technologyRef, index) => {
+        this.rateReachGroupMap[technology].matrixMap[index].value.splice(categoryIndex, 1)
       })
     })
   }
@@ -121,10 +124,10 @@ class RateReachDistanceEditorController {
       const multiplier = this.editableCategories[index].units === 'Gbps' ? 1000 : 1
       const speedMbps = this.editableCategories[index].speed * multiplier
       Object.keys(this.rateReachGroupMap).forEach(technology => {
-        Object.keys(this.rateReachGroupMap[technology].matrixMap).forEach(technologyRef => {
-          this.rateReachGroupMap[technology].matrixMap[technologyRef].forEach((item, arrIndex) => {
+        this.rateReachGroupMap[technology].matrixMap.forEach((item, tIndex) => {
+          this.rateReachGroupMap[technology].matrixMap[tIndex].value.forEach((item, arrIndex) => {
             if (index === arrIndex) {
-              this.rateReachGroupMap[technology].matrixMap[technologyRef][arrIndex].speed = speedMbps
+              this.rateReachGroupMap[technology].matrixMap[tIndex].value[arrIndex].speed = speedMbps
             }
           })
         })

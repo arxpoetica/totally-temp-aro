@@ -35,13 +35,16 @@ class EquipmentDetailController {
       if (!this.state.StateViewMode.allowViewModeClickAction(this.state)) return
       if (options.hasOwnProperty('roadSegments') && options.roadSegments.size > 0) return
       
+      const plan = state.plan.getValue()
+      const userId = this.state.loggedInUser.id
+      
       if (options.hasOwnProperty('equipmentFeatures') && options.equipmentFeatures.length > 0) {
         this.selectedEquipment = ''
         var equipmentList = this.state.getValidEquipmentFeaturesList(options.equipmentFeatures) //Filter Deleted equipment features
         if (equipmentList.length > 0) {
           const equipment = equipmentList[0]
           this.updateSelectedState(equipment)
-          const plan = state.plan.getValue()
+          
           this.displayEquipment(plan.id, equipment.object_id)
           .then((equipmentInfo) => {
             this.checkForBounds(equipment.object_id)
@@ -51,13 +54,20 @@ class EquipmentDetailController {
         this.selectedFiber = {}
         var fiberList = options.fiberFeatures
         const fiber = [...fiberList][0]
-        //const plan = state.plan.getValue()
-        //this.displayFiber(plan.id, fiber.link_id)
         var newSelection = state.cloneSelection()
         newSelection.details.fiberSegments = options.fiberFeatures
         state.selection = newSelection
 
+        fiber.attributes = {}
         this.selectedFiber = fiber
+        
+        this.$http.get(`/service/plan-feature/${plan.id}/fiber/${fiber.id}?userId=${userId}`)
+        .then(result => {
+          fiber.attributes = result.data.attributes
+          this.$timeout()
+        })
+        .catch(err => console.error(err))
+        
         this.currentEquipmentDetailView = this.EquipmentDetailView.Fiber
         this.state.activeViewModePanel = this.state.viewModePanels.EQUIPMENT_INFO
         this.$timeout()

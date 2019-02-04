@@ -29,9 +29,9 @@
     <tr>
       <th></th> <!-- This is for the draggable handle for each row -->
       <th style="min-width: 200px;">{{$ctrl.categoryDescription}}</th>
-      <th ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap"
+      <th ng-repeat="item in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap"
           style="white-space: nowrap;">
-        {{$ctrl.technologies[key].name}}
+        {{$ctrl.technologies[item.id].name}}
       </th>
     </tr>
   </thead>
@@ -42,7 +42,7 @@
         {{category.description}}
         <div class="float-right">
           <button class="btn btn-sm btn-light category-hover-button" ng-click="$ctrl.isCategoryInEditMode[$index] = true"><i class="fa fa-edit"></i></button>
-          <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.removeCategory(category)"><i class="fa fa-trash-alt"></i></button>
+          <button class="btn btn-sm btn-danger category-hover-button" ng-click="$ctrl.removeCategory($index)"><i class="fa fa-trash-alt"></i></button>
         </div>
       </td>
       <td ng-if="$ctrl.isCategoryInEditMode[$index]" class="input-group">
@@ -62,8 +62,8 @@
           <button class="btn btn-light" ng-click="$ctrl.saveCategory($index)"><i class="fa fa-save"></i></span>
         </div>
       </td>
-      <td ng-repeat="(key, value) in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap" style="min-width: 80px;">
-        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[key][$parent.$index].distance"
+      <td ng-repeat="item in $ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap" style="min-width: 80px;">
+        <input class="form-control" ng-model="$ctrl.rateReachGroupMap[$ctrl.selectedTechnologyType].matrixMap[$index].value[$parent.$index].distance"
               linear-unit-input>
       </td>
     </tr>

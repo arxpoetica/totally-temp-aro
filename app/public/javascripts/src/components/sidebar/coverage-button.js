@@ -9,6 +9,17 @@ class CoverageButtonController {
     this.isModifyingCoverage = false
   }
 
+  areInputsComplete() {
+
+    if (this.state.coverage.initializationParams.coverageType === 'census_block') {
+      return true // For census_blocks/Form477 inputs are complete even without selecting locationtypes
+    }
+
+    // Check if at least one location type is selected for optimization
+    const isLocationInputValid = this.state.locationInputSelected('business') || this.state.locationInputSelected('household') || this.state.locationInputSelected('celltower')
+    return isLocationInputValid
+  }
+
   initializeCoverageReport() {
     // Format the coverage report that so it can be sent over to aro-service
     var requestBody = {
@@ -36,13 +47,14 @@ class CoverageButtonController {
       requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
     }
     this.isInitializingCoverage = true
+    var coverageReport = null
     this.$http.post(`/service/coverage/report`, requestBody)
       .then((result) => {
-        this.state.coverage.report = result.data
-        return this.$http.post(`/service/coverage/report/${this.state.coverage.report.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
+        coverageReport = result.data
+        return this.$http.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${this.state.loggedInUser.id}`, {})
       })
-      .then(() => this.$http.post(`/service/coverage/report/${this.state.coverage.report.reportId}/process?user_id=${this.state.loggedInUser.id}`, {}))
       .then(() => {
+        this.state.coverage.report = coverageReport
         this.isInitializingCoverage = false
         this.$timeout()
       })

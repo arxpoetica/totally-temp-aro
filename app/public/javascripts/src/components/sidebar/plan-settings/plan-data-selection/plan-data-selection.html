@@ -22,16 +22,13 @@
               </button>
             </div>
           </div>
-          <span class="label label-danger"
+          <span class="label label-danger alert-danger" style="padding: 0px 10px;"
                 ng-if="!itemValue.isMinValueSelectionValid">Error: At least {{itemValue.minValue}} items must be selected</span>
-          <span class="label label-danger"
+          <span class="label label-danger alert-danger" style="padding: 0px 10px;" 
                 ng-if="!itemValue.isMaxValueSelectionValid">Error: A maximum of {{itemValue.maxValue}} items can be selected</span>
         </td>
       </tr>
     </tbody>
   </table>
-  <!-- Add a div that will overlay all the controls above. The div will be visible when the controls need to be disabled. -->
-  <div class="disable-sibling-controls"
-      ng-hide="$ctrl.areControlsEnabled">
-  </div>
+  
 </div>

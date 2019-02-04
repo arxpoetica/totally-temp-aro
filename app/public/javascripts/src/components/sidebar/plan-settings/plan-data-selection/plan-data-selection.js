@@ -1,4 +1,3 @@
-import Constants from '../../../common/constants'
 
 class DataSelectionController {
   constructor($http, $timeout, $rootScope, state, aclManager) {
@@ -7,20 +6,9 @@ class DataSelectionController {
     this.$rootScope = $rootScope
     this.state = state
     this.aclManager = aclManager
-    this.isDirty = false
     this.currentUser = state.loggedInUser
     this.sales_role_remove = ['cable_construction_area', 'construction_location', 'edge', 'construction_location', 'tile_system', 'construction_area']
-    state.plan.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
-
-    state.planOptimization.subscribe((newPlan) => {
-      if (newPlan) {
-        this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
-      }
-    })
+    
     this.isDataSourceEditable = {}
   }
 
@@ -30,6 +18,9 @@ class DataSelectionController {
       this.isDataSourceEditable[dataSourceKey] = false
       this.updateDataSourceEditableStatus(dataSourceKey)
     })
+    
+    var isValid = this.areAllSelectionsValid()
+    this.onChange({childKey:this.key, isValid:isValid, isInit: true})
   }
 
   $doCheck() {
@@ -38,57 +29,15 @@ class DataSelectionController {
       this.cachedDataItems = this.allDataItems
     }
   }
-
-  $onDestroy() {
-    // If any selections have been changed, ask the user if they want to save them
-    if (this.isDirty) {
-      if (this.areAllSelectionsValid()) {
-        swal({
-          title: 'Save modified settings?',
-          text: 'You have changed the data selection settings. Do you want to save your changes?',
-          type: 'warning',
-          confirmButtonColor: '#DD6B55',
-          confirmButtonText: 'Yes',
-          showCancelButton: true,
-          cancelButtonText: 'No',
-          closeOnConfirm: true
-        }, (result) => {
-          if (result) {
-            // Save the changed settings to aro-service
-            this.state.saveDataSelectionToServer()
-            //Clear the selected Service area when modify the optimization
-            this.clearAllSelectedSA()
-          }
-          this.isDirty = false  // Technically not required since we are in $onDestroy
-        })
-      } else {
-        // All selections are not valid
-        swal({
-          title: 'Invalid selections',
-          text: 'The data selections are not valid. Correct them before trying to save your changes.',
-          type: 'error',
-          showCancelButton: false,
-          confirmButtonColor: '#DD6B55'
-        })
-      }
-    }
-  }
-
-  clearAllSelectedSA() {
-    var plan = this.state.plan.getValue()
-
-    this.$http.delete(`/service_areas/${plan.id}/removeAllServiceAreaTargets`, { })
-    .then(() => {
-      this.state.reloadSelectedServiceAreas()
-      return Promise.resolve()
-    })
-  }
-
+  
+  
   onSelectionChanged(dataSource) {
-    this.isDirty = true
     this.state.dataItemsChanged.next(this.state.dataItems)
     this.updateSelectionValidation()
     this.updateDataSourceEditableStatus(dataSource)
+    
+    var isValid = this.areAllSelectionsValid()
+    this.onChange({childKey:this.key, isValid:isValid})
   }
 
   updateDataSourceEditableStatus(dataSourceKey) {
@@ -168,6 +117,8 @@ let planDataSelection = {
   bindings: {
     userId: '<',
     planId: '<',
+    key: '<', 
+    onChange: '&', 
     allDataItems: '='
   },
   controller: DataSelectionController

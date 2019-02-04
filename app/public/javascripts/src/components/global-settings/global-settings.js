@@ -49,7 +49,15 @@ class GlobalSettingsController {
     this.userIdForSettingsEdit = userId
     this.currentView = this.views.USER_SETTINGS
   }
-
+  
+  uploadDataSource() {
+    this.state.showDataSourceUploadModal.next(true)
+    if (0 < this.state.uploadDataSources.length){
+      this.state.uploadDataSource = this.state.uploadDataSources[0]
+    }
+    this.modalHide()
+  }
+  
   goBack() {
     if(!this.isManageUsersView() && !this.isReleaseNotesDescriptionView()) {
       this.backToGlobalSettings()
