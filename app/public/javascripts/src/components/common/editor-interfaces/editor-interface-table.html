@@ -1,25 +1,37 @@
 
 <div>
-  <div class="ei-header">{{$ctrl.displayProps.title}}</div>
-  
+  <!-- 
+  <div class="ei-header">{{$ctrl.rows.title}}</div>
+  -->
   <div class="ei-table-contain">
 	  <div class="ei-table-table">
 	    <div class="ei-table-body">
 	      <div class="ei-table-header-row">
-	        <div class="ei-table-col-head" ng-repeat="(colKey, colValue) in $ctrl.displayProps.cols">
-	          {{colValue.label}}
+	        <div class="ei-table-col-head" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
+	          {{colValue.displayName}} <!-- order by widget with type info -->
 	        </div>
-	        <div ng-if="$ctrl.isEdit && $ctrl.displayProps.canAdd" class="ei-table-col-head"></div>
+	        <div ng-if="$ctrl.canDelete" class="ei-table-col-head"></div>
+	        <div class="ei-table-col-head" ng-repeat="(btnKey, btnValue) in $ctrl.actions"></div>
 	      </div>
 	      
-	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.displayProps.rows">
-	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps.cols">
+	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows">
+	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
 	          
-	          <editor-interface-value display-props="colValue" model="rowValue[ colValue.property ]" is-edit="$ctrl.isEdit"></editor-interface-value>
+	          <editor-interface-value ng-if="rowValue.hasOwnProperty(colValue.propertyName)"
+	                                  display-props="colValue" 
+                                    on-change="$ctrl.onChange()" 
+                                    model="rowValue[colValue.propertyName]" 
+                                    is-edit="$ctrl.isEdit"
+                                    parent-obj="rowValue"
+                                    root-meta-data="$ctrl.rootMetaData">
+	          </editor-interface-value>
 	          
 	        </div>
-	        <div ng-if="$ctrl.isEdit && $ctrl.displayProps.canAdd" class="ei-table-cell">
+	        <div ng-if="$ctrl.canDelete" class="ei-table-cell">
 	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)">delete</button>
+	        </div>
+	        <div class="ei-table-cell" ng-repeat="(btnKey, btnValue) in $ctrl.actions">
+	          <button class="btn btn-sm" style="background-color: {{btnValue.buttonColor}}" ng-click="btnValue.callBack(rowKey, rowValue)">{{btnValue.buttonText}}</button>
 	        </div>
 	      </div>
 	      
@@ -27,7 +39,7 @@
 	  </div>
   </div>
   <button class="btn btn-primary btn-sm" 
-          ng-if="$ctrl.isEdit && $ctrl.displayProps.canAdd" 
+          ng-if="$ctrl.isEdit && $ctrl.canAdd" 
           ng-click="$ctrl.addItem()"
           style="display: inline-block;">add item</button>
 </div>

@@ -23,6 +23,95 @@ class ResourceManagerController {
       competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
       rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
     }
+    
+    
+    
+    
+    // for testing 
+    
+    this.displayProps = [
+      {
+        "propertyName": "name",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Name",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "editable": true,
+        "visible": true
+      },
+      {
+        "propertyName": "description",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Description",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "editable": true,
+        "visible": true
+      },
+      {
+        "propertyName": "minDown",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Min Down",
+        "enumTypeURL": "",
+        "displayDataType": "integer",
+        "defaultValue": "0",
+        "editable": true,
+        "visible": true
+      },
+      {
+        "propertyName": "maxDown",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Max Down",
+        "enumTypeURL": "",
+        "displayDataType": "integer",
+        "defaultValue": "0",
+        "editable": true,
+        "visible": true
+      }
+    ]
+    
+    this.rows = [
+      {
+        name: 'name 1', 
+        description: 'description of thing 1', 
+        minDown: 1, 
+        maxDown: 11
+      },
+      {
+        name: 'nombre 2', 
+        description: 'description of thing 2', 
+        minDown: 2, 
+        maxDown: 20
+      },
+      {
+        name: '333', 
+        description: 'this is a description of thing 3', 
+        minDown: 3, 
+        maxDown: 333
+      }
+    ]
+    
+    this.actions = [
+      {
+        buttonText: "Permissions", 
+        buttonColor: "", // use default
+        callBack: function(index, row){console.log('permissions');console.log(row)}
+      }, 
+      {
+        buttonText: "btn 2", 
+        buttonColor: "#990000", 
+        callBack: function(index, row){console.log('btn 2');console.log(row)}
+      }
+    ]
+    
+    // 
+    
   }
 
   $doCheck() {
