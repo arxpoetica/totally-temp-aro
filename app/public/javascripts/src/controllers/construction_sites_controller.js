@@ -104,8 +104,10 @@ app.controller('construction_sites_controller', ['$scope', '$rootScope', 'map_to
           tileDefinitions: [tileDefinition],
           renderMode: 'PRIMITIVE_FEATURES',
           selectable: true,
-          strokeStyle: layer.style_options.normal.strokeColor,
-          lineWidth: layer.style_options.normal.strokeWeight,
+          drawingOptions: {
+            strokeStyle: layer.style_options.normal.strokeColor,
+            lineWidth: layer.style_options.normal.strokeWeight
+          },
           highlightStyle: {
             lineWidth: layer.style_options.highlight.strokeWeight,
             strokeStyle: layer.style_options.highlight.strokeColor

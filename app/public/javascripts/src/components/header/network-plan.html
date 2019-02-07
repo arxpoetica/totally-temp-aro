@@ -24,11 +24,11 @@
 <div class="network-plan">
   <!-- For ephemeral plans, the name has not been set by the user -->
   <div ng-if="$ctrl.showPlan">
-    <div style="font-size: 25px; line-height: 40px;">Existing Network</div>
+    <div id="selectedPlan" style="font-size: 25px; line-height: 40px;">Existing Network</div>
   </div>
 
   <!-- For saved plans, display the plan name only -->
-  <div ng-if="$ctrl.plan && !$ctrl.plan.ephemeral" title="{{$ctrl.plan.name}}" class="non-ephemeral">
+  <div id="selectedPlan" ng-if="$ctrl.plan && !$ctrl.plan.ephemeral" title="{{$ctrl.plan.name}}" class="non-ephemeral">
     {{$ctrl.plan.name}}
   </div>
 </div>
