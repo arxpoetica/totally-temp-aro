@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ImmutablePropTypes from 'react-immutable-proptypes'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import CoverageActions from '../coverage/coverage-actions'
@@ -7,33 +8,34 @@ import CoverageStatusTypes from './constants'
 
 export class CoverageButton extends Component {
   render() {
-    return <div style={{ height: '35px' }}>
-      {(this.props.status === CoverageStatusTypes.RUNNING) ? this.renderProgressbarState() : this.renderButtonState()}
-    </div>
-  }
+    switch (this.props.status) {
+      case CoverageStatusTypes.UNINITIALIZED:
+        return this.renderUninitializedButton()
+      
+      case CoverageStatusTypes.RUNNING:
+        return this.renderProgressbar()
+      
+      case CoverageStatusTypes.FINISHED:
+        return this.renderFinishedButton()
 
-  // The component when it is to be shown as a button (e.g. Modify, Run, etc)
-  renderButtonState() {
-    var buttonClasses = 'btn btn-block', buttonText = 'Undefined', buttonDisabled = false
-    if (this.props.status === CoverageStatusTypes.FINISHED) {
-      buttonText = 'Modify coverage'
-      buttonClasses += ' modify-coverage-button'
-    } else {
-      buttonText = 'Run'
-      buttonClasses += ' btn-primary'
+      default:
+        return <div>ERROR: Unknown coverage status - {this.props.status}</div>
     }
-    return <button className={buttonClasses} disabled={buttonDisabled}
-      onClick={(this.props.status === CoverageStatusTypes.UNINITIALIZED)
-                ? () => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
-                                                            ['small', 'medium', 'large'], [], this.props.initializationParams)
-                : () => this.props.modifyCoverageReport(this.props.report.reportId)}>
-      <i className="fa fa-bolt"></i> {buttonText}
-    </button>
   }
 
-  // The component when it is to be shown as a progress bar
-  renderProgressbarState() {
-    return <div className={'progress'} style={{ height: '100%' }}>
+  renderUninitializedButton() {
+    return (
+      <button className={'btn btn-block btn-primary'} disabled={false}
+              onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
+                                                                 this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
+                                                                 [], this.props.initializationParams)}>
+        <i className="fa fa-bolt"></i> Run
+      </button>
+    )
+  }
+
+  renderProgressbar() {
+    return <div className={'progress'} style={{ height: '34px' }}>
       <div className={'progress-bar progress-bar-optimization'} role="progressbar" aria-valuenow={this.props.progress}
         aria-valuemin='0' aria-valuemax='1' style={{lineHeight: '34px', width: (this.props.progress * 100) + '%' }}>
       </div>
@@ -44,6 +46,15 @@ export class CoverageButton extends Component {
       </div> */}
     </div>
   }
+
+  renderFinishedButton() {
+    return (
+      <button className={'btn btn-block modify-coverage-button'} disabled={false}
+              onClick={() => this.props.modifyCoverageReport(this.props.report.reportId)}>
+        <i className="fa fa-edit"></i> Modify
+      </button>
+    )
+  }
 }
 
 CoverageButton.propTypes = {
@@ -52,6 +63,7 @@ CoverageButton.propTypes = {
   userId: PropTypes.number,
   planId: PropTypes.number,
   projectId: PropTypes.number,
+  locationLayers: ImmutablePropTypes.list,
   activeSelectionModeId: PropTypes.string,
   initializationParams: PropTypes.object,
   report: PropTypes.object
@@ -62,8 +74,9 @@ const mapStateToProps = (state) => {
     status: state.coverage.status,
     progress: state.coverage.progress,
     userId: state.user.loggedInUser.id,
-    planId: state.plan.activePlan.id,
+    planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
+    locationLayers: state.mapLayers.location,
     activeSelectionModeId: state.selection.activeSelectionMode.id,
     initializationParams: state.coverage.initializationParams,
     report: state.coverage.report
