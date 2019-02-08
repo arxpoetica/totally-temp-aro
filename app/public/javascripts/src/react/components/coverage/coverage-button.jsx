@@ -27,8 +27,10 @@ class CoverageButton extends Component {
       buttonDisabled = true
     }
     return <button className={buttonClasses} disabled={buttonDisabled}
-      onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
-        ['small', 'medium', 'large'], [], this.props.initializationParams, this.props.oldReport)}>
+      onClick={(this.props.status === CoverageStatusTypes.UNINITIALIZED)
+                ? () => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
+                                                            ['small', 'medium', 'large'], [], this.props.initializationParams, this.props.oldReport)
+                : () => this.props.modifyCoverageReport(this.props.oldReport.reportId)}>
       <i className="fa fa-bolt"></i> {buttonText}
     </button>
   }
@@ -50,7 +52,13 @@ class CoverageButton extends Component {
 
 CoverageButton.propTypes = {
   status: PropTypes.string,
-  progress: PropTypes.number
+  progress: PropTypes.number,
+  userId: PropTypes.number,
+  planId: PropTypes.number,
+  projectId: PropTypes.number,
+  activeSelectionModeId: PropTypes.string,
+  initializationParams: PropTypes.object,
+  oldReport: PropTypes.object
 }
 
 const mapStateToProps = (state) => {
@@ -69,7 +77,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch, ownProps) => ({
   initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport) => {
     dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport))
-  }
+  },
+  modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId))
 })
 
 const CoverageInitializerComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)

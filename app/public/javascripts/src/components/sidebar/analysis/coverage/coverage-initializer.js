@@ -31,7 +31,7 @@ class CoverageInitializerController {
       saveSiteCoverage: state.coverage.initializationParams.saveSiteCoverage,
       useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
       useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
-      coverageType: state.coverage.initializationParams.coverageType
+      coverageReport: state.coverage.report
     }
   }
 

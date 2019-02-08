@@ -74,6 +74,29 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
   }
 }
 
+// Modify the coverage report
+function modifyCoverageReport(reportId) {
+  return dispatch => {
+    fetch(`/service/coverage/report/${reportId}`, { method: 'DELETE' })
+      .then(result => {
+        dispatch({
+          type: Actions.UPDATE_COVERAGE_STATUS,
+          payload: {
+            report: null,
+            status: CoverageStatusTypes.UNINITIALIZED,
+            initializationParams: {
+              coverageType: 'location',
+              saveSiteCoverage: false,
+              useMarketableTechnologies: true,
+              useMaxSpeed: true
+            }
+          }
+        })
+      })
+      .catch(err => console.error(err))
+  }
+}
+
 // Fetch the coverage report status for a given plan and set it
 function updateCoverageStatus(planId) {
   return dispatch => {
@@ -106,5 +129,6 @@ function updateCoverageStatus(planId) {
 
 export default {
   updateCoverageStatus: updateCoverageStatus,
-  initializeCoverageReport: initializeCoverageReport
+  initializeCoverageReport: initializeCoverageReport,
+  modifyCoverageReport: modifyCoverageReport
 }
