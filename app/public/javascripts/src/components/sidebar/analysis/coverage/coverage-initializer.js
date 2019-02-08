@@ -1,5 +1,7 @@
+import { createSelector } from 'reselect'
+
 class CoverageInitializerController {
-  constructor(state, aclManager, $http, $timeout, $ngRedux) {
+  constructor(state, $http, $timeout, $ngRedux) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
@@ -11,30 +13,30 @@ class CoverageInitializerController {
 
     this.serviceAreas = []
     this.analysisAreas = []
-    this.selectionModeLabels = {}
-    this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
     this.siteAssignments = ['Proximity', 'Incremental']
     this.selectedSiteAssignment = 'Proximity'
-
-    this.allowedSelectionModes = angular.copy(state.selectionModes)
-    delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
   }
 
-  // Which part of the Redux global state does our component want to receive?
+  // Map global state to component properties
   mapStateToThis(state) {
+    const getAllSelectionModes = state => state.selection.selectionModes
+    const getAllowedSelectionModes = createSelector([getAllSelectionModes], 
+      (selectionModes) => angular.copy(selectionModes.filter(item => item.id !== 'SELECTED_LOCATIONS')))
+
     return {
       isSuperUser: state.user.isSuperUser,
-      
-      // value: state.test.value
+      activeSelectionModeId: state.selection.activeSelectionMode.id,
+      selectionModes: getAllowedSelectionModes(state),
+      coverageType: state.coverage.initializationParams.coverageType,
+      saveSiteCoverage: state.coverage.initializationParams.saveSiteCoverage,
+      useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
+      useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
+      coverageType: state.coverage.initializationParams.coverageType
     }
   }
 
   mapDispatchToTarget(dispatch) {
-    return {
-      increment: () => {dispatch({ type: 'INCREMENT' })}
-    }
+    return { }
   }
 
   $onDestroy() {
@@ -82,7 +84,7 @@ class CoverageInitializerController {
   }
 }
 
-CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout', '$ngRedux']
+CoverageInitializerController.$inject = ['state', '$http', '$timeout', '$ngRedux']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',

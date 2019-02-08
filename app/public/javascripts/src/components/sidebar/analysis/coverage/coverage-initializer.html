@@ -11,19 +11,19 @@
       <td>Coverage Type</td>
       <td>
         <select class="form-control"
-                ng-model="$ctrl.state.coverage.initializationParams.coverageType"
+                ng-model="$ctrl.coverageType"
                 ng-options="item.id as item.name for item in $ctrl.coverageTypes">
         </select>
       </td>
     </tr>
 
     <!-- Save site coverage -->
-    <tr ng-if="$ctrl.state.coverage.initializationParams.coverageType === 'location'">
+    <tr ng-if="$ctrl.coverageType === 'location'">
       <td>Save site coverage</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.coverage.initializationParams.saveSiteCoverage">
+               ng-model="$ctrl.saveSiteCoverage">
       </td>
     </tr>
     
@@ -33,7 +33,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.coverage.initializationParams.useMarketableTechnologies">
+               ng-model="$ctrl.state.useMarketableTechnologies">
       </td>
     </tr>
 
@@ -43,7 +43,7 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.coverage.initializationParams.useMaxSpeed">
+               ng-model="$ctrl.state.useMaxSpeed">
       </td>
     </tr>
 
@@ -63,9 +63,10 @@
       <td>Selection Type</td>
       <td>
         <select class="form-control" 
-                ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
-                ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
-          <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
+                ng-model="$ctrl.activeSelectionModeId"
+                ng-change="$ctrl.onSelectionTypeChange(this.activeSelectionMode)"
+                ng-options="item.id as item.description for item in $ctrl.selectionModes">
+          <!-- <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option> -->
         </select>
       </td>
     </tr>

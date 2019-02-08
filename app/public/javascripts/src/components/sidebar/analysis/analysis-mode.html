@@ -42,7 +42,8 @@
     <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
     <optimize-button ng-if="$ctrl.state.networkAnalysisType.id !== 'COVERAGE_ANALYSIS'"></optimize-button>
     <coverage-button ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'"></coverage-button>
-    <div ng-if="$ctrl.state.networkAnalysisType.id === 'REACT_COVERAGE_ANALYSIS'">
+    <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'">
+      React:
       <r-coverage-button></r-coverage-button>
     </div>
   </div>

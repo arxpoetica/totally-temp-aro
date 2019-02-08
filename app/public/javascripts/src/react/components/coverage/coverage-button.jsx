@@ -26,7 +26,9 @@ class CoverageButton extends Component {
       buttonClasses += ' btn-light'
       buttonDisabled = true
     }
-    return <button className={buttonClasses} disabled={buttonDisabled} onClick={() => this.props.initializeCoverageReport()}>
+    return <button className={buttonClasses} disabled={buttonDisabled}
+      onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
+        ['small', 'medium', 'large'], [], this.props.initializationParams, this.props.oldReport)}>
       <i className="fa fa-bolt"></i> {buttonText}
     </button>
   }
@@ -54,12 +56,20 @@ CoverageButton.propTypes = {
 const mapStateToProps = (state) => {
   return {
     status: state.coverage.status,
-    progress: state.coverage.progress
+    progress: state.coverage.progress,
+    userId: state.user.loggedInUser.id,
+    planId: state.plan.id,
+    projectId: state.user.loggedInUser.projectId,
+    activeSelectionModeId: state.selection.activeSelectionMode.id,
+    initializationParams: state.coverage.initializationParams,
+    oldReport: state.coverage.report
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  initializeCoverageReport: () => { dispatch(CoverageActions.updateCoverageStatus()) }
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport) => {
+    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport))
+  }
 })
 
 const CoverageInitializerComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)
