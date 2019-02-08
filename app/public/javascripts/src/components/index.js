@@ -62,6 +62,7 @@ import rateReachEditor from './sidebar/plan-settings/plan-resource-selection/rat
 import rateReachManagerCreator from './sidebar/plan-settings/plan-resource-selection/rate-reach-manager-creator'
 import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor'
 import boundaries from './views/boundaries'
+import locations from './views/locations'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
@@ -168,6 +169,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('rateReachManagerCreator', rateReachManagerCreator)
    .component('rateReachDistanceEditor', rateReachDistanceEditor)
    .component('boundaries', boundaries)
+   .component('locations', locations)
    .component('mapSplit', mapSplit)
    .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
    .component('mapSelectorExportLocations', mapSelectorExportLocations)

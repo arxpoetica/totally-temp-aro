@@ -1,5 +1,9 @@
 import { createSelector } from 'reselect'
 
+const getAllSelectionModes = state => state.selection.selectionModes
+const getAllowedSelectionModes = createSelector([getAllSelectionModes], 
+  (selectionModes) => angular.copy(selectionModes.filter(item => item.id !== 'SELECTED_LOCATIONS')))
+
 class CoverageInitializerController {
   constructor(state, $http, $timeout, $ngRedux) {
     this.state = state
@@ -19,10 +23,6 @@ class CoverageInitializerController {
 
   // Map global state to component properties
   mapStateToThis(state) {
-    const getAllSelectionModes = state => state.selection.selectionModes
-    const getAllowedSelectionModes = createSelector([getAllSelectionModes], 
-      (selectionModes) => angular.copy(selectionModes.filter(item => item.id !== 'SELECTED_LOCATIONS')))
-
     return {
       isSuperUser: state.user.isSuperUser,
       activeSelectionModeId: state.selection.activeSelectionMode.id,

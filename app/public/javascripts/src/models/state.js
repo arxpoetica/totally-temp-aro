@@ -1,3 +1,4 @@
+import { List } from 'immutable'
 import StateViewMode from './state-view-mode'
 import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
@@ -590,17 +591,25 @@ class State {
   }
 
   service.reloadLocationTypes = () => {
+
     var locationTypes = []
+    var locationTypesForRedux = List()
     var locations = service.configuration.locationCategories.categories
     Object.keys(locations).forEach((locationKey) => {
       var location = locations[locationKey]
 
       if (service.configuration.perspective.locationCategories[locationKey].show) {
-          location.checked = location.selected
-          locationTypes.push(location)
+        location.checked = location.selected
+        locationTypes.push(location)
+        locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location)))  // angular.toJson will strip out the $$hashkey key
       }
     })
     service.locationTypes.next(locationTypes)
+
+    $ngRedux.dispatch({
+      type: Actions.SET_LOCATION_LAYERS,
+      payload: locationTypesForRedux
+    })
   }
 
   // Get a POST body that we will send to aro-service for performing optimization
