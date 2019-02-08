@@ -35,15 +35,15 @@ export class CoverageButton extends Component {
   }
 
   renderProgressbar() {
-    return <div className={'progress'} style={{ height: '34px' }}>
+    return <div className={'progress'} style={{ height: '34px', position: 'relative' }}>
       <div className={'progress-bar progress-bar-optimization'} role="progressbar" aria-valuenow={this.props.progress}
         aria-valuemin='0' aria-valuemax='1' style={{lineHeight: '34px', width: (this.props.progress * 100) + '%' }}>
       </div>
-      {/* A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css!
-      <div style={{ position: 'relative', top: '-28px', backgroundColor: 'rgba(0, 0, 0, 0.4)', color: 'white', 
-                    width: '120px', textAlign: 'center', borderRadius: '3px',  margin: 'auto', fontWeight: 'bold' }}>
-        {this.props.progress * 100 + '%'}
-      </div> */}
+      <div style={{ position: 'absolute', top: '50%', left: '50%', backgroundColor: 'rgba(0, 0, 0, 0.4)', color: 'white',
+                    transform: 'translateX(-50%) translateY(-50%)', width: '80px', textAlign: 'center',
+                    borderRadius: '3px', fontWeight: 'bold' }}>
+        {Math.round(this.props.progress * 100) + '%'}
+      </div>
     </div>
   }
 
