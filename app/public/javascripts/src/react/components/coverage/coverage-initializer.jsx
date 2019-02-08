@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Provider, connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
-import Actions from '../../common/actions'
 import UserActions from '../user/user-actions'
 
 function connectWithStore(store, WrappedComponent, ...args) {

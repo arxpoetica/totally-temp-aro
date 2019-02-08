@@ -3,6 +3,7 @@ var express = require('express')
 var passport = require('passport')
 var bodyParser = require('body-parser')
 var compression = require('compression')
+const Socket = require('./sockets')
 
 var app = module.exports = express()
 app.use(compression())
@@ -68,4 +69,5 @@ if (module.id === require.main.id) {
   var port = process.env.PORT || 8000
   var server = app.listen(port)
   server.timeout = 60 * 60 * 1000 // 30min
+  const socket = new Socket(server)
 }
