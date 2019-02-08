@@ -1065,7 +1065,7 @@ class State {
     service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
     
     // Subscribe to the socket for this plan
-    this.subscribeToPlanSocket()
+    this.subscribeToPlanSocket(plan.id)
 
     return service.loadPlanInputs(plan.id)
       .then(() => service.recreateTilesAndCache())
@@ -1862,7 +1862,7 @@ class State {
   mapDispatchToTarget(dispatch) {
     return {
       setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
-      subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: planId }})}
+      subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})}
     }
   }
 }
