@@ -5,6 +5,7 @@ class ReportModalController {
     this.$http = $http
 
     this.plan
+    this.selectedFileType = {}
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.plan = newPlan
@@ -43,10 +44,14 @@ class ReportModalController {
         
         var analysis = []
         reports.forEach((report) => {
+          var reportName = `${prefix}${report.name}`
+          this.selectedFileType[reportName] = report.mediaTypes[0] //Choose the first media type by default          
+
           analysis.push({
-            name: `${prefix}${report.name}`,
-            type: `.${report.mediaType}`,
-            url: `/report-extended/${report.name}/${this.plan.id}/${report.mediaType}`
+            originalName: report.name,
+            name: reportName,
+            type: report.mediaTypes,
+            url: `/report-extended/${report.name}/${this.plan.id}/${this.selectedFileType[reportName]}`
           })
         })
         this.analysis = analysis
@@ -60,39 +65,7 @@ class ReportModalController {
 ReportModalController.$inject = ['$scope', '$http', 'state']
 
 let reportModal = {
-  template: `
-  <modal visible="$ctrl.state.reportModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
-    <modal-header title="Reports"></modal-header>
-      <modal-body style="max-height: 500px; overflow: scroll;">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>File Name</th>
-              <th>File Type</th>
-              <th>Date Created</th>
-              <th class="col-md-1"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr ng-repeat="file in $ctrl.analysis">
-              <td>{{ file.name }}</td>
-              <td>{{ file.type }}</td>
-              <td>{{ $ctrl.plan.updated_at | date:'shortDate' }}</td>
-              <td>
-                <a ng-show="file.url" href="{{ file.url }}" class="btn btn-primary btn-xs" download="{{ file.name }}{{ file.type }}">
-                  <span class="fa fa-download"></span> Download
-                </a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </modal-body>
-    <modal-footer>
-      <button type="button" class="btn btn-light" disabled>Download all reports</button>
-      <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-    </modal-footer>
-  </modal>
-  `,
+  templateUrl: '/components/header/report-modal.html',
   bindings: {},
   controller: ReportModalController
 }

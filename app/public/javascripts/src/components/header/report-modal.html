@@ -1,0 +1,37 @@
+<modal visible="$ctrl.state.reportModal.value" backdrop="static" on-show="$ctrl.modalShown()" on-hide="$ctrl.modalHide()" >
+    <modal-header title="Reports"></modal-header>
+      <modal-body style="max-height: 500px; overflow: auto;">
+        <table class="table table-md table-striped">
+          <thead>
+            <tr>
+              <th class="w-40">File Name</th>
+              <th class="w-25">File Type</th>
+              <th class="w-10">Date Created</th>
+              <th class="w-25"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="file in $ctrl.analysis track by $index">
+              <td style="word-break: break-all">{{ file.name }}</td>
+              <td>
+                <select class="form-control"
+                  ng-model="$ctrl.selectedFileType[file.name]"
+                  ng-options="item as item for item in file.type">
+                </select>
+              </td>
+              <td>{{ $ctrl.plan.updated_at | date:'shortDate' }}</td>
+              <td>
+                <a ng-show="file.url" ng-href='/report-extended/{{file.originalName}}/{{$ctrl.plan.id}}/{{$ctrl.selectedFileType[file.name]}}'
+                  class="btn btn-primary btn-xs" download="{{ file.name }}.{{ $ctrl.selectedFileType[file.name] }}">
+                  <span class="fa fa-download"></span> Download
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </modal-body>
+    <modal-footer>
+      <button type="button" class="btn btn-light" disabled>Download all reports</button>
+      <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+    </modal-footer>
+  </modal>
