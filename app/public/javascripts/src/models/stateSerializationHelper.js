@@ -45,9 +45,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
   var addLocationTypesToBody = (state, optimization, postBody) => {
-    var selectedLocationTypes = state.locationTypes.getValue().filter((item) => item.checked)
+    var selectedLocationLayers = state.locationLayers.filter((item) => item.checked)
     postBody.locationConstraints = {
-      locationTypes: _.pluck(selectedLocationTypes, 'plannerKey'),
+      locationTypes: _.pluck(selectedLocationLayers, 'plannerKey'),
       analysisSelectionMode: state.optimizationOptions.analysisSelectionMode
     }
     if (state.optimizationOptions.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
@@ -190,15 +190,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   var loadLocationTypesFromBody = (state, postBody) => {
-    var newLocationTypes = angular.copy(state.locationTypes.getValue())
-    newLocationTypes.forEach((locationType) => locationType.checked = false)
-    postBody.locationConstraints.locationTypes.forEach((locationType) => {
-      var serviceLocationTypeObj = newLocationTypes.filter((item) => item.plannerKey === locationType)[0]
-      if (serviceLocationTypeObj) {
-        serviceLocationTypeObj.checked = true
-      }
+
+    state.locationLayers.forEach((locationLayer) => {
+      const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
+      state.setLocationTypeVisibility(locationLayer, isVisible)
     })
-    state.locationTypes.next(newLocationTypes)
 
     // Load the selected data sources
     var libraryIdsToSelect = []

@@ -5,7 +5,6 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
-
 class LocationsController {
   
   constructor($rootScope, $location, $timeout, $ngRedux, map_tools, optimization, state) {
@@ -263,7 +262,7 @@ class LocationsController {
     if (mergedLayerDefinitions.length > 0) {
       // We have some business layers that need to be merged into one
       // We still have to specify an iconURL in case we want to debug the heatmap rendering. Pick any icon.
-      var firstLocation = this.state.locationTypes.getValue()[0]
+      var firstLocation = this.locationLayers[0]
       var mapLayerKey = 'aggregated_locations'
       oldMapLayers[mapLayerKey] = {
         tileDefinitions: mergedLayerDefinitions,
@@ -296,29 +295,25 @@ class LocationsController {
     this.updateMapLayers()
   }
 
-  // Upward data flow (updating map layer state)
-  setLocationTypeVisibility(locationType, isVisible) {
-    var newLocationTypes = angular.copy(this.state.locationTypes.getValue())
-
-    for (var iLocationType = 0; iLocationType < newLocationTypes.length; ++iLocationType) {
-      if (newLocationTypes[iLocationType].key === locationType.key) {
-        newLocationTypes[iLocationType].checked =  isVisible
-      }
-      if (newLocationTypes[iLocationType].group !== locationType.group){
-        newLocationTypes[iLocationType].checked = false
-      }
-    }
-    this.state.locationTypes.next(newLocationTypes)
-  }
-
   mapStateToThis(state) {
     return {
       locationLayers: getLocationLayersList(state)
     }
   }
+
   mapDispatchToTarget(dispatch) {
     return {
-      updateLayerVisibility: (layer, isVisible) => dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
+      updateLayerVisibility: (layer, isVisible, allLocationLayers) => {
+        // First set the visibility of the current layer
+        dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
+        
+        // Then check if other layers are in a different group
+        allLocationLayers.forEach(locLayer => {
+          if (locLayer.group !== layer.group) {
+            dispatch(MapLayerActions.setLayerVisibility(locLayer, false))
+          }
+        })
+      }
     }
   }
 

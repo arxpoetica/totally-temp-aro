@@ -1,10 +1,16 @@
 import { List } from 'immutable'
+import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
 import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
+import MapLayerActions from '../react/components/map-layers/map-layer-actions'
+
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 /* global app localStorage map */
 class State {
@@ -13,9 +19,8 @@ class State {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
-  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
-
   var service = {}
+  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service)
   service.INVALID_PLAN_ID = -1
   service.MAX_EXPORTABLE_AREA = 11000000000 //25000000
 
@@ -488,8 +493,6 @@ class State {
       })
   }
 
-  service.locationTypes = new Rx.BehaviorSubject([])
-
   // Hold all the selected tile elements like locations, service areas, etc.
   service.selection = {
     planTargets: {
@@ -591,8 +594,6 @@ class State {
   }
 
   service.reloadLocationTypes = () => {
-
-    var locationTypes = []
     var locationTypesForRedux = List()
     var locations = service.configuration.locationCategories.categories
     Object.keys(locations).forEach((locationKey) => {
@@ -600,16 +601,18 @@ class State {
 
       if (service.configuration.perspective.locationCategories[locationKey].show) {
         location.checked = location.selected
-        locationTypes.push(location)
         locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location)))  // angular.toJson will strip out the $$hashkey key
       }
     })
-    service.locationTypes.next(locationTypes)
 
     $ngRedux.dispatch({
       type: Actions.SET_LOCATION_LAYERS,
       payload: locationTypesForRedux
     })
+  }
+
+  service.setLocationTypeVisibility = (locationLayer, isVisible) => {
+    $ngRedux.dispatch(MapLayerActions.setLayerVisibility(locationLayer, isVisible))
   }
 
   // Get a POST body that we will send to aro-service for performing optimization
@@ -1075,9 +1078,9 @@ class State {
     service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global,tag.id))
     service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
     
-    this.setPlan(plan)
+    service.setPlanRedux(plan)
     // Subscribe to the socket for this plan
-    this.subscribeToPlanSocket(plan.id)
+    service.subscribeToPlanSocket(plan.id)
 
     return service.loadPlanInputs(plan.id)
       .then(() => service.recreateTilesAndCache())
@@ -1126,7 +1129,7 @@ class State {
   }
 
   service.locationInputSelected = (locationKey) => {
-    return service.locationTypes.getValue().filter((locationType)=> {
+    return service.locationLayers.filter((locationType)=> {
         return locationType.checked && locationType.categoryKey === locationKey
     }).length > 0
   }
@@ -1249,8 +1252,8 @@ class State {
 
   var checkToDisplayPopup = function () {
     return new Promise((resolve, reject) => {
-      var locationTypes = angular.copy(service.locationTypes.getValue())
-      var isHouseholdSelected = locationTypes.filter((locationType) => locationType.key === 'household')[0].checked
+      var locationLayers = angular.copy(service.locationLayers)
+      var isHouseholdSelected = locationLayers.filter((locationType) => locationType.key === 'household')[0].checked
 
       if(isHouseholdSelected && service.optimizationOptions.networkConstraints.routingMode == service.routingModes.DIRECT_ROUTING.id) {
         swal({
@@ -1510,7 +1513,7 @@ class State {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
     // Set the logged in user in the Redux store
-    this.setLoggedInUser(user)
+    service.setLoggedInUserRedux(user)
 
     service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
     service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1863,18 +1866,18 @@ class State {
   }
 
   return service
-//}])
   }
 
-  // Which part of the Redux global state does our component want to receive?
   mapStateToThis(state) {
-    return {}
+    return {
+      locationLayers: getLocationLayersList(state)
+    }
   }
 
   mapDispatchToTarget(dispatch) {
     return {
-      setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
-      setPlan: (plan) => {dispatch(PlanActions.setPlan(plan))},
+      setLoggedInUserRedux: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
+      setPlanRedux: (plan) => {dispatch(PlanActions.setPlan(plan))},
       subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})}
     }
   }
