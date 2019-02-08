@@ -1,82 +1,15 @@
 // === table view === //
 
-/*
-
-rows [objects of same type]
-
-// descriptions of each property (of items in rows) to be shown
-// similar to: 
-displayProperties: [
-  {
-    "propertyName": "name",
-    "levelOfDetail": 0,
-    "format": "",
-    "displayName": "Name",
-    "enumTypeURL": "",
-    "displayDataType": "string",
-    "defaultValue": "",
-    "editable": true,
-    "visible": true
-  },
-  {
-    "propertyName": "description",
-    "levelOfDetail": 0,
-    "format": "",
-    "displayName": "Description",
-    "enumTypeURL": "",
-    "displayDataType": "string",
-    "defaultValue": "",
-    "editable": true,
-    "visible": true
-  },
-  {
-    "propertyName": "minDown",
-    "levelOfDetail": 0,
-    "format": "",
-    "displayName": "Min Down",
-    "enumTypeURL": "",
-    "displayDataType": "integer",
-    "defaultValue": "0",
-    "editable": true,
-    "visible": true
-  },
-  {
-    "propertyName": "maxDown",
-    "levelOfDetail": 0,
-    "format": "",
-    "displayName": "Max Down",
-    "enumTypeURL": "",
-    "displayDataType": "integer",
-    "defaultValue": "0",
-    "editable": true,
-    "visible": true
-  }
-]
-
-// for additional buttons and standard button override
-actions: [
-  {
-    buttonText: "Permissions", 
-    buttonColor: "", // use default
-    callBack: function(index, row)
-  }, 
-  {
-    buttonText: "Delete", // in this case you'd send 'false' to canDelete because this button is handling that function 
-    buttonColor: "#990000"
-    callBack: function(index, row)
-  }
-]
-
-*/
-
 
 class EditorInterfaceTableController {
   constructor() {
-    //
+    this.orderCol = ""
+    this.isOrderAscending = true
   }
 
   $onInit() {
-    //
+    this.orderCol = this.displayProps[0].propertyName
+    this.orderTable()
   }
   
   addItem(){
@@ -99,6 +32,51 @@ class EditorInterfaceTableController {
   deleteItem(index){
     console.log('delete '+index)
     //this.rows.rows.splice(index, 1)
+  }
+  
+  setOrderCol(colName){
+    if (colName == this.orderCol){
+      this.isOrderAscending = !this.isOrderAscending
+    }else{
+      this.orderCol = colName
+      this.isOrderAscending = true
+    }
+    
+    this.orderTable()
+  }
+  
+  orderTable(){
+    
+    if (this.isOrderAscending){
+      this.rows.sort((a, b) => {
+        var valA = a[this.orderCol]
+        var valB = b[this.orderCol]
+        if (valA < valB) {
+          return -1;
+        }
+        if (valA > valB) {
+          return 1;
+        }
+  
+        // names must be equal
+        return 0;
+      });
+    }else{
+      this.rows.sort((a, b) => {
+        var valA = a[this.orderCol]
+        var valB = b[this.orderCol]
+        if (valA > valB) {
+          return -1;
+        }
+        if (valA < valB) {
+          return 1;
+        }
+  
+        // names must be equal
+        return 0;
+      });
+    }
+    
   }
   
 }

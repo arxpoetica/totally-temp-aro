@@ -27,9 +27,20 @@ class ResourceManagerController {
     
     
     
-    // for testing 
+    // for testing -------- 
     
     this.displayProps = [
+      {
+        "propertyName": "managerType",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Resource Type",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "editable": false,
+        "visible": true
+      },
       {
         "propertyName": "name",
         "levelOfDetail": 0,
@@ -49,28 +60,6 @@ class ResourceManagerController {
         "enumTypeURL": "",
         "displayDataType": "string",
         "defaultValue": "",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "minDown",
-        "levelOfDetail": 0,
-        "format": "",
-        "displayName": "Min Down",
-        "enumTypeURL": "",
-        "displayDataType": "integer",
-        "defaultValue": "0",
-        "editable": true,
-        "visible": true
-      },
-      {
-        "propertyName": "maxDown",
-        "levelOfDetail": 0,
-        "format": "",
-        "displayName": "Max Down",
-        "enumTypeURL": "",
-        "displayDataType": "integer",
-        "defaultValue": "0",
         "editable": true,
         "visible": true
       }
@@ -100,20 +89,38 @@ class ResourceManagerController {
     this.actions = [
       {
         buttonText: "Permissions", 
-        buttonColor: "", // use default
+        buttonClass: "", // use default
         callBack: function(index, row){console.log('permissions');console.log(row)}
-      }, 
-      {
-        buttonText: "btn 2", 
-        buttonColor: "#990000", 
-        callBack: function(index, row){console.log('btn 2');console.log(row)}
       }
     ]
     
-    // 
+    // -------
+    
+    
+    
+    
+    
     
   }
-
+  
+  
+  
+  $onChanges(changes){
+    if (changes.hasOwnProperty('resourceItems')){
+      var newRows = []
+      changes.resourceItems.currentValue
+      for (const key in changes.resourceItems.currentValue) {
+        if (changes.resourceItems.currentValue.hasOwnProperty(key)){
+          if (changes.resourceItems.currentValue[key].hasOwnProperty("allManagers")){
+            newRows = newRows.concat( changes.resourceItems.currentValue[key].allManagers )
+          }
+        }
+      }
+      this.rows = newRows
+    }
+  }
+  
+  
   $doCheck() {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
       this.oldResourceItems = this.resourceItems
@@ -259,6 +266,8 @@ class ResourceManagerController {
       })
     })
   }
+  
+  
 }
 
 ResourceManagerController.$inject = ['$http', '$document', 'state']

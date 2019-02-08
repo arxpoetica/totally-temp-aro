@@ -7,8 +7,14 @@
 	  <div class="ei-table-table">
 	    <div class="ei-table-body">
 	      <div class="ei-table-header-row">
-	        <div class="ei-table-col-head" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
-	          {{colValue.displayName}} <!-- order by widget with type info -->
+	        <div class="ei-table-col-head" 
+	             ng-repeat="(colKey, colValue) in $ctrl.displayProps"
+	             ng-click="$ctrl.setOrderCol(colValue.propertyName)">
+	          {{colValue.displayName}} 
+	          <div style="display: inline-block;" ng-if="$ctrl.orderCol == colValue.propertyName">
+	            <span ng-if="$ctrl.isOrderAscending">v</span>
+	            <span ng-if="!$ctrl.isOrderAscending">^</span>
+	          </div>
 	        </div>
 	        <div ng-if="$ctrl.canDelete" class="ei-table-col-head"></div>
 	        <div class="ei-table-col-head" ng-repeat="(btnKey, btnValue) in $ctrl.actions"></div>
@@ -31,7 +37,7 @@
 	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)">delete</button>
 	        </div>
 	        <div class="ei-table-cell" ng-repeat="(btnKey, btnValue) in $ctrl.actions">
-	          <button class="btn btn-sm" style="background-color: {{btnValue.buttonColor}}" ng-click="btnValue.callBack(rowKey, rowValue)">{{btnValue.buttonText}}</button>
+	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" ng-class="" ng-click="btnValue.callBack(rowKey, rowValue)">{{btnValue.buttonText}}</button>
 	        </div>
 	      </div>
 	      
