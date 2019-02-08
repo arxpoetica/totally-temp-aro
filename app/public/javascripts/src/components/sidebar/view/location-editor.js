@@ -43,6 +43,7 @@ class LocationEditorController {
 
   $onInit() {
     this.resumeOrCreateTransaction()
+    config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers()    
   }
   
   $onDestroy(){
@@ -329,6 +330,12 @@ class LocationEditorController {
 
   modalHide() {
     this.isExpandLocAttributes = false
+  }
+
+  selectAllLocationLayers() {
+    var locationLayers = this.state.locationTypes.getValue()
+    locationLayers.forEach((locationType) => locationType.checked = true)
+    this.state.locationTypes.next(locationLayers)
   }
 
 }
