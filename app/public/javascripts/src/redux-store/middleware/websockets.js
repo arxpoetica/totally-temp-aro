@@ -5,11 +5,9 @@ const socket = io()
 const createSocketMiddleware = () => {
   return storeAPI => {
 
-    socket.on("message", (message) => {
-      storeAPI.dispatch({
-        type: "SOCKET_MESSAGE_RECEIVED",
-        payload: message
-      })
+    // If we get a raw Redux command, dispatch it
+    socket.on('REDUX_COMMAND', (command) => {
+      storeAPI.dispatch(command)
     })
 
     return next => action => {

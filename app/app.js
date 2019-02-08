@@ -70,4 +70,5 @@ if (module.id === require.main.id) {
   var server = app.listen(port)
   server.timeout = 60 * 60 * 1000 // 30min
   const socket = new Socket(server)
+  api.Socket = socket   // For debugging only. Can be removed if not used in routes_service.js
 }

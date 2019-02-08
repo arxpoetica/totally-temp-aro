@@ -5,11 +5,20 @@ const defaultStatus = {
   report: null,
   status: CoverageStatusTypes.UNINITIALIZED,
   progress: 0,
-  initializationParams: null
+  initializationParams: {
+    coverageType: 'location',
+    saveSiteCoverage: false,
+    useMarketableTechnologies: true,
+    useMaxSpeed: true
+  }
 }
 
 function setCoverageStatus(state, report, status, initializationParams) {
   return { ...state, report: report, status: status, initializationParams: initializationParams }
+}
+
+function setCoverageProgress(state, progress) {
+  return { ...state, progress: progress }
 }
 
 function setDefaultCoverageDetails() {
@@ -32,7 +41,7 @@ function coverageReducer(state = defaultStatus, action) {
       return state
 
     case Actions.SET_COVERAGE_PROGRESS:
-      return state
+      return setCoverageProgress(state, action.payload.progress)
 
     default:
       return state

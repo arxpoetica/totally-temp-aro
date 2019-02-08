@@ -7,7 +7,9 @@ import CoverageStatusTypes from './constants'
 
 class CoverageButton extends Component {
   render() {
-    return (this.props.status === CoverageStatusTypes.RUNNING) ? this.renderProgressbarState() : this.renderButtonState()
+    return <div style={{ height: '35px' }}>
+      {(this.props.status === CoverageStatusTypes.RUNNING) ? this.renderProgressbarState() : this.renderButtonState()}
+    </div>
   }
 
   // The component when it is to be shown as a button (e.g. Modify, Run, etc)
@@ -30,16 +32,16 @@ class CoverageButton extends Component {
 
   // The component when it is to be shown as a progress bar
   renderProgressbarState() {
-    return <div className={'progress'} style={'height: 100%'}>
+    return <div className={'progress'} style={{ height: '100%' }}>
       <div className={'progress-bar progress-bar-optimization'} role="progressbar" aria-valuenow={this.props.progress}
-        aria-valuemin='0' aria-valuemax='1' style={{'line-height': '34px', width: this.props.progress * 100 + '%' }}>
+        aria-valuemin='0' aria-valuemax='1' style={{lineHeight: '34px', width: (this.props.progress * 100) + '%' }}>
       </div>
+      {/* A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css!
+      <div style={{ position: 'relative', top: '-28px', backgroundColor: 'rgba(0, 0, 0, 0.4)', color: 'white', 
+                    width: '120px', textAlign: 'center', borderRadius: '3px',  margin: 'auto', fontWeight: 'bold' }}>
+        {this.props.progress * 100 + '%'}
+      </div> */}
     </div>
-    {/* A div overlaid on top of the progress bar, so we can always see the text. Lot of custom css! 
-    <div style="position:relative; top:-28px; background-color: rgba(0, 0, 0, 0.4); color: white; width: 120px; text-align: center; border-radius: 3px; margin: auto; font-weight: bold">
-      {{$ctrl.state.progressMessage}}
-    </div>
-    */}
   }
 }
 

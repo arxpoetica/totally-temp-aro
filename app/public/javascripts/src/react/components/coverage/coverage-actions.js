@@ -30,6 +30,8 @@ function updateCoverageStatus(planId) {
   }
 }
 
+// Initialize coverage report
+
 export default {
   updateCoverageStatus: updateCoverageStatus
 }
