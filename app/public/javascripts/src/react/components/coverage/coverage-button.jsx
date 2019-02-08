@@ -16,7 +16,8 @@ class CoverageButton extends Component {
   renderButtonState() {
     var buttonClasses = 'btn btn-block', buttonText = 'Undefined', buttonDisabled = false
     if (this.props.status === CoverageStatusTypes.FINISHED) {
-      buttonText = 'Modify'
+      buttonText = 'Modify coverage'
+      buttonClasses += ' modify-coverage-button'
     } else if (true) {
       buttonText = 'Run'
       buttonClasses += ' btn-primary'

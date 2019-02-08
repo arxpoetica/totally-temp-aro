@@ -92,13 +92,18 @@ function getSuperUserFlag(userId) {
 
 // Set the logged in user
 function setLoggedInUser(loggedInUser) {
-  return {
-    type: Actions.SET_LOGGED_IN_USER,
-    loggedInUser: loggedInUser
+  return dispatch => {
+    // Set the logged in user
+    dispatch({
+      type: Actions.SET_LOGGED_IN_USER,
+      loggedInUser: loggedInUser
+    })
+    
+    // Check if the logged in user is a superuser
+    dispatch(getSuperUserFlag(loggedInUser.id))
   }
 }
 
 export default {
-  getSuperUserFlag: getSuperUserFlag,
   setLoggedInUser: setLoggedInUser
 }

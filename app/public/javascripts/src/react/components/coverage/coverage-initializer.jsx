@@ -16,7 +16,11 @@ class CoverageInitializer extends Component {
 }
 
 CoverageInitializer.propTypes = {
-  property1: PropTypes.number
+  coverageType: PropTypes.string,
+  saveSiteCoverage: PropTypes.boolean,
+  useMarketableTechnologies: PropTypes.boolean,
+  useMaxSpeed: PropTypes.boolean,
+  
 }
 
 const mapStateToProps = (state, ownProps) => {
