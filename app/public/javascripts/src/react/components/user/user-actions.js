@@ -1,4 +1,4 @@
-import fetch from 'cross-fetch'
+import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import Constants from '../../../components/common/constants'
 
@@ -17,10 +17,9 @@ function getPermissionBits() {
     RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null }
   })
 
-  return fetch('/service/auth/permissions')
-    .then(response => response.json(), err => console.log(err))
+  return AroHttp.get('/service/auth/permissions')
     .then(result => {
-      result.forEach((authPermissionEntity) => {
+      result.data.forEach((authPermissionEntity) => {
         if (accessTypes.hasOwnProperty(authPermissionEntity.name)) {
           accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
         }
@@ -34,13 +33,12 @@ function getPermissionBits() {
 function getEffectivePermissions(resourceType, resourceId, loggedInUser) {
   return Promise.all([
     getPermissionBits(),
-    fetch(`/service/auth/acl/${resourceType}/${resourceId}`),
-    fetch(`/service/auth/acl/SYSTEM/${loggedInUser.id}`)
+    AroHttp.get(`/service/auth/acl/${resourceType}/${resourceId}`),
+    AroHttp.get(`/service/auth/acl/SYSTEM/${loggedInUser.id}`)
   ])
-    .then((results) => Promise.all([Promise.resolve(results[0]), results[1].json(), results[2].json()]))
     .then((results) => {
       const resolvedAccessTypes = results[0]
-      const resourcePermissions = results[1], systemPermissions = results[2]
+      const resourcePermissions = results[1].data, systemPermissions = results[2].data
 
       var accessResult = {}
       accessResult[PERMISSIONS.READ] = false

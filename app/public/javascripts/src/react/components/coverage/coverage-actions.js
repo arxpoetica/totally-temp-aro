@@ -1,4 +1,4 @@
-import fetch from 'cross-fetch'
+import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import CoverageStatusTypes from './constants'
 
@@ -38,16 +38,9 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
     })
 
     var coverageReport = null
-    fetch(`/service/coverage/report`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: {
-        'Content-type': 'application/json'
-      }
-    })
-      .then(result => result.json())
+    AroHttp.post(`/service/coverage/report`, requestBody)
       .then(result => {
-        coverageReport = result
+        coverageReport = result.data
         dispatch({
           type: Actions.UPDATE_COVERAGE_STATUS,
           payload: {
@@ -56,7 +49,7 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
             initializationParams: requestBody.coverageAnalysisRequest
           }
         })
-        return fetch(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${userId}`, { method: 'POST' })
+        return AroHttp.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${userId}`, {})
       })
       .then(() => {
         dispatch({
@@ -77,7 +70,7 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
 // Modify the coverage report
 function modifyCoverageReport(reportId) {
   return dispatch => {
-    fetch(`/service/coverage/report/${reportId}`, { method: 'DELETE' })
+    AroHttp.delete(`/service/coverage/report/${reportId}`)
       .then(result => {
         dispatch({
           type: Actions.UPDATE_COVERAGE_STATUS,
@@ -104,11 +97,10 @@ function updateCoverageStatus(planId) {
     dispatch({
       type: Actions.SET_DEFAULT_COVERAGE_DETAILS
     })
-    fetch(`/service/coverage/report/search/plan_id/${planId}`)
-      .then(result => result.json())
+    AroHttp.get(`/service/coverage/report/search/plan_id/${planId}`)
       .then(result => {
         // Update the coverage status only if we have a valid report
-        const report = result.filter(item => item.coverageAnalysisRequest.planId === planId)[0]
+        const report = result.data.filter(item => item.coverageAnalysisRequest.planId === planId)[0]
         if (report) {
           dispatch({
             type: Actions.UPDATE_COVERAGE_STATUS,
