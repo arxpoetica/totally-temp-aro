@@ -5,7 +5,7 @@ import CoverageActions from '../coverage/coverage-actions'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageStatusTypes from './constants'
 
-class CoverageButton extends Component {
+export class CoverageButton extends Component {
   render() {
     return <div style={{ height: '35px' }}>
       {(this.props.status === CoverageStatusTypes.RUNNING) ? this.renderProgressbarState() : this.renderButtonState()}
@@ -18,13 +18,9 @@ class CoverageButton extends Component {
     if (this.props.status === CoverageStatusTypes.FINISHED) {
       buttonText = 'Modify coverage'
       buttonClasses += ' modify-coverage-button'
-    } else if (true) {
-      buttonText = 'Run'
-      buttonClasses += ' btn-primary'
     } else {
       buttonText = 'Run'
-      buttonClasses += ' btn-light'
-      buttonDisabled = true
+      buttonClasses += ' btn-primary'
     }
     return <button className={buttonClasses} disabled={buttonDisabled}
       onClick={(this.props.status === CoverageStatusTypes.UNINITIALIZED)
@@ -81,5 +77,5 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId))
 })
 
-const CoverageInitializerComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)
-export default CoverageInitializerComponent
+const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)
+export default CoverageButtonComponent
