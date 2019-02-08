@@ -20,20 +20,13 @@ class CoverageInitializerController {
 
     this.allowedSelectionModes = angular.copy(state.selectionModes)
     delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
-
-    this.isLoggedInUserSuperUser = false
-    aclManager.getEffectivePermissions('SYSTEM', '1', state.loggedInUser)
-      .then(permissions => {
-        // Only superusers can see the downloader
-        this.isLoggedInUserSuperUser = permissions && (permissions.IS_SUPERUSER)
-        this.$timeout()
-      })
-      .catch(err => console.error(err))
   }
 
   // Which part of the Redux global state does our component want to receive?
   mapStateToThis(state) {
     return {
+      isSuperUser: state.user.isSuperUser,
+      
       // value: state.test.value
     }
   }

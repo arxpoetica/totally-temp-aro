@@ -3,7 +3,7 @@
     line-height: 33px;  /* To vertically align text */
   }
 </style>
-<table id="table-coverage-initializer"  ng-if="$ctrl.isLoggedInUserSuperUser" class="table table-sm table-striped">
+<table id="table-coverage-initializer"  ng-if="$ctrl.isSuperUser" class="table table-sm table-striped">
   <tbody>
 
     <!-- Coverage type -->
@@ -60,15 +60,15 @@
 
     <!-- The selection type (service areas/analysis areas) -->
     <tr>
-        <td>Selection Type</td>
-        <td>
-          <select class="form-control" 
-                  ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
-                  ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
-            <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
-          </select>
-        </td>
-      </tr>
+      <td>Selection Type</td>
+      <td>
+        <select class="form-control" 
+                ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
+                ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
+          <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
+        </select>
+      </td>
+    </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
         <a ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)">
@@ -97,12 +97,12 @@
 </table>
 
 <!-- If we have a valid report, then disable all controls -->
-<div ng-if="$ctrl.isLoggedInUserSuperUser && $ctrl.state.coverage.report"
+<div ng-if="$ctrl.isSuperUser && $ctrl.state.coverage.report"
      class="disable-sibling-controls">
 
 </div>
         
-<div class="alert alert-danger" ng-if="!$ctrl.isLoggedInUserSuperUser" style="margin-top: 60px;">
+<div class="alert alert-danger" ng-if="!$ctrl.isSuperUser" style="margin-top: 60px;">
   You must be a system-wide superuser in order to use coverage reports.
 </div>
 <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
