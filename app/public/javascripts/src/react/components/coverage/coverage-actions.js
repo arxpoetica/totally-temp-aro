@@ -2,7 +2,7 @@ import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import CoverageStatusTypes from './constants'
 
-function initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport) {
+function initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) {
   return dispatch => {
     // Format the coverage report that so it can be sent over to aro-service
     var requestBody = {
@@ -28,38 +28,16 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
       requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
     }
 
-    dispatch({
-      type: Actions.UPDATE_COVERAGE_STATUS,
-      payload: {
-        report: oldReport, 
-        status: CoverageStatusTypes.RUNNING,
-        initializationParams: requestBody.coverageAnalysisRequest
-      }
-    })
+    dispatch({ type: Actions.SET_COVERAGE_STATUS, payload: { status: CoverageStatusTypes.RUNNING } })
 
     var coverageReport = null
     AroHttp.post(`/service/coverage/report`, requestBody)
       .then(result => {
         coverageReport = result.data
-        dispatch({
-          type: Actions.UPDATE_COVERAGE_STATUS,
-          payload: {
-            report: coverageReport, 
-            status: CoverageStatusTypes.RUNNING,
-            initializationParams: requestBody.coverageAnalysisRequest
-          }
-        })
+        dispatch({ type: Actions.SET_COVERAGE_STATUS, payload: { status: CoverageStatusTypes.RUNNING }})
+        dispatch({ type: Actions.SET_COVERAGE_REPORT, payload: { report: coverageReport }})
+        dispatch({ type: Actions.SET_COVERAGE_INIT_PARAMS, payload: { initializationParams: requestBody.coverageAnalysisRequest }})
         return AroHttp.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${userId}`, {})
-      })
-      .then(() => {
-        dispatch({
-          type: Actions.UPDATE_COVERAGE_STATUS,
-          payload: {
-            report: coverageReport, 
-            status: CoverageStatusTypes.FINISHED,
-            initializationParams: requestBody.coverageAnalysisRequest
-          }
-        })
       })
       .catch(err => {
         console.error(err)
@@ -72,19 +50,7 @@ function modifyCoverageReport(reportId) {
   return dispatch => {
     AroHttp.delete(`/service/coverage/report/${reportId}`)
       .then(result => {
-        dispatch({
-          type: Actions.UPDATE_COVERAGE_STATUS,
-          payload: {
-            report: null,
-            status: CoverageStatusTypes.UNINITIALIZED,
-            initializationParams: {
-              coverageType: 'location',
-              saveSiteCoverage: false,
-              useMarketableTechnologies: true,
-              useMaxSpeed: true
-            }
-          }
-        })
+        dispatch({ type: Actions.SET_DEFAULT_COVERAGE_DETAILS })
       })
       .catch(err => console.error(err))
   }
@@ -102,14 +68,9 @@ function updateCoverageStatus(planId) {
         // Update the coverage status only if we have a valid report
         const report = result.data.filter(item => item.coverageAnalysisRequest.planId === planId)[0]
         if (report) {
-          dispatch({
-            type: Actions.UPDATE_COVERAGE_STATUS,
-            payload: {
-              report: report, 
-              status: CoverageStatusTypes.FINISHED,
-              initializationParams: report.coverageAnalysisRequest
-            }
-          })
+          dispatch({ type: Actions.SET_COVERAGE_STATUS, payload: { status: CoverageStatusTypes.FINISHED }})
+          dispatch({ type: Actions.SET_COVERAGE_REPORT, payload: { report: report }})
+          dispatch({ type: Actions.SET_COVERAGE_INIT_PARAMS, payload: { initializationParams: report.coverageAnalysisRequest }})
         }
       })
       .catch(err => console.error(err))

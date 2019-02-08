@@ -29,8 +29,8 @@ class CoverageButton extends Component {
     return <button className={buttonClasses} disabled={buttonDisabled}
       onClick={(this.props.status === CoverageStatusTypes.UNINITIALIZED)
                 ? () => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
-                                                            ['small', 'medium', 'large'], [], this.props.initializationParams, this.props.oldReport)
-                : () => this.props.modifyCoverageReport(this.props.oldReport.reportId)}>
+                                                            ['small', 'medium', 'large'], [], this.props.initializationParams)
+                : () => this.props.modifyCoverageReport(this.props.report.reportId)}>
       <i className="fa fa-bolt"></i> {buttonText}
     </button>
   }
@@ -58,7 +58,7 @@ CoverageButton.propTypes = {
   projectId: PropTypes.number,
   activeSelectionModeId: PropTypes.string,
   initializationParams: PropTypes.object,
-  oldReport: PropTypes.object
+  report: PropTypes.object
 }
 
 const mapStateToProps = (state) => {
@@ -66,17 +66,17 @@ const mapStateToProps = (state) => {
     status: state.coverage.status,
     progress: state.coverage.progress,
     userId: state.user.loggedInUser.id,
-    planId: state.plan.id,
+    planId: state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     activeSelectionModeId: state.selection.activeSelectionMode.id,
     initializationParams: state.coverage.initializationParams,
-    oldReport: state.coverage.report
+    report: state.coverage.report
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport) => {
-    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams, oldReport))
+  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) => {
+    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams))
   },
   modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId))
 })

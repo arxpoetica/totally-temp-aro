@@ -13,8 +13,16 @@ const defaultStatus = {
   }
 }
 
-function setCoverageStatus(state, report, status, initializationParams) {
-  return { ...state, report: report, status: status, initializationParams: initializationParams }
+function setCoverageStatus(state, status) {
+  return { ...state, status: status }
+}
+
+function setCoverageReport(state, report) {
+  return { ...state, report: report }
+}
+
+function setCoverageInitParams(state, initializationParams) {
+  return { ...state, initializationParams: initializationParams }
 }
 
 function setCoverageProgress(state, progress) {
@@ -31,8 +39,14 @@ function coverageReducer(state = defaultStatus, action) {
     case Actions.SET_DEFAULT_COVERAGE_DETAILS:
       return setDefaultCoverageDetails()
 
-    case Actions.UPDATE_COVERAGE_STATUS:
-      return setCoverageStatus(state, action.payload.report, action.payload.status, action.payload.initializationParams)
+    case Actions.SET_COVERAGE_STATUS:
+      return setCoverageStatus(state, action.payload.status)
+
+    case Actions.SET_COVERAGE_REPORT:
+      return setCoverageReport(state, action.payload.report)
+
+    case Actions.SET_COVERAGE_INIT_PARAMS:
+      return setCoverageInitParams(state, action.payload.initializationParams)
 
     case Actions.INITIALIZE_COVERAGE:
       return state

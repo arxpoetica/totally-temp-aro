@@ -31,18 +31,12 @@ class Socket {
     var progress = 0
     this.io.to(`/plan`).emit(REDUX_COMMAND_MESSAGE, {
       type: 'UPDATE_COVERAGE_STATUS',
-      payload: {
-        report: null,
-        status: 'RUNNING',
-        initializationParams: null
-      }
+      payload: { status: 'RUNNING' }
     })
     var progressInterval = setInterval(() => {
       this.io.to(`/plan`).emit(REDUX_COMMAND_MESSAGE, {
         type: 'SET_COVERAGE_PROGRESS',
-        payload: {
-          progress: progress
-        }
+        payload: { progress: progress }
       })
       progress += 0.1
       if (progress >= 1.0) {
@@ -50,11 +44,7 @@ class Socket {
         this.io.to(`/plan`).emit(REDUX_COMMAND_MESSAGE,
           {
             type: 'UPDATE_COVERAGE_STATUS',
-            payload: {
-              report: null,
-              status: 'FINISHED',
-              initializationParams: null
-            }
+            payload: { status: 'FINISHED' }
           })
       }
     }, 1000)
