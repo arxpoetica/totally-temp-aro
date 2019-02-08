@@ -34,7 +34,7 @@ class CoverageInitializerController {
   // Which part of the Redux global state does our component want to receive?
   mapStateToThis(state) {
     return {
-      value: state.test.value
+      // value: state.test.value
     }
   }
 

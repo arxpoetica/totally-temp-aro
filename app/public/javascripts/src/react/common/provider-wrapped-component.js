@@ -1,3 +1,4 @@
+import React from 'react'
 import { Provider, connect } from 'react-redux'
 
 // This function takes a React component and wraps it with a <Provider> that gives access to the

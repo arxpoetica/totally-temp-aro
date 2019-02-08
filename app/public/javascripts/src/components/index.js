@@ -1,6 +1,7 @@
 import { react2angular } from 'react2angular'
 
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
+import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -209,6 +210,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
    // ReactJS components
    .component('rCoverageInitializer', react2angular(CoverageInitializer))
+   .component('rCoverageButton', react2angular(CoverageButton))
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)
