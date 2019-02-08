@@ -15,7 +15,7 @@ class CoverageButton extends Component {
   // The component when it is to be shown as a button (e.g. Modify, Run, etc)
   renderButtonState() {
     var buttonClasses = 'btn btn-block', buttonText = 'Undefined', buttonDisabled = false
-    if (this.props.isCoverageFinished) {
+    if (this.props.status === CoverageStatusTypes.FINISHED) {
       buttonText = 'Modify'
     } else if (true) {
       buttonText = 'Run'
