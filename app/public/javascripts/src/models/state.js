@@ -3,6 +3,7 @@ import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import UserActions from '../react/components/user/user-actions'
+import PlanActions from '../react/components/plan/plan-actions'
 
 /* global app localStorage map */
 class State {
@@ -1064,6 +1065,7 @@ class State {
     service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global,tag.id))
     service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
     
+    this.setPlan(plan)
     // Subscribe to the socket for this plan
     this.subscribeToPlanSocket(plan.id)
 
@@ -1862,6 +1864,7 @@ class State {
   mapDispatchToTarget(dispatch) {
     return {
       setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
+      setPlan: (plan) => {dispatch(PlanActions.setPlan(plan))},
       subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})}
     }
   }

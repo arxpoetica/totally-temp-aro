@@ -3,10 +3,10 @@ class Socket {
 
   constructor(app) {
     this.io = require('socket.io')(app)
-    this.interval = setInterval(() => {
-      console.log('sending message...')
-      this.io.to(`/plan/1`).emit('message', Math.random())
-    }, 2000)
+    // this.interval = setInterval(() => {
+    //   console.log('sending message...')
+    //   this.io.to(`/plan/1`).emit('message', Math.random())
+    // }, 2000)
 
     this.setupConnectionhandlers()
   }

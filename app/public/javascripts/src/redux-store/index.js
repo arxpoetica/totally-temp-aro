@@ -6,7 +6,8 @@ import thunk from 'redux-thunk'
 import createSocketMiddleware from './middleware/websockets'
 
 // Reducers
-import test from '../reducers/testReducer'
+import coverage from '../react/components/coverage/coverage-reducer'
+import plan from '../react/components/plan/plan-reducer'
 import user from '../react/components/user/user-reducer'
 
 const logger = createLogger({
@@ -15,7 +16,7 @@ const logger = createLogger({
 });
 const socketMiddleware = createSocketMiddleware()
 
-let reducer = combineReducers({user, test})
+let reducer = combineReducers({coverage, plan, user})
 
 var store = createStore(reducer, applyMiddleware(logger, thunk, socketMiddleware))
 export default store

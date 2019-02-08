@@ -1,16 +1,8 @@
 import React, { Component } from 'react'
-import { Provider, connect } from 'react-redux'
 import { PropTypes } from 'prop-types'
 import reduxStore from '../../../redux-store'
 import UserActions from '../user/user-actions'
-
-function connectWithStore(store, WrappedComponent, ...args) {
-  let ConnectedWrappedComponent = connect(...args)(WrappedComponent)
-  return function (props) {
-    // return <ConnectedWrappedComponent {...props} store={store} />
-    return <Provider store={store}><ConnectedWrappedComponent {...props} /></Provider>
-  }
-}
+import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 
 class CoverageInitializer extends Component {
   render() {
@@ -38,5 +30,5 @@ const mapDispatchToProps = (dispatch) => ({
   getSuperUser: () => {dispatch(UserActions.getSuperUserFlag(4))}
 })
 
-const CoverageInitializerComponent = connectWithStore(reduxStore, CoverageInitializer, mapStateToProps, mapDispatchToProps)
+const CoverageInitializerComponent = wrapComponentWithProvider(reduxStore, CoverageInitializer, mapStateToProps, mapDispatchToProps)
 export default CoverageInitializerComponent

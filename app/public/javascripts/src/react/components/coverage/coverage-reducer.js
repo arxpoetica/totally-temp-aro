@@ -1,16 +1,34 @@
-function counter(state, action) {
+import Actions from '../../common/actions'
 
-  if (typeof state === 'undefined') {
-    state = { value: 0, test: 'asdf' } // If state is undefined, initialize it with a default value
-  }
+const defaultStatus = {
+  report: null,
+  coverageStatus: 'READY',
+  isCalculatingCoverage: false,
+  isCoverageFinished: false,
+  coverageProgress: 0
+}
 
-  if (action.type === 'INCREMENT') {
-    return Object.assign({}, state, { value: state.value + 1 })
-  } else if (action.type === 'DECREMENT') {
-    return Object.assign({}, state, { value: state.value - 1 })
-  } else {
-    return state // In case an action is passed in we don't understand
+function setCoverageStatus(state, coverageStatus) {
+  return { ...state, coverageStatus: coverageStatus }
+}
+
+function coverageReducer(state = defaultStatus, action) {
+  switch(action.type) {
+    case Actions.SET_COVERAGE_STATUS:
+      return setCoverageStatus(state, coverageStatus)
+
+    case Actions.INITIALIZE_COVERAGE:
+      return state
+
+    case Actions.MODIFY_COVERAGE:
+      return state
+
+    case Actions.SET_COVERAGE_PROGRESS:
+      return state
+
+    default:
+      return state
   }
 }
 
-export default counter
+export default coverageReducer
