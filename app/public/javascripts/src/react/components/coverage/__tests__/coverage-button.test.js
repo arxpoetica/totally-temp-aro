@@ -38,6 +38,10 @@ test('When button is clicked to initialize report', () => {
     { plannerKey: 'small', checked: true },
     { plannerKey: 'medium', checked: false }
   ])
+  const boundaryLayers = new List([
+    { key: 'analysis_area', name: 'Analysis Area', checked: true },
+    { key: 'analysis_area', name: 'Analysis Area 2', checked: false }
+  ])
   const mockInitializeCoverageReport = jest.fn()
   const component = shallow(
     <CoverageButton status={CoverageStatusTypes.UNINITIALIZED}
@@ -45,6 +49,7 @@ test('When button is clicked to initialize report', () => {
                     planId={22}
                     projectId={7}
                     locationLayers={locationLayers}
+                    boundaryLayers={boundaryLayers}
                     activeSelectionModeId={'SELECTED_AREAS'}
                     initializationParams={{ generic: 'Init Params'}}
                     initializeCoverageReport={mockInitializeCoverageReport}></CoverageButton>
@@ -56,9 +61,11 @@ test('When button is clicked to initialize report', () => {
   expect(mockInitializeCoverageReport.mock.calls[0][1]).toEqual(22)
   expect(mockInitializeCoverageReport.mock.calls[0][2]).toEqual(7)
   expect(mockInitializeCoverageReport.mock.calls[0][3]).toEqual('SELECTED_AREAS')
+
   const expectedLocationLayers = locationLayers.filter(item => item.checked).map(item => item.plannerKey)
   expect(mockInitializeCoverageReport.mock.calls[0][4].equals(expectedLocationLayers)).toBeTruthy()
-  expect(mockInitializeCoverageReport.mock.calls[0][5]).toEqual([])
+
+  expect(mockInitializeCoverageReport.mock.calls[0][5].equals(boundaryLayers)).toBeTruthy()
   expect(mockInitializeCoverageReport.mock.calls[0][6]).toEqual({ generic: 'Init Params'})
 })
 

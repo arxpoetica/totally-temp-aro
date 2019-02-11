@@ -1,6 +1,14 @@
+import { createSelector } from 'reselect'
+import { List } from 'immutable'
+import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
+
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllBoundaryLayers = state => state.mapLayers.boundary
+const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaryLayer) => boundaryLayer.toJS())
+
 class BoundariesController {
 
-  constructor($rootScope, $http, state, map_tools, regions) {
+  constructor($rootScope, $http, $ngRedux, state, map_tools, regions) {
 
     this.$http = $http
     this.state = state
@@ -28,6 +36,8 @@ class BoundariesController {
     this.state.censusCategories.subscribe((newValue) => {
       this.censusCategories = newValue
     })
+
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
   
   reloadVisibleLayers() {
@@ -44,6 +54,7 @@ class BoundariesController {
           var wirecenter_layer = {
             description: serviceLayer.description, // Service Areas 
             type: 'wirecenter',
+            key: 'wirecenter',
             layerId: serviceLayer.id
           }
           newTileLayers.push(wirecenter_layer)
@@ -57,7 +68,8 @@ class BoundariesController {
         if (includeCensusBlocks) {
           newTileLayers.push({
             description: 'Census Blocks',
-            type: 'census_blocks'
+            type: 'census_blocks',
+            key: 'census_blocks'
           })
         }
     
@@ -70,18 +82,17 @@ class BoundariesController {
           newTileLayers.push({
             description: analysisLayer.description,
             type: 'analysis_layer',
+            key: 'analysis_layer',
             analysisLayerId: analysisLayer.id
           })
         })
 
-        this.state.boundaries.tileLayers = newTileLayers
-
         //enable visible boundaries by default
-        this.state.boundaries.tileLayers.forEach((tileLayers) => {
+        newTileLayers.forEach((tileLayers) => {
           var isLayerVisible = this.state.configuration && this.state.configuration.boundaryCategories && this.state.configuration.boundaryCategories.categories[tileLayers.type].visible
-          tileLayers.visible = isLayerVisible
+          tileLayers.checked = isLayerVisible
         })
-        this.updateMapLayers()
+        this.setBoundaryLayers(new List(newTileLayers))
         return Promise.resolve()
       })
       .catch((err) => console.error(err))
@@ -127,8 +138,8 @@ class BoundariesController {
     if (selectedServiceAreaLibraries) {
       selectedServiceAreaLibraries.forEach((selectedServiceAreaLibrary) => {
         
-        this.state.boundaries.tileLayers.forEach((layer) => {
-          if (layer.visible) {
+        this.boundaryLayers.forEach((layer) => {
+          if (layer.checked) {
             var layerOptions = layerSettings[layer.type]
             var pointTransform = this.getPointTransformForLayer(+layerOptions.aggregateZoomThreshold)
             var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
@@ -172,9 +183,41 @@ class BoundariesController {
   $onInit() {
     this.reloadVisibleLayers()
   }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
+  }
+
+  mapStateToThis(state) {
+    return {
+      boundaryLayers: getBoundaryLayersList(state)
+    }
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return {
+      setBoundaryLayers: (boundaryLayers) => dispatch(MapLayerActions.setBoundaryLayers(boundaryLayers)),
+      updateLayerVisibility: (layer, isVisible) => {
+        // First set the visibility of the current layer
+        dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
+      }
+    }
+  }
+
+  mergeToTarget(nextState, actions) {
+    const currentBoundaryLayers = this.boundaryLayers
+    
+    // merge state and actions onto controller
+    Object.assign(this, nextState);
+    Object.assign(this, actions);   
+    
+    if (currentBoundaryLayers !== nextState.boundaryLayers) {
+      this.updateMapLayers()
+    }
+  }
 }
 
-BoundariesController.$inject = ['$rootScope', '$http', 'state', 'map_tools', 'regions']
+BoundariesController.$inject = ['$rootScope', '$http', '$ngRedux', 'state', 'map_tools', 'regions']
 
 let boundaries = {
   templateUrl: '/components/views/boundaries.html',

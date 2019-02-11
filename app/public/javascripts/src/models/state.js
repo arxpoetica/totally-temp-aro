@@ -277,11 +277,6 @@ class State {
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
-  // Boundaries layer data - define once
-  service.boundaries = {
-    tileLayers: [],
-    areaLayers: []
-  }
   service.areTilesRendering = false
 
   service.censusCategories = new Rx.BehaviorSubject()
@@ -611,9 +606,27 @@ class State {
     })
   }
 
-  service.setLocationTypeVisibility = (locationLayer, isVisible) => {
-    $ngRedux.dispatch(MapLayerActions.setLayerVisibility(locationLayer, isVisible))
+  service.setLayerVisibility = (layer, isVisible) => {
+    $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
   }
+
+  service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
+    // First find the layer corresponding to the ID
+    const layerState = $ngRedux.getState().mapLayers
+    var layerToChange = null
+    Object.keys(layerState).forEach(layerType => {
+      layerState[layerType].forEach(layer => {
+        if (layer[keyType] === layerKey) {
+          layerToChange = layer
+        }
+      })
+    })
+    if (layerToChange) {
+      $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layerToChange, isVisible))
+   }
+  }
+
+  service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.visible && (item.key === 'analysis_layer'))
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {

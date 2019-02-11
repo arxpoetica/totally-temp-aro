@@ -11,6 +11,14 @@ function setLayerVisibility(layer, newVisibility) {
   }
 }
 
+function setBoundaryLayers(boundaryLayers) {
+  return {
+    type: Actions.SET_BOUNDARY_LAYERS,
+    payload: boundaryLayers
+  }
+}
+
 export default {
-  setLayerVisibility: setLayerVisibility
+  setLayerVisibility: setLayerVisibility,
+  setBoundaryLayers: setBoundaryLayers
 }

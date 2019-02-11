@@ -1,8 +1,13 @@
 import Actions from '../../common/actions'
 import { List } from 'immutable'
 
-function setLocationLayers(state, layers) {
-  return { ...state, location: layers }
+const defaultState = {
+  location: new List(),
+  boundary: new List()
+}
+
+function setLayers(state, layerKey, layers) {
+  return { ...state, [layerKey]: layers }
 }
 
 function setLayerVisibility(state, layer, visibility) {
@@ -24,10 +29,13 @@ function setLayerVisibility(state, layer, visibility) {
   return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer)}
 }
 
-function mapLayersReducer(state = { location: new List() }, action) {
+function mapLayersReducer(state = defaultState, action) {
   switch(action.type) {
     case Actions.SET_LOCATION_LAYERS:
-      return setLocationLayers(state, action.payload)
+      return setLayers(state, 'location', action.payload)
+
+    case Actions.SET_BOUNDARY_LAYERS:
+      return setLayers(state, 'boundary', action.payload)
     
     case Actions.SET_LAYER_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)

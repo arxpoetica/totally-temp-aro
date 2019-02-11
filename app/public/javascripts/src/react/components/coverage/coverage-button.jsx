@@ -28,7 +28,7 @@ export class CoverageButton extends Component {
       <button className={'btn btn-block btn-primary'} disabled={false}
               onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
                                                                  this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
-                                                                 [], this.props.initializationParams)}>
+                                                                 this.props.boundaryLayers, this.props.initializationParams)}>
         <i className="fa fa-bolt"></i> Run
       </button>
     )
@@ -64,6 +64,7 @@ CoverageButton.propTypes = {
   planId: PropTypes.number,
   projectId: PropTypes.number,
   locationLayers: ImmutablePropTypes.list,
+  boundaryLayers: ImmutablePropTypes.list,
   activeSelectionModeId: PropTypes.string,
   initializationParams: PropTypes.object,
   report: PropTypes.object
@@ -77,6 +78,7 @@ const mapStateToProps = (state) => {
     planId: state.plan.activePlan && state.plan.activePlan.id,
     projectId: state.user.loggedInUser.projectId,
     locationLayers: state.mapLayers.location,
+    boundaryLayers: state.mapLayers.boundary,
     activeSelectionModeId: state.selection.activeSelectionMode.id,
     initializationParams: state.coverage.initializationParams,
     report: state.coverage.report
@@ -84,10 +86,11 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) => {
-    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams))
-  },
-  modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId))
+  modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId)),
+  initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, boundaryLayers, initializationParams) => {
+    dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes,
+                                                      boundaryLayers, initializationParams))
+  }
 })
 
 const CoverageButtonComponent = wrapComponentWithProvider(reduxStore, CoverageButton, mapStateToProps, mapDispatchToProps)

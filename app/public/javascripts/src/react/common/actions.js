@@ -14,6 +14,7 @@ const Actions = Object.freeze({
 
   // Map layer
   SET_LOCATION_LAYERS: 'SET_LOCATION_LAYERS',
+  SET_BOUNDARY_LAYERS: 'SET_BOUNDARY_LAYERS',
   SET_LAYER_VISIBILITY: 'SET_LAYER_VISIBILITY',
 
   // Selection

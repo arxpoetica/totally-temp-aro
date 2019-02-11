@@ -52,7 +52,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
     if (state.optimizationOptions.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
-      const visibleAnalysisLayers = state.boundaries.tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
+      const visibleAnalysisLayers = state.getVisibleAnalysisLayers()
       if (visibleAnalysisLayers.length !== 1) {
         const errorMessage = 'You must have exactly one analysis layer selected to perform this analysis'
         swal({
@@ -193,7 +193,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
-      state.setLocationTypeVisibility(locationLayer, isVisible)
+      state.setLayerVisibility(locationLayer, isVisible)
     })
 
     // Load the selected data sources
@@ -281,11 +281,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_LOCATIONS) {
       optimization.setMode('targets')
     } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
-      state.boundaries.tileLayers.forEach(layer => {
-        if (layer.type === 'analysis_layer') {
-          layer.visible = (layer.analysisLayerId === postBody.locationConstraints.analysisLayerId)
-        }
-      })
+      state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
     }
   }
 
