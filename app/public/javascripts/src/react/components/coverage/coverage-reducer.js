@@ -36,25 +36,25 @@ function setDefaultCoverageDetails() {
 function coverageReducer(state = defaultStatus, action) {
   switch(action.type) {
 
-    case Actions.SET_DEFAULT_COVERAGE_DETAILS:
+    case Actions.COVERAGE_SET_DETAILS:
       return setDefaultCoverageDetails()
 
-    case Actions.SET_COVERAGE_STATUS:
+    case Actions.COVERAGE_SET_STATUS:
       return setCoverageStatus(state, action.payload.status)
 
-    case Actions.SET_COVERAGE_REPORT:
+    case Actions.COVERAGE_SET_REPORT:
       return setCoverageReport(state, action.payload.report)
 
-    case Actions.SET_COVERAGE_INIT_PARAMS:
+    case Actions.COVERAGE_SET_INIT_PARAMS:
       return setCoverageInitParams(state, action.payload.initializationParams)
 
-    case Actions.INITIALIZE_COVERAGE:
+    case Actions.COVERAGE_INITIALIZE:
       return state
 
-    case Actions.MODIFY_COVERAGE:
+    case Actions.COVERAGE_MODIFY:
       return state
 
-    case Actions.SET_COVERAGE_PROGRESS:
+    case Actions.COVERAGE_SET_PROGRESS:
       return setCoverageProgress(state, action.payload.progress)
 
     default:

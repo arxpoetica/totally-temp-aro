@@ -5,7 +5,7 @@ import CoverageActions from '../coverage/coverage-actions'
 function setPlan(plan) {
   return (dispatch) => {
     dispatch({
-      type: Actions.SET_PLAN,
+      type: Actions.PLAN_SET_PLAN,
       payload: {
         plan: plan
       }

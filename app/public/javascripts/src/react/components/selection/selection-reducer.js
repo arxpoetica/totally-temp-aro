@@ -15,7 +15,7 @@ function setActiveSelectionMode(state, newSelectionMode) {
 
 function selectionReducer(state = defaultState, action) {
   switch(action.type) {
-    case Actions.SET_ACTIVE_SELECTION_MODE:
+    case Actions.SELECTION_SET_ACTIVE_MODE:
       return setActiveSelectionMode(state, action.payload)
 
     default:

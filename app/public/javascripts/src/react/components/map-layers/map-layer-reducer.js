@@ -31,13 +31,13 @@ function setLayerVisibility(state, layer, visibility) {
 
 function mapLayersReducer(state = defaultState, action) {
   switch(action.type) {
-    case Actions.SET_LOCATION_LAYERS:
+    case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
 
-    case Actions.SET_BOUNDARY_LAYERS:
+    case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)
     
-    case Actions.SET_LAYER_VISIBILITY:
+    case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)
 
     default:

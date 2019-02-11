@@ -28,15 +28,15 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
       requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
     }
 
-    dispatch({ type: Actions.SET_COVERAGE_STATUS, payload: { status: CoverageStatusTypes.RUNNING } })
+    dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.RUNNING } })
 
     var coverageReport = null
     AroHttp.post(`/service/coverage/report`, requestBody)
       .then(result => {
         coverageReport = result.data
-        dispatch({ type: Actions.SET_COVERAGE_STATUS, payload: { status: CoverageStatusTypes.RUNNING }})
-        dispatch({ type: Actions.SET_COVERAGE_REPORT, payload: { report: coverageReport }})
-        dispatch({ type: Actions.SET_COVERAGE_INIT_PARAMS, payload: { initializationParams: requestBody.coverageAnalysisRequest }})
+        dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.RUNNING }})
+        dispatch({ type: Actions.COVERAGE_SET_REPORT, payload: { report: coverageReport }})
+        dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: requestBody.coverageAnalysisRequest }})
         return AroHttp.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${userId}`, {})
       })
       .catch(err => {
@@ -50,7 +50,7 @@ function modifyCoverageReport(reportId) {
   return dispatch => {
     AroHttp.delete(`/service/coverage/report/${reportId}`)
       .then(result => {
-        dispatch({ type: Actions.SET_DEFAULT_COVERAGE_DETAILS })
+        dispatch({ type: Actions.COVERAGE_SET_DETAILS })
       })
       .catch(err => console.error(err))
   }
@@ -61,16 +61,16 @@ function updateCoverageStatus(planId) {
   return dispatch => {
     // First set the status and report initialized/null
     dispatch({
-      type: Actions.SET_DEFAULT_COVERAGE_DETAILS
+      type: Actions.COVERAGE_SET_DETAILS
     })
     AroHttp.get(`/service/coverage/report/search/plan_id/${planId}`)
       .then(result => {
         // Update the coverage status only if we have a valid report
         const report = result.data.filter(item => item.coverageAnalysisRequest.planId === planId)[0]
         if (report) {
-          dispatch({ type: Actions.SET_COVERAGE_STATUS, payload: { status: CoverageStatusTypes.FINISHED }})
-          dispatch({ type: Actions.SET_COVERAGE_REPORT, payload: { report: report }})
-          dispatch({ type: Actions.SET_COVERAGE_INIT_PARAMS, payload: { initializationParams: report.coverageAnalysisRequest }})
+          dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED }})
+          dispatch({ type: Actions.COVERAGE_SET_REPORT, payload: { report: report }})
+          dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: report.coverageAnalysisRequest }})
         }
       })
       .catch(err => console.error(err))

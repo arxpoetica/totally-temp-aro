@@ -601,7 +601,7 @@ class State {
     })
 
     $ngRedux.dispatch({
-      type: Actions.SET_LOCATION_LAYERS,
+      type: Actions.LAYERS_SET_LOCATION,
       payload: locationTypesForRedux
     })
   }

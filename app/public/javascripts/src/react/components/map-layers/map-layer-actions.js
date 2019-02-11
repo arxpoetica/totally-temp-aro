@@ -3,7 +3,7 @@ import Actions from '../../common/actions'
 // Sets the visibility for a specified layer
 function setLayerVisibility(layer, newVisibility) {
   return {
-    type: Actions.SET_LAYER_VISIBILITY,
+    type: Actions.LAYERS_SET_VISIBILITY,
     payload: {
       layer: layer,
       visibility: newVisibility
@@ -13,7 +13,7 @@ function setLayerVisibility(layer, newVisibility) {
 
 function setBoundaryLayers(boundaryLayers) {
   return {
-    type: Actions.SET_BOUNDARY_LAYERS,
+    type: Actions.LAYERS_SET_BOUNDARY,
     payload: boundaryLayers
   }
 }

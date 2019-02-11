@@ -35,7 +35,7 @@ class Socket {
     })
     var progressInterval = setInterval(() => {
       this.io.to(`/plan`).emit(REDUX_COMMAND_MESSAGE, {
-        type: 'SET_COVERAGE_PROGRESS',
+        type: 'COVERAGE_SET_PROGRESS',
         payload: { progress: progress }
       })
       progress += 0.1

@@ -7,7 +7,7 @@ function setPlan(state, plan) {
 
 function planReducer(state = { }, action) {
   switch(action.type) {
-    case Actions.SET_PLAN:
+    case Actions.PLAN_SET_PLAN:
       return setPlan(state, action.payload.plan)
 
     default:
