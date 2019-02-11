@@ -36,7 +36,7 @@ test('When a coverage report is running at 10% progress', () => {
 test('When button is clicked to initialize report', () => {
   const locationLayers = new List([
     { plannerKey: 'small', checked: true },
-    { plannerKey: 'small', checked: false }
+    { plannerKey: 'medium', checked: false }
   ])
   const mockInitializeCoverageReport = jest.fn()
   const component = shallow(
