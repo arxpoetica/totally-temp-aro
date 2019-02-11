@@ -41,6 +41,10 @@ class LocationEditorController {
     this.removeMapObjects = removeMapObjects
   }
 
+  registerDeleteCreatedMapObject(deleteCreatedMapObject){
+    this.deleteCreatedMapObjectWithId = deleteCreatedMapObject
+  }
+
   $onInit() {
     this.resumeOrCreateTransaction()
     config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers()    
@@ -270,6 +274,7 @@ class LocationEditorController {
 
   handleObjectDeleted(mapObject) {
     this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
+    this.deleteCreatedMapObjectWithId && this.deleteCreatedMapObjectWithId(mapObject.objectId) //Delete location from map
   }
 
   deleteSelectedObject() {
