@@ -7,13 +7,13 @@
 	  <div class="ei-table-table">
 	    <div class="ei-table-body">
 	      <div class="ei-table-header-row">
-	        <div class="ei-table-col-head" 
+	        <div class="ei-table-col-head-sortable" 
 	             ng-repeat="(colKey, colValue) in $ctrl.displayProps"
 	             ng-click="$ctrl.setOrderCol(colValue.propertyName)">
-	          {{colValue.displayName}} 
-	          <div style="display: inline-block;" ng-if="$ctrl.orderCol == colValue.propertyName">
-	            <span ng-if="$ctrl.isOrderAscending">v</span>
-	            <span ng-if="!$ctrl.isOrderAscending">^</span>
+	          {{colValue.displayName}}
+	          <div class="ei-table-col-sort-icon" ng-if="$ctrl.orderCol == colValue.propertyName">
+	            <i ng-if="$ctrl.isOrderAscending" class="fa fa-chevron-down" aria-hidden="true"> </i>
+	            <i ng-if="!$ctrl.isOrderAscending" class="fa fa-chevron-up" aria-hidden="true"> </i>
 	          </div>
 	        </div>
 	        <div ng-if="$ctrl.canDelete" class="ei-table-col-head"></div>
