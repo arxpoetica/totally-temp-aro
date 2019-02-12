@@ -12,7 +12,8 @@
       <td>
         <select class="form-control"
                 ng-model="$ctrl.coverageType"
-                ng-options="item.id as item.name for item in $ctrl.coverageTypes">
+                ng-options="item.id as item.name for item in $ctrl.coverageTypes"
+                ng-change="$ctrl.setCoverageType($ctrl.coverageType)">
         </select>
       </td>
     </tr>
@@ -23,7 +24,8 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.saveSiteCoverage">
+               ng-checked="$ctrl.saveSiteCoverage"
+               ng-click="$ctrl.setSaveSiteCoverage(!$ctrl.saveSiteCoverage)">
       </td>
     </tr>
     
@@ -33,7 +35,8 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.useMarketableTechnologies">
+               ng-checked="$ctrl.useMarketableTechnologies"
+               ng-click="$ctrl.setLimitMarketableTechnology(!$ctrl.useMarketableTechnologies)">
       </td>
     </tr>
 
@@ -43,7 +46,8 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.useMaxSpeed">
+               ng-checked="$ctrl.useMaxSpeed"
+               ng-click="$ctrl.setLimitMaxSpeed(!$ctrl.useMaxSpeed)">
       </td>
     </tr>
 
@@ -64,7 +68,7 @@
       <td>
         <select class="form-control" 
                 ng-model="$ctrl.activeSelectionModeId"
-                ng-change="$ctrl.onSelectionTypeChange(this.activeSelectionMode)"
+                ng-change="$ctrl.onSelectionTypeChange($ctrl.activeSelectionModeId)"
                 ng-options="item.id as item.description for item in $ctrl.selectionModes">
           <!-- <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option> -->
         </select>

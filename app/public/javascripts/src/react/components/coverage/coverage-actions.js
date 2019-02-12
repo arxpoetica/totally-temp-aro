@@ -14,8 +14,8 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
     requestBody.coverageAnalysisRequest.locationTypes = locationTypes
     if (activeSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
-      const visibleAnalysisLayers = tileLayers.filter(item => item.visible && (item.type === 'analysis_layer'))
-      if (visibleAnalysisLayers.length !== 1) {
+      const visibleAnalysisLayers = tileLayers.filter(item => item.checked && (item.type === 'analysis_layer'))
+      if (visibleAnalysisLayers.size !== 1) {
         const errorMessage = 'You must have exactly one analysis layer selected to initialize the coverage report'
         swal({
           title: 'Analysis Layer error',
@@ -25,7 +25,8 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
         })
         return null
       }
-      requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
+      console.log( visibleAnalysisLayers.get(0))
+      requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers.get(0).analysisLayerId
     }
 
     dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.RUNNING } })
@@ -78,10 +79,48 @@ function updateCoverageStatus(planId) {
   }
 }
 
-// Initialize coverage report
+function setCoverageType(coverageType) {
+  return {
+    type: Actions.COVERAGE_SET_COVERAGE_TYPE,
+    payload: coverageType
+  }
+}
+
+function setSaveSiteCoverage(saveSiteCoverage) {
+  return {
+    type: Actions.COVERAGE_SET_SAVE_SITE_COVERAGE,
+    payload: saveSiteCoverage
+  }
+}
+
+function setLimitMarketableTechnology(limitMarketableTechnology) {
+  return {
+    type: Actions.COVERAGE_SET_LIMIT_MARKETABLE_TECHNOLOGIES,
+    payload: limitMarketableTechnology
+  }
+}
+
+function setLimitMaxSpeed(limitMaxSpeed) {
+  return {
+    type: Actions.COVERAGE_SET_LIMIT_MAX_SPEED,
+    payload: limitMaxSpeed
+  }
+}
+
+function setSiteAssignment(siteAssignment) {
+  return {
+    type: Actions.COVERAGE_SET_SITE_ASSIGNMENT,
+    payload: siteAssignment
+  }
+}
 
 export default {
   updateCoverageStatus: updateCoverageStatus,
   initializeCoverageReport: initializeCoverageReport,
-  modifyCoverageReport: modifyCoverageReport
+  modifyCoverageReport: modifyCoverageReport,
+  setCoverageType: setCoverageType,
+  setSaveSiteCoverage: setSaveSiteCoverage,
+  setLimitMarketableTechnology: setLimitMarketableTechnology,
+  setLimitMaxSpeed: setLimitMaxSpeed,
+  setSiteAssignment: setSiteAssignment
 }

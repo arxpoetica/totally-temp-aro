@@ -1,4 +1,6 @@
 import { createSelector } from 'reselect'
+import CoverageActions from '../../../../react/components/coverage/coverage-actions'
+import SelectionActions from '../../../../react/components/selection/selection-actions'
 
 const getAllSelectionModes = state => state.selection.selectionModes
 const getAllowedSelectionModes = createSelector([getAllSelectionModes], 
@@ -36,7 +38,13 @@ class CoverageInitializerController {
   }
 
   mapDispatchToTarget(dispatch) {
-    return { }
+    return {
+      setCoverageType: coverageType => dispatch(CoverageActions.setCoverageType(coverageType)),
+      setSaveSiteCoverage: saveSiteCoverage => dispatch(CoverageActions.setSaveSiteCoverage(saveSiteCoverage)),
+      setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
+      setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
+    }
   }
 
   $onDestroy() {
@@ -45,21 +53,18 @@ class CoverageInitializerController {
 
   onSelectionTypeChange(selectionType) {
     this.state.selectionTypeChanged.next(selectionType)
+    this.setSelectionTypeById(selectionType)
   } 
 
   removeServiceAreas(targets) {
     this.$http.post(`/service_areas/${this.state.plan.getValue().id}/removeServiceAreaTargets`, { serviceAreaIds: targets.map((sa) => sa.id) })
-      .then((response) => {
-        this.state.reloadSelectedServiceAreas()
-      })
+      .then(response => this.state.reloadSelectedServiceAreas())
       .catch(err => console.error(err))
   }
 
   removeAnalysisAreas(targets) {
     this.$http.post(`/analysis_areas/${this.state.plan.getValue().id}/removeAnalysisAreaTargets`, { analysisAreaIds: targets.map((sa) => sa.id) })
-      .then((response) => {
-        this.state.reloadSelectedAnalysisAreas()
-      })
+      .then(response => this.state.reloadSelectedAnalysisAreas())
       .catch(err => console.error(err))
   }
 

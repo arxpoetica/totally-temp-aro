@@ -9,14 +9,15 @@ const defaultState = {
   activeSelectionMode: { id: 'SELECTED_AREAS', description: 'Service Areas' }
 }
 
-function setActiveSelectionMode(state, newSelectionMode) {
-  return { ...state, activeSelectionMode: newSelectionMode }
+function setActiveSelectionModeById(state, newSelectionModeId) {
+  const selectionMode = state.selectionModes.filter(item => item.id === newSelectionModeId)[0]
+  return { ...state, activeSelectionMode: selectionMode }
 }
 
 function selectionReducer(state = defaultState, action) {
   switch(action.type) {
     case Actions.SELECTION_SET_ACTIVE_MODE:
-      return setActiveSelectionMode(state, action.payload)
+      return setActiveSelectionModeById(state, action.payload)
 
     default:
       return state
