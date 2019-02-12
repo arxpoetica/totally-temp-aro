@@ -25,7 +25,6 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
         })
         return null
       }
-      console.log( visibleAnalysisLayers.get(0))
       requestBody.coverageAnalysisRequest.analysisLayerId = visibleAnalysisLayers.get(0).analysisLayerId
     }
 
