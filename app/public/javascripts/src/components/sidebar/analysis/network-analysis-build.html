@@ -142,12 +142,17 @@
         <td>Endpoint Technology</td>
         <td>
           <div class="btn-group btn-group-sm">
-            <button ng-repeat="technology in $ctrl.state.optimizationOptions.technologies"
+            <button ng-repeat="(technologyKey, technology) in $ctrl.state.optimizationOptions.technologies"
                     ng-class="{'btn': true, 'btn-light': !technology.checked, 'btn-primary': technology.checked}"
-                    ng-click="technology.checked = !technology.checked">
+                    ng-click="$ctrl.onFiberOrFiveGClicked(technologyKey)">
               {{technology.label}}
             </button>
           </div>
+          <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis,
+                             'btn-primary': $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis}"
+                             ng-click="$ctrl.onAdvancedAnalysisClicked()">
+            Advanced
+          </button>
         </td>
       </tr>
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">

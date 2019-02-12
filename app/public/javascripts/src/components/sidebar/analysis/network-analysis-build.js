@@ -43,6 +43,24 @@ class NetworkAnalysisBuildController {
     this.state.optimizationOptions.budget = this.budgetDisplay
   }
 
+  onFiberOrFiveGClicked(networkType) {
+    // If Fiber or FiveG is enabled, disable advanced analysis
+    this.state.optimizationOptions.technologies[networkType].checked = !this.state.optimizationOptions.technologies[networkType].checked
+    if (this.state.optimizationOptions.technologies[networkType].checked) {
+      this.state.optimizationOptions.networkConstraints.advancedAnalysis = false  
+    }
+  }
+
+  onAdvancedAnalysisClicked() {
+    // If "Advanced Analysis" is enabled, disable Fiber and 5G
+    this.state.optimizationOptions.networkConstraints.advancedAnalysis = !this.state.optimizationOptions.networkConstraints.advancedAnalysis
+    if (this.state.optimizationOptions.networkConstraints.advancedAnalysis) {
+      Object.keys(this.state.optimizationOptions.technologies).forEach(technologyKey => {
+        this.state.optimizationOptions.technologies[technologyKey].checked = false
+      })
+    }
+  }
+
   $onChanges(changesObj) {
     if (changesObj.selection) {
       // The selected locations have changed. Get the count and addresses that we want to show
