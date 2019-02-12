@@ -132,7 +132,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     postBody.networkConstraints.advancedAnalysis = state.optimizationOptions.networkConstraints.advancedAnalysis
 
     var fiveGEnabled = state.optimizationOptions.technologies.FiveG.checked
-    if (fiveGEnabled) {
+    if (fiveGEnabled || state.optimizationOptions.networkConstraints.advancedAnalysis) {
       postBody.networkConstraints.cellNodeConstraints = {}
       postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
       // Cell radius should be added only for fixed radius
