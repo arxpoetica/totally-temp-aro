@@ -6,6 +6,7 @@ exports[`When a coverage report is running at 10% progress 1`] = `
   style={
     Object {
       "height": "34px",
+      "marginBottom": "10px",
       "position": "relative",
     }
   }
@@ -49,6 +50,11 @@ exports[`When the user does not have a coverage report 1`] = `
   className="btn btn-block btn-primary"
   disabled={false}
   onClick={[Function]}
+  style={
+    Object {
+      "marginBottom": "10px",
+    }
+  }
 >
   <i
     className="fa fa-bolt"
@@ -62,6 +68,11 @@ exports[`When the user has a coverage report 1`] = `
   className="btn btn-block modify-coverage-button"
   disabled={false}
   onClick={[Function]}
+  style={
+    Object {
+      "marginBottom": "10px",
+    }
+  }
 >
   <i
     className="fa fa-edit"

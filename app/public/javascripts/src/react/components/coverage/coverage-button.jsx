@@ -25,7 +25,7 @@ export class CoverageButton extends Component {
 
   renderUninitializedButton() {
     return (
-      <button className={'btn btn-block btn-primary'} disabled={false}
+      <button className={'btn btn-block btn-primary'} disabled={false} style={{ marginBottom: '10px' }}
               onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
                                                                  this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
                                                                  this.props.boundaryLayers, this.props.initializationParams)}>
@@ -35,7 +35,7 @@ export class CoverageButton extends Component {
   }
 
   renderProgressbar() {
-    return <div className={'progress'} style={{ height: '34px', position: 'relative' }}>
+    return <div className={'progress'} style={{ height: '34px', position: 'relative', marginBottom: '10px' }}>
       <div className={'progress-bar progress-bar-optimization'} role="progressbar" aria-valuenow={this.props.progress}
         aria-valuemin='0' aria-valuemax='1' style={{lineHeight: '34px', width: (this.props.progress * 100) + '%' }}>
       </div>
@@ -49,7 +49,7 @@ export class CoverageButton extends Component {
 
   renderFinishedButton() {
     return (
-      <button className={'btn btn-block modify-coverage-button'} disabled={false}
+      <button className={'btn btn-block modify-coverage-button'} disabled={false} style={{ marginBottom: '10px' }}
               onClick={() => this.props.modifyCoverageReport(this.props.report.reportId)}>
         <i className="fa fa-edit"></i> Modify
       </button>
