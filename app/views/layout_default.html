@@ -1,27 +1,5 @@
-<div ng-controller="locations_controller">
-  <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
-    <div class="panel-heading">
-      Measured distance: {{ measuredDistance * 0.000621371 | number: 2 }} mi
-    </div>
-  </div>
 
-  <div class="map-tool-wrapper">
-    <div ng-show="map_tools.is_visible('locations')" class="card map-tool">
-      <div class="card-header map-tools-card-header bg-primary text-white">
-        <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('locations')" ng-click="map_tools.collapse('locations')">
-          <span style="color:white" class="fa fa-chevron-up"></span>
-        </a>
-        <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('locations')" ng-click="map_tools.expand('locations')">
-          <span style="color:white" class="fa fa-chevron-down"></span>
-        </a>
-        <h5 class="map-tool-title-text">Locations</h5>
-      </div>
-      <div class="card-body map-tools-card-body" ng-show="map_tools.is_expanded('locations')">
-        <% include controller_locations.html %>
-      </div>
-    </div>
-  </div>
-</div>
+<locations></locations>
 
 <div class="map-tool-wrapper wrapper_csites_controller" ng-controller="construction_sites_controller">
   <div ng-show="map_tools.is_visible('construction_sites')" class="card map-tool">

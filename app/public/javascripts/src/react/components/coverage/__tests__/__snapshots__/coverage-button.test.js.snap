@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`When a coverage report is running at 10% progress 1`] = `
+<div
+  className="progress"
+  style={
+    Object {
+      "height": "34px",
+      "marginBottom": "10px",
+      "position": "relative",
+    }
+  }
+>
+  <div
+    aria-valuemax="1"
+    aria-valuemin="0"
+    aria-valuenow={0.1}
+    className="progress-bar progress-bar-optimization"
+    role="progressbar"
+    style={
+      Object {
+        "lineHeight": "34px",
+        "width": "10%",
+      }
+    }
+  />
+  <div
+    style={
+      Object {
+        "backgroundColor": "rgba(0, 0, 0, 0.4)",
+        "borderRadius": "3px",
+        "color": "white",
+        "fontWeight": "bold",
+        "left": "50%",
+        "position": "absolute",
+        "textAlign": "center",
+        "top": "50%",
+        "transform": "translateX(-50%) translateY(-50%)",
+        "width": "80px",
+      }
+    }
+  >
+    10%
+  </div>
+</div>
+`;
+
+exports[`When the user does not have a coverage report 1`] = `
+<button
+  className="btn btn-block btn-primary"
+  onClick={[Function]}
+  style={
+    Object {
+      "marginBottom": "10px",
+    }
+  }
+>
+  <i
+    className="fa fa-bolt"
+  />
+   Run
+</button>
+`;
+
+exports[`When the user has a coverage report 1`] = `
+<button
+  className="btn btn-block modify-coverage-button"
+  onClick={[Function]}
+  style={
+    Object {
+      "marginBottom": "10px",
+    }
+  }
+>
+  <i
+    className="fa fa-edit"
+  />
+   Modify
+</button>
+`;

@@ -41,7 +41,7 @@
   <div class="analysis-type">
     <h4 style="text-align: center; margin-top: 20px;">Analysis Type:{{$ctrl.state.networkAnalysisType.label}}</h4>
     <optimize-button ng-if="$ctrl.state.networkAnalysisType.id !== 'COVERAGE_ANALYSIS'"></optimize-button>
-    <coverage-button ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'"></coverage-button>
+    <r-coverage-button ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'"></r-coverage-button>
   </div>
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'INPUT'">
     <accordion-panel-title title="'Input'" panel-id="'INPUT'"></accordion-panel-title>
@@ -69,6 +69,9 @@
         <coverage-initializer selection="$ctrl.state.selection">
         </coverage-initializer>
       </div>
+      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'REACT_COVERAGE_ANALYSIS'">
+        <r-coverage-initializer></r-coverage-initializer>
+      </div>
     </accordion-panel-contents>
     <accordion-panel-title id="output-bar" title="'Output'" panel-id="'OUTPUT'"></accordion-panel-title>
     <accordion-panel-contents panel-id="'OUTPUT'">
@@ -78,7 +81,7 @@
       <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis-output></network-analysis-output>
       </div>
-      <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS' && $ctrl.state.coverage.report">
+      <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS' && $ctrl.coverageReport">
         <coverage-report-downloader>
         </coverage-report-downloader>
       </div>

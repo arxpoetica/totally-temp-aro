@@ -1,25 +1,31 @@
 class CoverageReportDownloaderController {
-  constructor($http, $timeout, state, Utils) {
+  constructor($http, $timeout, $ngRedux, state, Utils) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
     this.Utils = Utils
 
-    this.reports = []
     this.reportTypes = [
       { mediaType: 'xls', description: 'Excel'},
       { mediaType: 'csv', description: 'CSV' }
     ]
     this.selectedReportType = this.reportTypes.filter(item => item.mediaType === 'xls')[0]
     this.numReportsSelected = 0
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+    this.loadReportDetails()
   }
 
-  $onInit() {
-    // Get the coverage report details0
+  loadReportDetails() {
+    this.reports = []
+    if (!this.coverageReport) {
+      return
+    }
+
+    // Get the coverage report details
     this.$http.get('/service/installed/report/meta-data')
       .then(result => {
         this.reportFilename = ''
-        const allowedReportType = (this.state.coverage.report.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
+        const allowedReportType = (this.coverageReport.coverageAnalysisRequest.coverageType === 'location') ? 'COVERAGE' : 'FORM477'
         this.reports = result.data.filter(item => item.reportType === allowedReportType)
         this.reports.forEach((item, index) => {
           this.reports[index].downloadUrlPrefix = `/report-extended/${item.name}/${this.state.plan.getValue().id}`
@@ -77,9 +83,36 @@ class CoverageReportDownloaderController {
       this.selectedReportType = this.reportTypes[0]
     }
   }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
+  }
+
+  // Map global state to component properties
+  mapStateToThis(state) {
+    return {
+      coverageReport: state.coverage.report
+    }
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return { }
+  }
+
+  mergeToTarget(nextState, actions) {
+    const currentReport = this.coverageReport
+    
+    // merge state and actions onto controller
+    Object.assign(this, nextState);
+    Object.assign(this, actions);   
+    
+    if (currentReport !== nextState.coverageReport) {
+      this.loadReportDetails()
+    }
+  }
 }
 
-CoverageReportDownloaderController.$inject = ['$http', '$timeout', 'state', 'Utils']
+CoverageReportDownloaderController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'Utils']
 
 let coverageReportDownloader = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-report-downloader.html',

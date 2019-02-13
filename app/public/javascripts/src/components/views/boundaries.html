@@ -17,10 +17,10 @@
       <h5 class="map-tool-title-text">Boundaries</h5>
     </div>
     <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('boundaries')">
-      <div ng-repeat="layer in $ctrl.state.boundaries.tileLayers" ng-if="$ctrl.state.configuration.perspective.boundaries[layer.type].show">
+      <div ng-repeat="layer in $ctrl.boundaryLayers" ng-if="$ctrl.state.configuration.perspective.boundaries[layer.type].show">
         <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
           <div class="float-right">
-            <input type="checkbox" class="checkboxfill" ng-model="layer.visible" name="ctype-name" ng-change="$ctrl.updateMapLayers()"
+            <input type="checkbox" class="checkboxfill" ng-checked="layer.checked" name="ctype-name" ng-click="$ctrl.updateLayerVisibility(layer, !layer.checked)"
               ng-disabled="layer.disabled">
           </div>
           <div class="float-right" style="margin-right: 30px">
@@ -29,7 +29,7 @@
           <label>
             {{layer.description}}
             
-            <div ng-if="'census_blocks' == layer.type && layer.visible" style="padding-left: 0.5em;">
+            <div ng-if="'census_blocks' == layer.type && layer.checked" style="padding-left: 0.5em;">
               <select class="form-control" style="margin-bottom: 0.5em;"
                 ng-model="$ctrl.selectedCensusCat"
                 ng-options="item as item.description for item in $ctrl.censusCategories"

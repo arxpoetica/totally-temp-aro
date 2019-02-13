@@ -12,13 +12,13 @@ function setLoggedInUser(state, loggedInUser) {
 
 function userReducer(state = { isSuperUser: false }, action) {
   switch(action.type) {
-    case Actions.GET_SUPERUSER_FLAG:
+    case Actions.USER_GET_SUPERUSER_FLAG:
       return state
     
-    case Actions.SET_SUPERUSER_FLAG:
+    case Actions.USER_SET_SUPERUSER_FLAG:
       return setSuperUserFlag(state, action.payload.isSuperUser)
 
-    case Actions.SET_LOGGED_IN_USER:
+    case Actions.USER_SET_LOGGED_IN_USER:
       return setLoggedInUser(state, action.loggedInUser)
 
     default:

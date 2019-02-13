@@ -3,11 +3,7 @@
     line-height: 33px;  /* To vertically align text */
   }
 </style>
-<!-- <p>
-  I am an AngularJS component. Value from Redux: {{$ctrl.value}}
-  <button class="btn btn-light" ng-click="$ctrl.increment()">Update from AngularJS</button>
-</p> -->
-<table id="table-coverage-initializer"  ng-if="$ctrl.isLoggedInUserSuperUser" class="table table-sm table-striped">
+<table id="table-coverage-initializer"  ng-if="$ctrl.isSuperUser" class="table table-sm table-striped">
   <tbody>
 
     <!-- Coverage type -->
@@ -15,19 +11,21 @@
       <td>Coverage Type</td>
       <td>
         <select class="form-control"
-                ng-model="$ctrl.state.coverage.initializationParams.coverageType"
-                ng-options="item.id as item.name for item in $ctrl.coverageTypes">
+                ng-model="$ctrl.coverageType"
+                ng-options="item.id as item.name for item in $ctrl.coverageTypes"
+                ng-change="$ctrl.setCoverageType($ctrl.coverageType)">
         </select>
       </td>
     </tr>
 
     <!-- Save site coverage -->
-    <tr ng-if="$ctrl.state.coverage.initializationParams.coverageType === 'location'">
+    <tr ng-if="$ctrl.coverageType === 'location'">
       <td>Save site coverage</td>
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.coverage.initializationParams.saveSiteCoverage">
+               ng-checked="$ctrl.saveSiteCoverage"
+               ng-click="$ctrl.setSaveSiteCoverage(!$ctrl.saveSiteCoverage)">
       </td>
     </tr>
     
@@ -37,7 +35,8 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.coverage.initializationParams.useMarketableTechnologies">
+               ng-checked="$ctrl.useMarketableTechnologies"
+               ng-click="$ctrl.setLimitMarketableTechnology(!$ctrl.useMarketableTechnologies)">
       </td>
     </tr>
 
@@ -47,7 +46,8 @@
       <td>
         <input type="checkbox"
                class="checkboxfill"
-               ng-model="$ctrl.state.coverage.initializationParams.useMaxSpeed">
+               ng-checked="$ctrl.useMaxSpeed"
+               ng-click="$ctrl.setLimitMaxSpeed(!$ctrl.useMaxSpeed)">
       </td>
     </tr>
 
@@ -64,15 +64,16 @@
 
     <!-- The selection type (service areas/analysis areas) -->
     <tr>
-        <td>Selection Type</td>
-        <td>
-          <select class="form-control" 
-                  ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
-                  ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
-            <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
-          </select>
-        </td>
-      </tr>
+      <td>Selection Type</td>
+      <td>
+        <select class="form-control" 
+                ng-model="$ctrl.activeSelectionModeId"
+                ng-change="$ctrl.onSelectionTypeChange($ctrl.activeSelectionModeId)"
+                ng-options="item.id as item.description for item in $ctrl.selectionModes">
+          <!-- <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option> -->
+        </select>
+      </td>
+    </tr>
     <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
         <a ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)">
@@ -101,12 +102,12 @@
 </table>
 
 <!-- If we have a valid report, then disable all controls -->
-<div ng-if="$ctrl.isLoggedInUserSuperUser && $ctrl.state.coverage.report"
+<div ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
      class="disable-sibling-controls">
 
 </div>
         
-<div class="alert alert-danger" ng-if="!$ctrl.isLoggedInUserSuperUser" style="margin-top: 60px;">
+<div class="alert alert-danger" ng-if="!$ctrl.isSuperUser" style="margin-top: 60px;">
   You must be a system-wide superuser in order to use coverage reports.
 </div>
 <!-- Spinner that will show up if the UI configuration is being loaded from the server -->
