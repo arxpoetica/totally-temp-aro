@@ -129,9 +129,10 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
     postBody.networkConstraints.routingMode = state.optimizationOptions.networkConstraints.routingMode
+    postBody.networkConstraints.advancedAnalysis = state.optimizationOptions.networkConstraints.advancedAnalysis
 
     var fiveGEnabled = state.optimizationOptions.technologies.FiveG.checked
-    if (fiveGEnabled) {
+    if (fiveGEnabled || state.optimizationOptions.networkConstraints.advancedAnalysis) {
       postBody.networkConstraints.cellNodeConstraints = {}
       postBody.networkConstraints.cellNodeConstraints.polygonStrategy = state.optimizationOptions.networkConstraints.cellNodeConstraints.polygonStrategy
       // Cell radius should be added only for fixed radius
@@ -322,6 +323,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load technologies from a POST body object that is sent to the optimization engine
   var loadTechnologiesFromBody = (state, postBody) => {
+    state.optimizationOptions.networkConstraints.advancedAnalysis = postBody.networkConstraints.advancedAnalysis
     Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => state.optimizationOptions.technologies[technologyKey].checked = false)
     postBody.networkConstraints.networkTypes.forEach((networkType) => {
       var matchedTechnology = Object.keys(state.optimizationOptions.technologies).filter((technologyKey) => technologyKey.toUpperCase() === networkType.toUpperCase())[0]
