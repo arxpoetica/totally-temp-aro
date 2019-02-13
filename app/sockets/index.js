@@ -30,7 +30,7 @@ class Socket {
   mockCoverageEndpoint() {
     var progress = 0
     this.io.to(`/plan`).emit(REDUX_COMMAND_MESSAGE, {
-      type: 'UPDATE_COVERAGE_STATUS',
+      type: 'COVERAGE_SET_STATUS',
       payload: { status: 'RUNNING' }
     })
     var progressInterval = setInterval(() => {
@@ -43,7 +43,7 @@ class Socket {
         clearInterval(progressInterval)
         this.io.to(`/plan`).emit(REDUX_COMMAND_MESSAGE,
           {
-            type: 'UPDATE_COVERAGE_STATUS',
+            type: 'COVERAGE_SET_STATUS',
             payload: { status: 'FINISHED' }
           })
       }

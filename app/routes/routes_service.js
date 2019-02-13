@@ -15,10 +15,10 @@ exports.configure = (api, middleware) => {
   api.all('/service/*', (request, response, next) => {
 
     // Mock - For coverage report endpoints, start simulating websocket responses
-    var regexMatch = request.url.match(/^\/service\/coverage\/report\/.*[0-9]\/init/g)
-    if (regexMatch && regexMatch.length > 0) {
-      api.Socket.mockCoverageEndpoint()
-    }
+    // var regexMatch = request.url.match(/^\/service\/coverage\/report\/.*[0-9]\/init/g)
+    // if (regexMatch && regexMatch.length > 0) {
+    //   api.Socket.mockCoverageEndpoint()
+    // }
 
     // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
     var serviceUrl = request.url.substring('/service/'.length)

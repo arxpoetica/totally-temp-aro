@@ -39,8 +39,10 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
         dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: requestBody.coverageAnalysisRequest }})
         return AroHttp.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${userId}`, {})
       })
+      .then(() => dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED }}))
       .catch(err => {
         console.error(err)
+        dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED }})
       })
   }
 }
