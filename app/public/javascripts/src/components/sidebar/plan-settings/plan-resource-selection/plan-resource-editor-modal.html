@@ -1,16 +1,7 @@
 <modal visible="$ctrl.state.showPlanResourceEditorModal" backdrop="static" on-hide="$ctrl.modalHide()"
-       modal-size="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS ? 'modal-md' : 'modal-lg'">
+       modal-size="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS ? 'aro-modal-flex' : 'modal-lg'" 
+       ng-class="{'aro-modal-flex-contain': $ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS}">
   
-  <!-- 
-    grandparent div:
-    text-align: center;
-    
-    parent div:
-    display: inline-block;
-    max-width: 50%;
-    text-align: left;
-    
-   -->
   
   <resource-manager ng-if="$ctrl.selectedEditingMode === $ctrl.editingModes.LIST_RESOURCE_MANAGERS"
                     resource-items="$ctrl.state.resourceItems"
