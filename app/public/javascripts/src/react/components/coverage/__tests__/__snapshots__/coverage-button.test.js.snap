@@ -48,7 +48,6 @@ exports[`When a coverage report is running at 10% progress 1`] = `
 exports[`When the user does not have a coverage report 1`] = `
 <button
   className="btn btn-block btn-primary"
-  disabled={false}
   onClick={[Function]}
   style={
     Object {
@@ -66,7 +65,6 @@ exports[`When the user does not have a coverage report 1`] = `
 exports[`When the user has a coverage report 1`] = `
 <button
   className="btn btn-block modify-coverage-button"
-  disabled={false}
   onClick={[Function]}
   style={
     Object {
