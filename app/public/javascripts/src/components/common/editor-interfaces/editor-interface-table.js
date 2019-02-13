@@ -91,6 +91,7 @@ let editorInterfaceTable = {
     canAdd: '<', 
     canDelete: '<', 
     actions: '<', 
+    rowsPerPage: '<', 
     rootMetaData: '<'
   },
   controller: EditorInterfaceTableController

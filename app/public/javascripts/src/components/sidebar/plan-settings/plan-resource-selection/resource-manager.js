@@ -51,7 +51,7 @@ class ResourceManagerController {
         "defaultValue": "",
         "editable": true,
         "visible": true
-      },
+      }/*,
       {
         "propertyName": "description",
         "levelOfDetail": 0,
@@ -62,9 +62,11 @@ class ResourceManagerController {
         "defaultValue": "",
         "editable": true,
         "visible": true
-      }
+      }*/
     ]
     
+    this.rows = []
+    /*
     this.rows = [
       {
         name: 'name 1', 
@@ -85,7 +87,7 @@ class ResourceManagerController {
         maxDown: 333
       }
     ]
-    
+    */
     this.actions = [
       {
         buttonText: "Permissions", 
@@ -93,6 +95,7 @@ class ResourceManagerController {
         callBack: function(index, row){console.log('permissions');console.log(row)}
       }
     ]
+    
     
     // -------
     
