@@ -81,7 +81,7 @@
       <div ng-if="$ctrl.state.networkAnalysisType.id === 'NETWORK_ANALYSIS'">
         <network-analysis-output></network-analysis-output>
       </div>
-      <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS' && $ctrl.state.coverage.report">
+      <div ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS' && $ctrl.coverageReport">
         <coverage-report-downloader>
         </coverage-report-downloader>
       </div>
