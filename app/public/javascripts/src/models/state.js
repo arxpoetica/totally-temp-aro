@@ -1,7 +1,6 @@
 import { List } from 'immutable'
 import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
-import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
 import UserActions from '../react/components/user/user-actions'
@@ -1107,7 +1106,6 @@ class State {
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
         stateSerializationHelper.loadStateFromJSON(service, optimization, planInputs)
-        StateCoverage.initializeCoverage(service, $http, $timeout)
         return Promise.all([
           service.reloadSelectedLocations(),
           service.reloadSelectedServiceAreas(),
