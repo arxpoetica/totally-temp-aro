@@ -142,15 +142,20 @@
         <td>Endpoint Technology</td>
         <td>
           <div class="btn-group btn-group-sm">
-            <button ng-repeat="technology in $ctrl.state.optimizationOptions.technologies"
+            <button ng-repeat="(technologyKey, technology) in $ctrl.state.optimizationOptions.technologies"
                     ng-class="{'btn': true, 'btn-light': !technology.checked, 'btn-primary': technology.checked}"
-                    ng-click="technology.checked = !technology.checked">
+                    ng-click="$ctrl.onFiberOrFiveGClicked(technologyKey)">
               {{technology.label}}
             </button>
           </div>
+          <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis,
+                             'btn-primary': $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis}"
+                             ng-click="$ctrl.onAdvancedAnalysisClicked()">
+            Advanced
+          </button>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Polygon Type</td>
         <td> 
           <select class="form-control"
@@ -161,21 +166,21 @@
           </select>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Radius (m)</td>
         <td> 
           <input type="text" class="form-control text-right" placeholder="Cell Radius"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Granularity Ratio</td>
         <td>
           <input type="text" class="form-control text-right" placeholder="Granularity Ratio"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio">
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Minimum Ray Length</td>
         <td>
           <input type="text" class="form-control text-right" placeholder="Minimum Ray Length"

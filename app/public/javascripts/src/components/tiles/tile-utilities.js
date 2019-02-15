@@ -43,6 +43,16 @@ class TileUtilities {
       return false
     }
   }
+
+  static pixelCoordinatesFromScaledTileCoordinates(rawTileCoordinates) {
+    // rawTileCoordinates is an array of coordinates. Aro-service is scaling the coordinates, we
+    // have to scale them back to convert them to pixels
+    const TILE_COORDINATE_SCALING_FACTOR = 1.0 / 16
+    return rawTileCoordinates.map(item => ({
+      x: item.x * TILE_COORDINATE_SCALING_FACTOR,
+      y: item.y * TILE_COORDINATE_SCALING_FACTOR
+    }))
+  }
 }
 
 export default TileUtilities

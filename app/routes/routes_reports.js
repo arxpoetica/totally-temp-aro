@@ -231,79 +231,80 @@ exports.configure = (api, middleware) => {
       ),
       
       selected_service_layer AS (
-      SELECT *
-      FROM inputs i
-      JOIN reports.plan_service_layer psl
-      ON psl.root_plan_id = i.plan_id
-      ),
-      
-      modified_equipment AS (
-      SELECT 
-        ne.*
-      FROM  inputs i
-      JOIN  reports.network_equipment ne
-        ON ne.root_plan_id = i.plan_id
-        AND ne.is_branch_data
-      ),
-      
-      modified_equipment_service_area AS (
-      SELECT
-        s.id AS service_area_id,
-        s.name as service_area_name,
-        s.code as service_area_code,
-        me.*
-      FROM inputs i
-      CROSS JOIN modified_equipment me
-      CROSS JOIN selected_service_layer ssl
-      JOIN client.service_area s
-        ON ST_Contains(s.geom,me.geom) AND s.service_layer_id = ssl.id
-      ),
-      
-      existing_equipment_service_area AS (
-      SELECT
-        pesa.*
-      FROM inputs i
-      JOIN reports.plan_equipment_service_area pesa
-        ON  pesa.plan_id = i.plan_id
-      
-      ),
-
-      all_plan_equipment AS (
-      SELECT
-        COALESCE (be.id, pesa.id) AS id,  
-        COALESCE (be.object_id, pesa.object_id) AS object_id,
-        COALESCE (be.geom, pesa.geom) AS geom,
-        COALESCE (be.node_type_id, pesa.node_type_id) AS node_type_id,
-        COALESCE (be.network_equipment, pesa.network_equipment) AS network_equipment,
-        COALESCE (be.deployment_type, pesa.deployment_type) AS deployment_type,
-        COALESCE (be.is_library_data, pesa.is_library_data) AS is_library_data,
-        COALESCE (be.is_branch_data, pesa.is_branch_data) AS is_branch_data,
-        COALESCE (be.status, pesa.status) AS status,
-        COALESCE (be.site_clli, pesa.site_clli) AS site_clli,
-        COALESCE (be.site_name, pesa.site_name) AS site_name,
-        COALESCE (be.service_area_name, pesa.service_area_name) AS service_area_name, 
-        COALESCE (be.service_area_code, pesa.service_area_code) AS service_area_code 
-      FROM  modified_equipment_service_area be
-      FULL OUTER JOIN existing_equipment_service_area pesa
-        ON  pesa.plan_id = be.root_plan_id
-        AND pesa.object_id = be.object_id
-      )
-      --SELECT * FROM all_plan_equipment ;
-      SELECT
-      se.status AS "Status",
-      nt.description AS "Equipment Type",
-      ST_Y(se.geom) AS "Latitude",
-      ST_X(se.geom) AS "Longitude",
-      se.site_clli AS "Site CLLI",
-      se.site_name AS "Site Name",
-      se.service_area_name AS "Exchange Name",
-      se.service_area_code AS "Exchange CLLI"
-      FROM all_plan_equipment se
-      JOIN client.network_node_types nt
-        ON nt.id = se.node_type_id
-        AND nt.name <> 'junction_splitter' 
-      ORDER BY nt.description    
-    `;
+        SELECT *
+        FROM inputs i
+        JOIN reports.plan_service_layer psl
+        ON psl.root_plan_id = i.plan_id
+        ),
+        
+        modified_equipment AS (
+        SELECT 
+          ne.*
+        FROM  inputs i
+        JOIN  reports.network_equipment ne
+          ON ne.root_plan_id = i.plan_id
+          AND ne.is_branch_data
+          AND ne.is_deleted = FALSE
+        ),
+        
+        modified_equipment_service_area AS (
+        SELECT
+          s.id AS service_area_id,
+          s.name as service_area_name,
+          s.code as service_area_code,
+          me.*
+        FROM inputs i
+        CROSS JOIN modified_equipment me
+        CROSS JOIN selected_service_layer ssl
+        LEFT JOIN client.service_area s
+           ON ST_Contains(s.geom,me.geom) AND s.service_layer_id = ssl.id
+        ),
+        
+        existing_equipment_service_area AS (
+        SELECT
+          pesa.*
+        FROM inputs i
+        JOIN reports.plan_equipment_service_area pesa
+          ON  pesa.plan_id = i.plan_id
+        
+        ),
+        
+        all_plan_equipment AS (
+        SELECT
+          COALESCE (be.id, pesa.id) AS id,  
+          COALESCE (be.object_id, pesa.object_id) AS object_id,
+          COALESCE (be.geom, pesa.geom) AS geom,
+          COALESCE (be.node_type_id, pesa.node_type_id) AS node_type_id,
+          COALESCE (be.network_equipment, pesa.network_equipment) AS network_equipment,
+          COALESCE (be.deployment_type, pesa.deployment_type) AS deployment_type,
+          COALESCE (be.is_library_data, pesa.is_library_data) AS is_library_data,
+          COALESCE (be.is_branch_data, pesa.is_branch_data) AS is_branch_data,
+          COALESCE (be.status, pesa.status) AS status,
+          COALESCE (be.site_clli, pesa.site_clli) AS site_clli,
+          COALESCE (be.site_name, pesa.site_name) AS site_name,
+          COALESCE (be.service_area_name, pesa.service_area_name) AS service_area_name, 
+          COALESCE (be.service_area_code, pesa.service_area_code) AS service_area_code 
+        FROM  modified_equipment_service_area be
+        FULL OUTER JOIN existing_equipment_service_area pesa
+          ON  pesa.plan_id = be.root_plan_id
+          AND pesa.object_id = be.object_id
+        )
+        --SELECT * FROM all_plan_equipment ;
+        SELECT
+        se.status AS "Status",
+        nt.description AS "Equipment Type",
+        ST_Y(se.geom) AS "Latitude",
+        ST_X(se.geom) AS "Longitude",
+        se.site_clli AS "Site CLLI",
+        se.site_name AS "Site Name",
+        se.service_area_name AS "Exchange Name",
+        se.service_area_code AS "Exchange CLLI"
+        FROM all_plan_equipment se
+        JOIN client.network_node_types nt
+          ON nt.id = se.node_type_id
+          AND nt.name <> 'junction_splitter' 
+        ORDER BY nt.description
+        `;
 
     database.query(planQ).then(function (results) {
       //response.attachment('planSummary.csv')

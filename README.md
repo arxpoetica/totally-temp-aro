@@ -138,6 +138,14 @@ root@9e501c4758d4:/srv/www/aro# bootstrap/init.sh <admin_email_address> <admin_p
 ```
 This will generate output detailing the task's progress, and can take around 20 minutes (or longer, depending on system specs) to complete.
 
+## Setting up pre-commit hooks
+It is **strongly** recommended that you set up pre-commit hooks that will check for code quality. If the code you are committing does not pass quality checks, the commit will be rejected. To do that, run the following commands in the root folder of ARO-Platform. Note that you have to run this in your terminal window, and NOT from inside any container. Your local machine should also have `npm` installed.
+```
+cd git-hooks
+./setup-hooks.sh
+```
+This is a one-time activity. You only need to do this once after you clone the ARO-Platform repository. Running the `setup-hooks.sh` script multiple times is fine too, if you have for some reason deleted your hooks.
+
 ## Running the application in development
 As described earlier, in local development, your checked out version of the `ARO-Platform` repository is mapped into the `aro-app-base` container, so that code changes you make locally are immediately reflected in the running application. 
 

@@ -21,6 +21,7 @@
                      allow-boundary-creation="false"
                      is-boundary-creation-allowed="$ctrl.isBoundaryCreationAllowed"
                      feature-type="location"
+                     check-create-object="$ctrl.checkCanCreateObject(feature, usingMapClick)"
                      on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
                      on-modify-object="$ctrl.handleObjectModified(mapObject)"
                      on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"

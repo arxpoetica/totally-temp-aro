@@ -1,5 +1,13 @@
+import { createSelector } from 'reselect'
+import CoverageActions from '../../../../react/components/coverage/coverage-actions'
+import SelectionActions from '../../../../react/components/selection/selection-actions'
+
+const getAllSelectionModes = state => state.selection.selectionModes
+const getAllowedSelectionModes = createSelector([getAllSelectionModes], 
+  (selectionModes) => angular.copy(selectionModes.filter(item => item.id !== 'SELECTED_LOCATIONS')))
+
 class CoverageInitializerController {
-  constructor(state, aclManager, $http, $timeout, $ngRedux) {
+  constructor(state, $http, $timeout, $ngRedux) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
@@ -11,36 +19,31 @@ class CoverageInitializerController {
 
     this.serviceAreas = []
     this.analysisAreas = []
-    this.selectionModeLabels = {}
-    this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
     this.siteAssignments = ['Proximity', 'Incremental']
     this.selectedSiteAssignment = 'Proximity'
-
-    this.allowedSelectionModes = angular.copy(state.selectionModes)
-    delete this.allowedSelectionModes.SELECTED_LOCATIONS  // Do not allow locations to be a selection option
-
-    this.isLoggedInUserSuperUser = false
-    aclManager.getEffectivePermissions('SYSTEM', '1', state.loggedInUser)
-      .then(permissions => {
-        // Only superusers can see the downloader
-        this.isLoggedInUserSuperUser = permissions && (permissions.IS_SUPERUSER)
-        this.$timeout()
-      })
-      .catch(err => console.error(err))
   }
 
-  // Which part of the Redux global state does our component want to receive?
+  // Map global state to component properties
   mapStateToThis(state) {
     return {
-      value: state.test.value
+      isSuperUser: state.user.isSuperUser,
+      activeSelectionModeId: state.selection.activeSelectionMode.id,
+      selectionModes: getAllowedSelectionModes(state),
+      coverageType: state.coverage.initializationParams.coverageType,
+      saveSiteCoverage: state.coverage.initializationParams.saveSiteCoverage,
+      useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
+      useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
+      coverageReport: state.coverage.report
     }
   }
 
   mapDispatchToTarget(dispatch) {
     return {
-      increment: () => {dispatch({ type: 'INCREMENT' })}
+      setCoverageType: coverageType => dispatch(CoverageActions.setCoverageType(coverageType)),
+      setSaveSiteCoverage: saveSiteCoverage => dispatch(CoverageActions.setSaveSiteCoverage(saveSiteCoverage)),
+      setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
+      setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
     }
   }
 
@@ -50,21 +53,18 @@ class CoverageInitializerController {
 
   onSelectionTypeChange(selectionType) {
     this.state.selectionTypeChanged.next(selectionType)
+    this.setSelectionTypeById(selectionType)
   } 
 
   removeServiceAreas(targets) {
     this.$http.post(`/service_areas/${this.state.plan.getValue().id}/removeServiceAreaTargets`, { serviceAreaIds: targets.map((sa) => sa.id) })
-      .then((response) => {
-        this.state.reloadSelectedServiceAreas()
-      })
+      .then(response => this.state.reloadSelectedServiceAreas())
       .catch(err => console.error(err))
   }
 
   removeAnalysisAreas(targets) {
     this.$http.post(`/analysis_areas/${this.state.plan.getValue().id}/removeAnalysisAreaTargets`, { analysisAreaIds: targets.map((sa) => sa.id) })
-      .then((response) => {
-        this.state.reloadSelectedAnalysisAreas()
-      })
+      .then(response => this.state.reloadSelectedAnalysisAreas())
       .catch(err => console.error(err))
   }
 
@@ -89,7 +89,7 @@ class CoverageInitializerController {
   }
 }
 
-CoverageInitializerController.$inject = ['state', 'aclManager', '$http', '$timeout', '$ngRedux']
+CoverageInitializerController.$inject = ['state', '$http', '$timeout', '$ngRedux']
 
 let coverageInitializer = {
   templateUrl: '/components/sidebar/analysis/coverage/coverage-initializer.html',

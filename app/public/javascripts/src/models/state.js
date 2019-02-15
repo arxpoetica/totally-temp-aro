@@ -1,7 +1,15 @@
+import { List } from 'immutable'
+import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
-import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
+import Actions from '../react/common/actions'
 import UserActions from '../react/components/user/user-actions'
+import PlanActions from '../react/components/plan/plan-actions'
+import MapLayerActions from '../react/components/map-layers/map-layer-actions'
+
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 /* global app localStorage map */
 class State {
@@ -10,9 +18,8 @@ class State {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
-  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
-
   var service = {}
+  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service)
   service.INVALID_PLAN_ID = -1
   service.MAX_EXPORTABLE_AREA = 11000000000 //25000000
 
@@ -269,11 +276,6 @@ class State {
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
-  // Boundaries layer data - define once
-  service.boundaries = {
-    tileLayers: [],
-    areaLayers: []
-  }
   service.areTilesRendering = false
 
   service.censusCategories = new Rx.BehaviorSubject()
@@ -485,8 +487,6 @@ class State {
       })
   }
 
-  service.locationTypes = new Rx.BehaviorSubject([])
-
   // Hold all the selected tile elements like locations, service areas, etc.
   service.selection = {
     planTargets: {
@@ -575,6 +575,7 @@ class State {
       { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
       { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: "NETWORK_ANALYSIS" },
       { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
+      // { id: 'REACT_COVERAGE_ANALYSIS', label: 'React: Coverage Analysis', type: "COVERAGE" },
       { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" },
       { id: 'EXPERT_MODE', label: 'Expert Mode', type: "Expert" }
     ]
@@ -587,18 +588,44 @@ class State {
   }
 
   service.reloadLocationTypes = () => {
-    var locationTypes = []
+    var locationTypesForRedux = List()
     var locations = service.configuration.locationCategories.categories
     Object.keys(locations).forEach((locationKey) => {
       var location = locations[locationKey]
 
       if (service.configuration.perspective.locationCategories[locationKey].show) {
-          location.checked = location.selected
-          locationTypes.push(location)
+        location.checked = location.selected
+        locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location)))  // angular.toJson will strip out the $$hashkey key
       }
     })
-    service.locationTypes.next(locationTypes)
+
+    $ngRedux.dispatch({
+      type: Actions.LAYERS_SET_LOCATION,
+      payload: locationTypesForRedux
+    })
   }
+
+  service.setLayerVisibility = (layer, isVisible) => {
+    $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
+  }
+
+  service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
+    // First find the layer corresponding to the ID
+    const layerState = $ngRedux.getState().mapLayers
+    var layerToChange = null
+    Object.keys(layerState).forEach(layerType => {
+      layerState[layerType].forEach(layer => {
+        if (layer[keyType] === layerKey) {
+          layerToChange = layer
+        }
+      })
+    })
+    if (layerToChange) {
+      $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layerToChange, isVisible))
+   }
+  }
+
+  service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.visible && (item.key === 'analysis_layer'))
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
@@ -1062,6 +1089,10 @@ class State {
 
     service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global,tag.id))
     service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
+    
+    service.setPlanRedux(plan)
+    // Subscribe to the socket for this plan
+    service.subscribeToPlanSocket(plan.id)
 
     return service.loadPlanInputs(plan.id)
       .then(() => service.recreateTilesAndCache())
@@ -1075,7 +1106,6 @@ class State {
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
         stateSerializationHelper.loadStateFromJSON(service, optimization, planInputs)
-        StateCoverage.initializeCoverage(service, $http, $timeout)
         return Promise.all([
           service.reloadSelectedLocations(),
           service.reloadSelectedServiceAreas(),
@@ -1110,7 +1140,7 @@ class State {
   }
 
   service.locationInputSelected = (locationKey) => {
-    return service.locationTypes.getValue().filter((locationType)=> {
+    return service.locationLayers.filter((locationType)=> {
         return locationType.checked && locationType.categoryKey === locationKey
     }).length > 0
   }
@@ -1233,8 +1263,8 @@ class State {
 
   var checkToDisplayPopup = function () {
     return new Promise((resolve, reject) => {
-      var locationTypes = angular.copy(service.locationTypes.getValue())
-      var isHouseholdSelected = locationTypes.filter((locationType) => locationType.key === 'household')[0].checked
+      var locationLayers = angular.copy(service.locationLayers)
+      var isHouseholdSelected = locationLayers.filter((locationType) => locationType.key === 'household')[0].checked
 
       if(isHouseholdSelected && service.optimizationOptions.networkConstraints.routingMode == service.routingModes.DIRECT_ROUTING.id) {
         swal({
@@ -1494,7 +1524,7 @@ class State {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
     // Set the logged in user in the Redux store
-    this.setLoggedInUser(user)
+    service.setLoggedInUserRedux(user)
 
     service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
     service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1847,17 +1877,19 @@ class State {
   }
 
   return service
-//}])
   }
 
-  // Which part of the Redux global state does our component want to receive?
   mapStateToThis(state) {
-    return {}
+    return {
+      locationLayers: getLocationLayersList(state)
+    }
   }
 
   mapDispatchToTarget(dispatch) {
     return {
-      setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))}
+      setLoggedInUserRedux: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
+      setPlanRedux: (plan) => {dispatch(PlanActions.setPlan(plan))},
+      subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})}
     }
   }
 }

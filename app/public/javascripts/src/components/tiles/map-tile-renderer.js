@@ -476,8 +476,8 @@ class MapTileRenderer {
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
       
-      geometry.forEach((shape) => {
-        // Shape is an array of coordinates
+      geometry.forEach((rawShape) => {
+        const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
         if (1 == shape.length) {
   	      // This is a point
   	      var x = shape[0].x + geometryOffset.x - imageWidthBy2
