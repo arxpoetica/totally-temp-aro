@@ -34,10 +34,10 @@
 	          
 	        </div>
 	        <div ng-if="$ctrl.canDelete" class="ei-table-cell">
-	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)">delete</button>
+	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)"><i class="far fa-trash-alt action-button-icon"></i> delete</button>
 	        </div>
 	        <div class="ei-table-cell" ng-repeat="(btnKey, btnValue) in $ctrl.actions">
-	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" ng-class="" ng-click="btnValue.callBack(rowKey, rowValue)">{{btnValue.buttonText}}</button>
+	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" ng-class="" ng-click="btnValue.callBack(rowKey, rowValue)"><i ng-if="'' != btnValue.iconClass" ng-class="btnValue.iconClass" class="fa action-button-icon"></i>{{'' != btnValue.iconClass ? ' ' : ''}}{{btnValue.buttonText}}</button>
 	        </div>
 	      </div>
 	      
@@ -47,5 +47,5 @@
   <button class="btn btn-primary btn-sm" 
           ng-if="$ctrl.isEdit && $ctrl.canAdd" 
           ng-click="$ctrl.addItem()"
-          style="display: inline-block;">add item</button>
+          style="display: inline-block;"><i class="fa fa-file action-button-icon"></i> add item</button>
 </div>
