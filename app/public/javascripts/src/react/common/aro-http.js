@@ -2,14 +2,13 @@
 import fetch from 'cross-fetch'
 
 class AroHttp {
-
   // Make a HTTP GET request
-  static get(url) {
+  static get (url) {
     return this._fetch(url)
   }
 
   // Make a HTTP POST request
-  static post(url, body = {}) {
+  static post (url, body = {}) {
     const options = {
       method: 'POST',
       headers: {
@@ -21,7 +20,7 @@ class AroHttp {
   }
 
   // Make a HTTP DELETE request
-  static delete(url) {
+  static delete (url) {
     const options = {
       method: 'DELETE'
     }
@@ -29,17 +28,17 @@ class AroHttp {
   }
 
   // Internal fetch() implementation. Rejects all HTTP response codes other than 200-299
-  static _fetch(url, options) {
+  static _fetch (url, options) {
     var status
     return fetch(url, options)
       .then(response => {
         if (response.type === 'error') {
           // Error code from server, reject the promise
-          return Promise.reject('Network error when fetching data from the server')
+          return Promise.reject(new Error('Network error when fetching data from the server'))
         } else {
           // We have a response.
           status = response.status
-          return response.json()  // This will return a promise
+          return response.json() // This will return a promise
         }
       })
       .then(result => {
@@ -50,7 +49,6 @@ class AroHttp {
         })
       })
   }
-
 }
 
 export default Object.freeze(AroHttp)

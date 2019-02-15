@@ -1,8 +1,9 @@
+/* global swal */
 import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import CoverageStatusTypes from './constants'
 
-function initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) {
+function initializeCoverageReport (userId, planId, projectId, activeSelectionMode, locationTypes, tileLayers, initializationParams) {
   return dispatch => {
     // Format the coverage report that so it can be sent over to aro-service
     var requestBody = {
@@ -34,21 +35,21 @@ function initializeCoverageReport(userId, planId, projectId, activeSelectionMode
     AroHttp.post(`/service/coverage/report`, requestBody)
       .then(result => {
         coverageReport = result.data
-        dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.RUNNING }})
-        dispatch({ type: Actions.COVERAGE_SET_REPORT, payload: { report: coverageReport }})
-        dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: requestBody.coverageAnalysisRequest }})
+        dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.RUNNING } })
+        dispatch({ type: Actions.COVERAGE_SET_REPORT, payload: { report: coverageReport } })
+        dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: requestBody.coverageAnalysisRequest } })
         return AroHttp.post(`/service/coverage/report/${coverageReport.reportId}/init?user_id=${userId}`, {})
       })
-      .then(() => dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED }}))
+      .then(() => dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED } }))
       .catch(err => {
         console.error(err)
-        dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED }})
+        dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED } })
       })
   }
 }
 
 // Modify the coverage report
-function modifyCoverageReport(reportId) {
+function modifyCoverageReport (reportId) {
   return dispatch => {
     AroHttp.delete(`/service/coverage/report/${reportId}`)
       .then(result => {
@@ -59,7 +60,7 @@ function modifyCoverageReport(reportId) {
 }
 
 // Fetch the coverage report status for a given plan and set it
-function updateCoverageStatus(planId) {
+function updateCoverageStatus (planId) {
   return dispatch => {
     // First set the status and report initialized/null
     dispatch({
@@ -70,45 +71,44 @@ function updateCoverageStatus(planId) {
         // Update the coverage status only if we have a valid report
         const report = result.data.filter(item => item.coverageAnalysisRequest.planId === planId)[0]
         if (report) {
-          dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED }})
-          dispatch({ type: Actions.COVERAGE_SET_REPORT, payload: { report: report }})
-          dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: report.coverageAnalysisRequest }})
+          dispatch({ type: Actions.COVERAGE_SET_STATUS, payload: { status: CoverageStatusTypes.FINISHED } })
+          dispatch({ type: Actions.COVERAGE_SET_REPORT, payload: { report: report } })
+          dispatch({ type: Actions.COVERAGE_SET_INIT_PARAMS, payload: { initializationParams: report.coverageAnalysisRequest } })
         }
       })
       .catch(err => console.error(err))
-
   }
 }
 
-function setCoverageType(coverageType) {
+function setCoverageType (coverageType) {
   return {
     type: Actions.COVERAGE_SET_COVERAGE_TYPE,
     payload: coverageType
   }
 }
 
-function setSaveSiteCoverage(saveSiteCoverage) {
+function setSaveSiteCoverage (saveSiteCoverage) {
   return {
     type: Actions.COVERAGE_SET_SAVE_SITE_COVERAGE,
     payload: saveSiteCoverage
   }
 }
 
-function setLimitMarketableTechnology(limitMarketableTechnology) {
+function setLimitMarketableTechnology (limitMarketableTechnology) {
   return {
     type: Actions.COVERAGE_SET_LIMIT_MARKETABLE_TECHNOLOGIES,
     payload: limitMarketableTechnology
   }
 }
 
-function setLimitMaxSpeed(limitMaxSpeed) {
+function setLimitMaxSpeed (limitMaxSpeed) {
   return {
     type: Actions.COVERAGE_SET_LIMIT_MAX_SPEED,
     payload: limitMaxSpeed
   }
 }
 
-function setSiteAssignment(siteAssignment) {
+function setSiteAssignment (siteAssignment) {
   return {
     type: Actions.COVERAGE_SET_SITE_ASSIGNMENT,
     payload: siteAssignment

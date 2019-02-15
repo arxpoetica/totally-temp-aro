@@ -1,14 +1,15 @@
+/* global test expect jest */
 import React from 'react'
 import renderer from 'react-test-renderer'
 import { shallow } from 'enzyme'
 import { CoverageButton } from '../coverage-button'
 import CoverageStatusTypes from '../constants'
-import { List } from 'immutable';
+import { List } from 'immutable'
 
 // -----------------------------------------------------------------------------
 test('When the user does not have a coverage report', () => {
   const component = renderer.create(
-    <CoverageButton status={CoverageStatusTypes.UNINITIALIZED}></CoverageButton>
+    <CoverageButton status={CoverageStatusTypes.UNINITIALIZED} />
   )
   let tree = component.toJSON()
   expect(tree).toMatchSnapshot()
@@ -17,7 +18,7 @@ test('When the user does not have a coverage report', () => {
 // -----------------------------------------------------------------------------
 test('When the user has a coverage report', () => {
   const component = renderer.create(
-    <CoverageButton status={CoverageStatusTypes.FINISHED}></CoverageButton>
+    <CoverageButton status={CoverageStatusTypes.FINISHED} />
   )
   let tree = component.toJSON()
   expect(tree).toMatchSnapshot()
@@ -26,7 +27,7 @@ test('When the user has a coverage report', () => {
 // -----------------------------------------------------------------------------
 test('When a coverage report is running at 10% progress', () => {
   const component = renderer.create(
-    <CoverageButton status={CoverageStatusTypes.RUNNING} progress={0.1}></CoverageButton>
+    <CoverageButton status={CoverageStatusTypes.RUNNING} progress={0.1} />
   )
   let tree = component.toJSON()
   expect(tree).toMatchSnapshot()
@@ -45,14 +46,14 @@ test('When button is clicked to initialize report', () => {
   const mockInitializeCoverageReport = jest.fn()
   const component = shallow(
     <CoverageButton status={CoverageStatusTypes.UNINITIALIZED}
-                    userId={5}
-                    planId={22}
-                    projectId={7}
-                    locationLayers={locationLayers}
-                    boundaryLayers={boundaryLayers}
-                    activeSelectionModeId={'SELECTED_AREAS'}
-                    initializationParams={{ generic: 'Init Params'}}
-                    initializeCoverageReport={mockInitializeCoverageReport}></CoverageButton>
+      userId={5}
+      planId={22}
+      projectId={7}
+      locationLayers={locationLayers}
+      boundaryLayers={boundaryLayers}
+      activeSelectionModeId={'SELECTED_AREAS'}
+      initializationParams={{ generic: 'Init Params' }}
+      initializeCoverageReport={mockInitializeCoverageReport} />
   )
 
   component.find('button').simulate('click')
@@ -66,7 +67,7 @@ test('When button is clicked to initialize report', () => {
   expect(mockInitializeCoverageReport.mock.calls[0][4].equals(expectedLocationLayers)).toBeTruthy()
 
   expect(mockInitializeCoverageReport.mock.calls[0][5].equals(boundaryLayers)).toBeTruthy()
-  expect(mockInitializeCoverageReport.mock.calls[0][6]).toEqual({ generic: 'Init Params'})
+  expect(mockInitializeCoverageReport.mock.calls[0][6]).toEqual({ generic: 'Init Params' })
 })
 
 // -----------------------------------------------------------------------------
@@ -74,9 +75,8 @@ test('When button is clicked to modify/delete report', () => {
   const mockModifyCoverageReport = jest.fn()
   const component = shallow(
     <CoverageButton status={CoverageStatusTypes.FINISHED}
-                    report={{ reportId: 100 }}
-                    modifyCoverageReport={mockModifyCoverageReport}>
-    </CoverageButton>
+      report={{ reportId: 100 }}
+      modifyCoverageReport={mockModifyCoverageReport} />
   )
 
   component.find('button').simulate('click')

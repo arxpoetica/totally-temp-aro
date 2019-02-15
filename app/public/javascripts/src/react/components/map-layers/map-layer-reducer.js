@@ -6,13 +6,13 @@ const defaultState = {
   boundary: new List()
 }
 
-function setLayers(state, layerKey, layers) {
+function setLayers (state, layerKey, layers) {
   return { ...state, [layerKey]: layers }
 }
 
-function setLayerVisibility(state, layer, visibility) {
+function setLayerVisibility (state, layer, visibility) {
   // First determine which category/key (e.g. 'location' the layer belongs to)
-  var layerToChange = null, layerKey = null, layerIndex = NaN
+  var layerToChange = null; var layerKey = null; var layerIndex = NaN
   Object.keys(state).forEach(key => {
     const layers = state[key]
     layers.forEach((stateLayer, index) => {
@@ -26,17 +26,17 @@ function setLayerVisibility(state, layer, visibility) {
   // Create a new layer with the checked flag set
   const newLayer = { ...layerToChange, checked: visibility }
   // Replace this category in the state
-  return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer)}
+  return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }
 }
 
-function mapLayersReducer(state = defaultState, action) {
-  switch(action.type) {
+function mapLayersReducer (state = defaultState, action) {
+  switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
 
     case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)
-    
+
     case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)
 
