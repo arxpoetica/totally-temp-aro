@@ -21,19 +21,10 @@
     "webpack-deploy": "webpack",
     "webpack-dev": "webpack --watch",
     "dev": "npm run build-service-types && ./node_modules/.bin/concurrently \"npm run watch-client\" \"npm run watch-server\" \"npm run webpack-dev\" \"npm run test-unit-watch\"",
-    "lint": "standard"
+    "lint": "standard \"public/javascripts/src/react/**/*.js\" \"public/javascripts/src/react/**/*.jsx\""
   },
   "author": "Altman Vilandrie &Co. Advanced Analytics and Products Division",
   "license": "BSD-2-Clause",
-  "standard": {
-    "ignore": [
-      "public/javascripts/lib",
-      "public/javascripts/vendors",
-      "test/integration",
-      "test/ui/mocha.js",
-      "test/ui/chai.js"
-    ]
-  },
   "dependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
@@ -132,7 +123,7 @@
     "phantomjs": "^1.9.17",
     "protractor": "^2.1.0",
     "react-test-renderer": "^16.7.0",
-    "standard": "^6.0.7",
+    "standard": "^12.0.1",
     "wdio-dot-reporter": "0.0.8",
     "wdio-firefox-profile-service": "0.0.2",
     "wdio-jasmine-framework": "^0.3.0",
