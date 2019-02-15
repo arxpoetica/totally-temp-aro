@@ -1150,6 +1150,10 @@ class PlanEditorController {
     //this.handleObjectModified(this.selectedMapObject,true) 
   }
 
+  checkCanCreateObject(feature, usingMapClick) {
+    return true
+  }
+
   $doCheck() {
     // Doing it this way because we don't have a better way to detect when state.selectedBoundaryType has changed
     if (this.state.selectedBoundaryType.id !== this.cachedSelectedBoundaryTypeId

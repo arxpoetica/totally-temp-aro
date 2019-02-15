@@ -44,8 +44,9 @@
                ng-model="$ctrl.reportFilename" ng-disabled="$ctrl.numReportsSelected === 0">
         <div class="input-group-append">
           <button class="btn btn-primary btn-block" type="button" id="btnDownloadClubbedExcel" 
-                  ng-disabled="$ctrl.numReportsSelected === 0" ng-click="$ctrl.downloadReport()">
+                  ng-disabled="$ctrl.numReportsSelected === 0 || $ctrl.reportDownloading" ng-click="$ctrl.downloadReport()">
             <span class="fa fa-download"></span>
+            <span class="fa fa-spinner fa-spin" ng-if="$ctrl.reportDownloading"></span>
           </button>
         </div>
       </div>
