@@ -73,9 +73,7 @@ function getEffectivePermissions (resourceType, resourceId, loggedInUser) {
 function setSuperUserFlag (isSuperUser) {
   return {
     type: Actions.USER_SET_SUPERUSER_FLAG,
-    payload: {
-      isSuperUser: isSuperUser
-    }
+    payload: isSuperUser
   }
 }
 
@@ -94,7 +92,7 @@ function setLoggedInUser (loggedInUser) {
     // Set the logged in user
     dispatch({
       type: Actions.USER_SET_LOGGED_IN_USER,
-      loggedInUser: loggedInUser
+      payload: loggedInUser
     })
 
     // Check if the logged in user is a superuser
