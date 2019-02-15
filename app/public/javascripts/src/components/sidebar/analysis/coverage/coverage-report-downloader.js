@@ -11,6 +11,7 @@ class CoverageReportDownloaderController {
     ]
     this.selectedReportType = this.reportTypes.filter(item => item.mediaType === 'xls')[0]
     this.numReportsSelected = 0
+    this.reportDownloading = false
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
     this.loadReportDetails()
   }
@@ -38,6 +39,7 @@ class CoverageReportDownloaderController {
   }
 
   downloadReport() {
+    this.reportDownloading = true
     // Note that we are not using the cached "this.numReportsSelected" here. That is for disabling buttons in the UI only.
     const selectedReports = this.reports.filter(item => item.selectedForDownload)
     const numReportsSelected = selectedReports.length
@@ -46,7 +48,10 @@ class CoverageReportDownloaderController {
       // We are downloading an individual report. We need { responseType: 'arraybuffer' } to receive binary data.
       this.$http.get(`/service-download-file/${fileName}/report-extended/${selectedReports[0].name}/${this.state.plan.getValue().id}.${this.selectedReportType.mediaType}`,
                      { responseType: 'arraybuffer' })
-        .then(result => this.Utils.downloadFile(result.data, fileName))
+        .then(result => {
+          this.Utils.downloadFile(result.data, fileName)
+          this.reportDownloading = false
+        })
         .catch(err => console.error(err))
     } else {
       // We are downloading multiple reports. We need { responseType: 'arraybuffer' } to receive binary data.
@@ -55,7 +60,10 @@ class CoverageReportDownloaderController {
 
       this.$http.post(`/service-download-file/${fileName}/report-extended-queries/${this.state.plan.getValue().id}.xls`, reportNames,
                       { responseType: 'arraybuffer' })
-        .then(result => this.Utils.downloadFile(result.data, fileName))
+        .then(result => {
+          this.Utils.downloadFile(result.data, fileName)
+          this.reportDownloading = false          
+        })
         .catch(err => console.error(err))
     }
   }
@@ -85,6 +93,7 @@ class CoverageReportDownloaderController {
   }
 
   $onDestroy() {
+    this.reportDownloading = false
     this.unsubscribeRedux()
   }
 

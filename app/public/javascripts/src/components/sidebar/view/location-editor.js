@@ -1,4 +1,12 @@
+import { createSelector } from 'reselect'
+
 import WorkflowState from '../../common/workflow-state'
+import MapLayerActions from '../../../react/components/map-layers/map-layer-actions'
+
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+
 class LocationProperties {
   constructor(workflowStateId, numberOfLocations = 1) {
     this.locationTypes = ['Household']
@@ -10,9 +18,10 @@ class LocationProperties {
 }
 
 class LocationEditorController {
-  constructor($timeout, $http, state, tracker) {
+  constructor($timeout, $http, $ngRedux, state, tracker) {
     this.$timeout = $timeout
     this.$http = $http
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     this.state = state
     this.tracker = tracker
     this.selectedMapObject = null
@@ -47,12 +56,13 @@ class LocationEditorController {
 
   $onInit() {
     this.resumeOrCreateTransaction()
-    config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers()    
+    config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers(this.locationLayers)    
   }
   
   $onDestroy(){
     // to bring bakc the hidden locations
     this.state.requestMapLayerRefresh.next(null)
+    this.unsubscribeRedux()
   }
   
   resumeOrCreateTransaction() {
@@ -329,6 +339,26 @@ class LocationEditorController {
     return this.getAttributes(search, this.availableAttributesValueList)
   }
 
+  checkCanCreateObject(feature, usingMapClick) {
+    // For frontier client check If households layer is enabled or not, If not enabled don't allow to create a object
+    if (config.ARO_CLIENT === 'frontier' && !feature.isExistingObject) {
+      var hhLocationLayer = this.locationLayers.filter((locationType) => locationType.label === 'Residential')[0]
+
+      if (!hhLocationLayer.checked) {
+        swal({
+          title: 'Layer is turned off',
+          text: 'You are trying to add a location but the layer is currently turned off. Please turn on the location layer and try again.',
+          type: 'error'
+        })
+        return false
+      } else {
+        return true
+      }
+    } else {
+      return true
+    }
+  }
+
   modalShown() {
     this.isExpandLocAttributes = true
   }
@@ -337,15 +367,26 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
   }
 
-  selectAllLocationLayers() {
-    var locationLayers = this.state.locationTypes.getValue()
-    locationLayers.forEach((locationType) => locationType.checked = true)
-    this.state.locationTypes.next(locationLayers)
+  mapStateToThis(state) {
+    return {
+      locationLayers: getLocationLayersList(state)
+    }
+  }
+
+  mapDispatchToTarget(dispatch) {
+    return {
+      selectAllLocationLayers: (locationLayers) => {
+        locationLayers.forEach((layer) => {
+          // First set the visibility of the current layer
+          dispatch(MapLayerActions.setLayerVisibility(layer, true))
+        })
+      }
+    }
   }
 
 }
 
-LocationEditorController.$inject = ['$timeout', '$http', 'state', 'tracker']
+LocationEditorController.$inject = ['$timeout', '$http', '$ngRedux', 'state', 'tracker']
 
 let locationEditor = {
   templateUrl: '/components/sidebar/view/location-editor.html',
