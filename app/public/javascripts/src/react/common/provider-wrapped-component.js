@@ -6,7 +6,7 @@ import { Provider, connect } from 'react-redux'
 // <Provider> tag. This is done mainly because we are embedding React components within AngularJS.
 // Ideally, once the entire UI is migrated to React we will have a single React root component
 // and a single <Provider> tag.
-function wrapComponentWithProvider(store, WrappedComponent, ...args) {
+function wrapComponentWithProvider (store, WrappedComponent, ...args) {
   let ConnectedWrappedComponent = connect(...args)(WrappedComponent)
   return function (props) {
     return <Provider store={store}><ConnectedWrappedComponent {...props} /></Provider>

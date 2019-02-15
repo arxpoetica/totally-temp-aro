@@ -2,7 +2,7 @@ import Actions from '../../common/actions'
 import CoverageActions from '../coverage/coverage-actions'
 
 // Set the plan
-function setPlan(plan) {
+function setPlan (plan) {
   return (dispatch) => {
     dispatch({
       type: Actions.PLAN_SET_PLAN,

@@ -13,61 +13,60 @@ const defaultStatus = {
   }
 }
 
-function setCoverageStatus(state, status) {
+function setCoverageStatus (state, status) {
   return { ...state, status: status }
 }
 
-function setCoverageReport(state, report) {
+function setCoverageReport (state, report) {
   return { ...state, report: report }
 }
 
-function setCoverageInitParams(state, initializationParams) {
+function setCoverageInitParams (state, initializationParams) {
   return { ...state, initializationParams: initializationParams }
 }
 
-function setCoverageProgress(state, progress) {
+function setCoverageProgress (state, progress) {
   return { ...state, progress: progress }
 }
 
-function setDefaultCoverageDetails() {
+function setDefaultCoverageDetails () {
   return Object.assign({}, defaultStatus)
 }
 
-function setCoverageType(state, coverageType) {
+function setCoverageType (state, coverageType) {
   return { ...state,
     initializationParams: {
       ...state.initializationParams,
       coverageType: coverageType
-    }}
+    } }
 }
 
-function setSaveSiteCoverage(state, saveSiteCoverage) {
+function setSaveSiteCoverage (state, saveSiteCoverage) {
   return { ...state,
     initializationParams: {
       ...state.initializationParams,
       saveSiteCoverage: saveSiteCoverage
-    }}
+    } }
 }
 
-function setLimitMarketableTechnologies(state, limitMarketableTechnologies) {
+function setLimitMarketableTechnologies (state, limitMarketableTechnologies) {
   return { ...state,
     initializationParams: {
       ...state.initializationParams,
       useMarketableTechnologies: limitMarketableTechnologies
-    }}
+    } }
 }
 
-function setLimitMaxSpeed(state, limitMaxSpeed) {
+function setLimitMaxSpeed (state, limitMaxSpeed) {
   return { ...state,
     initializationParams: {
       ...state.initializationParams,
       useMaxSpeed: limitMaxSpeed
-    }}
+    } }
 }
 
-function coverageReducer(state = defaultStatus, action) {
-  switch(action.type) {
-
+function coverageReducer (state = defaultStatus, action) {
+  switch (action.type) {
     case Actions.COVERAGE_SET_DETAILS:
       return setDefaultCoverageDetails()
 

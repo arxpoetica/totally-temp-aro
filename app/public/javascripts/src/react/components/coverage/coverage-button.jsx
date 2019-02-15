@@ -7,14 +7,14 @@ import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageStatusTypes from './constants'
 
 export class CoverageButton extends Component {
-  render() {
+  render () {
     switch (this.props.status) {
       case CoverageStatusTypes.UNINITIALIZED:
         return this.renderUninitializedButton()
-      
+
       case CoverageStatusTypes.RUNNING:
         return this.renderProgressbar()
-      
+
       case CoverageStatusTypes.FINISHED:
         return this.renderFinishedButton()
 
@@ -23,35 +23,41 @@ export class CoverageButton extends Component {
     }
   }
 
-  renderUninitializedButton() {
+  renderUninitializedButton () {
     return (
       <button className={'btn btn-block btn-primary'} style={{ marginBottom: '10px' }}
-              onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
-                                                                 this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
-                                                                 this.props.boundaryLayers, this.props.initializationParams)}>
-        <i className="fa fa-bolt"></i> Run
+        onClick={() => this.props.initializeCoverageReport(this.props.userId, this.props.planId, this.props.projectId, this.props.activeSelectionModeId,
+          this.props.locationLayers.filter(item => item.checked).map(item => item.plannerKey),
+          this.props.boundaryLayers, this.props.initializationParams)}>
+        <i className='fa fa-bolt' /> Run
       </button>
     )
   }
 
-  renderProgressbar() {
+  renderProgressbar () {
     return <div className={'progress'} style={{ height: '34px', position: 'relative', marginBottom: '10px' }}>
-      <div className={'progress-bar progress-bar-optimization'} role="progressbar" aria-valuenow={this.props.progress}
-        aria-valuemin='0' aria-valuemax='1' style={{lineHeight: '34px', width: (this.props.progress * 100) + '%' }}>
-      </div>
-      <div style={{ position: 'absolute', top: '50%', left: '50%', backgroundColor: 'rgba(0, 0, 0, 0.4)', color: 'white',
-                    transform: 'translateX(-50%) translateY(-50%)', width: '80px', textAlign: 'center',
-                    borderRadius: '3px', fontWeight: 'bold' }}>
+      <div className={'progress-bar progress-bar-optimization'} role='progressbar' aria-valuenow={this.props.progress}
+        aria-valuemin='0' aria-valuemax='1' style={{ lineHeight: '34px', width: (this.props.progress * 100) + '%' }} />
+      <div style={{ position: 'absolute',
+        top: '50%',
+        left: '50%',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        color: 'white',
+        transform: 'translateX(-50%) translateY(-50%)',
+        width: '80px',
+        textAlign: 'center',
+        borderRadius: '3px',
+        fontWeight: 'bold' }}>
         {Math.round(this.props.progress * 100) + '%'}
       </div>
     </div>
   }
 
-  renderFinishedButton() {
+  renderFinishedButton () {
     return (
       <button className={'btn btn-block modify-coverage-button'} style={{ marginBottom: '10px' }}
-              onClick={() => this.props.modifyCoverageReport(this.props.report.reportId)}>
-        <i className="fa fa-edit"></i> Modify
+        onClick={() => this.props.modifyCoverageReport(this.props.report.reportId)}>
+        <i className='fa fa-edit' /> Modify
       </button>
     )
   }
@@ -89,7 +95,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   modifyCoverageReport: (reportId) => dispatch(CoverageActions.modifyCoverageReport(reportId)),
   initializeCoverageReport: (userId, planId, projectId, activeSelectionMode, locationTypes, boundaryLayers, initializationParams) => {
     dispatch(CoverageActions.initializeCoverageReport(userId, planId, projectId, activeSelectionMode, locationTypes,
-                                                      boundaryLayers, initializationParams))
+      boundaryLayers, initializationParams))
   }
 })
 
