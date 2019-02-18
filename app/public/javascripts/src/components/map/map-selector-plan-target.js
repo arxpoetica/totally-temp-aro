@@ -12,7 +12,6 @@ class MapSelectorPlanTargetController {
       this.updateDrawingManagerState()
     })
     this.state = state
-    this.selectionModes = state.selectionModes
     this.document = $document
 
     // Handle selection events from state

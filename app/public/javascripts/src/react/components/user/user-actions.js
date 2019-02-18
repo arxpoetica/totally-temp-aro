@@ -1,4 +1,4 @@
-import fetch from 'cross-fetch'
+import AroHttp from '../../common/aro-http'
 import Actions from '../../common/actions'
 import Constants from '../../../components/common/constants'
 
@@ -9,7 +9,7 @@ const PERMISSIONS = Object.freeze({
   IS_SUPERUSER: 'IS_SUPERUSER'
 })
 
-function getPermissionBits() {
+function getPermissionBits () {
   // Get the permission bits from aro-service
   const accessTypes = Object.freeze({
     RESOURCE_READ: { displayName: 'Read', permissionBits: null },
@@ -17,30 +17,28 @@ function getPermissionBits() {
     RESOURCE_ADMIN: { displayName: 'Owner', permissionBits: null }
   })
 
-  return fetch('/service/auth/permissions')
-    .then(response => response.json(), err => console.log(err))
+  return AroHttp.get('/service/auth/permissions')
     .then(result => {
-      result.forEach((authPermissionEntity) => {
+      result.data.forEach((authPermissionEntity) => {
         if (accessTypes.hasOwnProperty(authPermissionEntity.name)) {
           accessTypes[authPermissionEntity.name].permissionBits = authPermissionEntity.id
         }
       })
       return Promise.resolve(accessTypes)
     })
-  .catch(err => console.log(err))
+    .catch(err => console.log(err))
 }
 
 // Gets the effective permissions for a given resourceType (e.g. PLAN, SYSTEM) and resourceId (e.g. plan id, user id)
-function getEffectivePermissions(resourceType, resourceId, loggedInUser) {
+function getEffectivePermissions (resourceType, resourceId, loggedInUser) {
   return Promise.all([
     getPermissionBits(),
-    fetch(`/service/auth/acl/${resourceType}/${resourceId}`),
-    fetch(`/service/auth/acl/SYSTEM/${loggedInUser.id}`)
+    AroHttp.get(`/service/auth/acl/${resourceType}/${resourceId}`),
+    AroHttp.get(`/service/auth/acl/SYSTEM/${loggedInUser.id}`)
   ])
-    .then((results) => Promise.all([Promise.resolve(results[0]), results[1].json(), results[2].json()]))
     .then((results) => {
       const resolvedAccessTypes = results[0]
-      const resourcePermissions = results[1], systemPermissions = results[2]
+      const resourcePermissions = results[1].data; const systemPermissions = results[2].data
 
       var accessResult = {}
       accessResult[PERMISSIONS.READ] = false
@@ -53,9 +51,9 @@ function getEffectivePermissions(resourceType, resourceId, loggedInUser) {
         if ((loggedInUser.id === access.systemActorId) || (loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
           const permission = access.rolePermissions
           // Note the or-equal-to (|=). So we start out with no permissions, and keep adding to them.
-          accessResult[PERMISSIONS.READ] = accessResult[PERMISSIONS.READ] || ((permission & resolvedAccessTypes.RESOURCE_READ.permissionBits) != 0)
-          accessResult[PERMISSIONS.WRITE] = accessResult[PERMISSIONS.WRITE] || ((permission & resolvedAccessTypes.RESOURCE_WRITE.permissionBits) != 0)
-          accessResult[PERMISSIONS.ADMIN] = accessResult[PERMISSIONS.ADMIN] || ((permission & resolvedAccessTypes.RESOURCE_ADMIN.permissionBits) != 0)
+          accessResult[PERMISSIONS.READ] = accessResult[PERMISSIONS.READ] || ((permission & resolvedAccessTypes.RESOURCE_READ.permissionBits) !== 0)
+          accessResult[PERMISSIONS.WRITE] = accessResult[PERMISSIONS.WRITE] || ((permission & resolvedAccessTypes.RESOURCE_WRITE.permissionBits) !== 0)
+          accessResult[PERMISSIONS.ADMIN] = accessResult[PERMISSIONS.ADMIN] || ((permission & resolvedAccessTypes.RESOURCE_ADMIN.permissionBits) !== 0)
         }
       })
 
@@ -72,33 +70,36 @@ function getEffectivePermissions(resourceType, resourceId, loggedInUser) {
 }
 
 // Set the superuser flag for the specified user
-function setSuperUserFlag(isSuperUser) {
+function setSuperUserFlag (isSuperUser) {
   return {
-    type: Actions.SET_SUPERUSER_FLAG,
-    payload: {
-      isSuperUser: isSuperUser
-    }
+    type: Actions.USER_SET_SUPERUSER_FLAG,
+    payload: isSuperUser
   }
 }
 
 // Get the superuser flag for the specified user from the server
-function getSuperUserFlag(userId) {
+function getSuperUserFlag (userId) {
   return (dispatch) => {
-    return getEffectivePermissions('SYSTEM', '1', {id: userId, groupIds: []})
+    return getEffectivePermissions('SYSTEM', '1', { id: userId, groupIds: [] })
       .then(permissions => dispatch(setSuperUserFlag(permissions && permissions.IS_SUPERUSER)))
       .catch(err => console.log(err))
   }
 }
 
 // Set the logged in user
-function setLoggedInUser(loggedInUser) {
-  return {
-    type: Actions.SET_LOGGED_IN_USER,
-    loggedInUser: loggedInUser
+function setLoggedInUser (loggedInUser) {
+  return dispatch => {
+    // Set the logged in user
+    dispatch({
+      type: Actions.USER_SET_LOGGED_IN_USER,
+      payload: loggedInUser
+    })
+
+    // Check if the logged in user is a superuser
+    dispatch(getSuperUserFlag(loggedInUser.id))
   }
 }
 
 export default {
-  getSuperUserFlag: getSuperUserFlag,
   setLoggedInUser: setLoggedInUser
 }

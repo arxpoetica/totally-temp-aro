@@ -1,8 +1,17 @@
+import { createSelector } from 'reselect'
 import Constants from '../../common/constants'
+import SelectionModes from '../../../react/components/selection/selection-modes'
+import SelectionActions from '../../../react/components/selection/selection-actions'
+
+// Get a copy of selection modes as our combo box will add "objectHash" keys to the modes
+const getSelectionModes = state => state.selection.selectionModes
+const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes))
+
 class NetworkAnalysisBuildController {
 
-  constructor($http, state, optimization) {
+  constructor($http, $ngRedux, state, optimization) {
     this.$http = $http
+    this.$ngRedux = $ngRedux
     this.state = state
     this.optimization = optimization
     this.targets = []
@@ -16,11 +25,6 @@ class NetworkAnalysisBuildController {
     //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
     this.budgetDisplay = this.state.optimizationOptions.budget
     
-    this.selectionModeLabels = {}
-    this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
-    
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
@@ -32,15 +36,35 @@ class NetworkAnalysisBuildController {
         this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
+    this.SelectionModes = SelectionModes
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   onSelectionTypeChange(selectionType) {
-    this.state.selectionTypeChanged.next(selectionType)
+    this.setSelectionTypeById(selectionType)
   } 
   
   onBudgetChange(){
     //this.state.optimizationOptions.budget = this.budgetDisplay * 1000
     this.state.optimizationOptions.budget = this.budgetDisplay
+  }
+
+  onFiberOrFiveGClicked(networkType) {
+    // If Fiber or FiveG is enabled, disable advanced analysis
+    this.state.optimizationOptions.technologies[networkType].checked = !this.state.optimizationOptions.technologies[networkType].checked
+    if (this.state.optimizationOptions.technologies[networkType].checked) {
+      this.state.optimizationOptions.networkConstraints.advancedAnalysis = false  
+    }
+  }
+
+  onAdvancedAnalysisClicked() {
+    // If "Advanced Analysis" is enabled, disable Fiber and 5G
+    this.state.optimizationOptions.networkConstraints.advancedAnalysis = !this.state.optimizationOptions.networkConstraints.advancedAnalysis
+    if (this.state.optimizationOptions.networkConstraints.advancedAnalysis) {
+      Object.keys(this.state.optimizationOptions.technologies).forEach(technologyKey => {
+        this.state.optimizationOptions.technologies[technologyKey].checked = false
+      })
+    }
   }
 
   $onChanges(changesObj) {
@@ -71,9 +95,27 @@ class NetworkAnalysisBuildController {
         .catch(err => console.error(err))
     }
   }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
+  }
+
+  // Map global state to component properties
+  mapStateToThis (reduxState) {
+    return {
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      allSelectionModes: getAllSelectionModes(reduxState)
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
+    }
+  }
 }
 
-NetworkAnalysisBuildController.$inject = ['$http', 'state', 'optimization']
+NetworkAnalysisBuildController.$inject = ['$http', '$ngRedux', 'state', 'optimization']
 
 let networkAnalysisBuild = {
   templateUrl: '/components/sidebar/analysis/network-analysis-build.html',

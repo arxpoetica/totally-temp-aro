@@ -1,6 +1,7 @@
 import { react2angular } from 'react2angular'
 
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
+import CoverageButton from '../react/components/coverage/coverage-button.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -19,7 +20,6 @@ import aroSearch from './sidebar/view/aro-search'
 import aroMultiselectSearch from './sidebar/view/aro-multiselect-search'
 import displayModeButtons from './sidebar/display-mode-buttons'
 import optimizeButton from './sidebar/optimize-button'
-import coverageButton from './sidebar/coverage-button'
 import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
@@ -65,6 +65,7 @@ import rateReachEditor from './sidebar/plan-settings/plan-resource-selection/rat
 import rateReachManagerCreator from './sidebar/plan-settings/plan-resource-selection/rate-reach-manager-creator'
 import rateReachDistanceEditor from './sidebar/plan-settings/plan-resource-selection/rate-reach-distance-editor'
 import boundaries from './views/boundaries'
+import locations from './views/locations'
 import mapSplit from './map/map-split'
 import mapSelectorPlanTarget from './map/map-selector-plan-target'
 import mapSelectorExportLocations from './map/map-selector-export-locations'
@@ -128,7 +129,6 @@ app.component('boundaryDetail', boundaryDetail)
    .component('aroSearch', aroSearch)
    .component('aroMultiselectSearch', aroMultiselectSearch)
    .component('displayModeButtons', displayModeButtons)
-   .component('coverageButton', coverageButton)
    .component('optimizeButton', optimizeButton)
    .component('summaryReports', summaryReports)
    .component('analysisExpertMode', analysisExpertMode)
@@ -173,6 +173,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('rateReachManagerCreator', rateReachManagerCreator)
    .component('rateReachDistanceEditor', rateReachDistanceEditor)
    .component('boundaries', boundaries)
+   .component('locations', locations)
    .component('mapSplit', mapSplit)
    .component('mapSelectorPlanTarget', mapSelectorPlanTarget)
    .component('mapSelectorExportLocations', mapSelectorExportLocations)
@@ -215,6 +216,7 @@ app.component('boundaryDetail', boundaryDetail)
    .component('editorInterfaceNullableNumber', editorInterfaceNullableNumber)
    // ReactJS components
    .component('rCoverageInitializer', react2angular(CoverageInitializer))
+   .component('rCoverageButton', react2angular(CoverageButton))
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)

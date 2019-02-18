@@ -102,19 +102,19 @@
         <td>Coverage Target</td>
         <td>
           <div class="row">
-             <div class="col-md-5">
+             <div class="col-md-6">
                <input
                  type="range"
                  min="0"
                  max="1"
                  step="0.001"
                  ng-model="$ctrl.state.optimizationOptions.threshold"
-                 style="margin-top: 10px">
+                 style="margin-top: 10px; width:100%">
              </div>
-             <div class="col-md-7">
+             <div class="col-md-6">
                <div class="form-group form-group-sm">
                  <div class="input-group input-group-sm">
-                   <input
+                   <input id="coverageTargetValue"
                      type="number" step="0.1"
                      ng-model="$ctrl.state.optimizationOptions.threshold"
                      class="form-control text-right"
@@ -142,15 +142,20 @@
         <td>Endpoint Technology</td>
         <td>
           <div class="btn-group btn-group-sm">
-            <button ng-repeat="technology in $ctrl.state.optimizationOptions.technologies"
+            <button ng-repeat="(technologyKey, technology) in $ctrl.state.optimizationOptions.technologies"
                     ng-class="{'btn': true, 'btn-light': !technology.checked, 'btn-primary': technology.checked}"
-                    ng-click="technology.checked = !technology.checked">
+                    ng-click="$ctrl.onFiberOrFiveGClicked(technologyKey)">
               {{technology.label}}
             </button>
           </div>
+          <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis,
+                             'btn-primary': $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis}"
+                             ng-click="$ctrl.onAdvancedAnalysisClicked()">
+            Advanced
+          </button>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Polygon Type</td>
         <td> 
           <select class="form-control"
@@ -161,21 +166,21 @@
           </select>
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Radius (m)</td>
         <td> 
           <input type="text" class="form-control text-right" placeholder="Cell Radius"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellRadius">
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Granularity Ratio</td>
         <td>
           <input type="text" class="form-control text-right" placeholder="Granularity Ratio"
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.cellGranularityRatio">
         </td>
       </tr>
-      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked">
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Minimum Ray Length</td>
         <td>
           <input type="text" class="form-control text-right" placeholder="Minimum Ray Length"
@@ -317,13 +322,13 @@
         <td>Selection Type</td>
         <td>
           <select class="form-control" 
-                  ng-model="$ctrl.state.optimizationOptions.analysisSelectionMode"
-                  ng-change="$ctrl.onSelectionTypeChange($ctrl.state.optimizationOptions.analysisSelectionMode)">
-            <option ng-repeat="(selectionId, selectionVal) in $ctrl.state.selectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option>
+                  ng-model="$ctrl.activeSelectionModeId"
+                  ng-change="$ctrl.onSelectionTypeChange($ctrl.activeSelectionModeId)"
+                  ng-options="item.id as item.description for item in $ctrl.allSelectionModes">
           </select>
         </td>
       </tr>
-      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
+      <tr style="height: 100%" ng-if="$ctrl.activeSelectionModeId === $ctrl.SelectionModes.SELECTED_AREAS">
         <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
           <span class="far fa-trash-alt trash" ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceArea({target:$ctrl.serviceAreas})"></span>
         </td>
@@ -333,7 +338,7 @@
                         remove-target="$ctrl.removeServiceArea({target:target})"></show-targets>
         </td>
       </tr>
-      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_LOCATIONS">
+      <tr style="height: 100%" ng-if="$ctrl.activeSelectionModeId === $ctrl.SelectionModes.SELECTED_LOCATIONS">
         <td>Selected Locations({{$ctrl.targets.length || 0}})
           <span class="far fa-trash-alt trash" ng-if="$ctrl.targets.length > 0" ng-click="$ctrl.removeTarget({target:$ctrl.targets})"></span>
         </td>
@@ -343,7 +348,7 @@
                         remove-target="$ctrl.removeTarget({target:target})" zoom-target="$ctrl.zoomTarget({target:target})"></show-targets>
         </td>
       </tr>
-      <tr style="height: 100%" ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
+      <tr style="height: 100%" ng-if="$ctrl.activeSelectionModeId === $ctrl.SelectionModes.SELECTED_ANALYSIS_AREAS">
         <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
           <span class="far fa-trash-alt trash" ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas({target:$ctrl.analysisAreas})"></span>
         </td>

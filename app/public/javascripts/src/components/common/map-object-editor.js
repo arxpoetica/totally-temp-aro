@@ -723,20 +723,25 @@ class MapObjectEditorController {
     }
     var mapObject = null
     if (feature.geometry.type === 'Point') {
-      if(usingMapClick && this.state.areTilesRendering) return //Don't create when tiles are rendering
-      // if an existing object just show don't edit
-      if (feature.isExistingObject && !existingObjectOverride){
-        this.displayViewObject({feature:feature})
-        this.selectMapObject(null)
-        return
+      var canCreateObject = this.checkCreateObject && this.checkCreateObject({ feature: feature, usingMapClick: usingMapClick })
+      if(canCreateObject) {
+        if (usingMapClick && this.state.areTilesRendering) return //Don't create when tiles are rendering
+        // if an existing object just show don't edit
+        if (feature.isExistingObject && !existingObjectOverride) {
+          this.displayViewObject({ feature: feature })
+          this.selectMapObject(null)
+          return
+        }
+        mapObject = this.createPointMapObject(feature, iconUrl)
+        // Set up listeners on the map object
+        mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
+        mapObject.addListener('click', (event) => {
+          // Select this map object
+          this.selectMapObject(mapObject)
+        })
+      } else {
+        return          
       }
-      mapObject = this.createPointMapObject(feature, iconUrl)
-      // Set up listeners on the map object
-      mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
-      mapObject.addListener('click', (event) => {
-        // Select this map object
-        this.selectMapObject(mapObject)
-      })
     } else if (feature.geometry.type === 'Polygon') {
       mapObject = this.createPolygonMapObject(feature)
       // Set up listeners on the map object
@@ -1267,6 +1272,7 @@ let mapObjectEditor = {
     hideObjectIds: '<',    // A set of IDs that we will suppress visibility for
     featureType: '@',
     onInit: '&',
+    checkCreateObject: '&',
     onCreateObject: '&',
     onSelectObject: '&',
     onModifyObject: '&',

@@ -21,13 +21,15 @@
                      allow-boundary-creation="false"
                      is-boundary-creation-allowed="$ctrl.isBoundaryCreationAllowed"
                      feature-type="location"
+                     check-create-object="$ctrl.checkCanCreateObject(feature, usingMapClick)"
                      on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature)"
                      on-modify-object="$ctrl.handleObjectModified(mapObject)"
                      on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                      on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
                      register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                      register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
-                     register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)">
+                     register-remove-map-objects-callback="$ctrl.registerRemoveMapObjectsCallback(removeMapObjects)"
+                     register-delete-created-map-object="$ctrl.registerDeleteCreatedMapObject(deleteCreatedMapObject)">
   </map-object-editor>
 
   <!-- BEGIN section transaction details -->
@@ -65,7 +67,7 @@
         <tr>
           <td>Number of locations:</td>
           <td>
-            <input class="form-control"
+            <input class="form-control" 
                   ng-change="$ctrl.markSelectedLocationPropertiesDirty();$ctrl.setLastUsedNumberOfLocations($ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations);"
                   ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].numberOfLocations">
           </td>

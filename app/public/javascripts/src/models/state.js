@@ -1,7 +1,17 @@
+import { List } from 'immutable'
+import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
-import StateCoverage from './state-coverage'
 import Constants from '../components/common/constants'
+import Actions from '../react/common/actions'
 import UserActions from '../react/components/user/user-actions'
+import PlanActions from '../react/components/plan/plan-actions'
+import MapLayerActions from '../react/components/map-layers/map-layer-actions'
+import SelectionActions from '../react/components/selection/selection-actions'
+import SelectionModes from '../react/components/selection/selection-modes'
+
+// We need a selector, else the .toJS() call will create an infinite digest loop
+const getAllLocationLayers = state => state.mapLayers.location
+const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 /* global app localStorage map */
 class State {
@@ -10,9 +20,8 @@ class State {
   // Important: RxJS must have been included using browserify before this point
   var Rx = require('rxjs')
 
-  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
-
   var service = {}
+  this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(service)
   service.INVALID_PLAN_ID = -1
   service.MAX_EXPORTABLE_AREA = 11000000000 //25000000
 
@@ -27,12 +36,12 @@ class State {
     TABC: { id: 'TABC', algorithm: 'CUSTOM', label: 'ABCD analysis' },  // Verizon-specific
     COVERAGE: { id: 'COVERAGE', algorithm: 'COVERAGE', label: 'Coverage Target' }
   }
-  
+
   service.pruningStrategyTypes = {
-    INTER_WIRECENTER: {id: 'INTER_WIRECENTER', label: 'Inter Service Area'}, 
+    INTER_WIRECENTER: {id: 'INTER_WIRECENTER', label: 'Inter Service Area'},
     INTRA_WIRECENTER: {id: 'INTRA_WIRECENTER', label: 'Intra Service Area'}
   }
-  
+
   service.terminalValueStrategyTypes = {
     NONE: {id: 'NONE', label: 'None'},
     FIXED_MULTIPLIER: {id: 'FIXED_MULTIPLIER', label: 'End Year Multiplier'},
@@ -50,13 +59,13 @@ class State {
   ]
 
   service.expertModeTypes = {
-    OPTIMIZATION_SETTINGS: {id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings'}, 
+    OPTIMIZATION_SETTINGS: {id: 'OPTIMIZATION_SETTINGS', label: 'Optimization Settings'},
     MANUAL_PLAN_TARGET_ENTRY: {id: 'MANUAL_PLAN_TARGET_ENTRY', label: 'Manual plan Target Selection', isQueryValid: false},
     MANUAL_PLAN_SA_ENTRY: {id: 'MANUAL_PLAN_SA_ENTRY', label: 'Manual Plan Service Area Selection', isQueryValid: false}
   }
 
   service.selectedExpertMode = service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id
-  
+
   service.viewFiberOptions = [
     {
       id: 1,
@@ -125,13 +134,6 @@ class State {
     ROUTE_FROM_FIBER: 'ROUTE_FROM_FIBER'
   }
 
-  // The selection modes for the application
-  service.selectionModes = {
-    SELECTED_AREAS: 'SELECTED_AREAS', 
-    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS',
-    SELECTED_ANALYSIS_AREAS: 'SELECTED_ANALYSIS_AREAS'
-  }
-  
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',
@@ -219,7 +221,7 @@ class State {
   }
   if (config.ARO_CLIENT === 'frontier') {
     heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
-  }  
+  }
   service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
 
   service.defaultPlanCoordinates = {
@@ -240,11 +242,10 @@ class State {
   service.requestSetMapCenter = new Rx.BehaviorSubject({ latitude: service.defaultPlanCoordinates.latitude, longitude: service.defaultPlanCoordinates.longitude })
   service.requestSetMapZoom = new Rx.BehaviorSubject(service.defaultPlanCoordinates.zoom)
   service.showDetailedLocationInfo = new Rx.BehaviorSubject()
-  service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()    
+  service.showDetailedEquipmentInfo = new Rx.BehaviorSubject()
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.viewSettingsChanged = new Rx.BehaviorSubject()
-  service.selectionTypeChanged = new Rx.BehaviorSubject()
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
@@ -254,34 +255,27 @@ class State {
   service.editingPlanResourceKey = null
   service.isLoadingPlan = false
   service.expertMode = {
-    OPTIMIZATION_SETTINGS: null, 
+    OPTIMIZATION_SETTINGS: null,
     MANUAL_PLAN_TARGET_ENTRY: null,
     MANUAL_PLAN_SA_ENTRY: null
   }
-
-  service.selectionTypeChanged.next(service.selectionModes.SELECTED_AREAS)
 
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
   }
   service.mapFeaturesSelectedEvent = new Rx.BehaviorSubject({})
-  
+
   // Raise an event requesting locations within a polygon to be selected. Coordinates are relative to the visible map.
   service.requestPolygonSelect = new Rx.BehaviorSubject({})
 
-  // Boundaries layer data - define once
-  service.boundaries = {
-    tileLayers: [],
-    areaLayers: []
-  }
   service.areTilesRendering = false
-  
+
   service.censusCategories = new Rx.BehaviorSubject()
   service.reloadCensusCategories = (censusCategories) => {
     service.censusCategories.next(censusCategories)
     service.requestMapLayerRefresh.next(null)
   }
-  
+
   // The display modes for the application
   service.displayModes = Object.freeze({
     VIEW: 'VIEW',
@@ -485,8 +479,6 @@ class State {
       })
   }
 
-  service.locationTypes = new Rx.BehaviorSubject([])
-
   // Hold all the selected tile elements like locations, service areas, etc.
   service.selection = {
     planTargets: {
@@ -569,12 +561,12 @@ class State {
 
     service.reloadLocationTypes()
     service.selectedDisplayMode.next(service.displayModes.VIEW)
-    service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
       { id: 'NETWORK_ANALYSIS', label: 'Network Analysis', type: "NETWORK_ANALYSIS" },
       { id: 'COVERAGE_ANALYSIS', label: 'Coverage Analysis', type: "COVERAGE" },
+      // { id: 'REACT_COVERAGE_ANALYSIS', label: 'React: Coverage Analysis', type: "COVERAGE" },
       { id: 'NEARNET_ANALYSIS', label: 'Near-net Analysis', type: "UNDEFINED" },
       { id: 'EXPERT_MODE', label: 'Expert Mode', type: "Expert" }
     ]
@@ -587,29 +579,57 @@ class State {
   }
 
   service.reloadLocationTypes = () => {
-    var locationTypes = []
+    var locationTypesForRedux = List()
     var locations = service.configuration.locationCategories.categories
+    var uiLayerId = 0
     Object.keys(locations).forEach((locationKey) => {
       var location = locations[locationKey]
 
       if (service.configuration.perspective.locationCategories[locationKey].show) {
-          location.checked = location.selected
-          locationTypes.push(location)
+        location.checked = location.selected
+        location.uiLayerId = uiLayerId++
+        locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location)))  // angular.toJson will strip out the $$hashkey key
       }
     })
-    service.locationTypes.next(locationTypes)
+
+    $ngRedux.dispatch({
+      type: Actions.LAYERS_SET_LOCATION,
+      payload: locationTypesForRedux
+    })
   }
+
+  service.setLayerVisibility = (layer, isVisible) => {
+    $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
+  }
+
+  service.setLayerVisibilityByKey = (keyType, layerKey, isVisible) => {
+    // First find the layer corresponding to the ID
+    const layerState = $ngRedux.getState().mapLayers
+    var layerToChange = null
+    Object.keys(layerState).forEach(layerType => {
+      layerState[layerType].forEach(layer => {
+        if (layer[keyType] === layerKey) {
+          layerToChange = layer
+        }
+      })
+    })
+    if (layerToChange) {
+      $ngRedux.dispatch(MapLayerActions.setLayerVisibility(layerToChange, isVisible))
+   }
+  }
+
+  service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
-    return stateSerializationHelper.getOptimizationBody(service, optimization)
+    return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState(), optimization)
   }
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
     // Note that we are NOT returning the state (the state is set after the call), but a promise
     // that resolves once all the geographies have been loaded
-    return stateSerializationHelper.loadStateFromJSON(service, optimization, json)
+    return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, json)
   }
 
   $document.ready(() => {
@@ -678,7 +698,7 @@ class State {
             })
           }
         })
-        
+
         var newDataItems = {}
         dataTypeEntityResult.forEach((dataTypeEntity) => {
           if (dataTypeEntity.maxValue > 0) {
@@ -829,7 +849,7 @@ class State {
   // Save the plan resource selections to the server
   service.savePlanResourceSelectionToServer = () => {
     service.pristineResourceItems = angular.copy(service.resourceItems)
-    
+
     var putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -859,14 +879,14 @@ class State {
       .then((projectTemplateId) => {
         // Making parallel calls causes a crash in aro-service. Make sequential calls.
         service.pristineNetworkConfigurations = angular.copy(service.networkConfigurations)
-        
+
         var networkConfigurationsArray = []
         Object.keys(service.networkConfigurations).forEach((networkConfigurationKey) => {
           networkConfigurationsArray.push( service.networkConfigurations[networkConfigurationKey] )
         })
         var url = `/service/v1/project-template/${projectTemplateId}/network_configuration?user_id=${service.loggedInUser.id}`
         $http.put(url, networkConfigurationsArray)
-        
+
       })
       .catch((err) => console.error(err))
   }
@@ -910,7 +930,7 @@ class State {
               serviceAreaIds: []
             }
           }
-          
+
           planOptions.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
           planOptions.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
           // A parent plan is specified - append it to the POST url
@@ -953,7 +973,7 @@ class State {
         serviceAreaIds: []
       }
     }
-    
+
     newPlan.tagMapping.global = service.currentPlanTags.map(tag => tag.id)
     newPlan.tagMapping.linkTags.serviceAreaIds = service.currentPlanServiceAreaTags.map(tag => tag.id)
     //newPlan.tagMapping = {"global":service.currentPlanTags.map(tag => tag.id)}
@@ -1015,7 +1035,7 @@ class State {
       })
       .then((result) => {
         return service.loadPlan(result.data.id)
-      })  
+      })
   }
 
   service.loadPlan = (planId) => {
@@ -1059,10 +1079,14 @@ class State {
   service.setPlan = (plan) => {
     service.plan.next(plan)
     service.planOptimization.next(plan)
-    
+
     service.currentPlanTags = service.listOfTags.filter(tag => _.contains(plan.tagMapping.global,tag.id))
     service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds,tag.id))
     
+    service.setPlanRedux(plan)
+    // Subscribe to the socket for this plan
+    service.subscribeToPlanSocket(plan.id)
+
     return service.loadPlanInputs(plan.id)
       .then(() => service.recreateTilesAndCache())
       .catch((err) => console.error(err))
@@ -1074,8 +1098,7 @@ class State {
     return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-        stateSerializationHelper.loadStateFromJSON(service, optimization, planInputs)
-        StateCoverage.initializeCoverage(service, $http, $timeout)
+        stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, planInputs)
         return Promise.all([
           service.reloadSelectedLocations(),
           service.reloadSelectedServiceAreas(),
@@ -1098,19 +1121,19 @@ class State {
       })
       .catch((err) => console.error(err))
     )
-    
+
     promises.push( $http.get(`/service/plan-library-feature-mods/${planId}/equipment_boundary?userId=${service.loggedInUser.id}`)
       .then((result) => {
         result.data.forEach((feature) => tileDataService.addModifiedBoundary(feature))
       })
       .catch((err) => console.error(err))
     )
-    
+
     return Promise.all( promises )
   }
 
   service.locationInputSelected = (locationKey) => {
-    return service.locationTypes.getValue().filter((locationType)=> {
+    return service.locationLayers.filter((locationType)=> {
         return locationType.checked && locationType.categoryKey === locationKey
     }).length > 0
   }
@@ -1233,9 +1256,9 @@ class State {
 
   var checkToDisplayPopup = function () {
     return new Promise((resolve, reject) => {
-      var locationTypes = angular.copy(service.locationTypes.getValue())
-      var isHouseholdSelected = locationTypes.filter((locationType) => locationType.key === 'household')[0].checked
-      
+      var locationLayers = angular.copy(service.locationLayers)
+      var isHouseholdSelected = locationLayers.filter((locationType) => locationType.key === 'household')[0].checked
+
       if(isHouseholdSelected && service.optimizationOptions.networkConstraints.routingMode == service.routingModes.DIRECT_ROUTING.id) {
         swal({
           title: '',
@@ -1250,7 +1273,7 @@ class State {
           resolve(confirmClicked)
         })
       } else {
-        resolve(true)        
+        resolve(true)
       }
     })
   }
@@ -1369,7 +1392,7 @@ class State {
   service.showSiteBoundary = false
   service.boundaryTypes = []
   service.selectedBoundaryType = {}
-  
+
   var loadCensusCatData = function () {
     return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
     .then((result) => {
@@ -1384,10 +1407,10 @@ class State {
         censusCats[ cat.id+'' ] = cat
       })
       service.reloadCensusCategories(censusCats)
-    })  
+    })
   }
   loadCensusCatData()
-  
+
   var loadBoundaryLayers = function () {
     return $http.get(`/service/boundary_type`)
     .then((result) => {
@@ -1395,7 +1418,7 @@ class State {
       service.boundaryTypes.push({id: result.data.length + 1, name: "fiveg_coverage", description: "Undefined"})
       service.boundaryTypes.sort((a, b) => a.id-b.id)
       service.selectedBoundaryType = service.boundaryTypes[0]
-    })  
+    })
   }
 
   loadBoundaryLayers()
@@ -1418,18 +1441,18 @@ class State {
   service.flattenDeep = (arr) => {
     return arr.reduce((acc, val) => Array.isArray(val) ? acc.concat(service.flattenDeep(val)) : acc.concat(val), []);
   }
-  
+
   service.isFeatureLayerOn = (categoryItemKey) => {
     var isOn = false
-    if (service.configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) 
+    if (service.configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey)
         && service.configuration.networkEquipment.equipments[categoryItemKey].checked){
       isOn = true
     }
     return isOn
   }
-  
+
   service.isFeatureLayerOnForBoundary = (boundaryFeature) => {
-    // if it doesn't have a network_node_type return TRUE 
+    // if it doesn't have a network_node_type return TRUE
     var isOn = true
     var networkNodeType = ''
     if (boundaryFeature.network_node_type){
@@ -1442,7 +1465,7 @@ class State {
     }
     return isOn
   }
-  
+
   service.entityTypeList = {
     LocationObjectEntity: [],
     NetworkEquipmentEntity: [],
@@ -1459,7 +1482,7 @@ class State {
     service.entityTypeBoundaryList = []
   }
   service.selectedBoundaryTypeforSearch = null
-  
+
   service.systemActors = [] // All the system actors (i.e. users and groups)
   service.reloadSystemActors = () => {
     var newSystemActors = []
@@ -1478,7 +1501,7 @@ class State {
         result.data.forEach((user) => {
           user.type = 'user'
           // This is just horrible - get rid of this trustAsHtml asap. And no html in object properties!
-          user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`) 
+          user.name = $sce.trustAsHtml(`<i class="fa fa-user" aria-hidden="true"></i> ${user.firstName} ${user.lastName}`)
           newSystemActors.push(user)
         })
         service.systemActors = newSystemActors
@@ -1494,7 +1517,7 @@ class State {
     tracker.trackEvent(tracker.CATEGORIES.LOGIN, tracker.ACTIONS.CLICK, 'UserID', user.id)
 
     // Set the logged in user in the Redux store
-    this.setLoggedInUser(user)
+    service.setLoggedInUserRedux(user)
 
     service.equipmentLayerTypeVisibility.existing = service.configuration.networkEquipment.visibility.defaultShowExistingEquipment
     service.equipmentLayerTypeVisibility.planned = service.configuration.networkEquipment.visibility.defaultShowPlannedEquipment
@@ -1597,7 +1620,7 @@ class State {
     ]
 
     service.optimizationOptions.uiSelectedAlgorithm = service.optimizationOptions.uiAlgorithms[0]
-  } 
+  }
 
   service.planEditorChanged = new Rx.BehaviorSubject(false)
 
@@ -1751,7 +1774,7 @@ class State {
   service.loadServiceLayers()
 
   service.executeManualPlanTargetsQuery = () => {
-    //select id from aro.location_entity where data_source_id = 1 and id in 
+    //select id from aro.location_entity where data_source_id = 1 and id in
     //(239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
     $http.post('/locations/getLocationIds',{query: service.expertMode[service.selectedExpertMode]})
     .then((result)=>{
@@ -1759,11 +1782,12 @@ class State {
       // Get a list of ids to add and remove
       var idsToAdd = new Set(), idsToRemove = new Set()
 
-      if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id)
-        service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_LOCATIONS
-      else
-        service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
-      service.selectionTypeChanged.next(service.optimizationOptions.analysisSelectionMode)
+      if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
+        this.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
+      }
+      else {
+        this.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
+      }
 
       if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
         result.data.forEach((location) => {
@@ -1782,7 +1806,7 @@ class State {
           .then((response) => {
             // Reload selected locations from database
             service.reloadSelectedLocations()
-            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]            
+            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]
           })
       } else {
         result.data.forEach((serviceAreaId) => {
@@ -1800,7 +1824,7 @@ class State {
         Promise.all(addRemoveTargetPromises)
           .then((response) => {
             service.reloadSelectedServiceAreas()
-            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]            
+            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]
           })
           .catch(err => console.error(err))
       }
@@ -1831,10 +1855,10 @@ class State {
       if (!localStorage.getItem(service.loggedInUser.id) ||
         _.difference(service.listOfAppVersions, JSON.parse(currentuserAppVersions)).length > 0) {
         Notification.primary({
-          message: `<a href="#" onClick="openReleaseNotes()">New Features are implemented</a>`
+          message: `<a href="#" onClick="openReleaseNotes()">Latest Updates and Platform Improvements</a>`
         })
       }
-      
+
       localStorage.setItem(service.loggedInUser.id,JSON.stringify(service.listOfAppVersions))
     })
 
@@ -1846,18 +1870,28 @@ class State {
 
   }
 
-  return service
-//}])
+  service.getDispatchers = () => {
+    // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
+    return {
+      setSelectionTypeById: service.setSelectionTypeById
+    }
   }
 
-  // Which part of the Redux global state does our component want to receive?
+  return service
+  }
+
   mapStateToThis(state) {
-    return {}
+    return {
+      locationLayers: getLocationLayersList(state)
+    }
   }
 
   mapDispatchToTarget(dispatch) {
     return {
-      setLoggedInUser: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))}
+      setLoggedInUserRedux: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
+      setPlanRedux: (plan) => {dispatch(PlanActions.setPlan(plan))},
+      subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})},
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
     }
   }
 }

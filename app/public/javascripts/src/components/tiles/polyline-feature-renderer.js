@@ -8,8 +8,8 @@ class PolylineFeatureRenderer {
       ctx.globalAlpha = drawingStyleOverrides.lineOpacity
     }
 
-    ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.strokeStyle
-    ctx.lineWidth = drawingStyleOverrides ? drawingStyleOverrides.lineWidth : (mapLayer.lineWidth || 1)
+    ctx.strokeStyle = drawingStyleOverrides ? drawingStyleOverrides.strokeStyle : mapLayer.drawingOptions.strokeStyle
+    ctx.lineWidth = drawingStyleOverrides ? drawingStyleOverrides.lineWidth : (mapLayer.drawingOptions.lineWidth || 1)
 
     var xPrev = shape[0].x + geometryOffset.x
     var yPrev = shape[0].y + geometryOffset.y

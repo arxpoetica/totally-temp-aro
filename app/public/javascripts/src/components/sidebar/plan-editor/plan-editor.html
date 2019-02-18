@@ -45,6 +45,7 @@
                          is-boundary-creation-allowed="$ctrl.isBoundaryCreationAllowed(mapObject)"
                          hide-object-ids="$ctrl.objectIdsToHide"
                          feature-type="equipment"
+                         check-create-object="$ctrl.checkCanCreateObject(feature, usingMapClick)"
                          on-create-object="$ctrl.handleObjectCreated(mapObject, usingMapClick, feature, deleteExistingBoundary)"
                          on-modify-object="$ctrl.handleObjectModified(mapObject)"
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"

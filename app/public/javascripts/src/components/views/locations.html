@@ -1,0 +1,58 @@
+<div>
+  <div class="map-tool panel panel-primary" id="measuring-stick-result" ng-show="measuredDistance">
+    <div class="panel-heading">
+      Measured distance: {{ measuredDistance * 0.000621371 | number: 2 }} mi
+    </div>
+  </div>
+
+  <div class="map-tool-wrapper">
+    <div ng-show="$ctrl.map_tools.is_visible('locations')" class="card map-tool">
+      <div class="card-header map-tools-card-header bg-primary text-white">
+        <a href="javascript:void(0)" class="float-right" ng-show="$ctrl.map_tools.is_expanded('locations')" ng-click="$ctrl.map_tools.collapse('locations')">
+          <span style="color:white" class="fa fa-chevron-up"></span>
+        </a>
+        <a href="javascript:void(0)" class="float-right" ng-show="!$ctrl.map_tools.is_expanded('locations')" ng-click="$ctrl.map_tools.expand('locations')">
+          <span style="color:white" class="fa fa-chevron-down"></span>
+        </a>
+        <h5 class="map-tool-title-text">Locations</h5>
+      </div>
+      <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('locations')">
+        <div ng-if="state.configuration.perspective.mapTools['prosects'].show">
+          <div style="padding-left: 10px">
+            <span style="font-weight: bold">Filter:</span>
+          </div>
+          <div class="row" style="padding-bottom: 5px;margin-right: 0;margin-left: 0;padding-left: 11px;">
+            <div class="col-md-4" style="padding-left: 0;padding-right: 0" ng-repeat="filter in locationFilters">
+              <div class="ctype-checkbox">
+                <input type="checkbox" class="checkboxfill layer-type-checkboxes"
+                        style="margin-top: 0px; margin-right: 3px;"
+                        ng-model="filter.checked"
+                        ng-checked="filter.checked"
+                        ng-change="handleFiltersChanged()">
+                <img ng-src="{{filter.iconUrl}}" style="width:16px; margin-right:5px">
+                <span>{{filter.label}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <form>
+          <ul class="customer-type">
+            <!-- Loop through all location types -->
+            <li ng-repeat="locationType in $ctrl.locationLayers">
+              <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
+              <div class="ctype-name">{{locationType.label}}</div>
+              <div class="ctype-checkbox">
+                <input type="checkbox" class="checkboxfill" ng-style="stylebtn"
+                        ng-checked="locationType.checked"
+                        ng-click="$ctrl.updateLayerVisibility(locationType, !locationType.checked, $ctrl.locationLayers)">
+              </div>
+            </li>
+          </ul>
+        </form>
+        <div ng-if="disablelocations" class="alert alert-warning" role="alert">
+          Locations not displayed at this zoom level
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

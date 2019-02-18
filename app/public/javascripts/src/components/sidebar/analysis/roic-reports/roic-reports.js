@@ -110,6 +110,7 @@ class RoicReportsController {
 
   getOptionsForCalcType(calcType) {
     return {
+      id: Math.random(),  // What is this? The chart binding is doing an "angular.equals()" comparison, so without a unique ID it will not recompute axes labels, etc.
       maintainAspectRatio: false,
       tooltips: {
         callbacks: {

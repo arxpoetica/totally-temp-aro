@@ -1,5 +1,6 @@
 // Browserify includes
 var pointInPolygon = require('point-in-polygon')
+import TileUtilities from './tile-utilities'
 
 class FeatureSelector {
 
@@ -67,7 +68,8 @@ class FeatureSelector {
       deltaX = deltaX || 0
       deltaY = deltaY || 0
       var geometry = feature.loadGeometry()
-      geometry.forEach((shape) => {
+      geometry.forEach((rawShape) => {
+        const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
         if (shape.length === 1) {
           // Only support points for now
           var locationCoords = [shape[0].x + deltaX, shape[0].y + deltaY]
@@ -75,7 +77,7 @@ class FeatureSelector {
             selectFeature = true
           }
         } else if (feature.properties.gid) {
-          var roadGeom = feature.loadGeometry()[0];
+          const roadGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(feature.loadGeometry()[0])
           for (var i = 0; i < roadGeom.length; i++) {
             if (pointInPolygon([roadGeom[i].x + deltaX, roadGeom[i].y + deltaY], polygonCoords)) {
               selectFeature = true;
@@ -88,7 +90,8 @@ class FeatureSelector {
         } else if (feature.properties.code) {
           //Check the SA boundary inside the drew polygon 
           //This will be uses when draw the polygon with more than one SA. (With touch the SA boundary)
-          feature.loadGeometry().forEach(function (areaGeom) {
+          feature.loadGeometry().forEach(function (rawAreaGeom) {
+            const areaGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawAreaGeom)
             areaGeom.forEach(function (eachValue) {
               var eachPoint = []
               eachPoint.push(eachValue.x + deltaX)
@@ -104,7 +107,8 @@ class FeatureSelector {
           if(!selectFeature && feature.properties.code) {
             //Check the drew polygon coordinate inside SA boundary
             //This will be uses when draw the polygon with in one SA. (Without touch the SA boundary)
-            feature.loadGeometry().forEach(function (areaGeom) {
+            feature.loadGeometry().forEach(function (rawAreaGeom) {
+              const areaGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawAreaGeom)
               var areaPolyCoordinates = []
 
               areaGeom.forEach(function (eachValue) {
@@ -130,7 +134,8 @@ class FeatureSelector {
   
   static selectPolyline(feature, xWithinTile, yWithinTile, minPointToPolylineDistance, deltaX, deltaY) {
 
-    var geometry = feature.loadGeometry()
+    var rawGeometry = feature.loadGeometry()
+    const geometry = rawGeometry.map(shape => TileUtilities.pixelCoordinatesFromScaledTileCoordinates(shape))
     var distance //,distanceTolineX1Y1,distanceTolineX2Y2
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
@@ -212,8 +217,9 @@ class FeatureSelector {
       // Geometry is an array of shapes
       deltaX = deltaX || 0
       deltaY = deltaY || 0
-      geometry.forEach((shape) => {
+      geometry.forEach((rawShape) => {
         // Shape is an array of coordinates
+        const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
         if (shape.length === 1) {
           if (xWithinTile >= shape[0].x + deltaX - imageWidthBy2
               && xWithinTile <= shape[0].x + deltaX + imageWidthBy2
@@ -250,7 +256,8 @@ class FeatureSelector {
         }
 
         if (shouldTestFeature) {
-          feature.loadGeometry().forEach(function (areaGeom) {
+          feature.loadGeometry().forEach(function (rawAreaGeom) {
+            const areaGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawAreaGeom)
             var areaPolyCoordinates = []
   
             areaGeom.forEach(function (eachValue) {

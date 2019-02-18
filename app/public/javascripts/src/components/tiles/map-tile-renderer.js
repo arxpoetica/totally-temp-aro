@@ -7,7 +7,7 @@ var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
 
-  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, analysisSelectionMode, displayModes,
+  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,
               viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
@@ -16,6 +16,7 @@ class MapTileRenderer {
     this.mapTileOptions = mapTileOptions
     this.tileVersions = {}
     this.selectedDisplayMode = selectedDisplayMode
+    this.selectionModes = selectionModes
     this.analysisSelectionMode = analysisSelectionMode
     this.censusCategories = censusCategories
     this.displayModes = displayModes
@@ -476,8 +477,8 @@ class MapTileRenderer {
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
       
-      geometry.forEach((shape) => {
-        // Shape is an array of coordinates
+      geometry.forEach((rawShape) => {
+        const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
         if (1 == shape.length) {
   	      // This is a point
   	      var x = shape[0].x + geometryOffset.x - imageWidthBy2
@@ -486,13 +487,10 @@ class MapTileRenderer {
   	      //Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
-            // PointFeatureRenderer.renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, this.mapLayers, this.tileDataService,
-            //                                    this.selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-            //                                    this.selectedDisplayMode, this.displayModes, this.analysisSelectionMode, this.state.selectionModes)
             var featureObj = {
               'ctx': ctx, 'shape': shape, 'feature': feature, 'featureData': featureData, 'geometryOffset': geometryOffset, 'mapLayer': mapLayer, 'mapLayers': this.mapLayers, 'tileDataService': this.tileDataService,
               'selection': this.selection, 'selectedLocationImage': selectedLocationImage, 'lockOverlayImage': lockOverlayImage, 'invalidatedOverlayImage': invalidatedOverlayImage,
-              'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.state.selectionModes,
+              'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.selectionModes,
               'equipmentLayerTypeVisibility' : this.state.equipmentLayerTypeVisibility
             }
             pointFeatureRendererList.push(featureObj)
@@ -519,7 +517,7 @@ class MapTileRenderer {
               'tileDataService': this.tileDataService,'styles': this.styles,
               'tileSize': this.tileSize, 
               'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.state.selectionModes}
+              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.selectionModes}
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
             } else {
