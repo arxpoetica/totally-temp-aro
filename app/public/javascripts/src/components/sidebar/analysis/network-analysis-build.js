@@ -1,8 +1,12 @@
 import Constants from '../../common/constants'
+import SelectionModes from '../../../react/components/selection/selection-modes'
+import SelectionActions from '../../../react/components/selection/selection-actions'
+
 class NetworkAnalysisBuildController {
 
-  constructor($http, state, optimization) {
+  constructor($http, $ngRedux, state, optimization) {
     this.$http = $http
+    this.$ngRedux = $ngRedux
     this.state = state
     this.optimization = optimization
     this.targets = []
@@ -16,11 +20,6 @@ class NetworkAnalysisBuildController {
     //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
     this.budgetDisplay = this.state.optimizationOptions.budget
     
-    this.selectionModeLabels = {}
-    this.selectionModeLabels[state.selectionModes.SELECTED_AREAS] = 'Service Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_ANALYSIS_AREAS] = 'Analysis Areas'
-    this.selectionModeLabels[state.selectionModes.SELECTED_LOCATIONS] = 'Locations'
-    
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
@@ -32,10 +31,12 @@ class NetworkAnalysisBuildController {
         this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
     })
+    this.SelectionModes = SelectionModes
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
   onSelectionTypeChange(selectionType) {
-    this.state.selectionTypeChanged.next(selectionType)
+    this.setSelectionTypeById(selectionType)
   } 
   
   onBudgetChange(){
@@ -89,9 +90,27 @@ class NetworkAnalysisBuildController {
         .catch(err => console.error(err))
     }
   }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
+  }
+
+  // Map global state to component properties
+  mapStateToThis (reduxState) {
+    return {
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      allSelectionModes: reduxState.selection.selectionModes
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
+    }
+  }
 }
 
-NetworkAnalysisBuildController.$inject = ['$http', 'state', 'optimization']
+NetworkAnalysisBuildController.$inject = ['$http', '$ngRedux', 'state', 'optimization']
 
 let networkAnalysisBuild = {
   templateUrl: '/components/sidebar/analysis/network-analysis-build.html',

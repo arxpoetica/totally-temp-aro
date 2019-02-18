@@ -13,7 +13,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, optimization) => {
+  stateSerializationHelper.getOptimizationBody = (state, reduxState, optimization) => {
 
     var optimizationBody = {
       planId: state.plan.getValue().id,
@@ -21,7 +21,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       analysis_type: 'NETWORK_PLAN'
     }
 
-    addLocationTypesToBody(state, optimization, optimizationBody)
+    addLocationTypesToBody(state, reduxState, optimization, optimizationBody)
     addDataSelectionsToBody(state,optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
@@ -44,16 +44,16 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
-  var addLocationTypesToBody = (state, optimization, postBody) => {
+  var addLocationTypesToBody = (state, reduxState, optimization, postBody) => {
     var selectedLocationLayers = state.locationLayers.filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationLayers, 'plannerKey'),
-      analysisSelectionMode: state.optimizationOptions.analysisSelectionMode
+      analysisSelectionMode: reduxState.selection.activeSelectionMode.id
     }
-    if (state.optimizationOptions.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+    if (reduxState.selection.activeSelectionMode.id === 'SELECTED_ANALYSIS_AREAS') {
       // If we have analysis areas selected, we can have exactly one analysis layer selected in the UI
       const visibleAnalysisLayers = state.getVisibleAnalysisLayers()
-      if (visibleAnalysisLayers.length !== 1) {
+      if (visibleAnalysisLayers.size !== 1) {
         const errorMessage = 'You must have exactly one analysis layer selected to perform this analysis'
         swal({
           title: 'Analysis Layer error',
@@ -63,7 +63,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
         })
         throw errorMessage
       }
-      postBody.locationConstraints.analysisLayerId = visibleAnalysisLayers[0].analysisLayerId
+      postBody.locationConstraints.analysisLayerId = visibleAnalysisLayers.get(0).analysisLayerId
     }
   }
 
@@ -171,11 +171,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, optimization, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, dispatchers, optimization, planInputs) => {
     loadAnalysisTypeFromBody(state, planInputs)
     loadLocationTypesFromBody(state, planInputs)
     loadSelectedExistingFiberFromBody(state, planInputs)
-    loadAlgorithmParametersFromBody(state, optimization, planInputs)
+    loadAlgorithmParametersFromBody(state, dispatchers, optimization, planInputs)
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
   }
@@ -239,7 +239,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
-  var loadAlgorithmParametersFromBody = (state, optimization, postBody) => {
+  var loadAlgorithmParametersFromBody = (state, dispatchers, optimization, postBody) => {
 
     if (!postBody.optimization) {
       console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
@@ -276,12 +276,12 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     if (postBody.optimization.budget && Number.isFinite(+postBody.optimization.budget)) {
       state.optimizationOptions.budget = +postBody.optimization.budget/1000
     }
-    state.optimizationOptions.analysisSelectionMode = postBody.locationConstraints.analysisSelectionMode
-    if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_AREAS) {
+    dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
+    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
       optimization.setMode('boundaries')
-    } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_LOCATIONS) {
+    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
       optimization.setMode('targets')
-    } else if (postBody.locationConstraints.analysisSelectionMode === state.selectionModes.SELECTED_ANALYSIS_AREAS) {
+    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
     }
   }

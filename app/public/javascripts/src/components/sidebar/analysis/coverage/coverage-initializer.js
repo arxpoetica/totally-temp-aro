@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect'
 import CoverageActions from '../../../../react/components/coverage/coverage-actions'
 import SelectionActions from '../../../../react/components/selection/selection-actions'
+import SelectionModes from '../../../../react/components/selection/selection-modes'
 
 const getAllSelectionModes = state => state.selection.selectionModes
 const getAllowedSelectionModes = createSelector([getAllSelectionModes],
@@ -21,19 +22,20 @@ class CoverageInitializerController {
     this.analysisAreas = []
     this.siteAssignments = ['Proximity', 'Incremental']
     this.selectedSiteAssignment = 'Proximity'
+    this.SelectionModes = SelectionModes
   }
 
   // Map global state to component properties
-  mapStateToThis (state) {
+  mapStateToThis (reduxState) {
     return {
-      isSuperUser: state.user.isSuperUser,
-      activeSelectionModeId: state.selection.activeSelectionMode.id,
-      selectionModes: getAllowedSelectionModes(state),
-      coverageType: state.coverage.initializationParams.coverageType,
-      saveSiteCoverage: state.coverage.initializationParams.saveSiteCoverage,
-      useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
-      useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
-      coverageReport: state.coverage.report
+      isSuperUser: reduxState.user.isSuperUser,
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      selectionModes: getAllowedSelectionModes(reduxState),
+      coverageType: reduxState.coverage.initializationParams.coverageType,
+      saveSiteCoverage: reduxState.coverage.initializationParams.saveSiteCoverage,
+      useMarketableTechnologies: reduxState.coverage.initializationParams.useMarketableTechnologies,
+      useMaxSpeed: reduxState.coverage.initializationParams.useMaxSpeed,
+      coverageReport: reduxState.coverage.report
     }
   }
 
@@ -52,12 +54,6 @@ class CoverageInitializerController {
   }
 
   onSelectionTypeChange (selectionType) {
-    // Hack - set the selection type in optimization options, then raise an event.
-    // Temporary, since this is accessed throughout the code.
-    this.state.optimizationOptions.analysisSelectionMode = selectionType
-    this.state.selectionTypeChanged.next(selectionType)
-
-    // Dispatch redux action
     this.setSelectionTypeById(selectionType)
   }
 

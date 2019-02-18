@@ -50,9 +50,6 @@ class LocationsController {
       .skip(1)
       .subscribe((newValue) => this.updateMapLayers())
 
-    // Update map layers when the selection type in analysis mode changes
-    state.selectionTypeChanged.subscribe((newValue) => this.updateMapLayers())
-    
     // Update map layers when the display mode button changes
     state.selectedDisplayMode.subscribe((newValue) => this.updateMapLayers())
 
@@ -85,7 +82,7 @@ class LocationsController {
     }
 
     $(document).keydown(function (e) {
-      if (e.keyCode === 27 && $scope.measuringStickEnabled) {
+      if (e.keyCode === 27 && this.measuringStickEnabled) {
         this.toggleMeasuringStick()
       }
     })

@@ -1,10 +1,11 @@
 import Actions from '../../common/actions'
+import SelectionModes from './selection-modes'
 
 const defaultState = {
   selectionModes: [
-    { id: 'SELECTED_AREAS', description: 'Service Areas' },
-    { id: 'SELECTED_LOCATIONS', description: 'Locations' },
-    { id: 'SELECTED_ANALYSIS_AREAS', description: 'Analysis Areas' }
+    { id: SelectionModes.SELECTED_AREAS, description: 'Service Areas' },
+    { id: SelectionModes.SELECTED_LOCATIONS, description: 'Locations' },
+    { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' }
   ],
   activeSelectionMode: { id: 'SELECTED_AREAS', description: 'Service Areas' }
 }

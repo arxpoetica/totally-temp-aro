@@ -70,11 +70,10 @@
                 ng-model="$ctrl.activeSelectionModeId"
                 ng-change="$ctrl.onSelectionTypeChange($ctrl.activeSelectionModeId)"
                 ng-options="item.id as item.description for item in $ctrl.selectionModes">
-          <!-- <option ng-repeat="(selectionId, selectionVal) in $ctrl.allowedSelectionModes" value="{{selectionVal}}">{{$ctrl.selectionModeLabels[selectionVal]}}</option> -->
         </select>
       </td>
     </tr>
-    <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
+    <tr ng-if="$ctrl.activeSelectionModeId === $ctrl.SelectionModes.SELECTED_AREAS">
       <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
         <a ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)">
           <span class="far fa-trash-alt trash"></span>
@@ -86,7 +85,7 @@
                       remove-target="$ctrl.removeServiceAreas(target)"></show-targets>
       </td>
     </tr>
-    <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
+    <tr ng-if="$ctrl.activeSelectionModeId === $ctrl.SelectionModes.SELECTED_ANALYSIS_AREAS">
       <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
         <a ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)">
           <span class="far fa-trash-alt trash"></span>
@@ -110,7 +109,3 @@
 <div class="alert alert-danger" ng-if="!$ctrl.isSuperUser" style="margin-top: 60px;">
   You must be a system-wide superuser in order to use coverage reports.
 </div>
-<!-- Spinner that will show up if the UI configuration is being loaded from the server -->
-<!-- <div ng-show="$ctrl.state.coverage.isInitializingReport" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px; text-align: center; background-color: rgba(255, 255, 255, 0.7); z-index: 3;">
-  <i class="fa fa-spinner fa-spin" style="font-size:48px; position: relative; top: 50%; transform: translateY(-50%); "></i>
-</div> -->
