@@ -1,10 +1,10 @@
 <div>
   <!-- The ROIC Reports component-->
   <div style="position: relative; width: 100%;">
-    <roic-reports plan-id="$ctrl.state.plan.getValue().id"
+    <network-build-roic-reports plan-id="$ctrl.state.plan.getValue().id"
                   optimization-state="$ctrl.state.Optimizingplan.planState"
                   report-size="'small'">
-    </roic-reports>
+    </network-build-roic-reports>
   </div>
   <button class="btn btn-primary pull-left" ng-click="$ctrl.state.reportModal.next(true)">Reports</button>
   <button class="btn btn-primary pull-right" ng-click="$ctrl.showDetailedOutput()">Expand Results</button>

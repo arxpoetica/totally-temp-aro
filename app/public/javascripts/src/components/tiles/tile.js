@@ -289,13 +289,23 @@ class TileComponentController {
           'equipmentFeatures', 
           'censusFeatures'
         ]
-        //console.log(hitFeatures)
+        
         var bounds = []
         var boundsByNetworkNodeObjectId = {}
         featureCats.forEach((cat) => {
           hitFeatures[cat].forEach((feature) => {
-            if (feature.hasOwnProperty('object_id')) feature.objectId = feature.object_id
-            if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
+            var objectId = null
+            
+            if (feature.hasOwnProperty('object_id')){ 
+              objectId = feature.objectId = feature.object_id
+            }else if (feature.hasOwnProperty('objectId')){ 
+              objectId = feature.objectId
+            }else if (feature.hasOwnProperty('location_id')){ 
+              objectId = feature.location_id
+            }
+            
+            //if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
+            if ( objectId && !menuItemsById.hasOwnProperty(objectId) ){
               
               // ToDo: formalize this
               var singleHitFeature = {}
@@ -303,7 +313,8 @@ class TileComponentController {
               singleHitFeature[cat] = [feature]
               
               var data = {
-                'objectId': feature.objectId, 
+                //'objectId': feature.objectId, 
+                'objectId': objectId, 
                 //'dataTypeList': dataTypeList, 
                 'feature': feature, 
                 'latLng': hitFeatures.latLng
@@ -314,14 +325,12 @@ class TileComponentController {
                 this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
               }))
               
-              //console.log(feature)
-              //console.log(this.state.plan.getValue().id)
-              
               var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
               var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
               var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
               menuItems.push( menuItem )
-              menuItemsById[feature.objectId] = menuItem 
+              //menuItemsById[feature.objectId] = menuItem 
+              menuItemsById[objectId] = menuItem 
               if (feature.hasOwnProperty('network_node_object_id')){
                 bounds.push(feature)
                 boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem

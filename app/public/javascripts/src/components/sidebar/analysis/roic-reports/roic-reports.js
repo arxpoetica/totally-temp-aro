@@ -134,13 +134,6 @@ class RoicReportsController {
     }
   }
 
-  $onChanges(changesObj) {
-
-    if (changesObj.planId || changesObj.optimizationState) {
-      this.refreshData()
-    }
-  }
-
   formatYAxisValue(value, allValues, calcType, precision) {
     precision = precision || 1
     // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
@@ -160,37 +153,35 @@ class RoicReportsController {
       return `  ${calcType.tickPrefix}${value.toFixed(precision)}${calcType.tickSuffix}` // For values less than 1000
     }
   }
-
-  refreshData() {
-    if (!this.planId) {
-      console.error('Plan ID not available in ROIC Reports component')
-      return
+  
+  $onChanges(changesObj) {
+    if (changesObj.roicResultsData && this.roicResultsData) {
+      this.roicResults = JSON.parse(JSON.stringify(this.roicResultsData))
+      this.digestData()
     }
+  }
+  
+  digestData(){
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
-    for (var i = 0; i < this.state.getOptimizationBody().financialConstraints.years; ++i) {
+    var optimizationBody = this.state.getOptimizationBody()
+    for (var i = 0; i < optimizationBody.financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
-    this.loadROICResultsForPlan(this.planId)
-  }
-
-  loadROICResultsForPlan(planId) {
-    this.$http.get(`/service/report/plan/${planId}`)
-      .then(result => {
-        this.roicResults = result.data
-        // Some of the values have to be scaled (e.g. penetration should be in %)
-        Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
-          const component = this.roicResults.roicAnalysis.components[componentKey]
-          Object.keys(component).forEach(curveKey => {
-            const curve = component[curveKey]
-            const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
-            const multiplier = calcType ? calcType.multiplier : 1.0
-            curve.values = curve.values.map(item => item * multiplier)
-          })
-        })
+    
+    // Some of the values have to be scaled (e.g. penetration should be in %)
+    Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
+      const component = this.roicResults.roicAnalysis.components[componentKey]
+      Object.keys(component).forEach(curveKey => {
+        const curve = component[curveKey]
+        const calcType = this.calcTypes.filter(item => item.id === curve.calcType)[0]
+        const multiplier = calcType ? calcType.multiplier : 1.0
+        curve.values = curve.values.map(item => item * multiplier)
       })
-      .catch(err => console.error(err))
+    })
+    
   }
+  
 }
 
 RoicReportsController.$inject = ['$http', 'state']
@@ -198,8 +189,7 @@ RoicReportsController.$inject = ['$http', 'state']
 let roicReports = {
   templateUrl: '/components/sidebar/analysis/roic-reports/roic-reports.html',
   bindings: {
-    planId: '<',
-    optimizationState: '<',
+    roicResultsData: '<',
     reportSize: '<'
   },
   controller: RoicReportsController
