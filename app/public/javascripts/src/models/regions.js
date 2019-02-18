@@ -1,7 +1,6 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
 app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'MapLayer', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, MapLayer, optimization) => {
   var regions = { selectedRegions: [] }
-  var tool = config.ARO_CLIENT === 'verizon' ? 'boundaries' : map_tools.TOOL_IDS.AREA_NETWORK_PLANNING
 
   var selectionLayer
   function initSelectionLayer () {
@@ -9,7 +8,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
     selectionLayer = new google.maps.Data()
     selectionLayer.setStyle({
       fillColor: 'green',
-      zIndex: MapLayer.Z_INDEX_SELECTED_REGION  // We want the selected region to appear on top of non-selected regions
+      zIndex: MapLayer.Z_INDEX_SELECTED_REGION // We want the selected region to appear on top of non-selected regions
     })
     configureSelectionVisibility()
   }
@@ -54,17 +53,6 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
 
   $rootScope.$on('map_tool_changed_visibility', () => configureSelectionVisibility())
 
-  regions.removeGeography = (geography) => {
-    var index = regions.selectedRegions.indexOf(geography)
-    if (index >= 0) {
-      regions.selectedRegions.splice(index, 1)[0]
-      geography.features.forEach((feature) => {
-        selectionLayer.remove(feature)
-      })
-      $rootScope.$broadcast('regions_changed')
-    }
-  }
-
   regions.removeAllGeographies = () => {
     cleanUp()
   }
@@ -103,21 +91,21 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
     } else {
       // Get geometry information for all geography ids
       $http.post('/boundary/info', { serviceAreaIds: geographyIds })
-      .then((response) => {
-        if (response.status >= 200 && response.status <= 299) {
+        .then((response) => {
+          if (response.status >= 200 && response.status <= 299) {
           // Go through all elements of the response and select each element
-          response.data.forEach((boundary, index) => {
+            response.data.forEach((boundary, index) => {
             // Select geography, and suppress events for all but the last boundary
-            boundary.layerId = boundary.layer_id
-            delete boundary.layer_id
-            regions.selectGeography(boundary, index < response.data.length - 1)
-          })
-          defer.resolve()
-        } else {
-          defer.reject(response.data)
-        }
-      })
-      .catch((error) => defer.reject(error))
+              boundary.layerId = boundary.layer_id
+              delete boundary.layer_id
+              regions.selectGeography(boundary, index < response.data.length - 1)
+            })
+            defer.resolve()
+          } else {
+            defer.reject(response.data)
+          }
+        })
+        .catch((error) => defer.reject(error))
     }
 
     return defer.promise
@@ -210,7 +198,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
     })
   }
 
-  function regionsSelected(feature, layer) {
+  function regionsSelected (feature, layer) {
     var name = feature.getProperty('name')
     if (feature.getGeometry().getType() === 'MultiPolygon') {
       feature.toGeoJson((obj) => {
