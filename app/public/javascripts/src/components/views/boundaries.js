@@ -145,7 +145,7 @@ class BoundariesController {
           if (layer.checked) {
             var layerOptions = layerSettings[layer.type]
             var pointTransform = this.getPointTransformForLayer(+layerOptions.aggregateZoomThreshold)
-            var mapLayerKey = `${pointTransform}_${layer.type}_${selectedServiceAreaLibrary.identifier}`
+            var mapLayerKey = `${pointTransform}_${layer.uiLayerId}_${selectedServiceAreaLibrary.identifier}`
             var settingsKey = (pointTransform === 'smooth') ? 'aggregated_' + layer.type : layer.type
 
             if (!layerSettings.hasOwnProperty(settingsKey)) { settingsKey = 'default' }
