@@ -15,7 +15,6 @@ class MapSelectorExportLocationsController {
     this.$http = $http
     this.state = state
     this.Utils = Utils
-    this.selectionModes = state.selectionModes
   }
 
   $onDestroy() {

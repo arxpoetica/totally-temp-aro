@@ -8,6 +8,7 @@ import TileUtilities from './tile-utilities'
 import MapUtilities from '../common/plan/map-utilities'
 import FeatureSelector from './feature-selector'
 import Constants from '../common/constants'
+import SelectionModes from '../../react/components/selection/selection-modes'
 
 class TileComponentController {
 
@@ -36,7 +37,7 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, $timeout, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
+  constructor($document, $timeout, $ngRedux, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
 
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
@@ -70,6 +71,7 @@ class TileComponentController {
       if (plan) {
         this.areControlsEnabled = (plan.planState === Constants.PLAN_STATE.START_STATE) || (plan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
+      this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
     })
 
     // Subscribe to events for creating and destroying the map overlay layer
@@ -100,13 +102,6 @@ class TileComponentController {
     state.selectedDisplayMode.subscribe((selectedDisplayMode) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setselectedDisplayMode(selectedDisplayMode)
-      }
-    })
-    
-    // If analysis selection Type change, set that in the tile data
-    state.selectionTypeChanged.subscribe((analysisSelectionMode) => {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(analysisSelectionMode)
       }
     })
 
@@ -200,10 +195,10 @@ class TileComponentController {
           var canSelectLoc = true
           var canSelectSA = true
           if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS){
-            if (this.state.optimizationOptions.analysisSelectionMode != this.state.selectionModes.SELECTED_LOCATIONS){
+            if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS){
               canSelectLoc = false
             }
-            if (this.state.optimizationOptions.analysisSelectionMode != this.state.selectionModes.SELECTED_AREAS){
+            if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS){
               canSelectSA = false
             }
           }
@@ -259,7 +254,8 @@ class TileComponentController {
                                                          this.state.mapTileOptions.getValue(),
                                                          this.state.censusCategories.getValue(),
                                                          this.state.selectedDisplayMode.getValue(),
-                                                         this.state.optimizationOptions.analysisSelectionMode,
+                                                         SelectionModes,
+                                                         this.activeSelectionModeId,
                                                          this.state.displayModes,
                                                          this.state.viewModePanels, 
                                                          this.state, 
@@ -428,11 +424,11 @@ class TileComponentController {
         var canSelectSA   = false
         
         if(this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
-          switch (this.state.optimizationOptions.analysisSelectionMode) {
-            case this.state.selectionModes.SELECTED_AREAS:
+          switch (this.activeSelectionModeId) {
+            case SelectionModes.SELECTED_AREAS:
               canSelectSA = !canSelectSA
               break
-            case this.state.selectionModes.SELECTED_LOCATIONS:
+            case SelectionModes.SELECTED_LOCATIONS:
               canSelectLoc = !canSelectLoc
               break
           }
@@ -601,10 +597,37 @@ class TileComponentController {
   $onDestroy() {
     this.createMapOverlaySubscription()
     this.destroyMapOverlaySubscription()    
+    this.unsubscribeRedux()
+  }
+
+  // Map global state to component properties
+  mapStateToThis (reduxState) {
+    return {
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      selectionModes: reduxState.selection.selectionModes
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return { }
+  }
+
+  mergeToTarget(nextState, actions) {
+    const currentSelectionModeId = this.activeSelectionModeId
+    
+    // merge state and actions onto controller
+    Object.assign(this, nextState);
+    Object.assign(this, actions);   
+    
+    if (currentSelectionModeId !== nextState.activeSelectionModeId) {
+      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
+      }
+    }
   }
 }
 
-TileComponentController.$inject = ['$document', '$timeout', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
+TileComponentController.$inject = ['$document', '$timeout', '$ngRedux', 'state', 'tileDataService', 'uiNotificationService', 'contextMenuService', 'Utils']
 
 let tile = {
   template: '',

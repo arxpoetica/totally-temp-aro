@@ -16,7 +16,7 @@ function setLayerVisibility (state, layer, visibility) {
   Object.keys(state).forEach(key => {
     const layers = state[key]
     layers.forEach((stateLayer, index) => {
-      if (stateLayer.key === layer.key) {
+      if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
         layerToChange = stateLayer
         layerKey = key
         layerIndex = index

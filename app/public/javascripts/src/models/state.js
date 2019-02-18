@@ -6,6 +6,8 @@ import Actions from '../react/common/actions'
 import UserActions from '../react/components/user/user-actions'
 import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
+import SelectionActions from '../react/components/selection/selection-actions'
+import SelectionModes from '../react/components/selection/selection-modes'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -132,13 +134,6 @@ class State {
     ROUTE_FROM_FIBER: 'ROUTE_FROM_FIBER'
   }
 
-  // The selection modes for the application
-  service.selectionModes = {
-    SELECTED_AREAS: 'SELECTED_AREAS',
-    SELECTED_LOCATIONS: 'SELECTED_LOCATIONS',
-    SELECTED_ANALYSIS_AREAS: 'SELECTED_ANALYSIS_AREAS'
-  }
-
   // The selected panel when in the View mode
   service.viewModePanels = Object.freeze({
     LOCATION_INFO: 'LOCATION_INFO',
@@ -251,7 +246,6 @@ class State {
   service.showDataSourceUploadModal = new Rx.BehaviorSubject(false)
   service.dataItemsChanged = new Rx.BehaviorSubject({})
   service.viewSettingsChanged = new Rx.BehaviorSubject()
-  service.selectionTypeChanged = new Rx.BehaviorSubject()
   service.measuredDistance = new Rx.BehaviorSubject()
   service.dragStartEvent = new Rx.BehaviorSubject()
   service.dragEndEvent = new Rx.BehaviorSubject()
@@ -265,8 +259,6 @@ class State {
     MANUAL_PLAN_TARGET_ENTRY: null,
     MANUAL_PLAN_SA_ENTRY: null
   }
-
-  service.selectionTypeChanged.next(service.selectionModes.SELECTED_AREAS)
 
   service.hackRaiseEvent = (features) => {
     $rootScope.$broadcast('map_layer_clicked_feature', features, {})
@@ -569,7 +561,6 @@ class State {
 
     service.reloadLocationTypes()
     service.selectedDisplayMode.next(service.displayModes.VIEW)
-    service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
 
     service.networkAnalysisTypes = [
       { id: 'NETWORK_PLAN', label: 'Network Build', type: "NETWORK_PLAN" },
@@ -590,11 +581,13 @@ class State {
   service.reloadLocationTypes = () => {
     var locationTypesForRedux = List()
     var locations = service.configuration.locationCategories.categories
+    var uiLayerId = 0
     Object.keys(locations).forEach((locationKey) => {
       var location = locations[locationKey]
 
       if (service.configuration.perspective.locationCategories[locationKey].show) {
         location.checked = location.selected
+        location.uiLayerId = uiLayerId++
         locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location)))  // angular.toJson will strip out the $$hashkey key
       }
     })
@@ -625,18 +618,18 @@ class State {
    }
   }
 
-  service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.visible && (item.key === 'analysis_layer'))
+  service.getVisibleAnalysisLayers = () => $ngRedux.getState().mapLayers.boundary.filter(item => item.checked && (item.key === 'analysis_layer'))
 
   // Get a POST body that we will send to aro-service for performing optimization
   service.getOptimizationBody = () => {
-    return stateSerializationHelper.getOptimizationBody(service, optimization)
+    return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState(), optimization)
   }
 
   // Load optimization options from a JSON string
   service.loadOptimizationOptionsFromJSON = (json) => {
     // Note that we are NOT returning the state (the state is set after the call), but a promise
     // that resolves once all the geographies have been loaded
-    return stateSerializationHelper.loadStateFromJSON(service, optimization, json)
+    return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, json)
   }
 
   $document.ready(() => {
@@ -1105,7 +1098,7 @@ class State {
     return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
       .then((result) => {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-        stateSerializationHelper.loadStateFromJSON(service, optimization, planInputs)
+        stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, planInputs)
         return Promise.all([
           service.reloadSelectedLocations(),
           service.reloadSelectedServiceAreas(),
@@ -1789,11 +1782,12 @@ class State {
       // Get a list of ids to add and remove
       var idsToAdd = new Set(), idsToRemove = new Set()
 
-      if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id)
-        service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_LOCATIONS
-      else
-        service.optimizationOptions.analysisSelectionMode = service.selectionModes.SELECTED_AREAS
-      service.selectionTypeChanged.next(service.optimizationOptions.analysisSelectionMode)
+      if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
+        this.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
+      }
+      else {
+        this.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
+      }
 
       if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
         result.data.forEach((location) => {
@@ -1876,6 +1870,13 @@ class State {
 
   }
 
+  service.getDispatchers = () => {
+    // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
+    return {
+      setSelectionTypeById: service.setSelectionTypeById
+    }
+  }
+
   return service
   }
 
@@ -1889,7 +1890,8 @@ class State {
     return {
       setLoggedInUserRedux: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
       setPlanRedux: (plan) => {dispatch(PlanActions.setPlan(plan))},
-      subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})}
+      subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})},
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
     }
   }
 }
