@@ -164,8 +164,7 @@ class RoicReportsController {
   digestData(){
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
-    var optimizationBody = this.state.getOptimizationBody()
-    for (var i = 0; i < optimizationBody.financialConstraints.years; ++i) {
+    for (var i = 0; i < this.state.optimizationOptions.financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
     
