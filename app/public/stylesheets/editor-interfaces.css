@@ -107,6 +107,13 @@
   
 }
 
+.ei-button-icon{
+  padding-left: 10px;
+}
+
+.ei-button-icon{
+	padding-right: 10px;
+}
 
 .ei-foldout-state-label, .ei-foldout-btn, .ei-foldout-state-label-bottom, .ei-sub-btn, .ei-header-info{
   font-size: 0.7em;
@@ -238,9 +245,21 @@ editor-interface-tree .ei-header{
 	top: 0px;
 }
 
+.ei-pagination-menu{
+	text-align: center;
+}
 
+.ei-pagination-item{
+	display: inline-block;
+	padding: 8px;
+}
 
+.ei-pagination-item-nonactive{
+	font-weight: bold;
+}
 
-
+.ei-pagination-item-active{
+  cursor: pointer;
+}
 
  

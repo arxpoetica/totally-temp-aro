@@ -3,6 +3,7 @@
   <!-- 
   <div class="ei-header">{{$ctrl.rows.title}}</div>
   -->
+  
   <div class="ei-table-contain">
 	  <div class="ei-table-table">
 	    <div class="ei-table-body">
@@ -20,7 +21,7 @@
 	        <div class="ei-table-col-head" ng-repeat="(btnKey, btnValue) in $ctrl.actions"></div>
 	      </div>
 	      
-	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows">
+	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
 	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
 	          
 	          <editor-interface-value ng-if="rowValue.hasOwnProperty(colValue.propertyName)"
@@ -34,16 +35,29 @@
 	          
 	        </div>
 	        <div ng-if="$ctrl.canDelete" class="ei-table-cell">
-	          <button class="btn btn-danger btn-sm" ng-click="$ctrl.deleteItem(rowKey)"><i class="far fa-trash-alt action-button-icon"></i> delete</button>
+	          <button class="btn btn-danger btn-sm" 
+	                  ng-click="$ctrl.deleteItem(rowKey)"
+	                  data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="far fa-trash-alt ei-button-icon"></i></button>
 	        </div>
 	        <div class="ei-table-cell" ng-repeat="(btnKey, btnValue) in $ctrl.actions">
-	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" ng-class="" ng-click="btnValue.callBack(rowKey, rowValue)"><i ng-if="'' != btnValue.iconClass" ng-class="btnValue.iconClass" class="fa action-button-icon"></i>{{'' != btnValue.iconClass ? ' ' : ''}}{{btnValue.buttonText}}</button>
+	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
+	                  ng-click="btnValue.callBack(rowKey, rowValue)"
+	                  data-toggle="tooltip" data-placement="bottom" title="{{btnValue.toolTip}}"><i ng-if="'' != btnValue.iconClass" ng-class="btnValue.iconClass" class="fa ei-button-icon"></i>{{'' != btnValue.iconClass ? ' ' : ''}}{{btnValue.buttonText}}</button>
 	        </div>
 	      </div>
 	      
 	    </div>
 	  </div>
   </div>
+  
+  <div class="ei-pagination-menu" ng-if="$ctrl.rowsPerPage < $ctrl.rows.length">
+    <div class="ei-pagination-item" ng-repeat="page in $ctrl.pages track by $index+page">
+      <div class="ei-pagination-item-nonactive" ng-if="-1 == page || $ctrl.pageOffset == page">{{-1 == page ? "…" : page+1}}</div>
+      <div class="ei-pagination-item-active" ng-if="-1 != page && $ctrl.pageOffset != page" ng-click="$ctrl.setPage(page)">{{-1 == page ? "…" : page+1}}</div>
+    </div>
+  </div>
+        
+  
   <button class="btn btn-primary btn-sm" 
           ng-if="$ctrl.isEdit && $ctrl.canAdd" 
           ng-click="$ctrl.addItem()"

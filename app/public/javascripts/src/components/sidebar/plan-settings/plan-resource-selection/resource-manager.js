@@ -90,15 +90,17 @@ class ResourceManagerController {
     */
     this.actions = [
       {
-        buttonText: 'Edit', 
+        buttonText: '', //Edit
         buttonClass: "btn-primary", // use default
         iconClass: "fa-edit", 
+        toolTip: "Edit", 
         callBack: function(index, row){console.log('Edit');console.log(row)}
       }, 
       {
-        buttonText: 'Permissions', 
+        buttonText: '', // Permissions
         buttonClass: "btn-primary", // use default
-        iconClass: "", 
+        iconClass: "fa-user-plus", 
+        toolTip: "Permissions", 
         callBack: function(index, row){console.log('permissions');console.log(row)}
       }
     ]
