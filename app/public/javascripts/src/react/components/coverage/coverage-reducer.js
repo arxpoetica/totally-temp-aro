@@ -7,7 +7,7 @@ const defaultStatus = {
   progress: 0,
   initializationParams: {
     coverageType: 'location',
-    saveSiteCoverage: false,
+    groupKeyType: 'serviceArea',
     useMarketableTechnologies: true,
     useMaxSpeed: true
   }
@@ -41,12 +41,13 @@ function setCoverageType (state, coverageType) {
     } }
 }
 
-function setSaveSiteCoverage (state, saveSiteCoverage) {
+function setGroupKeyType (state, groupKeyType) {
   return { ...state,
     initializationParams: {
       ...state.initializationParams,
-      saveSiteCoverage: saveSiteCoverage
-    } }
+      groupKeyType: groupKeyType
+    }
+  }
 }
 
 function setLimitMarketableTechnologies (state, limitMarketableTechnologies) {
@@ -86,7 +87,7 @@ function coverageReducer (state = defaultStatus, action) {
       return setCoverageType(state, action.payload)
 
     case Actions.COVERAGE_SET_SAVE_SITE_COVERAGE:
-      return setSaveSiteCoverage(state, action.payload)
+      return setGroupKeyType(state, action.payload)
 
     case Actions.COVERAGE_SET_LIMIT_MARKETABLE_TECHNOLOGIES:
       return setLimitMarketableTechnologies(state, action.payload)
