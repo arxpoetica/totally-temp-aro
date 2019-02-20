@@ -87,10 +87,10 @@ function setCoverageType (coverageType) {
   }
 }
 
-function setSaveSiteCoverage (saveSiteCoverage) {
+function setGroupKeyType (groupKeyType) {
   return {
     type: Actions.COVERAGE_SET_SAVE_SITE_COVERAGE,
-    payload: saveSiteCoverage
+    payload: groupKeyType
   }
 }
 
@@ -120,7 +120,7 @@ export default {
   initializeCoverageReport: initializeCoverageReport,
   modifyCoverageReport: modifyCoverageReport,
   setCoverageType: setCoverageType,
-  setSaveSiteCoverage: setSaveSiteCoverage,
+  setGroupKeyType: setGroupKeyType,
   setLimitMarketableTechnology: setLimitMarketableTechnology,
   setLimitMaxSpeed: setLimitMaxSpeed,
   setSiteAssignment: setSiteAssignment

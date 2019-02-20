@@ -17,7 +17,11 @@ class CoverageInitializerController {
       { id: 'census_block', name: 'Form 477' },
       { id: 'location', name: 'Locations' }
     ]
-
+    this.groupKeyTypes = [
+      { id: 'serviceArea', name: 'Service Areas' },
+      { id: 'networkNode', name: 'Network Nodes' },
+      { id: 'location', name: 'Locations' }
+    ]
     this.serviceAreas = []
     this.analysisAreas = []
     this.siteAssignments = ['Proximity', 'Incremental']
@@ -32,7 +36,7 @@ class CoverageInitializerController {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
       selectionModes: getAllowedSelectionModes(reduxState),
       coverageType: reduxState.coverage.initializationParams.coverageType,
-      saveSiteCoverage: reduxState.coverage.initializationParams.saveSiteCoverage,
+      groupKeyType: reduxState.coverage.initializationParams.groupKeyType,
       useMarketableTechnologies: reduxState.coverage.initializationParams.useMarketableTechnologies,
       useMaxSpeed: reduxState.coverage.initializationParams.useMaxSpeed,
       coverageReport: reduxState.coverage.report
@@ -42,7 +46,7 @@ class CoverageInitializerController {
   mapDispatchToTarget (dispatch) {
     return {
       setCoverageType: coverageType => dispatch(CoverageActions.setCoverageType(coverageType)),
-      setSaveSiteCoverage: saveSiteCoverage => dispatch(CoverageActions.setSaveSiteCoverage(saveSiteCoverage)),
+      setGroupKeyType: groupKeyType => dispatch(CoverageActions.setGroupKeyType(groupKeyType)),
       setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
       setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
