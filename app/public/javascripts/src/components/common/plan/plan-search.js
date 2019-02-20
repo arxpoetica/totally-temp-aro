@@ -16,6 +16,7 @@ class PlanSearchController {
       params: {}
     }
     this.idToServiceAreaCode = {}
+    this.creatorsSearchList = []
   }
 
   $onInit() {
@@ -31,6 +32,8 @@ class PlanSearchController {
                             user.type = 'created_by'  // Just a lot of legacy stuff that depends upon this
                             return user
                           })
+
+      this.creatorsSearchList = this.systemUsers.slice(10)                          
     }
   }
 
@@ -214,6 +217,13 @@ class PlanSearchController {
   getPlanCreatorName(createdBy) {
     var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
     return creator && creator.fullName
+  }
+
+  searchCreatorsList(searchObj){
+    this.creatorsSearchList = this.systemUsers.filter((creator) => {
+      if(creator.fullName.toLocaleLowerCase().includes(searchObj.toLocaleLowerCase()))
+        return creator
+    }) 
   }
 }
 

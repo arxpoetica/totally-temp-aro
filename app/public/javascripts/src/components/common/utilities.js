@@ -91,6 +91,7 @@ class Utilities {
     var name = ''
     if ('location' == dataTypeList[0]){
       name = 'Location'
+      if (feature.hasOwnProperty(name)) name = feature.name
     }else if ('equipment_boundary' == dataTypeList[0]){
       name = 'Boundary'
     }else if(feature.hasOwnProperty('networkNodeType')){

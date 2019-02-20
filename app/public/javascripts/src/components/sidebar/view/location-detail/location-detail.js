@@ -7,11 +7,12 @@ class LocationDetailController {
     this.locationDetailPropertiesFactory = locationDetailPropertiesFactory
     this.plan = null
     this.selectedLocationInfo = null
-    this.map_url = null
+    //this.map_url = null
     this.currentUser = state.loggedInUser
     this.selectedLocation = null
     this.toggleOtherAttributes = false
-
+    this.roicPlanSettings = null
+    
     this.planSubscription = state.plan.subscribe((plan) => {
       this.plan = plan
     })
@@ -25,7 +26,6 @@ class LocationDetailController {
         !this.state.isRulerEnabled) {
         var locationsList = []
         if (options.hasOwnProperty('locations')) locationsList = options.locations
-        
         
         // Update state's selected location list 
         if (options.locations && options.locations.length > 0 && options.locations[0].location_id) {
@@ -49,7 +49,7 @@ class LocationDetailController {
           this.selectedLocationObjectId = feature.object_id
           this.toggleAuditLog = false
           this.updateSelectedState(feature, locationId)
-          this.getLocationInfo(this.plan.id,locationId,feature.object_id)
+          this.getLocationInfo(this.plan.id,locationId)
             .then(locationInfo => this.showStaticMap(locationInfo))
             .catch((err) => console.error(err))
         } else {
@@ -71,23 +71,44 @@ class LocationDetailController {
   }
 
   // Get the location Information
-  getLocationInfo(planId, id, objectId){
+  getLocationInfo(planId, id){
     return this.$http.get(`/locations/${planId}/${id}/show`)// note: change this for a service endpoint?
-      .then((result) => {
-        if (this.state.configuration.perspective.locationDetails.showDefaultDetails) {
-          return Promise.resolve(result.data)
-        } else if (this.state.configuration.perspective.locationDetails.showSalesDetails) {
-          result.data.latitude = result.data.geog.coordinates[1]
-          result.data.longitude = result.data.geog.coordinates[0]
-          var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
-          locationProperties.geog = result.data.geog
-          locationProperties.location_id = result.data.location_id
-          return Promise.resolve(locationProperties)
-        } else {
-          return Promise.reject('You must have either default or sales details shown')
+    .then((result) => {
+      
+      var locationIds = []
+      if (result.data.hasOwnProperty('locSourceIds')){
+        if(result.data.locSourceIds.hasOwnProperty('bizSourceIds') && result.data.locSourceIds.bizSourceIds.object_ids ){
+          locationIds = locationIds.concat( result.data.locSourceIds.bizSourceIds.object_ids )
         }
-      })
-      .catch((err) => console.error(err))
+        if(result.data.locSourceIds.hasOwnProperty('hhSourceIds') && result.data.locSourceIds.hhSourceIds.object_ids ){
+          locationIds = locationIds.concat( result.data.locSourceIds.hhSourceIds.object_ids )
+        }
+        if(result.data.locSourceIds.hasOwnProperty('towerSourceIds') && result.data.locSourceIds.towerSourceIds.object_ids ){
+          locationIds = locationIds.concat( result.data.locSourceIds.towerSourceIds.object_ids )
+        }
+      }
+      
+      this.roicPlanSettings = {
+        "analysis_type": "LOCATION_ROIC",
+        "locationIds": locationIds,
+        "planId": planId,
+        "projectTemplateId": 1
+      }
+      
+      if (this.state.configuration.perspective.locationDetails.showDefaultDetails) {
+        return Promise.resolve(result.data)
+      } else if (this.state.configuration.perspective.locationDetails.showSalesDetails) {
+        result.data.latitude = result.data.geog.coordinates[1]
+        result.data.longitude = result.data.geog.coordinates[0]
+        var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
+        locationProperties.geog = result.data.geog
+        locationProperties.location_id = result.data.location_id
+        return Promise.resolve(locationProperties)
+      } else {
+        return Promise.reject('You must have either default or sales details shown')
+      }
+    })
+    .catch((err) => console.error(err))
   }
   
   updateSelectedState(feature, id){
@@ -103,7 +124,7 @@ class LocationDetailController {
     this.selectedLocationInfo = locationInfo
     this.selectedLocationInfo.attributes = this.selectedLocationInfo.attributes.filter(val => val != null)
     this.showAttributes = (this.currentUser.perspective === 'sales_engineer' || this.currentUser.perspective === 'account_exec') && !angular.equals(locationInfo.attributes, {})
-    
+    /*
     var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
     var params = {
       center: coordinates,
@@ -114,13 +135,13 @@ class LocationDetailController {
       markers: 'color:red|label:L|' + coordinates,
       key: this.state.googleMapsLicensing.API_KEY
     }
-    this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
-      _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
-    
+    //this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
+    //  _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
+    */
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
   }
-
+  
   showDetailLocationInfo() {
     this.selectedLocationInfo.id = +this.selectedLocationInfo.location_id      
     this.state.showDetailedLocationInfo.next(this.selectedLocationInfo)
@@ -129,7 +150,7 @@ class LocationDetailController {
   viewSelectedLocation(selectedLocation) {
     this.selectedLocationObjectId = selectedLocation.objectId
     this.updateSelectedState(selectedLocation, selectedLocation.id)
-    this.getLocationInfo(this.plan.id,selectedLocation.id,selectedLocation.objectId)
+    this.getLocationInfo(this.plan.id,selectedLocation.id)
     .then(locationInfo => this.showStaticMap(locationInfo))
     .then(() => {
       map.setCenter({ lat: this.selectedLocationInfo.geog.coordinates[1], lng: this.selectedLocationInfo.geog.coordinates[0] })
