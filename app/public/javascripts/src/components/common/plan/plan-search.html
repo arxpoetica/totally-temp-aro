@@ -50,8 +50,9 @@
     <plan-search-filter style="flex: 0 1 auto;"
       object-name="Creator"
       search-property="fullName"
-      search-list="$ctrl.systemUsers"
-      apply-search="$ctrl.applySearchFilter(selectedFilters, 'created_by')"></plan-search-filter>
+      search-list="$ctrl.creatorsSearchList"
+      apply-search="$ctrl.applySearchFilter(selectedFilters, 'created_by')"
+      refresh-tag-list="$ctrl.searchCreatorsList(searchObj)"></plan-search-filter>
   </div>
 
   <p ng-show="$ctrl.plans.length < 1" class="text-center">
