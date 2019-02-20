@@ -28,7 +28,7 @@
         <select class="form-control"
                 ng-model="$ctrl.selectedResourceKey"
                 ng-change="$ctrl.onSelectedResourceKeyChanged()"
-                ng-options="key as value.description for (key, value) in $ctrl.resourceItems">
+                ng-options="key as value for (key, value) in $ctrl.filterByOptions">
         </select>
       </div>
     </div>

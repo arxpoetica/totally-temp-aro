@@ -3,6 +3,7 @@ class ResourceManagerController {
     this.$http = $http
     this.$document = $document
     this.state = state
+    this.filterByOptions = {}
     // Hold a mapping that we use to map from resource keys to endpoints
     this.resourceKeyToEndpointId = {
       price_book: 'pricebook',
@@ -51,43 +52,11 @@ class ResourceManagerController {
         "defaultValue": "",
         "editable": true,
         "visible": true
-      }/*,
-      {
-        "propertyName": "description",
-        "levelOfDetail": 0,
-        "format": "",
-        "displayName": "Description",
-        "enumTypeURL": "",
-        "displayDataType": "string",
-        "defaultValue": "",
-        "editable": true,
-        "visible": true
-      }*/
+      }
     ]
     
     this.rows = []
-    /*
-    this.rows = [
-      {
-        name: 'name 1', 
-        description: 'description of thing 1', 
-        minDown: 1, 
-        maxDown: 11
-      },
-      {
-        name: 'nombre 2', 
-        description: 'description of thing 2', 
-        minDown: 2, 
-        maxDown: 20
-      },
-      {
-        name: '333', 
-        description: 'this is a description of thing 3', 
-        minDown: 3, 
-        maxDown: 333
-      }
-    ]
-    */
+    
     this.actions = [
       {
         buttonText: '', //Edit
@@ -102,7 +71,15 @@ class ResourceManagerController {
         iconClass: "fa-user-plus", 
         toolTip: "Permissions", 
         callBack: function(index, row){console.log('permissions');console.log(row)}
+      }/*
+      {
+        buttonText: '', // Permissions
+        buttonClass: "btn-primary", // use default
+        iconClass: "fa-user-plus", 
+        toolTip: "Permissions", 
+        callBack: function(index, row){console.log('permissions');console.log(row)}
       }
+      */
     ]
     
     
@@ -118,20 +95,51 @@ class ResourceManagerController {
   
   
   $onChanges(changes){
+    if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')){
+      this.buildRows()
+    }
     if (changes.hasOwnProperty('resourceItems')){
-      var newRows = []
-      changes.resourceItems.currentValue
-      for (const key in changes.resourceItems.currentValue) {
-        if (changes.resourceItems.currentValue.hasOwnProperty(key)){
-          if (changes.resourceItems.currentValue[key].hasOwnProperty("allManagers")){
-            newRows = newRows.concat( changes.resourceItems.currentValue[key].allManagers )
-          }
-        }
-      }
-      this.rows = newRows
+      this.buildFilterOptions()
     }
   }
   
+  onSelectedResourceKeyChanged(){
+    this.buildRows()
+  }
+  
+  buildRows(){
+    var newRows = []
+    
+    for (const key in this.resourceItems) {
+      if (this.resourceItems.hasOwnProperty(key)){
+        if (this.resourceItems[key].hasOwnProperty("allManagers")
+            && ('all' == this.selectedResourceKey || key == this.selectedResourceKey)
+        ){
+          newRows = newRows.concat( this.resourceItems[key].allManagers )
+        }
+      }
+    }
+    this.rows = newRows
+  }
+  
+  buildFilterOptions(){
+    var newFilterByOptions = {'all':'all'}
+    
+    for (const key in this.resourceItems) {
+      if (this.resourceItems.hasOwnProperty(key)){
+        if (this.resourceItems[key].hasOwnProperty("allManagers")){
+          var desc = key
+          if (this.resourceItems[key].hasOwnProperty('description')){
+            desc = this.resourceItems[key].description
+          }
+          //newFilterByOptions.push({'label':desc, 'value':key})
+          newFilterByOptions[key] = desc
+        }
+      }
+    }
+    
+    this.filterByOptions = newFilterByOptions
+  }
   
   $doCheck() {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
