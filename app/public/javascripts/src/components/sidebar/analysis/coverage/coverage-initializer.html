@@ -18,17 +18,18 @@
       </td>
     </tr>
 
-    <!-- Save site coverage -->
-    <tr ng-if="$ctrl.coverageType === 'location'">
-      <td>Save site coverage</td>
+    <!-- Group key types -->
+    <tr>
+      <td>Save coverage in</td>
       <td>
-        <input type="checkbox"
-               class="checkboxfill"
-               ng-checked="$ctrl.saveSiteCoverage"
-               ng-click="$ctrl.setSaveSiteCoverage(!$ctrl.saveSiteCoverage)">
+        <select class="form-control"
+                ng-model="$ctrl.groupKeyType"
+                ng-options="item.id as item.name for item in $ctrl.groupKeyTypes"
+                ng-change="$ctrl.setGroupKeyType($ctrl.groupKeyType)">
+        </select>
       </td>
     </tr>
-    
+
     <!-- Limit To Marketable Technology -->
     <tr>
       <td>Limit To Marketable Technology</td>

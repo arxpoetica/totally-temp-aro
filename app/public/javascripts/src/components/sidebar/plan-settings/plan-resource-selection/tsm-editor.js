@@ -48,7 +48,7 @@ class TsmEditorController {
     })
 
     if (changedModels.length > 0) {
-      this.$http.put(`/service/v1/tsm-manager/${this.tsmManagerId}/spends`, changedModels)
+      this.$http.put(`/service/v1/tsm-manager/${this.tsmManagerId}/spends?refreshState=true`, changedModels)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
     } else {
