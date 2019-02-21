@@ -18,10 +18,7 @@ class MapSelectorPlanTargetController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
     // Handle selection events from state
-    this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
-      
-      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
-
+    this.unsub = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
       this.addOrRemoveSelection(event.locations, 'locations')
       this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas')
       this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas')
