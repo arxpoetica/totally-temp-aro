@@ -8,13 +8,13 @@ import SelectionModes from '../selection/selection-modes'
 export class PlanTargetList extends Component {
   render () {
     var geometryKey = null; var descriptionKey = null
-    if (this.props.activeSelectionMode.id === SelectionModes.SELECTED_LOCATIONS) {
+    if (this.props.activeSelectionModeId === SelectionModes.SELECTED_LOCATIONS) {
       geometryKey = 'locations'
       descriptionKey = 'address'
-    } else if (this.props.activeSelectionMode.id === SelectionModes.SELECTED_AREAS) {
+    } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_AREAS) {
       geometryKey = 'serviceAreas'
       descriptionKey = 'code'
-    } else if (this.props.activeSelectionMode.id === SelectionModes.SELECTED_ANALYSIS_AREAS) {
+    } else if (this.props.activeSelectionModeId === SelectionModes.SELECTED_ANALYSIS_AREAS) {
       geometryKey = 'analysisAreas'
       descriptionKey = 'code'
     }
@@ -58,14 +58,14 @@ export class PlanTargetList extends Component {
 
 PlanTargetList.propTypes = {
   planId: PropTypes.number,
-  activeSelectionMode: PropTypes.object,
+  activeSelectionModeId: PropTypes.string,
   planTargets: PropTypes.object,
   planTargetDescriptions: PropTypes.object
 }
 
 const mapStateToProps = (state) => ({
   planId: state.plan.activePlan && state.plan.activePlan.id,
-  activeSelectionMode: state.selection.activeSelectionMode,
+  activeSelectionModeId: state.selection.activeSelectionMode.id,
   planTargets: state.selection.planTargets,
   planTargetDescriptions: state.selection.planTargetDescriptions
 })
