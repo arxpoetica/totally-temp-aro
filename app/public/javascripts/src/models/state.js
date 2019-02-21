@@ -481,11 +481,6 @@ class State {
 
   // Hold all the selected tile elements like locations, service areas, etc.
   service.selection = {
-    planTargets: {
-      locationIds: new Set(),
-      serviceAreaIds: new Set(),
-      analysisAreaIds: new Set()
-    },
     details: {
       analysisAreaId: null,
       censusBlockId: null,
@@ -506,7 +501,6 @@ class State {
   // this point because everything binds to the "selection" object, so just creating a selection object is sufficient.
   service.cloneSelection = () => {
     return {
-      planTargets: service.selection.planTargets,
       details: service.selection.details,
       editable: service.selection.editable
     }
@@ -514,44 +508,6 @@ class State {
 
   // Hold a map of selected locations
   service.selectedLocationIcon = '/images/map_icons/aro/target.png'
-  service.reloadSelectedLocations = () => {
-    var plan = service.plan.getValue()
-    return $http.get(`/locations/${plan.id}/selectedLocationIds`)
-      .then((result) => {
-        var newSelection = service.cloneSelection()
-        newSelection.planTargets.locationIds = new Set()
-        result.data.forEach((selectedLocationId) => newSelection.planTargets.locationIds.add(+selectedLocationId.location_id))
-        service.selection = newSelection
-        return Promise.resolve()
-      })
-      .catch(err => console.error(err))
-  }
-
-  service.reloadSelectedServiceAreas = () => {
-    var plan = service.plan.getValue()
-    return $http.get(`/service_areas/${plan.id}/selectedServiceAreaIds`)
-      .then((result) => {
-        var newSelection = service.cloneSelection()
-        newSelection.planTargets.serviceAreaIds = new Set()
-        result.data.forEach((serviceArea) => newSelection.planTargets.serviceAreaIds.add(+serviceArea.service_area_id))
-        service.selection = newSelection
-        return Promise.resolve()
-      })
-      .catch(err => console.error(err))
-  }
-
-  service.reloadSelectedAnalysisAreas = () => {
-    var plan = service.plan.getValue()
-    return $http.get(`/analysis_areas/${plan.id}/selectedAnalysisAreaIds`)
-      .then((result) => {
-        var newSelection = service.cloneSelection()
-        newSelection.planTargets.analysisAreaIds = new Set()
-        result.data.forEach((analsisArea) => newSelection.planTargets.analysisAreaIds.add(+analsisArea.analysis_area_id))
-        service.selection = newSelection
-        return Promise.resolve()
-      })
-      .catch(err => console.error(err))
-  }
 
   // Plan - define once
   service.plan = new Rx.BehaviorSubject(null)
@@ -1099,8 +1055,6 @@ class State {
         var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
         stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, planInputs)
         return Promise.all([
-          service.reloadSelectedLocations(),
-          service.reloadSelectedServiceAreas(),
           service.loadPlanDataSelectionFromServer(),
           service.loadPlanResourceSelectionFromServer(),
           service.loadNetworkConfigurationFromServer()
@@ -1776,59 +1730,44 @@ class State {
     //select id from aro.location_entity where data_source_id = 1 and id in
     //(239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
     $http.post('/locations/getLocationIds',{query: service.expertMode[service.selectedExpertMode]})
-    .then((result)=>{
-      var plan = service.plan.getValue()
-      // Get a list of ids to add and remove
-      var idsToAdd = new Set(), idsToRemove = new Set()
+      .then((result)=>{
+        var plan = service.plan.getValue()
 
-      if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
-        this.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
-      }
-      else {
-        this.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
-      }
+        const dispatchers = service.getDispatchers()
+        if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
+          dispatchers.setSelectionTypeById(SelectionModes.SELECTED_LOCATIONS)
+        }
+        else {
+          dispatchers.setSelectionTypeById(SelectionModes.SELECTED_AREAS)
+        }
 
-      if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
-        result.data.forEach((location) => {
-          if (service.selection.planTargets.locationIds.has(+location)) {
-            idsToRemove.add(+location)
-          } else {
-            idsToAdd.add(+location)
-          }
-        })
-        // Make these changes to the database, then reload targets from the DB
-        var addRemoveTargetPromises = [
-          $http.post(`/network_plan/${plan.id}/addTargets`, { locationIds: Array.from(idsToAdd) }),
-          $http.post(`/network_plan/${plan.id}/removeTargets`, { locationIds: Array.from(idsToRemove) })
-        ]
-        Promise.all(addRemoveTargetPromises)
-          .then((response) => {
-            // Reload selected locations from database
-            service.reloadSelectedLocations()
-            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]
+        var addPlanTargets = { locations: new Set(), serviceAreas: new Set() }
+        var removePlanTargets = { locations: new Set(), serviceAreas: new Set() }
+        if (service.selectedExpertMode === service.expertModeTypes['MANUAL_PLAN_TARGET_ENTRY'].id) {
+          result.data.forEach((location) => {
+            if (service.reduxPlanTargets.locations.has(+location)) {
+              removePlanTargets.locations.add(+location)
+            } else {
+              addPlanTargets.locations.add(+location)
+            }
           })
-      } else {
-        result.data.forEach((serviceAreaId) => {
-          if (service.selection.planTargets.serviceAreaIds.has(+serviceAreaId)) {
-            idsToRemove.add(+serviceAreaId)
-          } else {
-            idsToAdd.add(+serviceAreaId)
-          }
-        })
-        // Make these changes to the database, then reload targets from the DB
-        var addRemoveTargetPromises = [
-          $http.post(`/service_areas/${plan.id}/addServiceAreaTargets`, { serviceAreaIds: Array.from(idsToAdd) }),
-          $http.post(`/service_areas/${plan.id}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(idsToRemove) })
-        ]
-        Promise.all(addRemoveTargetPromises)
-          .then((response) => {
-            service.reloadSelectedServiceAreas()
-            service.networkAnalysisType = service.networkAnalysisTypes.filter((analsisType) => analsisType.id === 'NETWORK_PLAN')[0]
+        } else {
+          result.data.forEach((serviceAreaId) => {
+            if (service.reduxPlanTargets.serviceAreas.has(+serviceAreaId)) {
+              removePlanTargets.serviceAreas.add(+serviceAreaId)
+            } else {
+              addPlanTargets.serviceAreas.add(+serviceAreaId)
+            }
           })
-          .catch(err => console.error(err))
-      }
-
-    })
+        }
+        if (addPlanTargets.locations.size > 0 || addPlanTargets.serviceAreas.size > 0) {
+          dispatchers.addPlanTargets(plan.id, addPlanTargets)
+        }
+        if (removePlanTargets.locations.size > 0 || removePlanTargets.serviceAreas.size > 0) {
+          dispatchers.removePlanTargets(plan.id, removePlanTargets)
+        }
+      })
+      .catch(err => console.log(err))
   }
 
   service.getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
@@ -1872,16 +1811,19 @@ class State {
   service.getDispatchers = () => {
     // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
     return {
-      setSelectionTypeById: service.setSelectionTypeById
+      setSelectionTypeById: service.setSelectionTypeById,
+      addPlanTargets: service.addPlanTargets,
+      removePlanTargets: service.removePlanTargets
     }
   }
 
   return service
   }
 
-  mapStateToThis(state) {
+  mapStateToThis(reduxState) {
     return {
-      locationLayers: getLocationLayersList(state)
+      locationLayers: getLocationLayersList(reduxState),
+      reduxPlanTargets: reduxState.selection.planTargets
     }
   }
 
@@ -1890,7 +1832,9 @@ class State {
       setLoggedInUserRedux: (loggedInUser) => {dispatch(UserActions.setLoggedInUser(loggedInUser))},
       setPlanRedux: (plan) => {dispatch(PlanActions.setPlan(plan))},
       subscribeToPlanSocket: (planId) => {dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` }})},
-      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
+      setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
+      addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
     }
   }
 }

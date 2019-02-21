@@ -1,7 +1,7 @@
 import MapUtilities from '../../common/plan/map-utilities'
 
 class AroDebugController {
-  constructor(state, $http, $timeout, tracker) {
+  constructor(state, $http, $timeout, $ngRedux, tracker) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
@@ -12,13 +12,14 @@ class AroDebugController {
       z: null,
       bounds: null
     }
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
     tracker.trackEvent(tracker.CATEGORIES.ENTER_DEBUGGING_MODE, tracker.ACTIONS.CLICK)
   }
 
   getMorphologyTileInfoForSelectedServiceAreas() {
     // For all selected service areas, gets the morphology tile debugging info from aro-service
     var tileInfoPromises = []
-    this.state.selection.planTargets.serviceAreaIds.forEach((serviceAreaId) => {
+    this.planTargetServiceAreas.forEach((serviceAreaId) => {
       tileInfoPromises.push(this.$http.get(`/service/v1/tile-system-cmd/check_service_area/${serviceAreaId}`))
     })
 
@@ -49,9 +50,23 @@ class AroDebugController {
   getTileBoundsInfo() {
     this.tileInfo.bounds = JSON.stringify(MapUtilities.getTileLatLngBounds(this.tileInfo.z,this.tileInfo.x,this.tileInfo.y),undefined,2)
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      planTargetServiceAreas: reduxState.selection.planTargets.serviceAreas
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return { }
+  }
+
+  $onDestroy() {
+    this.unsubscribeRedux()
+  }
 }
 
-AroDebugController.$inject = ['state', '$http', '$timeout', 'tracker']
+AroDebugController.$inject = ['state', '$http', '$timeout', '$ngRedux', 'tracker']
 
 let aroDebug = {
   templateUrl: '/components/sidebar/debug/aro-debug.html',

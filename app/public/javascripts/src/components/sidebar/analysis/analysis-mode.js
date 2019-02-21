@@ -27,14 +27,14 @@ class AnalysisModeController {
     this.removeTarget = (target) => {
       $http.post(`/network_plan/${this.plan.id}/removeTargets`, { locationIds: target.map((loc) => loc.id) })
       .then((response) => {
-        this.state.reloadSelectedLocations()
+        // this.state.reloadSelectedLocations()
       })
     }
 
     this.removeServiceArea = (target) => {
       $http.post(`/service_areas/${this.plan.id}/removeServiceAreaTargets`, { serviceAreaIds: target.map((sa) => sa.id) })
       .then((response) => {
-        this.state.reloadSelectedServiceAreas()
+        // this.state.reloadSelectedServiceAreas()
       })
       .catch(err => console.error(err))
     }
@@ -42,7 +42,7 @@ class AnalysisModeController {
     this.removeAnalysisAreas = (target) => {
       $http.post(`/analysis_areas/${this.plan.id}/removeAnalysisAreaTargets`, { analysisAreaIds: target.map((sa) => sa.id) })
       .then((response) => {
-        this.state.reloadSelectedAnalysisAreas()
+        // this.state.reloadSelectedAnalysisAreas()
       })
       .catch(err => console.error(err))
     }

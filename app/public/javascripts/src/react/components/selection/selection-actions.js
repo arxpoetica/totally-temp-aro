@@ -8,10 +8,14 @@ function setActiveSelectionMode (selectionModeId) {
   }
 }
 
+function clearAllPlanTargets () {
+  return { type: Actions.SELECTION_CLEAR_ALL_PLAN_TARGETS }
+}
+
 function loadPlanTargetSelectionsFromServer (planId) {
   return dispatch => {
     // First clear all selections
-    dispatch({ type: Actions.SELECTION_CLEAR_ALL_PLAN_TARGETS })
+    dispatch(clearAllPlanTargets)
 
     // Then get selections from the server
     var selectionPromises = [
@@ -75,6 +79,7 @@ function removePlanTargets (planId, planTargets) {
 
 export default {
   setActiveSelectionMode: setActiveSelectionMode,
+  clearAllPlanTargets: clearAllPlanTargets,
   loadPlanTargetSelectionsFromServer: loadPlanTargetSelectionsFromServer,
   addPlanTargets: addPlanTargets,
   removePlanTargets: removePlanTargets

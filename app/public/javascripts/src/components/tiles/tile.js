@@ -594,7 +594,7 @@ class TileComponentController {
   }
 
   $onChanges(changesObj) {
-    if (changesObj.selection) {
+    if (changesObj.oldSelection) {
       // Update the selection in the renderer
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.oldSelection)
@@ -631,15 +631,11 @@ class TileComponentController {
     Object.assign(this, nextState);
     Object.assign(this, actions);   
     
-    if (currentSelectionModeId !== nextState.activeSelectionModeId) {
+    if (currentSelectionModeId !== nextState.activeSelectionModeId
+        || this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
-      }
-    }
-    if (this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
-      if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
-        // If the selection has changed, redraw the tiles
         this.tileDataService.markHtmlCacheDirty()
         this.refreshMapTiles()
       }

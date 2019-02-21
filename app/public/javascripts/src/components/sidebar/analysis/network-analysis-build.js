@@ -69,30 +69,30 @@ class NetworkAnalysisBuildController {
 
   $onChanges(changesObj) {
     if (changesObj.selection) {
-      // The selected locations have changed. Get the count and addresses that we want to show
-      this.targetsTotal = this.state.selection.planTargets.locationIds.size
-      var locationIds = Array.from(this.state.selection.planTargets.locationIds) // Only get addresses for a few locations
-      this.$http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-        .then((result) => {
-          this.targets = result.data
-        })
-        .catch(err => console.error(err))
+      // // The selected locations have changed. Get the count and addresses that we want to show
+      // this.targetsTotal = this.state.selection.planTargets.locationIds.size
+      // var locationIds = Array.from(this.state.selection.planTargets.locationIds) // Only get addresses for a few locations
+      // this.$http.post('/network_plan/targets/addresses', { locationIds: locationIds })
+      //   .then((result) => {
+      //     this.targets = result.data
+      //   })
+      //   .catch(err => console.error(err))
 
-      // The selected service areas have changed.
-      var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
-      this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-        .then((result) => {
-          this.serviceAreas = result.data
-        })
-        .catch(err => console.error(err))
+      // // The selected service areas have changed.
+      // var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
+      // this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
+      //   .then((result) => {
+      //     this.serviceAreas = result.data
+      //   })
+      //   .catch(err => console.error(err))
       
-      // The selected analysis areas have changed.
-      var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
-      this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
-        .then((result) => {
-          this.analysisAreas = result.data
-        })
-        .catch(err => console.error(err))
+      // // The selected analysis areas have changed.
+      // var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
+      // this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
+      //   .then((result) => {
+      //     this.analysisAreas = result.data
+      //   })
+      //   .catch(err => console.error(err))
     }
   }
 
