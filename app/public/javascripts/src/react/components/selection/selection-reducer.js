@@ -1,12 +1,6 @@
 import Actions from '../../common/actions'
 import SelectionModes from './selection-modes'
 
-const emptyPlanTargets = {
-  locations: new Set(),
-  serviceAreas: new Set(),
-  analysisAreas: new Set()
-}
-
 const defaultState = {
   selectionModes: [
     { id: SelectionModes.SELECTED_AREAS, description: 'Service Areas' },
@@ -14,7 +8,11 @@ const defaultState = {
     { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' }
   ],
   activeSelectionMode: { id: 'SELECTED_AREAS', description: 'Service Areas' },
-  planTargets: emptyPlanTargets
+  planTargets: {
+    locations: new Set(),
+    serviceAreas: new Set(),
+    analysisAreas: new Set()
+  }
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -23,7 +21,14 @@ function setActiveSelectionModeById (state, newSelectionModeId) {
 }
 
 function clearAllPlanTargets (state) {
-  return { ...state, planTargets: emptyPlanTargets }
+  return {
+    ...state,
+    planTargets: {
+      locations: new Set(),
+      serviceAreas: new Set(),
+      analysisAreas: new Set()
+    }
+  }
 }
 
 function addPlanTargets (state, planTargets) {
