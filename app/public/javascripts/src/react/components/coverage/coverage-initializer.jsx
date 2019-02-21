@@ -15,6 +15,11 @@ class CoverageInitializer extends Component {
         { id: 'census_block', name: 'Form 477' },
         { id: 'location', name: 'Locations' }
       ],
+      groupKeyTypes: [
+        { id: 'serviceArea', name: 'Service Areas' },
+        { id: 'networkNode', name: 'Network Nodes' },
+        { id: 'location', name: 'Locations' }
+      ],
       siteAssignments: ['Proximity', 'Incremental'],
       selectedSiteAssignment: 'Proximity'
     }
@@ -37,19 +42,17 @@ class CoverageInitializer extends Component {
             </td>
           </tr>
 
-          {/* Save site coverage */}
-          {this.props.coverageType === 'location'
-            ? <tr ng-if="$ctrl.coverageType === 'location'">
-              <td>Save site coverage</td>
-              <td>
-                <input type='checkbox'
-                  className='checkboxfill'
-                  checked={this.props.saveSiteCoverage}
-                  onChange={event => this.props.setSaveSiteCoverage(event.target.checked)} />
-              </td>
-            </tr>
-            : null
-          }
+          {/* Group key types */}
+          <tr>
+            <td>Save coverage in</td>
+            <td>
+              <select className='form-control'
+                value={this.props.groupKeyType}
+                onChange={(event) => this.props.setGroupKeyType(event.target.value)}>
+                {this.state.groupKeyTypes.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}
+              </select>
+            </td>
+          </tr>
 
           {/* Limit To Marketable Technology */}
           <tr>
@@ -126,7 +129,7 @@ CoverageInitializer.propTypes = {
   activeSelectionModeId: PropTypes.string,
   selectionModes: PropTypes.array,
   coverageType: PropTypes.string,
-  saveSiteCoverage: PropTypes.bool,
+  groupKey: PropTypes.string,
   useMarketableTechnologies: PropTypes.bool,
   useMaxSpeed: PropTypes.bool,
   coverageReport: PropTypes.object
@@ -141,7 +144,7 @@ const mapStateToProps = state => ({
   activeSelectionModeId: state.selection.activeSelectionMode.id,
   selectionModes: getAllowedSelectionModes(state),
   coverageType: state.coverage.initializationParams.coverageType,
-  saveSiteCoverage: state.coverage.initializationParams.saveSiteCoverage,
+  groupKey: state.coverage.initializationParams.groupKey,
   useMarketableTechnologies: state.coverage.initializationParams.useMarketableTechnologies,
   useMaxSpeed: state.coverage.initializationParams.useMaxSpeed,
   coverageReport: state.coverage.report
@@ -149,7 +152,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   setCoverageType: coverageType => dispatch(CoverageActions.setCoverageType(coverageType)),
-  setSaveSiteCoverage: saveSiteCoverage => dispatch(CoverageActions.setSaveSiteCoverage(saveSiteCoverage)),
+  setGroupKeyType: groupKey => dispatch(CoverageActions.setGroupKeyType(groupKey)),
   setLimitMarketableTechnology: limitMarketableTechnology => dispatch(CoverageActions.setLimitMarketableTechnology(limitMarketableTechnology)),
   setLimitMaxSpeed: limitMaxSpeed => dispatch(CoverageActions.setLimitMaxSpeed(limitMaxSpeed)),
   setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId))
