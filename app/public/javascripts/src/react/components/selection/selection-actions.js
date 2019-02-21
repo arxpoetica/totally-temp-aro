@@ -53,18 +53,6 @@ function addPlanTargets (planId, planTargets) {
   }
 }
 
-function addLocationPlanTargets (planId, locationIds) {
-  return addPlanTargets(planId, { locations: locationIds })
-}
-
-function addServiceAreaPlanTargets (planId, serviceAreaIds) {
-  return addPlanTargets(planId, { serviceAreas: serviceAreaIds })
-}
-
-function addAnalysisAreaPlanTargets (planId, analysisAreaIds) {
-  return addPlanTargets(planId, { analysisAreas: analysisAreaIds })
-}
-
 function removePlanTargets (planId, planTargets) {
   return dispatch => {
     // Update client state
@@ -85,25 +73,9 @@ function removePlanTargets (planId, planTargets) {
   }
 }
 
-function removeLocationPlanTargets (planId, locationIds) {
-  return removePlanTargets(planId, { locations: locationIds })
-}
-
-function removeServiceAreaPlanTargets (planId, serviceAreaIds) {
-  return removePlanTargets(planId, { serviceAreas: serviceAreaIds })
-}
-
-function removeAnalysisAreaPlanTargets (planId, analysisAreaIds) {
-  return removePlanTargets(planId, { analysisAreas: analysisAreaIds })
-}
-
 export default {
   setActiveSelectionMode: setActiveSelectionMode,
   loadPlanTargetSelectionsFromServer: loadPlanTargetSelectionsFromServer,
-  addLocationPlanTargets: addLocationPlanTargets,
-  addServiceAreaPlanTargets: addServiceAreaPlanTargets,
-  addAnalysisAreaPlanTargets: addAnalysisAreaPlanTargets,
-  removeLocationPlanTargets: removeLocationPlanTargets,
-  removeServiceAreaPlanTargets: removeServiceAreaPlanTargets,
-  removeAnalysisAreaPlanTargets: removeAnalysisAreaPlanTargets
+  addPlanTargets: addPlanTargets,
+  removePlanTargets: removePlanTargets
 }

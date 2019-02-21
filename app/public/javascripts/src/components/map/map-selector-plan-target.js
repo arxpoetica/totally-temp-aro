@@ -25,67 +25,37 @@ class MapSelectorPlanTargetController {
       
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 
         && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-        // Get a list of ids to add and remove
-        var idsToAdd = new Set(), idsToRemove = new Set()
-        event.locations.forEach((location) => {
-          if (this.locationPlanTargets.has(+location.location_id)) {
-            idsToRemove.add(+location.location_id)
-          } else {
-            idsToAdd.add(+location.location_id)
-          }
-        })
-        this.addLocationPlanTargets(this.activePlanId, idsToAdd)
-        this.removeLocationPlanTargets(this.activePlanId, idsToRemove)
+        this.addOrRemoveSelection(event.locations, 'locations')
       }
 
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0 
           && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-        // Get a list of ids to add and remove
-        var idsToAdd = new Set(), idsToRemove = new Set()
-        event.serviceAreas.forEach((serviceArea) => {
-          if (state.selection.planTargets.serviceAreaIds.has(+serviceArea.id)) {
-            idsToRemove.add(+serviceArea.id)
-          } else {
-            idsToAdd.add(+serviceArea.id)
-          }
-        })
-        // Make these changes to the database, then reload targets from the DB
-        var addRemoveTargetPromises = [
-          $http.post(`/service_areas/${plan.id}/addServiceAreaTargets`, { serviceAreaIds: Array.from(idsToAdd) }),
-          $http.post(`/service_areas/${plan.id}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(idsToRemove) })
-        ]
-        Promise.all(addRemoveTargetPromises)
-          .then((response) => {
-            // Reload selected locations from database
-            state.reloadSelectedServiceAreas()
-          })
-          .catch(err => console.error(err))
+            this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas')
       }
 
       if (plan && plan.id !== state.INVALID_PLAN_ID && event.analysisAreas && event.analysisAreas.length > 0 
         && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-        // Get a list of ids to add and remove
-        var idsToAdd = new Set(), idsToRemove = new Set()
-        event.analysisAreas.forEach((analysisArea) => {
-          if (state.selection.planTargets.analysisAreaIds.has(+analysisArea.id)) {
-            idsToRemove.add(+analysisArea.id)
-          } else {
-            idsToAdd.add(+analysisArea.id)
-          }
-        })
-        // Make these changes to the database, then reload targets from the DB
-        var addRemoveAnalysisTargetPromises = [
-          $http.post(`/analysis_areas/${plan.id}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(idsToAdd) }),
-          $http.post(`/analysis_areas/${plan.id}/removeAnalysisAreaTargets`, { analysisAreaIds: Array.from(idsToRemove) })
-        ]
-        Promise.all(addRemoveAnalysisTargetPromises)
-          .then((response) => {
-            // Reload selected locations from database
-            state.reloadSelectedAnalysisAreas()
-          })
-          .catch(err => console.error(err))
+          this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas')
       }
     })
+  }
+
+  addOrRemoveSelection(entities, planTargetKey) {
+    // Get a list of ids to add and remove
+    var idsToAdd = new Set(), idsToRemove = new Set()
+    entities.forEach((entity) => {
+      if (this.planTargets[planTargetKey].has(+entity.id)) {
+        idsToRemove.add(+entity.id)
+      } else {
+        idsToAdd.add(+entity.id)
+      }
+    })
+    if (idsToAdd.size > 0) {
+      this.addPlanTargets(this.activePlanId, { [planTargetKey]: idsToAdd })
+    }
+    if (idsToRemove.size > 0) {
+      this.removePlanTargets(this.activePlanId, { [planTargetKey]: idsToRemove })
+    }
   }
 
   updateDrawingManagerState() {
@@ -154,14 +124,23 @@ class MapSelectorPlanTargetController {
   mapStateToThis (reduxState) {
     return {
       activePlanId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
-      locationPlanTargets: reduxState.selection.planTargets.locations
+      planTargets: reduxState.selection.planTargets,
+      locationPlanTargets: reduxState.selection.planTargets.locations,
+      serviceAreaPlanTargets: reduxState.selection.planTargets.serviceAreas,
+      analysisAreaPlanTargets: reduxState.selection.planTargets.analysisAreas
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
+      addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       addLocationPlanTargets: (planId, locationIds) => dispatch(SelectionActions.addLocationPlanTargets(planId, locationIds)),
-      removeLocationPlanTargets: (planId, locationIds) => dispatch(SelectionActions.removeLocationPlanTargets(planId, locationIds))
+      removeLocationPlanTargets: (planId, locationIds) => dispatch(SelectionActions.removeLocationPlanTargets(planId, locationIds)),
+      addServiceAreaPlanTargets: (planId, serviceAreaIds) => dispatch(SelectionActions.addServiceAreaPlanTargets(planId, serviceAreaIds)),
+      removeServiceAreaPlanTargets: (planId, serviceAreaIds) => dispatch(SelectionActions.removeServiceAreaPlanTargets(planId, serviceAreaIds)),
+      addAnalysisAreaPlanTargets: (planId, analysisAreaIds) => dispatch(SelectionActions.addAnalysisAreaPlanTargets(planId, analysisAreaIds)),
+      removeAnalysisAreaTargets: (planId, analysisAreaIds) => dispatch(SelectionActions.removeAnalysisAreaPlanTargets(planId, analysisAreaIds))
     }
   }
 }
