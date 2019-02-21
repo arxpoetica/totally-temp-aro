@@ -1,6 +1,12 @@
 import Actions from '../../common/actions'
 import SelectionModes from './selection-modes'
 
+const emptyPlanTargets = {
+  locations: new Set(),
+  serviceAreas: new Set(),
+  analysisAreas: new Set()
+}
+
 const defaultState = {
   selectionModes: [
     { id: SelectionModes.SELECTED_AREAS, description: 'Service Areas' },
@@ -8,7 +14,7 @@ const defaultState = {
     { id: SelectionModes.SELECTED_ANALYSIS_AREAS, description: 'Analysis Areas' }
   ],
   activeSelectionMode: { id: 'SELECTED_AREAS', description: 'Service Areas' },
-  planTargets: new Set()
+  planTargets: emptyPlanTargets
 }
 
 function setActiveSelectionModeById (state, newSelectionModeId) {
@@ -17,23 +23,47 @@ function setActiveSelectionModeById (state, newSelectionModeId) {
 }
 
 function clearAllPlanTargets (state) {
-  return { ...state, planTargets: new Set() }
+  return { ...state, planTargets: emptyPlanTargets }
 }
 
 function addPlanTargets (state, planTargets) {
-  var newPlanTargets = new Set(state.planTargets)
-  planTargets.forEach(target => newPlanTargets.add(target))
-  return { ...state, planTargets: newPlanTargets }
-}
-
-function removePlanTargetIds (state, idsToRemove) {
-  var newPlanTargets = new Set(state.planTargets)
-  newPlanTargets.forEach(target => {
-    if (idsToRemove.has(target.id)) {
-      newPlanTargets.delete(target)
+  var newState = { ...state }
+  Object.keys(planTargets).forEach(targetType => {
+    var newIds = new Set(state.planTargets[targetType])
+    planTargets[targetType].forEach(targetId => newIds.add(targetId))
+    newState = {
+      ...newState,
+      planTargets: {
+        ...newState.planTargets,
+        [targetType]: newIds
+      }
     }
   })
-  return { ...state, planTargets: newPlanTargets }
+  return newState
+}
+
+function removePlanTargetIds (state, planTargets) {
+  var newState = { ...state }
+  Object.keys(planTargets).forEach(targetType => {
+    var newIds = new Set(state.planTargets[targetType])
+    var isModified = false
+    newIds.forEach(targetId => {
+      if (planTargets[targetType].has(targetId)) {
+        newIds.delete(targetId)
+        isModified = true
+      }
+    })
+    if (isModified) {
+      newState = {
+        ...newState,
+        planTargets: {
+          ...newState.planTargets,
+          [targetType]: newIds
+        }
+      }
+    }
+  })
+  return newState
 }
 
 function selectionReducer (state = defaultState, action) {
