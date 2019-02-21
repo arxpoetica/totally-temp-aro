@@ -31,7 +31,7 @@ function loadPlanTargetSelectionsFromServer (planId) {
           serviceAreas: results[1].data.map(item => +item.id),
           analysisAreas: results[2].data.map(item => +item.id)
         }
-        dispatch({ type: Actions.SELECTION_ADD_PLAN_TARGETS, payload: planTargets })
+        dispatch(addPlanTargets(planId, planTargets))
       })
       .catch(err => console.error(err))
   }
@@ -54,6 +54,24 @@ function addPlanTargets (planId, planTargets) {
       AroHttp.post(`/analysis_areas/${planId}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
         .catch(err => console.error(err))
     }
+    // Get descriptions for added plan targets, then save them to the client state
+    var descriptionPromises = [
+      AroHttp.post('/network_plan/targets/addresses', { locationIds: [...(planTargets.locations || [])] }),
+      AroHttp.post('/network_plan/service_area/addresses', { serviceAreaIds: [...(planTargets.serviceAreas || [])] }),
+      AroHttp.post('/network_plan/analysis_area/addresses', { analysisAreaIds: [...(planTargets.analysisAreas || [])] })
+    ]
+    Promise.all(descriptionPromises)
+      .then(results => {
+        dispatch({
+          type: Actions.SELECTION_ADD_PLAN_TARGET_DESCRIPTIONS,
+          payload: {
+            locations: results[0].data,
+            serviceAreas: results[1].data,
+            analysisAreas: results[2].data
+          }
+        })
+      })
+      .catch(err => console.error(err))
   }
 }
 

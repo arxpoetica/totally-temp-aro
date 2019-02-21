@@ -19,9 +19,9 @@ class MapSelectorPlanTargetController {
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      this.addOrRemoveSelection(event.locations, 'locations', 'location_id')
-      this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas', 'id')
-      this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas', 'id')
+      this.addOrRemoveSelection(event.locations || [], 'locations', 'location_id')
+      this.addOrRemoveSelection(event.serviceAreas || [], 'serviceAreas', 'id')
+      this.addOrRemoveSelection(event.analysisAreas || [], 'analysisAreas', 'id')
     })
   }
 

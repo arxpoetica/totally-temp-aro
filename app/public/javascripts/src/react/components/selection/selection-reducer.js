@@ -12,6 +12,11 @@ const defaultState = {
     locations: new Set(),
     serviceAreas: new Set(),
     analysisAreas: new Set()
+  },
+  planTargetDescriptions: {
+    locations: {},
+    serviceAreas: {},
+    analysisAreas: {}
   }
 }
 
@@ -27,6 +32,11 @@ function clearAllPlanTargets (state) {
       locations: new Set(),
       serviceAreas: new Set(),
       analysisAreas: new Set()
+    },
+    planTargetDescriptions: {
+      locations: {},
+      serviceAreas: {},
+      analysisAreas: {}
     }
   }
 }
@@ -71,6 +81,23 @@ function removePlanTargetIds (state, planTargets) {
   return newState
 }
 
+function addPlanTargetDescriptions (state, planTargetDescriptions) {
+  var newState = { ...state }
+  Object.keys(planTargetDescriptions).forEach(targetType => {
+    newState = {
+      ...newState,
+      planTargetDescriptions: {
+        ...newState.planTargetDescriptions,
+        [targetType]: {
+          ...newState.planTargetDescriptions[targetType],
+          ...planTargetDescriptions[targetType]
+        }
+      }
+    }
+  })
+  return newState
+}
+
 function selectionReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.SELECTION_SET_ACTIVE_MODE:
@@ -84,6 +111,9 @@ function selectionReducer (state = defaultState, action) {
 
     case Actions.SELECTION_REMOVE_PLAN_TARGETS:
       return removePlanTargetIds(state, action.payload)
+
+    case Actions.SELECTION_ADD_PLAN_TARGET_DESCRIPTIONS:
+      return addPlanTargetDescriptions(state, action.payload)
 
     default:
       return state

@@ -5,6 +5,7 @@ import reduxStore from '../../../redux-store'
 import wrapComponentWithProvider from '../../common/provider-wrapped-component'
 import CoverageActions from './coverage-actions'
 import SelectionActions from '../selection/selection-actions'
+import PlanTargetList from '../selection/plan-target-list.jsx'
 
 class CoverageInitializer extends Component {
   constructor (props) {
@@ -95,30 +96,10 @@ class CoverageInitializer extends Component {
               </select>
             </td>
           </tr>
-          {/* <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_AREAS">
-            <td>Selected Geographies({{$ctrl.serviceAreas.length || 0}})
-              <a ng-if="$ctrl.serviceAreas.length > 0" ng-click="$ctrl.removeServiceAreas($ctrl.serviceAreas)">
-                <span className="far fa-trash-alt trash"></span>
-              </a>
-            </td>
-            <td>
-              <p ng-hide="$ctrl.serviceAreas.length > 0"><em>No geographies selected</em></p>
-              <show-targets targets="$ctrl.serviceAreas"
-                            remove-target="$ctrl.removeServiceAreas(target)"></show-targets>
-            </td>
+          <tr>
+            <td>Selected Geographies</td>
+            <td><PlanTargetList /></td>
           </tr>
-          <tr ng-if="$ctrl.state.optimizationOptions.analysisSelectionMode === $ctrl.state.selectionModes.SELECTED_ANALYSIS_AREAS">
-            <td>Selected Analysis Areas({{$ctrl.analysisAreas.length || 0}})
-              <a ng-if="$ctrl.analysisAreas.length > 0" ng-click="$ctrl.removeAnalysisAreas($ctrl.analysisAreas)">
-                <span className="far fa-trash-alt trash"></span>
-              </a>
-            </td>
-            <td>
-              <p ng-hide="$ctrl.analysisAreas.length > 0"><em>No analysis areas selected</em></p>
-              <show-targets targets="$ctrl.analysisAreas"
-                            remove-target="$ctrl.removeAnalysisAreas(target)" zoom-target="$ctrl.zoomTarget({target:$ctrl.targets})"></show-targets>
-            </td>
-          </tr> */}
         </tbody>
       </table>
 
