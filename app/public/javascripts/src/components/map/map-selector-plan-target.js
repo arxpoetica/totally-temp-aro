@@ -1,7 +1,7 @@
 import SelectionActions from '../../react/components/selection/selection-actions'
 
 class MapSelectorPlanTargetController {
-  constructor($document, $http, $ngRedux, state) {
+  constructor($document, $ngRedux, state) {
 
     this.mapRef = null
     this.drawingManager = null
@@ -19,20 +19,20 @@ class MapSelectorPlanTargetController {
 
     // Handle selection events from state
     this.unsub = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      this.addOrRemoveSelection(event.locations, 'locations')
-      this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas')
-      this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas')
+      this.addOrRemoveSelection(event.locations, 'locations', 'location_id')
+      this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas', 'id')
+      this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas', 'id')
     })
   }
 
-  addOrRemoveSelection(entities, planTargetKey) {
+  addOrRemoveSelection(entities, planTargetKey, entityIdKey) {
     // Get a list of ids to add and remove
     var idsToAdd = new Set(), idsToRemove = new Set()
     entities.forEach((entity) => {
-      if (this.planTargets[planTargetKey].has(+entity.id)) {
-        idsToRemove.add(+entity.id)
+      if (this.planTargets[planTargetKey].has(+entity[entityIdKey])) {
+        idsToRemove.add(+entity[entityIdKey])
       } else {
-        idsToAdd.add(+entity.id)
+        idsToAdd.add(+entity[entityIdKey])
       }
     })
     if (idsToAdd.size > 0) {
@@ -122,7 +122,7 @@ class MapSelectorPlanTargetController {
   }
 }
 
-MapSelectorPlanTargetController.$inject = ['$document', '$http', '$ngRedux', 'state']
+MapSelectorPlanTargetController.$inject = ['$document', '$ngRedux', 'state']
 
 let mapSelectorPlanTarget = {
   template: '', // No markup for this component. It interacts with the map directly.
