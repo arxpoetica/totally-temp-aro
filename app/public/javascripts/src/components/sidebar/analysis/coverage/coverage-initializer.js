@@ -72,26 +72,6 @@ class CoverageInitializerController {
       .then(response => this.state.reloadSelectedAnalysisAreas())
       .catch(err => console.error(err))
   }
-
-  $onChanges (changesObj) {
-    if (changesObj.selection) {
-      // // The selected service areas have changed.
-      // var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
-      // this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-      //   .then((result) => {
-      //     this.serviceAreas = result.data
-      //   })
-      //   .catch(err => console.error(err))
-
-      // // The selected analysis areas have changed.
-      // var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
-      // this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
-      //   .then((result) => {
-      //     this.analysisAreas = result.data
-      //   })
-      //   .catch(err => console.error(err))
-    }
-  }
 }
 
 CoverageInitializerController.$inject = ['state', '$http', '$timeout', '$ngRedux']

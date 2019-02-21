@@ -24,7 +24,6 @@ import optimizeButton from './sidebar/optimize-button'
 import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
-import showTargets from './sidebar/analysis/show-targets'
 
 import locationRoicReports from './sidebar/analysis/roic-reports/location-roic-reports'
 import networkBuildRoicReports from './sidebar/analysis/roic-reports/network-build-roic-reports'
@@ -134,7 +133,6 @@ app.component('boundaryDetail', boundaryDetail)
    .component('summaryReports', summaryReports)
    .component('analysisExpertMode', analysisExpertMode)
    .component('analysisMode', analysisMode)
-   .component('showTargets', showTargets)
    .component('networkAnalysisBuild', networkAnalysisBuild)
    .component('locationRoicReports', locationRoicReports)
    .component('networkBuildRoicReports', networkBuildRoicReports)

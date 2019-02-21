@@ -122,9 +122,7 @@ let networkAnalysisBuild = {
   bindings: {
     selection: '<',
     removeTarget: '&', 
-    zoomTarget: '&',
-    removeServiceArea: '&',
-    removeAnalysisAreas: '&'
+    zoomTarget: '&'
   },
   controller: NetworkAnalysisBuildController
 }
