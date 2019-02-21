@@ -27,7 +27,7 @@ class CoverageInitializer extends Component {
 
   render () {
     return <div>
-      <table id='table-coverage-initializer' ng-if='$ctrl.isSuperUser' className='table table-sm table-striped'>
+      <table id='table-coverage-initializer' ng-if='$ctrl.isSuperUser' className='table table-sm table-striped sidebar-options-table'>
         <tbody>
 
           {/* Coverage type */}
