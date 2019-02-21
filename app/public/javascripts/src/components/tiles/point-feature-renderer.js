@@ -17,20 +17,20 @@ class PointFeatureRenderer {
 
     deletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
-        Obj.selection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
+        Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes,Obj.equipmentLayerTypeVisibility)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
-        Obj.selection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
+        Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
         Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes,Obj.equipmentLayerTypeVisibility)
     })
 
   }
 
   static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
-                       selection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
+                       selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
                        selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility) {
 
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
@@ -68,7 +68,7 @@ class PointFeatureRenderer {
       }
     }
 
-    if (feature.properties.location_id && selection.planTargets.locationIds.has(+feature.properties.location_id)
+    if (feature.properties.location_id && selection.planTargets.locations.has(+feature.properties.location_id)
         //show selected location icon at analysis mode -> selection type is locations    
         && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
         // Draw selected icon
@@ -76,8 +76,8 @@ class PointFeatureRenderer {
     } else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) // for edit mode view of existing 
                && null != selectedListId
                && null != selectedListType
-               && selection.editable.hasOwnProperty(selectedListType)
-               && selection.editable[selectedListType].hasOwnProperty(selectedListId)) {
+               && oldSelection.editable.hasOwnProperty(selectedListType)
+               && oldSelection.editable[selectedListType].hasOwnProperty(selectedListId)) {
       // - Highlight this feature - //
       ctx.fillStyle = '#e8ffe8'
       ctx.strokeStyle = '#008000'

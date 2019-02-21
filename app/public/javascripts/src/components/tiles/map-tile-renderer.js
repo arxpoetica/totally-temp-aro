@@ -72,6 +72,10 @@ class MapTileRenderer {
     this.selection = selection
   }
 
+  setOldSelection(oldSelection) {
+    this.oldSelection = oldSelection
+  }
+
   setCensusCategories(censusCategories) {
     this.censusCategories = censusCategories
     this.tileDataService.markHtmlCacheDirty()
@@ -489,7 +493,7 @@ class MapTileRenderer {
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             var featureObj = {
               'ctx': ctx, 'shape': shape, 'feature': feature, 'featureData': featureData, 'geometryOffset': geometryOffset, 'mapLayer': mapLayer, 'mapLayers': this.mapLayers, 'tileDataService': this.tileDataService,
-              'selection': this.selection, 'selectedLocationImage': selectedLocationImage, 'lockOverlayImage': lockOverlayImage, 'invalidatedOverlayImage': invalidatedOverlayImage,
+              'selection': this.selection, oldSelection: this.oldSelection, 'selectedLocationImage': selectedLocationImage, 'lockOverlayImage': lockOverlayImage, 'invalidatedOverlayImage': invalidatedOverlayImage,
               'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.selectionModes,
               'equipmentLayerTypeVisibility' : this.state.equipmentLayerTypeVisibility
             }
@@ -527,8 +531,8 @@ class MapTileRenderer {
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
-            if ( (this.selection.details.roadSegments.size > 0 && this.highlightPolyline(feature,this.selection.details.roadSegments)) 
-              || (this.selection.details.fiberSegments.size > 0 && this.highlightPolyline(feature,this.selection.details.fiberSegments))) {
+            if ( (this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature,this.oldSelection.details.roadSegments)) 
+              || (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature,this.oldSelection.details.fiberSegments))) {
               //Highlight the Selected Polyline
               var drawingStyles = {
                 lineWidth: mapLayer.drawingOptions.lineWidth * 2,
@@ -559,7 +563,7 @@ class MapTileRenderer {
     //render point feature
     PointFeatureRenderer.renderFeatures(pointFeatureRendererList)
     //render polygon feature
-    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection)
+    PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection, this.oldSelection)
   }
 
   highlightPolyline(feature,polylines) {

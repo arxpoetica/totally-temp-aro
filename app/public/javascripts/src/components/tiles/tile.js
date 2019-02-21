@@ -42,6 +42,7 @@ class TileComponentController {
     this.layerIdToMapTilesIndex = {}
     this.mapRef = null  // Will be set in $document.ready()
     this.$timeout = $timeout
+    this.$ngRedux = $ngRedux
     this.state = state
     this.uiNotificationService = uiNotificationService
     this.tileDataService = tileDataService
@@ -71,7 +72,6 @@ class TileComponentController {
       if (plan) {
         this.areControlsEnabled = (plan.planState === Constants.PLAN_STATE.START_STATE) || (plan.planState === Constants.PLAN_STATE.INITIALIZED)
       }
-      this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
     })
 
     // Subscribe to events for creating and destroying the map overlay layer
@@ -239,6 +239,7 @@ class TileComponentController {
       // We should have a map variable at this point
       this.mapRef = window[this.mapGlobalObjectName]
       this.createMapOverlay()
+      this.unsubscribeRedux = this.$ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
     })
   }
 
@@ -264,8 +265,9 @@ class TileComponentController {
                                                         ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
 
-    // Update the selection in the renderer. We should have a bound "this.selection" at this point
+    // Update the selection in the renderer. We should have a bound "this.oldSelection" at this point
     if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.oldSelection)
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
     }
 
@@ -592,10 +594,10 @@ class TileComponentController {
   }
 
   $onChanges(changesObj) {
-    if (changesObj.selection) {
+    if (changesObj.oldSelection) {
       // Update the selection in the renderer
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.oldSelection)
         // If the selection has changed, redraw the tiles
         this.tileDataService.markHtmlCacheDirty()
         this.refreshMapTiles()
@@ -613,7 +615,8 @@ class TileComponentController {
   mapStateToThis (reduxState) {
     return {
       activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
-      selectionModes: reduxState.selection.selectionModes
+      selectionModes: reduxState.selection.selectionModes,
+      selection: reduxState.selection
     }
   }
 
@@ -623,16 +626,40 @@ class TileComponentController {
 
   mergeToTarget(nextState, actions) {
     const currentSelectionModeId = this.activeSelectionModeId
-    
+    const oldPlanTargets = this.selection && this.selection.planTargets
     // merge state and actions onto controller
     Object.assign(this, nextState);
     Object.assign(this, actions);   
     
-    if (currentSelectionModeId !== nextState.activeSelectionModeId) {
+    if (currentSelectionModeId !== nextState.activeSelectionModeId
+        || this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
+        this.tileDataService.markHtmlCacheDirty()
+        this.refreshMapTiles()
       }
     }
+  }
+
+  hasPlanTargetSelectionChanged(oldSelection, newSelection) {
+    if (!oldSelection || !newSelection || (oldSelection !== newSelection)) {
+      return true
+    }
+    // A hacky way to perform change detection, because of the way our tile.js and map-tile-renderer.js are set up.
+    const strOldSelection = JSON.stringify({
+      locations: [...oldSelection.locations],
+      serviceAreas: [...oldSelection.serviceAreas],
+      analysisAreas: [...oldSelection.analysisAreas]
+    })
+
+    const strNewSelection = JSON.stringify({
+      locations: [...newSelection.locations],
+      serviceAreas: [...newSelection.serviceAreas],
+      analysisAreas: [...newSelection.analysisAreas]
+    })
+
+    return strOldSelection !== strNewSelection
   }
 }
 
@@ -642,7 +669,7 @@ let tile = {
   template: '',
   bindings: {
     mapGlobalObjectName: '@',
-    selection: '<'  // An object describing the selected objects in the UI
+    oldSelection: '<'  // An object describing the selected objects in the UI
   },
   controller: TileComponentController
 }

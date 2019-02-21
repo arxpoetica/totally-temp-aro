@@ -57,19 +57,14 @@
         <network-analysis-build 
           remove-target="$ctrl.removeTarget(target)" 
           zoom-target="$ctrl.zoomTarget(target)" 
-          selection="$ctrl.state.selection"
-          remove-service-area="$ctrl.removeServiceArea(target)"
-          remove-analysis-areas="$ctrl.removeAnalysisAreas(target)"></network-analysis-build>
+          selection="$ctrl.state.selection">
+        </network-analysis-build>
       </div>
       
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'EXPERT_MODE'">
         <analysis-expert-mode></analysis-expert-mode>
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'">
-        <coverage-initializer selection="$ctrl.state.selection">
-        </coverage-initializer>
-      </div>
-      <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'REACT_COVERAGE_ANALYSIS'">
         <r-coverage-initializer></r-coverage-initializer>
       </div>
     </accordion-panel-contents>

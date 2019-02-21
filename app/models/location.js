@@ -144,7 +144,7 @@ module.exports = class Location {
    */
   static findSelectedLocationIds(planId) {
     var sql = `
-      SELECT location_id
+      SELECT location_id as id, 'location' as type
       FROM client.plan_targets
       WHERE plan_id=$1
     `

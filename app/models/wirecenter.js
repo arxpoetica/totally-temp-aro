@@ -71,9 +71,11 @@ module.exports = class Wirecenter {
    */
   static selectedServiceAreaIds(planId) {
     var sql = `
-      SELECT service_area_id
-      FROM client.selected_service_area
-      WHERE plan_id=$1
+      SELECT sa.id, 'service_area' as type
+      FROM client.selected_service_area ssa
+      JOIN client.service_area sa
+        ON ssa.service_area_id = sa.id
+      WHERE ssa.plan_id=$1
     `
     return database.query(sql, [planId])
   }
@@ -114,9 +116,11 @@ module.exports = class Wirecenter {
    */
   static selectedAnalysisAreaIds(planId) {
     var sql = `
-      SELECT analysis_area_id
-      FROM client.selected_analysis_area
-      WHERE plan_id=$1
+      SELECT aa.id, 'analysis_area' as type
+      FROM client.selected_analysis_area saa
+      JOIN client.analysis_area aa
+        ON saa.analysis_area_id = aa.id
+      WHERE saa.plan_id=$1
     `
     return database.query(sql, [planId])
   }
