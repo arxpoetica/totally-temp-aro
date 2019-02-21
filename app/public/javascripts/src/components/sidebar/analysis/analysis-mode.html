@@ -66,6 +66,7 @@
         <analysis-expert-mode></analysis-expert-mode>
       </div>
       <div style="height: 100%;" ng-if="$ctrl.state.networkAnalysisType.id === 'COVERAGE_ANALYSIS'">
+        <r-coverage-initializer></r-coverage-initializer>
         <coverage-initializer selection="$ctrl.state.selection">
         </coverage-initializer>
       </div>
