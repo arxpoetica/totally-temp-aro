@@ -21,22 +21,10 @@ class MapSelectorPlanTargetController {
     this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
       
       if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
-      var plan = state.plan.getValue()
-      
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 
-        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-        this.addOrRemoveSelection(event.locations, 'locations')
-      }
 
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0 
-          && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-            this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas')
-      }
-
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.analysisAreas && event.analysisAreas.length > 0 
-        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-          this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas')
-      }
+      this.addOrRemoveSelection(event.locations, 'locations')
+      this.addOrRemoveSelection(event.serviceAreas, 'serviceAreas')
+      this.addOrRemoveSelection(event.analysisAreas, 'analysisAreas')
     })
   }
 
@@ -110,7 +98,7 @@ class MapSelectorPlanTargetController {
       this.drawingManager.setDrawingMode(null)
       this.drawingManager.setMap(null)
     }
-    this.$doCheck.unsubscribeRedux()
+    this.unsubscribeRedux()
   }
 
   $doCheck() {
@@ -121,26 +109,18 @@ class MapSelectorPlanTargetController {
       this.updateDrawingManagerState()
     }
   }
+
   mapStateToThis (reduxState) {
     return {
       activePlanId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
-      planTargets: reduxState.selection.planTargets,
-      locationPlanTargets: reduxState.selection.planTargets.locations,
-      serviceAreaPlanTargets: reduxState.selection.planTargets.serviceAreas,
-      analysisAreaPlanTargets: reduxState.selection.planTargets.analysisAreas
+      planTargets: reduxState.selection.planTargets
     }
   }
 
   mapDispatchToTarget (dispatch) {
     return {
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
-      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
-      addLocationPlanTargets: (planId, locationIds) => dispatch(SelectionActions.addLocationPlanTargets(planId, locationIds)),
-      removeLocationPlanTargets: (planId, locationIds) => dispatch(SelectionActions.removeLocationPlanTargets(planId, locationIds)),
-      addServiceAreaPlanTargets: (planId, serviceAreaIds) => dispatch(SelectionActions.addServiceAreaPlanTargets(planId, serviceAreaIds)),
-      removeServiceAreaPlanTargets: (planId, serviceAreaIds) => dispatch(SelectionActions.removeServiceAreaPlanTargets(planId, serviceAreaIds)),
-      addAnalysisAreaPlanTargets: (planId, analysisAreaIds) => dispatch(SelectionActions.addAnalysisAreaPlanTargets(planId, analysisAreaIds)),
-      removeAnalysisAreaTargets: (planId, analysisAreaIds) => dispatch(SelectionActions.removeAnalysisAreaPlanTargets(planId, analysisAreaIds))
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
     }
   }
 }

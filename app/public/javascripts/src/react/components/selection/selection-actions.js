@@ -43,11 +43,11 @@ function addPlanTargets (planId, planTargets) {
         .catch(err => console.error(err))
     }
     if (planTargets.serviceAreas) {
-      AroHttp.post(`/network_plan/${planId}/addServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
+      AroHttp.post(`/service_areas/${planId}/addServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
         .catch(err => console.error(err))
     }
     if (planTargets.analysisAreas) {
-      AroHttp.post(`/network_plan/${planId}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
+      AroHttp.post(`/analysis_areas/${planId}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
         .catch(err => console.error(err))
     }
   }
@@ -63,11 +63,11 @@ function removePlanTargets (planId, planTargets) {
         .catch(err => console.error(err))
     }
     if (planTargets.serviceAreas) {
-      AroHttp.post(`/network_plan/${planId}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
+      AroHttp.post(`/service_areas/${planId}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(planTargets.serviceAreas) })
         .catch(err => console.error(err))
     }
     if (planTargets.analysisAreas) {
-      AroHttp.post(`/network_plan/${planId}/removeAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
+      AroHttp.post(`/analysis_areas/${planId}/removeAnalysisAreaTargets`, { analysisAreaIds: Array.from(planTargets.analysisAreas) })
         .catch(err => console.error(err))
     }
   }
