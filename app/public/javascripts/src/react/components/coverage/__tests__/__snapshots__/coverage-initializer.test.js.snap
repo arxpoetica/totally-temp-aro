@@ -1,0 +1,632 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`When the logged in user is a SuperUser 1`] = `
+<div>
+  <table
+    className="table table-sm table-striped sidebar-options-table"
+    id="table-coverage-initializer"
+    ng-if="$ctrl.isSuperUser"
+  >
+    <tbody>
+      <tr>
+        <td>
+          Coverage Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageType"
+            onChange={[Function]}
+          >
+            <option
+              value="census_block"
+            >
+              Form 477
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Save coverage in
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectGroupKeyType"
+            onChange={[Function]}
+          >
+            <option
+              value="serviceArea"
+            >
+              Service Areas
+            </option>
+            <option
+              value="networkNode"
+            >
+              Network Nodes
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Marketable Technology
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkLimitMarketableTechnologies"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Max Equipment Speed
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkLimitMaxSpeed"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Site Assignment
+        </td>
+        <td>
+          <select
+            className="form-control"
+            onChange={[Function]}
+            value="Proximity"
+          >
+            <option
+              value="Proximity"
+            >
+              Proximity
+            </option>
+            <option
+              value="Incremental"
+            >
+              Incremental
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selection Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageInitializerSelectionType"
+            onChange={[Function]}
+          >
+            <option
+              value="SELECTED_AREAS"
+            >
+              Service Areas
+            </option>
+            <option
+              value="SELECTED_LOCATIONS"
+            >
+              Locations
+            </option>
+            <option
+              value="SELECTED_ANALYSIS_AREAS"
+            >
+              Analysis Areas
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selected Geographies
+        </td>
+        <td>
+          <div>
+            (no items selected)
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`When the logged in user is not a SuperUser 1`] = `
+<div>
+  <div
+    className="alert alert-danger"
+    style={
+      Object {
+        "marginTop": "60px",
+      }
+    }
+  >
+    You must be a system-wide superuser in order to use coverage reports.
+  </div>
+</div>
+`;
+
+exports[`When we do not have an existing report 1`] = `
+<div>
+  <table
+    className="table table-sm table-striped sidebar-options-table"
+    id="table-coverage-initializer"
+    ng-if="$ctrl.isSuperUser"
+  >
+    <tbody>
+      <tr>
+        <td>
+          Coverage Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageType"
+            onChange={[Function]}
+          >
+            <option
+              value="census_block"
+            >
+              Form 477
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Save coverage in
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectGroupKeyType"
+            onChange={[Function]}
+          >
+            <option
+              value="serviceArea"
+            >
+              Service Areas
+            </option>
+            <option
+              value="networkNode"
+            >
+              Network Nodes
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Marketable Technology
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkLimitMarketableTechnologies"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Max Equipment Speed
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkLimitMaxSpeed"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Site Assignment
+        </td>
+        <td>
+          <select
+            className="form-control"
+            onChange={[Function]}
+            value="Proximity"
+          >
+            <option
+              value="Proximity"
+            >
+              Proximity
+            </option>
+            <option
+              value="Incremental"
+            >
+              Incremental
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selection Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageInitializerSelectionType"
+            onChange={[Function]}
+          >
+            <option
+              value="SELECTED_AREAS"
+            >
+              Service Areas
+            </option>
+            <option
+              value="SELECTED_LOCATIONS"
+            >
+              Locations
+            </option>
+            <option
+              value="SELECTED_ANALYSIS_AREAS"
+            >
+              Analysis Areas
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selected Geographies
+        </td>
+        <td>
+          <div>
+            (no items selected)
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`;
+
+exports[`When we have an existing report 1`] = `
+<div>
+  <table
+    className="table table-sm table-striped sidebar-options-table"
+    id="table-coverage-initializer"
+    ng-if="$ctrl.isSuperUser"
+  >
+    <tbody>
+      <tr>
+        <td>
+          Coverage Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageType"
+            onChange={[Function]}
+          >
+            <option
+              value="census_block"
+            >
+              Form 477
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Save coverage in
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectGroupKeyType"
+            onChange={[Function]}
+          >
+            <option
+              value="serviceArea"
+            >
+              Service Areas
+            </option>
+            <option
+              value="networkNode"
+            >
+              Network Nodes
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Marketable Technology
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkLimitMarketableTechnologies"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Max Equipment Speed
+        </td>
+        <td>
+          <input
+            className="checkboxfill"
+            id="chkLimitMaxSpeed"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Site Assignment
+        </td>
+        <td>
+          <select
+            className="form-control"
+            onChange={[Function]}
+            value="Proximity"
+          >
+            <option
+              value="Proximity"
+            >
+              Proximity
+            </option>
+            <option
+              value="Incremental"
+            >
+              Incremental
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selection Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageInitializerSelectionType"
+            onChange={[Function]}
+          >
+            <option
+              value="SELECTED_AREAS"
+            >
+              Service Areas
+            </option>
+            <option
+              value="SELECTED_LOCATIONS"
+            >
+              Locations
+            </option>
+            <option
+              value="SELECTED_ANALYSIS_AREAS"
+            >
+              Analysis Areas
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selected Geographies
+        </td>
+        <td>
+          <div>
+            (no items selected)
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    className="disable-sibling-controls"
+    ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
+  />
+</div>
+`;
+
+exports[`When we have supplied all parameters 1`] = `
+<div>
+  <table
+    className="table table-sm table-striped sidebar-options-table"
+    id="table-coverage-initializer"
+    ng-if="$ctrl.isSuperUser"
+  >
+    <tbody>
+      <tr>
+        <td>
+          Coverage Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageType"
+            onChange={[Function]}
+            value="location"
+          >
+            <option
+              value="census_block"
+            >
+              Form 477
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Save coverage in
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectGroupKeyType"
+            onChange={[Function]}
+          >
+            <option
+              value="serviceArea"
+            >
+              Service Areas
+            </option>
+            <option
+              value="networkNode"
+            >
+              Network Nodes
+            </option>
+            <option
+              value="location"
+            >
+              Locations
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Marketable Technology
+        </td>
+        <td>
+          <input
+            checked={true}
+            className="checkboxfill"
+            id="chkLimitMarketableTechnologies"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Limit To Max Equipment Speed
+        </td>
+        <td>
+          <input
+            checked={true}
+            className="checkboxfill"
+            id="chkLimitMaxSpeed"
+            onChange={[Function]}
+            type="checkbox"
+          />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Site Assignment
+        </td>
+        <td>
+          <select
+            className="form-control"
+            onChange={[Function]}
+            value="Proximity"
+          >
+            <option
+              value="Proximity"
+            >
+              Proximity
+            </option>
+            <option
+              value="Incremental"
+            >
+              Incremental
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selection Type
+        </td>
+        <td>
+          <select
+            className="form-control"
+            id="selectCoverageInitializerSelectionType"
+            onChange={[Function]}
+            value="SELECTED_AREAS"
+          >
+            <option
+              value="SELECTED_AREAS"
+            >
+              Service Areas
+            </option>
+            <option
+              value="SELECTED_LOCATIONS"
+            >
+              Locations
+            </option>
+            <option
+              value="SELECTED_ANALYSIS_AREAS"
+            >
+              Analysis Areas
+            </option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Selected Geographies
+        </td>
+        <td>
+          <div>
+            (no items selected)
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div
+    className="disable-sibling-controls"
+    ng-if="$ctrl.isSuperUser && $ctrl.coverageReport"
+  />
+</div>
+`;
