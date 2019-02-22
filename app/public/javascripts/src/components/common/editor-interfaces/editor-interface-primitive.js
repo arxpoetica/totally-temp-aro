@@ -40,7 +40,8 @@ class EditorInterfacePrimitiveController {
   
   getEnumSet(){
     if ("enum" == this.displayProps.displayDataType && this.displayProps.enumTypeURL){
-      AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL).then((enumSet) => {
+      AroFeatureFactory.getEnumSet(this.rootMetaData, this.parentObj, '/service/type-enum/'+this.displayProps.enumTypeURL)
+      .then((enumSet) => {
         var oldEnumText = JSON.stringify(this.enumSet)
         var isEnumSame = (JSON.stringify(enumSet) == oldEnumText)
         
