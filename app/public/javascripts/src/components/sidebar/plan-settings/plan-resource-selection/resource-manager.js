@@ -3,6 +3,7 @@ class ResourceManagerController {
     this.$http = $http
     this.$document = $document
     this.state = state
+    this.filterByOptions = {}
     // Hold a mapping that we use to map from resource keys to endpoints
     this.resourceKeyToEndpointId = {
       price_book: 'pricebook',
@@ -15,7 +16,7 @@ class ResourceManagerController {
     }
     this.managerIdString = 'MANAGER_ID'
     this.managerDeleteUrl = {
-      price_book: `/service/v1/price_book/${this.managerIdString}`,
+      price_book: `/service/v1/pricebook/${this.managerIdString}`,
       roic_manager: `/service/v1/roic_manager/${this.managerIdString}`,
       arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}`,
       impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}`,
@@ -23,8 +24,128 @@ class ResourceManagerController {
       competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
       rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
     }
+    
+    this.rows = []
+    
+    this.displayProps = [
+      {
+        "propertyName": "managerType",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Resource Type",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "editable": false,
+        "visible": true
+      },
+      {
+        "propertyName": "name",
+        "levelOfDetail": 0,
+        "format": "",
+        "displayName": "Name",
+        "enumTypeURL": "",
+        "displayDataType": "string",
+        "defaultValue": "",
+        "editable": true,
+        "visible": true
+      }
+    ]
+    
+    this.actions = [
+      {
+        buttonText: '', //Delete
+        buttonClass: "btn-danger", 
+        iconClass: "fa-trash-alt", 
+        toolTip: "Delete", 
+        callBack: (row, index) => {
+          //console.log('Delete')
+          //console.log(row)
+          this.deleteSelectedResourceManager(row)
+        }
+      }, 
+      {
+        buttonText: '', //Edit
+        buttonClass: "btn-primary", 
+        iconClass: "fa-edit", 
+        toolTip: "Edit", 
+        callBack: (row, index) => {
+          //console.log('Edit') 
+          //console.log(row)
+          this.editSelectedManager(row)
+        }
+      }, 
+      {
+        buttonText: '', // Clone
+        buttonClass: "btn-primary", 
+        iconClass: "fa-copy", 
+        toolTip: "Clone", 
+        callBack: (row, index) => {
+          //console.log('Clone')
+          //console.log(row)
+          this.cloneSelectedManagerFromSource(row)
+        }
+      }/*
+      {
+        buttonText: '', // Permissions
+        buttonClass: "btn-primary", // use default
+        iconClass: "fa-user-plus", 
+        toolTip: "Permissions", 
+        callBack: function(index, row){console.log('permissions');console.log(row)}
+      }
+      */
+    ]
+    
   }
-
+  
+  
+  $onChanges(changes){
+    if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')){
+      this.buildRows()
+    }
+    if (changes.hasOwnProperty('resourceItems')){
+      this.buildFilterOptions()
+    }
+  }
+  
+  onSelectedResourceKeyChanged(){
+    this.buildRows()
+  }
+  
+  buildRows(){
+    var newRows = []
+    
+    for (const key in this.resourceItems) {
+      if (this.resourceItems.hasOwnProperty(key)){
+        if (this.resourceItems[key].hasOwnProperty("allManagers")
+            && ('all' == this.selectedResourceKey || key == this.selectedResourceKey)
+        ){
+          newRows = newRows.concat( this.resourceItems[key].allManagers )
+        }
+      }
+    }
+    this.rows = newRows
+  }
+  
+  buildFilterOptions(){
+    var newFilterByOptions = {'all':'all'}
+    
+    for (const key in this.resourceItems) {
+      if (this.resourceItems.hasOwnProperty(key)){
+        if (this.resourceItems[key].hasOwnProperty("allManagers")){
+          var desc = key
+          if (this.resourceItems[key].hasOwnProperty('description')){
+            desc = this.resourceItems[key].description
+          }
+          //newFilterByOptions.push({'label':desc, 'value':key})
+          newFilterByOptions[key] = desc
+        }
+      }
+    }
+    
+    this.filterByOptions = newFilterByOptions
+  }
+  
   $doCheck() {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
       this.oldResourceItems = this.resourceItems
@@ -36,8 +157,8 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
-  cloneSelectedPriceBook() {
-    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+  cloneSelectedPriceBook(selectedManager) {
+    this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
@@ -46,23 +167,25 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.createRateReachManagerMode })
   }
 
-  cloneSelectedRateReachManager() {
-    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+  cloneSelectedRateReachManager(selectedManager) {
+    this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.createRateReachManagerMode })
   }
 
-  cloneSelectedManagerFromSource(managerId) {
+  cloneSelectedManagerFromSource(selectedManager) {
+    
+    var managerId = this.resourceKeyToEndpointId[selectedManager.managerType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
-      this.cloneSelectedPriceBook()
+      this.cloneSelectedPriceBook(selectedManager)
     } else if (managerId === 'rate-reach-matrix') {
-      this.cloneSelectedRateReachManager()
+      this.cloneSelectedRateReachManager(selectedManager)
     } else {
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
       .then((resourceName) => {
         // Create a new manager with the specified name and description
-        return this.$http.post(`/service/v1/${managerId}?source_manager=${this.resourceItems[this.selectedResourceKey].selectedManager.id}`,
+        return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}`,
                               { name: resourceName, description: resourceName })
       })
       .then((result) => this.onManagerCreated(result.data.id))
@@ -77,10 +200,10 @@ class ResourceManagerController {
     return Promise.resolve()
   }
 
-  editSelectedManager() {
-    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+  editSelectedManager(selectedManager) {
+    this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
-    this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
+    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.managerType })
   }
 
   askUserToConfirmManagerDelete(managerName) {
@@ -104,24 +227,26 @@ class ResourceManagerController {
   }
 
   deleteManager(deleteUrl) {
+    console.log(deleteUrl)
     this.$http.delete(deleteUrl)
-      .then((result) => {
-        this.onManagersChanged && this.onManagersChanged()
-        this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
-      })
-      .catch((err) => console.error(err))
+    .then((result) => {
+      this.onManagersChanged && this.onManagersChanged()
+      //this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
+    })
+    .catch((err) => console.error(err))
   }
 
-  deleteSelectedResourceManager() {
-    this.askUserToConfirmManagerDelete(this.resourceItems[this.selectedResourceKey].selectedManager.name)
-      .then((okToDelete) => {
-        if (okToDelete) {
-          const managerIdToDelete = this.resourceItems[this.selectedResourceKey].selectedManager.id
-          const deleteUrl = this.managerDeleteUrl[this.selectedResourceKey].replace(this.managerIdString, managerIdToDelete)
-          this.deleteManager(deleteUrl)
-        }
-      })
-      .catch((err) => console.error(err))
+  deleteSelectedResourceManager(selectedManager) {
+    this.askUserToConfirmManagerDelete(selectedManager.name)
+    .then((okToDelete) => {
+      if (okToDelete) {
+        const managerIdToDelete = selectedManager.id
+        // this.selectedResourceKey selectedManager.managerType
+        const deleteUrl = this.managerDeleteUrl[selectedManager.managerType].replace(this.managerIdString, managerIdToDelete)
+        this.deleteManager(deleteUrl)
+      }
+    })
+    .catch((err) => console.error(err))
   }
 
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
@@ -170,7 +295,9 @@ class ResourceManagerController {
       })
     })
   }
+  
 }
+
 
 ResourceManagerController.$inject = ['$http', '$document', 'state']
 

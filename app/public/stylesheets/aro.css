@@ -1433,3 +1433,20 @@ ui-select-font {
 .multiselect-container.dropdown-menu>.active:hover>a {
   color: white;
 }
+
+/* augment bootstrap modal for shrinkfit sizing */
+.aro-modal-flex-contain{
+	text-align: center;
+}
+
+.aro-modal-flex-contain > *{
+  text-align: left;
+}
+
+.aro-modal-flex.modal-dialog{
+  display: inline-block;
+  max-width: 90%;
+  text-align: left;
+}
+
+
