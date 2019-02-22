@@ -52,7 +52,7 @@
   <body ng-controller="body_controller">
 
     <!-- The tile component subscribes to map layer events raised from state.js. Include it before changing the state -->
-    <tile map-global-object-name="map" selection="state.selection"></tile>
+    <tile map-global-object-name="map" old-selection="state.selection"></tile>
 
     <div ng-controller="data_management_controller">
       <% include modal_data_management.html %>

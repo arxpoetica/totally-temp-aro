@@ -4,12 +4,12 @@ class PolygonFeatureRenderer {
 
   // First renders unselected polygon's then selected polygons
   // So selected polygon styles will be visible
-  static renderFeatures(closedPolygonFeatureLayersList, selection){
+  static renderFeatures(closedPolygonFeatureLayersList, selection, oldSelection){
 
     var unselectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
-      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != selection.details.serviceAreaId) {
+      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != oldSelection.details.serviceAreaId) {
         return featureObj
-      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !selection.planTargets.serviceAreaIds.has(featureObj.feature.properties.id)) {
+      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && !selection.planTargets.serviceAreas.has(featureObj.feature.properties.id)) {
         return featureObj
       } else {
         return featureObj
@@ -17,22 +17,22 @@ class PolygonFeatureRenderer {
     })
 
     var selectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
-      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id == selection.details.serviceAreaId) {
+      if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id == oldSelection.details.serviceAreaId) {
         return featureObj
-      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && selection.planTargets.serviceAreaIds.has(featureObj.feature.properties.id)) {
+      } else if (featureObj.selectedDisplayMode == featureObj.displayModes.ANALYSIS && selection.planTargets.serviceAreas.has(featureObj.feature.properties.id)) {
         return featureObj
       }
     })
   
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
-        Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
+        Obj.tileSize, selection, oldSelection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.analysisSelectionMode, Obj.selectionModes)
     })
 
     selectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
-        Obj.tileSize, selection, Obj.selectedDisplayMode, Obj.displayModes,
+        Obj.tileSize, selection, oldSelection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.analysisSelectionMode, Obj.selectionModes)
     })
 
@@ -40,7 +40,7 @@ class PolygonFeatureRenderer {
 
   // Renders a polygon feature onto the canvas
   static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
-                       selection, selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
+                       selection, oldSelection, selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
 
     ctx.lineCap = 'round';
     // Get the drawing styles for rendering the polygon
@@ -52,25 +52,25 @@ class PolygonFeatureRenderer {
     //    a non-selected service area could have the same id as the selected census block
     if (feature.properties.hasOwnProperty('layerType')
       && 'census_block' == feature.properties.layerType) {
-      if (selection.details.censusBlockId == feature.properties.id) {
+      if (oldSelection.details.censusBlockId == feature.properties.id) {
         // Hilight selected census block
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
         drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
       }
 
       // check for census filters
-      if ('undefined' != typeof selection.details.censusCategoryId
-        && feature.properties.tags.hasOwnProperty(selection.details.censusCategoryId)) {
-        let tagId = feature.properties.tags[selection.details.censusCategoryId]
+      if ('undefined' != typeof oldSelection.details.censusCategoryId
+        && feature.properties.tags.hasOwnProperty(oldSelection.details.censusCategoryId)) {
+        let tagId = feature.properties.tags[oldSelection.details.censusCategoryId]
 
-        if (censusCategories[selection.details.censusCategoryId].tags.hasOwnProperty(tagId)) {
-          let color = censusCategories[selection.details.censusCategoryId].tags[tagId].colourHash
+        if (censusCategories[oldSelection.details.censusCategoryId].tags.hasOwnProperty(tagId)) {
+          let color = censusCategories[oldSelection.details.censusCategoryId].tags[tagId].colourHash
           drawingStyles.strokeStyle = color
           drawingStyles.fillStyle = color
         }
       }
 
-    } else if (selection.planTargets.serviceAreaIds.has(feature.properties.id)
+    } else if (selection.planTargets.serviceAreas.has(feature.properties.id)
       && selectedDisplayMode == displayModes.ANALYSIS
       && analysisSelectionMode == selectionModes.SELECTED_AREAS) {
       //Highlight the selected SA
@@ -79,21 +79,21 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if (selection.planTargets.analysisAreaIds.has(feature.properties.id)
+    } else if (selection.planTargets.analysisAreas.has(feature.properties.id)
                && selectedDisplayMode == displayModes.ANALYSIS) {
       //highlight if analysis mode -> selection type is service areas 
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if ((selection.details.serviceAreaId == feature.properties.id)
+    } else if ((oldSelection.details.serviceAreaId == feature.properties.id)
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
     } else if (feature.properties.hasOwnProperty('_data_type')
       && 'analysis_area' === feature.properties._data_type
-      && selection.details.analysisAreaId == feature.properties.id
+      && oldSelection.details.analysisAreaId == feature.properties.id
       && selectedDisplayMode == displayModes.VIEW) {
       //Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle

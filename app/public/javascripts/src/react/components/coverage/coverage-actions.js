@@ -89,7 +89,7 @@ function setCoverageType (coverageType) {
 
 function setGroupKeyType (groupKeyType) {
   return {
-    type: Actions.COVERAGE_SET_SAVE_SITE_COVERAGE,
+    type: Actions.COVERAGE_SET_GROUP_KEY_TYPE,
     payload: groupKeyType
   }
 }

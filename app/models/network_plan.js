@@ -77,11 +77,17 @@ module.exports = class NetworkPlan {
     if (!_.isArray(locationIds) || locationIds.length === 0) return Promise.resolve()
 
     var sql = `
-      SELECT id, address,ST_X(geom) as lng, ST_Y(geom) as lat
+      SELECT id, INITCAP(address) as address,ST_X(geom) as lng, ST_Y(geom) as lat
       FROM locations
       WHERE id IN ($1)
     `
     return database.query(sql, [locationIds])
+    .then(result => {
+      // Convert array to a keyed object, then return it.
+      var idToLocation = {}
+      result.forEach(location => idToLocation[location.id] = location)
+      return idToLocation
+    })
   }
 
   static getServiceAreaAddresses (serviceAreaIds) {
@@ -93,7 +99,13 @@ module.exports = class NetworkPlan {
       WHERE id IN ($1)
     `
     return database.query(sql, [serviceAreaIds])
-  }
+      .then(result => {
+        // Convert array to a keyed object, then return it.
+        var idToServiceArea = {}
+        result.forEach(serviceArea => idToServiceArea[serviceArea.id] = serviceArea)
+        return idToServiceArea
+      })
+}
 
   static getAnalysisAreaAddresses (analysisAreaIds) {
     if (!_.isArray(analysisAreaIds) || analysisAreaIds.length === 0) return Promise.resolve()
@@ -104,7 +116,13 @@ module.exports = class NetworkPlan {
       WHERE id IN ($1)
     `
     return database.query(sql, [analysisAreaIds])
-  }
+      .then(result => {
+        // Convert array to a keyed object, then return it.
+        var idToAnalysisArea = {}
+        result.forEach(analysisArea => idToAnalysisArea[analysisArea.id] = analysisArea)
+        return idToAnalysisArea
+      })
+}
 
   static _deleteSources (plan_id, network_node_ids) {
     if (!_.isArray(network_node_ids) || network_node_ids.length === 0) return Promise.resolve()

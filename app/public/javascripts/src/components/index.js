@@ -2,6 +2,7 @@ import { react2angular } from 'react2angular'
 
 import CoverageInitializer from '../react/components/coverage/coverage-initializer.jsx'
 import CoverageButton from '../react/components/coverage/coverage-button.jsx'
+import PlanTargetList from '../react/components/selection/plan-target-list.jsx'
 
 import boundaryDetail from './sidebar/view/boundary-detail'
 import equipmentDetail from './sidebar/view/equipment-detail'
@@ -23,7 +24,6 @@ import optimizeButton from './sidebar/optimize-button'
 import summaryReports from './sidebar/summary-reports'
 import analysisExpertMode from './sidebar/analysis/analysis-expert-mode'
 import analysisMode from './sidebar/analysis/analysis-mode'
-import showTargets from './sidebar/analysis/show-targets'
 
 import locationRoicReports from './sidebar/analysis/roic-reports/location-roic-reports'
 import networkBuildRoicReports from './sidebar/analysis/roic-reports/network-build-roic-reports'
@@ -36,7 +36,6 @@ import networkAnalysisBuild from './sidebar/analysis/network-analysis-build'
 import networkAnalysisOutput from './sidebar/analysis/network-analysis/network-analysis-output'
 import networkAnalysisOutputContent from './sidebar/analysis/network-analysis/network-analysis-output-content'
 import networkAnalysisModal from './sidebar/analysis/network-analysis/network-analysis-modal'
-import coverageInitializer from './sidebar/analysis/coverage/coverage-initializer'
 import coverageReportDownloader from './sidebar/analysis/coverage/coverage-report-downloader'
 import networkBuildOutput from './sidebar/analysis/network-build/network-build-output'
 import aroDebug from './sidebar/debug/aro-debug'
@@ -134,7 +133,6 @@ app.component('boundaryDetail', boundaryDetail)
    .component('summaryReports', summaryReports)
    .component('analysisExpertMode', analysisExpertMode)
    .component('analysisMode', analysisMode)
-   .component('showTargets', showTargets)
    .component('networkAnalysisBuild', networkAnalysisBuild)
    .component('locationRoicReports', locationRoicReports)
    .component('networkBuildRoicReports', networkBuildRoicReports)
@@ -145,7 +143,6 @@ app.component('boundaryDetail', boundaryDetail)
    .component('networkAnalysisOutput', networkAnalysisOutput)
    .component('networkAnalysisOutputContent', networkAnalysisOutputContent)
    .component('networkAnalysisModal', networkAnalysisModal)
-   .component('coverageInitializer', coverageInitializer)
    .component('coverageReportDownloader', coverageReportDownloader)
    .component('networkBuildOutput', networkBuildOutput)
    .component('aroDebug', aroDebug)
@@ -219,6 +216,7 @@ app.component('boundaryDetail', boundaryDetail)
    // ReactJS components
    .component('rCoverageInitializer', react2angular(CoverageInitializer))
    .component('rCoverageButton', react2angular(CoverageButton))
+   .component('rPlanTargetList', react2angular(PlanTargetList))
    .service('Utils', utils)
    .service('state', state)
    .service('aclManager', aclManager)

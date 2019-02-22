@@ -154,7 +154,12 @@ let mapSplit = {
         <network-plan style="flex: 0 0 auto; margin: auto;"></network-plan>
         <div id="spacerForIconOnSidebar" style="flex: 0 0 40px;"></div>
       </div>
-      <map-selector-plan-target map-global-object-name="map" ng-if="!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT"></map-selector-plan-target>
+      <!-- Plan target map selector should be active only if we are in analysis mode -->
+      <map-selector-plan-target map-global-object-name="map"
+        ng-if="(!$ctrl.state.selectedToolBarAction || $ctrl.state.selectedToolBarAction === $ctrl.state.toolbarActions.POLYGON_SELECT)
+               && $ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.ANALYSIS
+               && !$ctrl.state.isRulerEnabled">
+      </map-selector-plan-target>
       <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
         && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET"></map-selector-export-locations>
     </div>
@@ -186,7 +191,6 @@ let mapSplit = {
           <display-mode-buttons></display-mode-buttons>
         </div>
         <div style="flex: 1 1 auto; position: relative;">
-          <!-- <r-coverage-initializer></r-coverage-initializer> -->
           <!-- ng-if is important here because the plan settings components implement $onDestroy() to show a messagebox
               when destroyed to ask if settings should be saved -->
           <view-mode ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW"></view-mode>
