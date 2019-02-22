@@ -330,234 +330,220 @@ exports.configure = (api, middleware) => {
       CROSS JOIN client.site_boundary_type bt
       WHERE bt.name = '${site_boundary}' AND p.id = ${plan_id} 
     ),
-    
+      
     selected_service_layer AS (
-    SELECT
-         *
-    FROM inputs i
-    JOIN reports.plan_service_layer psl
-    ON psl.root_plan_id = i.plan_id
-    ),
-    
-    modified_boundaries AS (
-      SELECT 
-        nb.*
-      FROM  inputs i
-      JOIN  reports.network_boundary nb
-        ON nb.root_plan_id = i.plan_id
-        AND nb.is_branch_data
-        AND nb.boundary_type = i.boundary_type
-      AND nb.date_from <> '294276-01-01 00:00:00'::timestamp
-    ),
-    
-    service_areas AS (
       SELECT
-        psa.*
+           *
       FROM inputs i
-      JOIN reports.plan_service_area psa
-        ON i.plan_id = psa.tagged_plan_id 
-    ),
-    
-    data_sources AS (
-    SELECT *
-    FROM inputs i
-    JOIN client.active_plan_data_source d ON i.plan_id = d.root_plan_id
-      AND data_type_id = 3
-    ),
-    
-    existing_boundaries AS (
-      SELECT
-        sb.id,
-        sb.object_id,
-        sb.network_node_object_id
-        --STRING_AGG(pbsa.service_area_code, ',') AS code,
-        --STRING_AGG(pbsa.service_area_name, ',') AS name
-      FROM inputs i
-      /*JOIN reports.plan_boundary_service_area pbsa
-        ON pbsa.root_plan_id = i.plan_id
-        AND pbsa.boundary_type = i.boundary_type */
-      CROSS JOIN data_sources ds
-      CROSS JOIN service_areas sa 
-      JOIN client.extended_boundary sb 
-        ON (sb.data_source_id = ANY ( ds.full_path)) --ds.data_source_id OR (sb.data_source_id = ANY (ds.parent_path))) AND sb.is_library_data
-        AND sb.date_to = '294276-01-01 00:00:00'
-        AND sb.boundary_type = i.boundary_type 
-        AND st_intersects(sa.geom, sb.geom)
-      GROUP BY 1, 2, 3
-    ),
-    
-    all_boundaries AS (
-    SELECT
-      *   
-    FROM modified_boundaries
-    /*    COALESCE(mb.id, xb.id)                                         AS id,
-        COALESCE(mb.network_node_object_id, xb.network_node_object_id) AS network_node_object_id,
-        COALESCE(mb.object_id, xb.object_id)                           AS object_id
-    
-      --COALESCE(mb.code, xb.code) AS code,
-      --COALESCE(mb.name, xb.name) AS name
-      FROM existing_boundaries xb
-      FULL OUTER JOIN modified_boundaries mb
-        ON mb.object_id = xb.object_id*/
+      JOIN reports.plan_service_layer psl
+      ON psl.root_plan_id = i.plan_id
       ),
-    
-    location_ds_ids as (
-      select unnest(ds.parent_path || ds.id) as ds_id,
-          g.name AS data_source_name
-      from inputs i
-      join client.active_plan_data_source ads on
-                                          i.plan_id = ads.root_plan_id
-                                          and ads.data_type_id = 1
-      join aro_core.data_source ds
-        on ds.id = ads.data_source_id
-        LEFT JOIN aro_core.global_library g ON ds.id = g.data_source_id
-    ),
-    
-    boundary_locations AS (
-      SELECT
-         l.id AS location_id,
-         l.object_id AS location_object_id,
-         l.geom AS location_geom,
-         l.cb_gid,
-         sa.id AS service_area_id,
-         l.location_type, 
-         l.number_of_households,
-         lds.data_source_name,
-         l.workflow_state_id,
-         l.attributes,
-         b.*
-      FROM
-        inputs i
-        cross join selected_service_layer ssl
-        CROSS JOIN modified_boundaries mb
-        cross join location_ds_ids lds
-      JOIN client.extended_boundary b
-         ON b.id = mb.id
-        JOIN client.extended_location l
-          ON ST_Contains(mb.geom, l.geom)
-             AND lds.ds_id = l.data_source_id
-       AND l.date_to = '294276-01-01'
-      JOIN client.service_area sa
-        ON sa.service_layer_id = ssl.id
-        AND ST_Contains(sa.geom, l.geom)
-           AND ST_Intersects(sa.geom, mb.geom)
-    ),
-    
-    service_area_locations AS (
-      SELECT
-        l.*,
-        sa.id AS service_area_id,
-      lds.data_source_name
+      
+      modified_boundaries AS (
+        SELECT 
+          nb.*
+        FROM  inputs i
+        JOIN  reports.network_boundary nb
+          ON nb.root_plan_id = i.plan_id
+          AND nb.is_branch_data
+          AND nb.boundary_type = i.boundary_type
+        AND nb.date_from <> '294276-01-01 00:00:00'::timestamp
+      ),
+      
+      service_areas AS (
+        SELECT
+          psa.*
+        FROM inputs i
+        JOIN reports.plan_service_area psa
+          ON i.plan_id = psa.tagged_plan_id 
+      ),
+      
+      data_sources AS (
+      SELECT *
       FROM inputs i
-        cross join location_ds_ids lds
-        JOIN reports.plan_service_area sal
-          ON sal.tagged_plan_id = i.plan_id
-        JOIN client.extended_location l
-          on
-            lds.ds_id = l.data_source_id
-       AND l.date_to = '294276-01-01'
-        JOIN client.service_area sa
-          on sal.id = sa.id
-             AND ST_Contains(sa.geom, l.geom)
-    ),
-    
-    reconciled_locations AS (
-
-    SELECT 
-      (CASE WHEN bl.id IS NOT NULL THEN 1 ELSE 0 END) + 
-        (CASE WHEN sl.id IS NOT NULL THEN 2 ELSE 0 END) AS  reconciled_code,
-      COALESCE(bl.service_area_id, sl.service_area_id) AS location_service_area_id,
-      COALESCE(bl.id, sl.id) AS id,
-      COALESCE(bl.location_id, sl.id) AS location_id,
-      COALESCE(bl.location_geom, sl.geom) AS geom,
-      COALESCE(bl.location_object_id, sl.object_id) AS location_object_id,
-      COALESCE(bl.object_id, sl.object_id) AS boundary_object_id,
-      COALESCE(bl.location_type, sl.location_type) AS location_type,
-      bl.network_node_object_id AS equipment_object_id,
-      COALESCE(bl.cb_gid, sl.cb_gid)::int AS cb_gid,
-      COALESCE(bl.service_area_id, sl.service_area_id) AS service_area_id,
-      COALESCE(bl.number_of_households, sl.number_of_households) AS number_of_households,
-      COALESCE(bl.data_source_name, sl.data_source_name) AS data_source_name,
-      COALESCE(bl.workflow_state_id, sl.workflow_state_id) AS workflow_state_id,
-      COALESCE(bl.attributes, sl.attributes) AS attributes
-    FROM service_area_locations sl
-    FULL OUTER JOIN boundary_locations bl
-        ON bl.location_object_id = sl.object_id
-
-    ),
-    
-    matched_equipment AS (
+      JOIN client.active_plan_data_source d ON i.plan_id = d.root_plan_id
+        AND data_type_id = 3
+      ),
+      
+      existing_boundaries AS (
+        SELECT
+          sb.id,
+          sb.object_id,
+          sb.network_node_object_id
+        FROM inputs i
+        CROSS JOIN data_sources ds
+        CROSS JOIN service_areas sa 
+        JOIN client.extended_boundary sb 
+          ON (sb.data_source_id = ANY ( ds.full_path)) --ds.data_source_id OR (sb.data_source_id = ANY (ds.parent_path))) AND sb.is_library_data
+          AND sb.date_to = '294276-01-01 00:00:00'
+          AND sb.boundary_type = i.boundary_type 
+          AND st_intersects(sa.geom, sb.geom)
+        GROUP BY 1, 2, 3
+      ),
+      
+      all_boundaries AS (
+      SELECT
+        *   
+      FROM modified_boundaries
+        ),
+      
+      location_ds_ids as (
+        select unnest(ds.parent_path || ds.id) as ds_id,
+            g.name AS data_source_name
+        from inputs i
+        join client.active_plan_data_source ads on
+                                            i.plan_id = ads.root_plan_id
+                                            and ads.data_type_id = 1
+        join aro_core.data_source ds
+          on ds.id = ads.data_source_id
+          LEFT JOIN aro_core.global_library g ON ds.id = g.data_source_id
+      ),
+      
+      boundary_locations AS (
+        SELECT
+           l.id AS location_id,
+           l.object_id AS location_object_id,
+           l.geom AS location_geom,
+           l.cb_gid,
+           sa.id AS service_area_id,
+           l.location_type, 
+           l.number_of_households,
+           lds.data_source_name,
+           l.workflow_state_id,
+																l.attributes,
+           b.*
+        FROM
+          inputs i
+          cross join selected_service_layer ssl
+          CROSS JOIN modified_boundaries mb
+          cross join location_ds_ids lds
+        JOIN client.extended_boundary b
+           ON b.id = mb.id
+          JOIN client.extended_location l
+            ON ST_Contains(mb.geom, l.geom)
+               AND lds.ds_id = l.data_source_id
+			   AND l.date_to = '294276-01-01'
+        LEFT JOIN client.service_area sa
+          ON sa.service_layer_id = ssl.id
+          AND ST_Contains(sa.geom, l.geom)
+             AND ST_Intersects(sa.geom, mb.geom)
+      ),
+      
+      service_area_locations AS (
+        SELECT
+          l.*,
+          sa.id AS service_area_id,
+        lds.data_source_name
+        FROM inputs i
+          cross join location_ds_ids lds
+          JOIN reports.plan_service_area sal
+            ON sal.tagged_plan_id = i.plan_id
+          JOIN client.extended_location l
+            on
+              lds.ds_id = l.data_source_id
+			   AND l.date_to = '294276-01-01'
+          JOIN client.service_area sa
+            on sal.id = sa.id
+               AND ST_Contains(sa.geom, l.geom)
+      ),
+      
+      reconciled_locations AS (
+      
       SELECT 
-        ne.*
-      FROM  inputs i
-      CROSS JOIN all_boundaries b
-      JOIN  reports.network_equipment ne
-          ON ne.root_plan_id = i.plan_id
-          AND ne.is_branch_data
-             AND ne.object_id = b.network_node_object_id
-          AND ne.node_type_id <> 8
-
-    ),
-    
-    unique_gids AS (
-    SELECT DISTINCT cb_gid
-    FROM reconciled_locations rl
-    ),
-    
-    joiner AS (
-    SELECT cb.*
-    FROM aro.census_blocks cb
-    JOIN unique_gids rl
-      ON cb.gid =rl.cb_gid
-    )
-    
-    SELECT 
-    rl.location_object_id                                                                         AS "Location Object ID",
-      rl.data_source_name                                                                         AS "Data Source",
-      rl.number_of_households                                                                                                             AS "Location Count",
-      rl.location_type                                                                            AS "Location Type",
-      ws.name                                                                                     AS "Location Status",  
-      ST_Y(
-          rl.geom)                                                                                AS "Location Latitude",
-      ST_X(
-          rl.geom)                                                                                AS "Location Longitude",
-      e.site_name                                                                                 AS "Covered-By Site Name",
-      e.site_clli                                                                                 AS "Covered-By Site CLLI",
-      e.object_id                                                                                 AS "Covered-By Site Object ID",
-      sa.name                                                                                     AS "Wirecenter Name",
-      sa.code                                                                                     AS "Wirecenter CLLI" ,
-      cb.tabblock_id                                                                              AS "Census Block" ,
-      (SELECT description
-       FROM aro_core.tag
-       WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
-                                                   FROM aro_core.category
-                                                   WHERE description =
-                                                         'CAF Phase I Part I') :: text) :: int))  AS "CAF Phase I Part I Tag",
-      (SELECT description
-       FROM aro_core.tag
-       WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
-                                                   FROM aro_core.category
-                                                   WHERE description =
-                                                         'CAF Phase I Part II') :: text) :: int)) AS "CAF Phase I Part II Tag",
-      (SELECT description
-       FROM aro_core.tag
-       WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
-                                                   FROM aro_core.category
-                                                   WHERE description =
-                                                      'CAF Phase II') :: text) :: int))        AS "CAF Phase II Tag",
-    rl.attributes
-                              
-    FROM reconciled_locations rl
-    JOIN joiner cb
-      ON cb.gid =rl.cb_gid
-    JOIN client.service_area sa
-      ON sa.id = rl.location_service_area_id
-    LEFT JOIN all_boundaries b
-      ON rl.boundary_object_id = b.object_id
-    LEFT JOIN matched_equipment e
-      ON rl.equipment_object_id = e.object_id
-    JOIN aro.workflow_state ws
-      ON rl.workflow_state_id = ws.id
+        (CASE WHEN bl.id IS NOT NULL THEN 1 ELSE 0 END) + 
+          (CASE WHEN sl.id IS NOT NULL THEN 2 ELSE 0 END) AS  reconciled_code,
+        COALESCE(bl.service_area_id, sl.service_area_id) AS location_service_area_id,
+        COALESCE(bl.id, sl.id) AS id,
+        COALESCE(bl.location_id, sl.id) AS location_id,
+        COALESCE(bl.location_geom, sl.geom) AS geom,
+        COALESCE(bl.location_object_id, sl.object_id) AS location_object_id,
+        COALESCE(bl.object_id, sl.object_id) AS boundary_object_id,
+        COALESCE(bl.location_type, sl.location_type) AS location_type,
+        bl.network_node_object_id AS equipment_object_id,
+        COALESCE(bl.cb_gid, sl.cb_gid)::int AS cb_gid,
+        COALESCE(bl.service_area_id, sl.service_area_id) AS service_area_id,
+        COALESCE(bl.number_of_households, sl.number_of_households) AS number_of_households,
+        COALESCE(bl.data_source_name, sl.data_source_name) AS data_source_name,
+        COALESCE(bl.workflow_state_id, sl.workflow_state_id) AS workflow_state_id,
+        COALESCE(bl.attributes, sl.attributes) AS attributes
+      FROM service_area_locations sl
+      FULL OUTER JOIN boundary_locations bl
+          ON bl.location_object_id = sl.object_id
+      
+      ),
+      
+      matched_equipment AS (
+        SELECT 
+          ne.*
+        FROM  inputs i
+        CROSS JOIN all_boundaries b
+        JOIN  reports.network_equipment ne
+            ON ne.root_plan_id = i.plan_id
+            AND ne.is_branch_data
+               AND ne.object_id = b.network_node_object_id
+            AND ne.node_type_id <> 8
+        
+      ),
+      
+      unique_gids AS (
+      SELECT DISTINCT cb_gid
+      FROM reconciled_locations rl
+      ),
+      
+      joiner AS (
+      SELECT cb.*
+      FROM aro.census_blocks cb
+      JOIN unique_gids rl
+        ON cb.gid =rl.cb_gid
+      )
+      
+      SELECT 
+      rl.location_object_id                                                                         AS "Location Object ID",
+        rl.data_source_name                                                                         AS "Data Source",
+        rl.number_of_households                                                                                                             AS "Location Count",
+        rl.location_type                                                                            AS "Location Type",
+        ws.name                                                                                     AS "Location Status",  
+        ST_Y(
+            rl.geom)                                                                                AS "Location Latitude",
+        ST_X(
+            rl.geom)                                                                                AS "Location Longitude",
+        e.site_name                                                                                 AS "Covered-By Site Name",
+        e.site_clli                                                                                 AS "Covered-By Site CLLI",
+        e.object_id                                                                                 AS "Covered-By Site Object ID",
+        sa.name                                                                                     AS "Wirecenter Name",
+        sa.code                                                                                     AS "Wirecenter CLLI" ,
+        cb.tabblock_id                                                                              AS "Census Block" ,
+        (SELECT description
+         FROM aro_core.tag
+         WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
+                                                     FROM aro_core.category
+                                                     WHERE description =
+                                                           'CAF Phase I Part I') :: text) :: int))  AS "CAF Phase I Part I Tag",
+        (SELECT description
+         FROM aro_core.tag
+         WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
+                                                     FROM aro_core.category
+                                                     WHERE description =
+                                                           'CAF Phase I Part II') :: text) :: int)) AS "CAF Phase I Part II Tag",
+        (SELECT description
+         FROM aro_core.tag
+         WHERE id = ((cb.tags -> 'category_map' ->> (SELECT id
+                                                     FROM aro_core.category
+                                                     WHERE description =
+                                                           'CAF Phase II') :: text) :: int))        AS "CAF Phase II Tag",
+		rl.attributes
+                                
+      FROM reconciled_locations rl
+      LEFT JOIN joiner cb
+        ON cb.gid =rl.cb_gid
+      LEFT JOIN client.service_area sa
+        ON sa.id = rl.location_service_area_id
+      LEFT JOIN all_boundaries b
+        ON rl.boundary_object_id = b.object_id
+      LEFT JOIN matched_equipment e
+        ON rl.equipment_object_id = e.object_id
+      JOIN aro.workflow_state ws
+        ON rl.workflow_state_id = ws.id
     `;
 
     return database.findOne('SELECT name FROM client.active_plan WHERE id=$1', [plan_id])
