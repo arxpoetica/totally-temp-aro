@@ -1,6 +1,8 @@
 // === table view === //
 
 
+// Note: edit mode is not implimented yet 
+
 class EditorInterfaceTableController {
   constructor() {
     this.orderCol = ""

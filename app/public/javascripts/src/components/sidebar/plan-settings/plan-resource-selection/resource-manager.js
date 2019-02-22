@@ -55,34 +55,34 @@ class ResourceManagerController {
     this.actions = [
       {
         buttonText: '', //Delete
-        buttonClass: "btn-danger", // use default
+        buttonClass: "btn-danger", 
         iconClass: "fa-trash-alt", 
         toolTip: "Delete", 
         callBack: (row, index) => {
-          console.log('Delete')
-          console.log(row)
+          //console.log('Delete')
+          //console.log(row)
           this.deleteSelectedResourceManager(row)
         }
       }, 
       {
         buttonText: '', //Edit
-        buttonClass: "btn-primary", // use default
+        buttonClass: "btn-primary", 
         iconClass: "fa-edit", 
         toolTip: "Edit", 
         callBack: (row, index) => {
-          console.log('Edit') 
-          console.log(row)
+          //console.log('Edit') 
+          //console.log(row)
           this.editSelectedManager(row)
         }
       }, 
       {
         buttonText: '', // Clone
-        buttonClass: "btn-primary", // use default
+        buttonClass: "btn-primary", 
         iconClass: "fa-copy", 
         toolTip: "Clone", 
         callBack: (row, index) => {
-          console.log('Clone')
-          console.log(row)
+          //console.log('Clone')
+          //console.log(row)
           this.cloneSelectedManagerFromSource(row)
         }
       }/*
