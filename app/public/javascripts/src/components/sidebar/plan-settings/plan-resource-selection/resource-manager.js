@@ -16,7 +16,7 @@ class ResourceManagerController {
     }
     this.managerIdString = 'MANAGER_ID'
     this.managerDeleteUrl = {
-      price_book: `/service/v1/price_book/${this.managerIdString}`,
+      price_book: `/service/v1/pricebook/${this.managerIdString}`,
       roic_manager: `/service/v1/roic_manager/${this.managerIdString}`,
       arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}`,
       impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}`,
@@ -59,18 +59,37 @@ class ResourceManagerController {
     
     this.actions = [
       {
+        buttonText: '', //Delete
+        buttonClass: "btn-danger", // use default
+        iconClass: "fa-trash-alt", 
+        toolTip: "Delete", 
+        callBack: (row, index) => {
+          console.log('Delete')
+          console.log(row)
+          this.deleteSelectedResourceManager(row)
+        }
+      }, 
+      {
         buttonText: '', //Edit
         buttonClass: "btn-primary", // use default
         iconClass: "fa-edit", 
         toolTip: "Edit", 
-        callBack: function(index, row){console.log('Edit');console.log(row)}
+        callBack: (row, index) => {
+          console.log('Edit') 
+          console.log(row)
+          this.editSelectedManager(row)
+        }
       }, 
       {
-        buttonText: '', // Permissions
+        buttonText: '', // Clone
         buttonClass: "btn-primary", // use default
-        iconClass: "fa-user-plus", 
-        toolTip: "Permissions", 
-        callBack: function(index, row){console.log('permissions');console.log(row)}
+        iconClass: "fa-copy", 
+        toolTip: "Clone", 
+        callBack: (row, index) => {
+          console.log('Clone')
+          console.log(row)
+          this.cloneSelectedManagerFromSource(row)
+        }
       }/*
       {
         buttonText: '', // Permissions
@@ -152,8 +171,8 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
-  cloneSelectedPriceBook() {
-    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+  cloneSelectedPriceBook(selectedManager) {
+    this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
@@ -162,23 +181,25 @@ class ResourceManagerController {
     this.setEditingMode({ mode: this.createRateReachManagerMode })
   }
 
-  cloneSelectedRateReachManager() {
-    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+  cloneSelectedRateReachManager(selectedManager) {
+    this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.createRateReachManagerMode })
   }
 
-  cloneSelectedManagerFromSource(managerId) {
+  cloneSelectedManagerFromSource(selectedManager) {
+    
+    var managerId = this.resourceKeyToEndpointId[selectedManager.managerType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
-      this.cloneSelectedPriceBook()
+      this.cloneSelectedPriceBook(selectedManager)
     } else if (managerId === 'rate-reach-matrix') {
-      this.cloneSelectedRateReachManager()
+      this.cloneSelectedRateReachManager(selectedManager)
     } else {
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
       .then((resourceName) => {
         // Create a new manager with the specified name and description
-        return this.$http.post(`/service/v1/${managerId}?source_manager=${this.resourceItems[this.selectedResourceKey].selectedManager.id}`,
+        return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}`,
                               { name: resourceName, description: resourceName })
       })
       .then((result) => this.onManagerCreated(result.data.id))
@@ -193,10 +214,10 @@ class ResourceManagerController {
     return Promise.resolve()
   }
 
-  editSelectedManager() {
-    this.setEditingManagerId({ newId: this.resourceItems[this.selectedResourceKey].selectedManager.id })
+  editSelectedManager(selectedManager) {
+    this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
-    this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
+    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.managerType })
   }
 
   askUserToConfirmManagerDelete(managerName) {
@@ -220,24 +241,26 @@ class ResourceManagerController {
   }
 
   deleteManager(deleteUrl) {
+    console.log(deleteUrl)
     this.$http.delete(deleteUrl)
-      .then((result) => {
-        this.onManagersChanged && this.onManagersChanged()
-        this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
-      })
-      .catch((err) => console.error(err))
+    .then((result) => {
+      this.onManagersChanged && this.onManagersChanged()
+      //this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
+    })
+    .catch((err) => console.error(err))
   }
 
-  deleteSelectedResourceManager() {
-    this.askUserToConfirmManagerDelete(this.resourceItems[this.selectedResourceKey].selectedManager.name)
-      .then((okToDelete) => {
-        if (okToDelete) {
-          const managerIdToDelete = this.resourceItems[this.selectedResourceKey].selectedManager.id
-          const deleteUrl = this.managerDeleteUrl[this.selectedResourceKey].replace(this.managerIdString, managerIdToDelete)
-          this.deleteManager(deleteUrl)
-        }
-      })
-      .catch((err) => console.error(err))
+  deleteSelectedResourceManager(selectedManager) {
+    this.askUserToConfirmManagerDelete(selectedManager.name)
+    .then((okToDelete) => {
+      if (okToDelete) {
+        const managerIdToDelete = selectedManager.id
+        // this.selectedResourceKey selectedManager.managerType
+        const deleteUrl = this.managerDeleteUrl[selectedManager.managerType].replace(this.managerIdString, managerIdToDelete)
+        this.deleteManager(deleteUrl)
+      }
+    })
+    .catch((err) => console.error(err))
   }
 
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).

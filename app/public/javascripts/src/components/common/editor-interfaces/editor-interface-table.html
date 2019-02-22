@@ -41,7 +41,7 @@
 	        </div>
 	        <div class="ei-table-cell" ng-repeat="(btnKey, btnValue) in $ctrl.actions">
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
-	                  ng-click="btnValue.callBack(rowKey, rowValue)"
+	                  ng-click="btnValue.callBack(rowValue, rowKey)"
 	                  data-toggle="tooltip" data-placement="bottom" title="{{btnValue.toolTip}}"><i ng-if="'' != btnValue.iconClass" ng-class="btnValue.iconClass" class="fa ei-button-icon"></i>{{'' != btnValue.iconClass ? ' ' : ''}}{{btnValue.buttonText}}</button>
 	        </div>
 	      </div>
