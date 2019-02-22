@@ -1,0 +1,15 @@
+{
+  "categories": {
+    "road_segments": {
+      "style_options": {
+        "normal": {
+          "strokeColor": "#ffffff",
+          "strokeWeight": 5
+        },
+        "highlight": {
+          "strokeWeight": 6
+        }
+      }
+    }
+  }
+}
