@@ -25,10 +25,7 @@ class ResourceManagerController {
       rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
     }
     
-    
-    
-    
-    // for testing -------- 
+    this.rows = []
     
     this.displayProps = [
       {
@@ -54,8 +51,6 @@ class ResourceManagerController {
         "visible": true
       }
     ]
-    
-    this.rows = []
     
     this.actions = [
       {
@@ -101,16 +96,7 @@ class ResourceManagerController {
       */
     ]
     
-    
-    // -------
-    
-    
-    
-    
-    
-    
   }
-  
   
   
   $onChanges(changes){
@@ -310,8 +296,8 @@ class ResourceManagerController {
     })
   }
   
-  
 }
+
 
 ResourceManagerController.$inject = ['$http', '$document', 'state']
 
