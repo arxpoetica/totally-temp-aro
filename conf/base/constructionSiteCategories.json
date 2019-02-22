@@ -1,0 +1,31 @@
+{
+  "categories": {
+    "road_segments": {
+      "short_name": "RS",
+      "name": "Road Segments",
+      "type": "road_segments",
+      "style_options": {
+        "normal": {
+          "strokeColor": "teal",
+          "strokeWeight": 2
+        },
+        "highlight": {
+          "strokeColor": "#b34d4d",
+          "strokeWeight": 4
+        }
+      },
+      "libraryId": 2,
+      "aggregateZoomThreshold": 15,
+      "checked": false,
+      "disabled": false,
+      "tileDefinition": {
+        "dataId": "v1.tiles.edge.{libraryId}.{transform}",
+        "vtlType": "EdgeLayer",
+        "libraryId": "{libraryId}",
+        "transform": "{transform}"
+      },
+      "threshold": 12,
+      "reload": "always"
+    }
+  }
+}

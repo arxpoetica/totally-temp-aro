@@ -1,0 +1,27 @@
+<div class="map-tool-wrapper">
+  <div ng-show="$ctrl.map_tools.is_visible('construction_sites')" class="card map-tool">
+    <div class="card-header map-tools-card-header bg-primary text-white">
+      <a href="javascript:void(0)" class="float-right" ng-show="$ctrl.map_tools.is_expanded('construction_sites')" ng-click="$ctrl.map_tools.collapse('construction_sites')">
+        <span style="color:white" class="fa fa-chevron-up"></span>
+      </a>
+      <a href="javascript:void(0)" class="float-right" ng-show="!$ctrl.map_tools.is_expanded('construction_sites')" ng-click="$ctrl.map_tools.expand('construction_sites')">
+        <span style="color:white" class="fa fa-chevron-down"></span>
+      </a>
+      <h5 class="map-tool-title-text">Construction Sites</h5>
+    </div>
+    <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('construction_sites')">
+      <div ng-repeat="layer in $ctrl.constructionLayers">
+        <div class="checkbox" ng-attr-id="map_layers_toggle_{{layer.type}}" ng-class="{ 'disabled': layer.disabled }">
+          <div class="float-right">
+            <input type="checkbox" class="checkboxfill" ng-checked="layer.checked" name="ctype-name" ng-click="$ctrl.updateLayerVisibility(layer, !layer.checked)"
+              ng-disabled="layer.disabled">
+          </div>
+          <div class="float-right" style="margin-right: 30px">
+            <span class="fa fa-repeat map-layer-spinner map-layer-spinner-{{layer.type}}"></span>
+          </div>
+          <label>{{layer.name}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

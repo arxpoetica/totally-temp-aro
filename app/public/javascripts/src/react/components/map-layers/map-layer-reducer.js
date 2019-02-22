@@ -3,6 +3,7 @@ import { List } from 'immutable'
 
 const defaultState = {
   location: new List(),
+  constructionSite: new List(),
   boundary: new List()
 }
 
@@ -33,6 +34,9 @@ function mapLayersReducer (state = defaultState, action) {
   switch (action.type) {
     case Actions.LAYERS_SET_LOCATION:
       return setLayers(state, 'location', action.payload)
+
+    case Actions.LAYERS_SET_CONSTRUCTION_SITE:
+      return setLayers(state, 'constructionSite', action.payload)
 
     case Actions.LAYERS_SET_BOUNDARY:
       return setLayers(state, 'boundary', action.payload)

@@ -1,22 +1,7 @@
 
 <locations></locations>
 
-<div class="map-tool-wrapper wrapper_csites_controller" ng-controller="construction_sites_controller">
-  <div ng-show="map_tools.is_visible('construction_sites')" class="card map-tool">
-    <div class="card-header map-tools-card-header bg-primary text-white">
-      <a href="javascript:void(0)" class="float-right" ng-show="map_tools.is_expanded('construction_sites')" ng-click="map_tools.collapse('construction_sites')">
-        <span style="color:white" class="fa fa-chevron-up"></span>
-      </a>
-      <a href="javascript:void(0)" class="float-right" ng-show="!map_tools.is_expanded('construction_sites')" ng-click="map_tools.expand('construction_sites')">
-        <span style="color:white" class="fa fa-chevron-down"></span>
-      </a>
-      <h5 class="map-tool-title-text">Construction Sites</h5>
-    </div>
-    <div class="card-body map-tools-card-body" ng-show="map_tools.is_expanded('construction_sites')">
-      <% include controller_construction_sites.html %>
-    </div>
-  </div>
-</div>
+<construction-sites></construction-sites>
 
 <boundaries></boundaries>
 

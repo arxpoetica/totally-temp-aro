@@ -41,6 +41,7 @@ function loadConfiguration() {
   const configurationTypes = [
     'locationCategories',
     'networkEquipment',
+    'constructionSiteCategories',
     'boundaryCategories',
     'units',
     'aroClient',
