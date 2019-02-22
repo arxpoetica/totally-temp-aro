@@ -10,11 +10,11 @@ class OptimizeButtonController {
 
   areInputsComplete() {
     // First, check if the selected targets are valid. E.g. if the user has selected Service Areas, then at least one service area must be selected.
-    const areLocationsValid = (this.state.selection.planTargets.locationIds.size > 0)
+    const areLocationsValid = (this.planTargets.locations.size > 0)
                               && (this.activeSelectionModeId === SelectionModes.SELECTED_LOCATIONS)
-    const areServiceAreasValid = (this.state.selection.planTargets.serviceAreaIds.size > 0)
+    const areServiceAreasValid = (this.planTargets.serviceAreas.size > 0)
                                  && (this.activeSelectionModeId === SelectionModes.SELECTED_AREAS)
-    const areAnalysisAreasValid = (this.state.selection.planTargets.analysisAreaIds.size > 0)
+    const areAnalysisAreasValid = (this.planTargets.analysisAreas.size > 0)
                                   && (this.activeSelectionModeId === SelectionModes.SELECTED_ANALYSIS_AREAS)
     const isTargetSelectionValid = areLocationsValid || areServiceAreasValid || areAnalysisAreasValid
 
@@ -31,7 +31,8 @@ class OptimizeButtonController {
   // Map global state to component properties
   mapStateToThis (reduxState) {
     return {
-      activeSelectionModeId: reduxState.selection.activeSelectionMode.id
+      activeSelectionModeId: reduxState.selection.activeSelectionMode.id,
+      planTargets: reduxState.selection.planTargets
     }
   }
 

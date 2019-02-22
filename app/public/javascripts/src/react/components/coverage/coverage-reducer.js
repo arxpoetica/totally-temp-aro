@@ -86,7 +86,7 @@ function coverageReducer (state = defaultStatus, action) {
     case Actions.COVERAGE_SET_COVERAGE_TYPE:
       return setCoverageType(state, action.payload)
 
-    case Actions.COVERAGE_SET_SAVE_SITE_COVERAGE:
+    case Actions.COVERAGE_SET_GROUP_KEY_TYPE:
       return setGroupKeyType(state, action.payload)
 
     case Actions.COVERAGE_SET_LIMIT_MARKETABLE_TECHNOLOGIES:

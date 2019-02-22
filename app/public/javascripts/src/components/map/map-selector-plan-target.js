@@ -1,5 +1,7 @@
+import SelectionActions from '../../react/components/selection/selection-actions'
+
 class MapSelectorPlanTargetController {
-  constructor($document, $http, state) {
+  constructor($document, $ngRedux, state) {
 
     this.mapRef = null
     this.drawingManager = null
@@ -13,84 +15,32 @@ class MapSelectorPlanTargetController {
     })
     this.state = state
     this.document = $document
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
 
     // Handle selection events from state
-    this.unsub = state.mapFeaturesSelectedEvent.subscribe((event) => {
-      
-      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
-      var plan = state.plan.getValue()
-      
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.locations && event.locations.length > 0 
-        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-      // Get a list of ids to add and remove
-      var idsToAdd = new Set(), idsToRemove = new Set()
-      event.locations.forEach((location) => {
-        if (state.selection.planTargets.locationIds.has(+location.location_id)) {
-          idsToRemove.add(+location.location_id)
-        } else {
-          idsToAdd.add(+location.location_id)
-        }
-      })
-      // Make these changes to the database, then reload targets from the DB
-      var addRemoveTargetPromises = [
-        $http.post(`/network_plan/${plan.id}/addTargets`, { locationIds: Array.from(idsToAdd) }),
-        $http.post(`/network_plan/${plan.id}/removeTargets`, { locationIds: Array.from(idsToRemove) })
-      ]
-      Promise.all(addRemoveTargetPromises)
-        .then((response) => {
-          // Reload selected locations from database
-          state.reloadSelectedLocations()
-        })
-      }
-      
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.serviceAreas && event.serviceAreas.length > 0 
-          && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-        // Get a list of ids to add and remove
-        var idsToAdd = new Set(), idsToRemove = new Set()
-        event.serviceAreas.forEach((serviceArea) => {
-          if (state.selection.planTargets.serviceAreaIds.has(+serviceArea.id)) {
-            idsToRemove.add(+serviceArea.id)
-          } else {
-            idsToAdd.add(+serviceArea.id)
-          }
-        })
-        // Make these changes to the database, then reload targets from the DB
-        var addRemoveTargetPromises = [
-          $http.post(`/service_areas/${plan.id}/addServiceAreaTargets`, { serviceAreaIds: Array.from(idsToAdd) }),
-          $http.post(`/service_areas/${plan.id}/removeServiceAreaTargets`, { serviceAreaIds: Array.from(idsToRemove) })
-        ]
-        Promise.all(addRemoveTargetPromises)
-          .then((response) => {
-            // Reload selected locations from database
-            state.reloadSelectedServiceAreas()
-          })
-          .catch(err => console.error(err))
-      }
+    this.unsub = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
+      this.addOrRemoveSelection(event.locations || [], 'locations', 'location_id')
+      this.addOrRemoveSelection(event.serviceAreas || [], 'serviceAreas', 'id')
+      this.addOrRemoveSelection(event.analysisAreas || [], 'analysisAreas', 'id')
+    })
+  }
 
-      if (plan && plan.id !== state.INVALID_PLAN_ID && event.analysisAreas && event.analysisAreas.length > 0 
-        && state.selectedDisplayMode.getValue() === state.displayModes.ANALYSIS) {
-        // Get a list of ids to add and remove
-        var idsToAdd = new Set(), idsToRemove = new Set()
-        event.analysisAreas.forEach((analysisArea) => {
-          if (state.selection.planTargets.analysisAreaIds.has(+analysisArea.id)) {
-            idsToRemove.add(+analysisArea.id)
-          } else {
-            idsToAdd.add(+analysisArea.id)
-          }
-        })
-        // Make these changes to the database, then reload targets from the DB
-        var addRemoveAnalysisTargetPromises = [
-          $http.post(`/analysis_areas/${plan.id}/addAnalysisAreaTargets`, { analysisAreaIds: Array.from(idsToAdd) }),
-          $http.post(`/analysis_areas/${plan.id}/removeAnalysisAreaTargets`, { analysisAreaIds: Array.from(idsToRemove) })
-        ]
-        Promise.all(addRemoveAnalysisTargetPromises)
-          .then((response) => {
-            // Reload selected locations from database
-            state.reloadSelectedAnalysisAreas()
-          })
-          .catch(err => console.error(err))
+  addOrRemoveSelection(entities, planTargetKey, entityIdKey) {
+    // Get a list of ids to add and remove
+    var idsToAdd = new Set(), idsToRemove = new Set()
+    entities.forEach((entity) => {
+      if (this.planTargets[planTargetKey].has(+entity[entityIdKey])) {
+        idsToRemove.add(+entity[entityIdKey])
+      } else {
+        idsToAdd.add(+entity[entityIdKey])
       }
     })
+    if (idsToAdd.size > 0) {
+      this.addPlanTargets(this.activePlanId, { [planTargetKey]: idsToAdd })
+    }
+    if (idsToRemove.size > 0) {
+      this.removePlanTargets(this.activePlanId, { [planTargetKey]: idsToRemove })
+    }
   }
 
   updateDrawingManagerState() {
@@ -137,7 +87,6 @@ class MapSelectorPlanTargetController {
 
   }
 
-
   $onDestroy() {
     if(this.unsub)
       this.unsub.unsubscribe()
@@ -146,6 +95,7 @@ class MapSelectorPlanTargetController {
       this.drawingManager.setDrawingMode(null)
       this.drawingManager.setMap(null)
     }
+    this.unsubscribeRedux()
   }
 
   $doCheck() {
@@ -156,9 +106,23 @@ class MapSelectorPlanTargetController {
       this.updateDrawingManagerState()
     }
   }
+
+  mapStateToThis (reduxState) {
+    return {
+      activePlanId: reduxState.plan.activePlan && reduxState.plan.activePlan.id,
+      planTargets: reduxState.selection.planTargets
+    }
+  }
+
+  mapDispatchToTarget (dispatch) {
+    return {
+      addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
+    }
+  }
 }
 
-MapSelectorPlanTargetController.$inject = ['$document', '$http', 'state']
+MapSelectorPlanTargetController.$inject = ['$document', '$ngRedux', 'state']
 
 let mapSelectorPlanTarget = {
   template: '', // No markup for this component. It interacts with the map directly.

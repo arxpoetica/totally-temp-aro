@@ -1265,6 +1265,10 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   border: solid 1px #ccc;
 }
 
+.sidebar-options-table td {
+  line-height: 33px;
+}
+
 .satags {
   background-color:white;
   border-color:#1f7de6;
