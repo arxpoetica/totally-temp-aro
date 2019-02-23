@@ -5,10 +5,10 @@
   -->
   
   <div class="ei-table-contain">
-	  <div class="ei-table-table">
-	    <div class="ei-table-body">
-	      <div class="ei-table-header-row">
-	        <div class="ei-table-col-head-sortable" 
+	  <table class="table table-sm table-striped">
+      <thead class="thead-dark">
+	      <tr>
+	        <th class="ei-table-col-head-sortable" 
 	             ng-repeat="(colKey, colValue) in $ctrl.displayProps"
 	             ng-click="$ctrl.setOrderCol(colValue.propertyName)">
 	          {{colValue.displayName}}
@@ -16,13 +16,13 @@
 	            <i ng-if="$ctrl.isOrderAscending" class="fa fa-chevron-down" aria-hidden="true"> </i>
 	            <i ng-if="!$ctrl.isOrderAscending" class="fa fa-chevron-up" aria-hidden="true"> </i>
 	          </div>
-	        </div>
-	        <div ng-if="$ctrl.canDelete" class="ei-table-col-head"></div>
-	        <div class="ei-table-col-head" ng-repeat="(btnKey, btnValue) in $ctrl.actions"></div>
-	      </div>
-	      
-	      <div class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
-	        <div class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
+	        </th>
+	        <th class="ei-table-col-head"></th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
+	        <td class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
 	          
 	          <editor-interface-value ng-if="rowValue.hasOwnProperty(colValue.propertyName)"
 	                                  display-props="colValue" 
@@ -33,18 +33,19 @@
                                     root-meta-data="$ctrl.rootMetaData">
 	          </editor-interface-value>
 	          
-	        </div>
-	        <div ng-if="$ctrl.canDelete" class="ei-table-cell">
-	          <button class="btn btn-danger btn-sm" 
+	        </td>
+	        <td class="ei-table-cell">
+	          <button class="btn btn-outline-danger btn-sm"
+	                  ng-if="$ctrl.canDelete" 
 	                  ng-click="$ctrl.deleteItem(rowKey)"
 	                  data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="far fa-trash-alt ei-button-icon"></i></button>
-	        </div>
-	        <div class="ei-table-cell" ng-repeat="(btnKey, btnValue) in $ctrl.actions">
+	          
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
+	                  ng-repeat="(btnKey, btnValue) in $ctrl.actions"
 	                  ng-click="btnValue.callBack(rowValue, rowKey)"
 	                  data-toggle="tooltip" data-placement="bottom" title="{{btnValue.toolTip}}"><i ng-if="'' != btnValue.iconClass" ng-class="btnValue.iconClass" class="fa ei-button-icon"></i>{{'' != btnValue.iconClass ? ' ' : ''}}{{btnValue.buttonText}}</button>
-	        </div>
-	      </div>
+	        </td>
+	      </tr>
 	      
 	    </div>
 	  </div>
