@@ -30,18 +30,19 @@
                           root-meta-data="{}">
   </editor-interface-table>
   
-  <form class="form-horizontal">
+  <form class="form-horizontal"
+        ng-if="$ctrl.selectedResourceKey === 'all' || $ctrl.selectedResourceKey === 'price_book' || $ctrl.selectedResourceKey === 'rate_reach_manager'">
     <div class="form-group row" style="flex-direction: row-reverse;">
       <!-- 
       ToDo: revisit this markup 
       -->
       <div class="col-sm-8" style="margin-top: 1rem">
-        <button class="btn btn-primary btn-block" 
+        <button class="btn btn-light btn-block" 
                 ng-click="$ctrl.createBlankPriceBook()"
                 ng-if="$ctrl.selectedResourceKey === 'all' || $ctrl.selectedResourceKey === 'price_book'">
           <i class="fa fa-file action-button-icon"></i>New blank Price Book
         </button>
-        <button class="btn btn-primary btn-block"
+        <button class="btn btn-light btn-block"
                 ng-click="$ctrl.createBlankRateReachManager()"
                 ng-if="$ctrl.selectedResourceKey === 'all' || $ctrl.selectedResourceKey === 'rate_reach_manager'">
           <i class="fa fa-file action-button-icon"></i>New blank Rate Reach Manager

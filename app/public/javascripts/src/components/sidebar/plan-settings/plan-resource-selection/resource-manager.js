@@ -55,7 +55,7 @@ class ResourceManagerController {
     this.actions = [
       {
         buttonText: '', //Delete
-        buttonClass: "btn-danger", 
+        buttonClass: "btn-outline-danger", 
         iconClass: "fa-trash-alt", 
         toolTip: "Delete", 
         callBack: (row, index) => {
@@ -66,7 +66,7 @@ class ResourceManagerController {
       }, 
       {
         buttonText: '', //Edit
-        buttonClass: "btn-primary", 
+        buttonClass: "btn-light", 
         iconClass: "fa-edit", 
         toolTip: "Edit", 
         callBack: (row, index) => {
@@ -77,7 +77,7 @@ class ResourceManagerController {
       }, 
       {
         buttonText: '', // Clone
-        buttonClass: "btn-primary", 
+        buttonClass: "btn-light", 
         iconClass: "fa-copy", 
         toolTip: "Clone", 
         callBack: (row, index) => {
