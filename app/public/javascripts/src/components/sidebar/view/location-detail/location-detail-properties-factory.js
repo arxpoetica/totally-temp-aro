@@ -1,11 +1,10 @@
 class LocationDetailPropertiesFactory {
-
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
   }
 
-  createObject(objectDescriptor, properties, outLocationDetailProperties) {
+  createObject (objectDescriptor, properties, outLocationDetailProperties) {
     // First create an object to describe all the properties
     var displayProperties = []
     Object.keys(objectDescriptor).forEach((categoryKey) => {
@@ -32,10 +31,9 @@ class LocationDetailPropertiesFactory {
       }
       outLocationDetailProperties.getDisplayProperties = () => displayProperties
     })
-
   }
 
-  getLocationDetailPropertiesFor(locationDetails) {
+  getLocationDetailPropertiesFor (locationDetails) {
     var locationDetailProperties = {}
     this.createObject(this.state.configuration.locationDetailProperties, locationDetails, locationDetailProperties)
     return locationDetailProperties

@@ -8,8 +8,7 @@ const getSelectionModes = state => state.selection.selectionModes
 const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes))
 
 class NetworkAnalysisBuildController {
-
-  constructor($http, $ngRedux, state, optimization) {
+  constructor ($http, $ngRedux, state, optimization) {
     this.$http = $http
     this.$ngRedux = $ngRedux
     this.state = state
@@ -22,9 +21,9 @@ class NetworkAnalysisBuildController {
     this.toggleAdvanceSettings = false
 
     this.areControlsEnabled = true
-    //this.budgetDisplay = this.state.optimizationOptions.budget / 1000
+    // this.budgetDisplay = this.state.optimizationOptions.budget / 1000
     this.budgetDisplay = this.state.optimizationOptions.budget
-    
+
     state.plan.subscribe((newPlan) => {
       if (newPlan) {
         this.areControlsEnabled = (newPlan.planState === Constants.PLAN_STATE.START_STATE) || (newPlan.planState === Constants.PLAN_STATE.INITIALIZED)
@@ -40,24 +39,24 @@ class NetworkAnalysisBuildController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
-  onSelectionTypeChange(selectionType) {
+  onSelectionTypeChange (selectionType) {
     this.setSelectionTypeById(selectionType)
-  } 
-  
-  onBudgetChange(){
-    //this.state.optimizationOptions.budget = this.budgetDisplay * 1000
+  }
+
+  onBudgetChange () {
+    // this.state.optimizationOptions.budget = this.budgetDisplay * 1000
     this.state.optimizationOptions.budget = this.budgetDisplay
   }
 
-  onFiberOrFiveGClicked(networkType) {
+  onFiberOrFiveGClicked (networkType) {
     // If Fiber or FiveG is enabled, disable advanced analysis
     this.state.optimizationOptions.technologies[networkType].checked = !this.state.optimizationOptions.technologies[networkType].checked
     if (this.state.optimizationOptions.technologies[networkType].checked) {
-      this.state.optimizationOptions.networkConstraints.advancedAnalysis = false  
+      this.state.optimizationOptions.networkConstraints.advancedAnalysis = false
     }
   }
 
-  onAdvancedAnalysisClicked() {
+  onAdvancedAnalysisClicked () {
     // If "Advanced Analysis" is enabled, disable Fiber and 5G
     this.state.optimizationOptions.networkConstraints.advancedAnalysis = !this.state.optimizationOptions.networkConstraints.advancedAnalysis
     if (this.state.optimizationOptions.networkConstraints.advancedAnalysis) {
@@ -67,7 +66,7 @@ class NetworkAnalysisBuildController {
     }
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.selection) {
       // // The selected locations have changed. Get the count and addresses that we want to show
       // this.targetsTotal = this.state.selection.planTargets.locationIds.size
@@ -85,7 +84,7 @@ class NetworkAnalysisBuildController {
       //     this.serviceAreas = result.data
       //   })
       //   .catch(err => console.error(err))
-      
+
       // // The selected analysis areas have changed.
       // var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
       // this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
@@ -96,7 +95,7 @@ class NetworkAnalysisBuildController {
     }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 
@@ -121,7 +120,7 @@ let networkAnalysisBuild = {
   templateUrl: '/components/sidebar/analysis/network-analysis-build.html',
   bindings: {
     selection: '<',
-    removeTarget: '&', 
+    removeTarget: '&',
     zoomTarget: '&'
   },
   controller: NetworkAnalysisBuildController

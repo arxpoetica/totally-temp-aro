@@ -1,23 +1,20 @@
 class AroPanelController {
-
-  constructor(state,$timeout) {
+  constructor (state, $timeout) {
     this.state = state
     this.$timeout = $timeout
 
     this.showPanel = true
     this.measuredDistance = 0
     this.state.measuredDistance.subscribe((measuredDistance) => {
-      this.showPanel = measuredDistance ? true : false
+      this.showPanel = !!measuredDistance
       this.panelInfo = 'Measured distance:'
       this.measuredDistance = measuredDistance
-      this.$timeout();
+      this.$timeout()
     })
-  
   }
-
 }
 
-AroPanelController.$inject = ['state','$timeout']
+AroPanelController.$inject = ['state', '$timeout']
 
 let aroPanel = {
   template: `

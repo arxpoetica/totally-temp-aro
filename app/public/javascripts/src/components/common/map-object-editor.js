@@ -5,8 +5,7 @@ import FeatureSelector from '../tiles/feature-selector'
 import Utilities from './utilities'
 
 class MapObjectEditorController {
-
-  constructor($http, $element, $compile, $document, $timeout, state, tileDataService, contextMenuService, Utils) {
+  constructor ($http, $element, $compile, $document, $timeout, state, tileDataService, contextMenuService, Utils) {
     this.$http = $http
     this.$element = $element
     this.$compile = $compile
@@ -24,31 +23,31 @@ class MapObjectEditorController {
     this.selectedMapObjectPreviousShape = {}
     this.iconAnchors = {}
     this.polygonInvalidMsg = {
-      title: "Invalid Polygon",
-      text: "Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting."
+      title: 'Invalid Polygon',
+      text: 'Polygon shape is invalid, please try again. Ensure that the polygon is not self-intersecting.'
     }
-    
+
     this.drawing = {
       drawingManager: null,
-      markerIdForBoundary: null   // The objectId of the marker for which we are drawing the boundary
+      markerIdForBoundary: null // The objectId of the marker for which we are drawing the boundary
     }
     this.polygonOptions = {
       strokeColor: '#FF1493',
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: '#FF1493',
-      fillOpacity: 0.4,
+      fillOpacity: 0.4
     }
     this.selectedPolygonOptions = {
       strokeColor: '#000000',
       strokeOpacity: 0.8,
       strokeWeight: 3,
       fillColor: '#FF1493',
-      fillOpacity: 0.4,
+      fillOpacity: 0.4
     }
   }
-  
-  $onInit() {
+
+  $onInit () {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
       console.error('ERROR: Map Object Editor component initialized, but a map object is not available at this time.')
@@ -59,7 +58,7 @@ class MapObjectEditorController {
     if (!this.featureType) {
       console.warn('map-object-editor: featureType must be defined (currently either "location" or "equipment"')
     }
-    
+
     this.$timeout(() => {
       this.dropTargetElement = this.$element.find('.map-object-drop-targets-container')[0]
       this.$element[0].removeChild(this.dropTargetElement)
@@ -72,7 +71,7 @@ class MapObjectEditorController {
 
     // Note we are using skip(1) to skip the initial value (that is fired immediately) from the RxJS stream.
     this.mapFeaturesSelectedEventObserver = this.state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
+      if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
       this.handleMapEntitySelected(event)
     })
 
@@ -87,10 +86,10 @@ class MapObjectEditorController {
       var hasBoundaryType = (event.dataTransfer.types.indexOf(Constants.DRAG_IS_BOUNDARY) >= 0)
       this.isHavingBoundaryDraggedOver = hasBoundaryType
       this.$timeout()
-      return !(hasEntityType || hasBoundaryType);  // false == allow dropping
+      return !(hasEntityType || hasBoundaryType) // false == allow dropping
     }
     this.dragStartEventObserver = this.state.dragEndEvent.skip(1).subscribe((event) => {
-      //console.log('drag ... start?')
+      // console.log('drag ... start?')
       this.objectIdToDropCSS = {} // So that we will regenerate the CSS in case the map has zoomed/panned
       this.$timeout()
     })
@@ -105,7 +104,7 @@ class MapObjectEditorController {
       if (hasBoundaryType) {
         // This will be handled by our custom drop targets. Do not use the map canvas' ondrop to handle it.
         return
-      }      
+      }
       // Convert pixels to latlng
       var grabOffsetX = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_X)
       var grabOffsetY = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_OFFSET_Y)
@@ -113,27 +112,27 @@ class MapObjectEditorController {
       var grabImageH = event.dataTransfer.getData(Constants.DRAG_DROP_GRAB_ICON_H)
       var offsetX = (grabImageW * 0.5) - grabOffsetX // center
       var offsetY = grabImageH - grabOffsetY // bottom
-      
+
       var dropLatLng = this.pixelToLatlng(event.clientX + offsetX, event.clientY + offsetY)
 
-      if(event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY) !== Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
+      if (event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY) !== Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
         // ToDo feature should probably be a class
         var feature = {
           objectId: this.utils.getUUID(),
           geometry: {
             type: 'Point',
             coordinates: [dropLatLng.lng(), dropLatLng.lat()]
-          }, 
+          },
           networkNodeType: event.dataTransfer.getData(Constants.DRAG_DROP_ENTITY_DETAILS_KEY)
         }
-        
+
         this.getObjectIconUrl({ objectKey: Constants.MAP_OBJECT_CREATE_KEY_NETWORK_NODE_TYPE, objectValue: feature.networkNodeType })
-        .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
-        .catch((err) => console.error(err))
+          .then((iconUrl) => this.createMapObject(feature, iconUrl, true))
+          .catch((err) => console.error(err))
       } else {
-        var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng());
-        var radius = (40000/Math.pow(2,this.mapRef.getZoom())) * 2 * 256 //radius in meters
-        var path = this.generateHexagonPath(position,radius)
+        var position = new google.maps.LatLng(dropLatLng.lat(), dropLatLng.lng())
+        var radius = (40000 / Math.pow(2, this.mapRef.getZoom())) * 2 * 256 // radius in meters
+        var path = this.generateHexagonPath(position, radius)
         var feature = {
           objectId: this.utils.getUUID(),
           geometry: {
@@ -142,43 +141,39 @@ class MapObjectEditorController {
           },
           isExistingObject: false
         }
-       this.createMapObject(feature, null, true)
+        this.createMapObject(feature, null, true)
       }
 
-      event.preventDefault();
-    };
-    
-    
+      event.preventDefault()
+    }
+
     this.overlayRightClickListener = this.mapRef.addListener('rightclick', (event) => {
-      // ToDo: this should be in plan-editor 
-      if ('equipment' == this.featureType || 'serviceArea' == this.featureType){// we're editing a equipment and eqipment bounds NOT locations
+      // ToDo: this should be in plan-editor
+      if (this.featureType == 'equipment' || this.featureType == 'serviceArea') { // we're editing a equipment and eqipment bounds NOT locations
         var eventXY = this.getXYFromEvent(event)
         if (!eventXY) return
         this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, null)
       }
     })
-    
-    
+
     this.onInit && this.onInit()
     // We register a callback so that the parent object can request a map object to be deleted
-    this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({deleteObjectWithId: this.deleteObjectWithId.bind(this)})
-    this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({createMapObjects: this.createMapObjects.bind(this)})
-    this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({removeMapObjects: this.removeCreatedMapObjects.bind(this)})
-    this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this)})
-    this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this)})
-    
+    this.registerObjectDeleteCallback && this.registerObjectDeleteCallback({ deleteObjectWithId: this.deleteObjectWithId.bind(this) })
+    this.registerCreateMapObjectsCallback && this.registerCreateMapObjectsCallback({ createMapObjects: this.createMapObjects.bind(this) })
+    this.registerRemoveMapObjectsCallback && this.registerRemoveMapObjectsCallback({ removeMapObjects: this.removeCreatedMapObjects.bind(this) })
+    this.registerCreateEditableExistingMapObject && this.registerCreateEditableExistingMapObject({ createEditableExistingMapObject: this.createEditableExistingMapObject.bind(this) })
+    this.registerDeleteCreatedMapObject && this.registerDeleteCreatedMapObject({ deleteCreatedMapObject: this.deleteCreatedMapObject.bind(this) })
+
     this.state.clearEditingMode.skip(1).subscribe((clear) => {
       if (clear) {
-        this.selectMapObject(null) //deselects the selected equipment 
+        this.selectMapObject(null) // deselects the selected equipment
       }
     })
-    
   }
-  
-  
+
   // ----- rightclick menu ----- //
 
-  getXYFromEvent(event){
+  getXYFromEvent (event) {
     var mouseEvent = null
     Object.keys(event).forEach((eventKey) => {
       if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
@@ -188,54 +183,54 @@ class MapObjectEditorController {
     if (!mouseEvent) return
     var x = mouseEvent.clientX
     var y = mouseEvent.clientY
-    return {'x':x, 'y':y}
+    return { 'x': x, 'y': y }
   }
-  
-  closeContextMenu(){
+
+  closeContextMenu () {
     this.contextMenuService.menuOff()
     this.$timeout()
   }
-  
-  openContextMenu(x, y, menuItems){
+
+  openContextMenu (x, y, menuItems) {
     var bounds = []
     var boundsByNetworkNodeObjectId = {}
     menuItems.forEach((menuItem) => {
       var feature = menuItem.data.feature
-      if (feature && feature.hasOwnProperty('network_node_object_id')){
+      if (feature && feature.hasOwnProperty('network_node_object_id')) {
         bounds.push(feature)
         boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
       }
     })
-    
+
     this.utils.getBoundsCLLIs(bounds, this.state)
-    .then((results) => {
-      results.data.forEach((result) => {
-        if (result.clli){
-          boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
-        }
+      .then((results) => {
+        results.data.forEach((result) => {
+          if (result.clli) {
+            boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+          }
+        })
+
+        this.contextMenuService.populateMenu(menuItems)
+        this.contextMenuService.moveMenu(x, y)
+        this.contextMenuService.menuOn()
+        this.$timeout()
       })
-    
-      this.contextMenuService.populateMenu(menuItems)
-      this.contextMenuService.moveMenu(x, y)
-      this.contextMenuService.menuOn()
-      this.$timeout()
-    })
   }
-  
-  editExistingFeature(feature, latLng){
+
+  editExistingFeature (feature, latLng) {
     var hitFeatures = {}
     hitFeatures['latLng'] = latLng
-    if ('location' == this.featureType) hitFeatures['locations'] = [feature]
-    if ('equipment' == this.featureType) hitFeatures['equipmentFeatures'] = [feature]
-    if ('serviceArea' == this.featureType)  hitFeatures['serviceAreas'] = [feature]
+    if (this.featureType == 'location') hitFeatures['locations'] = [feature]
+    if (this.featureType == 'equipment') hitFeatures['equipmentFeatures'] = [feature]
+    if (this.featureType == 'serviceArea') hitFeatures['serviceAreas'] = [feature]
     this.state.mapFeaturesSelectedEvent.next(hitFeatures)
   }
-  
-  selectProposedFeature(objectId){
+
+  selectProposedFeature (objectId) {
     this.selectMapObject(this.createdMapObjects[objectId])
   }
-  
-  startDrawingBoundaryForId(objectId){
+
+  startDrawingBoundaryForId (objectId) {
     this.startDrawingBoundaryFor(this.createdMapObjects[objectId])
   }
   /*
@@ -244,32 +239,32 @@ class MapObjectEditorController {
     //this.selectedMapObject.setEditable(true);
   }
   */
-  
-  filterFeatureForSelection(feature){
+
+  filterFeatureForSelection (feature) {
     // has it been deleted?
-    if (feature.is_deleted && "false" != feature.is_deleted) return false
+    if (feature.is_deleted && feature.is_deleted != 'false') return false
     // is the boundary type visible? (caf2 etc.)
     if (feature.hasOwnProperty('boundary_type') && feature.boundary_type != this.state.selectedBoundaryType.id) return false
     if (feature.hasOwnProperty('boundaryTypeId') && feature.boundaryTypeId != this.state.selectedBoundaryType.id) return false
-    var objectId = '' 
-    if (feature.hasOwnProperty('object_id')){
+    var objectId = ''
+    if (feature.hasOwnProperty('object_id')) {
       objectId = feature.object_id
-    }else if (feature.hasOwnProperty('objectId')){
+    } else if (feature.hasOwnProperty('objectId')) {
       objectId = feature.objectId
     }
-    
-    if ('' != objectId && !this.createdMapObjects.hasOwnProperty(objectId)){
+
+    if (objectId != '' && !this.createdMapObjects.hasOwnProperty(objectId)) {
       // we have an objectId and the feature is NOT on the edit layer
       // check that the equipment layer is on for that feature
       var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
-      
+
       var validFeature = true
-      if ('equipment' == dataTypeList[0]){
+      if (dataTypeList[0] == 'equipment') {
         validFeature = (dataTypeList.length > 0 && this.state.isFeatureLayerOn(dataTypeList[1]))
-      }else{
+      } else {
         validFeature = this.state.isFeatureLayerOnForBoundary(feature)
-        if (validFeature && this.tileDataService.modifiedBoundaries.hasOwnProperty(objectId) 
-            && this.tileDataService.modifiedBoundaries[objectId].deleted){
+        if (validFeature && this.tileDataService.modifiedBoundaries.hasOwnProperty(objectId) &&
+            this.tileDataService.modifiedBoundaries[objectId].deleted) {
           // a bounds that is on and has been modified
           // check to see if it's lying about being deleted
           validFeature = false
@@ -277,164 +272,161 @@ class MapObjectEditorController {
       }
       if (!validFeature) return false
     }
-    
+
     return true
   }
-  
-  updateContextMenu(latLng, x, y, clickedMapObject) {
-    if ('equipment' == this.featureType){ // ToDo: need a better way to do this, should be in plan-editor 
-      
+
+  updateContextMenu (latLng, x, y, clickedMapObject) {
+    if (this.featureType == 'equipment') { // ToDo: need a better way to do this, should be in plan-editor
       this.getFeaturesAtPoint(latLng)
-      .then((results) => {
-        //console.log(clickedMapObject)
-        //console.log(results)
+        .then((results) => {
+        // console.log(clickedMapObject)
+        // console.log(results)
         // We may have come here when the user clicked an existing map object. For now, just add it to the list.
         // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
-        if (clickedMapObject) {
-          var clickedFeature = {
-            _data_type: this.isMarker(clickedMapObject) ? 'equipment' : 'equipment_boundary',
-            object_id: clickedMapObject.objectId,
-            is_deleted: false
-          }
-          results.push(clickedFeature)
-        }
-
-        var menuItems = []
-        var menuItemsById = {}
-        
-        results.forEach((result) => {
-          //populate context menu aray here
-          // we may need different behavour for different controllers using this
-          var options = []
-          var dataTypeList = this.utils.getDataTypeListOfFeature(result)
-          
-          if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
-          var validFeature = false
-          
-          // have we already added this one?
-          if (('equipment' == dataTypeList[0] || 'equipment_boundary' == dataTypeList[0]) 
-              && !menuItemsById.hasOwnProperty( result.objectId) ){
-            validFeature = this.filterFeatureForSelection(result)
-          }
-          
-          if (validFeature){  
-            var feature = result
-            if (this.createdMapObjects.hasOwnProperty(result.objectId) ){
-              // it's on the edit layer / in the transaction
-              feature = this.createdMapObjects[result.objectId].feature
-              options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
-              if ('equipment' == dataTypeList[0]){
-                if (this.isBoundaryCreationAllowed({'mapObject':result})){
-                  options.push( this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => {this.startDrawingBoundaryForId(result.objectId)}) )
-                }
-              }else if('equipment_boundary' == dataTypeList[0]){
-                //options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
-              }
-              options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {this.deleteObjectWithId(result.objectId)}) )
-            }else{
-              options.push( this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+          if (clickedMapObject) {
+            var clickedFeature = {
+              _data_type: this.isMarker(clickedMapObject) ? 'equipment' : 'equipment_boundary',
+              object_id: clickedMapObject.objectId,
+              is_deleted: false
             }
-            
-            var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
-            
-            menuItemsById[result.objectId] = options
-            
-            var data = {
-              'objectId': result.objectId, 
-              'dataTypeList': dataTypeList, 
-              'feature': feature, 
-              'latLng': latLng
-            }
-            menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
+            results.push(clickedFeature)
           }
-        })
-      
-        if (menuItems.length <= 0){
-          this.closeContextMenu()
-        }else{
-          this.openContextMenu(x, y, menuItems)
-        }
-      })
-    } else if ('serviceArea' == this.featureType) {
 
-      this.getFeaturesAtPoint(latLng)
-      .then((results) => {
+          var menuItems = []
+          var menuItemsById = {}
 
-        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
-        // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
-        if (clickedMapObject) {
-          var clickedFeature = {
-            _data_type: 'service_layer',
-            object_id: clickedMapObject.objectId,
-            is_deleted: false
-          }
-          results.push(clickedFeature)
-        }
-
-        var menuItems = []
-        var menuItemsById = {}
-
-        if(results.length == 0) {
-          var options = []
-          options.push( this.contextMenuService.makeItemOption('Add Service Area', 'fa-plus', () => {this.startDrawingBoundaryForSA(latLng)}) )
-          var data = {
-            'latLng': latLng
-          }
-          var name = 'Add Service Area'
-          menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
-        } else {
           results.forEach((result) => {
-            //populate context menu aray here
-            // we may need different behavour for different controllers using this
+          // populate context menu aray here
+          // we may need different behavour for different controllers using this
             var options = []
             var dataTypeList = this.utils.getDataTypeListOfFeature(result)
-            
+
             if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
             var validFeature = false
 
             // have we already added this one?
-            if ('service_layer' == dataTypeList[0]
-              && !menuItemsById.hasOwnProperty(result.objectId)) {
-              validFeature = true
+            if ((dataTypeList[0] == 'equipment' || dataTypeList[0] == 'equipment_boundary') &&
+              !menuItemsById.hasOwnProperty(result.objectId)) {
+              validFeature = this.filterFeatureForSelection(result)
             }
 
             if (validFeature) {
               var feature = result
               if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
-                // it's on the edit layer / in the transaction
+              // it's on the edit layer / in the transaction
                 feature = this.createdMapObjects[result.objectId].feature
-                options.push( this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => {this.selectProposedFeature(result.objectId)} ) )
-                //options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
-                options.push( this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
-                  this.deleteObjectWithId(result.objectId)
-                  this.deleteCreatedMapObject(result.objectId)
-                }) )
+                options.push(this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => { this.selectProposedFeature(result.objectId) }))
+                if (dataTypeList[0] == 'equipment') {
+                  if (this.isBoundaryCreationAllowed({ 'mapObject': result })) {
+                    options.push(this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => { this.startDrawingBoundaryForId(result.objectId) }))
+                  }
+                } else if (dataTypeList[0] == 'equipment_boundary') {
+                // options.push( this.contextMenuService.makeItemOption('Edit Boundary', 'fa-pencil', () => {this.editBoundary(result.objectId)}) )
+                }
+                options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => { this.deleteObjectWithId(result.objectId) }))
               } else {
-                options.push( this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+                options.push(this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))
               }
-              
-              var name = this.utils.getFeatureDisplayName(result, this.state, dataTypeList)
-              
+
+              var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
+
               menuItemsById[result.objectId] = options
-              
+
               var data = {
-                'objectId': result.objectId, 
-                'dataTypeList': dataTypeList, 
-                'feature': feature, 
+                'objectId': result.objectId,
+                'dataTypeList': dataTypeList,
+                'feature': feature,
                 'latLng': latLng
               }
-              menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
+              menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
             }
           })
-        }
-        
-        if (menuItems.length <= 0) {
-          this.closeContextMenu()
-        } else {
-          this.openContextMenu(x, y, menuItems)
-        }
-      })
-    } else if('location' == this.featureType){
+
+          if (menuItems.length <= 0) {
+            this.closeContextMenu()
+          } else {
+            this.openContextMenu(x, y, menuItems)
+          }
+        })
+    } else if (this.featureType == 'serviceArea') {
+      this.getFeaturesAtPoint(latLng)
+        .then((results) => {
+        // We may have come here when the user clicked an existing map object. For now, just add it to the list.
+          // This should be replaced by something that loops over all created map objects and picks those that are under the cursor.
+          if (clickedMapObject) {
+            var clickedFeature = {
+              _data_type: 'service_layer',
+              object_id: clickedMapObject.objectId,
+              is_deleted: false
+            }
+            results.push(clickedFeature)
+          }
+
+          var menuItems = []
+          var menuItemsById = {}
+
+          if (results.length == 0) {
+            var options = []
+            options.push(this.contextMenuService.makeItemOption('Add Service Area', 'fa-plus', () => { this.startDrawingBoundaryForSA(latLng) }))
+            var data = {
+              'latLng': latLng
+            }
+            var name = 'Add Service Area'
+            menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
+          } else {
+            results.forEach((result) => {
+            // populate context menu aray here
+            // we may need different behavour for different controllers using this
+              var options = []
+              var dataTypeList = this.utils.getDataTypeListOfFeature(result)
+
+              if (result.hasOwnProperty('object_id')) result.objectId = result.object_id
+              var validFeature = false
+
+              // have we already added this one?
+              if (dataTypeList[0] == 'service_layer' &&
+              !menuItemsById.hasOwnProperty(result.objectId)) {
+                validFeature = true
+              }
+
+              if (validFeature) {
+                var feature = result
+                if (this.createdMapObjects.hasOwnProperty(result.objectId)) {
+                // it's on the edit layer / in the transaction
+                  feature = this.createdMapObjects[result.objectId].feature
+                  options.push(this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => { this.selectProposedFeature(result.objectId) }))
+                  // options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+                  options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
+                    this.deleteObjectWithId(result.objectId)
+                    this.deleteCreatedMapObject(result.objectId)
+                  }))
+                } else {
+                  options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))
+                }
+
+                var name = this.utils.getFeatureDisplayName(result, this.state, dataTypeList)
+
+                menuItemsById[result.objectId] = options
+
+                var data = {
+                  'objectId': result.objectId,
+                  'dataTypeList': dataTypeList,
+                  'feature': feature,
+                  'latLng': latLng
+                }
+                menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
+              }
+            })
+          }
+
+          if (menuItems.length <= 0) {
+            this.closeContextMenu()
+          } else {
+            this.openContextMenu(x, y, menuItems)
+          }
+        })
+    } else if (this.featureType == 'location') {
       var name = 'Location'
       var options = [ this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
         this.deleteObjectWithId(this.selectedMapObject.objectId)
@@ -442,77 +434,77 @@ class MapObjectEditorController {
       }) ]
       var menuItems = []
       var data = {
-        'objectId': this.selectedMapObject.objectId, 
-        'dataTypeList': ['location'], 
-        'feature': this.selectedMapObject, 
+        'objectId': this.selectedMapObject.objectId,
+        'dataTypeList': ['location'],
+        'feature': this.selectedMapObject,
         'latLng': latLng
       }
-      menuItems.push( this.contextMenuService.makeMenuItem(name, data, options) )
-        this.openContextMenu(x, y, menuItems)
+      menuItems.push(this.contextMenuService.makeMenuItem(name, data, options))
+      this.openContextMenu(x, y, menuItems)
     }
   }
-  
-  getFeaturesAtPoint(latLng){
+
+  getFeaturesAtPoint (latLng) {
     var lat = latLng.lat()
     var lng = latLng.lng()
-    
+
     // Get zoom
     var zoom = this.mapRef.getZoom()
-    
+
     // Get tile coordinates from lat/lng/zoom. Using Mercator projection.
     var tileCoords = MapUtilities.getTileCoordinates(zoom, lat, lng)
-    
+
     // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
     var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
 
     return FeatureSelector.performHitDetection(this.tileDataService, { width: 256, height: 256 }, this.state.mapLayers.getValue(),
-                                               zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y,
-                                               this.state.selectedBoundaryType.id)
+      zoom, tileCoords.x, tileCoords.y, clickedPointPixels.x, clickedPointPixels.y,
+      this.state.selectedBoundaryType.id)
   }
 
-  makeIconAnchor(iconUrl, callback){
-    if ('undefined' == typeof callback) callback = {}
-    var img = new Image();
+  makeIconAnchor (iconUrl, callback) {
+    if (typeof callback === 'undefined') callback = {}
+    var img = new Image()
     var loadCallBack = (w, h) => {
-      this.iconAnchors[iconUrl] = new google.maps.Point(w*0.5, h*0.5)
+      this.iconAnchors[iconUrl] = new google.maps.Point(w * 0.5, h * 0.5)
       callback()
     }
-    img.addEventListener("load", function(){
-      loadCallBack( this.naturalWidth, this.naturalHeight)
+    img.addEventListener('load', function () {
+      loadCallBack(this.naturalWidth, this.naturalHeight)
     })
     img.src = iconUrl
   }
-  
-  setMapObjectIcon(mapObject, iconUrl){
-    if (!this.iconAnchors.hasOwnProperty(iconUrl)){
+
+  setMapObjectIcon (mapObject, iconUrl) {
+    if (!this.iconAnchors.hasOwnProperty(iconUrl)) {
       this.makeIconAnchor(iconUrl, () => {
-        //mapObject.setIcon({path: google.maps.SymbolPath.CIRCLE, url: iconUrl, anchor: this.iconAnchors[iconUrl]})
-        mapObject.setIcon({url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+        // mapObject.setIcon({path: google.maps.SymbolPath.CIRCLE, url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+        mapObject.setIcon({ url: iconUrl, anchor: this.iconAnchors[iconUrl] })
       })
-    }else{
-      //mapObject.setIcon({path: google.maps.SymbolPath.CIRCLE, url: iconUrl, anchor: this.iconAnchors[iconUrl]})
-      mapObject.setIcon({url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+    } else {
+      // mapObject.setIcon({path: google.maps.SymbolPath.CIRCLE, url: iconUrl, anchor: this.iconAnchors[iconUrl]})
+      mapObject.setIcon({ url: iconUrl, anchor: this.iconAnchors[iconUrl] })
     }
   }
-  
-  handleOnDropped(eventArgs) {
+
+  handleOnDropped (eventArgs) {
     this.onObjectDroppedOnMarker && this.onObjectDroppedOnMarker(eventArgs)
   }
 
   // Convert from pixel coordinates to latlngs. https://stackoverflow.com/a/30541162
-  pixelToLatlng(xcoor, ycoor) {
-    var ne = this.mapRef.getBounds().getNorthEast();
-    var sw = this.mapRef.getBounds().getSouthWest();
-    var projection = this.mapRef.getProjection();
-    var topRight = projection.fromLatLngToPoint(ne);
-    var bottomLeft = projection.fromLatLngToPoint(sw);
-    var scale = 1 << this.mapRef.getZoom();
-    var newLatlng = projection.fromPointToLatLng(new google.maps.Point(xcoor / scale + bottomLeft.x, ycoor / scale + topRight.y));
-    return newLatlng;
+  pixelToLatlng (xcoor, ycoor) {
+    var ne = this.mapRef.getBounds().getNorthEast()
+    var sw = this.mapRef.getBounds().getSouthWest()
+    var projection = this.mapRef.getProjection()
+    var topRight = projection.fromLatLngToPoint(ne)
+    var bottomLeft = projection.fromLatLngToPoint(sw)
+    var scale = 1 << this.mapRef.getZoom()
+    var newLatlng = projection.fromPointToLatLng(new google.maps.Point(xcoor / scale + bottomLeft.x, ycoor / scale + topRight.y))
+    return newLatlng
   }
 
   // Convert from latlng to pixel coordinates. https://stackoverflow.com/a/2692617
-  latLngToPixel(latLng) {
+  latLngToPixel (latLng) {
     var scale = Math.pow(2, this.mapRef.getZoom())
     var nw = new google.maps.LatLng(
       this.mapRef.getBounds().getNorthEast().lat(),
@@ -527,8 +519,8 @@ class MapObjectEditorController {
   }
 
   // Gets the CSS for a drop target based on a map object. Can return null if not a valid drop target.
-  getDropTargetCSSForMapObject(mapObject) {
-    if (!this.isMarker(mapObject) || !this.isBoundaryCreationAllowed({'mapObject':mapObject})) { 
+  getDropTargetCSSForMapObject (mapObject) {
+    if (!this.isMarker(mapObject) || !this.isBoundaryCreationAllowed({ 'mapObject': mapObject })) {
       return null
     }
     // Without the 'this.objectIdToDropCSS' cache we get into an infinite digest cycle
@@ -536,7 +528,7 @@ class MapObjectEditorController {
     if (dropTargetCSS) {
       return dropTargetCSS
     }
-    const radius = 50;  // Pixels
+    const radius = 50 // Pixels
     var pixelCoords = this.latLngToPixel(mapObject.getPosition())
     dropTargetCSS = {
       position: 'absolute',
@@ -550,21 +542,21 @@ class MapObjectEditorController {
       'background-color': 'rgba(255, 255, 255, 0.5)'
     }
     this.objectIdToDropCSS[mapObject.objectId] = dropTargetCSS
-    return dropTargetCSS;
+    return dropTargetCSS
   }
 
-  createMapObjects(features) {
+  createMapObjects (features) {
     // "features" is an array that comes directly from aro-service. Create map objects for these features
     features.forEach((feature) => {
-      this.createMapObject(feature, feature.iconUrl, false)  // Feature is not created usin a map click
+      this.createMapObject(feature, feature.iconUrl, false) // Feature is not created usin a map click
     })
   }
 
-  createPointMapObject(feature, iconUrl) {
+  createPointMapObject (feature, iconUrl) {
     // Create a "point" map object - a marker
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id)
-                          || (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
+                          (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
     var mapMarker = new google.maps.Marker({
       objectId: feature.objectId, // Not used by Google Maps
       featureType: feature.networkNodeType,
@@ -574,17 +566,17 @@ class MapObjectEditorController {
         // anchor: this.iconAnchors[this.objectIconUrl]
       },
       label: {
-        text: '◯', 
-        color: "#000000",
-        fontSize: "46px"
-      }, 
+        text: '◯',
+        color: '#000000',
+        fontSize: '46px'
+      },
       draggable: isEditable, // Allow dragging only if feature is not locked
       clickable: true, // if it's an icon we can select it then the panel will tell us it's locked
       map: this.mapRef
     })
-    
+
     if (!isEditable) {
-      mapMarker.setOptions({clickable:false}); //Don't allow right click for locked markers
+      mapMarker.setOptions({ clickable: false }) // Don't allow right click for locked markers
       if (feature.workflow_state_id & WorkflowState.LOCKED.id) {
         var lockIconOverlay = new google.maps.Marker({
           icon: {
@@ -595,7 +587,7 @@ class MapObjectEditorController {
           map: this.mapRef
         })
         lockIconOverlay.bindTo('position', mapMarker, 'position')
-        this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay 
+        this.createdMapObjects[`${feature.objectId}_lockIconOverlay`] = lockIconOverlay
       }
       if (feature.workflow_state_id & WorkflowState.INVALIDATED.id) {
         var lockIconOverlay = new google.maps.Marker({
@@ -607,7 +599,7 @@ class MapObjectEditorController {
           map: this.mapRef
         })
         lockIconOverlay.bindTo('position', mapMarker, 'position')
-        this.createdMapObjects[`${feature.objectId}_invalidatedIconOverlay`] = lockIconOverlay 
+        this.createdMapObjects[`${feature.objectId}_invalidatedIconOverlay`] = lockIconOverlay
       }
     }
 
@@ -624,9 +616,9 @@ class MapObjectEditorController {
     }
     this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
     this.state.requestMapLayerRefresh.next(tilesToRefresh)
-    // ToDo: this needs to be fixed by having a standard object model for features 
-    if (!feature.hasOwnProperty('dataType')) feature.dataType = "equipment."+feature.networkNodeType
-    
+    // ToDo: this needs to be fixed by having a standard object model for features
+    if (!feature.hasOwnProperty('dataType')) feature.dataType = 'equipment.' + feature.networkNodeType
+
     mapMarker.feature = feature
     mapMarker.hitTest = (latLng) => {
       var scale = 1 << this.mapRef.getZoom()
@@ -638,22 +630,22 @@ class MapObjectEditorController {
       var markerLng = mapMarker.position.lng()
       var east = mapMarker.position.lng() - w
       var west = mapMarker.position.lng() + w
-      
-      return (markerLng+w >= lng && lng >= markerLng-w 
-          && markerLat+h >= lat && lat >= markerLat-h)
+
+      return (markerLng + w >= lng && lng >= markerLng - w &&
+          markerLat + h >= lat && lat >= markerLat - h)
     }
-    
+
     return mapMarker
   }
 
-  createPolygonMapObject(feature) {
+  createPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
     feature.geometry.coordinates[0].forEach((polygonVertex) => {
       polygonPath.push({
-        lat: polygonVertex[1],  // Note array index
-        lng: polygonVertex[0]   // Note array index
+        lat: polygonVertex[1], // Note array index
+        lng: polygonVertex[0] // Note array index
       })
     })
 
@@ -665,12 +657,12 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     polygon.setOptions(this.polygonOptions)
-    
-    // ToDo: this needs to be fixed by having a standard object model for features 
-    if (!feature.hasOwnProperty('dataType')) feature.dataType = "equipment_boundary"
-    
+
+    // ToDo: this needs to be fixed by having a standard object model for features
+    if (!feature.hasOwnProperty('dataType')) feature.dataType = 'equipment_boundary'
+
     polygon.feature = feature
-    
+
     polygon.hitTest = (latLng) => {
       if (!this.state.showSiteBoundary) return false
       return google.maps.geometry.poly.containsLocation(latLng, polygon)
@@ -678,14 +670,14 @@ class MapObjectEditorController {
     return polygon
   }
 
-  createMultiPolygonMapObject(feature) {
+  createMultiPolygonMapObject (feature) {
     // Create a "polygon" map object
     this.tileDataService.addFeatureToExclude(feature.objectId)
     var polygonPath = []
     feature.geometry.coordinates[0][0].forEach((polygonVertex) => {
       polygonPath.push({
-        lat: polygonVertex[1],  // Note array index
-        lng: polygonVertex[0]   // Note array index
+        lat: polygonVertex[1], // Note array index
+        lng: polygonVertex[0] // Note array index
       })
     })
 
@@ -697,14 +689,14 @@ class MapObjectEditorController {
       map: this.mapRef
     })
     polygon.setOptions(this.polygonOptions)
-    
+
     polygon.feature = feature
-    
+
     return polygon
   }
 
   // Return true if the given path is a closed path
-  isClosedPath(path) {
+  isClosedPath (path) {
     const firstPoint = path.getAt(0)
     const lastPoint = path.getAt(path.length - 1)
     const deltaLat = Math.abs(firstPoint.lat() - lastPoint.lat())
@@ -712,20 +704,20 @@ class MapObjectEditorController {
     const TOLERANCE = 0.0001
     return (deltaLat < TOLERANCE) && (deltaLng < TOLERANCE)
   }
-  
-  createEditableExistingMapObject(feature, iconUrl){
+
+  createEditableExistingMapObject (feature, iconUrl) {
     this.createMapObject(feature, iconUrl, true, true)
   }
-  
-  createMapObject(feature, iconUrl, usingMapClick, existingObjectOverride,deleteExistingBoundary) {
-    if ('undefined' == typeof existingObjectOverride) {
+
+  createMapObject (feature, iconUrl, usingMapClick, existingObjectOverride, deleteExistingBoundary) {
+    if (typeof existingObjectOverride === 'undefined') {
       existingObjectOverride = false
     }
     var mapObject = null
     if (feature.geometry.type === 'Point') {
       var canCreateObject = this.checkCreateObject && this.checkCreateObject({ feature: feature, usingMapClick: usingMapClick })
-      if(canCreateObject) {
-        if (usingMapClick && this.state.areTilesRendering) return //Don't create when tiles are rendering
+      if (canCreateObject) {
+        if (usingMapClick && this.state.areTilesRendering) return // Don't create when tiles are rendering
         // if an existing object just show don't edit
         if (feature.isExistingObject && !existingObjectOverride) {
           this.displayViewObject({ feature: feature })
@@ -734,13 +726,13 @@ class MapObjectEditorController {
         }
         mapObject = this.createPointMapObject(feature, iconUrl)
         // Set up listeners on the map object
-        mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({mapObject}))
+        mapObject.addListener('dragend', (event) => this.onModifyObject && this.onModifyObject({ mapObject }))
         mapObject.addListener('click', (event) => {
           // Select this map object
           this.selectMapObject(mapObject)
         })
       } else {
-        return          
+        return
       }
     } else if (feature.geometry.type === 'Polygon') {
       mapObject = this.createPolygonMapObject(feature)
@@ -750,14 +742,14 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       })
       var self = this
-      mapObject.getPaths().forEach(function(path, index){
-        google.maps.event.addListener(path, 'insert_at', function(){
+      mapObject.getPaths().forEach(function (path, index) {
+        google.maps.event.addListener(path, 'insert_at', function () {
           self.modifyObject(mapObject)
-        });
-        google.maps.event.addListener(path, 'remove_at', function(){
+        })
+        google.maps.event.addListener(path, 'remove_at', function () {
           self.modifyObject(mapObject)
-        });
-        google.maps.event.addListener(path, 'set_at', function(){
+        })
+        google.maps.event.addListener(path, 'set_at', function () {
           if (!self.isClosedPath(path)) {
             // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
             if (index === 0) {
@@ -772,12 +764,12 @@ class MapObjectEditorController {
           } else {
             self.modifyObject(mapObject)
           }
-        });
-      });
-      google.maps.event.addListener(mapObject, 'dragend', function(){
-        //self.onModifyObject && self.onModifyObject({mapObject})
+        })
+      })
+      google.maps.event.addListener(mapObject, 'dragend', function () {
+        // self.onModifyObject && self.onModifyObject({mapObject})
         self.modifyObject(mapObject)
-      });
+      })
     } else if (feature.geometry.type === 'MultiPolygon') {
       mapObject = this.createMultiPolygonMapObject(feature)
       // Set up listeners on the map object
@@ -786,14 +778,14 @@ class MapObjectEditorController {
         this.selectMapObject(mapObject)
       })
       var self = this
-      mapObject.getPaths().forEach(function(path, index){
-        google.maps.event.addListener(path, 'insert_at', function(){
+      mapObject.getPaths().forEach(function (path, index) {
+        google.maps.event.addListener(path, 'insert_at', function () {
           self.modifyObject(mapObject)
-        });
-        google.maps.event.addListener(path, 'remove_at', function(){
+        })
+        google.maps.event.addListener(path, 'remove_at', function () {
           self.modifyObject(mapObject)
-        });
-        google.maps.event.addListener(path, 'set_at', function(){
+        })
+        google.maps.event.addListener(path, 'set_at', function () {
           if (!self.isClosedPath(path)) {
             // IMPORTANT to check if it is already a closed path, otherwise we will get into an infinite loop when trying to keep it closed
             if (index === 0) {
@@ -808,78 +800,76 @@ class MapObjectEditorController {
           } else {
             self.modifyObject(mapObject)
           }
-        });
-      });
+        })
+      })
       // google.maps.event.addListener(mapObject, 'dragend', function(){
       //   self.onModifyObject && self.onModifyObject({mapObject})
       // });
     } else {
       throw `createMapObject() not supported for geometry type ${feature.geometry.type}`
     }
-    
-    
+
     mapObject.addListener('rightclick', (event) => {
-      if ('undefined' == typeof event) return
+      if (typeof event === 'undefined') return
       // 'event' contains a MouseEvent which we use to get X,Y coordinates. The key of the MouseEvent object
       // changes with google maps implementations. So iterate over the keys to find the right object.
-      
-      if ('location' == this.featureType){
+
+      if (this.featureType == 'location') {
         this.selectMapObject(mapObject)
       }
       var eventXY = this.getXYFromEvent(event)
       if (!eventXY) return
       this.updateContextMenu(event.latLng, eventXY.x, eventXY.y, mapObject)
     })
-    
+
     this.createdMapObjects[mapObject.objectId] = mapObject
-    this.onCreateObject && this.onCreateObject({mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary})
-    
+    this.onCreateObject && this.onCreateObject({ mapObject: mapObject, usingMapClick: usingMapClick, feature: feature, deleteExistingBoundary: !deleteExistingBoundary })
+
     if (usingMapClick) this.selectMapObject(mapObject)
   }
-  
-  
-  handleMapEntitySelected(event) {
+
+  handleMapEntitySelected (event) {
     if (!event || !event.latLng) {
       return
     }
-    
+
     // filter out equipment and locations already in the list
     // ToDo: should we do this for all types of features?
     var filterArrayByObjectId = (featureList) => {
       let filteredList = []
-      for (let i=0; i<featureList.length; i++){
+      for (let i = 0; i < featureList.length; i++) {
         let feature = featureList[i]
-        if (!feature.object_id 
-            || (!this.createdMapObjects.hasOwnProperty(feature.object_id) 
-                && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay')
-                && !this.createdMapObjects.hasOwnProperty(feature.object_id + '_invalidatedIconOverlay')
-                && this.filterFeatureForSelection(feature)
-               ) 
-          ){
+        if (!feature.object_id ||
+            (!this.createdMapObjects.hasOwnProperty(feature.object_id) &&
+                !this.createdMapObjects.hasOwnProperty(feature.object_id + '_lockIconOverlay') &&
+                !this.createdMapObjects.hasOwnProperty(feature.object_id + '_invalidatedIconOverlay') &&
+                this.filterFeatureForSelection(feature)
+            )
+        ) {
           filteredList.push(feature)
         }
       }
       return filteredList
     }
-    
+
     var equipmentFeatures = []
-    if (event.equipmentFeatures){
+    if (event.equipmentFeatures) {
       equipmentFeatures = filterArrayByObjectId(event.equipmentFeatures)
     }
-    
+
     var locations = []
-    if (event.locations){
+    if (event.locations) {
       locations = filterArrayByObjectId(event.locations)
     }
 
     var feature = {
       geometry: {
         type: 'Point',
-        coordinates: [event.latLng.lng(), event.latLng.lat()] 
+        coordinates: [event.latLng.lng(), event.latLng.lat()]
       },
       isExistingObject: false
     }
-    
+
     var iconKey = Constants.MAP_OBJECT_CREATE_KEY_OBJECT_ID
     var featurePromise = null
     if (this.featureType === 'location' && locations.length > 0) {
@@ -889,40 +879,40 @@ class MapObjectEditorController {
       // A feature is "locked" if the workflow state is LOCKED or INVALIDATED.
       feature.workflow_state_id = locations[0].workflow_state_id
       featurePromise = this.$http.get(`/service/library/features/${this.modifyingLibraryId}/${feature.objectId}`)
-      .then((result) => {
-        var serviceFeature = result.data
-        // use feature's coord NOT the event's coords
-        feature.geometry.coordinates = serviceFeature.geometry.coordinates
-        feature.attributes = serviceFeature.attributes
-        feature.directlyEditExistingFeature = true
-        return Promise.resolve(feature)
-      })
+        .then((result) => {
+          var serviceFeature = result.data
+          // use feature's coord NOT the event's coords
+          feature.geometry.coordinates = serviceFeature.geometry.coordinates
+          feature.attributes = serviceFeature.attributes
+          feature.directlyEditExistingFeature = true
+          return Promise.resolve(feature)
+        })
     } else if (this.featureType === 'equipment' && equipmentFeatures.length > 0) {
       // The map was clicked on, and there was an equipmentFeature under the cursor
-      const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] //Filter Deleted equipments
-      feature.objectId = clickedObject.object_id 
+      const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] // Filter Deleted equipments
+      feature.objectId = clickedObject.object_id
       feature.isExistingObject = true
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
         // Get the boundary geometry from aro-service
         featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-        .then((result) => {
+          .then((result) => {
           // ToDo: check for empty object, reject on true
-          if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')){
-            return Promise.reject( `object: ${feature.objectId} may have been deleted` )
-          }
-          
-          var serviceFeature = result.data
-          serviceFeature.attributes = {
-            network_node_object_id: serviceFeature.networkObjectId,
-            networkNodeType: serviceFeature.networkNodeType
-          }
-          serviceFeature.isExistingObject = true
-          return Promise.resolve(serviceFeature)
-        })
+            if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')) {
+              return Promise.reject(`object: ${feature.objectId} may have been deleted`)
+            }
+
+            var serviceFeature = result.data
+            serviceFeature.attributes = {
+              network_node_object_id: serviceFeature.networkObjectId,
+              networkNodeType: serviceFeature.networkNodeType
+            }
+            serviceFeature.isExistingObject = true
+            return Promise.resolve(serviceFeature)
+          })
       } else {
         // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
-        this.displayViewObject({feature:feature})
+        this.displayViewObject({ feature: feature })
         this.selectMapObject(null)
         // Update selected feature in state so it is rendered correctly
         var newSelection = this.state.cloneSelection()
@@ -931,8 +921,8 @@ class MapObjectEditorController {
         this.state.selection = newSelection
         return
       }
-    } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas')
-      && event.serviceAreas.length > 0 && event.serviceAreas[0].hasOwnProperty('code')) {
+    } else if (this.featureType === 'serviceArea' && event.hasOwnProperty('serviceAreas') &&
+      event.serviceAreas.length > 0 && event.serviceAreas[0].hasOwnProperty('code')) {
       iconKey = Constants.MAP_OBJECT_CREATE_SERVICE_AREA
       var serviceArea = event.serviceAreas[0]
       feature.isExistingObject = true
@@ -950,7 +940,7 @@ class MapObjectEditorController {
           serviceFeature.isExistingObject = true
           return Promise.resolve(serviceFeature)
         })
-  } else {
+    } else {
       // The map was clicked on, but there was no location under the cursor.
       // If there is a selected polygon, set it to non-editable
       if (this.selectedMapObject && !this.isMarker(this.selectedMapObject)) {
@@ -958,7 +948,7 @@ class MapObjectEditorController {
       }
       this.selectMapObject(null)
       if (!this.createObjectOnClick) {
-        return    // We do not want to create the map object on click
+        return // We do not want to create the map object on click
       }
       feature.objectId = this.utils.getUUID()
       feature.isExistingObject = false
@@ -970,13 +960,13 @@ class MapObjectEditorController {
       .then((result) => {
         featureToUse = result
         // When we are modifying existing objects, the iconUrl to use is provided by the parent control via a function.
-        
+
         return this.getObjectIconUrl && this.getObjectIconUrl({ objectKey: iconKey, objectValue: featureToUse.objectId })
       })
       .then((iconUrl) => this.createMapObject(featureToUse, iconUrl, true, featureToUse.directlyEditExistingFeature))
       .then(() => {
         // If we are editing an existing polygon object, make it editable
-        if (feature.isExistingObject && (iconKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY || 
+        if (feature.isExistingObject && (iconKey === Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY ||
           iconKey === Constants.MAP_OBJECT_CREATE_SERVICE_AREA)) {
           this.selectedMapObject.setEditable(true)
         }
@@ -984,19 +974,19 @@ class MapObjectEditorController {
       .catch((err) => console.error(err))
   }
 
-  isMarker(mapObject) {
+  isMarker (mapObject) {
     return mapObject && mapObject.icon
   }
 
-  selectMapObject(mapObject) {
+  selectMapObject (mapObject) {
     // First de-select the currently selected map object (if any)
     if (this.selectedMapObject) {
       if (this.isMarker(this.selectedMapObject)) {
-        //this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
-        //this.selectedMapObject.label.color = "black"
+        // this.setMapObjectIcon(this.selectedMapObject, this.getIconsByFeatureType(this.selectedMapObject.featureType).iconUrl)
+        // this.selectedMapObject.label.color = "black"
         var label = this.selectedMapObject.getLabel()
-        label.color="#000000";
-        this.selectedMapObject.setLabel(label);
+        label.color = '#000000'
+        this.selectedMapObject.setLabel(label)
       } else {
         this.selectedMapObject.setOptions(this.polygonOptions)
         this.selectedMapObject.setEditable(false)
@@ -1004,28 +994,28 @@ class MapObjectEditorController {
     }
 
     // Then select the map object
-    if (mapObject) {  // Can be null if we are de-selecting everything
+    if (mapObject) { // Can be null if we are de-selecting everything
       if (this.isMarker(mapObject)) {
-        //this.setMapObjectIcon(mapObject, this.getIconsByFeatureType(mapObject.featureType).selectedIconUrl)
-        //mapObject.label.color = "green"
+        // this.setMapObjectIcon(mapObject, this.getIconsByFeatureType(mapObject.featureType).selectedIconUrl)
+        // mapObject.label.color = "green"
         var label = mapObject.getLabel()
-        label.color="#009900";
-        mapObject.setLabel(label);
-        //mapObject.label: 
+        label.color = '#009900'
+        mapObject.setLabel(label)
+        // mapObject.label:
       } else {
         mapObject.setOptions(this.selectedPolygonOptions)
         mapObject.setEditable(true)
       }
     }
-    
+
     this.selectedMapObject = mapObject
-    if(mapObject && !this.isMarker(mapObject)) { //If selected mapobject is boundary store the geom
-      this.selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry 
+    if (mapObject && !this.isMarker(mapObject)) { // If selected mapobject is boundary store the geom
+      this.selectedMapObjectPreviousShape[mapObject.objectId] = mapObject.feature.geometry
     }
 
-    this.onSelectObject && this.onSelectObject({mapObject})
+    this.onSelectObject && this.onSelectObject({ mapObject })
   }
-  
+
   /*
   toggleEditSelectedPolygon() {
     if (!this.selectedMapObject || this.isMarker(this.selectedMapObject)) {
@@ -1035,8 +1025,8 @@ class MapObjectEditorController {
     this.selectedMapObject.setEditable(!isEditable)
   }
   */
-  
-  removeCreatedMapObjects() {
+
+  removeCreatedMapObjects () {
     // Remove created objects from map
     this.selectMapObject(null)
     Object.keys(this.createdMapObjects).forEach((objectId) => {
@@ -1045,26 +1035,26 @@ class MapObjectEditorController {
     this.createdMapObjects = {}
   }
 
-  deleteSelectedObject() {
+  deleteSelectedObject () {
     if (this.selectedMapObject) {
       this.deleteObjectWithId(this.selectedMapObject.objectId)
       this.deleteCreatedMapObject(this.selectedMapObject.objectId)
     }
   }
 
-  deleteObjectWithId(objectId) {
+  deleteObjectWithId (objectId) {
     if (this.selectedMapObject && (this.selectedMapObject.objectId === objectId)) {
       // Deselect the currently selected object, as it is about to be deleted.
       this.selectMapObject(null)
     }
     var mapObjectToDelete = this.createdMapObjects[objectId]
-    if(mapObjectToDelete) {
-      this.onDeleteObject && this.onDeleteObject({mapObject: mapObjectToDelete})
+    if (mapObjectToDelete) {
+      this.onDeleteObject && this.onDeleteObject({ mapObject: mapObjectToDelete })
     }
     this.closeContextMenu()
   }
 
-  deleteCreatedMapObject(objectId) {
+  deleteCreatedMapObject (objectId) {
     var mapObjectToDelete = this.createdMapObjects[objectId]
     if (mapObjectToDelete) {
       mapObjectToDelete.setMap(null)
@@ -1072,7 +1062,7 @@ class MapObjectEditorController {
     }
   }
 
-  startDrawingBoundaryFor(mapObject) {
+  startDrawingBoundaryFor (mapObject) {
     if (!this.isMarker(mapObject)) {
       console.warn('startDrawingBoundarFor() called on a non-marker object.')
       return
@@ -1088,11 +1078,11 @@ class MapObjectEditorController {
     this.drawing.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
       drawingControl: false,
-      polygonOptions:this.selectedPolygonOptions
-    });
-    this.drawing.drawingManager.setMap(this.mapRef);
-    var self = this;
-    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function(event) {
+      polygonOptions: this.selectedPolygonOptions
+    })
+    this.drawing.drawingManager.setMap(this.mapRef)
+    var self = this
+    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function (event) {
       // Create a boundary object using the regular object-creation workflow. A little awkward as we are converting
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
@@ -1109,13 +1099,13 @@ class MapObjectEditorController {
       event.overlay.getPaths().forEach((path) => {
         var pathPoints = []
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-        pathPoints.push(pathPoints[0])  // Close the polygon
+        pathPoints.push(pathPoints[0]) // Close the polygon
         feature.geometry.coordinates.push(pathPoints)
       })
 
-      //Check if polygon is valid, if valid create a map object
-      var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: feature.geometry})
-      isValidPolygon ? self.createMapObject(feature, null ,true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
+      // Check if polygon is valid, if valid create a map object
+      var isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: feature.geometry })
+      isValidPolygon ? self.createMapObject(feature, null, true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
 
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
@@ -1123,11 +1113,10 @@ class MapObjectEditorController {
       self.drawing.drawingManager.setMap(null)
       self.drawing.drawingManager = null
       self.drawing.markerIdForBoundary = null
-    });
+    })
   }
 
-  startDrawingBoundaryForSA(latLng) {
-
+  startDrawingBoundaryForSA (latLng) {
     if (this.drawing.drawingManager) {
       // If we already have a drawing manager, discard it.
       console.warn('We already have a drawing manager active')
@@ -1138,11 +1127,11 @@ class MapObjectEditorController {
     this.drawing.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.POLYGON,
       drawingControl: false,
-      polygonOptions:this.selectedPolygonOptions
-    });
-    this.drawing.drawingManager.setMap(this.mapRef);
-    var self = this;
-    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function(event) {
+      polygonOptions: this.selectedPolygonOptions
+    })
+    this.drawing.drawingManager.setMap(this.mapRef)
+    var self = this
+    google.maps.event.addListener(this.drawing.drawingManager, 'overlaycomplete', function (event) {
       // Create a boundary object using the regular object-creation workflow. A little awkward as we are converting
       // the polygon object coordinates to aro-service format, and then back to google.maps.Polygon() paths later.
       // We keep it this way because the object creation workflow does other things like set up events, etc.
@@ -1157,13 +1146,13 @@ class MapObjectEditorController {
       event.overlay.getPaths().forEach((path) => {
         var pathPoints = []
         path.forEach((latLng) => pathPoints.push([latLng.lng(), latLng.lat()]))
-        pathPoints.push(pathPoints[0])  // Close the polygon
+        pathPoints.push(pathPoints[0]) // Close the polygon
         feature.geometry.coordinates[0].push(pathPoints)
       })
 
-      //Check if polygon is valid, if valid create a map object
-      var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: {type: 'Polygon', coordinates: feature.geometry.coordinates[0]} })
-      isValidPolygon ? self.createMapObject(feature, null ,true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
+      // Check if polygon is valid, if valid create a map object
+      var isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: { type: 'Polygon', coordinates: feature.geometry.coordinates[0] } })
+      isValidPolygon ? self.createMapObject(feature, null, true) : Utilities.displayErrorMessage(self.polygonInvalidMsg)
 
       // Remove the overlay. It will be replaced with the created map object
       event.overlay.setMap(null)
@@ -1171,40 +1160,40 @@ class MapObjectEditorController {
       self.drawing.drawingManager.setMap(null)
       self.drawing.drawingManager = null
       self.drawing.markerIdForBoundary = null
-    });
+    })
   }
 
-  generateHexagonPath(position,radius) {
-    var pathPoints = [];
-    for(var angle= -90;angle < 270; angle+=60) {
+  generateHexagonPath (position, radius) {
+    var pathPoints = []
+    for (var angle = -90; angle < 270; angle += 60) {
       var point = google.maps.geometry.spherical.computeOffset(position, radius, angle)
-      pathPoints.push([point.lng(), point.lat()]);    
+      pathPoints.push([point.lng(), point.lat()])
     }
-    pathPoints.push(pathPoints[0])  // Close the polygon
+    pathPoints.push(pathPoints[0]) // Close the polygon
 
     return pathPoints
   }
 
-  modifyObject(mapObject) {
-    //Check if polygon is valid, if valid modify a map object
+  modifyObject (mapObject) {
+    // Check if polygon is valid, if valid modify a map object
     var polygonGeoJsonPath = MapUtilities.polygonPathsToWKT(mapObject.getPaths())
-    var isValidPolygon = MapUtilities.isPolygonValid({type: "Feature", geometry: polygonGeoJsonPath})
+    var isValidPolygon = MapUtilities.isPolygonValid({ type: 'Feature', geometry: polygonGeoJsonPath })
 
-    if(isValidPolygon) {
+    if (isValidPolygon) {
       this.selectedMapObjectPreviousShape[mapObject.objectId] = polygonGeoJsonPath
-      this.onModifyObject && this.onModifyObject({mapObject})
+      this.onModifyObject && this.onModifyObject({ mapObject })
     } else {
-      //display error message & undo last invalid change 
+      // display error message & undo last invalid change
       Utilities.displayErrorMessage(this.polygonInvalidMsg)
       mapObject.setMap(null)
 
       mapObject.feature.geometry = this.selectedMapObjectPreviousShape[mapObject.objectId]
 
-      this.createMapObject(mapObject.feature,null,true,null,true)
+      this.createMapObject(mapObject.feature, null, true, null, true)
     }
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj && changesObj.hideObjectIds && (this.hideObjectIds) instanceof Set) {
       // First set all objects as visible
       Object.keys(this.createdMapObjects).forEach((objectId) => this.createdMapObjects[objectId].setVisible(true))
@@ -1220,24 +1209,24 @@ class MapObjectEditorController {
     }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     if (this.overlayRightClickListener) {
       google.maps.event.removeListener(this.overlayRightClickListener)
       this.overlayRightClickListener = null
     }
-    
+
     // Remove listener
     google.maps.event.removeListener(this.clickListener)
     this.removeCreatedMapObjects()
 
-    //unsubscribe map click observer
-    this.mapFeaturesSelectedEventObserver.unsubscribe();
-    this.dragEndEventObserver.unsubscribe();
-    this.dragStartEventObserver.unsubscribe();
+    // unsubscribe map click observer
+    this.mapFeaturesSelectedEventObserver.unsubscribe()
+    this.dragEndEventObserver.unsubscribe()
+    this.dragStartEventObserver.unsubscribe()
 
     // Go back to the default map cursor
     this.mapRef.setOptions({ draggableCursor: null })
-    
+
     /*
     // Remove the context menu from the document body
     this.$timeout(() => {
@@ -1247,7 +1236,7 @@ class MapObjectEditorController {
       mapCanvas.removeChild(this.dropTargetElement)
     }, 0)
     */
-    
+
     // Remove any dragging DOM event listeners
     var mapCanvas = this.$document.find(`#${this.mapContainerId}`)[0]
     mapCanvas.ondragover = null
@@ -1261,15 +1250,15 @@ let mapObjectEditor = {
   templateUrl: '/components/common/map-object-editor.html',
   bindings: {
     mapGlobalObjectName: '@',
-    mapContainerId: '@',  // The HTML element that contains the map
+    mapContainerId: '@', // The HTML element that contains the map
     getObjectIconUrl: '&',
     getObjectSelectedIconUrl: '&',
-    modifyingLibraryId: '<',  // Can be null, valid only if we are modifying locations
+    modifyingLibraryId: '<', // Can be null, valid only if we are modifying locations
     deleteMode: '<',
     createObjectOnClick: '<',
-    //allowBoundaryCreation: '<',
-    isBoundaryCreationAllowed: '&', 
-    hideObjectIds: '<',    // A set of IDs that we will suppress visibility for
+    // allowBoundaryCreation: '<',
+    isBoundaryCreationAllowed: '&',
+    hideObjectIds: '<', // A set of IDs that we will suppress visibility for
     featureType: '@',
     onInit: '&',
     checkCreateObject: '&',
@@ -1277,12 +1266,12 @@ let mapObjectEditor = {
     onSelectObject: '&',
     onModifyObject: '&',
     onDeleteObject: '&',
-    displayViewObject: '&', 
+    displayViewObject: '&',
     onObjectDroppedOnMarker: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
-    registerCreateMapObjectsCallback: '&',  // To be called to register a callback, which will create map objects for existing objectIds
-    registerRemoveMapObjectsCallback: '&',   // To be called to register a callback, which will remove all created map objects
-    registerCreateEditableExistingMapObject: '&',  // To be called to register a callback, which will create a map object from and existing object
+    registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds
+    registerRemoveMapObjectsCallback: '&', // To be called to register a callback, which will remove all created map objects
+    registerCreateEditableExistingMapObject: '&', // To be called to register a callback, which will create a map object from and existing object
     registerDeleteCreatedMapObject: '&'
   },
   controller: MapObjectEditorController

@@ -1,6 +1,5 @@
 class ViewModeController {
-  
-  constructor(state) {
+  constructor (state) {
     this.state = state
     this.currentUser = state.loggedInUser
   }
@@ -9,7 +8,7 @@ class ViewModeController {
 ViewModeController.$inject = ['state']
 
 let viewMode = {
-    templateUrl: '/components/sidebar/view/view-mode.html',
+  templateUrl: '/components/sidebar/view/view-mode.html',
   controller: ViewModeController
 }
 

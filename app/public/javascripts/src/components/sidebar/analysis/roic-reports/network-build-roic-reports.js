@@ -1,36 +1,34 @@
 import Constants from '../../../common/constants'
 
 class NetworkBuildRoicReportsController {
-
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
 
     this.roicResultsData = null
   }
-  
-  $onChanges(changesObj) {
+
+  $onChanges (changesObj) {
     if (changesObj.planId || changesObj.optimizationState) {
       this.refreshData()
     }
   }
-  
-  refreshData() {
+
+  refreshData () {
     if (!this.planId) {
       console.error('Plan ID not available in ROIC Reports component')
       return
     }
-    
+
     this.loadROICResultsForPlan(this.planId)
   }
 
-  loadROICResultsForPlan(planId) {
+  loadROICResultsForPlan (planId) {
     this.$http.get(`/service/report/plan/${planId}`)
-    .then(result => {
-      this.roicResultsData = result.data
-    })
-    .catch(err => console.error(err))
-    
+      .then(result => {
+        this.roicResultsData = result.data
+      })
+      .catch(err => console.error(err))
   }
 }
 
@@ -41,7 +39,7 @@ let networkBuildRoicReports = {
   bindings: {
     planId: '<',
     optimizationState: '<',
-    reportSize: '<', 
+    reportSize: '<',
     isLocation: '<'
   },
   controller: NetworkBuildRoicReportsController

@@ -5,7 +5,6 @@ app.service('CustomOverlay', ($http, $rootScope) => {
   // Based on https://developers.google.com/maps/documentation/javascript/customoverlays
 
   return class CustomOverlay extends google.maps.OverlayView {
-
     constructor (map, elem, width, height, latLng, callback) {
       super()
       this.setMap(map)
@@ -76,6 +75,5 @@ app.service('CustomOverlay', ($http, $rootScope) => {
         this.setMap(this.map_)
       }
     }
-
   }
 })

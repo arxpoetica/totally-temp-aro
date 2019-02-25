@@ -1,5 +1,4 @@
 app.service('tileDataService', ['uiNotificationService', (uiNotificationService) => {
-
   // IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
   var VectorTile = require('vector-tile').VectorTile
   var Protobuf = require('pbf')
@@ -8,13 +7,13 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
   var tileDataService = {}
   tileDataService.tileDataCache = {}
   tileDataService.tileProviderCache = {}
-  tileDataService.tileHtmlCache = {}  // A cache of HTML elements created. Used to prevent flicker.
+  tileDataService.tileHtmlCache = {} // A cache of HTML elements created. Used to prevent flicker.
   // Hold a map of layer keys to image urls (and image data once it is loaded)
   tileDataService.entityImageCache = {}
   tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
   tileDataService.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
   tileDataService.modifiedBoundaries = {}
-  
+
   // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
   // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
   // and the app appears unresponsive until all vector tiles are loaded. To get around this, we are going to limit the
@@ -75,9 +74,9 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
       var oReq = new XMLHttpRequest()
       oReq.open('POST', `/tile/v1/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, true)
       oReq.setRequestHeader('Content-Type', 'application/json')
-      oReq.responseType = "arraybuffer";
+      oReq.responseType = 'arraybuffer'
 
-      oReq.onload = function(oEvent) {
+      oReq.onload = function (oEvent) {
         var arrayBuffer = oReq.response
         // De-serialize the binary data into a VectorTile object
         var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
@@ -87,11 +86,11 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
           var layer = mapboxVectorTile.layers[layerKey]
           var features = []
           for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-              let feature = layer.feature(iFeature)
-              // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
-              if (layerKey.startsWith('v1.tiles.census_block.')){
-                formatCensusBlockData( feature )
-              }
+            let feature = layer.feature(iFeature)
+            // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+            if (layerKey.startsWith('v1.tiles.census_block.')) {
+              formatCensusBlockData(feature)
+            }
             features.push(feature)
           }
           layerToFeatures[layerKey] = features
@@ -104,10 +103,10 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
         })
         resolve(layerToFeatures)
       }
-      oReq.onerror = function(error) { reject(error) }
-      oReq.onabort = function() { reject('XMLHttpRequest abort') }
-      oReq.ontimeout = function() { reject('XMLHttpRequest timeout') }
-      oReq.onreadystatechange = function() {
+      oReq.onerror = function (error) { reject(error) }
+      oReq.onabort = function () { reject('XMLHttpRequest abort') }
+      oReq.ontimeout = function () { reject('XMLHttpRequest timeout') }
+      oReq.onreadystatechange = function () {
         if (oReq.readyState === 4 && oReq.status >= 400) {
           reject(`ERROR: Tile data URL returned status code ${oReq.status}`)
         }
@@ -144,14 +143,14 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
       })
       // Wrap a promise that will make the request
       var dataPromise = tileDataService.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
-                          .catch((err) => {
-                            console.error(err)
-                            // There was a server error when getting the data. Delete this promise from the tileProviderCache
-                            // so that the system will re-try downloading tile data if it is asked for again
-                            tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
-                              delete tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId]
-                            })
-                          })
+        .catch((err) => {
+          console.error(err)
+          // There was a server error when getting the data. Delete this promise from the tileProviderCache
+          // so that the system will re-try downloading tile data if it is asked for again
+          tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
+            delete tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId]
+          })
+        })
       // For all the tile definitions that we are going to download, this is the promise that we save.
       // Note that some map layers may have been downloaded previously. We have to be careful not to overwrite those promises.
       // Hence, using tileDefinitionsToDownload and not tileDataService.mapLayers
@@ -187,20 +186,20 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
     }
   }
 
-  var formatCensusBlockData = function(cBlock){
+  var formatCensusBlockData = function (cBlock) {
     let sepA = ';'
     let sepB = ':'
     cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
-  	let kvPairs = cBlock.properties.tags.split( sepA )
+  	let kvPairs = cBlock.properties.tags.split(sepA)
   	cBlock.properties.tags = {}
   	kvPairs.forEach((pair) => {
-  	  let kv = pair.split( sepB )
-  	  // incase there are extra ':'s in the value we join all but the first together 
-  	  if ("" != kv[0]) cBlock.properties.tags[ kv[0]+"" ] = kv.slice(1).join( sepB )
-  	}) 
-    //return cBlock 
+  	  let kv = pair.split(sepB)
+  	  // incase there are extra ':'s in the value we join all but the first together
+  	  if (kv[0] != '') cBlock.properties.tags[ kv[0] + '' ] = kv.slice(1).join(sepB)
+  	})
+    // return cBlock
   }
-  
+
   // Flattens all URLs and returns tile data that is a simple union of all features
   tileDataService.getTileDataFlatten = (mapLayer, zoom, tileX, tileY) => {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
@@ -221,7 +220,7 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
     if (hasIcon) {
       promises.push(imagePromise(mapLayer.iconUrl))
     }
-    
+
     var hasSelectedIcon = mapLayer.hasOwnProperty('selectedIconUrl')
     if (hasSelectedIcon) {
       promises.push(imagePromise(mapLayer.selectedIconUrl))
@@ -231,7 +230,7 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
     if (hasGreyedOutIcon) {
       promises.push(imagePromise(mapLayer.greyOutIconUrl))
     }
-    
+
     return Promise.all(promises)
       .then((results) => {
         var allFeatures = []
@@ -249,7 +248,7 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
             FEATURES_FLATTENED: allFeatures
           }
         }
-        
+
         if (hasIcon) {
           tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon)]
         }
@@ -298,11 +297,11 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
               }
               // TODO: Cannot do a "import TileUtilities from './tile-utilities'" so we have copy/pasted code here
               const TILE_COORDINATE_SCALING_FACTOR = 1.0 / 16
-              const scaledGeom = feature.loadGeometry().map(shape => ({ x: shape.x * TILE_COORDINATE_SCALING_FACTOR, y: shape.y * TILE_COORDINATE_SCALING_FACTOR}))
+              const scaledGeom = feature.loadGeometry().map(shape => ({ x: shape.x * TILE_COORDINATE_SCALING_FACTOR, y: shape.y * TILE_COORDINATE_SCALING_FACTOR }))
               entityData[aggregateEntityGID].geometry = scaledGeom
               // Store the value to be aggregated (e.g. download_speed) in this layer
               if (!entityData[aggregateEntityGID].layers) {
-                entityData[aggregateEntityGID].layers =[]
+                entityData[aggregateEntityGID].layers = []
               }
               entityData[aggregateEntityGID].layers.push(feature.properties[mapLayer.aggregateProperty])
             })
@@ -379,13 +378,12 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
   tileDataService.addModifiedFeature = (feature) => {
     tileDataService.modifiedFeatures[feature.objectId] = feature
   }
-  
-  //Add a modified boundary to the set of modified features
+
+  // Add a modified boundary to the set of modified features
   tileDataService.addModifiedBoundary = (feature) => {
     tileDataService.modifiedBoundaries[feature.objectId] = feature
   }
-  
-  
+
   // Clear the entire tile data cache
   tileDataService.clearDataCache = () => {
     tileDataService.tileDataCache = {}
@@ -434,7 +432,7 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
         const matchingTiles = tilesToRefresh.filter((item) => cacheId.indexOf(`${item.zoom}-${item.x}-${item.y}`) === 0)
         isDirty = matchingTiles.length > 0
       } else {
-        isDirty = true  // Mark all tiles as dirty
+        isDirty = true // Mark all tiles as dirty
       }
       tileDataService.tileHtmlCache[cacheId].isDirty = isDirty
     })
@@ -446,7 +444,7 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
       // We have the specified node in our cache
       var htmlTileNode = tileDataService.tileHtmlCache[cacheId].div
       htmlTileNode.parentNode.removeChild(htmlTileNode) // Remove the HTML node from the document
-      delete tileDataService.tileHtmlCache[cacheId]     // Remove the reference to the (now non-existent) HTML element
+      delete tileDataService.tileHtmlCache[cacheId] // Remove the reference to the (now non-existent) HTML element
     }
   }
 

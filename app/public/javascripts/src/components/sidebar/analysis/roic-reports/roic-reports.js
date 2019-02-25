@@ -1,12 +1,11 @@
 import Constants from '../../../common/constants'
 
 class RoicReportsController {
-
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
 
-    this.series = ['Series A', 'Series B'];
+    this.series = ['Series A', 'Series B']
     this.datasetOverride = { fill: false }
     this.roicResults = null
 
@@ -108,9 +107,9 @@ class RoicReportsController {
     ]
   }
 
-  getOptionsForCalcType(calcType) {
+  getOptionsForCalcType (calcType) {
     return {
-      id: Math.random(),  // What is this? The chart binding is doing an "angular.equals()" comparison, so without a unique ID it will not recompute axes labels, etc.
+      id: Math.random(), // What is this? The chart binding is doing an "angular.equals()" comparison, so without a unique ID it will not recompute axes labels, etc.
       maintainAspectRatio: false,
       tooltips: {
         callbacks: {
@@ -134,15 +133,15 @@ class RoicReportsController {
     }
   }
 
-  formatYAxisValue(value, allValues, calcType, precision) {
+  formatYAxisValue (value, allValues, calcType, precision) {
     precision = precision || 1
     // This function will format the Y-axis tick values so that we show '100 K' instead of '100000'
     // (and will do the same for millions/billions). We can also specify a tick prefix like '$'
     const maxValue = Math.max.apply(Math, allValues) // Inefficient to do this every time, but 'values' length will be small
     const thresholds = [
-      { zeroes: 9, suffix: 'B' },   // Billions
-      { zeroes: 6, suffix: 'M' },   // Millions
-      { zeroes: 3, suffix: 'K' }    // Thousands
+      { zeroes: 9, suffix: 'B' }, // Billions
+      { zeroes: 6, suffix: 'M' }, // Millions
+      { zeroes: 3, suffix: 'K' } // Thousands
     ]
     const threshold = thresholds.filter(item => maxValue >= Math.pow(10, item.zeroes))[0]
     // Two spaces in front of the return value - For some reason values with yMax = 900,000 were getting chopped off on the graph
@@ -153,21 +152,21 @@ class RoicReportsController {
       return `  ${calcType.tickPrefix}${value.toFixed(precision)}${calcType.tickSuffix}` // For values less than 1000
     }
   }
-  
-  $onChanges(changesObj) {
+
+  $onChanges (changesObj) {
     if (changesObj.roicResultsData && this.roicResultsData) {
       this.roicResults = JSON.parse(JSON.stringify(this.roicResultsData))
       this.digestData()
     }
   }
-  
-  digestData(){
+
+  digestData () {
     const currentYear = (new Date()).getFullYear()
     this.xAxisLabels = []
     for (var i = 0; i < this.state.optimizationOptions.financialConstraints.years; ++i) {
       this.xAxisLabels.push(currentYear + i)
     }
-    
+
     // Some of the values have to be scaled (e.g. penetration should be in %)
     Object.keys(this.roicResults.roicAnalysis.components).forEach(componentKey => {
       const component = this.roicResults.roicAnalysis.components[componentKey]
@@ -178,9 +177,7 @@ class RoicReportsController {
         curve.values = curve.values.map(item => item * multiplier)
       })
     })
-    
   }
-  
 }
 
 RoicReportsController.$inject = ['$http', 'state']

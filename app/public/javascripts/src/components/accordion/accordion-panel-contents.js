@@ -1,18 +1,18 @@
 // See README.md for details on how to use the accordion component
 
 class AccordionPanelContentsController {
-  constructor($element) {
+  constructor ($element) {
     this.$element = $element
   }
 
-  $onInit() {
+  $onInit () {
     // Register a listener that will handle the expanded accordion ID changing
     this.parentAccordion.addExpandedAccordionIdListener(this.onExpandedAccordionIdChanged.bind(this))
     this.onExpandedAccordionIdChanged()
     this.$element.addClass('accordion-common')
   }
 
-  onExpandedAccordionIdChanged() {
+  onExpandedAccordionIdChanged () {
     // Manually add and remove expanded/collapsed classes on the element. This has to be done because the
     // flexbox requires *immediate* children to have the "flex:" property.
     this.$element.removeClass('accordion-expanded')

@@ -1,6 +1,5 @@
 class NetworkPlanModalController {
-  constructor($http, state) {
-
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
 
@@ -12,12 +11,12 @@ class NetworkPlanModalController {
     this.currentView = this.views.Search_plans
   }
 
-  loadPlan(plan) {
+  loadPlan (plan) {
     this.state.loadPlan(plan.id)
     this.state.networkPlanModal.next(false)
   }
 
-  deletePlan(plan) {
+  deletePlan (plan) {
     if (!plan) {
       return Promise.resolve()
     }
@@ -34,12 +33,12 @@ class NetworkPlanModalController {
       }, (deletePlan) => {
         if (deletePlan) {
           this.$http.delete(`/service/v1/plan/${plan.id}?user_id=${this.state.loggedInUser.id}`)
-          .then((response) => {
-            resolve()
-            return this.state.getOrCreateEphemeralPlan()
-          })
-          .then((ephemeralPlan) => this.state.setPlan(ephemeralPlan.data))
-          .catch((err) => reject(err))
+            .then((response) => {
+              resolve()
+              return this.state.getOrCreateEphemeralPlan()
+            })
+            .then((ephemeralPlan) => this.state.setPlan(ephemeralPlan.data))
+            .catch((err) => reject(err))
         } else {
           resolve()
         }
@@ -47,23 +46,23 @@ class NetworkPlanModalController {
     })
   }
 
-  getTagCategories(currentPlanTags) {
-    return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  getTagCategories (currentPlanTags) {
+    return this.state.listOfTags.filter(tag => _.contains(currentPlanTags, tag.id))
   }
 
-  getSATagCategories(currentSATags) {
+  getSATagCategories (currentSATags) {
     var serviceAreaIdsToFetch = []
     var promises = []
     var listOfServiceAreaTagIds = _.pluck(this.state.listOfServiceAreaTags, 'id')
     serviceAreaIdsToFetch = currentSATags.filter((n) => listOfServiceAreaTagIds.indexOf(n) < 0)
 
     if (serviceAreaIdsToFetch.length === 0) {
-      return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags,tag.id)))
+      return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags, tag.id)))
     }
 
-    while(serviceAreaIdsToFetch.length) {
+    while (serviceAreaIdsToFetch.length) {
       var filter = ''
-      serviceAreaIdsToFetch.splice(0,100).forEach((serviceAreaId, index) => {
+      serviceAreaIdsToFetch.splice(0, 100).forEach((serviceAreaId, index) => {
         if (index > 0) {
           filter += ' or '
         }
@@ -73,22 +72,22 @@ class NetworkPlanModalController {
       promises.push(this.$http.get(`/service/odata/ServiceAreaView?$select=id,code,name&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
-    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http,this.state,promises)
-    .then((result) => {
-      return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags,tag.id)))
-    })
-    .catch((err) => console.error(err))
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http, this.state, promises)
+      .then((result) => {
+        return Promise.resolve(this.state.listOfServiceAreaTags.filter(tag => _.contains(currentSATags, tag.id)))
+      })
+      .catch((err) => console.error(err))
   }
 
-  updateTag(plan,removeTag) {
+  updateTag (plan, removeTag) {
     var updatePlan = plan
-    if(removeTag.type == 'svc') {
+    if (removeTag.type == 'svc') {
       updatePlan.tagMapping.linkTags.serviceAreaIds = _.without(updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.tag.id)
     } else {
       updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
     }
-    
-    return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`,updatePlan)
+
+    return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
   }
 }
 

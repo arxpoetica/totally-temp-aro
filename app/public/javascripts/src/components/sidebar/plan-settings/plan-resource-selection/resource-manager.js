@@ -1,5 +1,5 @@
 class ResourceManagerController {
-  constructor($http, $document, state) {
+  constructor ($http, $document, state) {
     this.$http = $http
     this.$document = $document
     this.state = state
@@ -24,65 +24,65 @@ class ResourceManagerController {
       competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
       rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
     }
-    
+
     this.rows = []
-    
+
     this.displayProps = [
       {
-        "propertyName": "managerType",
-        "levelOfDetail": 0,
-        "format": "",
-        "displayName": "Resource Type",
-        "enumTypeURL": "",
-        "displayDataType": "string",
-        "defaultValue": "",
-        "editable": false,
-        "visible": true
+        'propertyName': 'managerType',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Resource Type',
+        'enumTypeURL': '',
+        'displayDataType': 'string',
+        'defaultValue': '',
+        'editable': false,
+        'visible': true
       },
       {
-        "propertyName": "name",
-        "levelOfDetail": 0,
-        "format": "",
-        "displayName": "Name",
-        "enumTypeURL": "",
-        "displayDataType": "string",
-        "defaultValue": "",
-        "editable": true,
-        "visible": true
+        'propertyName': 'name',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Name',
+        'enumTypeURL': '',
+        'displayDataType': 'string',
+        'defaultValue': '',
+        'editable': true,
+        'visible': true
       }
     ]
-    
+
     this.actions = [
       {
-        buttonText: '', //Edit
-        buttonClass: "btn-light", 
-        iconClass: "fa-edit", 
-        toolTip: "Edit", 
+        buttonText: '', // Edit
+        buttonClass: 'btn-light',
+        iconClass: 'fa-edit',
+        toolTip: 'Edit',
         callBack: (row, index) => {
-          //console.log('Edit') 
-          //console.log(row)
+          // console.log('Edit')
+          // console.log(row)
           this.editSelectedManager(row)
         }
-      }, 
+      },
       {
         buttonText: '', // Clone
-        buttonClass: "btn-light", 
-        iconClass: "fa-copy", 
-        toolTip: "Clone", 
+        buttonClass: 'btn-light',
+        iconClass: 'fa-copy',
+        toolTip: 'Clone',
         callBack: (row, index) => {
-          //console.log('Clone')
-          //console.log(row)
+          // console.log('Clone')
+          // console.log(row)
           this.cloneSelectedManagerFromSource(row)
         }
       },
       {
-        buttonText: '', //Delete
-        buttonClass: "btn-outline-danger", 
-        iconClass: "fa-trash-alt", 
-        toolTip: "Delete", 
+        buttonText: '', // Delete
+        buttonClass: 'btn-outline-danger',
+        iconClass: 'fa-trash-alt',
+        toolTip: 'Delete',
         callBack: (row, index) => {
-          //console.log('Delete')
-          //console.log(row)
+          // console.log('Delete')
+          // console.log(row)
           this.deleteSelectedResourceManager(row)
         }
       }
@@ -90,91 +90,88 @@ class ResourceManagerController {
       {
         buttonText: '', // Permissions
         buttonClass: "btn-primary", // use default
-        iconClass: "fa-user-plus", 
-        toolTip: "Permissions", 
+        iconClass: "fa-user-plus",
+        toolTip: "Permissions",
         callBack: function(index, row){console.log('permissions');console.log(row)}
       }
       */
     ]
-    
   }
-  
-  
-  $onChanges(changes){
-    if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')){
+
+  $onChanges (changes) {
+    if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
       this.buildRows()
     }
-    if (changes.hasOwnProperty('resourceItems')){
+    if (changes.hasOwnProperty('resourceItems')) {
       this.buildFilterOptions()
     }
   }
-  
-  onSelectedResourceKeyChanged(){
+
+  onSelectedResourceKeyChanged () {
     this.buildRows()
   }
-  
-  buildRows(){
+
+  buildRows () {
     var newRows = []
-    
+
     for (const key in this.resourceItems) {
-      if (this.resourceItems.hasOwnProperty(key)){
-        if (this.resourceItems[key].hasOwnProperty("allManagers")
-            && ('all' == this.selectedResourceKey || key == this.selectedResourceKey)
-        ){
-          newRows = newRows.concat( this.resourceItems[key].allManagers )
+      if (this.resourceItems.hasOwnProperty(key)) {
+        if (this.resourceItems[key].hasOwnProperty('allManagers') &&
+            (this.selectedResourceKey == 'all' || key == this.selectedResourceKey)
+        ) {
+          newRows = newRows.concat(this.resourceItems[key].allManagers)
         }
       }
     }
     this.rows = newRows
   }
-  
-  buildFilterOptions(){
-    var newFilterByOptions = {'all':'all'}
-    
+
+  buildFilterOptions () {
+    var newFilterByOptions = { 'all': 'all' }
+
     for (const key in this.resourceItems) {
-      if (this.resourceItems.hasOwnProperty(key)){
-        if (this.resourceItems[key].hasOwnProperty("allManagers")){
+      if (this.resourceItems.hasOwnProperty(key)) {
+        if (this.resourceItems[key].hasOwnProperty('allManagers')) {
           var desc = key
-          if (this.resourceItems[key].hasOwnProperty('description')){
+          if (this.resourceItems[key].hasOwnProperty('description')) {
             desc = this.resourceItems[key].description
           }
-          //newFilterByOptions.push({'label':desc, 'value':key})
+          // newFilterByOptions.push({'label':desc, 'value':key})
           newFilterByOptions[key] = desc
         }
       }
     }
-    
+
     this.filterByOptions = newFilterByOptions
   }
-  
-  $doCheck() {
+
+  $doCheck () {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
       this.oldResourceItems = this.resourceItems
     }
   }
 
-  createBlankPriceBook() {
+  createBlankPriceBook () {
     this.setEditingManagerId({ newId: null })
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
-  cloneSelectedPriceBook(selectedManager) {
+  cloneSelectedPriceBook (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.createPriceBookMode })
   }
 
-  createBlankRateReachManager() {
+  createBlankRateReachManager () {
     this.setEditingManagerId({ newId: null })
     this.setEditingMode({ mode: this.createRateReachManagerMode })
   }
 
-  cloneSelectedRateReachManager(selectedManager) {
+  cloneSelectedRateReachManager (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.createRateReachManagerMode })
   }
 
-  cloneSelectedManagerFromSource(selectedManager) {
-    
+  cloneSelectedManagerFromSource (selectedManager) {
     var managerId = this.resourceKeyToEndpointId[selectedManager.managerType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
@@ -184,30 +181,30 @@ class ResourceManagerController {
     } else {
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
-      .then((resourceName) => {
+        .then((resourceName) => {
         // Create a new manager with the specified name and description
-        return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}`,
-                              { name: resourceName, description: resourceName })
-      })
-      .then((result) => this.onManagerCreated(result.data.id))
-      .catch((err) => console.error(err))
+          return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}`,
+            { name: resourceName, description: resourceName })
+        })
+        .then((result) => this.onManagerCreated(result.data.id))
+        .catch((err) => console.error(err))
     }
   }
 
-  onManagerCreated(createdManagerId) {
+  onManagerCreated (createdManagerId) {
     this.setEditingManagerId({ newId: createdManagerId })
     this.setEditingMode({ mode: this.editMode })
     this.onManagersChanged && this.onManagersChanged()
     return Promise.resolve()
   }
 
-  editSelectedManager(selectedManager) {
+  editSelectedManager (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.managerType })
   }
 
-  askUserToConfirmManagerDelete(managerName) {
+  askUserToConfirmManagerDelete (managerName) {
     return new Promise((resolve, reject) => {
       swal({
         title: 'Delete resource manager?',
@@ -227,33 +224,33 @@ class ResourceManagerController {
     })
   }
 
-  deleteManager(deleteUrl) {
+  deleteManager (deleteUrl) {
     console.log(deleteUrl)
     this.$http.delete(deleteUrl)
-    .then((result) => {
-      this.onManagersChanged && this.onManagersChanged()
-      //this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
-    })
-    .catch((err) => console.error(err))
+      .then((result) => {
+        this.onManagersChanged && this.onManagersChanged()
+      // this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
+      })
+      .catch((err) => console.error(err))
   }
 
-  deleteSelectedResourceManager(selectedManager) {
+  deleteSelectedResourceManager (selectedManager) {
     this.askUserToConfirmManagerDelete(selectedManager.name)
-    .then((okToDelete) => {
-      if (okToDelete) {
-        const managerIdToDelete = selectedManager.id
-        // this.selectedResourceKey selectedManager.managerType
-        const deleteUrl = this.managerDeleteUrl[selectedManager.managerType].replace(this.managerIdString, managerIdToDelete)
-        this.deleteManager(deleteUrl)
-      }
-    })
-    .catch((err) => console.error(err))
+      .then((okToDelete) => {
+        if (okToDelete) {
+          const managerIdToDelete = selectedManager.id
+          // this.selectedResourceKey selectedManager.managerType
+          const deleteUrl = this.managerDeleteUrl[selectedManager.managerType].replace(this.managerIdString, managerIdToDelete)
+          this.deleteManager(deleteUrl)
+        }
+      })
+      .catch((err) => console.error(err))
   }
 
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
   // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
   // Call this function before showing the SweetAlert
-  fixBootstrapModal() {
+  fixBootstrapModal () {
     var modalNodes = this.$document[0].querySelectorAll('.modal')
     if (!modalNodes) return
 
@@ -266,7 +263,7 @@ class ResourceManagerController {
   // Showing a SweetAlert from within a modal dialog does not work (The input box is not clickable).
   // Workaround from https://github.com/t4t5/sweetalert/issues/412#issuecomment-234675096
   // Call this function before hiding the SweetAlert
-  restoreBootstrapModal() {
+  restoreBootstrapModal () {
     var modalNode = this.$document[0].querySelector('.modal.js-swal-fixed')
     if (!modalNode) return
 
@@ -274,9 +271,9 @@ class ResourceManagerController {
     modalNode.classList.remove('js-swal-fixed')
   }
 
-  getNewResourceDetailsFromUser() {
+  getNewResourceDetailsFromUser () {
     // Get the name for a new plan from the user
-    this.fixBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
+    this.fixBootstrapModal() // Workaround to show SweetAlert from within a modal dialog
     return new Promise((resolve, reject) => {
       var swalOptions = {
         title: 'Resource name required',
@@ -287,7 +284,7 @@ class ResourceManagerController {
         confirmButtonText: 'OK'
       }
       swal(swalOptions, (resourceName) => {
-        this.restoreBootstrapModal()  // Workaround to show SweetAlert from within a modal dialog
+        this.restoreBootstrapModal() // Workaround to show SweetAlert from within a modal dialog
         if (resourceName) {
           resolve(resourceName)
         } else {
@@ -296,9 +293,7 @@ class ResourceManagerController {
       })
     })
   }
-  
 }
-
 
 ResourceManagerController.$inject = ['$http', '$document', 'state']
 

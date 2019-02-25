@@ -1,11 +1,11 @@
 // See README.md for details on how to use the accordion component
 
 class AccordionPanelTitleController {
-  constructor($element) {
+  constructor ($element) {
     this.$element = $element
   }
 
-  $onInit() {
+  $onInit () {
     // Have to do this because the "flex" property has to be applied on the root element
     this.$element.addClass('accordion-title-root')
   }

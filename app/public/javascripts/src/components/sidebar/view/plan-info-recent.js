@@ -1,5 +1,5 @@
 class PlanInfoRecentController {
-  constructor(state) {
+  constructor (state) {
     this.state = state
   }
 }

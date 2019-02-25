@@ -1,7 +1,6 @@
 /* global app config $ _ google map */
 // Fiber Plant Controller
 app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', 'state', 'map_tools', ($scope, $rootScope, $location, state, map_tools) => {
-
   $scope.map_tools = map_tools
   $scope.state = state
 
@@ -12,7 +11,6 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
 
   // Create map layers for census blocks
   const createLayersForCensusBlocks = (mapLayerKey, state, dataSource, oldMapLayers, createdMapLayerKeys) => {
-
     var censusBlockTileDefinitions = []
     const CENSUS_BLOCK_ZOOM_THRESHOLD = 11
     var blockType = map.getZoom() > CENSUS_BLOCK_ZOOM_THRESHOLD ? 'census-block' : 'census-block-group'
@@ -20,7 +18,7 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     const polyTransform = map.getZoom() > 5 ? 'select' : 'smooth'
     const selectedCompetitionResourceManager = state.resourceItems && state.resourceItems.competition_manager && state.resourceItems.competition_manager.selectedManager
     if (state.competition.showCensusBlocks && dataSource) {
-      var aggregateOptionsType = null, cbStrokeStyle = null, cbFillStyle = null
+      var aggregateOptionsType = null; var cbStrokeStyle = null; var cbFillStyle = null
       if (state.competition.useAllCompetitors) {
         // Our endpoint uses "all competitors"
         const strengthDescriptor = (blockType === 'census-block') ? 'cb-strength' : 'cbg-strength'
@@ -182,11 +180,10 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
   }
 
   // Update map layers based on the selections in the state object
-  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port();
+  var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port()
   // Creates map layers based on selection in the UI
   var createdMapLayerKeys = new Set()
   var updateMapLayers = () => {
-
     // We need a competition resource manager selected before we can update any layers
     const selectedCompetitionResourceManager = state.resourceItems && state.resourceItems.competition_manager && state.resourceItems.competition_manager.selectedManager
     if (!selectedCompetitionResourceManager) {
@@ -223,7 +220,6 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     // "oldMapLayers" now contains the new layers. Set it in the state
     state.mapLayers.next(oldMapLayers)
   }
-
 
   // Called when the selected competitor type changes
   $scope.onCompetitorTypeChanged = () => {
@@ -265,22 +261,19 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
     }
     updateMapLayers()
   }
-  
-  function reloadCompetitors() {
+
+  function reloadCompetitors () {
     state.reloadCompetitors()
   }
 
   reloadCompetitors()
-  
+
   $rootScope.$on('map_dragend', () => {
-    if (map_tools.is_visible('fiber_plant'))
-      reloadCompetitors()
-  })
-  
-  $rootScope.$on('map_zoom_changed', () => {
-    if (map_tools.is_visible('fiber_plant'))
-      reloadCompetitors()
-    updateMapLayers()
+    if (map_tools.is_visible('fiber_plant')) { reloadCompetitors() }
   })
 
+  $rootScope.$on('map_zoom_changed', () => {
+    if (map_tools.is_visible('fiber_plant')) { reloadCompetitors() }
+    updateMapLayers()
+  })
 }])

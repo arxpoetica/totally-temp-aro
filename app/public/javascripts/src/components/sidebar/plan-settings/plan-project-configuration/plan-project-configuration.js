@@ -1,15 +1,15 @@
 
 class PlanProjectConfigurationController {
-  constructor($http, $timeout, state) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
-    
+
     this.allProjects = []
     this.selectedProjectId = null
   }
 
-  $onInit() {
+  $onInit () {
     this.$http.get(`/service/v1/project-template?user_id=${this.userId}`)
       .then((result) => {
         this.allProjects = result.data
@@ -22,20 +22,19 @@ class PlanProjectConfigurationController {
       .catch((err) => console.error(err))
   }
 
-  copySelectedProjectSettingsToPlan() {
+  copySelectedProjectSettingsToPlan () {
     this.state.copyProjectSettingsToPlan(this.selectedProjectId, this.planId, this.userId)
   }
 
-  planSettingsToProject() {
+  planSettingsToProject () {
     // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()
       .then(() => this.state.saveNetworkConfigurationToDefaultProject())
       .catch((err) => console.error(err))
-    
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
-  savePlanDataAndResourceSelectionToProject() {
+  savePlanDataAndResourceSelectionToProject () {
     var putBody = {
       configurationItems: [],
       resourceConfigItems: []
@@ -67,7 +66,7 @@ class PlanProjectConfigurationController {
 
     // Save the configuration to the project
     return this.$http.put(`/service/v1/project-template/${this.selectedProjectId}/configuration?user_id=${this.userId}`, putBody)
-  }    
+  }
 }
 
 PlanProjectConfigurationController.$inject = ['$http', '$timeout', 'state']

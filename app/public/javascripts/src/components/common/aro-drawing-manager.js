@@ -1,5 +1,5 @@
 class aroDrawingManagerController {
-  constructor($window) {
+  constructor ($window) {
     this.$window = $window
     this.isEphemralShapes = false
     this.drawingManager = null
@@ -11,7 +11,7 @@ class aroDrawingManagerController {
     }
   }
 
-  enableDrawingManager() {
+  enableDrawingManager () {
     if (!this.drawingManager) {
       this.all_overlays = []
       var addListeners = this.featureType != 'ephemralShape' && this.editable
@@ -29,18 +29,18 @@ class aroDrawingManagerController {
           fillColor: 'transparent',
           editable: this.editable
         }
-      });
-      this.drawingManager.setMap(this.mapRef);
+      })
+      this.drawingManager.setMap(this.mapRef)
 
       google.maps.event.addListener(this.drawingManager, 'overlaycomplete', (e) => {
-        this.all_overlays.push(e);
-        this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: this.all_overlays})
+        this.all_overlays.push(e)
+        this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({ createMapObjects: this.all_overlays })
         addListeners && this.addMapObjectEvents(this.all_overlays)
         if (addListeners) {
           // Switch back to non-drawing mode after drawing a shape.
-          this.drawingManager.setMap(null);
+          this.drawingManager.setMap(null)
         }
-      });
+      })
     } else {
       if (this.drawingManager) {
         this.drawingManager.setMap(this.mapRef)
@@ -48,18 +48,18 @@ class aroDrawingManagerController {
     }
   }
 
-  clearAllShape() {
+  clearAllShape () {
     this.all_overlays && this.all_overlays.forEach((shape) => shape.overlay.setMap(null))
-    this.all_overlays = [];
+    this.all_overlays = []
   }
 
-  removeDrawingManager() {
+  removeDrawingManager () {
     if (this.drawingManager) {
       this.drawingManager.setMap(null)
     }
   }
 
-  setEphemralShapes() {
+  setEphemralShapes () {
     this.isEphemralShapes = !this.isEphemralShapes
     if (this.isEphemralShapes) {
       this.enableDrawingManager()
@@ -69,58 +69,57 @@ class aroDrawingManagerController {
     }
   }
 
-  addMapObjectEvents(features) {
+  addMapObjectEvents (features) {
     features.forEach((feature) => {
       this.addMapObjectEvent(feature)
     })
   }
 
-  addMapObjectEvent(feature) {
+  addMapObjectEvent (feature) {
     if (feature.type === 'polygon') {
-      var mapObject= feature
+      var mapObject = feature
 
       mapObject.overlay.getPaths().forEach((path, index) => {
-        google.maps.event.addListener(path, 'insert_at',() => {
-          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: [mapObject]})
-        });
-        google.maps.event.addListener(path, 'remove_at',() => {
-          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({createMapObjects: [mapObject]})
-        });
-        google.maps.event.addListener(path, 'set_at',() => {
+        google.maps.event.addListener(path, 'insert_at', () => {
           this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({ createMapObjects: [mapObject] })
-        });
-      });
+        })
+        google.maps.event.addListener(path, 'remove_at', () => {
+          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({ createMapObjects: [mapObject] })
+        })
+        google.maps.event.addListener(path, 'set_at', () => {
+          this.registerCreateMapObjectCallback && this.registerCreateMapObjectCallback({ createMapObjects: [mapObject] })
+        })
+      })
     } else {
       throw `createMapObject() not supported for geometry type ${feature.type}`
     }
   }
 
-  destroyDrawingManager() {
+  destroyDrawingManager () {
     this.isEphemralShapes = false
     this.clearAllShape()
     this.removeDrawingManager()
   }
 
-  $onInit() {
+  $onInit () {
     this.mapRef = this.$window[this.mapGlobalObjectName]
   }
 
-  $onChanges(changes) {
+  $onChanges (changes) {
     if (this.featureType != 'ephemralShape' && changes.deleteMapObjects.currentValue) {
       this.destroyDrawingManager()
     }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.destroyDrawingManager()
   }
-
 }
 
 aroDrawingManagerController.$inject = ['$window']
 
 let aroDrawingManager = {
-  templateUrl:'/components/common/aro-drawing-manager.html',
+  templateUrl: '/components/common/aro-drawing-manager.html',
   bindings: {
     mapGlobalObjectName: '@',
     featureType: '@',

@@ -1,8 +1,7 @@
 import SelectionActions from '../../react/components/selection/selection-actions'
 
 class MapSelectorPlanTargetController {
-  constructor($document, $ngRedux, state) {
-
+  constructor ($document, $ngRedux, state) {
     this.mapRef = null
     this.drawingManager = null
 
@@ -25,9 +24,9 @@ class MapSelectorPlanTargetController {
     })
   }
 
-  addOrRemoveSelection(entities, planTargetKey, entityIdKey) {
+  addOrRemoveSelection (entities, planTargetKey, entityIdKey) {
     // Get a list of ids to add and remove
-    var idsToAdd = new Set(), idsToRemove = new Set()
+    var idsToAdd = new Set(); var idsToRemove = new Set()
     entities.forEach((entity) => {
       if (this.planTargets[planTargetKey].has(+entity[entityIdKey])) {
         idsToRemove.add(+entity[entityIdKey])
@@ -43,29 +42,28 @@ class MapSelectorPlanTargetController {
     }
   }
 
-  updateDrawingManagerState() {
+  updateDrawingManagerState () {
     if (!this.drawingManager) {
       return
     }
 
-    if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW)
-        && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_PLAN_TARGET) {
+    if ((this.selectedDisplayMode === this.displayModes.ANALYSIS || this.selectedDisplayMode === this.displayModes.VIEW) &&
+        this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_PLAN_TARGET) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
       this.drawingManager.setDrawingMode(null)
       this.drawingManager.setMap(null)
     }
-
   }
 
-  $onInit() {
-    this.document.ready(()=> {
+  $onInit () {
+    this.document.ready(() => {
       this.doInit()
     })
   }
 
-  doInit() {
+  doInit () {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
@@ -84,21 +82,19 @@ class MapSelectorPlanTargetController {
       })
       setTimeout(() => e.overlay.setMap(null), 100)
     })
-
   }
 
-  $onDestroy() {
-    if(this.unsub)
-      this.unsub.unsubscribe()
+  $onDestroy () {
+    if (this.unsub) { this.unsub.unsubscribe() }
 
-    if(this.drawingManager) {
+    if (this.drawingManager) {
       this.drawingManager.setDrawingMode(null)
       this.drawingManager.setMap(null)
     }
     this.unsubscribeRedux()
   }
 
-  $doCheck() {
+  $doCheck () {
     // Do a manual check on selectedTargetSelectionMode, as it is no longer a BehaviorSubject
     var oldValue = this.targetSelectionMode
     this.targetSelectionMode = this.state.selectedTargetSelectionMode

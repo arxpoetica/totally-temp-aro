@@ -1,6 +1,6 @@
 /* global app config $ encodeURIComponent _ tinycolor swal location Chart angular */
 // Selected location controller
-app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, map_layers, map_tools,state) => {
+app.controller('selected_location_controller', ($rootScope, $scope, $http, $filter, map_layers, map_tools, state) => {
   $scope.location = {}
   $scope.show_households = config.ui.map_tools.locations.view.indexOf('residential') >= 0
   $scope.config = config
@@ -16,7 +16,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   }
 
   $scope.state = state
-  
+
   $scope.select_random_location = () => {
     var map_layer = map_layers.getFeatureLayer('locations')
     var feature
@@ -35,11 +35,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
 
   $rootScope.$on('map_layer_clicked_feature', (event, options, map_layer) => {
     if (!map_tools.is_visible(map_tools.TOOL_IDS.LOCATIONS)) {
-      return  // Process the click only if we have the locations layer open
+      return // Process the click only if we have the locations layer open
     }
     if (options.length > 0 && options[0].location_id) {
       var id = options[0].location_id
-      //openLocation(id) In project2.0 version on click of location in view mode -> more info w'll display the location detail modal
+      // openLocation(id) In project2.0 version on click of location in view mode -> more info w'll display the location detail modal
     }
   })
 
@@ -54,10 +54,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
       $scope.market_size = null
       $scope.fair_share = null
       $scope.calculateMarketSize()
-      .then(() => {
-        $('#selected_location_controller').modal('show')
-        $('#selected_location_market_profile select[multiple]').select2('val', [])
-      })
+        .then(() => {
+          $('#selected_location_controller').modal('show')
+          $('#selected_location_market_profile select[multiple]').select2('val', [])
+        })
     })
   }
 
@@ -68,15 +68,15 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
 
   state.showDetailedLocationInfo
     .subscribe((locationInfo) => {
-      if(!locationInfo) return
+      if (!locationInfo) return
       setSelectedLocation(locationInfo)
       $scope.market_size = null
       $scope.fair_share = null
       $scope.calculateMarketSize()
-      .then(() => {
-        $('#selected_location_controller').modal('show')
-        $('#selected_location_market_profile select[multiple]').select2('val', [])
-      })
+        .then(() => {
+          $('#selected_location_controller').modal('show')
+          $('#selected_location_market_profile select[multiple]').select2('val', [])
+        })
     })
 
   $('#selected_location_controller').on('shown.bs.modal', (e) => {
@@ -108,8 +108,8 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
     var params = {
       center: coordinates,
       zoom: 13,
-      size: '434x110',  // We want an image with size '868x220' but our free license only allows a max size of 640x640
-      scale: 2,         // So we set scale = 2 and size of '434x110'
+      size: '434x110', // We want an image with size '868x220' but our free license only allows a max size of 640x640
+      scale: 2, // So we set scale = 2 and size of '434x110'
       maptype: 'roadmap',
       markers: 'color:red|label:L|' + coordinates,
       key: state.googleMapsLicensing.API_KEY
@@ -214,10 +214,10 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
         method: 'GET',
         params: params
       })
-      .then((response) => {
-        swal('Exported file now available')
-        location.href = '/exported_file?filename=' + encodeURIComponent(name)
-      })
+        .then((response) => {
+          swal('Exported file now available')
+          location.href = '/exported_file?filename=' + encodeURIComponent(name)
+        })
     })
   }
 
@@ -246,7 +246,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
   function destroyCharts () {
     destroyMarketSizeChart()
     destroyFairShareCharts()
-    //destroyCustomerProfileCharts()
+    // destroyCustomerProfileCharts()
   }
 
   function arr (value) {
@@ -260,7 +260,7 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
       showFairShareCharts()
     } else if (href === '#selected_location_market_profile') {
       showMarketProfileCharts()
-    } 
+    }
     // else if (href === '#selected_location_customer_profile') {
     //   showCustomerProfileCharts()
     // }
@@ -303,12 +303,13 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
 
     var options = {
       scaleBeginAtZero: 1,
-      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' },beginAtZero:  true } }] },
-      tooltips: { mode: 'label', callbacks: {
+      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' }, beginAtZero: true } }] },
+      tooltips: { mode: 'label',
+        callbacks: {
           label: function (tooltipItems, data) {
             return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
           }
-      } }
+        } }
     }
     var ctx = document.getElementById('location_market_size_chart').getContext('2d')
     destroyMarketSizeChart()
@@ -344,11 +345,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
     var el = document.getElementById(`location_fair_share_chart_${type}`)
     if (!el) return
     var ctx = el.getContext('2d')
-    var chart = new Chart(ctx,{
+    var chart = new Chart(ctx, {
       type: 'pie',
       data: data,
       options: options
-    });
+    })
     fairShareCharts[type] = chart
     document.getElementById(`location_fair_share_chart_legend_${type}`).innerHTML = chart.generateLegend()
   }
@@ -454,11 +455,11 @@ app.controller('selected_location_controller', ($rootScope, $scope, $http, $filt
 
     var options = {
       scaleBeginAtZero: 1,
-      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' },beginAtZero:  true } }] },
+      scales: { yAxes: [{ ticks: { callback: function (value, index, values) { return $filter('currency')(value / 1000, '$', 0) + ' K' }, beginAtZero: true } }] },
       tooltips: { callbacks: {
-          label: function (tooltipItems, data) {
-            return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
-          }
+        label: function (tooltipItems, data) {
+          return $filter('currency')(tooltipItems.yLabel / 1000, '$', 2) + ' K'
+        }
       } }
     }
     destroyBusinessMarketSizeChart()

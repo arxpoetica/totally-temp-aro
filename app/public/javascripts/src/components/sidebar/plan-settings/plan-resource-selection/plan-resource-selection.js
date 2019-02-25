@@ -1,15 +1,14 @@
 
 class ResourceSelectionController {
-  constructor($http, $timeout, state) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
   }
-  
-  onSelectionChanged() {
-    this.onChange({childKey:this.key, isValid:true})
+
+  onSelectionChanged () {
+    this.onChange({ childKey: this.key, isValid: true })
   }
-  
 }
 
 ResourceSelectionController.$inject = ['$http', '$timeout', 'state']
@@ -19,8 +18,8 @@ let planResourceSelection = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-selection.html',
   bindings: {
     userId: '<',
-    planId: '<', 
-    key: '<', 
+    planId: '<',
+    key: '<',
     onChange: '&'
   },
   controller: ResourceSelectionController

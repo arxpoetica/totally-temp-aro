@@ -1,5 +1,5 @@
 class RateReachManagerCreatorController {
-  constructor($http, $timeout, state) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -14,7 +14,7 @@ class RateReachManagerCreatorController {
     this.sourceRateReachManager = null
   }
 
-  $onInit() {
+  $onInit () {
     if (this.sourceRateReachManagerId) {
       this.$http.get(`/service/rate-reach-matrix/resource/${this.sourceRateReachManagerId}`)
         .then(result => this.sourceRateReachManager = result.data)
@@ -22,7 +22,7 @@ class RateReachManagerCreatorController {
     }
   }
 
-  createRateReachManager() {
+  createRateReachManager () {
     // Create a new rate reach manager with the specified name and description
     var createUrl = '/service/rate-reach-matrix/resource'
     if (this.sourceRateReachManagerId) {
@@ -44,7 +44,7 @@ class RateReachManagerCreatorController {
       .catch((err) => console.error(err))
   }
 
-  getDefaultConfiguration() {
+  getDefaultConfiguration () {
     const technologyTypes = ['Fiber', 'FiberProximity', 'Copper', 'CellTower']
     const configuration = {
       managerType: 'rate_reach_manager',
@@ -86,7 +86,7 @@ class RateReachManagerCreatorController {
       .catch(err => console.error(err))
   }
 
-  closeDialog() {
+  closeDialog () {
     this.setEditingMode && this.setEditingMode({ mode: this.listMode })
   }
 }

@@ -1,6 +1,5 @@
 class MapSplitController {
-  
-  constructor($document, $timeout, $scope, state, $compile) {
+  constructor ($document, $timeout, $scope, state, $compile) {
     this.$timeout = $timeout
     this.state = state
     this.displayModes = state.displayModes
@@ -9,7 +8,7 @@ class MapSplitController {
     this.isCollapsed = false
     this.sizesBeforeCollapse = null
     this.transitionTimeMsec = 100
-    this.transitionCSS = `width ${this.transitionTimeMsec}ms`  // This must be the same for the map and sidebar, otherwise animations don't work correctly
+    this.transitionCSS = `width ${this.transitionTimeMsec}ms` // This must be the same for the map and sidebar, otherwise animations don't work correctly
     $scope.showFooter = config.ARO_CLIENT === 'frontier'
 
     $document.ready(() => {
@@ -20,7 +19,7 @@ class MapSplitController {
           onDragEnd: () => {
             // Trigger a resize so that any tiles that have been uncovered will be loaded
             if (map) {
-              google.maps.event.trigger(map, "resize")
+              google.maps.event.trigger(map, 'resize')
             }
             if (map.getStreetView().getVisible()) {
               google.maps.event.trigger(panorama, 'resize')
@@ -42,7 +41,7 @@ class MapSplitController {
     })
   }
 
-  toggleCollapseSideBar() {
+  toggleCollapseSideBar () {
     if (this.isCollapsed) {
       // The sidebar is already collapsed. Un-collapse it by restoring the saved sizes
       this.splitterObj.setSizes(this.sizesBeforeCollapse)
@@ -56,12 +55,12 @@ class MapSplitController {
     // Trigger a resize so that any tiles that have been uncovered will be loaded
     if (map) {
       // Call the resize a litle bit after animations finish, so that the right width is loaded
-      this.$timeout(() => google.maps.event.trigger(map, "resize"), this.transitionTimeMsec + 50)
+      this.$timeout(() => google.maps.event.trigger(map, 'resize'), this.transitionTimeMsec + 50)
     }
     if (map.getStreetView().getVisible()) {
       this.$timeout(() => google.maps.event.trigger(panorama, 'resize'), this.transitionTimeMsec + 50)
     }
-    this.state.splitterObj.next(this.splitterObj)    
+    this.state.splitterObj.next(this.splitterObj)
   }
 }
 

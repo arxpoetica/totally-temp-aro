@@ -1,10 +1,9 @@
 class NetworkBuildOutputController {
-
-  constructor(state) {
+  constructor (state) {
     this.state = state
   }
 
-  showDetailedOutput() {
+  showDetailedOutput () {
     this.state.showRoicReportsModal = true
   }
 }

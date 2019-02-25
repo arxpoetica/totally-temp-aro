@@ -1,8 +1,7 @@
 import Constants from '../components/common/constants'
 
 class AclManager {
-
-  constructor($http) {
+  constructor ($http) {
     this.$http = $http
     this.PERMISSIONS = Object.freeze({
       READ: 'READ',
@@ -12,8 +11,7 @@ class AclManager {
     })
   }
 
-  getPermissionBits() {
-
+  getPermissionBits () {
     // Get the permission bits from aro-service
     const accessTypes = Object.freeze({
       RESOURCE_READ: { displayName: 'Read', permissionBits: null },
@@ -32,10 +30,9 @@ class AclManager {
       })
       .catch(err => console.log(err))
   }
-    
 
   // Gets the effective permissions for a given resourceType (e.g. PLAN, SYSTEM) and resourceId (e.g. plan id, user id)
-  getEffectivePermissions(resourceType, resourceId, loggedInUser) {
+  getEffectivePermissions (resourceType, resourceId, loggedInUser) {
     return Promise.all([
       this.getPermissionBits(),
       this.$http.get(`/service/auth/acl/${resourceType}/${resourceId}`),
@@ -43,7 +40,7 @@ class AclManager {
     ])
       .then((results) => {
         const resolvedAccessTypes = results[0]
-        const resourcePermissions = results[1].data, systemPermissions = results[2].data
+        const resourcePermissions = results[1].data; const systemPermissions = results[2].data
 
         var accessResult = {}
         accessResult[this.PERMISSIONS.READ] = false

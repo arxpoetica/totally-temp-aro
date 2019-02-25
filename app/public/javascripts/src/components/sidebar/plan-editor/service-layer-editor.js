@@ -1,8 +1,7 @@
 import Constants from '../../common/constants'
 
 class ServiceLayerEditorController {
-  
-  constructor($http,$timeout,state,Utils) {
+  constructor ($http, $timeout, state, Utils) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -11,7 +10,7 @@ class ServiceLayerEditorController {
 
     this.discardChanges = false
     this.currentTransaction = null
-    
+
     this.serviceLayerName = null
     this.serviceLayerCode = null
 
@@ -19,12 +18,12 @@ class ServiceLayerEditorController {
     this.selectedMapObject = null
   }
 
-  $onInit() {
+  $onInit () {
     this.resumeOrCreateTransaction()
   }
 
   // Convert the paths in a Google Maps object into a Polygon WKT
-  polygonPathsToWKT(paths) {
+  polygonPathsToWKT (paths) {
     var allPaths = []
     paths.forEach((path) => {
       var pathPoints = []
@@ -37,7 +36,7 @@ class ServiceLayerEditorController {
     }
   }
 
-  formatServiceLayerForService(mapObject) {
+  formatServiceLayerForService (mapObject) {
     // ToDo: this should use AroFeatureFactory
     var serviceFeature = {
       objectId: mapObject.feature.objectId,
@@ -51,61 +50,61 @@ class ServiceLayerEditorController {
     return serviceFeature
   }
 
-  handleObjectCreated(mapObject, usingMapClick, feature) {
+  handleObjectCreated (mapObject, usingMapClick, feature) {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
-    //this.updateObjectIdsToHide()
+    // this.updateObjectIdsToHide()
 
-    //Create New SA
-    if(!mapObject.feature.isExistingObject) {
+    // Create New SA
+    if (!mapObject.feature.isExistingObject) {
       mapObject.feature.name = this.serviceLayerName
       mapObject.feature.code = this.serviceLayerCode
       var serviceLayerFeature = this.formatServiceLayerForService(mapObject)
       // send serviceLayer feature to service
-      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`,serviceLayerFeature)  
+      this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
     }
-    
+
     this.$timeout()
   }
 
-  handleSelectedObjectChanged(mapObject) {
-    if (null == this.currentTransaction) return   
-    if (null != mapObject){
+  handleSelectedObjectChanged (mapObject) {
+    if (this.currentTransaction == null) return
+    if (mapObject != null) {
       this.updateSelectedState(mapObject)
-    } 
+    }
     this.selectedMapObject = mapObject
     this.$timeout()
   }
 
-  handleObjectModified(mapObject) {
-    //const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
+  handleObjectModified (mapObject) {
+    // const boundaryProperties = this.objectIdToProperties[mapObject.objectId]
     var serviceLayerFeature = this.formatServiceLayerForService(mapObject)
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
       .catch((err) => console.error(err))
     this.$timeout()
   }
 
-  handleObjectDroppedOnMarker(eventArgs) {
-    console.log(eventArgs)    
+  handleObjectDroppedOnMarker (eventArgs) {
+    console.log(eventArgs)
   }
 
-  handleObjectDeleted(mapObject) {
+  handleObjectDeleted (mapObject) {
     this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
   }
 
-  updateSelectedState(selectedFeature){
+  updateSelectedState (selectedFeature) {
     var newSelection = this.state.cloneSelection()
     newSelection.editable.serviceArea = {}
-    if ('undefined' != typeof selectedFeature) {
+    if (typeof selectedFeature !== 'undefined') {
       newSelection.editable.serviceArea[selectedFeature.object_id || selectedFeature.objectId] = selectedFeature
     }
     this.state.selection = newSelection
   }
 
-  isBoundaryCreationAllowed(mapObject){
+  isBoundaryCreationAllowed (mapObject) {
     return false
   }
 
-  resumeOrCreateTransaction() {
+  resumeOrCreateTransaction () {
     this.currentTransaction = null
     // See if we have an existing transaction for the currently selected location library
     var selectedLibraryItem = this.state.dataItems.service_layer.selectedLibraryItems[0]
@@ -135,26 +134,26 @@ class ServiceLayerEditorController {
       })
   }
 
-  commitTransaction() {
+  commitTransaction () {
     this.$http.put(`/service/library/transaction/${this.currentTransaction.id}`)
-    .then((result) => {
+      .then((result) => {
       // Transaction has been committed, start a new one
-      this.discardChanges = true
-      this.currentTransaction = null
-      this.state.recreateTilesAndCache()
-      return this.resumeOrCreateTransaction()
-    })
-    .catch((err) => {
-      this.discardChanges = true
-      this.currentTransaction = null
-      this.state.recreateTilesAndCache()
-      this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
-      this.$timeout()
-      console.error(err)
-    })
+        this.discardChanges = true
+        this.currentTransaction = null
+        this.state.recreateTilesAndCache()
+        return this.resumeOrCreateTransaction()
+      })
+      .catch((err) => {
+        this.discardChanges = true
+        this.currentTransaction = null
+        this.state.recreateTilesAndCache()
+        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
+        this.$timeout()
+        console.error(err)
+      })
   }
 
-  discardTransaction() {
+  discardTransaction () {
     swal({
       title: 'Delete transaction?',
       text: `Are you sure you want to delete transaction with ID ${this.currentTransaction.id} for library ${this.currentTransaction.libraryName}`,
@@ -178,7 +177,7 @@ class ServiceLayerEditorController {
           .catch((err) => {
             this.discardChanges = true
             this.currentTransaction = null
-            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
             this.$timeout()
             console.error(err)
           })
@@ -187,7 +186,7 @@ class ServiceLayerEditorController {
   }
 
   // Returns a promise that resolves to the iconUrl for a given object id
-  getObjectIconUrl(eventArgs) {
+  getObjectIconUrl (eventArgs) {
     if (eventArgs.objectKey === Constants.MAP_OBJECT_CREATE_SERVICE_AREA) {
       // Icon doesn't matter for Service area, just return an empty string
       return Promise.resolve('')
@@ -195,7 +194,7 @@ class ServiceLayerEditorController {
     return Promise.reject(`Unknown object key ${eventArgs.objectKey}`)
   }
 
-  markSelectedServiceAreaPropertiesDirty() {
+  markSelectedServiceAreaPropertiesDirty () {
     if (this.selectedMapObject) {
       var objectProperties = this.objectIdToMapObject[this.selectedMapObject.objectId]
       objectProperties.isDirty = true
@@ -203,29 +202,28 @@ class ServiceLayerEditorController {
   }
 
   // Saves the properties of the selected service area
-  saveSelectedServiceAreaProperties() {
+  saveSelectedServiceAreaProperties () {
     if (this.selectedMapObject) {
       var serviceLayerFeature = this.formatServiceLayerForService(this.selectedMapObject)
       this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, serviceLayerFeature)
-      .then((result) => {
-        this.objectIdToMapObject[this.selectedMapObject.objectId].isDirty = false
-        this.$timeout()
-      })
-      .catch((err) => console.error(err))
+        .then((result) => {
+          this.objectIdToMapObject[this.selectedMapObject.objectId].isDirty = false
+          this.$timeout()
+        })
+        .catch((err) => console.error(err))
     }
   }
 
   // $onChanges(changesObj) {
-    
+
   // }
 
   // $onDestroy() {
-    
-  // }
 
+  // }
 }
-  
-ServiceLayerEditorController.$inject = ['$http','$timeout','state','Utils']
+
+ServiceLayerEditorController.$inject = ['$http', '$timeout', 'state', 'Utils']
 
 let serviceLayerEditor = {
   templateUrl: '/components/sidebar/plan-editor/service-layer-editor.html',

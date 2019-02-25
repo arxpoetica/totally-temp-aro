@@ -1,25 +1,25 @@
 // See README.md for details on how to use the accordion component
 class AccordionController {
-  constructor() {
+  constructor () {
     this.expandedAccordionIdListeners = []
     this.nextAvailableChildId = 0
   }
 
-  $onInit() {
+  $onInit () {
     this.expandedAccordionId = this.initialExpandedPanel
   }
 
-  $doCheck() {
-    //Toggle the panel in the following two ways
-    //Programatically change the toggleExpandedPanel value.
-    //When click the specific panel.
+  $doCheck () {
+    // Toggle the panel in the following two ways
+    // Programatically change the toggleExpandedPanel value.
+    // When click the specific panel.
     if (this.toggleExpandedPanel && this.expandedAccordionId != this.toggleExpandedPanel) {
       this.setExpandedAccordionId(this.toggleExpandedPanel)
     }
   }
 
   // Returns the next available child ID.
-  getNextChildId() {
+  getNextChildId () {
     // Set the expanded accordion ID if this is the first child being added
     if (!this.expandedAccordionId) {
       this.setExpandedAccordionId(this.nextAvailableChildId)
@@ -28,11 +28,11 @@ class AccordionController {
   }
 
   // Sets the ID of the accordion to be expanded
-  setExpandedAccordionId(id) {
+  setExpandedAccordionId (id) {
     this.expandedAccordionId = id
-    //Can set toggle panel when it is available.
-    //We are using it in location/road segment select.
-    if(this.toggleExpandedPanel) {
+    // Can set toggle panel when it is available.
+    // We are using it in location/road segment select.
+    if (this.toggleExpandedPanel) {
       this.toggleExpandedPanel = id
     }
     // Notify listeners (child elements) so that they can expand/collapse themselves
@@ -40,7 +40,7 @@ class AccordionController {
   }
 
   // Adds a listener that will be fired when the expanded accordion ID changes
-  addExpandedAccordionIdListener(listener) {
+  addExpandedAccordionIdListener (listener) {
     this.expandedAccordionIdListeners.push(listener)
   }
 }

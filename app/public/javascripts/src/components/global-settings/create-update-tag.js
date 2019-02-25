@@ -1,29 +1,28 @@
 class CreateUpdateTagController {
-
-  constructor($element) {
+  constructor ($element) {
     this.$element = $element
-    this.$element[0].style.setProperty('--saturation', config.hsv_defaults.saturation * 100+'%')
+    this.$element[0].style.setProperty('--saturation', config.hsv_defaults.saturation * 100 + '%')
     // https://gist.github.com/xpansive/1337890
     // http://colorizer.org/
     // Calculate lightness value in HSL using saturation,value in HSV
-    var hsl = this.hsvtohsl(null,config.hsv_defaults.saturation,config.hsv_defaults.value) 
-    //this.$element[0].style.setProperty('--value', config.hsv_defaults.value * 100+'%')
-    this.$element[0].style.setProperty('--value', hsl[2] * 100+'%')
+    var hsl = this.hsvtohsl(null, config.hsv_defaults.saturation, config.hsv_defaults.value)
+    // this.$element[0].style.setProperty('--value', config.hsv_defaults.value * 100+'%')
+    this.$element[0].style.setProperty('--value', hsl[2] * 100 + '%')
   }
 
-  hsvtohsl(hue, sat, val) {
-    return [ //[hue, saturation, lightness]
-      //Range should be between 0 - 1
-      hue, //Hue stays the same
+  hsvtohsl (hue, sat, val) {
+    return [ // [hue, saturation, lightness]
+      // Range should be between 0 - 1
+      hue, // Hue stays the same
 
-      //Saturation is very different between the two color spaces
-      //If (2-sat)*val < 1 set it to sat*val/((2-sat)*val)
-      //Otherwise sat*val/(2-(2-sat)*val)
-      //Conditional is not operating with hue, it is reassigned!
+      // Saturation is very different between the two color spaces
+      // If (2-sat)*val < 1 set it to sat*val/((2-sat)*val)
+      // Otherwise sat*val/(2-(2-sat)*val)
+      // Conditional is not operating with hue, it is reassigned!
       sat * val / ((hue = (2 - sat) * val) < 1 ? hue : 2 - hue),
 
-      hue / 2 //Lightness is (2-sat)*val/2
-      //See reassignment of hue above
+      hue / 2 // Lightness is (2-sat)*val/2
+      // See reassignment of hue above
     ]
   }
 }

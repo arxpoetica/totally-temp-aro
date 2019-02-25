@@ -2,20 +2,20 @@ import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 
 class OptimizeButtonController {
-  constructor($ngRedux, state) {
+  constructor ($ngRedux, state) {
     this.state = state
     this.Constants = Constants
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
-  areInputsComplete() {
+  areInputsComplete () {
     // First, check if the selected targets are valid. E.g. if the user has selected Service Areas, then at least one service area must be selected.
-    const areLocationsValid = (this.planTargets.locations.size > 0)
-                              && (this.activeSelectionModeId === SelectionModes.SELECTED_LOCATIONS)
-    const areServiceAreasValid = (this.planTargets.serviceAreas.size > 0)
-                                 && (this.activeSelectionModeId === SelectionModes.SELECTED_AREAS)
-    const areAnalysisAreasValid = (this.planTargets.analysisAreas.size > 0)
-                                  && (this.activeSelectionModeId === SelectionModes.SELECTED_ANALYSIS_AREAS)
+    const areLocationsValid = (this.planTargets.locations.size > 0) &&
+                              (this.activeSelectionModeId === SelectionModes.SELECTED_LOCATIONS)
+    const areServiceAreasValid = (this.planTargets.serviceAreas.size > 0) &&
+                                 (this.activeSelectionModeId === SelectionModes.SELECTED_AREAS)
+    const areAnalysisAreasValid = (this.planTargets.analysisAreas.size > 0) &&
+                                  (this.activeSelectionModeId === SelectionModes.SELECTED_ANALYSIS_AREAS)
     const isTargetSelectionValid = areLocationsValid || areServiceAreasValid || areAnalysisAreasValid
 
     // Check if at least one location type is selected for optimization
@@ -24,7 +24,7 @@ class OptimizeButtonController {
     return isTargetSelectionValid && isLocationInputValid
   }
 
-  saveExpertMode(){
+  saveExpertMode () {
     this.state.loadOptimizationOptionsFromJSON(JSON.parse(this.state.expertMode.OPTIMIZATION_SETTINGS))
   }
 
@@ -40,7 +40,7 @@ class OptimizeButtonController {
     return { }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 }

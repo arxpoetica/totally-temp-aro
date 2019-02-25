@@ -1,5 +1,5 @@
 class PlanResourceEditorController {
-  constructor(state) {
+  constructor (state) {
     this.state = state
     this.editingModes = Object.freeze({
       LIST_RESOURCE_MANAGERS: 'LIST_RESOURCE_MANAGERS',
@@ -11,23 +11,23 @@ class PlanResourceEditorController {
     this.editingManagerId = 1
   }
 
-  modalHide() {
+  modalHide () {
     this.state.showPlanResourceEditorModal = false
   }
 
-  setEditingMode(newEditingMode) {
+  setEditingMode (newEditingMode) {
     this.selectedEditingMode = newEditingMode
   }
 
-  setEditingManagerId(newId) {
+  setEditingManagerId (newId) {
     this.editingManagerId = newId
   }
 
-  onManagersChanged() {
+  onManagersChanged () {
     this.state.loadPlanResourceSelectionFromServer()
   }
 
-  setSelectedResourceKey(resourceKey) {
+  setSelectedResourceKey (resourceKey) {
     this.selectedResourceKey = resourceKey
   }
 }

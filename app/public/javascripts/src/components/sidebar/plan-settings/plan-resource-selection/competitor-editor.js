@@ -1,18 +1,18 @@
 class CompetitorEditorController {
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
     this.competitorManagerConfiguration = []
     this.pristineCompetitorManagerConfiguration = {}
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.competitorManagerId) {
       this.reloadCompetitionManagerConfiguration()
     }
   }
 
-  reloadCompetitionManagerConfiguration() {
+  reloadCompetitionManagerConfiguration () {
     this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}`)
       .then((result) => {
         this.competitorManager = result.data
@@ -20,15 +20,14 @@ class CompetitorEditorController {
       .catch(err => console.error(err))
 
     this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths`)
-    .then((result) => {
-      this.competitorManagerConfiguration = result.data
-      this.pristineCompetitorManagerConfiguration = angular.copy(result.data)
-    })
-    .catch((err) => console.error(err))
+      .then((result) => {
+        this.competitorManagerConfiguration = result.data
+        this.pristineCompetitorManagerConfiguration = angular.copy(result.data)
+      })
+      .catch((err) => console.error(err))
   }
 
-  saveConfigurationToServer() {
-
+  saveConfigurationToServer () {
     // Only save those configurations that have changed
     var changedModels = []
     this.competitorManagerConfiguration.forEach((competitorModel, index) => {
@@ -50,14 +49,14 @@ class CompetitorEditorController {
 
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths`, changedModels)
-      .then((result) => this.exitEditingMode())
-      .catch((err) => console.error(err))
+        .then((result) => this.exitEditingMode())
+        .catch((err) => console.error(err))
     } else {
       console.log('Competitor Editor: No models were changed. Nothing to save.')
     }
   }
 
-  exitEditingMode() {
+  exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
 }

@@ -1,5 +1,5 @@
 class ArpuEditorController {
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
     this.arpuManagerConfiguration = []
@@ -7,13 +7,13 @@ class ArpuEditorController {
     this.speedCategoryHelp = null
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.arpuManagerId) {
       this.reloadArpuManagerConfiguration()
     }
   }
 
-  reloadArpuManagerConfiguration() {
+  reloadArpuManagerConfiguration () {
     this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}`)
       .then((result) => {
         this.arpuManager = result.data
@@ -21,35 +21,34 @@ class ArpuEditorController {
       .catch(err => console.error(err))
 
     this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`)
-    .then((result) => {
-      var arpuModels = []
-      // Sort the arpu models based on the locationTypeEntity
-      const locationEntityOrder = ['household', 'small', 'medium', 'large', 'celltower']
-      locationEntityOrder.forEach(locationEntity => {
-        const filteredModels = result.data.arpuModels
-                                .filter(item => item.id.locationEntityType === locationEntity)
-                                .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
-        arpuModels = arpuModels.concat(filteredModels)
-      })
-      this.arpuManagerConfiguration = { arpuModels: arpuModels }
-      this.selectedArpuModelIndex = 0
-      this.pristineArpuManagerConfiguration = {}
-      var copyOfModels = angular.copy(this.arpuManagerConfiguration.arpuModels)
-      copyOfModels.forEach((arpuModel) => {
+      .then((result) => {
+        var arpuModels = []
+        // Sort the arpu models based on the locationTypeEntity
+        const locationEntityOrder = ['household', 'small', 'medium', 'large', 'celltower']
+        locationEntityOrder.forEach(locationEntity => {
+          const filteredModels = result.data.arpuModels
+            .filter(item => item.id.locationEntityType === locationEntity)
+            .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+          arpuModels = arpuModels.concat(filteredModels)
+        })
+        this.arpuManagerConfiguration = { arpuModels: arpuModels }
+        this.selectedArpuModelIndex = 0
+        this.pristineArpuManagerConfiguration = {}
+        var copyOfModels = angular.copy(this.arpuManagerConfiguration.arpuModels)
+        copyOfModels.forEach((arpuModel) => {
         // Create a key from the "id" object
-        var arpuKey = JSON.stringify(arpuModel.id)
-        this.pristineArpuManagerConfiguration[arpuKey] = arpuModel
+          var arpuKey = JSON.stringify(arpuModel.id)
+          this.pristineArpuManagerConfiguration[arpuKey] = arpuModel
+        })
       })
-    })
-    .catch((err) => console.error(err))
+      .catch((err) => console.error(err))
   }
 
-  selectArpuModel(index) {
+  selectArpuModel (index) {
     this.selectedArpuModelIndex = index
   }
 
-  saveConfigurationToServer() {
-
+  saveConfigurationToServer () {
     // Only save those configurations that have changed
     var changedModels = []
     this.arpuManagerConfiguration.arpuModels.forEach((arpuModel) => {
@@ -65,22 +64,22 @@ class ArpuEditorController {
 
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`, changedModels)
-      .then((result) => this.exitEditingMode())
-      .catch((err) => console.error(err))
+        .then((result) => this.exitEditingMode())
+        .catch((err) => console.error(err))
     } else {
       console.log('ARPU Editor: No models were changed. Nothing to save.')
     }
   }
 
-  showSpeedCategoryHelp(category) {
+  showSpeedCategoryHelp (category) {
     this.speedCategoryHelp = this.state.configuration.resourceEditors.speedCategoryHelp[category] || this.state.configuration.resourceEditors.speedCategoryHelp.default
   }
 
-  hideSpeedCategoryHelp() {
+  hideSpeedCategoryHelp () {
     this.speedCategoryHelp = null
   }
 
-  exitEditingMode() {
+  exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
 }

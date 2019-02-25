@@ -1,6 +1,5 @@
 class ViewSettingsController {
-
-  constructor(state, $rootScope) {
+  constructor (state, $rootScope) {
     this.state = state
     this.$rootScope = $rootScope
 
@@ -14,18 +13,18 @@ class ViewSettingsController {
       .subscribe((mapTileOptions) => this.mapTileOptions = angular.copy(mapTileOptions))
   }
 
-  fiberOptionChanged() {
+  fiberOptionChanged () {
     this.state.requestMapLayerRefresh.next(null)
   }
 
-  saveEquipmentPropertiesToRender() {
+  saveEquipmentPropertiesToRender () {
     this.state.configuration.networkEquipment.labelDrawingOptions.properties = JSON.parse(this.equipmentPropertiesToRender)
     this.state.viewSettingsChanged.next()
     this.state.requestMapLayerRefresh.next(null)
   }
 
   // Take the mapTileOptions defined in $scope and set it on the state
-  updateState() {
+  updateState () {
     var newMapTileOptions = angular.copy(this.mapTileOptions)
     this.state.mapTileOptions.next(newMapTileOptions)
   }

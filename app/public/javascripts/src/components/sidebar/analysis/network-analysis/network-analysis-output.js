@@ -1,21 +1,20 @@
 class NetworkAnalysisOutputController {
-
-  constructor($element, $timeout, state) {
+  constructor ($element, $timeout, state) {
     this.$element = $element
     this.$timeout = $timeout
     this.showGraph = false
-    
+
     this.showOutput = () => {
       state.showNetworkAnalysisOutput = true
     }
 
     state.plan
-    .subscribe((plan) => {
-      this.downloadLink = `/reports/network_analysis/download/${plan.id}/optimization_analysis`
-    })
+      .subscribe((plan) => {
+        this.downloadLink = `/reports/network_analysis/download/${plan.id}/optimization_analysis`
+      })
   }
 
-  $doCheck() {
+  $doCheck () {
     // Show the graph only if the element width is large enough
     var oldShowGraph = this.showGraph
 
@@ -33,7 +32,7 @@ class NetworkAnalysisOutputController {
     })
   }
 
-  $onInit() {
+  $onInit () {
     // We must apply display:block on $element[0] in order for its size to be reported correctly in $doCheck
     this.$element[0].style.display = 'block'
   }

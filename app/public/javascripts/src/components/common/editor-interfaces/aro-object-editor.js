@@ -3,26 +3,26 @@
 // will get unweildy to use with too much nesting). Editing of arrays is NOT supported as of now.
 
 class AroObjectEditorController {
-  constructor() {
+  constructor () {
     // Store the "Object.keys()" function so we can use it in the markup
     this.ObjectKeys = Object.keys
     this.pixelsPerIndentationLevel = 20
     this.isKeyExpanded = {}
   }
 
-  $onInit() {
+  $onInit () {
     this.indentationLevel = this.indentationLevel || 0
   }
 
-  isEditable(obj) {
+  isEditable (obj) {
     return (typeof obj === 'number') || (typeof obj === 'string') || (typeof obj === 'boolean') || Array.isArray(obj)
   }
 
-  isExpandable(obj) {
+  isExpandable (obj) {
     return (typeof obj === 'object' && !angular.equals({}, obj))// && object isn't empty, ToDo: check that at least one child it showable
   }
 
-  toggleIsKeyExpanded(index) {
+  toggleIsKeyExpanded (index) {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
 }
@@ -32,8 +32,8 @@ class AroObjectEditorController {
 let aroObjectEditor = {
   templateUrl: '/components/common/editor-interfaces/aro-object-editor.html',
   bindings: {
-    objectToEdit: '=',      // Two Way binding, we will directly edit object values for now!
-    indentationLevel: '<', 
+    objectToEdit: '=', // Two Way binding, we will directly edit object values for now!
+    indentationLevel: '<',
     onChange: '&'
   },
   controller: AroObjectEditorController

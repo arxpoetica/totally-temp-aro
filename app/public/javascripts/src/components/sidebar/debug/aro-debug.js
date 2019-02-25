@@ -1,7 +1,7 @@
 import MapUtilities from '../../common/plan/map-utilities'
 
 class AroDebugController {
-  constructor(state, $http, $timeout, $ngRedux, tracker) {
+  constructor (state, $http, $timeout, $ngRedux, tracker) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
@@ -16,7 +16,7 @@ class AroDebugController {
     tracker.trackEvent(tracker.CATEGORIES.ENTER_DEBUGGING_MODE, tracker.ACTIONS.CLICK)
   }
 
-  getMorphologyTileInfoForSelectedServiceAreas() {
+  getMorphologyTileInfoForSelectedServiceAreas () {
     // For all selected service areas, gets the morphology tile debugging info from aro-service
     var tileInfoPromises = []
     this.planTargetServiceAreas.forEach((serviceAreaId) => {
@@ -47,8 +47,8 @@ class AroDebugController {
       })
   }
 
-  getTileBoundsInfo() {
-    this.tileInfo.bounds = JSON.stringify(MapUtilities.getTileLatLngBounds(this.tileInfo.z,this.tileInfo.x,this.tileInfo.y),undefined,2)
+  getTileBoundsInfo () {
+    this.tileInfo.bounds = JSON.stringify(MapUtilities.getTileLatLngBounds(this.tileInfo.z, this.tileInfo.x, this.tileInfo.y), undefined, 2)
   }
 
   mapStateToThis (reduxState) {
@@ -61,7 +61,7 @@ class AroDebugController {
     return { }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 }

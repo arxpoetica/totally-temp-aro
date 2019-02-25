@@ -1,15 +1,14 @@
 class ManageGroupsController {
-
-  constructor($http, $timeout) {
+  constructor ($http, $timeout) {
     this.$http = $http
     this.$timeout = $timeout
     this.groups = []
     this.loadGroups()
     this.initEmptyUserMessage()
-    this.USER_MESSAGE_TIMEOUT = 5000  // Number of milliseconds a user message will be shown on the screen
+    this.USER_MESSAGE_TIMEOUT = 5000 // Number of milliseconds a user message will be shown on the screen
   }
 
-  initEmptyUserMessage() {
+  initEmptyUserMessage () {
     this.userMessage = {
       show: false,
       type: '',
@@ -17,7 +16,7 @@ class ManageGroupsController {
     }
   }
 
-  loadGroups() {
+  loadGroups () {
     var userAdminPermissions = null
     this.$http.get('/service/auth/permissions')
       .then((result) => {
@@ -45,7 +44,7 @@ class ManageGroupsController {
       .catch((err) => console.error(err))
   }
 
-  addGroup() {
+  addGroup () {
     // Create a group in aro-service and then add it to our groups list. This ensures we will have a valid group id.
     // Don't do anything with ACL as the default is a non-administrator group
     this.groups.forEach((group) => group.isEditing = false)
@@ -63,7 +62,7 @@ class ManageGroupsController {
       .catch((err) => console.error(err))
   }
 
-  saveGroup(group) {
+  saveGroup (group) {
     // First save the group name and description
     group.isEditing = false
     var userAdminPermissions = null
@@ -122,7 +121,7 @@ class ManageGroupsController {
       })
   }
 
-  deleteGroup(group) {
+  deleteGroup (group) {
     this.$http.delete(`/service/auth/groups/${group.id}`)
       .then((result) => {
         this.userMessage = {

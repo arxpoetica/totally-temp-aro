@@ -1,9 +1,9 @@
-import BoundaryDetailController from './boundaryDetailController';
+import BoundaryDetailController from './boundaryDetailController'
 
 let boundaryDetail = {
-    templateUrl: '/components/sidebar/view/boundary-detail.html',
-    bindings: {},
-    controller: BoundaryDetailController
-  }
+  templateUrl: '/components/sidebar/view/boundary-detail.html',
+  bindings: {},
+  controller: BoundaryDetailController
+}
 
-  export default boundaryDetail
+export default boundaryDetail

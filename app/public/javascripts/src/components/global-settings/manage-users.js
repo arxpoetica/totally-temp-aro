@@ -1,6 +1,5 @@
 class ManageUsersController {
-
-  constructor($http, $timeout, state, globalSettingsService) {
+  constructor ($http, $timeout, state, globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
     this.$http = $http
@@ -36,7 +35,7 @@ class ManageUsersController {
     this.initializeNewUser()
   }
 
-  recalculatePagination(maxNumberOfItems) {
+  recalculatePagination (maxNumberOfItems) {
     this.pagination.allPages = []
     const numPages = Math.floor(maxNumberOfItems / this.pagination.itemsPerPage) + 1
     for (var iPage = 0; iPage < numPages; ++iPage) {
@@ -44,7 +43,7 @@ class ManageUsersController {
     }
   }
 
-  recalculateVisiblePages() {
+  recalculateVisiblePages () {
     const NUM_VISIBLE_PAGES_BY2 = 3
     const visiblePageStart = Math.max(0, this.pagination.currentPage - NUM_VISIBLE_PAGES_BY2)
     const visiblePageEnd = 1 + Math.min(this.pagination.allPages.length - 1, this.pagination.currentPage + NUM_VISIBLE_PAGES_BY2 - 2)
@@ -52,7 +51,7 @@ class ManageUsersController {
     this.$timeout()
   }
 
-  selectPage(newPageNumber) {
+  selectPage (newPageNumber) {
     if (this.pagination.allPages.indexOf(newPageNumber) < 0) {
       console.error(`Page ${newPageNumber} selected, but this page does not exist in our list`)
       return
@@ -62,21 +61,21 @@ class ManageUsersController {
     this.recalculateVisiblePages()
   }
 
-  selectPreviousPage() {
+  selectPreviousPage () {
     const currentIndex = this.pagination.allPages.indexOf(this.pagination.currentPage)
     if (currentIndex > 0) {
       this.selectPage(this.pagination.allPages[currentIndex - 1])
     }
   }
 
-  selectNextPage() {
+  selectNextPage () {
     const currentIndex = this.pagination.allPages.indexOf(this.pagination.currentPage)
     if (currentIndex < this.pagination.allPages.length - 1) {
       this.selectPage(this.pagination.allPages[currentIndex + 1])
-    }    
+    }
   }
 
-  filterUsers(repaginate) {
+  filterUsers (repaginate) {
     this.filteredUsers = []
     if (this.searchText === '') {
       this.filteredUsers = this.allUsers
@@ -98,8 +97,8 @@ class ManageUsersController {
     this.$timeout()
   }
 
-  onSearchKeyUp(event) {
-    const SEARCH_DELAY = 500  // milliseconds. Delay before we fire a search request on the server
+  onSearchKeyUp (event) {
+    const SEARCH_DELAY = 500 // milliseconds. Delay before we fire a search request on the server
     if (this.searchPromise) {
       // We have already scheduled a search (from the previous keystroke). Cancel it.
       this.$timeout.cancel(this.searchPromise)
@@ -108,7 +107,7 @@ class ManageUsersController {
     this.searchPromise = this.$timeout(() => this.filterUsers(true), SEARCH_DELAY)
   }
 
-  loadUsers() {
+  loadUsers () {
     this.isLoadingUsers = true
     this.$timeout()
     this.$http.get('/service/auth/users')
@@ -120,15 +119,15 @@ class ManageUsersController {
         this.allUsers.forEach((user, index) => {
           var selectedGroupObjects = []
           user.groupIds.forEach((userGroupId) => selectedGroupObjects.push(this.mapIdToGroup[userGroupId]))
-          this.allUsers[index].userGroups = selectedGroupObjects   // Make sure you modify the object and not a copy
+          this.allUsers[index].userGroups = selectedGroupObjects // Make sure you modify the object and not a copy
           delete this.allUsers[index].groupIds
         })
         this.filterUsers(true)
       })
-    .catch((err) => console.error(err))
+      .catch((err) => console.error(err))
   }
 
-  initializeNewUser() {
+  initializeNewUser () {
     const publicGroup = this.allGroups.filter((item) => item.name === 'Public')[0]
     this.newUser = {
       firstName: '',
@@ -141,7 +140,7 @@ class ManageUsersController {
     }
   }
 
-  copyLink(user) {
+  copyLink (user) {
     var input = $(`#resend-link-input-${user.id}`)
     input.select()
     var success = document.execCommand('copy')
@@ -154,7 +153,7 @@ class ManageUsersController {
     }
   }
 
-  resendLink(user) {
+  resendLink (user) {
     swal({
       title: 'Are you sure?',
       text: 'A new mail will be sent to this user',
@@ -170,7 +169,7 @@ class ManageUsersController {
     })
   }
 
-  deleteUser(user) {
+  deleteUser (user) {
     swal({
       title: 'Are you sure?',
       text: 'You will not be able to recover the deleted user!',
@@ -187,7 +186,7 @@ class ManageUsersController {
   }
 
   // Save any modifications made to the filtered users
-  saveUsers() {
+  saveUsers () {
     this.filteredUsers.forEach((user, index) => {
       // aro-service requires group ids in the user objects. replace group objects by group ids
       var serviceUser = angular.copy(user)
@@ -200,7 +199,7 @@ class ManageUsersController {
     })
   }
 
-  registerUser() {
+  registerUser () {
     if (this.newUser.email !== this.newUser.confirmEmail) {
       return swal({
         title: 'Error',
@@ -211,7 +210,6 @@ class ManageUsersController {
     var serviceUser = angular.copy(this.newUser)
     serviceUser.groupIds = []
     this.newUser.groups.forEach((group) => serviceUser.groupIds.push(group.id))
-
 
     this.$http.post('/admin/users/registerWithoutPassword', serviceUser)
       .then((response) => {

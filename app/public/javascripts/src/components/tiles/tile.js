@@ -11,7 +11,6 @@ import Constants from '../common/constants'
 import SelectionModes from '../../react/components/selection/selection-modes'
 
 class TileComponentController {
-
   // MapLayer objects contain the following information
   // id: A globally (within an instance of the application) unique identifier for this layer
   // dataUrls: One or more URLs where we will get the data from. The URL will contain everything except the tile coordinates (zoom/x/y)
@@ -37,10 +36,9 @@ class TileComponentController {
   // fillStyle: (Optional) For polygon features, this is the fill color
   // opacity: (Optional, default 1.0) This is the maximum opacity of anything drawn on the map layer. Aggregate layers will have features of varying opacity, but none exceeding this value
 
-  constructor($document, $timeout, $ngRedux, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
-
+  constructor ($document, $timeout, $ngRedux, state, tileDataService, uiNotificationService, contextMenuService, Utils) {
     this.layerIdToMapTilesIndex = {}
-    this.mapRef = null  // Will be set in $document.ready()
+    this.mapRef = null // Will be set in $document.ready()
     this.$timeout = $timeout
     this.$ngRedux = $ngRedux
     this.state = state
@@ -48,7 +46,7 @@ class TileComponentController {
     this.tileDataService = tileDataService
     this.contextMenuService = contextMenuService
     this.utils = Utils
-    
+
     this.areControlsEnabled = true
 
     // Subscribe to changes in the mapLayers subject
@@ -90,7 +88,7 @@ class TileComponentController {
       this.tileDataService.markHtmlCacheDirty(tilesToRefresh)
       this.refreshMapTiles(tilesToRefresh)
     })
-    
+
     // If selected census category map changes or gets loaded, set that in the tile data road
     state.censusCategories.subscribe((censusCategories) => {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -112,7 +110,7 @@ class TileComponentController {
       }
     })
 
-    // To change the center of the map to given LatLng 
+    // To change the center of the map to given LatLng
     state.requestSetMapCenter.subscribe((mapCenter) => {
       if (this.mapRef) {
         this.mapRef.panTo({ lat: mapCenter.latitude, lng: mapCenter.longitude })
@@ -128,11 +126,11 @@ class TileComponentController {
     })
 
     this.state.requestPolygonSelect.subscribe((args) => {
-      //console.log(args)
+      // console.log(args)
       if (!this.mapRef || !args.coords) {
         return
       }
-      
+
       var mapBounds = this.mapRef.getBounds()
       var neCorner = mapBounds.getNorthEast()
       var swCorner = mapBounds.getSouthWest()
@@ -145,17 +143,16 @@ class TileComponentController {
       var pointInPolyPromises = []
       for (var xTile = tileCoordsNW.x; xTile <= tileCoordsSE.x; ++xTile) {
         for (var yTile = tileCoordsNW.y; yTile <= tileCoordsSE.y; ++yTile) {
-
           // Convert lat lng coordinates into pixel coordinates relative to this tile
           var tileCoords = { x: xTile, y: yTile }
           var convertedPixelCoords = []
           args.coords.forEach((latLng) => {
             var lat, lng
-            
-            if (latLng.hasOwnProperty('lat')){
+
+            if (latLng.hasOwnProperty('lat')) {
               lat = latLng.lat()
               lng = latLng.lng()
-            }else{
+            } else {
               lat = latLng[1]
               lng = latLng[0]
             }
@@ -165,12 +162,12 @@ class TileComponentController {
 
           // Get the locations from this tile that are in the polygon
           pointInPolyPromises.push(FeatureSelector.getPointsInPolygon(tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
-                                                                      this.state.mapLayers.getValue(),
-                                                                      zoom, tileCoords.x, tileCoords.y, convertedPixelCoords,
-                                                                      this.state.selectedBoundaryType.id))
+            this.state.mapLayers.getValue(),
+            zoom, tileCoords.x, tileCoords.y, convertedPixelCoords,
+            this.state.selectedBoundaryType.id))
         }
       }
-      Promise.all(pointInPolyPromises) 
+      Promise.all(pointInPolyPromises)
         .then((results) => {
           var selectedLocations = new Set()
           var selectedServiceAreas = new Set()
@@ -179,41 +176,40 @@ class TileComponentController {
             result.forEach((selectedObj) => {
               if (selectedObj.location_id) {
                 selectedLocations.add(selectedObj.location_id)
-              } else if("service_layer" == selectedObj._data_type && selectedObj.id) {
+              } else if (selectedObj._data_type == 'service_layer' && selectedObj.id) {
                 selectedServiceAreas.add(selectedObj.id)
               } else if (selectedObj.gid) {
-                selectedRoadSegments.add(selectedObj);
+                selectedRoadSegments.add(selectedObj)
               }
             })
           })
-          
+
           var selectedLocationsIds = []
           var selectedServiceAreaIds = []
-          
-          
+
           // ToDo: need to combine this with the overlayClickListener below
           var canSelectLoc = true
           var canSelectSA = true
-          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS){
-            if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS){
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+            if (this.activeSelectionModeId != SelectionModes.SELECTED_LOCATIONS) {
               canSelectLoc = false
             }
-            if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS){
+            if (this.activeSelectionModeId != SelectionModes.SELECTED_AREAS) {
               canSelectSA = false
             }
           }
-          
-          if (canSelectLoc){
+
+          if (canSelectLoc) {
             selectedLocations.forEach((id) => selectedLocationsIds.push({ location_id: id }))
           }
-          
-          if (canSelectSA){
+
+          if (canSelectSA) {
             selectedServiceAreas.forEach((id) => selectedServiceAreaIds.push({ id: id }))
           }
-          
+
           state.hackRaiseEvent(selectedLocationsIds)
 
-          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+          // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
           state.mapFeaturesSelectedEvent.next({
             locations: selectedLocationsIds,
             serviceAreas: selectedServiceAreaIds,
@@ -221,15 +217,15 @@ class TileComponentController {
             area: processArea()
           })
 
-          function processArea() {
-            //console.log(google.maps)
-            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({paths:args.coords.map((a)=>{
-              if (a.hasOwnProperty('lat')){
-                return {lat: a.lat() , lng: a.lng()} 
-              }else{
-                return {lat: a[1] , lng: a[0]} 
+          function processArea () {
+            // console.log(google.maps)
+            return google.maps.geometry.spherical.computeArea(new google.maps.Polygon({ paths: args.coords.map((a) => {
+              if (a.hasOwnProperty('lat')) {
+                return { lat: a.lat(), lng: a.lng() }
+              } else {
+                return { lat: a[1], lng: a[0] }
               }
-            })}).getPath())
+            }) }).getPath())
           }
         })
         .catch((err) => console.error(err))
@@ -244,25 +240,25 @@ class TileComponentController {
   }
 
   // Creates the map overlay that will be used to display vector tile information
-  createMapOverlay() {
+  createMapOverlay () {
     if (this.mapRef.overlayMapTypes.length > 0) {
       console.error('ERROR: Creating a map overlay, but we already have overlays defined')
       console.error(this.mapRef.overlayMapTypes)
       return
     }
-    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE), 
-                                                         this.tileDataService,
-                                                         this.state.mapTileOptions.getValue(),
-                                                         this.state.censusCategories.getValue(),
-                                                         this.state.selectedDisplayMode.getValue(),
-                                                         SelectionModes,
-                                                         this.activeSelectionModeId,
-                                                         this.state.displayModes,
-                                                         this.state.viewModePanels, 
-                                                         this.state, 
-                                                         this.uiNotificationService, 
-                                                         MapUtilities.getPixelCoordinatesWithinTile.bind(this)
-                                                        ))
+    this.mapRef.overlayMapTypes.push(new MapTileRenderer(new google.maps.Size(Constants.TILE_SIZE, Constants.TILE_SIZE),
+      this.tileDataService,
+      this.state.mapTileOptions.getValue(),
+      this.state.censusCategories.getValue(),
+      this.state.selectedDisplayMode.getValue(),
+      SelectionModes,
+      this.activeSelectionModeId,
+      this.state.displayModes,
+      this.state.viewModePanels,
+      this.state,
+      this.uiNotificationService,
+      MapUtilities.getPixelCoordinatesWithinTile.bind(this)
+    ))
     this.OVERLAY_MAP_INDEX = this.mapRef.overlayMapTypes.getLength() - 1
 
     // Update the selection in the renderer. We should have a bound "this.oldSelection" at this point
@@ -272,100 +268,98 @@ class TileComponentController {
     }
 
     this.overlayRightclickListener = this.mapRef.addListener('rightclick', (event) => {
-      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW 
-          || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS
-          || this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
+      if (this.state.selectedDisplayMode.getValue() != this.state.displayModes.VIEW ||
+          this.state.activeViewModePanel == this.state.viewModePanels.EDIT_LOCATIONS ||
+          this.state.activeViewModePanel == this.state.viewModePanels.EDIT_SERVICE_LAYER
       ) return
-      
+
       this.getFeaturesUnderLatLng(event.latLng)
-      .then((hitFeatures) => {
-        var menuItems = []
-        var menuItemsById = {}
-        
-        // ToDo: this should be formalised 
-        var featureCats = [ 
-          'locations',
-          'serviceAreas',
-          'analysisAreas',
-          'roadSegments',
-          'equipmentFeatures', 
-          'censusFeatures'
-        ]
-        
-        var bounds = []
-        var boundsByNetworkNodeObjectId = {}
-        featureCats.forEach((cat) => {
-          hitFeatures[cat].forEach((feature) => {
-            var objectId = null
-            
-            if (feature.hasOwnProperty('object_id')){ 
-              objectId = feature.objectId = feature.object_id
-            }else if (feature.hasOwnProperty('objectId')){ 
-              objectId = feature.objectId
-            }else if (feature.hasOwnProperty('location_id')){ 
-              objectId = feature.location_id
-            }
-            
-            //if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
-            if ( objectId && !menuItemsById.hasOwnProperty(objectId) ){
-              
+        .then((hitFeatures) => {
+          var menuItems = []
+          var menuItemsById = {}
+
+          // ToDo: this should be formalised
+          var featureCats = [
+            'locations',
+            'serviceAreas',
+            'analysisAreas',
+            'roadSegments',
+            'equipmentFeatures',
+            'censusFeatures'
+          ]
+
+          var bounds = []
+          var boundsByNetworkNodeObjectId = {}
+          featureCats.forEach((cat) => {
+            hitFeatures[cat].forEach((feature) => {
+              var objectId = null
+
+              if (feature.hasOwnProperty('object_id')) {
+                objectId = feature.objectId = feature.object_id
+              } else if (feature.hasOwnProperty('objectId')) {
+                objectId = feature.objectId
+              } else if (feature.hasOwnProperty('location_id')) {
+                objectId = feature.location_id
+              }
+
+              // if ( feature.hasOwnProperty('objectId') && !menuItemsById.hasOwnProperty(feature.objectId) ){
+              if (objectId && !menuItemsById.hasOwnProperty(objectId)) {
               // ToDo: formalize this
-              var singleHitFeature = {}
-              singleHitFeature.latLng = hitFeatures.latLng
-              singleHitFeature[cat] = [feature]
-              
-              var data = {
-                //'objectId': feature.objectId, 
-                'objectId': objectId, 
-                //'dataTypeList': dataTypeList, 
-                'feature': feature, 
-                'latLng': hitFeatures.latLng
-              }
-              
-              var options = []
-              options.push( this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
-                this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
-              }))
-              
-              var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
-              var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
-              var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
-              menuItems.push( menuItem )
-              //menuItemsById[feature.objectId] = menuItem 
-              menuItemsById[objectId] = menuItem 
-              if (feature.hasOwnProperty('network_node_object_id')){
-                bounds.push(feature)
-                boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
-              }
-            }
-          })
-        })
-        
-        if (menuItems.length > 0){
-          this.utils.getBoundsCLLIs(bounds, this.state)
-          .then((results) => {
-            results.data.forEach((result) => {
-              if (result.clli){
-                boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+                var singleHitFeature = {}
+                singleHitFeature.latLng = hitFeatures.latLng
+                singleHitFeature[cat] = [feature]
+
+                var data = {
+                // 'objectId': feature.objectId,
+                  'objectId': objectId,
+                  // 'dataTypeList': dataTypeList,
+                  'feature': feature,
+                  'latLng': hitFeatures.latLng
+                }
+
+                var options = []
+                options.push(this.contextMenuService.makeItemOption('Select', 'fa-eye', () => {
+                  this.state.mapFeaturesSelectedEvent.next(singleHitFeature)
+                }))
+
+                var dataTypeList = this.utils.getDataTypeListOfFeature(feature)
+                var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
+                var menuItem = this.contextMenuService.makeMenuItem(name, data, options)
+                menuItems.push(menuItem)
+                // menuItemsById[feature.objectId] = menuItem
+                menuItemsById[objectId] = menuItem
+                if (feature.hasOwnProperty('network_node_object_id')) {
+                  bounds.push(feature)
+                  boundsByNetworkNodeObjectId[feature.network_node_object_id] = menuItem
+                }
               }
             })
-            
-            var eventXY = this.getXYFromEvent(event)
-            this.contextMenuService.populateMenu(menuItems)
-            this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
-            this.contextMenuService.menuOn()
-            this.$timeout()
           })
-        }else{
-          this.contextMenuService.menuOff()
-          this.$timeout()
-        }
-        
-      })
+
+          if (menuItems.length > 0) {
+            this.utils.getBoundsCLLIs(bounds, this.state)
+              .then((results) => {
+                results.data.forEach((result) => {
+                  if (result.clli) {
+                    boundsByNetworkNodeObjectId[result.objectId].label += `: ${result.clli}`
+                  }
+                })
+
+                var eventXY = this.getXYFromEvent(event)
+                this.contextMenuService.populateMenu(menuItems)
+                this.contextMenuService.moveMenu(eventXY.x, eventXY.y)
+                this.contextMenuService.menuOn()
+                this.$timeout()
+              })
+          } else {
+            this.contextMenuService.menuOff()
+            this.$timeout()
+          }
+        })
     })
-    
+
     // ToDo: this function should probably be a global utility
-    this.getXYFromEvent = function(event){
+    this.getXYFromEvent = function (event) {
       var mouseEvent = null
       Object.keys(event).forEach((eventKey) => {
         if (event.hasOwnProperty(eventKey) && (event[eventKey] instanceof MouseEvent)) {
@@ -374,40 +368,39 @@ class TileComponentController {
       })
       var x = mouseEvent.clientX
       var y = mouseEvent.clientY
-      return {'x':x, 'y':y}
+      return { 'x': x, 'y': y }
     }
-    
-    
+
     this.overlayDragstartListener = this.mapRef.addListener('dragstart', (event) => {
-      if (this.contextMenuService.isMenuVisible.getValue()){
+      if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
       }
     })
-    
+
     this.overlayClickListener = this.mapRef.addListener('click', (event) => {
-      if (this.contextMenuService.isMenuVisible.getValue()){
+      if (this.contextMenuService.isMenuVisible.getValue()) {
         this.contextMenuService.menuOff()
         this.$timeout()
         return
       }
-      
+
       this.getFeaturesUnderLatLng(event.latLng)
-      .then((hitFeatures) => {
-        //console.log(hitFeatures)
-        if (hitFeatures){
-          if (hitFeatures.locations.length > 0) {
-            this.state.hackRaiseEvent(hitFeatures.locations)
+        .then((hitFeatures) => {
+        // console.log(hitFeatures)
+          if (hitFeatures) {
+            if (hitFeatures.locations.length > 0) {
+              this.state.hackRaiseEvent(hitFeatures.locations)
+            }
+
+            // Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
+            // ToDo: now that we have types these categories should to be dynamic
+            this.state.mapFeaturesSelectedEvent.next(hitFeatures)
           }
-          
-          //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
-          // ToDo: now that we have types these categories should to be dynamic
-          this.state.mapFeaturesSelectedEvent.next(hitFeatures)
-        }
-      })
+        })
     })
 
-    this.getFeaturesUnderLatLng = function(latLng){
+    this.getFeaturesUnderLatLng = function (latLng) {
       // Get latitiude and longitude
       var lat = latLng.lat()
       var lng = latLng.lng()
@@ -420,115 +413,112 @@ class TileComponentController {
       // Get the pixel coordinates of the clicked point WITHIN the tile (relative to the top left corner of the tile)
       var clickedPointPixels = MapUtilities.getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng)
       return FeatureSelector.performHitDetection(this.tileDataService, { width: Constants.TILE_SIZE, height: Constants.TILE_SIZE },
-                                          this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
-                                          clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
-      .then((results) => {
-        var locationFeatures = []
-        var analysisAreaFeatures = []
-        var serviceAreaFeatures = []
-        var roadSegments = new Set()
-        var equipmentFeatures = []
-        var censusFeatures = []
-        var fiberFeatures = new Set()
-        
-        var canSelectLoc  = false
-        var canSelectSA   = false
-        
-        if(this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
-          switch (this.activeSelectionModeId) {
-            case SelectionModes.SELECTED_AREAS:
-              canSelectSA = !canSelectSA
-              break
-            case SelectionModes.SELECTED_LOCATIONS:
-              canSelectLoc = !canSelectLoc
-              break
-          }
-        } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
-          canSelectSA = true
-        }  
+        this.state.mapLayers.getValue(), zoom, tileCoords.x, tileCoords.y,
+        clickedPointPixels.x, clickedPointPixels.y, this.state.selectedBoundaryType.id)
+        .then((results) => {
+          var locationFeatures = []
+          var analysisAreaFeatures = []
+          var serviceAreaFeatures = []
+          var roadSegments = new Set()
+          var equipmentFeatures = []
+          var censusFeatures = []
+          var fiberFeatures = new Set()
 
-        results.forEach((result) => {
-          //console.log(result)
-          // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
-          // ToDo: filter out deleted etc 
-          if(result.location_id && (canSelectLoc || 
-              this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
-            locationFeatures = locationFeatures.concat(result)
-          } else if ( result.hasOwnProperty('_data_type') && 
-            result.code && 'analysis_area' === result._data_type ) {
-            analysisAreaFeatures.push(result)
-          } else if (result.code && canSelectSA) {
-            serviceAreaFeatures = serviceAreaFeatures.concat(result)
-          } else if (result.gid) {
-            roadSegments.add(result)
-          } else if ( result.hasOwnProperty('layerType') 
-                      && 'census_block' == result.layerType
-                      && this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW){
-              censusFeatures.push(result)
-          } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
-            equipmentFeatures = equipmentFeatures.concat(result)
-          } else if ( (result.id || result.link_id ) && (result._data_type.indexOf('fiber') >= 0)) {
-            //fiberFeatures = fiberFeatures.concat(result)
-            fiberFeatures.add(result)
+          var canSelectLoc = false
+          var canSelectSA = false
+
+          if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.ANALYSIS) {
+            switch (this.activeSelectionModeId) {
+              case SelectionModes.SELECTED_AREAS:
+                canSelectSA = !canSelectSA
+                break
+              case SelectionModes.SELECTED_LOCATIONS:
+                canSelectLoc = !canSelectLoc
+                break
+            }
+          } else if (this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
+            canSelectSA = true
           }
-        })
-        
-        // ToDo: formalize this
-        var hitFeatures = { 
-          latLng: latLng,
-          locations: locationFeatures,
-          serviceAreas: serviceAreaFeatures,
-          analysisAreas: analysisAreaFeatures,
-          roadSegments: roadSegments,
-          equipmentFeatures: equipmentFeatures, 
-          censusFeatures: censusFeatures,
-          fiberFeatures: fiberFeatures
-        }
-        
-        return hitFeatures
+
+          results.forEach((result) => {
+          // console.log(result)
+          // ToDo: need a better way to differentiate feature types. An explicit way like featureType, also we can then generalize these feature arrays
+          // ToDo: filter out deleted etc
+            if (result.location_id && (canSelectLoc ||
+              this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW)) {
+              locationFeatures = locationFeatures.concat(result)
+            } else if (result.hasOwnProperty('_data_type') &&
+            result.code && result._data_type === 'analysis_area') {
+              analysisAreaFeatures.push(result)
+            } else if (result.code && canSelectSA) {
+              serviceAreaFeatures = serviceAreaFeatures.concat(result)
+            } else if (result.gid) {
+              roadSegments.add(result)
+            } else if (result.hasOwnProperty('layerType') &&
+                      result.layerType == 'census_block' &&
+                      this.state.selectedDisplayMode.getValue() === this.state.displayModes.VIEW) {
+              censusFeatures.push(result)
+            } else if (result.id && (result._data_type.indexOf('equipment') >= 0)) {
+              equipmentFeatures = equipmentFeatures.concat(result)
+            } else if ((result.id || result.link_id) && (result._data_type.indexOf('fiber') >= 0)) {
+            // fiberFeatures = fiberFeatures.concat(result)
+              fiberFeatures.add(result)
+            }
+          })
+
+          // ToDo: formalize this
+          var hitFeatures = {
+            latLng: latLng,
+            locations: locationFeatures,
+            serviceAreas: serviceAreaFeatures,
+            analysisAreas: analysisAreaFeatures,
+            roadSegments: roadSegments,
+            equipmentFeatures: equipmentFeatures,
+            censusFeatures: censusFeatures,
+            fiberFeatures: fiberFeatures
+          }
+
+          return hitFeatures
         /*
         //console.log(hitFeatures)
-        
+
         if (locationFeatures.length > 0) {
           this.state.hackRaiseEvent(locationFeatures)
         }
-        
+
         //Locations or service areas can be selected in Analysis Mode and when plan is in START_STATE/INITIALIZED
         // ToDo: now that we have types these categories should to be dynamic
         this.state.mapFeaturesSelectedEvent.next(hitFeatures)
         // */
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     }
-    
-    
-    
   }
 
   // Removes the existing map overlay
-  destoryMapOverlay() {
+  destoryMapOverlay () {
     if (this.overlayClickListener) {
       google.maps.event.removeListener(this.overlayClickListener)
       this.overlayClickListener = null
     }
-    
+
     if (this.overlayRightclickListener) {
       google.maps.event.removeListener(this.overlayRightclickListener)
       this.overlayRightclickListener = null
     }
-    
+
     if (this.overlayDragstartListener) {
       google.maps.event.removeListener(this.overlayDragstartListener)
       this.overlayDragstartListener = null
     }
-    
+
     this.mapRef.overlayMapTypes.clear()
   }
 
   // Refresh map tiles
-  refreshMapTiles(tilesToRefresh) {
+  refreshMapTiles (tilesToRefresh) {
     if (!this.mapRef || !this.mapRef.getBounds()) {
       return
     }
@@ -549,7 +539,7 @@ class TileComponentController {
     // Redraw the non-visible tiles. If we don't do this, these tiles will have stale data if the user pans/zooms.
     var redrawnTiles = new Set()
     visibleTiles.forEach((visibleTile) => redrawnTiles.add(TileUtilities.getTileId(visibleTile.zoom, visibleTile.x, visibleTile.y)))
-   
+
     var tilesOutOfViewport = []
     Object.keys(this.tileDataService.tileHtmlCache).forEach((tileKey) => {
       var cachedTile = this.tileDataService.tileHtmlCache[tileKey]
@@ -577,7 +567,7 @@ class TileComponentController {
   }
 
   // Handles map layer events
-  handleMapEvents(oldMapLayers, newMapLayers, mapLayerActions) {
+  handleMapEvents (oldMapLayers, newMapLayers, mapLayerActions) {
     if (!this.mapRef || this.mapRef.overlayMapTypes.getLength() <= this.OVERLAY_MAP_INDEX) {
       // Map not initialized yet
       return
@@ -587,13 +577,13 @@ class TileComponentController {
     this.refreshMapTiles()
   }
 
-  $onInit() {
+  $onInit () {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.oldSelection) {
       // Update the selection in the renderer
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
@@ -605,9 +595,9 @@ class TileComponentController {
     }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.createMapOverlaySubscription()
-    this.destroyMapOverlaySubscription()    
+    this.destroyMapOverlaySubscription()
     this.unsubscribeRedux()
   }
 
@@ -624,15 +614,15 @@ class TileComponentController {
     return { }
   }
 
-  mergeToTarget(nextState, actions) {
+  mergeToTarget (nextState, actions) {
     const currentSelectionModeId = this.activeSelectionModeId
     const oldPlanTargets = this.selection && this.selection.planTargets
     // merge state and actions onto controller
-    Object.assign(this, nextState);
-    Object.assign(this, actions);   
-    
-    if (currentSelectionModeId !== nextState.activeSelectionModeId
-        || this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
+
+    if (currentSelectionModeId !== nextState.activeSelectionModeId ||
+        this.hasPlanTargetSelectionChanged(oldPlanTargets, nextState.selection && nextState.selection.planTargets)) {
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setAnalysisSelectionMode(nextState.activeSelectionModeId)
         this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(nextState.selection)
@@ -642,7 +632,7 @@ class TileComponentController {
     }
   }
 
-  hasPlanTargetSelectionChanged(oldSelection, newSelection) {
+  hasPlanTargetSelectionChanged (oldSelection, newSelection) {
     if (!oldSelection || !newSelection || (oldSelection !== newSelection)) {
       return true
     }
@@ -669,7 +659,7 @@ let tile = {
   template: '',
   bindings: {
     mapGlobalObjectName: '@',
-    oldSelection: '<'  // An object describing the selected objects in the UI
+    oldSelection: '<' // An object describing the selected objects in the UI
   },
   controller: TileComponentController
 }

@@ -1,8 +1,7 @@
 class DropTargetController {
-  
-  constructor($element) {
+  constructor ($element) {
     $element[0].ondrop = (event) => {
-      event.preventDefault();
+      event.preventDefault()
       this.onDropped && this.onDropped({
         dropEvent: event,
         targetObjectId: this.targetObjectId
@@ -17,9 +16,9 @@ let dropTarget = {
   template: `
   `,
   bindings: {
-    ngStyle : '<',
+    ngStyle: '<',
     targetObjectId: '<',
-    onDropped : '&'
+    onDropped: '&'
   },
   controller: DropTargetController
 }

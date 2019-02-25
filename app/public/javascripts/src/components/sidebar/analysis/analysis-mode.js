@@ -1,6 +1,5 @@
 class AnalysisModeController {
-
-  constructor($scope, $http, $ngRedux, state, optimization, tracker) {
+  constructor ($scope, $http, $ngRedux, state, optimization, tracker) {
     this.state = state
     this.optimization = optimization
     this.canceler = null
@@ -22,22 +21,22 @@ class AnalysisModeController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
   }
 
-  expandAccordion(expandedAccordionIndex) {
+  expandAccordion (expandedAccordionIndex) {
     this.expandedAccordionIndex = expandedAccordionIndex
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 
   // Map global state to component properties
-  mapStateToThis(state) {
+  mapStateToThis (state) {
     return {
       coverageReport: state.coverage.report
     }
   }
 
-  mapDispatchToTarget(dispatch) {
+  mapDispatchToTarget (dispatch) {
     return {}
   }
 }
@@ -51,4 +50,3 @@ let analysisMode = {
 }
 
 export default analysisMode
-

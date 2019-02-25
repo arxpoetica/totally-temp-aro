@@ -1,6 +1,5 @@
 class SummaryReportsController {
-
-  constructor(state, Utils, $http, $timeout) {
+  constructor (state, Utils, $http, $timeout) {
     this.state = state
     this.Utils = Utils
     this.$http = $http
@@ -27,19 +26,19 @@ class SummaryReportsController {
     }
   }
 
-  downloadReport(reportType) {
+  downloadReport (reportType) {
     // Substitute plan id, selected boundary name, etc
     const planId = this.state.plan.getValue().id
     const planName = this.state.plan.getValue().name
     const selectedBoundaryName = this.state.selectedBoundaryType.name
 
     this.downloads[reportType].url = this.downloads[reportType].url
-                                      .replace('{PLAN_ID}', planId)
-                                      .replace('{SELECTED_BOUNDARY_NAME}', selectedBoundaryName)
+      .replace('{PLAN_ID}', planId)
+      .replace('{SELECTED_BOUNDARY_NAME}', selectedBoundaryName)
     this.downloads[reportType].fileName = this.downloads[reportType].fileName
-                                           .replace('{PLAN_ID}', planId)
-                                           .replace('{SELECTED_BOUNDARY_NAME}', selectedBoundaryName)
-                                           .replace('{PLAN_NAME}', planName)
+      .replace('{PLAN_ID}', planId)
+      .replace('{SELECTED_BOUNDARY_NAME}', selectedBoundaryName)
+      .replace('{PLAN_NAME}', planName)
 
     this.downloads[reportType].isDownloading = true
     this.$http.get(this.downloads[reportType].url)

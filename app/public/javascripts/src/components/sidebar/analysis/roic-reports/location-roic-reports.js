@@ -1,30 +1,28 @@
 import Constants from '../../../common/constants'
 
 class LocationRoicReportsController {
-
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
 
     this.roicResultsData = null
-    
   }
-  
-  $onChanges(changesObj) {
+
+  $onChanges (changesObj) {
     if (changesObj.roicPlanSettings) {
       this.refreshData()
     }
   }
-  
-  refreshData() {
+
+  refreshData () {
     if (!this.roicPlanSettings) {
       return
     }
-    
+
     this.loadROICResultsForLocation()
   }
 
-  loadROICResultsForLocation() {
+  loadROICResultsForLocation () {
     var userId = this.state.loggedInUser.id
     /*
     var planSettings = {
@@ -37,11 +35,10 @@ class LocationRoicReportsController {
     }
     */
     this.$http.post(`/service/location-analysis/roic?userId=${userId}`, this.roicPlanSettings)
-    .then(result => {
-      this.roicResultsData = {'roicAnalysis': result.data}
-    })
-    .catch(err => console.error(err))
-    
+      .then(result => {
+        this.roicResultsData = { 'roicAnalysis': result.data }
+      })
+      .catch(err => console.error(err))
   }
 }
 
@@ -50,7 +47,7 @@ LocationRoicReportsController.$inject = ['$http', 'state']
 let locationRoicReports = {
   templateUrl: '/components/sidebar/analysis/roic-reports/common-roic-reports.html',
   bindings: {
-    roicPlanSettings: '<', 
+    roicPlanSettings: '<',
     reportSize: '<'
   },
   controller: LocationRoicReportsController

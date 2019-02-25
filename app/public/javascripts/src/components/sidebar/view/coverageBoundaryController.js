@@ -1,6 +1,5 @@
 class CoverageBoundaryController {
-
-  constructor($http, $timeout, state) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -10,7 +9,7 @@ class CoverageBoundaryController {
       COMPUTED: 'COMPUTED'
     })
     this.controlState = this.controlStates.NO_TARGET_SELECTED
-    this.coverageRadius = 10000   // In whatever units are specified in the configuration.units service
+    this.coverageRadius = 10000 // In whatever units are specified in the configuration.units service
     this.householdsCovered = null
     this.targetMarker = new google.maps.Marker({
       position: new google.maps.LatLng(-122, 48),
@@ -28,7 +27,7 @@ class CoverageBoundaryController {
     this.coveragePolygon = null
   }
 
-  $onInit() {
+  $onInit () {
     // We should have a map variable at this point
     if (!window[this.mapGlobalObjectName]) {
       console.error('ERROR: The Coverage Boundary component initialized, but a map object is not available at this time.')
@@ -43,11 +42,10 @@ class CoverageBoundaryController {
     var self = this
     this.clickListener = google.maps.event.addListener(this.mapRef, 'click', function (event) {
       self.handleCoverageTargetUpdated(event.latLng)
-    });
+    })
   }
 
-  handleCoverageTargetUpdated(position) {
-
+  handleCoverageTargetUpdated (position) {
     // If we are still processing a previous click, do nothing
     if (this.controlState === this.controlStates.COMPUTING) {
       console.warn('Warning: A coverage boundary computation is in process. Ignoring handleCoverageTargetUpdated')
@@ -57,7 +55,7 @@ class CoverageBoundaryController {
     // Update the marker position and show it in the map
     this.targetMarker.position = position
     this.targetMarker.setMap(this.mapRef)
-    this.targetMarker.setDraggable(false)   // No dragging while we are computing coverage
+    this.targetMarker.setDraggable(false) // No dragging while we are computing coverage
     this.controlState = this.controlStates.COMPUTING
     if (this.coveragePolygon) {
       this.coveragePolygon.setMap(null)
@@ -66,7 +64,7 @@ class CoverageBoundaryController {
 
     this.calculateCoverage()
       .then((result) => {
-        // Draw the polygon onto the screen 
+        // Draw the polygon onto the screen
         console.log(result)
         this.coveragePolygon = new google.maps.Polygon({
           paths: result.coveragePolygon,
@@ -80,18 +78,18 @@ class CoverageBoundaryController {
         this.coveragePolygon.setMap(this.mapRef)
         this.householdsCovered = result.householdsCovered
         this.controlState = this.controlStates.COMPUTED
-        this.targetMarker.setDraggable(true)   // Allow dragging the marker
+        this.targetMarker.setDraggable(true) // Allow dragging the marker
         this.$timeout()
       })
       .catch((err) => {
         console.error(err)
-        this.targetMarker.setDraggable(true)   // Allow dragging the marker
+        this.targetMarker.setDraggable(true) // Allow dragging the marker
       })
 
     this.$timeout()
   }
 
-  calculateCoverage() {
+  calculateCoverage () {
     // Get the POST body for optimization based on the current application state
     var optimizationBody = this.state.getOptimizationBody()
     // Replace analysis_type and add a point and radius
@@ -121,8 +119,7 @@ class CoverageBoundaryController {
       .catch((err) => console.error(err))
   }
 
-  $onDestroy() {
-
+  $onDestroy () {
     // Remove the click event listener that we registered
     google.maps.event.removeListener(this.clickListener)
 

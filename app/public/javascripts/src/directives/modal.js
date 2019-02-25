@@ -4,59 +4,57 @@ app.directive('modal', function () {
     restrict: 'E',
     transclude: true,
     replace: true,
-    scope: { visible: '=', modalSize: "<", onShow: '&', onHide: '&' },
-    link: function postLink(scope, element, attrs) {
-
+    scope: { visible: '=', modalSize: '<', onShow: '&', onHide: '&' },
+    link: function postLink (scope, element, attrs) {
       $(element).modal({
         show: false,
         backdrop: attrs.backdrop
-      });
+      })
 
       var currentModalSize = attrs.modalSize || 'modal-md'
       $(element).find('div').addClass(currentModalSize)
 
-      scope.$watch(function () { return scope.visible; }, function (value) {
+      scope.$watch(function () { return scope.visible }, function (value) {
         if (value == true) {
-          $(element).modal('show');
+          $(element).modal('show')
         } else {
-          $(element).modal('hide');
+          $(element).modal('hide')
         }
-      });
+      })
 
-      scope.$watch(function () { return scope.modalSize; }, function (value) {
+      scope.$watch(function () { return scope.modalSize }, function (value) {
         $(element).find('div').removeClass(currentModalSize)
         currentModalSize = value
         $(element).find('div').addClass(currentModalSize)
-      });
+      })
 
       $(element).on('shown.bs.modal', function () {
         scope.$apply(function () {
-          scope.$parent[attrs.visible] = true;
-        });
-      });
+          scope.$parent[attrs.visible] = true
+        })
+      })
 
       $(element).on('hidden.bs.modal', function () {
         scope.$apply(function () {
-          scope.$parent[attrs.visible] = false;
-        });
-      });
+          scope.$parent[attrs.visible] = false
+        })
+      })
 
       $(element).on('shown.bs.modal', function () {
         scope.$apply(function () {
-          scope.onShow({});
-        });
-      });
+          scope.onShow({})
+        })
+      })
 
       $(element).on('hidden.bs.modal', function () {
         scope.$apply(function () {
-          scope.onHide({});
-        });
-      });
-
+          scope.onHide({})
+        })
+      })
     }
-  };
+  }
 }
-);
+)
 
 app.directive('modalHeader', function () {
   return {
@@ -71,8 +69,8 @@ app.directive('modalHeader', function () {
     restrict: 'E',
     scope: { title: '@' },
     transclude: true
-  };
-});
+  }
+})
 
 app.directive('modalBody', function () {
   return {
@@ -80,8 +78,8 @@ app.directive('modalBody', function () {
     replace: true,
     restrict: 'E',
     transclude: true
-  };
-});
+  }
+})
 
 app.directive('modalFooter', function () {
   return {
@@ -89,5 +87,5 @@ app.directive('modalFooter', function () {
     replace: true,
     restrict: 'E',
     transclude: true
-  };
-});
+  }
+})

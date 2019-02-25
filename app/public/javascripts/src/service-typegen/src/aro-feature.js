@@ -1,9 +1,7 @@
 class AroFeature {
-
-  static getProperties() {
+  static getProperties () {
     throw 'getEditingInfo() not implemented in class AroFeature'
   }
-
 }
 
 export default AroFeature

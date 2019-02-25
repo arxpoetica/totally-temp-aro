@@ -1,42 +1,41 @@
 class Utilities {
-
-  constructor($document, $http){
+  constructor ($document, $http) {
     this.$document = $document
     this.$http = $http
     this.uuidStore = []
     this.getUUIDsFromServer()
   }
 
-  static displayErrorMessage(errorMsg) {
+  static displayErrorMessage (errorMsg) {
     swal({ title: errorMsg.title, text: errorMsg.text, type: 'error' })
   }
 
-  downloadFile(data, fileName) {
+  downloadFile (data, fileName) {
     // Blob is not supported in older browsers, but we need it for downloading larger files in Chrome.
     // Without this, we get a generic "Failed - network error" in Chrome only.
-    let a = this.$document[0].createElement('a');
-    this.$document[0].body.appendChild(a);
-    var file = new Blob([data]);
-    var fileURL = window.URL.createObjectURL(file);
-    a.href = fileURL;
-    a.download = fileName;
-    a.click();
-    this.$document[0].body.removeChild(a);
+    let a = this.$document[0].createElement('a')
+    this.$document[0].body.appendChild(a)
+    var file = new Blob([data])
+    var fileURL = window.URL.createObjectURL(file)
+    a.href = fileURL
+    a.download = fileName
+    a.click()
+    this.$document[0].body.removeChild(a)
   }
 
-  blinkMarker(){
-    setTimeout( function(){
-      var blink = this.document.createElement( 'div' );
-      blink.className = 'blink';
-      this.document.querySelector('#map-canvas').appendChild( blink );
-      setTimeout( function(){
-        blink.remove();
-      }, 5000 );
-    }, 1000 );
+  blinkMarker () {
+    setTimeout(function () {
+      var blink = this.document.createElement('div')
+      blink.className = 'blink'
+      this.document.querySelector('#map-canvas').appendChild(blink)
+      setTimeout(function () {
+        blink.remove()
+      }, 5000)
+    }, 1000)
   }
 
   // Get a list of UUIDs from the server
-  getUUIDsFromServer() {
+  getUUIDsFromServer () {
     const numUUIDsToFetch = 20
     this.$http.get(`/service/library/uuids/${numUUIDsToFetch}`)
       .then((result) => {
@@ -45,7 +44,7 @@ class Utilities {
       .catch((err) => console.error(err))
   }
   // Get a UUID from the store
-  getUUID() {
+  getUUID () {
     if (this.uuidStore.length < 7) {
       // We are running low on UUIDs. Get some new ones from aro-this while returning one of the ones that we have
       this.getUUIDsFromServer()
@@ -60,86 +59,85 @@ class Utilities {
   // The advantage is that you do not have to wait for service to return UUIDs before you can initialize the app and
   // the searching controls. Do NOT pass these back to service in any form, and do not use these where security is involved.
   // Code is from https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-  getInsecureV4UUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+  getInsecureV4UUID () {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0; var v = c == 'x' ? r : (r & 0x3 | 0x8)
+      return v.toString(16)
+    })
   }
 
-  getObjectSize(object) {
-    return Object.keys(object).length;
+  getObjectSize (object) {
+    return Object.keys(object).length
   }
-  
+
   // - Below are concerned with displaying information about a feature or equipment. These could be moved into their own utils class if this one gets too large
-  
-  getDataTypeList(dataType){
+
+  getDataTypeList (dataType) {
     return dataType.split('.')
   }
-  
-  getDataTypeListOfFeature(feature){
+
+  getDataTypeListOfFeature (feature) {
     var dataTypeList = ['']
     if (feature.hasOwnProperty('_data_type')) dataTypeList = this.getDataTypeList(feature._data_type)
     if (feature.hasOwnProperty('dataType')) dataTypeList = this.getDataTypeList(feature.dataType)
     return dataTypeList
   }
-  
-  //ToDo: combine display name and CLLIs
-  getFeatureDisplayName(feature, state, dataTypeList){
-    if ('undefined' == typeof dataTypeList) dataTypeList = this.getDataTypeListOfFeature(feature)
-    
+
+  // ToDo: combine display name and CLLIs
+  getFeatureDisplayName (feature, state, dataTypeList) {
+    if (typeof dataTypeList === 'undefined') dataTypeList = this.getDataTypeListOfFeature(feature)
+
     var name = ''
-    if ('location' == dataTypeList[0]){
+    if (dataTypeList[0] == 'location') {
       name = 'Location'
       if (feature.hasOwnProperty(name)) name = feature.name
-    }else if ('equipment_boundary' == dataTypeList[0]){
+    } else if (dataTypeList[0] == 'equipment_boundary') {
       name = 'Boundary'
-    }else if(feature.hasOwnProperty('networkNodeType')){
+    } else if (feature.hasOwnProperty('networkNodeType')) {
       name = feature.networkNodeType
-    }else if ('service_layer' == dataTypeList[0]) {
+    } else if (dataTypeList[0] == 'service_layer') {
       name = 'Service Area'
-    }else{
-      name = dataTypeList[1].split('_').join(' ').replace(/\b\w/g, function(l){return l.toUpperCase()})
+    } else {
+      name = dataTypeList[1].split('_').join(' ').replace(/\b\w/g, function (l) { return l.toUpperCase() })
     }
-    
-    if (feature.hasOwnProperty('code')){
-      if ('' != name) name += ': '
+
+    if (feature.hasOwnProperty('code')) {
+      if (name != '') name += ': '
       name += feature.code
-    }else if (feature.hasOwnProperty('siteClli')){
-      if ('' != name) name += ': '
+    } else if (feature.hasOwnProperty('siteClli')) {
+      if (name != '') name += ': '
       name += feature.siteClli
     }
-    
-    if (state.configuration.networkEquipment.equipments.hasOwnProperty(name)){
+
+    if (state.configuration.networkEquipment.equipments.hasOwnProperty(name)) {
       name = state.configuration.networkEquipment.equipments[name].label
-    }else if(state.networkNodeTypesEntity.hasOwnProperty(name)){
+    } else if (state.networkNodeTypesEntity.hasOwnProperty(name)) {
       name = state.networkNodeTypesEntity[name]
     }
-    
+
     return name
   }
-  
-  getBoundsCLLIs(features, state){
+
+  getBoundsCLLIs (features, state) {
     var cllisByObjectId = {}
     var doCall = false
     var filter = `planId eq ${state.plan.getValue().id} and (`
     features.forEach((feature) => {
       filter += `objectId eq guid'${feature.network_node_object_id}' or `
       doCall = true
-    }) 
-    
-    if (doCall){
+    })
+
+    if (doCall) {
       filter = filter.substring(0, filter.length - 4) + ')'
       return this.$http.get(`/service/odata/NetworkEquipmentEntity?$select=id,objectId,clli&$filter=${filter}`)
-    }else{
-      return Promise.resolve({'data':[]})
+    } else {
+      return Promise.resolve({ 'data': [] })
     }
   }
-  
+
   // ---
-  
 }
 
-Utilities.$inject =['$document', '$http'];
+Utilities.$inject = ['$document', '$http']
 
 export default Utilities

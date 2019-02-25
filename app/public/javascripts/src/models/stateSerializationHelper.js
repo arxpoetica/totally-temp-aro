@@ -4,7 +4,6 @@
  * Services like "state" and "region" are intentionally not injected into this, instead we send them in as parameters.
  */
 app.service('stateSerializationHelper', ['$q', ($q) => {
-
   var OPTIMIZATION_DATA_SOURCE_GLOBAL = 1
   var stateSerializationHelper = {}
 
@@ -14,7 +13,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Get a POST body that we will send to aro-service for performing optimization
   stateSerializationHelper.getOptimizationBody = (state, reduxState, optimization) => {
-
     var optimizationBody = {
       planId: state.plan.getValue().id,
       projectTemplateId: state.loggedInUser.projectId,
@@ -22,13 +20,13 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     }
 
     addLocationTypesToBody(state, reduxState, optimization, optimizationBody)
-    addDataSelectionsToBody(state,optimizationBody)
+    addDataSelectionsToBody(state, optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
     optimizationBody.generatedDataRequest = state.optimizationOptions.generatedDataRequest
     optimizationBody.fronthaulOptimization = state.optimizationOptions.fronthaulOptimization
-    
-    addNetworkAnalysisType(state, optimizationBody)    
+
+    addNetworkAnalysisType(state, optimizationBody)
 
     return optimizationBody
   }
@@ -122,9 +120,9 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       delete postBody.optimization.threshold
     }
 
-    postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints))  // Quick deep copy
+    postBody.financialConstraints = JSON.parse(JSON.stringify(state.optimizationOptions.financialConstraints)) // Quick deep copy
   }
-  
+
   // Add fiber network constraints to a POST body that we will send to aro-service for optimization
   var addFiberNetworkConstraintsToBody = (state, postBody) => {
     postBody.networkConstraints = {}
@@ -157,7 +155,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
     })
 
     // Add Route from Existing Fiber
-    if(state.optimizationOptions.networkConstraints.routeFromFiber) {
+    if (state.optimizationOptions.networkConstraints.routeFromFiber) {
       postBody.networkConstraints.fiberRoutingMode = state.fiberRoutingModes.ROUTE_FROM_FIBER
     }
   }
@@ -191,7 +189,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load location types from a POST body object that is sent to the optimization engine
   var loadLocationTypesFromBody = (state, postBody) => {
-
     state.locationLayers.forEach((locationLayer) => {
       const isVisible = (postBody.locationConstraints.locationTypes.indexOf(locationLayer.plannerKey) >= 0)
       state.setLayerVisibility(locationLayer, isVisible)
@@ -240,7 +237,6 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
   var loadAlgorithmParametersFromBody = (state, dispatchers, optimization, postBody) => {
-
     if (!postBody.optimization) {
       console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
       return
@@ -252,15 +248,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.COVERAGE
     } else {
       if (postBody.optimization.algorithm === 'IRR') {
-        if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold && 
-          !Number.isFinite(+postBody.optimization.budget))
-          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR
-        else if ( !postBody.optimization.preIrrThreshold && !postBody.optimization.threshold )
-          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET  
-        else if (!postBody.optimization.preIrrThreshold)
-          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET
-        else
-          state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH  
+        if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold &&
+          !Number.isFinite(+postBody.optimization.budget)) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.MAX_IRR } else if (!postBody.optimization.preIrrThreshold && !postBody.optimization.threshold) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.BUDGET } else if (!postBody.optimization.preIrrThreshold) { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_TARGET } else { state.optimizationOptions.uiSelectedAlgorithm = state.OPTIMIZATION_TYPES.IRR_THRESH }
       }
     }
 
@@ -274,7 +263,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.preIrrThreshold = +postBody.optimization.preIrrThreshold
     }
     if (postBody.optimization.budget && Number.isFinite(+postBody.optimization.budget)) {
-      state.optimizationOptions.budget = +postBody.optimization.budget/1000
+      state.optimizationOptions.budget = +postBody.optimization.budget / 1000
     }
     dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
     if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
@@ -292,8 +281,8 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.networkConstraints.routingMode = postBody.networkConstraints.routingMode
     }
 
-    if (postBody.networkConstraints
-        && postBody.networkConstraints.cellNodeConstraints) {
+    if (postBody.networkConstraints &&
+        postBody.networkConstraints.cellNodeConstraints) {
       var cellNodeConstraintsObj = state.optimizationOptions.networkConstraints.cellNodeConstraints
       if (postBody.networkConstraints.cellNodeConstraints.cellRadius) {
         cellNodeConstraintsObj.cellRadius = postBody.networkConstraints.cellNodeConstraints.cellRadius
