@@ -1,5 +1,5 @@
 class PriceBookEditorController {
-  constructor($http, $timeout) {
+  constructor ($http, $timeout) {
     this.$http = $http
     this.$timeout = $timeout
     this.priceBookDefinitions = []
@@ -17,13 +17,13 @@ class PriceBookEditorController {
       .catch((err) => console.error(err))
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.priceBookId) {
       this.rebuildPricebookDefinitions()
     }
   }
 
-  rebuildPricebookDefinitions() {
+  rebuildPricebookDefinitions () {
     if (!this.priceBookId) {
       return
     }
@@ -53,7 +53,7 @@ class PriceBookEditorController {
 
   // Ensures that pristine cost assignments contain items for the specified state code.
   // If cost assignments are not present, the ones from state code '*' are copied into the ones for statecode.
-  ensurePristineCostAssignmentsForState(stateCode) {
+  ensurePristineCostAssignmentsForState (stateCode) {
     const hasCostAssignmentsForState = this.pristineAssignments.costAssignments.filter((item) => item.state === stateCode).length > 0
     if (!hasCostAssignmentsForState) {
       // We don't have cost assignments for this state. Copy them over from state code '*'
@@ -67,8 +67,7 @@ class PriceBookEditorController {
     }
   }
 
-  definePriceBookForSelectedState() {
-
+  definePriceBookForSelectedState () {
     // First ensure that we have pristine assignments for the given state code
     this.ensurePristineCostAssignmentsForState(this.selectedStateForStrategy)
 
@@ -122,8 +121,7 @@ class PriceBookEditorController {
     })
   }
 
-  saveAssignmentsToServer() {
-
+  saveAssignmentsToServer () {
     // Build a map of cost assignment ids to their index within the array
     var assignments = JSON.parse(JSON.stringify(this.pristineAssignments))
     var itemIdToCostAssignmentIndex = {}
@@ -139,7 +137,6 @@ class PriceBookEditorController {
 
     // Loop through the pricebook definitions
     this.structuredPriceBookDefinitions.forEach((priceBookDefinition) => {
-
       // Loop through items in this definition
       priceBookDefinition.items.forEach((item) => {
         if (item.costAssignment) {
@@ -168,7 +165,7 @@ class PriceBookEditorController {
       .catch((err) => console.error(err))
   }
 
-  exitEditingMode() {
+  exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
 }

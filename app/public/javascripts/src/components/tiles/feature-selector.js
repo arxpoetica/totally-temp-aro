@@ -1,11 +1,10 @@
 // Browserify includes
-var pointInPolygon = require('point-in-polygon')
 import TileUtilities from './tile-utilities'
+var pointInPolygon = require('point-in-polygon')
 
 class FeatureSelector {
-
   // Loops through all features in this tile and selects the ones that match a comparator function
-  static selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId) {
+  static selectFeatures (tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId) {
     // Build an array of promises that gets all map layer features (for the layers marked as selectable)
     var promises = []
     Object.keys(mapLayers).forEach((mapLayerKey) => {
@@ -19,11 +18,11 @@ class FeatureSelector {
               tileDataService.getTileData(mapLayer, tileZoom, tileX + deltaX, tileY + deltaY)
             ])
             promises.push(res.then((results) => {
-                results[1].deltaXPx = results[0].deltaX * tileSize.width
-                results[1].deltaYPx = results[0].deltaY * tileSize.height
-                results[1].featureFilter = mapLayer.featureFilter
-                return Promise.resolve(results[1])
-              })
+              results[1].deltaXPx = results[0].deltaX * tileSize.width
+              results[1].deltaYPx = results[0].deltaY * tileSize.height
+              results[1].featureFilter = mapLayer.featureFilter
+              return Promise.resolve(results[1])
+            })
             )
           }
         }
@@ -60,8 +59,7 @@ class FeatureSelector {
   }
 
   // Gets all features that are within a given polygon
-  static getPointsInPolygon(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, polygonCoords, selectedBoundaryLayerId) {
-
+  static getPointsInPolygon (tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, polygonCoords, selectedBoundaryLayerId) {
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
       var selectFeature = false
@@ -80,16 +78,16 @@ class FeatureSelector {
           const roadGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(feature.loadGeometry()[0])
           for (var i = 0; i < roadGeom.length; i++) {
             if (pointInPolygon([roadGeom[i].x + deltaX, roadGeom[i].y + deltaY], polygonCoords)) {
-              selectFeature = true;
-              break;
+              selectFeature = true
+              break
             }
-            //Check the fiber start or end point is with in polygon
-            //Skip all middle points and set to last point.
-            i += roadGeom.length - 2;
+            // Check the fiber start or end point is with in polygon
+            // Skip all middle points and set to last point.
+            i += roadGeom.length - 2
           }
         } else if (feature.properties.code) {
-          //Check the SA boundary inside the drew polygon 
-          //This will be uses when draw the polygon with more than one SA. (With touch the SA boundary)
+          // Check the SA boundary inside the drew polygon
+          // This will be uses when draw the polygon with more than one SA. (With touch the SA boundary)
           feature.loadGeometry().forEach(function (rawAreaGeom) {
             const areaGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawAreaGeom)
             areaGeom.forEach(function (eachValue) {
@@ -99,14 +97,13 @@ class FeatureSelector {
 
               if (pointInPolygon(eachPoint, polygonCoords)) {
                 selectFeature = true
-                return
               }
             })
           })
 
-          if(!selectFeature && feature.properties.code) {
-            //Check the drew polygon coordinate inside SA boundary
-            //This will be uses when draw the polygon with in one SA. (Without touch the SA boundary)
+          if (!selectFeature && feature.properties.code) {
+            // Check the drew polygon coordinate inside SA boundary
+            // This will be uses when draw the polygon with in one SA. (Without touch the SA boundary)
             feature.loadGeometry().forEach(function (rawAreaGeom) {
               const areaGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawAreaGeom)
               var areaPolyCoordinates = []
@@ -131,83 +128,74 @@ class FeatureSelector {
     }
     return this.selectFeatures(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, shouldFeatureBeSelected, selectedBoundaryLayerId)
   }
-  
-  static selectPolyline(feature, xWithinTile, yWithinTile, minPointToPolylineDistance, deltaX, deltaY) {
 
+  static selectPolyline (feature, xWithinTile, yWithinTile, minPointToPolylineDistance, deltaX, deltaY) {
     var rawGeometry = feature.loadGeometry()
     const geometry = rawGeometry.map(shape => TileUtilities.pixelCoordinatesFromScaledTileCoordinates(shape))
-    var distance //,distanceTolineX1Y1,distanceTolineX2Y2
+    var distance //, distanceTolineX1Y1,distanceTolineX2Y2
 
     // Ref: http://www.cprogramto.com/c-program-to-find-shortest-distance-between-point-and-line-segment
-    var lineX1, lineY1, lineX2, lineY2, pointX, pointY;
+    var lineX1, lineY1, lineX2, lineY2, pointX, pointY
     deltaX = deltaX || 0
     deltaY = deltaY || 0
-    //Some road segments has more points
+    // Some road segments has more points
     for (var i = 0; i < geometry[0].length - 1; i++) {
-      lineX1 = deltaX + Object.values(geometry[0])[i].x //X1, Y1 are the first point of that line segment.
+      lineX1 = deltaX + Object.values(geometry[0])[i].x // X1, Y1 are the first point of that line segment.
       lineY1 = deltaY + Object.values(geometry[0])[i].y
-  
-      lineX2 = deltaX + Object.values(geometry[0])[i+1].x //X2, Y2 are the end point of that line segment
-      lineY2 = deltaY + Object.values(geometry[0])[i+1].y
 
-      pointX = xWithinTile  //pointX, pointY are the point of the reference point.
+      lineX2 = deltaX + Object.values(geometry[0])[i + 1].x // X2, Y2 are the end point of that line segment
+      lineY2 = deltaY + Object.values(geometry[0])[i + 1].y
+
+      pointX = xWithinTile // pointX, pointY are the point of the reference point.
       pointY = yWithinTile
 
-      distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY)       //calling function to find the shortest distance
+      distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY) // calling function to find the shortest distance
       // distanceTolineX1Y1 = findDistanceToPoint(lineX1, lineY1, pointX, pointY)
       // distanceTolineX2Y2 = findDistanceToPoint(lineX2, lineY2, pointX, pointY)
       // console.log(distance + ' , ' + distanceTolineX1Y1 + ' , '+ distanceTolineX2Y2)
-      if(distance <= minPointToPolylineDistance) {
+      if (distance <= minPointToPolylineDistance) {
         return true
       }
     }
 
-    function findDistanceToPoint(x1, y1, pointX, pointY) {
-      return Math.sqrt( (Math.pow((pointX-x1), 2)) + (Math.pow((pointY-y1), 2)) )
+    function findDistanceToPoint (x1, y1, pointX, pointY) {
+      return Math.sqrt((Math.pow((pointX - x1), 2)) + (Math.pow((pointY - y1), 2)))
     }
 
-    function findDistanceToSegment(x1, y1, x2, y2, pointX, pointY)
-    {
-        var diffX = x2 - x1
-        var diffY = y2 - y1
-        if ((diffX == 0) && (diffY == 0))
-        {
-            diffX = pointX - x1
-            diffY = pointY - y1
-            return Math.sqrt(diffX * diffX + diffY * diffY)
-        }
-    
-        var t = ((pointX - x1) * diffX + (pointY - y1) * diffY) / (diffX * diffX + diffY * diffY)
-    
-        if (t < 0)
-        {
-            //point is nearest to the first point i.e x1 and y1
-            diffX = pointX - x1
-            diffY = pointY - y1
-        }
-        else if (t > 1)
-        {
-            //point is nearest to the end point i.e x2 and y2
-            diffX = pointX - x2
-            diffY = pointY - y2
-        }
-        else
-        {
-            //if perpendicular line intersect the line segment.
-            diffX = pointX - (x1 + t * diffX)
-            diffY = pointY - (y1 + t * diffY)
-        }
-    
-        //returning shortest distance
+    function findDistanceToSegment (x1, y1, x2, y2, pointX, pointY) {
+      var diffX = x2 - x1
+      var diffY = y2 - y1
+      if ((diffX == 0) && (diffY == 0)) {
+        diffX = pointX - x1
+        diffY = pointY - y1
         return Math.sqrt(diffX * diffX + diffY * diffY)
+      }
+
+      var t = ((pointX - x1) * diffX + (pointY - y1) * diffY) / (diffX * diffX + diffY * diffY)
+
+      if (t < 0) {
+        // point is nearest to the first point i.e x1 and y1
+        diffX = pointX - x1
+        diffY = pointY - y1
+      } else if (t > 1) {
+        // point is nearest to the end point i.e x2 and y2
+        diffX = pointX - x2
+        diffY = pointY - y2
+      } else {
+        // if perpendicular line intersect the line segment.
+        diffX = pointX - (x1 + t * diffX)
+        diffY = pointY - (y1 + t * diffY)
+      }
+
+      // returning shortest distance
+      return Math.sqrt(diffX * diffX + diffY * diffY)
     }
   }
 
   // Perform hit detection on features and get the first one (if any) under the mouse
-  static performHitDetection(tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, xWithinTile, yWithinTile, selectedBoundaryLayerId) {
-
-    var minimumPointToRoadDistance = 10;
-    var minimumPointToFiberDistance = 50;
+  static performHitDetection (tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, xWithinTile, yWithinTile, selectedBoundaryLayerId) {
+    var minimumPointToRoadDistance = 10
+    var minimumPointToFiberDistance = 50
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
       var selectFeature = false
@@ -221,34 +209,33 @@ class FeatureSelector {
         // Shape is an array of coordinates
         const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
         if (shape.length === 1) {
-          if (xWithinTile >= shape[0].x + deltaX - imageWidthBy2
-              && xWithinTile <= shape[0].x + deltaX + imageWidthBy2
-              //&& yWithinTile >= shape[0].y + deltaY - imageHeightBy2 // for location in center of icon
-              //&& yWithinTile <= shape[0].y + deltaY + imageHeightBy2
-              && yWithinTile >= shape[0].y + deltaY - icon.height     // for location at bottom center of icon
-              && yWithinTile <= shape[0].y + deltaY 
-              ) {
-                // The clicked point is inside the bounding box of the features icon
-                selectFeature = true
-              }
+          if (xWithinTile >= shape[0].x + deltaX - imageWidthBy2 &&
+              xWithinTile <= shape[0].x + deltaX + imageWidthBy2 &&
+              // && yWithinTile >= shape[0].y + deltaY - imageHeightBy2 // for location in center of icon
+              // && yWithinTile <= shape[0].y + deltaY + imageHeightBy2
+              yWithinTile >= shape[0].y + deltaY - icon.height && // for location at bottom center of icon
+              yWithinTile <= shape[0].y + deltaY
+          ) {
+            // The clicked point is inside the bounding box of the features icon
+            selectFeature = true
+          }
         }
       })
 
-      //Select Roadsegments
-      if(feature.properties.gid) {
+      // Select Roadsegments
+      if (feature.properties.gid) {
         selectFeature = this.selectPolyline(feature, xWithinTile, yWithinTile, minimumPointToRoadDistance, deltaX, deltaY)
       }
 
-      //Select Existing/planned fiber
+      // Select Existing/planned fiber
       // Don't allow FDH equipment which is not a fiber
-      if(feature.properties._data_type.indexOf('fiber') > -1 && feature.properties._data_type.indexOf('equipment.') < 0) {
+      if (feature.properties._data_type.indexOf('fiber') > -1 && feature.properties._data_type.indexOf('equipment.') < 0) {
         selectFeature = this.selectPolyline(feature, xWithinTile, yWithinTile, minimumPointToFiberDistance, deltaX, deltaY)
       }
 
-      //Load the selected service area 
-      //if(feature.properties.code) { // ToDo: use featureType when implimented 
-    	if(feature.properties.id) {
-
+      // Load the selected service area
+      // if(feature.properties.code) { // ToDo: use featureType when implimented
+    	if (feature.properties.id) {
         // Only select boundary features if the current boundary type is selected
         var shouldTestFeature = true
         if (feature.properties._data_type === 'equipment_boundary.select' && feature.properties.boundary_type) {
@@ -259,17 +246,16 @@ class FeatureSelector {
           feature.loadGeometry().forEach(function (rawAreaGeom) {
             const areaGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawAreaGeom)
             var areaPolyCoordinates = []
-  
+
             areaGeom.forEach(function (eachValue) {
               var eachPoint = []
               eachPoint.push(eachValue.x + deltaX)
               eachPoint.push(eachValue.y + deltaY)
               areaPolyCoordinates.push(eachPoint)
             })
-  
+
             if (pointInPolygon([xWithinTile, yWithinTile], areaPolyCoordinates)) {
               selectFeature = true
-              return
             }
           })
         }

@@ -6,8 +6,7 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 class LocationsController {
-  
-  constructor($rootScope, $location, $timeout, $ngRedux, map_tools, optimization, state) {
+  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, optimization, state) {
     this.$location = $location
     this.$timeout = $timeout
     this.map_tools = map_tools
@@ -88,7 +87,7 @@ class LocationsController {
     })
   }
 
-  toggleMeasuringStick() {
+  toggleMeasuringStick () {
     var current = this.drawingManager.getMap()
     this.drawingManager.setMap(current ? null : map)
     removeLatestOverlay()
@@ -96,14 +95,12 @@ class LocationsController {
     if (current) this.measuredDistance = null
   }
 
-
-  $onDestroy() {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 
   // Creates map layers based on selection in the UI
-  updateMapLayers() {
-
+  updateMapLayers () {
     const baseUrl = `${this.$location.protocol()}://${this.$location.host()}:${this.$location.port()}`
 
     // Make a copy of the state mapLayers. We will update this
@@ -148,27 +145,25 @@ class LocationsController {
       selectedLocationLibraries.forEach((selectedLocationLibrary) => {
         // Loop through the location types
         this.locationLayers.forEach((locationType) => {
-            if (locationType.checked 
-            //Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
-            && map && map.getZoom() >= 10) {
+          if (locationType.checked &&
+            // Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
+            map && map.getZoom() >= 10) {
             this.disablelocations = false
             this.$timeout()
 
             if (this.state.configuration.perspective.hasLocationFilters) {
-              var hasFiltersSelected = this.state.locationFilters.filter((f)=>{return f.checked}).length > 0
-              if (hasFiltersSelected){
+              var hasFiltersSelected = this.state.locationFilters.filter((f) => { return f.checked }).length > 0
+              if (hasFiltersSelected) {
                 asGroup()
-              }
-              else {
+              } else {
                 asSingle.bind(this)()
               }
-            }
-            else {
+            } else {
               asSingle.bind(this)()
             }
 
             // Returns a feature filter if we are in "sales" mode, otherwise return null
-            function getFilterIfSales(locationType, filterName) {
+            function getFilterIfSales (locationType, filterName) {
               if (!locationType.isSalesTile) {
                 return null
               }
@@ -176,12 +171,12 @@ class LocationsController {
                 console.warn('We must have a filter name at this point')
               }
               return (feature) => {
-                return (feature.properties.salesCategory === locationType.categoryKey)
-                      && (feature.properties.salesType === filterName)
+                return (feature.properties.salesCategory === locationType.categoryKey) &&
+                      (feature.properties.salesType === filterName)
               }
             }
 
-            function asSingle() {
+            function asSingle () {
               // Location type is visible
               var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
               var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
@@ -210,10 +205,9 @@ class LocationsController {
               }
             }
 
-            function asGroup() {
-
+            function asGroup () {
               for (let filter of this.state.locationFilters) {
-                if(filter.checked) {
+                if (filter.checked) {
                   // Location type is visible
                   var mapLayerKey = `${locationType.key}_${filter.name}_${selectedLocationLibrary.identifier}`
                   var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
@@ -232,7 +226,7 @@ class LocationsController {
                     // We want to create an individual layer
                     oldMapLayers[mapLayerKey] = {
                       tileDefinitions: tileDefinitions,
-                      iconUrl: `${baseUrl}${filter.iconUrl}`,  // NOTE that we are using the icon for the filter, not the location category
+                      iconUrl: `${baseUrl}${filter.iconUrl}`, // NOTE that we are using the icon for the filter, not the location category
                       renderMode: 'PRIMITIVE_FEATURES',
                       zIndex: locationType.zIndex,
                       selectable: true,
@@ -243,14 +237,12 @@ class LocationsController {
                 }
               }
             }
-          }
-          else if (map && map.getZoom() < 10){
+          } else if (map && map.getZoom() < 10) {
             this.disablelocations = true
-            this.$timeout();
-          }
-          else if (map && map.getZoom() >= 10){
+            this.$timeout()
+          } else if (map && map.getZoom() >= 10) {
             this.disablelocations = false
-            this.$timeout();
+            this.$timeout()
           }
         })
       })
@@ -274,7 +266,7 @@ class LocationsController {
     this.state.mapLayers.next(oldMapLayers)
   }
 
-  handleFiltersChanged() {
+  handleFiltersChanged () {
     // When filters change, we want to turn on/off the Tier checkboxes
     var isMinOneFilterChecked = false
     this.state.locationFilters.forEach((filter) => isMinOneFilterChecked |= (filter.checked))
@@ -288,22 +280,22 @@ class LocationsController {
   }
 
   // Update old and new map layers when data sources change
-  onSelectedDataSourcesChanged() {
+  onSelectedDataSourcesChanged () {
     this.updateMapLayers()
   }
 
-  mapStateToThis(state) {
+  mapStateToThis (state) {
     return {
       locationLayers: getLocationLayersList(state)
     }
   }
 
-  mapDispatchToTarget(dispatch) {
+  mapDispatchToTarget (dispatch) {
     return {
       updateLayerVisibility: (layer, isVisible, allLocationLayers) => {
         // First set the visibility of the current layer
         dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
-        
+
         // Then check if other layers are in a different group
         allLocationLayers.forEach(locLayer => {
           if (locLayer.group !== layer.group) {
@@ -314,13 +306,13 @@ class LocationsController {
     }
   }
 
-  mergeToTarget(nextState, actions) {
+  mergeToTarget (nextState, actions) {
     const currentLocationLayers = this.locationLayers
-    
+
     // merge state and actions onto controller
-    Object.assign(this, nextState);
-    Object.assign(this, actions);   
-    
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
+
     if (currentLocationLayers !== nextState.locationLayers) {
       this.updateMapLayers()
     }

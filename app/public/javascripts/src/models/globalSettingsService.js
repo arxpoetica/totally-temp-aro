@@ -1,5 +1,4 @@
-app.service('globalSettingsService', ['$http','state', ($http,state) => {
-
+app.service('globalSettingsService', ['$http', 'state', ($http, state) => {
   var globalSettings = {}
 
   globalSettings.new_user = {}
@@ -78,7 +77,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
       data: data
     }).then((response) => {
       state.showGlobalSettings = false
-      state.reloadSystemActors()  // The name/email may have changed for the current user. Reload all actors
+      state.reloadSystemActors() // The name/email may have changed for the current user. Reload all actors
     }).catch((response) => {
       state.showGlobalSettings = false
     })
@@ -87,19 +86,19 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   globalSettings.TagManagerViews = Object.freeze({
     Tags: 0,
     CreateTag: 1,
-    UpdateTag: 2,
+    UpdateTag: 2
   })
 
   globalSettings.currentTagManagerView = globalSettings.TagManagerViews.Tags
 
   globalSettings.getTags = () => {
     globalSettings.tagsList = state.listOfTags
-  }  
+  }
 
   globalSettings.createTag = () => {
     $http.post(`/service/tag-mapping/tags?name=${globalSettings.newTag.name}&description=${globalSettings.newTag.description}&colourHue=${globalSettings.newTag.colourHue}`)
       .then((response) => {
-        return state.StateViewMode.loadListOfPlanTags($http,state)
+        return state.StateViewMode.loadListOfPlanTags($http, state)
       })
       .then(() => {
         globalSettings.getTags()
@@ -111,7 +110,7 @@ app.service('globalSettingsService', ['$http','state', ($http,state) => {
   globalSettings.updateTag = () => {
     $http.put(`/service/tag-mapping/tags`, _.omit(globalSettings.updatedTag, 'type'))
       .then((response) => {
-        return state.StateViewMode.loadListOfPlanTags($http,state)
+        return state.StateViewMode.loadListOfPlanTags($http, state)
       })
       .then(() => {
         globalSettings.getTags()

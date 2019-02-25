@@ -38,7 +38,7 @@ app.service('tracker', ['$rootScope', ($rootScope) => {
           value: value
         })
       }
-    } catch(err) {
+    } catch (err) {
       // Yes, we are swallowing the exception. But the tracker should never interfere with the functioning of the app. Being extra cautious.
       console.error(err)
     }

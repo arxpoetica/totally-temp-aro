@@ -1,4 +1,4 @@
-import EquipmentDetailController from './equipmentDetailController';
+import EquipmentDetailController from './equipmentDetailController'
 
 let equipmentDetail = {
   templateUrl: '/components/sidebar/view/equipment-detail.html',

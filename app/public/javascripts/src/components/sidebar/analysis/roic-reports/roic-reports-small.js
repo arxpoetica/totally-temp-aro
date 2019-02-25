@@ -1,24 +1,22 @@
 class RoicReportsSmallController {
-
-  constructor(state) {
+  constructor (state) {
     this.state = state
-    this.series = ['Series A', 'Series B'];
-    this.config = config  // Ugh - A global from a time long ago!
+    this.series = ['Series A', 'Series B']
+    this.config = config // Ugh - A global from a time long ago!
   }
 
-  $onInit() {
-    
-    this.selectedEntityType = this.entityTypes.filter(item => item.id === 'network')[0]  // Because "medium" is the only thing supported in service right now
+  $onInit () {
+    this.selectedEntityType = this.entityTypes.filter(item => item.id === 'network')[0] // Because "medium" is the only thing supported in service right now
     this.selectedNetworkType = this.networkTypes.filter(item => item.id === 'new_network')[0]
     this.selectCategory(this.categories[1])
     this.selectedCalcType = this.selectedCategory.calcTypes[0]
   }
 
-  selectCategory(category) {
+  selectCategory (category) {
     this.selectedCategory = category
   }
 
-  selectedCategoryChanged() {
+  selectedCategoryChanged () {
     this.selectedCalcType = this.selectedCategory.calcTypes[0]
   }
 }

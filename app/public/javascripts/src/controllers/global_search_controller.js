@@ -1,6 +1,6 @@
 /* global app $ map */
 // Search Controller
-app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$sce', 'map_tools' ,'$timeout', 'state', 'Utils', ($scope, $rootScope, $http, $sce, map_tools, $timeout, state, Utils) => {
+app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$sce', 'map_tools', '$timeout', 'state', 'Utils', ($scope, $rootScope, $http, $sce, map_tools, $timeout, state, Utils) => {
   var ids = 0
 
   // We now need a plan ID in the search address url
@@ -10,9 +10,9 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
     var marker = new google.maps.Marker({
       map: map,
       animation: google.maps.Animation.BOUNCE,
-      position: {lat: latitude, lng: longitude}
-    });
-    $timeout(() => marker.setMap(null), 5000);
+      position: { lat: latitude, lng: longitude }
+    })
+    $timeout(() => marker.setMap(null), 5000)
   }
 
   // Gets a session token for use in searching (which is, in turn, passed by the server to the Google Autocomplete API).
@@ -28,7 +28,7 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
       ajax: {
         url: `/search/addresses`,
         dataType: 'json',
-        quietMillis: 250,     // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
+        quietMillis: 250, // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
         data: (searchTerm) => ({
           text: searchTerm,
           sessionToken: searchSessionToken,
@@ -67,10 +67,10 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
         const ZOOM_FOR_LOCATION_SEARCH = 17
         if (selectedLocation.type === 'placeId') {
           // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
-          var geocoder = new google.maps.Geocoder;
-          geocoder.geocode({'placeId': selectedLocation.value}, function(results, status) {
+          var geocoder = new google.maps.Geocoder()
+          geocoder.geocode({ 'placeId': selectedLocation.value }, function (results, status) {
             if (status !== 'OK') {
-              console.error('Geocoder failed: ' + status);
+              console.error('Geocoder failed: ' + status)
               return
             }
             state.requestSetMapCenter.next({
@@ -94,4 +94,4 @@ app.controller('global-search-controller', ['$scope', '$rootScope', '$http', '$s
   }
 
   initializeSelect()
-}]);
+}])

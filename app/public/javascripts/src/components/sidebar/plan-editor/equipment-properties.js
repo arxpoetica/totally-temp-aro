@@ -1,5 +1,5 @@
 class EquipmentProperties {
-  constructor(siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment, deploymentType) {
+  constructor (siteIdentifier, siteName, siteNetworkNodeType, selectedEquipmentType, networkNodeEquipment, deploymentType) {
     this.siteIdentifier = siteIdentifier || ''
     this.siteName = siteName || ''
     this.siteNetworkNodeType = siteNetworkNodeType

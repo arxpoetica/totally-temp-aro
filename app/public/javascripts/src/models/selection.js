@@ -29,19 +29,19 @@ app.service('selection', ($rootScope, map_layers) => {
   })
 
   $rootScope.$on('selection_tool_polygon', (e, overlay, deselect_mode, selectBoundaries) => {
-    if(selectBoundaries){
+    if (selectBoundaries) {
       Object.keys(map_layers.feature_layers).forEach(function (key) {
-        var feat = map_layers.feature_layers[key];
+        var feat = map_layers.feature_layers[key]
 
-        if(feat.isBoundaryLayer){
+        if (feat.isBoundaryLayer) {
           map_layers.getFeatureLayer(feat.type).changeSelectionForFeaturesMatching(!deselect_mode, (feature) => {
-            var doesContain = true;
-            feature.getGeometry().forEachLatLng((l)=>{
-              if(!google.maps.geometry.poly.containsLocation(l, overlay)){
-                doesContain = false;
+            var doesContain = true
+            feature.getGeometry().forEachLatLng((l) => {
+              if (!google.maps.geometry.poly.containsLocation(l, overlay)) {
+                doesContain = false
               }
             })
-            return doesContain;
+            return doesContain
           })
         }
       })

@@ -1,29 +1,29 @@
 class RoicReportsModalController {
-  constructor($http, state, Utils) {
+  constructor ($http, state, Utils) {
     this.$http = $http
     this.state = state
     this.Utils = Utils
   }
 
-  close() {
+  close () {
     this.state.showRoicReportsModal = false
   }
 
-  downloadReport() {
+  downloadReport () {
     // Run the export endpoint
     this.$http.get(`/financial_profile/${this.state.plan.getValue().id}/export`)
-    .then((r)=>{
-      if(r.data === ""){
-        return swal({
-          title: 'Error',
-          text: 'No data returned',
-          type: 'error'
-        })
-      }
+      .then((r) => {
+        if (r.data === '') {
+          return swal({
+            title: 'Error',
+            text: 'No data returned',
+            type: 'error'
+          })
+        }
 
-      this.Utils.downloadFile(r.data, `financial_profile_${new Date()}.csv`)
-    })
-    .catch((err) => console.error(err))
+        this.Utils.downloadFile(r.data, `financial_profile_${new Date()}.csv`)
+      })
+      .catch((err) => console.error(err))
   }
 }
 

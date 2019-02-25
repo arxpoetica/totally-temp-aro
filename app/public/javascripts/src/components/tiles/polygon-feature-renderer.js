@@ -1,11 +1,9 @@
 import PolylineFeatureRenderer from './polyline-feature-renderer'
 
 class PolygonFeatureRenderer {
-
   // First renders unselected polygon's then selected polygons
   // So selected polygon styles will be visible
-  static renderFeatures(closedPolygonFeatureLayersList, selection, oldSelection){
-
+  static renderFeatures (closedPolygonFeatureLayersList, selection, oldSelection) {
     var unselectedClosedPolygonFeatureLayersList = closedPolygonFeatureLayersList.filter((featureObj) => {
       if (featureObj.selectedDisplayMode == featureObj.displayModes.VIEW && featureObj.feature.properties.id != oldSelection.details.serviceAreaId) {
         return featureObj
@@ -23,7 +21,7 @@ class PolygonFeatureRenderer {
         return featureObj
       }
     })
-  
+
     unselectedClosedPolygonFeatureLayersList.forEach((Obj) => {
       PolygonFeatureRenderer.renderFeature(Obj.feature, Obj.shape, Obj.geometryOffset, Obj.ctx, Obj.mapLayer, Obj.censusCategories, Obj.tileDataService, Obj.styles,
         Obj.tileSize, selection, oldSelection, Obj.selectedDisplayMode, Obj.displayModes,
@@ -35,23 +33,21 @@ class PolygonFeatureRenderer {
         Obj.tileSize, selection, oldSelection, Obj.selectedDisplayMode, Obj.displayModes,
         Obj.analysisSelectionMode, Obj.selectionModes)
     })
-
   }
 
   // Renders a polygon feature onto the canvas
-  static renderFeature(feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
-                       selection, oldSelection, selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
-
-    ctx.lineCap = 'round';
+  static renderFeature (feature, shape, geometryOffset, ctx, mapLayer, censusCategories, tileDataService, styles, tileSize,
+    selection, oldSelection, selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes) {
+    ctx.lineCap = 'round'
     // Get the drawing styles for rendering the polygon
     var drawingStyles = this.getDrawingStylesForPolygon(feature, mapLayer)
 
     // ToDo: should this go into getDrawingStylesForPolygon?
     // ToDo: use an object merge of mapLayer.highlightStyle instead having to know which attributes are implemented
-    // ToDo: need to ensure feature type 
+    // ToDo: need to ensure feature type
     //    a non-selected service area could have the same id as the selected census block
-    if (feature.properties.hasOwnProperty('layerType')
-      && 'census_block' == feature.properties.layerType) {
+    if (feature.properties.hasOwnProperty('layerType') &&
+      feature.properties.layerType == 'census_block') {
       if (oldSelection.details.censusBlockId == feature.properties.id) {
         // Hilight selected census block
         drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
@@ -59,8 +55,8 @@ class PolygonFeatureRenderer {
       }
 
       // check for census filters
-      if ('undefined' != typeof oldSelection.details.censusCategoryId
-        && feature.properties.tags.hasOwnProperty(oldSelection.details.censusCategoryId)) {
+      if (typeof oldSelection.details.censusCategoryId !== 'undefined' &&
+        feature.properties.tags.hasOwnProperty(oldSelection.details.censusCategoryId)) {
         let tagId = feature.properties.tags[oldSelection.details.censusCategoryId]
 
         if (censusCategories[oldSelection.details.censusCategoryId].tags.hasOwnProperty(tagId)) {
@@ -69,39 +65,38 @@ class PolygonFeatureRenderer {
           drawingStyles.fillStyle = color
         }
       }
-
-    } else if (selection.planTargets.serviceAreas.has(feature.properties.id)
-      && selectedDisplayMode == displayModes.ANALYSIS
-      && analysisSelectionMode == selectionModes.SELECTED_AREAS) {
-      //Highlight the selected SA
-      //highlight if analysis mode -> selection type is service areas 
+    } else if (selection.planTargets.serviceAreas.has(feature.properties.id) &&
+      selectedDisplayMode == displayModes.ANALYSIS &&
+      analysisSelectionMode == selectionModes.SELECTED_AREAS) {
+      // Highlight the selected SA
+      // highlight if analysis mode -> selection type is service areas
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if (selection.planTargets.analysisAreas.has(feature.properties.id)
-               && selectedDisplayMode == displayModes.ANALYSIS) {
-      //highlight if analysis mode -> selection type is service areas 
+    } else if (selection.planTargets.analysisAreas.has(feature.properties.id) &&
+               selectedDisplayMode == displayModes.ANALYSIS) {
+      // highlight if analysis mode -> selection type is service areas
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if ((oldSelection.details.serviceAreaId == feature.properties.id)
-      && selectedDisplayMode == displayModes.VIEW) {
-      //Highlight the selected SA in view mode
+    } else if ((oldSelection.details.serviceAreaId == feature.properties.id) &&
+      selectedDisplayMode == displayModes.VIEW) {
+      // Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if (feature.properties.hasOwnProperty('_data_type')
-      && 'analysis_area' === feature.properties._data_type
-      && oldSelection.details.analysisAreaId == feature.properties.id
-      && selectedDisplayMode == displayModes.VIEW) {
-      //Highlight the selected SA in view mode
+    } else if (feature.properties.hasOwnProperty('_data_type') &&
+      feature.properties._data_type === 'analysis_area' &&
+      oldSelection.details.analysisAreaId == feature.properties.id &&
+      selectedDisplayMode == displayModes.VIEW) {
+      // Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
-    //console.log(feature)
-    if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id)
-        && 'ExistingBoundaryPointLayer' == mapLayer.tileDefinitions[0].vtlType){
+    // console.log(feature)
+    if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) &&
+        mapLayer.tileDefinitions[0].vtlType == 'ExistingBoundaryPointLayer') {
       drawingStyles.strokeStyle = styles.modifiedBoundary.strokeStyle
       drawingStyles.lineOpacity = styles.modifiedBoundary.lineOpacity
     }
@@ -121,7 +116,7 @@ class PolygonFeatureRenderer {
     }
     ctx.fill()
 
-    //Make Line Border is highlighted
+    // Make Line Border is highlighted
     ctx.globalAlpha = mapLayer.opacity || 0.7
 
     // Then draw a polyline except for the lines that are along the tile extents
@@ -130,8 +125,7 @@ class PolygonFeatureRenderer {
   }
 
   // Computes the fill and stroke styles for polygon features
-  static getDrawingStylesForPolygon(feature, mapLayer) {
-
+  static getDrawingStylesForPolygon (feature, mapLayer) {
     // Set the default drawing styles that we will return in case we are not aggregating features
     var drawingStyles = {
       strokeStyle: mapLayer.strokeStyle,
@@ -146,13 +140,13 @@ class PolygonFeatureRenderer {
     var maxPropertyValue = mapLayer.aggregateMaxPalette || 1.0
     var range = maxPropertyValue - minPropertyValue
     if (range === 0) {
-      range = 1.0  // Prevent any divide-by-zeros
+      range = 1.0 // Prevent any divide-by-zeros
     }
     var valueToPlot = feature.properties[mapLayer.aggregateProperty]
 
     if (mapLayer.renderMode === 'AGGREGATE_OPACITY') {
       // Calculate the opacity at which we want to show this feature
-      var minAlpha = 0.2, maxAlpha = 0.8
+      var minAlpha = 0.2; var maxAlpha = 0.8
       var opacity = (valueToPlot - minPropertyValue) / range * (maxAlpha - minAlpha)
       opacity = Math.max(minAlpha, opacity)
       opacity = Math.min(maxAlpha, opacity)
@@ -173,7 +167,6 @@ class PolygonFeatureRenderer {
     }
     return drawingStyles
   }
-
 }
 
 export default PolygonFeatureRenderer

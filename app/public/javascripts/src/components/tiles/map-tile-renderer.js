@@ -6,9 +6,8 @@ import TileUtilities from './tile-utilities'
 var AsyncPriorityQueue = require('async').priorityQueue
 
 class MapTileRenderer {
-
-  constructor(tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,
-              viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
+  constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,
+    viewModePanels, state, uiNotificationService, getPixelCoordinatesWithinTile, mapLayers = []) {
     this.tileSize = tileSize
     this.tileDataService = tileDataService
     this.mapLayers = mapLayers
@@ -31,10 +30,10 @@ class MapTileRenderer {
       // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
       task()
         .then((result) => {
-          callback(result)  // Callback so that the next tile can be processed
+          callback(result) // Callback so that the next tile can be processed
         })
         .catch((err) => {
-          callback(err)     // Callback even on error, so the next tile can be processed
+          callback(err) // Callback even on error, so the next tile can be processed
         })
     }, MAX_CONCURRENT_VECTOR_TILE_RENDERS)
     this.latestTileRenderPriority = Number.MAX_SAFE_INTEGER
@@ -49,69 +48,69 @@ class MapTileRenderer {
       MODIFIED: 'MODIFIED',
       DELETED: 'DELETED'
     })
-    
+
     // we should start holding the styles here so they can be adstracted, I'll start
     this.styles = {
       modifiedBoundary: {
-        strokeStyle: '#dddddd', 
+        strokeStyle: '#dddddd',
         lineOpacity: 0.5
       }
     }
   }
-  
-  // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down 
-  
+
+  // ToDo: Maybe we could maybe generalize the repeated code below along with the subscriptions further down
+
   // Sets the global tile options
-  setMapTileOptions(mapTileOptions) {
+  setMapTileOptions (mapTileOptions) {
     this.mapTileOptions = mapTileOptions
     this.tileDataService.markHtmlCacheDirty()
   }
 
   // Sets the "selected entities list"
-  setSelection(selection) {
+  setSelection (selection) {
     this.selection = selection
   }
 
-  setOldSelection(oldSelection) {
+  setOldSelection (oldSelection) {
     this.oldSelection = oldSelection
   }
 
-  setCensusCategories(censusCategories) {
+  setCensusCategories (censusCategories) {
     this.censusCategories = censusCategories
     this.tileDataService.markHtmlCacheDirty()
   }
-  
+
   // Sets the selected display mode
-  setselectedDisplayMode(selectedDisplayMode) {
+  setselectedDisplayMode (selectedDisplayMode) {
     this.selectedDisplayMode = selectedDisplayMode
     this.tileDataService.markHtmlCacheDirty()
   }
-  
+
   // Sets the selected analysis selection type
-  setAnalysisSelectionMode(analysisSelectionMode) {
+  setAnalysisSelectionMode (analysisSelectionMode) {
     this.analysisSelectionMode = analysisSelectionMode
     this.tileDataService.markHtmlCacheDirty()
   }
-  
+
   // ToDo: move this to a place of utility functions
   // utility function NOTE: will apply default val to source object items
-  getOrderedKeys(obj, orderPram, defaultVal){
+  getOrderedKeys (obj, orderPram, defaultVal) {
     let orderedArr = Object.keys(obj)
     orderedArr.sort(function (a, b) {
 	  let aObj = obj[a]
 	  let bObj = obj[b]
-	    
-	  if ( !aObj.hasOwnProperty(orderPram) || isNaN(aObj[orderPram]) ){ aObj[orderPram] = defaultVal }
-	  if ( !bObj.hasOwnProperty(orderPram) || isNaN(bObj[orderPram]) ){ bObj[orderPram] = defaultVal }
-	  
-      return aObj[orderPram] - bObj[orderPram];
-    });
-    
-    return orderedArr;
+
+	  if (!aObj.hasOwnProperty(orderPram) || isNaN(aObj[orderPram])) { aObj[orderPram] = defaultVal }
+	  if (!bObj.hasOwnProperty(orderPram) || isNaN(bObj[orderPram])) { bObj[orderPram] = defaultVal }
+
+      return aObj[orderPram] - bObj[orderPram]
+    })
+
+    return orderedArr
   }
-  
+
   // Sets the map layers for this renderer
-  setMapLayers(mapLayers) {
+  setMapLayers (mapLayers) {
     // Check if any of the map layers have changed. JSON.stringify() doesn't work because the order may be different
     var layersChanged = false
     Object.keys(this.mapLayers).forEach((oldMapLayerKey) => {
@@ -132,37 +131,37 @@ class MapTileRenderer {
         layersChanged = true
       }
     })
-    
+
     if (layersChanged) {
       this.tileDataService.markHtmlCacheDirty()
-      // order by zIndex for drawing in proper stacking order 
+      // order by zIndex for drawing in proper stacking order
       this.mapLayersByZ = TileUtilities.getOrderedKeys(mapLayers, 'zIndex', 0) // ToDo: replace 0 with var for default zIndex
     }
-    
-    this.mapLayers = mapLayers  // Set the object in any case (why? this should go in the above if)
-    
+
+    this.mapLayers = mapLayers // Set the object in any case (why? this should go in the above if)
+
     // Set the map layers in the data service too, so that we can download all layer data in a single call
     this.tileDataService.setMapLayers(mapLayers)
   }
 
   // Helper to shuffle an array. From https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-  shuffleArray(array) {
-    var currentIndex = array.length, temporaryValue, randomIndex;
+  shuffleArray (array) {
+    var currentIndex = array.length; var temporaryValue; var randomIndex
     // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
+    while (currentIndex !== 0) {
       // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
+      randomIndex = Math.floor(Math.random() * currentIndex)
+      currentIndex -= 1
       // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
+      temporaryValue = array[currentIndex]
+      array[currentIndex] = array[randomIndex]
+      array[randomIndex] = temporaryValue
     }
-    return array;
+    return array
   }
 
   // Redraws cached tiles with the specified tile IDs
-  redrawCachedTiles(tiles) {
+  redrawCachedTiles (tiles) {
     // Shuffle the order of the tiles. Just for a UI "effect" - this has no bearing on performance, etc.
     const shuffledTiles = this.shuffleArray(tiles)
 
@@ -180,16 +179,15 @@ class MapTileRenderer {
   }
 
   // Creates a tile canvas element
-  createTileCanvas(ownerDocument) {
-    var canvas = ownerDocument.createElement('canvas');
-    canvas.width = this.tileSize.width;
-    canvas.height = this.tileSize.height;
+  createTileCanvas (ownerDocument) {
+    var canvas = ownerDocument.createElement('canvas')
+    canvas.width = this.tileSize.width
+    canvas.height = this.tileSize.height
     return canvas
   }
 
   // This method is called by Google Maps. Render a canvas tile and send it back.
-  getTile(coord, zoom, ownerDocument) {
-
+  getTile (coord, zoom, ownerDocument) {
     // Initially, we were using just the `zoom-x-y` as the tile cache key. At certain latitudes on the map,
     // e.g. at '14-3950-5917', as you pan around, Google Maps will rebuild the map overlay. In the process,
     // it will call getTile() for '14-3950-5917' and then call releaseTile() on the OLD overlays tile DOM element.
@@ -244,7 +242,7 @@ class MapTileRenderer {
   }
 
   // This method is called by the Google Maps API.
-  releaseTile(node) {
+  releaseTile (node) {
     // Remove this tiles node (DIV element) from our cache. This will include the HTML element, children canvases, etc.
     // Without this we will hold on to a lot of tiles and will keep repainting even offscreen tiles.
     // Note that releaseTile() is not called the very moment that a tile goes offscreen. Google Maps API seems
@@ -253,7 +251,7 @@ class MapTileRenderer {
   }
 
   // Renders all data for this tile
-  renderTile(zoom, coord, htmlCache) {
+  renderTile (zoom, coord, htmlCache) {
     const tileId = `${zoom}-${coord.x}-${coord.y}`
 
     // This render for this tile will have a "version". This is because we can have multiple refreshes
@@ -267,12 +265,12 @@ class MapTileRenderer {
     const currentTileVersion = this.tileVersions[tileId] + 1
     this.tileVersions[tileId] = currentTileVersion
 
-    var renderingData = {}, globalIndexToLayer = {}, globalIndexToIndex = {}
+    var renderingData = {}; var globalIndexToLayer = {}; var globalIndexToIndex = {}
     var singleTilePromises = []
     this.mapLayersByZ.forEach((mapLayerKey, index) => {
       // Initialize rendering data for this layer
       var mapLayer = this.mapLayers[mapLayerKey]
-      var numNeighbors = 1 //(mapLayer.renderMode === 'HEATMAP') ? 1 : 0
+      var numNeighbors = 1 // (mapLayer.renderMode === 'HEATMAP') ? 1 : 0
       renderingData[mapLayerKey] = {
         numNeighbors: numNeighbors,
         dataPromises: [],
@@ -302,7 +300,7 @@ class MapTileRenderer {
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer('SELECTED_LOCATION'))
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.LOCK_ICON_KEY))
     singleTilePromises.push(this.tileDataService.getEntityImageForLayer(this.tileDataService.locationStates.INVALIDATED_ICON_KEY))
-    
+
     this.uiNotificationService.addNotification('main', 'rendering tiles')
     this.state.areTilesRendering = true
     // Get all the data for this tile
@@ -349,7 +347,7 @@ class MapTileRenderer {
   }
 
   // Renders a single layer on a tile
-  renderSingleTileFull(zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, canvas, heatmapCanvas) {
+  renderSingleTileFull (zoom, coord, renderingData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, canvas, heatmapCanvas) {
     var ctx = canvas.getContext('2d')
     ctx.lineWidth = 1
     var heatMapData = []
@@ -392,11 +390,11 @@ class MapTileRenderer {
   }
 
   // Render tile information
-  renderTileInformation(canvas, ctx, tileCoordinateString) {
+  renderTileInformation (canvas, ctx, tileCoordinateString) {
     if (this.mapTileOptions.showTileExtents) {
-      ctx.globalAlpha = 1.0   // The heat map renderer may have changed this
+      ctx.globalAlpha = 1.0 // The heat map renderer may have changed this
       // Draw a rectangle showing the tile margins
-      ctx.strokeStyle = "#000000"
+      ctx.strokeStyle = '#000000'
       ctx.lineWidth = 2
       // Draw a rectangle showing the tile (not the margins)
       ctx.setLineDash([])
@@ -405,16 +403,16 @@ class MapTileRenderer {
       ctx.fillStyle = '#000000'
       ctx.strokeStyle = '#ffffff'
       ctx.lineWidth = 4
-      ctx.font = "15px Arial"
-      ctx.textAlign="center"
-      ctx.textBaseline = "middle"
-      ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height /2)
-      ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height /2)
+      ctx.font = '15px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.strokeText(tileCoordinateString, canvas.width / 2, canvas.height / 2)
+      ctx.fillText(tileCoordinateString, canvas.width / 2, canvas.height / 2)
     }
   }
-  
+
   // Render a set of features on the map
-  renderFeatures(ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
+  renderFeatures (ctx, zoom, tileCoords, features, featureData, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage, geometryOffset, heatMapData, heatmapID, mapLayer) {
     ctx.globalAlpha = 1.0
     // If a filtering function is provided for this layer, apply it to filter out features
     const filteredFeatures = mapLayer.featureFilter ? features.filter(mapLayer.featureFilter) : features
@@ -425,7 +423,7 @@ class MapTileRenderer {
       console.log(mapLayer.tileDefinitions[0].vtlType)
       console.log(this.tileDataService.featuresToExclude)
       console.log(this.tileDataService.modifiedBoundaries)
-    }    
+    }
     // */
 
     var closedPolygonFeatureLayersList = []
@@ -436,66 +434,80 @@ class MapTileRenderer {
 
       if (feature.properties) {
         // Try object_id first, else try location_id
-        var featureId = feature.properties.object_id || feature.properties.location_id  
-        
-        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN 
-            && this.tileDataService.featuresToExclude.has(featureId)
-            && !(feature.properties._data_type && feature.properties._data_type == "location") ) {
+        var featureId = feature.properties.object_id || feature.properties.location_id
+
+        if (this.selectedDisplayMode == this.displayModes.EDIT_PLAN &&
+            this.tileDataService.featuresToExclude.has(featureId) &&
+            !(feature.properties._data_type && feature.properties._data_type == 'location')) {
           // This feature is to be excluded. Do not render it. (edit: ONLY in edit mode)
           continue
         }
-        if (this.selectedDisplayMode == this.displayModes.VIEW 
-            && (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS || 
-              this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER)
-            && this.tileDataService.featuresToExclude.has(featureId) 
-            && feature.properties._data_type && (feature.properties._data_type == "location" || 
-              feature.properties._data_type == "service_layer")){
+        if (this.selectedDisplayMode == this.displayModes.VIEW &&
+            (this.state.activeViewModePanel == this.viewModePanels.EDIT_LOCATIONS ||
+              this.state.activeViewModePanel == this.viewModePanels.EDIT_SERVICE_LAYER) &&
+            this.tileDataService.featuresToExclude.has(featureId) &&
+            feature.properties._data_type && (feature.properties._data_type == 'location' ||
+              feature.properties._data_type == 'service_layer')) {
           // this is a location/Service area that is being edited
           continue
         }
       }
-      
-      var selectedListType = null 
-      var selectedListId = null 
+
+      var selectedListType = null
+      var selectedListId = null
       var entityImage = featureData.icon
-      if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
+      if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
         var fullDataType = feature.properties._data_type + '.'
         selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
         if (feature.properties.hasOwnProperty('location_id')) {
           selectedListId = feature.properties.location_id
         } else if (feature.properties.hasOwnProperty('object_id')) {
           selectedListId = feature.properties.object_id
-          //greyout an RT with hsiEanbled true for frontier client
+          // greyout an RT with hsiEanbled true for frontier client
           if (config.ARO_CLIENT === 'frontier' &&
-            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam')
-            && (feature.properties.hsiEnabled !== 'true')) {
-              entityImage = featureData.greyOutIcon
+            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
+            (feature.properties.hsiEnabled !== 'true')) {
+            entityImage = featureData.greyOutIcon
           }
-        } else if ( feature.properties.hasOwnProperty('id') ){
+        } else if (feature.properties.hasOwnProperty('id')) {
           selectedListId = feature.properties.id
-        } 
+        }
       }
-      
+
       var geometry = feature.loadGeometry()
       // Geometry is an array of shapes
       var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
       var imageHeightBy2 = entityImage ? entityImage.height / 2 : 0
-      
+
       geometry.forEach((rawShape) => {
         const shape = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(rawShape)
-        if (1 == shape.length) {
+        if (shape.length == 1) {
   	      // This is a point
   	      var x = shape[0].x + geometryOffset.x - imageWidthBy2
   	      var y = shape[0].y + geometryOffset.y - (imageHeightBy2 * 2)
-          
-  	      //Draw the location icons with its original color
+
+  	      // Draw the location icons with its original color
   	      ctx.globalCompositeOperation = 'source-over'
   	      if (heatmapID === 'HEATMAP_OFF' || heatmapID === 'HEATMAP_DEBUG' || mapLayer.renderMode === 'PRIMITIVE_FEATURES') {
             var featureObj = {
-              'ctx': ctx, 'shape': shape, 'feature': feature, 'featureData': featureData, 'geometryOffset': geometryOffset, 'mapLayer': mapLayer, 'mapLayers': this.mapLayers, 'tileDataService': this.tileDataService,
-              'selection': this.selection, oldSelection: this.oldSelection, 'selectedLocationImage': selectedLocationImage, 'lockOverlayImage': lockOverlayImage, 'invalidatedOverlayImage': invalidatedOverlayImage,
-              'selectedDisplayMode': this.selectedDisplayMode, 'displayModes': this.displayModes, 'analysisSelectionMode': this.analysisSelectionMode, 'selectionModes': this.selectionModes,
-              'equipmentLayerTypeVisibility' : this.state.equipmentLayerTypeVisibility
+              'ctx': ctx,
+              'shape': shape,
+              'feature': feature,
+              'featureData': featureData,
+              'geometryOffset': geometryOffset,
+              'mapLayer': mapLayer,
+              'mapLayers': this.mapLayers,
+              'tileDataService': this.tileDataService,
+              'selection': this.selection,
+              oldSelection: this.oldSelection,
+              'selectedLocationImage': selectedLocationImage,
+              'lockOverlayImage': lockOverlayImage,
+              'invalidatedOverlayImage': invalidatedOverlayImage,
+              'selectedDisplayMode': this.selectedDisplayMode,
+              'displayModes': this.displayModes,
+              'analysisSelectionMode': this.analysisSelectionMode,
+              'selectionModes': this.selectionModes,
+              'equipmentLayerTypeVisibility': this.state.equipmentLayerTypeVisibility
             }
             pointFeatureRendererList.push(featureObj)
   	      } else {
@@ -505,51 +517,57 @@ class MapTileRenderer {
   	          var adjustedWeight = Math.pow(+aggregationProperty, this.mapTileOptions.heatMap.powerExponent)
   	          heatMapData.push([x, y, adjustedWeight])
   	        }
-  	      }  
-        }else{
+  	      }
+        } else {
           // Check if this is a closed polygon
           var firstPoint = shape[0]
           var lastPoint = shape[shape.length - 1]
           var isClosedPolygon = (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y)
 
           if (isClosedPolygon) {
-            
             // First draw a filled polygon with the fill color
-            //show siteboundaries for the equipments that are selected
-            if (this.state.isFeatureLayerOnForBoundary(feature)){
-              var featureObj = {'feature':feature,'shape':shape,'geometryOffset': geometryOffset,'ctx':ctx,'mapLayer': mapLayer,'censusCategories': this.censusCategories, 
-              'tileDataService': this.tileDataService,'styles': this.styles,
-              'tileSize': this.tileSize, 
-              'selectedDisplayMode':this.selectedDisplayMode,'displayModes': this.displayModes,
-              'analysisSelectionMode': this.analysisSelectionMode,'selectionModes': this.selectionModes}
+            // show siteboundaries for the equipments that are selected
+            if (this.state.isFeatureLayerOnForBoundary(feature)) {
+              var featureObj = { 'feature': feature,
+                'shape': shape,
+                'geometryOffset': geometryOffset,
+                'ctx': ctx,
+                'mapLayer': mapLayer,
+                'censusCategories': this.censusCategories,
+                'tileDataService': this.tileDataService,
+                'styles': this.styles,
+                'tileSize': this.tileSize,
+                'selectedDisplayMode': this.selectedDisplayMode,
+                'displayModes': this.displayModes,
+                'analysisSelectionMode': this.analysisSelectionMode,
+                'selectionModes': this.selectionModes }
               closedPolygonFeatureLayersList.push(featureObj)
               ctx.globalAlpha = 1.0
             } else {
-              return
+
             }
-            
           } else {
             // This is not a closed polygon. Render lines only
             ctx.globalAlpha = 1.0
-            if ( (this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature,this.oldSelection.details.roadSegments)) 
-              || (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature,this.oldSelection.details.fiberSegments))) {
-              //Highlight the Selected Polyline
+            if ((this.oldSelection.details.roadSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.roadSegments)) ||
+              (this.oldSelection.details.fiberSegments.size > 0 && this.highlightPolyline(feature, this.oldSelection.details.fiberSegments))) {
+              // Highlight the Selected Polyline
               var drawingStyles = {
                 lineWidth: mapLayer.drawingOptions.lineWidth * 2,
                 strokeStyle: mapLayer.drawingOptions.strokeStyle
               }
-              if (mapLayer.highlightStyle){
+              if (mapLayer.highlightStyle) {
                 drawingStyles = {
                   lineWidth: mapLayer.highlightStyle.lineWidth,
                   strokeStyle: mapLayer.highlightStyle.strokeStyle
                 }
               }
               PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
-            } else if (this.state.showFiberSize && feature.properties._data_type === "fiber" && this.state.viewSetting.selectedFiberOption.id !== 1) {
+            } else if (this.state.showFiberSize && feature.properties._data_type === 'fiber' && this.state.viewSetting.selectedFiberOption.id !== 1) {
               var selectedFiberOption = this.state.viewSetting.selectedFiberOption
               var viewOption = selectedFiberOption.pixelWidth
               var drawingStyles = {
-                lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field,feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
+                lineWidth: TileUtilities.getFiberStrandSize(selectedFiberOption.field, feature.properties.fiber_strands, viewOption.min, viewOption.max, viewOption.divisor, viewOption.atomicDivisor),
                 strokeStyle: mapLayer.strokeStyle
               }
               PolylineFeatureRenderer.renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyles, false, this.tileSize)
@@ -560,22 +578,17 @@ class MapTileRenderer {
         }
       })
     }
-    //render point feature
+    // render point feature
     PointFeatureRenderer.renderFeatures(pointFeatureRendererList)
-    //render polygon feature
+    // render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection, this.oldSelection)
   }
 
-  highlightPolyline(feature,polylines) {
+  highlightPolyline (feature, polylines) {
     var ishighlight = false
 
     var ishighlight = [...polylines].filter(function (polyline) {
-      if(feature.properties && feature.properties._data_type && feature.properties._data_type == "fiber")
-        return polyline.link_id === feature.properties.link_id
-      else if (feature.properties && feature.properties._data_type && feature.properties._data_type == "existing_fiber.") 
-        return polyline.id === feature.properties.id
-      else if (feature.properties && feature.properties._data_type && feature.properties._data_type == "edge") 
-        return polyline.gid === feature.properties.gid
+      if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'fiber') { return polyline.link_id === feature.properties.link_id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'existing_fiber.') { return polyline.id === feature.properties.id } else if (feature.properties && feature.properties._data_type && feature.properties._data_type == 'edge') { return polyline.gid === feature.properties.gid }
     }).length > 0
 
     return ishighlight

@@ -1,5 +1,5 @@
 class MapToggleController {
-  constructor($document, state) {
+  constructor ($document, state) {
     this.mapRefPromise = null
     this.$document = $document
     this.state = state
@@ -9,21 +9,21 @@ class MapToggleController {
       roadmap: 'fa-road'
     }
     this.currentMapType = 'roadmap'
-    this.overridenMapType = null    // Used if the user manually clicks on a map type
+    this.overridenMapType = null // Used if the user manually clicks on a map type
   }
 
-  $onInit() {
+  $onInit () {
     this.ensureMapRefPromiseCreated()
   }
 
-  ensureMapRefPromiseCreated() {
+  ensureMapRefPromiseCreated () {
     if (!this.mapRefPromise) {
       this.mapRefPromise = new Promise((resolve, reject) => {
-        this.$document.ready(()=>{
+        this.$document.ready(() => {
           if (!this.mapGlobalObjectName) {
             reject('ERROR: You must specify the name of the global variable that contains the map object.')
           }
-      
+
           // We should have a map variable at this point
           resolve(window[this.mapGlobalObjectName])
         })
@@ -31,7 +31,7 @@ class MapToggleController {
     }
   }
 
-  toggle() {
+  toggle () {
     this.currentMapType = (this.currentMapType === 'hybrid') ? 'roadmap' : 'hybrid'
     this.overridenMapType = this.currentMapType
     this.mapRefPromise
@@ -39,7 +39,7 @@ class MapToggleController {
       .catch((err) => console.log(err))
   }
 
-  updateMapType() {
+  updateMapType () {
     if (this.overridenMapType) {
       // The user has overriden the map type. Use it.
       this.mapRefPromise
@@ -57,11 +57,11 @@ class MapToggleController {
     }
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj && changesObj.userPerspective) {
       // User perspective has changed. Set the overriden configuration to null
       this.overridenMapType = null
-      this.ensureMapRefPromiseCreated()  // In case it has not been created yet
+      this.ensureMapRefPromiseCreated() // In case it has not been created yet
       this.updateMapType()
     }
   }
@@ -70,12 +70,12 @@ class MapToggleController {
 MapToggleController.$inject = ['$document', 'state']
 
 let mapToggle = {
-  template:'<button class="map-toggle" ng-click="$ctrl.toggle()"><i class="fa {{$ctrl.buttonIcons[$ctrl.currentMapType]}}"></i></button>',
+  template: '<button class="map-toggle" ng-click="$ctrl.toggle()"><i class="fa {{$ctrl.buttonIcons[$ctrl.currentMapType]}}"></i></button>',
   bindings: {
     mapGlobalObjectName: '@',
     userPerspective: '<'
   },
-  controller:MapToggleController
-};
+  controller: MapToggleController
+}
 
 export default mapToggle

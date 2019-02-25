@@ -1,5 +1,5 @@
 /* global app config $ */
-app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootScope, tracker, state, $document) => {
+app.service('map_tools', ['$rootScope', 'tracker', 'state', '$document', ($rootScope, tracker, state, $document) => {
   var tools = {}
   var visible = []
   var collapsed = {}
@@ -7,9 +7,9 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootSc
 
   var accordion = $('#map-tools-accordion')
 
-  $document.on("keydown keyup",(event) => hideModal(event))
+  $document.on('keydown keyup', (event) => hideModal(event))
 
-  function hideModal(e) {
+  function hideModal (e) {
     if (e.keyCode == 27) {
       var visibleModal = _.filter(tools.available_tools, (tool) => tool.id == visible[0])
       visibleModal.map(tools.toggle)
@@ -71,11 +71,11 @@ app.service('map_tools', ['$rootScope', 'tracker', 'state','$document', ($rootSc
   }
 
   tools.toggle = (tool) => {
-    var name = tool.id;
-     if(!$rootScope.currentPlan && tool.needsPlan){
-       $rootScope.$broadcast('show_create_plan_dialog')
-       return;
-     }
+    var name = tool.id
+    if (!$rootScope.currentPlan && tool.needsPlan) {
+      $rootScope.$broadcast('show_create_plan_dialog')
+      return
+    }
     tools.is_visible(name) ? tools.hide(name) : tools.show(name)
   }
 

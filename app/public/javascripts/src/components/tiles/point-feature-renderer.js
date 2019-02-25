@@ -1,8 +1,7 @@
 import WorkflowState from '../common/workflow-state'
 
 class PointFeatureRenderer {
-
-  static renderFeatures(pointFeatureRendererList) {
+  static renderFeatures (pointFeatureRendererList) {
     var deletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
       if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) === PointFeatureRenderer.modificationTypes.DELETED) {
         return featureObj
@@ -18,34 +17,32 @@ class PointFeatureRenderer {
     deletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
-        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes,Obj.equipmentLayerTypeVisibility)
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
-        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes,Obj.equipmentLayerTypeVisibility)
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility)
     })
-
   }
 
-  static renderFeature(ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
-                       selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-                       selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility) {
-
+  static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
+    selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
+    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility) {
     const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
-    var selectedListType = null 
-    var selectedListId = null 
-    if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type){
+    var selectedListType = null
+    var selectedListId = null
+    if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
       var fullDataType = feature.properties._data_type + '.'
       selectedListType = fullDataType.substr(0, fullDataType.indexOf('.'))
       if (feature.properties.hasOwnProperty('location_id')) {
         selectedListId = feature.properties.location_id
       } else if (feature.properties.hasOwnProperty('object_id')) {
         selectedListId = feature.properties.object_id
-      } else if ( feature.properties.hasOwnProperty('id') ){
+      } else if (feature.properties.hasOwnProperty('id')) {
         selectedListId = feature.properties.id
-      } 
+      }
     }
 
     var imageWidthBy2 = entityImage ? entityImage.width / 2 : 0
@@ -55,38 +52,37 @@ class PointFeatureRenderer {
 
     // Display individual locations. Either because we are zoomed in, or we want to debug the heatmap rendering
     const modificationType = this.getModificationTypeForFeature(feature, mapLayer, tileDataService)
-    
 
-    if ( !(equipmentLayerTypeVisibility.existing && equipmentLayerTypeVisibility.planned)
+    if (!(equipmentLayerTypeVisibility.existing && equipmentLayerTypeVisibility.planned) &&
         // When both exisiting and planned are turnned on show deleted,original,modified and exisiting
-        && (modificationType === PointFeatureRenderer.modificationTypes.ORIGINAL || modificationType === PointFeatureRenderer.modificationTypes.DELETED) 
+        (modificationType === PointFeatureRenderer.modificationTypes.ORIGINAL || modificationType === PointFeatureRenderer.modificationTypes.DELETED) &&
         // we dont show originals/deleted when only planned view is on
-        && feature.properties.hasOwnProperty('_data_type')) {
+        feature.properties.hasOwnProperty('_data_type')) {
       var equipmentType = feature.properties._data_type.substring(feature.properties._data_type.lastIndexOf('.') + 1)
       if (mapLayers.hasOwnProperty(equipmentType + '_planned')) {
         return
       }
     }
 
-    if (feature.properties.location_id && selection.planTargets.locations.has(+feature.properties.location_id)
-        //show selected location icon at analysis mode -> selection type is locations    
-        && selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
-        // Draw selected icon
+    if (feature.properties.location_id && selection.planTargets.locations.has(+feature.properties.location_id) &&
+        // show selected location icon at analysis mode -> selection type is locations
+        selectedDisplayMode == displayModes.ANALYSIS && analysisSelectionMode == selectionModes.SELECTED_LOCATIONS) {
+      // Draw selected icon
       ctx.drawImage(selectedLocationImage[0], x, y)
-    } else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) // for edit mode view of existing 
-               && null != selectedListId
-               && null != selectedListType
-               && oldSelection.editable.hasOwnProperty(selectedListType)
-               && oldSelection.editable[selectedListType].hasOwnProperty(selectedListId)) {
+    } else if ((selectedDisplayMode == displayModes.VIEW || selectedDisplayMode == displayModes.EDIT_PLAN) && // for edit mode view of existing
+               selectedListId != null &&
+               selectedListType != null &&
+               oldSelection.editable.hasOwnProperty(selectedListType) &&
+               oldSelection.editable[selectedListType].hasOwnProperty(selectedListId)) {
       // - Highlight this feature - //
       ctx.fillStyle = '#e8ffe8'
       ctx.strokeStyle = '#008000'
       ctx.lineWidth = 2
-      ctx.beginPath();
+      ctx.beginPath()
       var halfWidth = 0.5 * entityImage.width
-      ctx.arc(x + halfWidth, y + (0.5 * entityImage.height), halfWidth + 4, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.stroke();
+      ctx.arc(x + halfWidth, y + (0.5 * entityImage.height), halfWidth + 4, 0, 2 * Math.PI)
+      ctx.fill()
+      ctx.stroke()
 
       ctx.drawImage(entityImage, x, y)
     } else {
@@ -117,7 +113,7 @@ class PointFeatureRenderer {
   }
 
   // Gets the modification type for a given feature
-  static getModificationTypeForFeature(feature, mapLayer, tileDataService) {
+  static getModificationTypeForFeature (feature, mapLayer, tileDataService) {
     // If this feature is a "modified feature" then add an overlay. (Its all "object_id" now, no "location_id" anywhere)
     var modificationType = PointFeatureRenderer.modificationTypes.UNMODIFIED
     if (tileDataService.modifiedFeatures.hasOwnProperty(feature.properties.object_id)) {
@@ -125,7 +121,7 @@ class PointFeatureRenderer {
       if (modifiedFeature.deleted) {
         modificationType = PointFeatureRenderer.modificationTypes.DELETED
       } else {
-        if ('LibraryEquipmentPointLayer' == mapLayer.tileDefinitions[0].vtlType) {
+        if (mapLayer.tileDefinitions[0].vtlType == 'LibraryEquipmentPointLayer') {
           modificationType = PointFeatureRenderer.modificationTypes.ORIGINAL
         } else {
           modificationType = PointFeatureRenderer.modificationTypes.MODIFIED
@@ -135,14 +131,14 @@ class PointFeatureRenderer {
     return modificationType
   }
 
-  static getEntityImageForFeature(feature, featureData) {
+  static getEntityImageForFeature (feature, featureData) {
     var entityImage = featureData.icon
-    if (feature.properties.hasOwnProperty('_data_type') && "" != feature.properties._data_type) {
+    if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
       if (feature.properties.hasOwnProperty('object_id')) {
-        //greyout an RT with hsiEanbled true for frontier client
+        // greyout an RT with hsiEanbled true for frontier client
         if (config.ARO_CLIENT === 'frontier' &&
-            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam')
-            && (feature.properties.hsiEnabled !== 'true')) {
+            (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
+            (feature.properties.hsiEnabled !== 'true')) {
           entityImage = featureData.greyOutIcon
         }
       }
@@ -151,17 +147,16 @@ class PointFeatureRenderer {
   }
 
   // Renders a "modification" overlay over a feature icon
-  static renderModificationOverlay(ctx, x, y, width, height, modificationType) {
-
+  static renderModificationOverlay (ctx, x, y, width, height, modificationType) {
     if (modificationType === PointFeatureRenderer.modificationTypes.UNMODIFIED) {
-      return  // Unmodified feature, nothing to do
+      return // Unmodified feature, nothing to do
     }
 
     var overlayText = ''
     switch (modificationType) {
-      case PointFeatureRenderer.modificationTypes.ORIGINAL: overlayText = 'O'; break;
-      case PointFeatureRenderer.modificationTypes.MODIFIED: overlayText = 'M'; break;
-      case PointFeatureRenderer.modificationTypes.DELETED: overlayText = 'D'; break;
+      case PointFeatureRenderer.modificationTypes.ORIGINAL: overlayText = 'O'; break
+      case PointFeatureRenderer.modificationTypes.MODIFIED: overlayText = 'M'; break
+      case PointFeatureRenderer.modificationTypes.DELETED: overlayText = 'D'; break
     }
 
     ctx.fillStyle = '#ffffff'
@@ -179,26 +174,25 @@ class PointFeatureRenderer {
   }
 
   // Renders labels for a feature
-  static renderFeatureLabels(ctx, mapLayer, feature, featureCenterX, featureCenterY, featureIconWidth, featureIconHeight) {
-
+  static renderFeatureLabels (ctx, mapLayer, feature, featureCenterX, featureCenterY, featureIconWidth, featureIconHeight) {
     if (!mapLayer.drawingOptions || !mapLayer.drawingOptions.labels) {
-      return  // Nothing to draw
+      return // Nothing to draw
     }
 
-    const labelMargin = mapLayer.drawingOptions.labels.labelMargin, labelPadding = mapLayer.drawingOptions.labels.labelPadding
+    const labelMargin = mapLayer.drawingOptions.labels.labelMargin; const labelPadding = mapLayer.drawingOptions.labels.labelPadding
     var labelYOffset = 0
     mapLayer.drawingOptions.labels.properties.forEach((labelProperty) => {
       // Calculate the center of the label
-      var labelCenterX = featureCenterX, labelCenterY = featureCenterY
+      var labelCenterX = featureCenterX; var labelCenterY = featureCenterY
       switch (mapLayer.drawingOptions.labels.align) {
         case 'bottom':
-          labelCenterX = featureCenterX;
+          labelCenterX = featureCenterX
           labelCenterY = featureCenterY + featureIconHeight / 2 + labelMargin + labelPadding + mapLayer.drawingOptions.labels.fontSize / 2
-          break;
+          break
         case 'top':
-          labelCenterX = featureCenterX;
+          labelCenterX = featureCenterX
           labelCenterY = featureCenterY - (featureIconHeight / 2 + labelMargin + labelPadding + mapLayer.drawingOptions.labels.fontSize / 2)
-          break;
+          break
       }
       labelCenterY += labelYOffset
       // Draw the box for the label
@@ -213,7 +207,7 @@ class PointFeatureRenderer {
         ctx.fillStyle = mapLayer.drawingOptions.labels.fillColor || '#ffffff'
         ctx.beginPath()
         ctx.rect(labelCenterX - textMetrics.width / 2 - labelPadding, labelCenterY - fontSize / 2 - labelPadding,
-                 textMetrics.width + labelPadding * 2, rectHeight)
+          textMetrics.width + labelPadding * 2, rectHeight)
         if (mapLayer.drawingOptions.labels.fillColor) {
           ctx.fill()
         }

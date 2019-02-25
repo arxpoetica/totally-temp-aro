@@ -1,5 +1,5 @@
 class TsmEditorController {
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
     this.tsmManagerConfiguration = []
@@ -11,28 +11,27 @@ class TsmEditorController {
     }
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.tsmManagerId) {
       this.reloadTsmManagerConfiguration()
     }
   }
 
-  reloadTsmManagerConfiguration() {
+  reloadTsmManagerConfiguration () {
     this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}`)
-    .then((result) => {
-      this.tsmManager = result.data
-    })
+      .then((result) => {
+        this.tsmManager = result.data
+      })
 
     this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}/strengths`)
-    .then((result) => {
-      this.tsmManagerConfiguration = result.data
-      this.pristineTsmManagerConfiguration = angular.copy(result.data)
-    })
-    .catch((err) => console.error(err))
+      .then((result) => {
+        this.tsmManagerConfiguration = result.data
+        this.pristineTsmManagerConfiguration = angular.copy(result.data)
+      })
+      .catch((err) => console.error(err))
   }
 
-  saveConfigurationToServer() {
-
+  saveConfigurationToServer () {
     // Only save those configurations that have changed
     var changedModels = []
     this.tsmManagerConfiguration.forEach((tsmModel, index) => {
@@ -41,7 +40,7 @@ class TsmEditorController {
         // Check to see if the model has changed
         if (JSON.stringify(pristineModel) !== angular.toJson(tsmModel)) {
           var tsmModelToSend = angular.copy(tsmModel)
-          delete tsmModelToSend.dimensionName   // Can't send this over to aro-service
+          delete tsmModelToSend.dimensionName // Can't send this over to aro-service
           changedModels.push(tsmModelToSend)
         }
       }
@@ -49,14 +48,14 @@ class TsmEditorController {
 
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/tsm-manager/${this.tsmManagerId}/spends?refreshState=true`, changedModels)
-      .then((result) => this.exitEditingMode())
-      .catch((err) => console.error(err))
+        .then((result) => this.exitEditingMode())
+        .catch((err) => console.error(err))
     } else {
       console.log('TSM Editor: No models were changed. Nothing to save.')
     }
   }
 
-  exitEditingMode() {
+  exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
 }

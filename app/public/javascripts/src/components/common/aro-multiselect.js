@@ -2,43 +2,43 @@
 // The library (css and js) must be included somewhere in the html (index.html?) before using this component.
 
 class AroMultiSelectController {
-  constructor($element) {
+  constructor ($element) {
     this.$element = $element
-    this.selectElement = null 
+    this.selectElement = null
     this.previousItemsLength
     this.previousSelectedItems = []
   }
 
-  $onInit() {
+  $onInit () {
     // Call the bootstrap-multiselect library's multiselect() method on our '<select>' child element.
     this.selectElement = this.$element.find('select')
     setTimeout(() => this.selectElement.multiselect({
-        buttonWidth: '100%',
-        enableHTML:this.enableHtml ? true : false,
-        onChange: () => {
-          if (this.selectionChanged) {
-            this.selectionChanged({dataSource: this.datasourceType})
-          }
-        },
-        maxHeight: this.maxHeight ? this.maxHeight : 200,
-        includeSelectAllOption: this.enableSearch ? true : false,
-        enableFiltering: this.enableSearch ? true : false,
-        nonSelectedText: this.placeholder ? this.placeholder : 'None Selected',
-        onDropdownShow: (event) => {
-          var menu = $(event.currentTarget).find(".dropdown-menu");     
-          menu.css("overflow-x", "auto");
-          menu.css("width", "100%");
+      buttonWidth: '100%',
+      enableHTML: !!this.enableHtml,
+      onChange: () => {
+        if (this.selectionChanged) {
+          this.selectionChanged({ dataSource: this.datasourceType })
         }
-      }), 0);
+      },
+      maxHeight: this.maxHeight ? this.maxHeight : 200,
+      includeSelectAllOption: !!this.enableSearch,
+      enableFiltering: !!this.enableSearch,
+      nonSelectedText: this.placeholder ? this.placeholder : 'None Selected',
+      onDropdownShow: (event) => {
+        var menu = $(event.currentTarget).find('.dropdown-menu')
+        menu.css('overflow-x', 'auto')
+        menu.css('width', '100%')
+      }
+    }), 0)
   }
 
-  $doCheck() {
+  $doCheck () {
     if (this.previousItemsLength != this.allItems.length || this.previousModelLength !== this.model.length) {
       this.previousItemsLength = this.allItems.length
       this.previousModelLength = this.model.length
       setTimeout(() => {
-        this.selectElement.multiselect('rebuild');
-      }, 0);
+        this.selectElement.multiselect('rebuild')
+      }, 0)
     }
   }
 }
@@ -54,12 +54,12 @@ let aroMultiSelect = {
   `,
   bindings: {
     datasourceType: '@',
-    model: '=',             // Will be passed in as a ng-model to our select. Two Way binding for now!
-    allItems: '<',          // All the items to show.
-    selectionChanged: '&',  // [Optional] Called when the selected items change
+    model: '=', // Will be passed in as a ng-model to our select. Two Way binding for now!
+    allItems: '<', // All the items to show.
+    selectionChanged: '&', // [Optional] Called when the selected items change
     enableSearch: '@',
     enableHtml: '@',
-    placeholder: '@'  // [optional] placeholder to show
+    placeholder: '@' // [optional] placeholder to show
   },
   controller: AroMultiSelectController
 }

@@ -7,9 +7,7 @@ const getAllConstructionLayers = reduxState => reduxState.mapLayers.construction
 const getConstructionLayersList = createSelector([getAllConstructionLayers], (constructionLayers) => constructionLayers.toJS())
 
 class ConstructionSitesController {
-
-  constructor($rootScope, $ngRedux, map_tools, state) {
-
+  constructor ($rootScope, $ngRedux, map_tools, state) {
     this.map_tools = map_tools
     this.state = state
     this.selected_tool = null
@@ -26,8 +24,7 @@ class ConstructionSitesController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $onInit() {
-
+  $onInit () {
     var constructionSiteLayers = []
 
     this.state.configuration && Object.keys(this.state.configuration.constructionSiteCategories.categories).forEach((layerKey) => {
@@ -37,7 +34,7 @@ class ConstructionSitesController {
   }
 
   // Replaces any occurrences of searchText by replaceText in the keys of an object
-  objectKeyReplace(obj, searchText, replaceText) {
+  objectKeyReplace (obj, searchText, replaceText) {
     Object.keys(obj).forEach((key) => {
       if (typeof obj[key] === 'string') {
         obj[key] = obj[key].replace(searchText, replaceText)
@@ -45,8 +42,7 @@ class ConstructionSitesController {
     })
   }
 
-  updateMapLayers() {
-
+  updateMapLayers () {
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 
@@ -82,7 +78,7 @@ class ConstructionSitesController {
               lineWidth: layer.style_options.highlight.strokeWeight,
               strokeStyle: layer.style_options.highlight.strokeColor
             },
-            fillStyle: "transparent",
+            fillStyle: 'transparent',
             zIndex: 4500, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
             opacity: 0.7
           }
@@ -95,13 +91,13 @@ class ConstructionSitesController {
     this.state.mapLayers.next(oldMapLayers)
   }
 
-  mapStateToThis(reduxState) {
+  mapStateToThis (reduxState) {
     return {
       constructionLayers: getConstructionLayersList(reduxState)
     }
   }
 
-  mapDispatchToTarget(dispatch) {
+  mapDispatchToTarget (dispatch) {
     return {
       setConstructionSiteLayers: (constructionSiteLayers) => dispatch(MapLayerActions.setConstructionSiteLayers(constructionSiteLayers)),
       updateLayerVisibility: (layer, isVisible) => {
@@ -111,23 +107,22 @@ class ConstructionSitesController {
     }
   }
 
-  mergeToTarget(nextState, actions) {
+  mergeToTarget (nextState, actions) {
     const currentConstructionLayers = this.constructionLayers
 
     // merge state and actions onto controller
-    Object.assign(this, nextState);
-    Object.assign(this, actions);
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
 
     if (currentConstructionLayers !== nextState.constructionLayers) {
       this.updateMapLayers()
     }
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.unsubscribeRedux()
   }
 }
-
 
 ConstructionSitesController.$inject = ['$rootScope', '$ngRedux', 'map_tools', 'state']
 

@@ -1,7 +1,7 @@
 import Constants from '../../common/constants'
 
 class PlanInfoController {
-  constructor($http, state, $timeout, Utils) {
+  constructor ($http, state, $timeout, Utils) {
     this.$http = $http
     this.state = state
     this.$timeout = $timeout
@@ -30,7 +30,7 @@ class PlanInfoController {
     })
   }
 
-  updateEditableStatus() {
+  updateEditableStatus () {
     this.currentUserCanEdit = false
     this.$http.get('/service/auth/permissions')
       .then((result) => {
@@ -46,13 +46,13 @@ class PlanInfoController {
         ])
       })
       .then((results) => {
-        const planPermissions = results[0].data, systemPermissions = results[1].data
+        const planPermissions = results[0].data; const systemPermissions = results[1].data
         // First, check if the user or usergroups have write permissions
-        var currentUserCanWrite = false, currentUserIsAdmin = false
+        var currentUserCanWrite = false; var currentUserIsAdmin = false
         planPermissions.resourcePermissions.forEach((access) => {
           // We are checking if the logged in user or any of the users groups have permission to write.
-          if ((this.state.loggedInUser.id === access.systemActorId)
-              || (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
+          if ((this.state.loggedInUser.id === access.systemActorId) ||
+              (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const permission = access.rolePermissions
             currentUserCanWrite = ((permission & this.accessTypes.RESOURCE_WRITE.permissionBits) != 0)
             currentUserIsAdmin = ((permission & this.accessTypes.RESOURCE_ADMIN.permissionBits) != 0)
@@ -63,8 +63,8 @@ class PlanInfoController {
         // Next, check the global namespace to see if this user or groups have "SuperUser" permissions
         systemPermissions.resourcePermissions.forEach((access) => {
           // We are checking if the logged in user or any of the users groups have permission to write.
-          if ((this.state.loggedInUser.id === access.systemActorId)
-              || (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
+          if ((this.state.loggedInUser.id === access.systemActorId) ||
+              (this.state.loggedInUser.groupIds.indexOf(access.systemActorId) >= 0)) {
             const currentUserIsGod = (access.rolePermissions === Constants.SUPER_USER_PERMISSIONS)
             this.currentUserCanEdit = this.currentUserCanEdit || currentUserIsGod
           }
@@ -75,17 +75,17 @@ class PlanInfoController {
       .catch((err) => console.error(err))
   }
 
-  registerSaveAccessCallback(saveResourceAccess) {
+  registerSaveAccessCallback (saveResourceAccess) {
     // We will call this function in resource-permissions-editor when we want to save the access settings for a plan.
     this.saveResourceAccess = saveResourceAccess
   }
 
-  editCurrentPlan() {
+  editCurrentPlan () {
     this.isEditMode = true
     this.setPlanLocation()
   }
 
-  commitUpdatestoPlan(isDestroyingControl) {
+  commitUpdatestoPlan (isDestroyingControl) {
     // This will call a function into the resource permissions editor that will do the actual save
     // DO NOT SAVE ON DESTROY. This may be causing all sorts of issues with threading on service.
     if (!isDestroyingControl) {
@@ -98,43 +98,43 @@ class PlanInfoController {
     this.addSATags = false
   }
 
-  getPlanTagDetails() {
-    this.generalPlanTags = this.getTagDetails && this.getTagDetails({tagObject:this.currentPlanInfo.tagMapping.global})
-    if(this.getSaTagDetails) {
-      this.getSaTagDetails({tagObject:this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds})
-      .then((serviceAreaIds) => {
-        this.saPlanTags = serviceAreaIds
-      })
+  getPlanTagDetails () {
+    this.generalPlanTags = this.getTagDetails && this.getTagDetails({ tagObject: this.currentPlanInfo.tagMapping.global })
+    if (this.getSaTagDetails) {
+      this.getSaTagDetails({ tagObject: this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds })
+        .then((serviceAreaIds) => {
+          this.saPlanTags = serviceAreaIds
+        })
     }
   }
 
-  removeTag(type,tag) {
-    this.updateTag({plan:this.currentPlanInfo,removeTag:{type:type,tag:tag}})
-    .then(() => {
-      this.state.loadPlan(this.currentPlanInfo.id)
-    })
+  removeTag (type, tag) {
+    this.updateTag({ plan: this.currentPlanInfo, removeTag: { type: type, tag: tag } })
+      .then(() => {
+        this.state.loadPlan(this.currentPlanInfo.id)
+      })
   }
 
-  updatePlanTags() {
+  updatePlanTags () {
     this.currentPlanInfo.tagMapping.linkTags.serviceAreaIds = _.map(this.saPlanTags, (tag) => tag.id)
     this.currentPlanInfo.tagMapping.global = _.map(this.generalPlanTags, (tag) => tag.id)
     this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, this.currentPlanInfo)
   }
 
-  setPlanLocation() {
-    if(!this.currentPlanInfo.ephemeral) {
+  setPlanLocation () {
+    if (!this.currentPlanInfo.ephemeral) {
       var default_location = this.currentPlanInfo.areaName
       var ids = 0
       var search = $('.plan-details-container .select2')
       search.select2({
         placeholder: 'Set an address, city, state or CLLI code',
         initSelection: function (select, callback) {
-          callback({"id": 0, "text":default_location})
+          callback({ 'id': 0, 'text': default_location })
         },
         ajax: {
           url: `/search/addresses`,
           dataType: 'json',
-          quietMillis: 250,     // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
+          quietMillis: 250, // *** In newer versions of select2, this is called 'delay'. Remember this when upgrading select2
           data: (term) => ({
             text: term,
             sessionToken: this.searchSessionToken,
@@ -172,11 +172,11 @@ class PlanInfoController {
           this.searchSessionToken = this.utils.getInsecureV4UUID()
           if (selectedLocation.type === 'placeId') {
             // This is a google maps place_id. The actual latitude/longitude can be obtained by another call to the geocoder
-            var geocoder = new google.maps.Geocoder;
+            var geocoder = new google.maps.Geocoder()
             var self = this
-            geocoder.geocode({'placeId': selectedLocation.value}, function(results, status) {
+            geocoder.geocode({ 'placeId': selectedLocation.value }, function (results, status) {
               if (status !== 'OK') {
-                console.error('Geocoder failed: ' + status);
+                console.error('Geocoder failed: ' + status)
                 return
               }
               self.currentPlanInfo.areaName = selectedLocation.text
@@ -189,21 +189,21 @@ class PlanInfoController {
           }
         }
       })
-  
-      search.select2("val", default_location, true)
+
+      search.select2('val', default_location, true)
     }
   }
 
-  getPlanCreatorName(createdBy) {
+  getPlanCreatorName (createdBy) {
     var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
     return creator && creator.fullName
   }
-  
-  $onInit() {
+
+  $onInit () {
     this.getPlanTagDetails()
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.commitUpdatestoPlan(true)
     this.planObserver.unsubscribe()
   }

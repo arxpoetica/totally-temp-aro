@@ -1,5 +1,5 @@
 class PriceBookCreatorController {
-  constructor($http, $timeout, state) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -9,7 +9,7 @@ class PriceBookCreatorController {
     this.sourcePriceBook = null
   }
 
-  $onInit() {
+  $onInit () {
     this.selectedPriceStrategy = null
     var clonedPricebookPromise = this.sourcePriceBookId ? this.$http.get(`/service/v1/pricebook/${this.sourcePriceBookId}`) : Promise.resolve()
     Promise.all([this.$http.get('/service/v1/pricebook-strategies'), clonedPricebookPromise])
@@ -28,7 +28,7 @@ class PriceBookCreatorController {
       .catch((err) => console.error(err))
   }
 
-  createPriceBook() {
+  createPriceBook () {
     // Create a new pricebook with the specified name and description
     var createdManagerId = null
     return this.$http.post('/service/v1/pricebook', { name: this.newPriceBookName, description: this.newPriceBookDescription, priceStrategy: this.selectedPriceStrategy.name })
@@ -66,7 +66,7 @@ class PriceBookCreatorController {
       .catch((err) => console.error(err))
   }
 
-  closeDialog() {
+  closeDialog () {
     this.setEditingMode && this.setEditingMode({ mode: this.listMode })
   }
 }
@@ -79,7 +79,7 @@ let priceBookCreator = {
     sourcePriceBookId: '<',
     onManagersChanged: '&',
     listMode: '<',
-    setEditingMode: '&',
+    setEditingMode: '&'
   },
   controller: PriceBookCreatorController
 }

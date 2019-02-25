@@ -1,5 +1,5 @@
 class ImpedanceEditorController {
-  constructor($http) {
+  constructor ($http) {
     this.$http = $http
     this.impedanceManagerConfiguration = []
     // "mappingLabels" should map from a impedance mapping key (e.g. 0) to a text description of the mapping
@@ -15,13 +15,13 @@ class ImpedanceEditorController {
     this.orderedImpedanceMapKeys = []
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.impedanceManagerId) {
       this.reloadImpedanceManagerConfiguration()
     }
   }
 
-  reloadImpedanceManagerConfiguration() {
+  reloadImpedanceManagerConfiguration () {
     this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}`)
       .then((result) => {
         this.impedanceManager = result.data
@@ -29,22 +29,22 @@ class ImpedanceEditorController {
       .catch(err => console.error(err))
 
     this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`)
-    .then((result) => {
-      this.impedanceManagerConfiguration = result.data
-      // The map is a set of key value pairs, we convert it to a sorted array
-      this.orderedImpedanceMapKeys = Object.keys(this.impedanceManagerConfiguration.map)
-      this.orderedImpedanceMapKeys.sort((a, b) => (a < b) ? -1 : 1)
-    })
-    .catch((err) => console.error(err))
+      .then((result) => {
+        this.impedanceManagerConfiguration = result.data
+        // The map is a set of key value pairs, we convert it to a sorted array
+        this.orderedImpedanceMapKeys = Object.keys(this.impedanceManagerConfiguration.map)
+        this.orderedImpedanceMapKeys.sort((a, b) => (a < b) ? -1 : 1)
+      })
+      .catch((err) => console.error(err))
   }
 
-  saveConfigurationToServer() {
+  saveConfigurationToServer () {
     this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`, this.impedanceManagerConfiguration)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
   }
 
-  exitEditingMode() {
+  exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
 }

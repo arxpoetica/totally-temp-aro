@@ -1,58 +1,58 @@
 class RoicEditorController {
-  constructor($http, state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
     this.roicManagerConfiguration = []
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj.roicManagerId) {
       this.reloadRoicManagerConfiguration()
     }
   }
 
-  reloadRoicManagerConfiguration() {
+  reloadRoicManagerConfiguration () {
     this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}`)
-    .then((result) => {
-      this.roicManager = result.data
-    })
+      .then((result) => {
+        this.roicManager = result.data
+      })
 
     this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}/configuration`)
-    .then((result) => {
-      var roicModels = []
-      // Sort the roic models based on the locationTypeEntity
-      const locationEntityOrder = ['household', 'smallBusiness', 'mediumBusiness', 'largeBusiness', 'cellTower']
-      locationEntityOrder.forEach(locationEntity => {
-        const filteredModels = result.data.inputs
-                                .filter(item => item.id.entityType === locationEntity)
-                                .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
-        roicModels = roicModels.concat(filteredModels)
+      .then((result) => {
+        var roicModels = []
+        // Sort the roic models based on the locationTypeEntity
+        const locationEntityOrder = ['household', 'smallBusiness', 'mediumBusiness', 'largeBusiness', 'cellTower']
+        locationEntityOrder.forEach(locationEntity => {
+          const filteredModels = result.data.inputs
+            .filter(item => item.id.entityType === locationEntity)
+            .sort((a, b) => (a.id.speedCategory < b.id.speedCategory) ? -1 : 1)
+          roicModels = roicModels.concat(filteredModels)
+        })
+        this.roicManagerConfiguration = { inputs: roicModels }
+        this.selectedRoicModelIndex = 0
       })
-      this.roicManagerConfiguration = { inputs: roicModels }
-      this.selectedRoicModelIndex = 0
-    })
-    .catch((err) => console.error(err))
+      .catch((err) => console.error(err))
   }
 
-  selectRoicModel(index) {
+  selectRoicModel (index) {
     this.selectedRoicModelIndex = index
   }
 
-  saveConfigurationToServer() {
+  saveConfigurationToServer () {
     this.$http.put(`/service/v1/roic-manager/${this.roicManagerId}/configuration`, this.roicManagerConfiguration)
-    .then((result) => this.exitEditingMode())
-    .catch((err) => console.error(err))
+      .then((result) => this.exitEditingMode())
+      .catch((err) => console.error(err))
   }
 
-  exitEditingMode() {
+  exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
 
-  showSpeedCategoryHelp(category) {
+  showSpeedCategoryHelp (category) {
     this.speedCategoryHelp = this.state.configuration.resourceEditors.speedCategoryHelp[category] || this.state.configuration.resourceEditors.speedCategoryHelp.default
   }
 
-  hideSpeedCategoryHelp() {
+  hideSpeedCategoryHelp () {
     this.speedCategoryHelp = null
   }
 }

@@ -1,16 +1,14 @@
 class NetworkPlanController {
-
-  constructor($timeout, state)  {
+  constructor ($timeout, state) {
     this.plan = null
-    this.currentUser = state.loggedInUser;
-    this.showPlan = true;
+    this.currentUser = state.loggedInUser
+    this.showPlan = true
 
     state.plan.subscribe((newValue) => {
-      this.plan = newValue;
+      this.plan = newValue
       this.showPlan = (this.plan && this.plan.ephemeral) && this.currentUser.perspective === 'admin'
     })
   }
-
 }
 
 NetworkPlanController.$inject = ['$timeout', 'state']

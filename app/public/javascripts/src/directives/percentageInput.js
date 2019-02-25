@@ -8,13 +8,13 @@ app.directive('percentageInput', function () {
   return {
     require: 'ngModel',
     link: function (scope, elem, attrs, ngModel) {
-      ngModel.$parsers.push(function toModel(input) {
+      ngModel.$parsers.push(function toModel (input) {
         // Divide the value by 100 to store it in the model
         input = input || '0'
         return (+input) / 100.0
       })
 
-      ngModel.$formatters.push(function toView(input) {
+      ngModel.$formatters.push(function toView (input) {
         // Multiply the value by 100 to display it in the view
         input = input || '0'
         var inputTransformed = (+input) * 100.0
@@ -32,19 +32,19 @@ app.directive('percentageInput', function () {
  */
 app.directive('format', ['$filter', function ($filter) {
   return {
-      require: '?ngModel',
-      link: function (scope, elem, attrs, ctrl) {
-        if (!ctrl) return;
+    require: '?ngModel',
+    link: function (scope, elem, attrs, ctrl) {
+      if (!ctrl) return
 
-        ctrl.$formatters.unshift(function (a) {
-          return $filter(attrs.format)(ctrl.$modelValue)
-        });
+      ctrl.$formatters.unshift(function (a) {
+        return $filter(attrs.format)(ctrl.$modelValue)
+      })
 
-        ctrl.$parsers.unshift(function (viewValue) {
-          var plainNumber = viewValue.replace(/[^\d|\-+|\.+]/g, '');
-          elem.val($filter(attrs.format)(+plainNumber));
-          return plainNumber;
-        });
-      }
-  };
-}]);
+      ctrl.$parsers.unshift(function (viewValue) {
+        var plainNumber = viewValue.replace(/[^\d|\-+|\.+]/g, '')
+        elem.val($filter(attrs.format)(+plainNumber))
+        return plainNumber
+      })
+    }
+  }
+}])

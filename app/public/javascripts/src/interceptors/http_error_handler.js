@@ -1,6 +1,5 @@
 /* global app swal */
 app.config(($httpProvider) => {
-
   // The keys for CUSTOM_ERRORS should map to aro-service enum AroError
   const CUSTOM_ERRORS = {
     INSUFFICIENT_PERMISSIONS_TO_MODIFY_PLAN: {

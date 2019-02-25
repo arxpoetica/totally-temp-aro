@@ -1,5 +1,5 @@
 class ReportModalController {
-  constructor($scope ,$http, state) {
+  constructor ($scope, $http, state) {
     this.state = state
     this.analysis = []
     this.$http = $http
@@ -13,39 +13,39 @@ class ReportModalController {
     })
   }
 
-  close() {
+  close () {
     this.state.reportModal.next(false)
-    //this.state.previousModal.next(true)
+    // this.state.previousModal.next(true)
   }
 
-  modalShown() {
+  modalShown () {
     this.state.reportModal.next(true)
-    if(this.plan) {
+    if (this.plan) {
       this.loadPlanReport()
     }
   }
 
-  modalHide() {
+  modalHide () {
     this.state.reportModal.next(false)
-    //this.state.previousModal.next(true)
+    // this.state.previousModal.next(true)
   }
-  
-  loadPlanReport(){
+
+  loadPlanReport () {
     this.analysis = []
     this.$http.get(`/service/installed/report/meta-data`).then((response) => {
-      if (response.data){
+      if (response.data) {
         var reports = response.data
-        
+
         var twoDigits = (d) => d > 9 ? String(d) : '0' + d
         var date = new Date()
         var now = `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}`
-        //var prefix = `${now}_${this.plan.id}_${this.plan.areaName}_`
+        // var prefix = `${now}_${this.plan.id}_${this.plan.areaName}_`
         var prefix = `${now}_${this.plan.id}_`
-        
+
         var analysis = []
         reports.forEach((report) => {
           var reportName = `${prefix}${report.name}`
-          this.selectedFileType[reportName] = report.mediaTypes[0] //Choose the first media type by default          
+          this.selectedFileType[reportName] = report.mediaTypes[0] // Choose the first media type by default
 
           analysis.push({
             originalName: report.name,

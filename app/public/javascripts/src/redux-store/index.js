@@ -15,12 +15,12 @@ import user from '../react/components/user/user-reducer'
 const logger = createLogger({
   level: 'info',
   collapsed: true
-});
+})
 const socketMiddleware = createSocketMiddleware()
 
-let reducer = combineReducers({coverage, mapLayers, plan, selection, user})
+let reducer = combineReducers({ coverage, mapLayers, plan, selection, user })
 
 // Add support for Redux devtools extension. Yes, even in production.
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 var store = createStore(reducer, composeEnhancers(applyMiddleware(logger, thunk, socketMiddleware)))
 export default store

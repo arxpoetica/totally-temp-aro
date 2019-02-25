@@ -1,82 +1,80 @@
 class DataSourceUploadController {
-  
-  constructor($http, $timeout, state, aclManager) {
+  constructor ($http, $timeout, state, aclManager) {
     this.state = state
     this.$http = $http
     this.$timeout = $timeout
     this.aclManager = aclManager
     this.projectId = state.loggedInUser.projectId
-    this.conicTileSystemUploaderApi = null  // Will be set if the conic tile uploader is active
+    this.conicTileSystemUploaderApi = null // Will be set if the conic tile uploader is active
     this.editingDataset = {
       name: ''
     }
     this.isUpLoad = false
     this.isUpLoading = false
-    this.dataSourceMeta = {}  // Metadata for a data source (e.g. isLoading)
+    this.dataSourceMeta = {} // Metadata for a data source (e.g. isLoading)
 
     this.saCreationTypes = [
-      {id:"upload_file",label:"Upload From File"},
-      {id:"polygon_equipment",label:"Create Polygon From Equipment"},
-      {id:"draw_polygon",label:"Draw service areas on map"},
+      { id: 'upload_file', label: 'Upload From File' },
+      { id: 'polygon_equipment', label: 'Create Polygon From Equipment' },
+      { id: 'draw_polygon', label: 'Draw service areas on map' }
     ]
     this.saCreationType
     this.selectedEquipment
 
-    this.cableTypes =  ["FEEDER", "DISTRIBUTION", "IOF", "UNKNOWN", "COPPER"]
+    this.cableTypes = ['FEEDER', 'DISTRIBUTION', 'IOF', 'UNKNOWN', 'COPPER']
     this.selectedcableType = this.cableTypes[0]
-    //Default Polygon radius in meters
+    // Default Polygon radius in meters
     this.radius = 20000
 
-    var form;
+    var form
 
     this.isDataManagementView = false
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
-        if ($('#data_source_upload_modal input[type=file]').get(0)
-            && $('#data_source_upload_modal input[type=text]').get(0)) {  // Added IF for now. All this must go!
+        if ($('#data_source_upload_modal input[type=file]').get(0) &&
+            $('#data_source_upload_modal input[type=text]').get(0)) { // Added IF for now. All this must go!
           $('#data_source_upload_modal input[type=file]').get(0).value = ''
           $('#data_source_upload_modal input[type=text]').get(0).value = ''
-          
+
           form = $('#data_source_upload_modal form').get(0)
         }
       }, 0)
     })
-
   }
 
-  close() {
+  close () {
     this.state.showDataSourceUploadModal.next(false)
-    this.isDataManagementView = false    
+    this.isDataManagementView = false
   }
 
-  modalShown() {
+  modalShown () {
     this.state.showDataSourceUploadModal.next(true)
   }
 
-  modalHide() {
+  modalHide () {
     this.state.showDataSourceUploadModal.next(false)
-    this.isDataManagementView = false    
+    this.isDataManagementView = false
   }
 
-  onInitConicUploader(api) {
+  onInitConicUploader (api) {
     this.conicTileSystemUploaderApi = api
   }
 
-  onDestroyConicUploader() {
+  onDestroyConicUploader () {
     this.conicTileSystemUploaderApi = null
   }
 
-  registerSaveAccessCallback(saveResourceAccess) {
+  registerSaveAccessCallback (saveResourceAccess) {
     // We will call this function in resource-permissions-editor when we want to save the access settings for a data source.
     // Note that this will get overwritten every time we open a datasources access editor (and only one editor can be active at a time).
     this.saveResourceAccess = saveResourceAccess
   }
 
-  saveAccessSettings(dataSource) {
+  saveAccessSettings (dataSource) {
     // This will call a function into the resource permissions editor that will do the actual save
     if (this.saveResourceAccess) {
-      this.saveResourceAccess() 
+      this.saveResourceAccess()
         .then(() => Promise.all([
           this.state.loadPlanDataSelectionFromServer(),
           this.state.loadPlanResourceSelectionFromServer(),
@@ -88,33 +86,32 @@ class DataSourceUploadController {
     }
   }
 
-  save() {
-
+  save () {
     if (this.conicTileSystemUploaderApi) {
       // We have a conic system uploader API, so the upload will be handled by the control
       // Close dialog only after save is done, otherwise the FileList in the child control resets to 0
       this.isUploading = true
       this.conicTileSystemUploaderApi.save()
-      .then(() => {
-        this.isUploading = false
-        this.close()
-      })
-      .catch((err) => {
-        this.isUploading = false
-        console.error(err)
-      })
+        .then(() => {
+          this.isUploading = false
+          this.close()
+        })
+        .catch((err) => {
+          this.isUploading = false
+          console.error(err)
+        })
     } else if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'draw_polygon') {
       this.getLibraryId() // Just create Datasource
-      .then((result) => {
-        this.isUploading = false
-        this.close()
-        this.addDatasource(result)
-        // Put the application in "Edit Service Layer" mode
-        this.state.dataItems.service_layer.selectedLibraryItems[0] = result
-        this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
-        this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
-        this.state.loadServiceLayers()
-      })
+        .then((result) => {
+          this.isUploading = false
+          this.close()
+          this.addDatasource(result)
+          // Put the application in "Edit Service Layer" mode
+          this.state.dataItems.service_layer.selectedLibraryItems[0] = result
+          this.state.selectedDisplayMode.next(this.state.displayModes.VIEW)
+          this.state.activeViewModePanel = this.state.viewModePanels.EDIT_SERVICE_LAYER
+          this.state.loadServiceLayers()
+        })
       // Draw the layer by entering edit mode
     } else {
       if (this.state.uploadDataSource.name != 'service_layer' || this.saCreationType.id != 'polygon_equipment') {
@@ -135,18 +132,15 @@ class DataSourceUploadController {
       if (this.state.uploadDataSource.name === 'fiber') {
         this.setCableConstructionType(this.selectedcableType)
       } else {
-      this.getLibraryId()
-        .then((library) => {
-          if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'polygon_equipment')
-            this.layerBoundary(this.selectedEquipment.identifier,library.identifier)
-          else  
-            this.submit(library.identifier)
-        })
-      }  
+        this.getLibraryId()
+          .then((library) => {
+            if (this.state.uploadDataSource.name === 'service_layer' && this.saCreationType.id === 'polygon_equipment') { this.layerBoundary(this.selectedEquipment.identifier, library.identifier) } else { this.submit(library.identifier) }
+          })
+      }
     }
   }
 
-  getLibraryId() {
+  getLibraryId () {
     var dataType = this.state.uploadDataSource.name
 
     var libraryOptions = {
@@ -160,19 +154,19 @@ class DataSourceUploadController {
     }
 
     return this.$http(libraryOptions)
-    .then((response) => {
-      return Promise.resolve(response.data)
-    })
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
   }
 
-  submit(libraryId) {
+  submit (libraryId) {
     this.isUpLoad = true
-    var fd = new FormData();
+    var fd = new FormData()
     var file = $('#data_source_upload_modal input[type=file]').get(0).files[0]
-    fd.append("file", file);
+    fd.append('file', file)
     var fileExtension = file.name.substr(file.name.lastIndexOf('.') + 1).toUpperCase()
     var url = `/uploadservice/v1/library/${libraryId}?userId=${this.state.loggedInUser.id}&media=${fileExtension}`
-    
+
     this.$http.post(url, fd, {
       withCredentials: true,
       headers: { 'Content-Type': undefined },
@@ -184,10 +178,10 @@ class DataSourceUploadController {
     }).catch((e) => {
       this.isUpLoad = false
       swal('Error', e.statusText, 'error')
-    });
+    })
   }
 
-  layerBoundary(equipmentLibraryId,serviceLayerLibraryId) {
+  layerBoundary (equipmentLibraryId, serviceLayerLibraryId) {
     var boundaryOptions = {
       url: '/service/v1/project/' + this.projectId + '/serviceLayers-cmd?user_id=' + this.state.loggedInUser.id,
       method: 'POST',
@@ -201,37 +195,37 @@ class DataSourceUploadController {
     }
 
     return this.$http(boundaryOptions)
-    .then((e) => {
-      this.state.dataItems['service_layer'].allLibraryItems.push(e.data.serviceLayerLibrary)
-      this.isUpLoad = false
-      this.close()
-    })
+      .then((e) => {
+        this.state.dataItems['service_layer'].allLibraryItems.push(e.data.serviceLayerLibrary)
+        this.isUpLoad = false
+        this.close()
+      })
   }
 
-  setCableConstructionType(cableType) {
+  setCableConstructionType (cableType) {
     var cableOptions = {
       url: '/service/v1/library_cable?user_id=' + this.state.loggedInUser.id,
       method: 'POST',
       data: {
-        "libraryItem": {
-          "dataType": this.state.uploadDataSource.name,
-          "name": $('#data_source_upload_modal input[type=text]').get(0).value
+        'libraryItem': {
+          'dataType': this.state.uploadDataSource.name,
+          'name': $('#data_source_upload_modal input[type=text]').get(0).value
         },
-        "param": {
-          "param_type": "cable_param",
-          "fiberType": cableType
+        'param': {
+          'param_type': 'cable_param',
+          'fiberType': cableType
         }
       },
       json: true
     }
 
     return this.$http(cableOptions)
-    .then((response) => {
-      this.submit(response.data.libraryItem.identifier)
-    })
+      .then((response) => {
+        this.submit(response.data.libraryItem.identifier)
+      })
   }
 
-  deleteDatasource(dataSource) {
+  deleteDatasource (dataSource) {
     this.$http.delete(`/service/v1/library-entry/${dataSource.identifier}?user_id=${this.state.loggedInUser.id}`)
       .then(() => {
         this.state.dataItems[dataSource.dataType].allLibraryItems = this.state.dataItems[dataSource.dataType].allLibraryItems.filter(item => item.identifier !== dataSource.identifier)
@@ -239,16 +233,16 @@ class DataSourceUploadController {
       })
   }
 
-  addDatasource(data) {
+  addDatasource (data) {
     this.state.dataItems[data.dataType].allLibraryItems.push(data)
   }
 
-  loadDataSources() {
+  loadDataSources () {
     if (!this.state.uploadDataSource) {
-      return  // When items in state.js are being refreshed, this may be null as the combobox has a two-way binding to the model.
+      return // When items in state.js are being refreshed, this may be null as the combobox has a two-way binding to the model.
     }
-    if(this.isDataManagementView) {
-      var aclPromises = []  // For each data source, get the effective ACL permissions and then allow/disallow editing
+    if (this.isDataManagementView) {
+      var aclPromises = [] // For each data source, get the effective ACL permissions and then allow/disallow editing
       this.dataSourceMeta = {}
       var indexToIdentifier = {}
       this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => {
@@ -271,18 +265,17 @@ class DataSourceUploadController {
     }
   }
 
-  toggleDataSourceExpanded(dataSource) {
+  toggleDataSourceExpanded (dataSource) {
     const newValue = !this.dataSourceMeta[dataSource.identifier].isExpanded
     // Collapse all datasources, then expand/collapse the selected one
     this.state.dataItems[this.state.uploadDataSource.name].allLibraryItems.forEach((item, index) => this.dataSourceMeta[item.identifier].isExpanded = false)
     this.dataSourceMeta[dataSource.identifier].isExpanded = newValue
   }
 
-  toggleView() {
+  toggleView () {
     this.isDataManagementView = !this.isDataManagementView
     this.loadDataSources()
   }
-
 }
 
 DataSourceUploadController.$inject = ['$http', '$timeout', 'state', 'aclManager']

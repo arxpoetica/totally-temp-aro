@@ -8,7 +8,7 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 class LocationProperties {
-  constructor(workflowStateId, numberOfLocations = 1) {
+  constructor (workflowStateId, numberOfLocations = 1) {
     this.locationTypes = ['Household']
     this.selectedLocationType = this.locationTypes[0]
     this.numberOfLocations = numberOfLocations
@@ -18,7 +18,7 @@ class LocationProperties {
 }
 
 class LocationEditorController {
-  constructor($timeout, $http, $ngRedux, state, tracker) {
+  constructor ($timeout, $http, $ngRedux, state, tracker) {
     this.$timeout = $timeout
     this.$http = $http
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this)
@@ -35,37 +35,37 @@ class LocationEditorController {
     this.isExpandLocAttributes = false
 
     this.availableAttributesKeyList = ['loop_extended']
-    this.availableAttributesValueList = ['true','false']
+    this.availableAttributesValueList = ['true', 'false']
   }
 
-  registerObjectDeleteCallback(deleteObjectWithIdCallback) {
+  registerObjectDeleteCallback (deleteObjectWithIdCallback) {
     this.deleteObjectWithId = deleteObjectWithIdCallback
   }
 
-  registerCreateMapObjectsCallback(createMapObjects) {
+  registerCreateMapObjectsCallback (createMapObjects) {
     this.createMapObjects = createMapObjects
   }
 
-  registerRemoveMapObjectsCallback(removeMapObjects) {
+  registerRemoveMapObjectsCallback (removeMapObjects) {
     this.removeMapObjects = removeMapObjects
   }
 
-  registerDeleteCreatedMapObject(deleteCreatedMapObject){
+  registerDeleteCreatedMapObject (deleteCreatedMapObject) {
     this.deleteCreatedMapObjectWithId = deleteCreatedMapObject
   }
 
-  $onInit() {
+  $onInit () {
     this.resumeOrCreateTransaction()
-    config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers(this.locationLayers)    
+    config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers(this.locationLayers)
   }
-  
-  $onDestroy(){
+
+  $onDestroy () {
     // to bring bakc the hidden locations
     this.state.requestMapLayerRefresh.next(null)
     this.unsubscribeRedux()
   }
-  
-  resumeOrCreateTransaction() {
+
+  resumeOrCreateTransaction () {
     this.removeMapObjects && this.removeMapObjects()
     this.currentTransaction = null
     this.lastUsedNumberOfLocations = 1
@@ -97,8 +97,8 @@ class LocationEditorController {
         this.objectIdToMapObject = {}
         // Filter out all non-deleted features - we do not want to create map objects for deleted features.
         var features = result.data
-                         .filter((item) => item.crudAction !== 'delete')
-                         .map((item) => item.feature)
+          .filter((item) => item.crudAction !== 'delete')
+          .map((item) => item.feature)
         this.deletedFeatures = result.data.filter((item) => item.crudAction === 'delete')
         // Put the iconUrl in the features list
         features.forEach((item) => item.iconUrl = '/images/map_icons/aro/households_modified.png')
@@ -119,12 +119,12 @@ class LocationEditorController {
       })
   }
 
-  getFeaturesCount() {
+  getFeaturesCount () {
     // For this count we should show the deleted features too
     return (Object.keys(this.objectIdToProperties).length + this.deletedFeatures.length)
   }
 
-  commitTransaction() {
+  commitTransaction () {
     if (!this.currentTransaction) {
       console.error('No current transaction. We should never be in this state. Aborting commit...')
     }
@@ -143,23 +143,23 @@ class LocationEditorController {
         this.currentTransaction = null
         this.isCommiting = false
         this.state.recreateTilesAndCache()
-        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+        this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
         this.$timeout()
         console.error(err)
       })
   }
 
-  getObjectIconUrl() {
+  getObjectIconUrl () {
     // Hardcoded for now
     return Promise.resolve('/images/map_icons/aro/households_modified.png')
   }
 
-  getObjectSelectedIconUrl() {
+  getObjectSelectedIconUrl () {
     // Hardcoded for now
     return Promise.resolve('/images/map_icons/aro/households_selected.png')
   }
 
-  discardTransaction() {
+  discardTransaction () {
     swal({
       title: 'Delete transaction?',
       text: `Are you sure you want to delete transaction with ID ${this.currentTransaction.id} for library ${this.currentTransaction.libraryName}`,
@@ -181,7 +181,7 @@ class LocationEditorController {
           })
           .catch((err) => {
             this.currentTransaction = null
-            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO  // Close out this panel
+            this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO // Close out this panel
             this.$timeout()
             console.error(err)
           })
@@ -190,12 +190,12 @@ class LocationEditorController {
   }
 
   // Sets the last-used number-of-locations property so we can use it for new locations
-  setLastUsedNumberOfLocations(newValue) {
+  setLastUsedNumberOfLocations (newValue) {
     this.lastUsedNumberOfLocations = +newValue
   }
 
   // Marks the properties of the selected location as dirty (changed).
-  markSelectedLocationPropertiesDirty() {
+  markSelectedLocationPropertiesDirty () {
     if (this.selectedMapObject) {
       var objectProperties = this.objectIdToProperties[this.selectedMapObject.objectId]
       objectProperties.isDirty = true
@@ -203,9 +203,9 @@ class LocationEditorController {
   }
 
   // Saves the properties of the selected location to aro-service
-  saveSelectedLocationAndProperties() {
+  saveSelectedLocationAndProperties () {
     if (this.selectedMapObject) {
-      var selectedMapObject = this.selectedMapObject  // May change while the $http.post() is returning
+      var selectedMapObject = this.selectedMapObject // May change while the $http.post() is returning
       var locationObject = this.formatLocationForService(selectedMapObject.objectId)
       this.$http.put(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
         .then((result) => {
@@ -217,10 +217,10 @@ class LocationEditorController {
   }
 
   // Formats a location (based on the objectId) so that it can be sent in calls to aro-service
-  formatLocationForService(objectId) {
+  formatLocationForService (objectId) {
     var mapObject = this.objectIdToMapObject[objectId]
     var objectProperties = this.objectIdToProperties[objectId]
-    
+
     var featureObj = {
       objectId: objectId,
       geometry: {
@@ -234,23 +234,23 @@ class LocationEditorController {
       workflowState: WorkflowState.CREATED.name
     }
 
-    if(!mapObject.feature.hasOwnProperty('attributes')){
+    if (!mapObject.feature.hasOwnProperty('attributes')) {
       mapObject.feature.attributes = {}
     }
 
-    //featureObj.attributes = mapObject.feature.attributes
+    // featureObj.attributes = mapObject.feature.attributes
     Object.keys(mapObject.feature.attributes).forEach((key) => {
-      if(mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null'
-        && key != 'number_of_households') {
+      if (mapObject.feature.attributes[key] != null && mapObject.feature.attributes[key] != 'null' &&
+        key != 'number_of_households') {
         featureObj.attributes[key] = mapObject.feature.attributes[key]
       }
     })
-    
+
     return featureObj
   }
 
-  handleObjectCreated(mapObject, usingMapClick, feature) {
-    var numberOfLocations = this.lastUsedNumberOfLocations  // use last used number of locations until commit
+  handleObjectCreated (mapObject, usingMapClick, feature) {
+    var numberOfLocations = this.lastUsedNumberOfLocations // use last used number of locations until commit
     if (feature.attributes && feature.attributes.number_of_households) {
       numberOfLocations = +feature.attributes.number_of_households
     }
@@ -258,8 +258,8 @@ class LocationEditorController {
     this.objectIdToMapObject[mapObject.objectId] = mapObject
     var locationObject = this.formatLocationForService(mapObject.objectId)
     // The marker is editable if the state is not LOCKED or INVALIDATED
-    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id)
-                          || (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
+    const isEditable = !((feature.workflow_state_id & WorkflowState.LOCKED.id) ||
+                          (feature.workflow_state_id & WorkflowState.INVALIDATED.id))
 
     if (isEditable) {
       this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
@@ -267,12 +267,12 @@ class LocationEditorController {
     this.$timeout()
   }
 
-  handleSelectedObjectChanged(mapObject) {
-    if(!this.isExpandLocAttributes) this.selectedMapObject = mapObject
+  handleSelectedObjectChanged (mapObject) {
+    if (!this.isExpandLocAttributes) this.selectedMapObject = mapObject
     this.$timeout()
   }
 
-  handleObjectModified(mapObject) {
+  handleObjectModified (mapObject) {
     var locationObject = this.formatLocationForService(mapObject.objectId)
     this.$http.post(`/service/library/transaction/${this.currentTransaction.id}/features`, locationObject)
       .then((result) => {
@@ -282,64 +282,64 @@ class LocationEditorController {
       .catch((err) => console.error(err))
   }
 
-  handleObjectDeleted(mapObject) {
+  handleObjectDeleted (mapObject) {
     this.$http.delete(`/service/library/transaction/${this.currentTransaction.id}/features/${mapObject.objectId}`)
-    this.deleteCreatedMapObjectWithId && this.deleteCreatedMapObjectWithId(mapObject.objectId) //Delete location from map
+    this.deleteCreatedMapObjectWithId && this.deleteCreatedMapObjectWithId(mapObject.objectId) // Delete location from map
   }
 
-  deleteSelectedObject() {
+  deleteSelectedObject () {
     // Ask the map to delete the selected object. If successful, we will get a callback where we can delete the object from aro-service.
     if (this.selectedMapObject) {
       this.deleteObjectWithId && this.deleteObjectWithId(this.selectedMapObject.objectId)
     }
   }
-  
-  isBoundaryCreationAllowed(mapObject){
+
+  isBoundaryCreationAllowed (mapObject) {
     return false
   }
 
-  editLocationAttributes(index,updatedKey,updatedVal) {
-    //attribute key is updated
-    if(updatedKey != Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]){
-      //delete key and insert updated key,value
+  editLocationAttributes (index, updatedKey, updatedVal) {
+    // attribute key is updated
+    if (updatedKey != Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]) {
+      // delete key and insert updated key,value
       var key = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
 
-      this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = 
+      this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] =
         this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
 
       delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[key]
     } else {
-      //key is not updated, just update value
+      // key is not updated, just update value
       this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[updatedKey] = updatedVal
     }
   }
 
-  deleteLocationAttributes(index,key,val) {
+  deleteLocationAttributes (index, key, val) {
     var keypairToDelete = Object.keys(this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes)[index]
     delete this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes[keypairToDelete]
   }
 
-  addLocationAttributes() {
+  addLocationAttributes () {
     this.objectIdToMapObject[this.selectedMapObject.objectId].feature.attributes['att'] = 'value'
   }
 
-  getAttributes(search, list) {
-    var newAttr = list.slice();
+  getAttributes (search, list) {
+    var newAttr = list.slice()
     if (search && newAttr.indexOf(search) === -1) {
-      newAttr.unshift(search);
+      newAttr.unshift(search)
     }
-    return newAttr;
+    return newAttr
   }
 
-  getAttributesKey(search) {
+  getAttributesKey (search) {
     return this.getAttributes(search, this.availableAttributesKeyList)
   }
 
-  getAttributesValue(search) {
+  getAttributesValue (search) {
     return this.getAttributes(search, this.availableAttributesValueList)
   }
 
-  checkCanCreateObject(feature, usingMapClick) {
+  checkCanCreateObject (feature, usingMapClick) {
     // For frontier client check If households layer is enabled or not, If not enabled don't allow to create a object
     if (config.ARO_CLIENT === 'frontier' && !feature.isExistingObject) {
       var hhLocationLayer = this.locationLayers.filter((locationType) => locationType.label === 'Residential')[0]
@@ -359,21 +359,21 @@ class LocationEditorController {
     }
   }
 
-  modalShown() {
+  modalShown () {
     this.isExpandLocAttributes = true
   }
 
-  modalHide() {
+  modalHide () {
     this.isExpandLocAttributes = false
   }
 
-  mapStateToThis(state) {
+  mapStateToThis (state) {
     return {
       locationLayers: getLocationLayersList(state)
     }
   }
 
-  mapDispatchToTarget(dispatch) {
+  mapDispatchToTarget (dispatch) {
     return {
       selectAllLocationLayers: (locationLayers) => {
         locationLayers.forEach((layer) => {
@@ -383,7 +383,6 @@ class LocationEditorController {
       }
     }
   }
-
 }
 
 LocationEditorController.$inject = ['$timeout', '$http', '$ngRedux', 'state', 'tracker']

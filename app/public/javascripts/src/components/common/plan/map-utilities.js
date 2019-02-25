@@ -3,9 +3,8 @@ import Constants from '../constants'
 var gpsi = require('geojson-polygon-self-intersections')
 
 class MapUtilities {
-
   // Returns the tile coordinates (x, y) for a given lat/long and zoom level
-  static getTileCoordinates(zoom, lat, lng) {
+  static getTileCoordinates (zoom, lat, lng) {
     // Using Mercator projection.
     // https://gis.stackexchange.com/questions/133205/wmts-convert-geolocation-lat-long-to-tile-index-at-a-given-zoom-level
     var n = Math.pow(2.0, zoom)
@@ -19,7 +18,7 @@ class MapUtilities {
     }
   }
 
-  static getVisibleTiles(mapRef) {
+  static getVisibleTiles (mapRef) {
     if (!mapRef || !mapRef.getBounds()) {
       return
     }
@@ -47,7 +46,7 @@ class MapUtilities {
   }
 
   // Get the pixel coordinates of the clicked point WITHIN a tile (relative to the top left corner of the tile)
-  static getPixelCoordinatesWithinTile(zoom, tileCoords, lat, lng) {
+  static getPixelCoordinatesWithinTile (zoom, tileCoords, lat, lng) {
     // 1. Get the top left coordinates of the tile in lat lngs
     var nwCornerLatLng = this.getNWTileCornerLatLng(zoom, tileCoords.x, tileCoords.y)
     // 2. Convert to pixels
@@ -63,7 +62,7 @@ class MapUtilities {
 
   // Returns the latitiude and longitude of the northwest corner of a tile
   // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
-  static getNWTileCornerLatLng(tileZoom, tileX, tileY) {
+  static getNWTileCornerLatLng (tileZoom, tileX, tileY) {
     var n = Math.pow(2.0, tileZoom)
     var lon_deg = tileX / n * 360.0 - 180.0
     var lat_rad = Math.atan(Math.sinh(Math.PI * (1 - 2 * tileY / n)))
@@ -74,7 +73,7 @@ class MapUtilities {
     }
   }
 
-  static getTileLatLngBounds(tileZoom, tileX, tileY) {
+  static getTileLatLngBounds (tileZoom, tileX, tileY) {
     var NELatLng = MapUtilities.getNWTileCornerLatLng(tileZoom, tileX + 1, tileY)
     var SWLatLng = MapUtilities.getNWTileCornerLatLng(tileZoom, tileX, tileY + 1)
 
@@ -88,14 +87,14 @@ class MapUtilities {
 
   // Returns the GLOBAL pixel coordinates (not screen pixel coordinates) for a lat long
   // https://developers.google.com/maps/documentation/javascript/examples/map-coordinates
-  static getPixelCoordinatesFromLatLng(latLng, zoom) {
-    var siny = Math.sin(latLng.lat * Math.PI / 180);
+  static getPixelCoordinatesFromLatLng (latLng, zoom) {
+    var siny = Math.sin(latLng.lat * Math.PI / 180)
     // Truncating to 0.9999 effectively limits latitude to 89.189. This is
     // about a third of a tile past the edge of the world tile.
-    siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+    siny = Math.min(Math.max(siny, -0.9999), 0.9999)
 
-    var xUnscaled = Constants.TILE_SIZE * (0.5 + latLng.lng / 360);
-    var yUnscaled = Constants.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI));
+    var xUnscaled = Constants.TILE_SIZE * (0.5 + latLng.lng / 360)
+    var yUnscaled = Constants.TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI))
 
     var scale = Math.pow(2.0, zoom)
     return {
@@ -106,16 +105,16 @@ class MapUtilities {
 
   // https://www.npmjs.com/package/geojson-polygon-self-intersections
   // check for self Intersection of a polygon
-  static isPolygonValid(polygon) {
+  static isPolygonValid (polygon) {
     var options = {
       useSpatialIndex: false
     }
-    var selfIntersectingPoints = gpsi(polygon, function filterFn(unique) { return [unique] }, options)
-    return selfIntersectingPoints.length === 0 ? true : false
+    var selfIntersectingPoints = gpsi(polygon, function filterFn (unique) { return [unique] }, options)
+    return selfIntersectingPoints.length === 0
   }
 
   // Convert the paths in a Google Maps object into a Polygon WKT
-  static polygonPathsToWKT(paths) {
+  static polygonPathsToWKT (paths) {
     var allPaths = []
     paths.forEach((path) => {
       var pathPoints = []

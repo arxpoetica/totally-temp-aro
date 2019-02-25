@@ -1,9 +1,7 @@
 class UserAccountSettingsController {
-
-  constructor($http, globalSettingsService) {
+  constructor ($http, globalSettingsService) {
     this.globalSettingsService = globalSettingsService
   }
-
 }
 
 UserAccountSettingsController.$inject = ['$http', 'globalSettingsService']

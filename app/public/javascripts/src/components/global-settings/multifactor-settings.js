@@ -1,6 +1,5 @@
 class MultifactorSettingsController {
-
-  constructor($http, $timeout, $anchorScroll) {
+  constructor ($http, $timeout, $anchorScroll) {
     this.$http = $http
     this.$timeout = $timeout
     this.$anchorScroll = $anchorScroll
@@ -37,7 +36,7 @@ class MultifactorSettingsController {
 
   // Overwrite the TOTP secret for the user, and get it back so the user can sync with their app.
   // Note that this will overwrite any existing TOTP secret that the user has.
-  overwriteSecretForUser() {
+  overwriteSecretForUser () {
     this.isWaitingForResponse = true
     return this.$http.get('/multifactor/overwrite-totp-secret')
       .then(res => {
@@ -46,7 +45,7 @@ class MultifactorSettingsController {
         this.currentState = this.tfaStates.SECRET_GENERATED
         this.$timeout()
         const SECRET_EXPIRY = 120000 // milliseconds. Verify secret within this time.
-        this.$timeout(() => this.totpSecret = null, SECRET_EXPIRY)   // Do not hold the secret for long
+        this.$timeout(() => this.totpSecret = null, SECRET_EXPIRY) // Do not hold the secret for long
       })
       .catch(err => {
         this.currentState = this.tfaStates.UNDEFINED
@@ -55,7 +54,7 @@ class MultifactorSettingsController {
   }
 
   // Verify the TOTP secret for the user
-  verifySecretForUser() {
+  verifySecretForUser () {
     this.isWaitingForResponse = true
     this.errorMessage = null
     return this.$http.post('/multifactor/verify-totp-secret', { verificationCode: this.verificationCode })
@@ -76,14 +75,14 @@ class MultifactorSettingsController {
   }
 
   // Reset multi-factor authentication for the user
-  resetMultiFactorForUser() {
+  resetMultiFactorForUser () {
     this.verifySecretForUser()
       .then(() => this.overwriteSecretForUser())
       .catch(err => console.error(err))
   }
 
   // Disable multi-factor authentication for the user
-  disableMultiFactorForUser() {
+  disableMultiFactorForUser () {
     this.isWaitingForResponse = true
     this.$http.post(`/multifactor/delete-totp-settings`, { verificationCode: this.verificationCode })
       .then(res => {
@@ -103,7 +102,7 @@ class MultifactorSettingsController {
   }
 
   // For the currently logged in user, send an email with the current OTP
-  sendOTPByEmail() {
+  sendOTPByEmail () {
     this.$http.post('/send-totp-by-email', {})
       .then(() => {
         this.totpEmailSent = true

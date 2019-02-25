@@ -78,12 +78,12 @@ app.service('optimization', ($rootScope, $http, $q) => {
     var canceler = $q.defer()
 
     // Clear the geography selection from the plan
-    function clearGeographySelection(planId) {
+    function clearGeographySelection (planId) {
       return $http.post('/network_plan/' + planId + '/clearGeographySelection')
     }
 
     // Add the geographies to the plan
-    function addGeographiesToPlan(planId, geographies) {
+    function addGeographiesToPlan (planId, geographies) {
       if (!geographies || geographies.length === 0) {
         // No geographies to select. For example, if this is called from target builder.
         return Promise.resolve()
@@ -105,11 +105,11 @@ app.service('optimization', ($rootScope, $http, $q) => {
     }
 
     // Delete the analysis for the plan so that the state won't be 'COMPLETED' (or FAILED, etc)
-    function deletePlanAnalysis(planId) {
-      return $http.delete(`/service/v1/plan/${planId}/analysis?user_id=${user_id}`)   // user_id is a global variable :(
+    function deletePlanAnalysis (planId) {
+      return $http.delete(`/service/v1/plan/${planId}/analysis?user_id=${user_id}`) // user_id is a global variable :(
     }
 
-    function callOptimizationEndpoint(planId) {
+    function callOptimizationEndpoint (planId) {
       var url = '/network_plan/' + planId + '/edit'
       var options = {
         url: url,
@@ -121,7 +121,6 @@ app.service('optimization', ($rootScope, $http, $q) => {
     }
 
     function run (hideProgressBar) {
-
       // First clear any geography selections
       clearGeographySelection(plan.id)
         .then(addGeographiesToPlan.bind(null, plan.id, geographies))

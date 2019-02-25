@@ -1,10 +1,10 @@
 class SpeedCategory {
-  constructor(speed, units) {
+  constructor (speed, units) {
     this.speed = speed
     this.units = units
   }
 
-  toServiceCategory() {
+  toServiceCategory () {
     // Format the category in aro-service format
     const label = `${this.speed} ${this.units}`
     const multiplier = this.units === 'Mbps' ? 1 : 1000
@@ -15,7 +15,7 @@ class SpeedCategory {
     }
   }
 
-  static fromServiceCategory(serviceCategory) {
+  static fromServiceCategory (serviceCategory) {
     // Create a SpeedCategory object from an aro-service object formatted using the SpeedCategory.toServiceCategory() object
     if (serviceCategory.name !== serviceCategory.description) {
       console.warn('Service category name and description are different. They should be the same. Attempting to continue with name...')
@@ -27,34 +27,34 @@ class SpeedCategory {
     if (parts[1] !== 'Mbps' && parts[1] !== 'Gbps') {
       console.warn('Category units should be Mbps or Gbps')
     }
-   return new SpeedCategory(+serviceCategory.speed, parts[1])
+    return new SpeedCategory(+serviceCategory.speed, parts[1])
   }
 }
 
 class RateReachDistanceEditorController {
-  constructor($element, $http, $timeout, state) {
+  constructor ($element, $http, $timeout, state) {
     this.$element = $element
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
 
-    this.isCategoryInEditMode = []  // For each category hold a flag that tells us if it is being edited
-    this.editableCategories = []    // For each category, we have a "editable" category that we can copy back-and-forth
+    this.isCategoryInEditMode = [] // For each category hold a flag that tells us if it is being edited
+    this.editableCategories = [] // For each category, we have a "editable" category that we can copy back-and-forth
   }
 
-  $onInit() {
+  $onInit () {
     // Use JQuery-UI Sortable to allow the table rows to be sorted using drag-and-drop
     const sortableBody = this.$element.find('#rateReachDistanceEditorSortableBody')
     sortableBody.sortable({
       handle: '.row-draggable-handle',
       stop: this.handleSortOrderChanged.bind(this)
-    });
-    sortableBody.disableSelection();
+    })
+    sortableBody.disableSelection()
   }
 
-  handleSortOrderChanged(event, ui) {
+  handleSortOrderChanged (event, ui) {
     // The JQuery UI "sortable" widget has sorted the <tr> with the category, but our model has not updated.
-    // We will loop through the <tr>'s in the DOM and create a new model array with the new order, and then 
+    // We will loop through the <tr>'s in the DOM and create a new model array with the new order, and then
     // force angularjs to re-bind to our new model array.
     const newCategories = []
     const tableRows = this.$element.find('#rateReachDistanceEditorSortableBody tr')
@@ -68,7 +68,7 @@ class RateReachDistanceEditorController {
     this.$timeout()
   }
 
-  $doCheck() {
+  $doCheck () {
     if (this.oldCategories !== this.categories) {
       this.oldCategories = this.categories
       this.isCategoryInEditMode = []
@@ -82,7 +82,7 @@ class RateReachDistanceEditorController {
     }
   }
 
-  addCategory() {
+  addCategory () {
     // Add a new category and also add placeholder values for the categories
     var newCategory = null
     if (this.categoryType === 'SPEED') {
@@ -106,7 +106,7 @@ class RateReachDistanceEditorController {
     })
   }
 
-  removeCategory(categoryIndex) {
+  removeCategory (categoryIndex) {
     this.categories.splice(categoryIndex, 1)
     this.isCategoryInEditMode.splice(categoryIndex, 1)
     Object.keys(this.rateReachGroupMap).forEach(technology => {
@@ -116,7 +116,7 @@ class RateReachDistanceEditorController {
     })
   }
 
-  saveCategory(index) {
+  saveCategory (index) {
     // Copies over the "editable" category onto the service-formatted category
     if (this.categoryType === 'SPEED') {
       this.categories[index] = this.editableCategories[index].toServiceCategory()
@@ -131,7 +131,7 @@ class RateReachDistanceEditorController {
             }
           })
         })
-      })  
+      })
     } else {
       this.categories[index] = this.editableCategories[index]
       // No need to copy over the speeds to the distance/speed maps

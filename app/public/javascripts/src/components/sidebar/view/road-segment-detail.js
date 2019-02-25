@@ -1,19 +1,19 @@
 class RoadSegmentDetailController {
-  constructor(state, $timeout) {
+  constructor (state, $timeout) {
     this.state = state
     this.$timeout = $timeout
     this.selectedEdgeInfo = null
     this.isSingleRoad
 
     state.clearViewMode.subscribe((clear) => {
-      if(clear) {
+      if (clear) {
         this.selectedEdgeInfo = null
         this.updateSelectedState()
       }
     })
 
     this.mapFeaturesSelectedEventObserver = state.mapFeaturesSelectedEvent.skip(1).subscribe((event) => {
-      //On click of equipment or location dont show road segment details
+      // On click of equipment or location dont show road segment details
       if (event.hasOwnProperty('equipmentFeatures') && event.equipmentFeatures.length > 0) return
       if (event.hasOwnProperty('locations') && event.locations.length > 0) return
       if (this.state.activeViewModePanel === this.state.viewModePanels.EDIT_LOCATIONS) return
@@ -35,32 +35,31 @@ class RoadSegmentDetailController {
     })
   }
 
-  isFeatureListEmpty(event) {
+  isFeatureListEmpty (event) {
     var isObjectEmpty = true
     var features = Object.keys(event)
     for (let i = 0; i < features.length; i++) {
-      if("latLng" == features[i] || "roadSegments" == features[i]) continue
+      if (features[i] == 'latLng' || features[i] == 'roadSegments') continue
       if (event[features[i]].length > 0 || [...event[features[i]]].length > 0) isObjectEmpty = false
     }
 
     return isObjectEmpty
   }
 
-  generateRoadSegmentsInfo(roadSegments) {
-
+  generateRoadSegmentsInfo (roadSegments) {
     var roadSegmentsInfo = {
     }
 
-    if(roadSegments.size == 1) {
-      roadSegmentsInfo.gid =  [...roadSegments][0].gid
-      roadSegmentsInfo.edge_length =  [...roadSegments][0].edge_length.toFixed(2)
+    if (roadSegments.size == 1) {
+      roadSegmentsInfo.gid = [...roadSegments][0].gid
+      roadSegmentsInfo.edge_length = [...roadSegments][0].edge_length.toFixed(2)
     } else {
       roadSegmentsInfo.totalLength = [...roadSegments].reduce((total, item) => { return total + item.edge_length }, 0).toFixed(2)
       roadSegmentsInfo.count = roadSegments.length
     }
 
-    //Temp values
-    //Later we have to load it from response
+    // Temp values
+    // Later we have to load it from response
     var constructionTypes = {
       aerial: Math.floor(roadSegments.size / 2),
       buried: Math.floor(roadSegments.size / 2)
@@ -72,24 +71,24 @@ class RoadSegmentDetailController {
 
     roadSegmentsInfo.constructionTypes = constructionTypes
     roadSegmentsInfo.roadTypes = roadTypes
-    
+
     return roadSegmentsInfo
   }
 
-  updateSelectedState(){
+  updateSelectedState () {
     var newSelection = this.state.cloneSelection()
     newSelection.details.roadSegments = new Set()
-    if ('undefined' != typeof feature && 'undefined' != typeof id){
+    if (typeof feature !== 'undefined' && typeof id !== 'undefined') {
       newSelection.editable.roadSegments[ id ] = feature
     }
     this.state.selection = newSelection
   }
 
-  viewRoadSegmentInfo() {
+  viewRoadSegmentInfo () {
     this.state.activeViewModePanel = this.state.viewModePanels.ROAD_SEGMENT_INFO
   }
 
-  $onDestroy() {
+  $onDestroy () {
     this.mapFeaturesSelectedEventObserver.unsubscribe()
   }
 }

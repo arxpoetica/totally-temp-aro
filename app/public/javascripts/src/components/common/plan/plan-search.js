@@ -1,6 +1,5 @@
 class PlanSearchController {
-
-  constructor($http, $timeout, state) {
+  constructor ($http, $timeout, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.state = state
@@ -8,7 +7,7 @@ class PlanSearchController {
     this.search_text = ''
     this.searchText = []
     this.searchList = []
-    this.allPlans  = false
+    this.allPlans = false
     this.systemUsers = []
     this.planOptions = {
       url: '/service/v1/plan',
@@ -19,26 +18,25 @@ class PlanSearchController {
     this.creatorsSearchList = []
   }
 
-  $onInit() {
+  $onInit () {
     this.loadPlans(1)
   }
 
-  $onChanges(changesObj) {
+  $onChanges (changesObj) {
     if (changesObj && changesObj.systemActors) {
       this.systemUsers = this.systemActors
-                          .filter((item) => item.type === 'user')
-                          .map(item => {
-                            var user = angular.copy(item)
-                            user.type = 'created_by'  // Just a lot of legacy stuff that depends upon this
-                            return user
-                          })
+        .filter((item) => item.type === 'user')
+        .map(item => {
+          var user = angular.copy(item)
+          user.type = 'created_by' // Just a lot of legacy stuff that depends upon this
+          return user
+        })
 
-      this.creatorsSearchList = this.systemUsers.slice(10)                          
+      this.creatorsSearchList = this.systemUsers.slice(10)
     }
   }
 
-  loadServiceAreaInfo(plans) {
-
+  loadServiceAreaInfo (plans) {
     // Load service area ids for all service areas referenced by the plans
     // First determine which ids to fetch. We might already have a some or all of them
     var serviceAreaIdsToFetch = new Set()
@@ -54,11 +52,11 @@ class PlanSearchController {
     }
 
     // Get the ids from aro-service
-    let serviceAreaIds = [...serviceAreaIdsToFetch];
+    let serviceAreaIds = [...serviceAreaIdsToFetch]
     var promises = []
-    while(serviceAreaIds.length) {
+    while (serviceAreaIds.length) {
       var filter = ''
-      serviceAreaIds.splice(0,100).forEach((serviceAreaId, index) => {
+      serviceAreaIds.splice(0, 100).forEach((serviceAreaId, index) => {
         if (index > 0) {
           filter += ' or '
         }
@@ -68,29 +66,27 @@ class PlanSearchController {
       promises.push(this.$http.get(`/service/odata/servicearea?$select=id,code&$filter=${filter}&$orderby=id&$top=10000`))
     }
 
-    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http,this.state,promises)
-    .then((result) => {
-      result.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
-      this.$timeout()
-    })
-    .catch((err) => console.error(err))
-
+    return this.state.StateViewMode.loadListOfSAPlanTagsById(this.$http, this.state, promises)
+      .then((result) => {
+        result.forEach((serviceArea) => this.idToServiceAreaCode[serviceArea.id] = serviceArea.code)
+        this.$timeout()
+      })
+      .catch((err) => console.error(err))
   }
 
-  loadPlans(page, callback) {
+  loadPlans (page, callback) {
     this.constructSearch()
     this.currentPage = page || 1
     this.maxResults = 10
     if (page > 1) {
-      var start = this.maxResults * (page - 1);
-      var end = start + this.maxResults;
-      this.plans = this.allPlans.slice(start, end);
+      var start = this.maxResults * (page - 1)
+      var end = start + this.maxResults
+      this.plans = this.allPlans.slice(start, end)
       this.loadServiceAreaInfo(this.plans)
-      return;
+      return
     }
 
     var load = (callback) => {
-
       this.planOptions.params.user_id = this.state.loggedInUser.id
       this.planOptions.params.search = this.search_text
       this.planOptions.params.project_template_id = this.state.loggedInUser.projectId
@@ -111,13 +107,13 @@ class PlanSearchController {
                 plan.optimizationState = info.optimizationState
               }
             })
-            this.allPlans = _.sortBy(response.data, 'name');
-            this.plans = this.allPlans.slice(0, this.maxResults);
+            this.allPlans = _.sortBy(response.data, 'name')
+            this.plans = this.allPlans.slice(0, this.maxResults)
             this.loadServiceAreaInfo(this.plans)
-            this.pages = [];
-            var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0);
+            this.pages = []
+            var pageSize = Math.floor(response.data.length / this.maxResults) + (response.data.length % this.maxResults > 0 ? 1 : 0)
             for (var i = 1; i <= pageSize; i++) {
-              this.pages.push(i);
+              this.pages.push(i)
             }
 
             callback && callback()
@@ -127,10 +123,10 @@ class PlanSearchController {
     load(callback)
   }
 
-  constructSearch() {
+  constructSearch () {
     this.search_text = ''
-    var selectedFilterPlans = _.filter(this.searchText,(plan) => {
-      if(_.isString(plan)) return plan
+    var selectedFilterPlans = _.filter(this.searchText, (plan) => {
+      if (_.isString(plan)) return plan
     })
     const typeToProperty = {
       svc: 'code',
@@ -138,17 +134,17 @@ class PlanSearchController {
       created_by: 'fullName'
     }
     var selectedFilters = this.searchText
-                            .filter((item) => typeof item !== 'string')
-                            .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
-    if(selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
+      .filter((item) => typeof item !== 'string')
+      .map((item) => `${item.type}:\"${item[typeToProperty[item.type]]}\"`)
+    if (selectedFilterPlans.length > 0) selectedFilters = selectedFilters.concat(`"${selectedFilterPlans.join(' ')}"`)
     this.search_text = selectedFilters.join(' ')
   }
 
-  onPlanClicked(plan) {
+  onPlanClicked (plan) {
     this.onPlanSelected && this.onPlanSelected({ plan: plan })
   }
 
-  onPlanDeleteClicked(plan) {
+  onPlanDeleteClicked (plan) {
     if (this.onPlanDeleteRequested) {
       this.onPlanDeleteRequested({ plan: plan })
         .then(() => {
@@ -161,69 +157,68 @@ class PlanSearchController {
     }
   }
 
-  getTagCategories(currentPlanTags) {
-    return this.state.listOfTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  getTagCategories (currentPlanTags) {
+    return this.state.listOfTags.filter(tag => _.contains(currentPlanTags, tag.id))
   }
 
-  getSATagCategories(currentPlanTags) {
-    return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags,tag.id))
+  getSATagCategories (currentPlanTags) {
+    return this.state.listOfServiceAreaTags.filter(tag => _.contains(currentPlanTags, tag.id))
   }
 
-  applySearchFilter(selectedFilters, type) {
-    const filters = selectedFilters.map(item => { 
+  applySearchFilter (selectedFilters, type) {
+    const filters = selectedFilters.map(item => {
       item.type = type
       return item
-    }) 
+    })
     this.applySearch(filters)
   }
 
-  applySearch(filters) {
+  applySearch (filters) {
     this.searchText = _.uniq(this.searchText.concat(filters))
     this.searchList = _.uniq(this.searchList.concat(filters))
     this.loadPlans()
   }
 
-  sortBy(key, descending) {
+  sortBy (key, descending) {
     this.sortField = key
     this.descending = descending
   }
 
-  loadSortBy(key, descending) {
-    this.planOptions.params.$orderby = key + " " + descending
+  loadSortBy (key, descending) {
+    this.planOptions.params.$orderby = key + ' ' + descending
     this.loadPlans()
   }
 
-  updateTag(plan,removeTag) {
+  updateTag (plan, removeTag) {
     var updatePlan = plan
-    if(removeTag.type == 'svc') {
+    if (removeTag.type == 'svc') {
       updatePlan.tagMapping.linkTags.serviceAreaIds = _.without(updatePlan.tagMapping.linkTags.serviceAreaIds, removeTag.tag.id)
     } else {
       updatePlan.tagMapping.global = _.without(updatePlan.tagMapping.global, removeTag.tag.id)
     }
-    
-    return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`,updatePlan)
-    .then((response) => {
-      this.loadPlans()
-    })
+
+    return this.$http.put(`/service/v1/plan?user_id=${this.state.loggedInUser.id}`, updatePlan)
+      .then((response) => {
+        this.loadPlans()
+      })
   }
 
-  openReport() {
+  openReport () {
     this.state.networkPlanModal.next(false)
-    //This previous modal will show after close the report
+    // This previous modal will show after close the report
     this.state.previousModal = this.state.networkPlanModal
     this.state.reportModal.next(true)
   }
 
-  getPlanCreatorName(createdBy) {
+  getPlanCreatorName (createdBy) {
     var creator = this.state.systemActors.filter((creator) => creator.id === createdBy)[0]
     return creator && creator.fullName
   }
 
-  searchCreatorsList(searchObj){
+  searchCreatorsList (searchObj) {
     this.creatorsSearchList = this.systemUsers.filter((creator) => {
-      if(creator.fullName.toLocaleLowerCase().includes(searchObj.toLocaleLowerCase()))
-        return creator
-    }) 
+      if (creator.fullName.toLocaleLowerCase().includes(searchObj.toLocaleLowerCase())) { return creator }
+    })
   }
 }
 

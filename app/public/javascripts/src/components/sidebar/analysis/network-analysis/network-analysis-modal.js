@@ -1,9 +1,9 @@
 class NetworkAnalysisModalController {
-  constructor(state) {
+  constructor (state) {
     this.state = state
   }
 
-  onHideModal() {
+  onHideModal () {
     // The modal binds to the value of showNetworkAnalysisOutput. Set it to false so that the
     // next time it changes to "true" the modal will be shown.
     this.state.showNetworkAnalysisOutput = false

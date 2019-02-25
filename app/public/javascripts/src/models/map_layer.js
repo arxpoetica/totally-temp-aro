@@ -1,7 +1,7 @@
 /* global app google map _ encodeURIComponent document $ */
 'use strict'
 
-app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notification) => {
+app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils, Notification) => {
   var plan = null
   $rootScope.$on('plan_selected', (e, p) => {
     plan = p
@@ -10,18 +10,17 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
   var all = []
 
   return class MapLayer {
-
     // Keep all Z indices of map layers in one place.
     // This is the region (e.g. wirecenter boundary) that is *selected*. This was created so that the selected
     // wirecenter boundary always appears on top of other boundaries without z-fighting
-    static get Z_INDEX_SELECTED_REGION() { return 2 }
+    static get Z_INDEX_SELECTED_REGION () { return 2 }
 
-    // Fiber strands have a higher z index because we want their events (e.g. mouseover) to fire even when 
+    // Fiber strands have a higher z index because we want their events (e.g. mouseover) to fire even when
     // a wirecenter boundary is selected
-    static get Z_INDEX_FIBER_STRANDS() { return 3 }
+    static get Z_INDEX_FIBER_STRANDS () { return 3 }
 
     // The "upward route" fiber strands have a higher z index because they should appear on top of the other fiber strands.
-    static get Z_INDEX_UPWARD_FIBER_STRANDS() { return 4 }
+    static get Z_INDEX_UPWARD_FIBER_STRANDS () { return 4 }
 
     static isEquipmentVisible () {
       return all.some((layer) => {
@@ -73,11 +72,11 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
       this.heatmap = options.heatmap
       this.hoverField = options.hoverField
       this.clickField = options.clickField
-      this.visibilityThreshold  =  options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
+      this.visibilityThreshold = options.visibilityThreshold || config.ui.map_tools.layerVisibilityThresh
       this.isBoundaryLayer = options.isBoundaryLayer || false
       this.scaleIcon = options.scaleIcon || false
       this.onDataLoaded = options.onDataLoaded || false
-      
+
       this.setDeclarativeStyle(options.declarativeStyles)
 
       var data_layer = this.data_layer
@@ -161,8 +160,8 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
             this.markAsDirty()
           }
 
-          if(this.scaleIcon){
-              this.data_layer.revertStyle()    ;
+          if (this.scaleIcon) {
+            this.data_layer.revertStyle()
           }
         })
       })
@@ -191,7 +190,7 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
         }
         var icon = !styles.icon && feature.getProperty('icon')
         if (icon) {
-          styles.icon = icon;
+          styles.icon = icon
         }
         this.declarativeStyles && this.declarativeStyles(feature, styles)
         return styles
@@ -291,10 +290,10 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
 
     // Load GeoJSON data into the layer if it's not already loaded
     loadData () {
-      if(map && (map.getZoom() < this.visibilityThreshold) && ((this.heatmapLayer) && this.heatmapLayer.getData().length > 0 || this.features.length > 0)){
-        this.clearData();
-        Notification.info({message: 'Layers Hidden, Zoom threshold exceeded.', positionY: 'bottom', positionX: 'right'})
-        return;
+      if (map && (map.getZoom() < this.visibilityThreshold) && ((this.heatmapLayer) && this.heatmapLayer.getData().length > 0 || this.features.length > 0)) {
+        this.clearData()
+        Notification.info({ message: 'Layers Hidden, Zoom threshold exceeded.', positionY: 'bottom', positionX: 'right' })
+        return
       }
 
       if (this.type !== 'wirecenter' && (!this.data_loaded || this.dirty)) {
@@ -318,7 +317,7 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
           _.extend(params, this.http_params || {})
           this.is_loading = true
           var api_endpoint = this.api_endpoint
-                                .replace(/\:plan_id/g, (plan && plan.id) || '')
+            .replace(/\:plan_id/g, (plan && plan.id) || '')
 
           if (this._canceler) {
             this._canceler.promise.canceled = true
@@ -334,72 +333,71 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
             params: params,
             timeout: this._canceler.promise
           })
-          .then((response) => {
-            if (response.status >= 200 && response.status <= 299) {
-              spinner.removeClass('spin')
-              this.is_loading = false
-              var data = response.data
-              // hide layer to change styles "in background"
-              var visible = this.visible
-              this.hide()
-              this.clearData()
-              if (this.heatmapLayer && params.zoom <= params.threshold) {
-                this.heatmapLayer.setData(
-                  data.feature_collection.features.map((feature) => {
-                    var coordinates = feature.geometry.coordinates
-                    var density = feature.properties.density
-                    return {
-                      location: new google.maps.LatLng(coordinates[1], coordinates[0]),
-                      weight: density
-                    }
-                  })
-                )
-                this.heatmapLayer.setMap(map)
-              } else {
-                var covArr = [];
+            .then((response) => {
+              if (response.status >= 200 && response.status <= 299) {
+                spinner.removeClass('spin')
+                this.is_loading = false
+                var data = response.data
+                // hide layer to change styles "in background"
+                var visible = this.visible
+                this.hide()
+                this.clearData()
+                if (this.heatmapLayer && params.zoom <= params.threshold) {
+                  this.heatmapLayer.setData(
+                    data.feature_collection.features.map((feature) => {
+                      var coordinates = feature.geometry.coordinates
+                      var density = feature.properties.density
+                      return {
+                        location: new google.maps.LatLng(coordinates[1], coordinates[0]),
+                        weight: density
+                      }
+                    })
+                  )
+                  this.heatmapLayer.setMap(map)
+                } else {
+                  var covArr = []
 
-                var featureCollection = data.feature_collection;
-                //handle coverage_geom in the api call if needed
-                if(this.is_coverage){
+                  var featureCollection = data.feature_collection
+                  // handle coverage_geom in the api call if needed
+                  if (this.is_coverage) {
+                  // iterate through features
+                    featureCollection.features.map((feature) => {
+                      var temp = {}
+                      // copy the actual data in case #passbyreference
+                      angular.copy(feature, temp)
 
-                  //iterate through features
-                  featureCollection.features.map((feature) => {
-                    var temp = {};
-                    //copy the actual data in case #passbyreference
-                    angular.copy(feature , temp);
+                      // extract the coverage_geom
+                      var geom = temp.properties.coverage_geom
+                      delete temp.properties.coverage_geom
 
-                    //extract the coverage_geom
-                    var geom = temp.properties.coverage_geom;
-                    delete temp.properties.coverage_geom;
-
-                    if(geom){
-                      var _fet = {
-                          geometry : geom,
+                      if (geom) {
+                        var _fet = {
+                          geometry: geom,
                           properties: temp.properties,
                           type: 'Feature'
+                        }
+                        covArr.push(_fet)
                       }
-                      covArr.push(_fet);
-                    }
-                  })
-                  // create a geoJSON for secondary geometry
-                  featureCollection = {features : covArr , type : "FeatureCollection"}
-                } 
-                this.addGeoJson(featureCollection)
-                this.heatmapLayer && this.heatmapLayer.setMap(null)
+                    })
+                    // create a geoJSON for secondary geometry
+                    featureCollection = { features: covArr, type: 'FeatureCollection' }
+                  }
+                  this.addGeoJson(featureCollection)
+                  this.heatmapLayer && this.heatmapLayer.setMap(null)
+                }
+                this.metadata = data.metadata
+                this.data_loaded = true
+                this._createHovers()
+                this._createClickListener()
+                this.onDataLoaded && this.onDataLoaded(this)
+                $rootScope.$broadcast('map_layer_loaded_data', this)
+                this.configureFeatureStyles()
+                // set the layer visible or not again
+                this.setVisible(visible)
+              } else {
+                spinner.removeClass('spin')
               }
-              this.metadata = data.metadata
-              this.data_loaded = true
-              this._createHovers()
-              this._createClickListener()
-              this.onDataLoaded && this.onDataLoaded(this)
-              $rootScope.$broadcast('map_layer_loaded_data', this)
-              this.configureFeatureStyles()
-              // set the layer visible or not again
-              this.setVisible(visible)
-            } else {
-              spinner.removeClass('spin')
-            }
-          })
+            })
         }
       }
     }
@@ -424,8 +422,8 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
       if (!this.clickField) return
       var dataLayer = this.data_layer
       this.data_layer.addListener('click', (event) => {
-        $rootScope.$broadcast('map_layer_census_block_click',event.feature)
-      }) 
+        $rootScope.$broadcast('map_layer_census_block_click', event.feature)
+      })
     }
 
     setApiEndpoint (api_endpoint, params) {
@@ -568,15 +566,15 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
       if (!this.visible) return
       var changes = this.createEmptyChanges()
 
-      var matchingFeatures = [];
+      var matchingFeatures = []
       this.data_layer.forEach((feature) => {
         if (func(feature)) {
           this.setFeatureSelected(feature, select, changes)
-          matchingFeatures.push(feature);
+          matchingFeatures.push(feature)
         }
       })
       this.broadcastChanges(changes)
-      $rootScope.$broadcast('map_layer_selected_items',this , matchingFeatures);
+      $rootScope.$broadcast('map_layer_selected_items', this, matchingFeatures)
     }
 
     remove () {
@@ -607,6 +605,5 @@ app.service('MapLayer', ($http, $rootScope, map_tools, $q, map_utils,Notificatio
       this.threshold = threshold || 0
       this.reloadData()
     }
-
   }
 })

@@ -1,8 +1,6 @@
 class PolylineFeatureRenderer {
-
   // Renders a polyline feature onto the canvas
-  static renderFeature(shape, geometryOffset, ctx, mapLayer, drawingStyleOverrides, isPolygonBorder, tileSize) {
-
+  static renderFeature (shape, geometryOffset, ctx, mapLayer, drawingStyleOverrides, isPolygonBorder, tileSize) {
     const oldOpacity = ctx.globalAlpha
     if (drawingStyleOverrides && drawingStyleOverrides.lineOpacity) {
       ctx.globalAlpha = drawingStyleOverrides.lineOpacity
@@ -47,7 +45,7 @@ class PolylineFeatureRenderer {
     ctx.globalAlpha = oldOpacity
   }
   // Draws an arrow showing the direction of a polyline
-  static drawPolylineDirection(shape, geometryOffset, ctx, strokeStyle) {
+  static drawPolylineDirection (shape, geometryOffset, ctx, strokeStyle) {
     if (shape.length <= 1) {
       return // Nothing to do
     }
@@ -63,15 +61,15 @@ class PolylineFeatureRenderer {
       polylineLength += segmentLength
     }
 
-    const arrowLength = 5, arrowWidth = 5
+    const arrowLength = 5; const arrowWidth = 5
     if (polylineLength < arrowLength * 2.0) {
       // Polyline is too small at this zoom level. Do not draw an arrow
       return
     }
 
     // Now travel along the polyline and find the point that is in the middle
-    var xCenter = NaN, yCenter = NaN
-    var currentSegment = 0, centerSegment = -1
+    var xCenter = NaN; var yCenter = NaN
+    var currentSegment = 0; var centerSegment = -1
     var remainingDistance = polylineLength / 2
     while (remainingDistance > 0 && currentSegment < segmentLengths.length) {
       if (segmentLengths[currentSegment] < remainingDistance) {

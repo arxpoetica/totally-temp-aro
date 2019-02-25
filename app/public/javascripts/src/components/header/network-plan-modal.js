@@ -1,18 +1,18 @@
 class NetworkPlanModalController {
-  constructor(state) {
-    this.state    = state
+  constructor (state) {
+    this.state = state
     this.loadPlan = false
   }
 
-  close() {
+  close () {
     this.state.networkPlanModal.next(false)
   }
 
-  modalShown() {
+  modalShown () {
     this.state.networkPlanModal.next(true)
   }
 
-  modalHide() {
+  modalHide () {
     this.state.networkPlanModal.next(false)
   }
 }

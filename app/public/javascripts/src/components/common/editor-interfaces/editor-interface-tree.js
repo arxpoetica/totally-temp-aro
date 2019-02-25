@@ -2,73 +2,73 @@
 // boxes for string, boolean and integer types. Objects can be nested as deep as required (though it
 // will get unweildy to use with too much nesting). Editing of arrays is NOT supported as of now.
 
-//ToDo: inherit from AroObjectEditorController 
+// ToDo: inherit from AroObjectEditorController
 
 class EditorInterfaceTreeController {
-  constructor() {
+  constructor () {
     // Store the "Object.keys()" function so we can use it in the markup
     this.ObjectKeys = Object.keys
     this.pixelsPerIndentationLevel = 20
     this.isKeyExpanded = {}
   }
 
-  $onInit() {
+  $onInit () {
     this.indentationLevel = this.indentationLevel || 0
   }
-  
-  toggleIsKeyExpanded(index) {
+
+  toggleIsKeyExpanded (index) {
     this.isKeyExpanded[index] = !this.isKeyExpanded[index]
   }
-  
-  doShow(prop, data){
-    if ('undefined' == typeof data || null == data) data = this.objectToView
-    if ('undefined' == typeof data || null == data) return false
+
+  doShow (prop, data) {
+    if (typeof data === 'undefined' || data == null) data = this.objectToView
+    if (typeof data === 'undefined' || data == null) return false
     if (!prop.visible) return false
     if (!data.hasOwnProperty(prop.propertyName)) return false
-    
+
     return true
   }
-  
-  isList(){
-    return ('undefined' != typeof this.objectMetaData && this.objectMetaData.displayDataType.startsWith('array') )
+
+  isList () {
+    return (typeof this.objectMetaData !== 'undefined' && this.objectMetaData.displayDataType.startsWith('array'))
   }
-  
-  getSummeryCount(propVal){
+
+  getSummeryCount (propVal) {
     var summeryCount = 0
-    if ("undefined" != typeof propVal && "function" == typeof propVal.getDisplayProperties){
+    if (typeof propVal !== 'undefined' && typeof propVal.getDisplayProperties === 'function') {
       var props = propVal.getDisplayProperties()
-      for (var i=0; i<props.length; i++){
-        if (props[i].hasOwnProperty('levelOfDetail') && "1" == props[i].levelOfDetail){
+      for (var i = 0; i < props.length; i++) {
+        if (props[i].hasOwnProperty('levelOfDetail') && props[i].levelOfDetail == '1') {
           summeryCount++
         }
       }
     }
-    
+
     return summeryCount
   }
-  
-  hasChildren(data){
-    if ('undefined' == typeof data || null == data) return false
-    return ('function' == typeof data.getDisplayProperties)
+
+  hasChildren (data) {
+    if (typeof data === 'undefined' || data == null) return false
+    return (typeof data.getDisplayProperties === 'function')
   }
-  
-  addItem(propVal, prop){
-    // the weird extra () down there is because of the way angular stores function references 
-    // this.getNewListItem() actualy returns the function signature then the following (prop.propertyName) calls it with our parameter 
-    var newItem = this.getNewListItem()(prop.propertyName) 
-    if ('undefined' != typeof newItem){
-      propVal.push( newItem )
+
+  addItem (propVal, prop) {
+    // the weird extra () down there is because of the way angular stores function references
+    // this.getNewListItem() actualy returns the function signature then the following (prop.propertyName) calls it with our parameter
+    var newItem = this.getNewListItem()(prop.propertyName)
+    if (typeof newItem !== 'undefined') {
+      propVal.push(newItem)
       this.onChange()
     }
   }
-  
-  deleteItem(parent, index, metaData){
+
+  deleteItem (parent, index, metaData) {
     if (!this.isEdit) return
-    var itemName = metaData.displayName +' '+ (index+1)
-    
+    var itemName = metaData.displayName + ' ' + (index + 1)
+
     swal({
-      title: 'Delete '+itemName+'?',
-      text: 'Are you sure you want to delete '+itemName+'?',
+      title: 'Delete ' + itemName + '?',
+      text: 'Are you sure you want to delete ' + itemName + '?',
       type: 'warning',
       confirmButtonColor: '#DD6B55',
       confirmButtonText: 'Yes, delete',
@@ -82,9 +82,7 @@ class EditorInterfaceTreeController {
         this.onChange()
       }
     })
-    
   }
-  
 }
 
 // AroInfoObjectViewController.$inject = []
@@ -92,14 +90,14 @@ class EditorInterfaceTreeController {
 let editorInterfaceTree = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-tree.html',
   bindings: {
-    objectToView: '=',      
-    objectMetaData: '<', 
-    onChange: '&', 
-    getNewListItem: '&', 
-    isEdit: '<', 
-    parentObj: '=', 
-    rootMetaData: '<', 
-    indentationLevel: '<' 
+    objectToView: '=',
+    objectMetaData: '<',
+    onChange: '&',
+    getNewListItem: '&',
+    isEdit: '<',
+    parentObj: '=',
+    rootMetaData: '<',
+    indentationLevel: '<'
   },
   controller: EditorInterfaceTreeController
 }

@@ -1,39 +1,37 @@
 class locationAuditLogController {
-
-  constructor($http,state) {
+  constructor ($http, state) {
     this.$http = $http
     this.state = state
   }
 
-  getLocationAuditLog() {
+  getLocationAuditLog () {
     this.objectId &&
     this.$http.get(`/service/audit/location/trail/${this.objectId}?plan_id=${this.planId}&user_id=${this.currentUserId}`)
-    .then((response) => {
-      this.locationAuditLog = response.data
-    })
+      .then((response) => {
+        this.locationAuditLog = response.data
+      })
   }
 
-  $onInit() {
+  $onInit () {
     this.oldObjectId = this.objectId
     this.getLocationAuditLog()
   }
-  
-  $doCheck() {
+
+  $doCheck () {
     if (this.oldObjectId !== this.objectId) {
       this.oldObjectId = this.objectId
-      //businesses don't have objectId in VT features
-      if(!this.objectId) this.locationAuditLog = []
+      // businesses don't have objectId in VT features
+      if (!this.objectId) this.locationAuditLog = []
       this.getLocationAuditLog()
     }
-  }  
-
-  $onDestroy() {
-    this.locationAuditLog = []
   }
 
+  $onDestroy () {
+    this.locationAuditLog = []
+  }
 }
 
-locationAuditLogController.$inject = ['$http','state']
+locationAuditLogController.$inject = ['$http', 'state']
 
 let locationAuditLog = {
   templateUrl: '/components/sidebar/view/location-audit-log.html',

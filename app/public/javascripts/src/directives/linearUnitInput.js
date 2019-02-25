@@ -8,13 +8,13 @@ app.directive('linearUnitInput', ['state', function (state) {
   return {
     require: 'ngModel',
     link: function (scope, elem, attrs, ngModel) {
-      ngModel.$parsers.push(function toModel(input) {
+      ngModel.$parsers.push(function toModel (input) {
         // Convert user-input value (in user units) to meters
         input = input || '0'
         return (+input) * state.configuration.units.length_units_to_meters
       })
 
-      ngModel.$formatters.push(function toView(input) {
+      ngModel.$formatters.push(function toView (input) {
         // Convert model value (always in meters) to user units before displaying it to the user
         input = input || '0'
         var inputTransformed = (+input) * state.configuration.units.meters_to_length_units

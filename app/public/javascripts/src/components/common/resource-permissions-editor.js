@@ -1,6 +1,5 @@
 class ResourcePermissionsEditorController {
-  
-  constructor($http,$timeout) {
+  constructor ($http, $timeout) {
     this.$http = $http
     this.$timeout = $timeout
     this.accessTypes = Object.freeze({
@@ -10,16 +9,16 @@ class ResourcePermissionsEditorController {
     })
   }
 
-  $onInit() {
+  $onInit () {
     if (typeof this.enabled === 'undefined') {
-      this.enabled = true   // If not defined, then make it true
+      this.enabled = true // If not defined, then make it true
     }
     this.loadResourceAccess()
     this.subSystemActors = this.systemActors && this.systemActors.slice(0, 10)
     this.registerSaveAccessCallback && this.registerSaveAccessCallback({ saveResourceAccess: this.saveResourceAccess.bind(this) })
   }
 
-  loadResourceAccess() {
+  loadResourceAccess () {
     return this.$http.get('/service/auth/permissions')
       .then((result) => {
         result.data.forEach((authPermissionEntity) => {
@@ -46,7 +45,7 @@ class ResourcePermissionsEditorController {
       .catch((err) => console.error(err))
   }
 
-  saveResourceAccess() {
+  saveResourceAccess () {
     return this.$http.get(`/service/auth/acl/${this.resourceType}/${this.resourceId}`)
       .then((result) => {
         // Loop through all our access types
@@ -75,25 +74,25 @@ class ResourcePermissionsEditorController {
       .catch((err) => console.error(err))
   }
 
-  searchActors(filterObj) {
-    if(filterObj !== '') {
-      var reg = new RegExp(filterObj, 'i');  
+  searchActors (filterObj) {
+    if (filterObj !== '') {
+      var reg = new RegExp(filterObj, 'i')
       this.subSystemActors = this.systemActors.filter((actor) => {
-          //Filter users
-          if (actor.hasOwnProperty('firstName')) {
-            return actor.firstName.match(reg) || actor.lastName.match(reg)
-          }
-          //Filter Groups
-          else if(actor.hasOwnProperty('originalName')) {
-            return actor.originalName.match(reg)
-          }
-        });  
+        // Filter users
+        if (actor.hasOwnProperty('firstName')) {
+          return actor.firstName.match(reg) || actor.lastName.match(reg)
+        }
+        // Filter Groups
+        else if (actor.hasOwnProperty('originalName')) {
+          return actor.originalName.match(reg)
+        }
+      })
       this.$timeout()
     }
   }
 }
 
-ResourcePermissionsEditorController.$inject = ['$http','$timeout']
+ResourcePermissionsEditorController.$inject = ['$http', '$timeout']
 
 let resourcePermissionsEditor = {
   templateUrl: '/components/common/resource-permissions-editor.html',

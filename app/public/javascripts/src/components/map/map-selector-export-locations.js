@@ -1,6 +1,5 @@
 class MapSelectorExportLocationsController {
-  constructor($document, $http, state, Utils) {
-    
+  constructor ($document, $http, state, Utils) {
     this.mapRef = null
     this.drawingManager = null
 
@@ -17,23 +16,22 @@ class MapSelectorExportLocationsController {
     this.Utils = Utils
   }
 
-  $onDestroy() {
-    if(this.unsub)
-      this.unsub.unsubscribe()
+  $onDestroy () {
+    if (this.unsub) { this.unsub.unsubscribe() }
 
-    if(this.drawingManager) {
+    if (this.drawingManager) {
       this.drawingManager.setDrawingMode(null)
       this.drawingManager.setMap(null)
     }
   }
 
-  updateDrawingManagerState() {
+  updateDrawingManagerState () {
     if (!this.drawingManager) {
       return
     }
 
-    if (this.selectedDisplayMode === this.displayModes.VIEW
-        && this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
+    if (this.selectedDisplayMode === this.displayModes.VIEW &&
+        this.targetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
@@ -41,31 +39,31 @@ class MapSelectorExportLocationsController {
       this.drawingManager.setMap(null)
     }
   }
-  
-  exportLocationsByPolygon(polygon){
-    if(this.state.isRulerEnabled) return //disable any click action when ruler is enabled
+
+  exportLocationsByPolygon (polygon) {
+    if (this.state.isRulerEnabled) return // disable any click action when ruler is enabled
 
     var area = google.maps.geometry.spherical.computeArea(polygon)
-    if(area > this.state.MAX_EXPORTABLE_AREA) {
+    if (area > this.state.MAX_EXPORTABLE_AREA) {
       return swal({
         title: 'Error',
         text: 'Polygon too big to export',
         type: 'error'
       })
     }
-    
+
     var planId = this.state.plan.getValue().id
     var points = []
-    for (var polyI=0; polyI<polygon.length; polyI++){
+    for (var polyI = 0; polyI < polygon.length; polyI++) {
       var pt = polygon[polyI]
       points[polyI] = [pt.lng(), pt.lat()]
     }
     points.push(points[0])
-    
+
     // Run the export endpoint
-    this.$http.post("/locations/exportRegion", {'polygon': points, 'planId': planId})
-      .then((r)=>{
-        if(r.data === ""){
+    this.$http.post('/locations/exportRegion', { 'polygon': points, 'planId': planId })
+      .then((r) => {
+        if (r.data === '') {
           return swal({
             title: 'Error',
             text: 'No data returned',
@@ -73,18 +71,18 @@ class MapSelectorExportLocationsController {
           })
         }
 
-        this.Utils.downloadFile(r.data, "exported_locations.csv")
+        this.Utils.downloadFile(r.data, 'exported_locations.csv')
       })
       .catch((err) => console.error(err))
   }
-  
-  $onInit() {
-    this.document.ready(()=>{
+
+  $onInit () {
+    this.document.ready(() => {
       this.doInit()
     })
   }
 
-  doInit() {
+  doInit () {
     if (!this.mapGlobalObjectName) {
       console.error('ERROR: You must specify the name of the global variable that contains the map object.')
     }
@@ -99,21 +97,20 @@ class MapSelectorExportLocationsController {
     })
 
     this.drawingManager.addListener('overlaycomplete', (e) => {
-      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET){
-        this.exportLocationsByPolygon( e.overlay.getPath().getArray() )
-      }else{
-        // not sure if this is still used 
+      if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
+        this.exportLocationsByPolygon(e.overlay.getPath().getArray())
+      } else {
+        // not sure if this is still used
         this.state.requestPolygonSelect.next({
           coords: e.overlay.getPath().getArray()
         })
       }
-      
+
       setTimeout(() => e.overlay.setMap(null), 100)
     })
   }
 
-
-  $doCheck() {
+  $doCheck () {
     // Do a manual check on selectedTargetSelectionMode, as it is no longer a BehaviorSubject
     var oldValue = this.targetSelectionMode
     this.targetSelectionMode = this.state.selectedTargetSelectionMode
