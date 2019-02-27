@@ -1,10 +1,10 @@
-// import { createSelector } from 'reselect'
-// import { List } from 'immutable'
-// import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
+import { createSelector } from 'reselect'
+import { List } from 'immutable'
+import MapLayerActions from '../../react/components/map-layers/map-layer-actions'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
-// const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
-// const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers.toJS())
+const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
+const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
 class NetworkEquipmentController {
   constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, optimization, state) {
@@ -35,16 +35,28 @@ class NetworkEquipmentController {
 
     this.createdMapLayerKeys = new Set()
 
-    //this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
+    this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
   $onInit() {
     // var networkEquipmentLayers = []
+    // var types = ['equipments','cables']
 
-    // this.state.configuration && Object.keys(this.state.configuration.constructionSiteCategories.categories).forEach((layerKey) => {
-    //   networkEquipmentLayers.push(this.state.configuration.constructionSiteCategories.categories[layerKey])
+    // types.forEach((type) => {
+    //   this.state.configuration && Object.keys(this.state.configuration.networkEquipment[type]).forEach((layerKey) => {
+    //     networkEquipmentLayers.push(this.state.configuration.networkEquipment[type][layerKey])
+    //   })
     // })
-    // this.setNetworkEquipmentLayers(new List(networkEquipmentLayers))
+
+    if (config.ARO_CLIENT === 'tdc') {
+      var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
+      this.state.configuration.networkEquipment.equipments = {}
+      this.equ_tdc_order.forEach((key) => {
+        this.state.configuration.networkEquipment.equipments[key] = equ[key]
+      })
+    }
+
+    this.setNetworkEquipmentLayers(this.state.configuration.networkEquipment)
   }
 
   // Get the point transformation mode with the current zoom level
@@ -112,8 +124,8 @@ class NetworkEquipmentController {
           (feature.properties.deployment_type === 1) ||
           (feature.properties.is_deleted !== 'true'))
       }
-      if (this.state.showEquipmentLabels && map.getZoom() > this.state.configuration.networkEquipment.labelDrawingOptions.visibilityZoomThreshold) {
-        drawingOptions.labels = this.state.configuration.networkEquipment.labelDrawingOptions
+      if (this.state.showEquipmentLabels && map.getZoom() > this.networkEquipmentLayers.labelDrawingOptions.visibilityZoomThreshold) {
+        drawingOptions.labels = this.networkEquipmentLayers.labelDrawingOptions
       }
     } else if (categoryType === 'boundaries') {
       featureFilter = (feature) => {
@@ -144,7 +156,7 @@ class NetworkEquipmentController {
   createMapLayersForCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
     // First loop through all the equipment types (e.g. central_office)
     this.mapZoom = map.getZoom()
-    Object.keys(categoryItems).forEach((categoryItemKey) => {
+    categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
       var networkEquipment = categoryItems[categoryItemKey]
 
       if (networkEquipment.equipmentType !== 'point' ||
@@ -172,6 +184,7 @@ class NetworkEquipmentController {
   }
 
   updateMapLayers() {
+    if(!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
     var oldMapLayers = angular.copy(this.state.mapLayers.getValue())
 
@@ -180,40 +193,32 @@ class NetworkEquipmentController {
       delete oldMapLayers[createdMapLayerKey]
     })
 
-    if (config.ARO_CLIENT === 'tdc') {
-      var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
-      this.state.configuration.networkEquipment.equipments = {}
-      this.equ_tdc_order.forEach((key) => {
-        this.state.configuration.networkEquipment.equipments[key] = equ[key]
-      })
-    }
-
     // Create layers for network equipment nodes and cables
     this.createdMapLayerKeys.clear()
-    this.createMapLayersForCategory(this.state.configuration.networkEquipment.equipments, 'equipment', oldMapLayers, this.createdMapLayerKeys)
-    this.createMapLayersForCategory(this.state.configuration.networkEquipment.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForCategory(this.networkEquipmentLayers.equipments, 'equipment', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
     // Hack to check/uncheck site boundaries based on view settings
-    Object.keys(this.state.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
-      var selectedBoundaryName
-      this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-      if (boundaryKey === 'siteBoundaries') {
-        this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
-      } else if (boundaryKey === 'fiveg_coverage') {
-        this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
-          this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
-      }
-    })
+    // Object.keys(this.state.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
+    //   var selectedBoundaryName
+    //   this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
+    //   if (boundaryKey === 'siteBoundaries') {
+    //     this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
+    //   } else if (boundaryKey === 'fiveg_coverage') {
+    //     this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
+    //       this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
+    //   }
+    // })
 
     // Hack to show copper in toolbar ruler options
-    Object.keys(this.state.configuration.networkEquipment.cables).forEach((cable) => {
-      if (cable === 'COPPER' && this.state.configuration.networkEquipment.cables['COPPER'].checked) {
-        this.state.rulerActions.indexOf(this.state.allRulerActions.COPPER) === -1 && this.state.rulerActions.push(this.state.allRulerActions.COPPER)
-      } else if (cable === 'COPPER' && !this.state.configuration.networkEquipment.cables['COPPER'].checked) {
-        var index = this.state.rulerActions.indexOf(this.state.allRulerActions.COPPER)
-        index !== -1 && this.state.rulerActions.splice(index, 1)
-      }
-    })
-    this.createMapLayersForCategory(this.state.configuration.networkEquipment.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
+    // Object.keys(this.state.configuration.networkEquipment.cables).forEach((cable) => {
+    //   if (cable === 'COPPER' && this.state.configuration.networkEquipment.cables['COPPER'].checked) {
+    //     this.state.rulerActions.indexOf(this.state.allRulerActions.COPPER) === -1 && this.state.rulerActions.push(this.state.allRulerActions.COPPER)
+    //   } else if (cable === 'COPPER' && !this.state.configuration.networkEquipment.cables['COPPER'].checked) {
+    //     var index = this.state.rulerActions.indexOf(this.state.allRulerActions.COPPER)
+    //     index !== -1 && this.state.rulerActions.splice(index, 1)
+    //   }
+    // })
+    this.createMapLayersForCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)
@@ -237,37 +242,41 @@ class NetworkEquipmentController {
     return layer.drawingOptions.strokeStyle
   }
 
-  // mapStateToThis (reduxState) {
-  //   return {
-  //     networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState)
-  //   }
-  // }
+  mapStateToThis (reduxState) {
+    return {
+      networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState)
+      //networkEquipmentLayers: reduxState.mapLayers.networkEquipment
+    }
+  }
 
-  // mapDispatchToTarget (dispatch) {
-  //   return {
-  //     setNetworkEquipmentLayers: (networkEquipmentLayers) => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
-  //     updateLayerVisibility: (layer, isVisible) => {
-  //       // First set the visibility of the current layer
-  //       dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
-  //     }
-  //   }
-  // }
+  mapDispatchToTarget (dispatch) {
+    return {
+      setNetworkEquipmentLayers: (networkEquipmentLayers) => dispatch(MapLayerActions.setNetworkEquipmentLayers(networkEquipmentLayers)),
+      updateLayerVisibility: (layerType, layer, isVisible) => {
+        // First set the visibility of the current layer
+        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
+      },
+      updateType: (visibilityType, isVisible) => {
+        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibilityType(visibilityType, isVisible))
+      }
+    }
+  }
 
-  // mergeToTarget (nextState, actions) {
-  //   const currentNetworkEquipmentLayers = this.networkEquipmentLayers
+  mergeToTarget (nextState, actions) {
+    const currentNetworkEquipmentLayers = this.networkEquipmentLayers
 
-  //   // merge state and actions onto controller
-  //   Object.assign(this, nextState)
-  //   Object.assign(this, actions)
+    // merge state and actions onto controller
+    Object.assign(this, nextState)
+    Object.assign(this, actions)
 
-  //   if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) {
-  //     this.updateMapLayers()
-  //   }
-  // }
+    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) {
+      this.updateMapLayers()
+    }
+  }
 
-  // $onDestroy () {
-  //   this.unsubscribeRedux()
-  // }
+  $onDestroy () {
+    this.unsubscribeRedux()
+  }
 }
 
 NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state']
