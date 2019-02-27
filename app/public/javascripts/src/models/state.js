@@ -1806,11 +1806,11 @@ class State {
       Object.keys(service.networkEquipmentLayers.boundaries).forEach((boundaryKey) => {
         var selectedBoundaryName
         service.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-        if (boundaryKey === 'siteBoundaries') {
+        if (selectedBoundaryName === 'siteBoundaries') {
           //this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
           var isVisible = service.showSiteBoundary && boundaryKey === selectedBoundaryName
           service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
-        } else if (boundaryKey === 'fiveg_coverage') {
+        } else if (selectedBoundaryName === 'fiveg_coverage') {
           // this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
           //   this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
           var isVisible = (service.showSiteBoundary && boundaryKey === selectedBoundaryName &&

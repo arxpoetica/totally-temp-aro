@@ -98,7 +98,7 @@
 			        ng-if="$ctrl.state.showSiteBoundary" 
 			        ng-model="$ctrl.state.selectedBoundaryType"
 			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
-			        ng-change="$ctrl.toggleSiteBoundary()">
+			        ng-change="$ctrl.state.toggleSiteBoundary()">
 			      </select>
           </div>
           
