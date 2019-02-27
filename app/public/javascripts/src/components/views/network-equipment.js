@@ -14,7 +14,6 @@ class NetworkEquipmentController {
     this.mapZoom = 0// map.getZoom()
     this.equ_tdc_order = ['central_office', 'splice_point', 'fiber_distribution_hub', 'fiber_distribution_terminal', 'multiple_dwelling_unit', 'bulk_distribution_terminal', 'dslam', 'cell_5g', 'loop_extender', 'network_anchor']
     this.usePointAggregate = false // aggregating multiple pieces of equipment under one marker causes problems with Equipment Selection
-    var baseUrl = $location.protocol() + '://' + $location.host() + ':' + $location.port()
 
     // When the map zoom changes, map layers can change
     $rootScope.$on('map_zoom_changed', () => this.updateMapLayers())
