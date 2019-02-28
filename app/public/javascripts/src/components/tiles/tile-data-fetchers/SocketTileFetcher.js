@@ -3,6 +3,7 @@ import io from 'socket.io-client'
 import { VectorTile } from 'vector-tile'
 import Protobuf from 'pbf'
 import AroHttp from '../../../react/common/aro-http'
+import uuidv4 from 'uuid/v4'
 
 class SocketTileFetcher {
 
@@ -19,10 +20,10 @@ class SocketTileFetcher {
     // We are going to fire a POST request to get the vector tile data. The POST request returns a UUID for that
     // request, and we get the (uuid+actual tile data) via websockets. Sometimes, the websocket returns tile data
     // even before the POST request returns. We have to handle both the cases.
+    const requestUuid = uuidv4()  // Not cryptographically secure but good enough for our purposes
     const mapDataPromise = new Promise((resolve, reject) => {
-      AroHttp.post(`/tile/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, layerDefinitions)
+      AroHttp.post(`/tile/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, layerDefinitions)
         .then(result => {
-          const requestUuid = result.data
           if (this.tileReceivers[requestUuid]) {
             // This means that our websocket has already received data for this request. Go ahead and proces it.
             var receiver = this.tileReceivers[requestUuid] // This will now have the "binaryData" field set

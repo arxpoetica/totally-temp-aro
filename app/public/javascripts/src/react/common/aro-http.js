@@ -38,8 +38,13 @@ class AroHttp {
         } else {
           // We have a response.
           status = response.status
-          return response.json() // This will return a promise
+          // We cannot do response.json() on an empty response (which is sometimes returned by service)
+          return response.text()
         }
+      })
+      .then(result => {
+        const parsedResult = (result === '') ? {} : JSON.parse(result)
+        return Promise.resolve(parsedResult)
       })
       .then(result => {
         // We have all the data from the request. Send it back
