@@ -123,8 +123,11 @@ app.service('tileDataService', ['$http', ($http) => {
   tileDataService.tileReceivers = {}
 
   socket.emit('SOCKET_SUBSCRIBE_TO_ROOM', '/vectorTiles')
-  socket.on('VECTOR_TILE_DATA', (message) => {
-    const mvtData = Uint8Array.from(atob(message.data), c => c.charCodeAt(0))
+  socket.on('VECTOR_TILE_DATA', (binaryMessage) => {
+    // Is there a better way to perform the arraybuffer decoding?
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(binaryMessage.content))
+    const messageObj = JSON.parse(stringMessage)
+    const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
     // Save the features in a per-layer object
     var layerToFeatures = {}
@@ -141,32 +144,78 @@ app.service('tileDataService', ['$http', ($http) => {
       }
       layerToFeatures[layerKey] = features
     })
+    if (!tileDataService.tileReceivers.hasOwnProperty(messageObj.uuid)) {
+      // If we don't have this UUID in our list yet, that means we got tile data back even before the original
+      // POST request completed. In this case we are going to store the result, and let the original POST handler
+      // take care of everything
+      tileDataService.tileReceivers[messageObj.uuid] = {
+        binaryMessage: binaryMessage
+      }
+    } else {
+      // At this point the POST request has completed and we can process the socket response here
+      tileDataService.tileReceivers[messageObj.uuid].binaryMessage = binaryMessage
+      tileDataService.processSocketData(tileDataService.tileReceivers[messageObj.uuid])
+      // Remove the receiver data
+      delete tileDataService.tileReceivers[messageObj.uuid]
+    }
+  })
+
+  tileDataService.processSocketData = receiver => {
+    // Is there a better way to perform the arraybuffer decoding?
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.content))
+    const messageObj = JSON.parse(stringMessage)
+    const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
+    var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
+    // Save the features in a per-layer object
+    var layerToFeatures = {}
+    Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+      var layer = mapboxVectorTile.layers[layerKey]
+      var features = []
+      for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+        let feature = layer.feature(iFeature)
+        // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+        if (layerKey.startsWith('v1.tiles.census_block.')) {
+          formatCensusBlockData(feature)
+        }
+        features.push(feature)
+      }
+      layerToFeatures[layerKey] = features
+    })
+    // At this point the POST request has completed and we can resolve the promise here
     // If there is no data, we won't get a layer in the vector tile. Make sure we set it to an empty array of features.
-    tileDataService.tileReceivers[message.uuid].layerDefinitions.forEach(layerDefinition => {
+    receiver.layerDefinitions.forEach(layerDefinition => {
       if (!layerToFeatures.hasOwnProperty(layerDefinition.dataId)) {
         layerToFeatures[layerDefinition.dataId] = []
       }
     })
-    tileDataService.tileReceivers[message.uuid].resolve(layerToFeatures)
-  })
+    receiver.resolve(layerToFeatures)
+  }
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
   // IMPORTANT: This will immediately fire a HTTP request, so do not use this method directly. Use getMapData().
   tileDataService.getMapDataInternalSockets = (layerDefinitions, zoom, tileX, tileY) => {
 
-    var receiver = {
-      uuid: null,
-      resolve: null,
-      reject: null,
-      layerDefinitions: layerDefinitions
-    }
     const mapDataPromise = new Promise((resolve, reject) => {
-      receiver.resolve = resolve
-      receiver.reject = reject
       $http.post(`/tile/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, layerDefinitions)
         .then(result => {
-          receiver.uuid = JSON.parse(result.data) // result.data has quotes around it, so JON.parse..ing
-          tileDataService.tileReceivers[receiver.uuid] = receiver
+          const requestUuid = JSON.parse(result.data) // result.data has quotes around it, so JON.parse..ing
+          if (tileDataService.tileReceivers[requestUuid]) {
+            // This means that our websocket has already received data for this request. Go ahead and proces it.
+            var receiver = tileDataService.tileReceivers[requestUuid] // This will now have the "binaryData" field set
+            receiver.resolve = resolve
+            receiver.reject = reject
+            receiver.layerDefinitions = layerDefinitions
+            tileDataService.processSocketData(receiver)
+          } else {
+            // We don't have the socket data yet. Save the receiver so we can use it later
+            const receiver = {
+              uuid: requestUuid,
+              resolve: resolve,
+              reject: reject,
+              layerDefinitions: layerDefinitions
+            }
+            tileDataService.tileReceivers[requestUuid] = receiver
+          }
           return Promise.resolve()
         })
         .catch(err => {
@@ -176,51 +225,6 @@ app.service('tileDataService', ['$http', ($http) => {
     })
 
     return mapDataPromise
-
-    return new Promise((resolve, reject) => {
-      // Getting binary data from the server. Directly use XMLHttpRequest()
-      var oReq = new XMLHttpRequest()
-      oReq.open('POST', `/tile/v1/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, true)
-      oReq.setRequestHeader('Content-Type', 'application/json')
-      oReq.responseType = 'arraybuffer'
-
-      oReq.onload = function (oEvent) {
-        var arrayBuffer = oReq.response
-        // De-serialize the binary data into a VectorTile object
-        var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
-        // Save the features in a per-layer object
-        var layerToFeatures = {}
-        Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
-          var layer = mapboxVectorTile.layers[layerKey]
-          var features = []
-          for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-            let feature = layer.feature(iFeature)
-            // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
-            if (layerKey.startsWith('v1.tiles.census_block.')) {
-              formatCensusBlockData(feature)
-            }
-            features.push(feature)
-          }
-          layerToFeatures[layerKey] = features
-        })
-        // If there is no data, we won't get a layer in the vector tile. Make sure we set it to an empty array of features.
-        layerDefinitions.forEach((layerDefinition) => {
-          if (!layerToFeatures.hasOwnProperty(layerDefinition.dataId)) {
-            layerToFeatures[layerDefinition.dataId] = []
-          }
-        })
-        resolve(layerToFeatures)
-      }
-      oReq.onerror = function (error) { reject(error) }
-      oReq.onabort = function () { reject('XMLHttpRequest abort') }
-      oReq.ontimeout = function () { reject('XMLHttpRequest timeout') }
-      oReq.onreadystatechange = function () {
-        if (oReq.readyState === 4 && oReq.status >= 400) {
-          reject(`ERROR: Tile data URL returned status code ${oReq.status}`)
-        }
-      }
-      oReq.send(JSON.stringify(layerDefinitions))
-    })
   }
 
   // ------------------------------ END new vector-tile-via-websockets section ----------------------

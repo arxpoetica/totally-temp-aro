@@ -16,9 +16,9 @@ amqp.connect('amqp://guest:guest@rabbitmq/', (err, conn) => {
       console.log(" [x] Received %s", msg.content.toString())
 
       // There must be a better way than JSON.parse...
-      const mvtData = Buffer.from(JSON.parse(msg.content.toString()).data, 'base64')
-      var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
-      console.log(mapboxVectorTile.layers)
+      // const mvtData = Buffer.from(JSON.parse(msg.content.toString()).data, 'base64')
+      // var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
+      // console.log(mapboxVectorTile.layers)
 
 
     }, {noAck: true})
