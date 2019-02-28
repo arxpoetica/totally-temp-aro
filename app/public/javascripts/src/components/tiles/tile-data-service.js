@@ -1,66 +1,71 @@
+import io from 'socket.io-client'
+// IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
+const VectorTile = require('vector-tile').VectorTile
+const Protobuf = require('pbf')
+const AsyncQueue = require('async').queue
 
-app.service('tileDataService', ['$http', ($http) => {
-  // IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
-  var VectorTile = require('vector-tile').VectorTile
-  var Protobuf = require('pbf')
-  var AsyncQueue = require('async').queue
-  var io = require('socket.io-client')
-  const socket = io()
+class TileDataService {
 
-  var tileDataService = {}
-  tileDataService.tileDataCache = {}
-  tileDataService.tileProviderCache = {}
-  tileDataService.tileHtmlCache = {} // A cache of HTML elements created. Used to prevent flicker.
-  // Hold a map of layer keys to image urls (and image data once it is loaded)
-  tileDataService.entityImageCache = {}
-  tileDataService.featuresToExclude = new Set() // Locations with these location ids will not be rendered
-  tileDataService.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
-  tileDataService.modifiedBoundaries = {}
+  constructor($http) {
+    this.$http = $http
+    this.socket = io()
 
-  // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
-  // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
-  // and the app appears unresponsive until all vector tiles are loaded. To get around this, we are going to limit the
-  // number of concurrent vector tiles requests, so as to keep at least 1 "slot" open for other quick  aro-service requests.
-  const MAX_CONCURRENT_VECTOR_TILE_REQUESTS = 5
-  tileDataService.httpThrottle = new AsyncQueue((task, callback) => {
-    // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
-    task()
-      .then((result) => callback({ status: 'success', data: result }))
-      .catch((err) => callback({ status: 'failure', data: err }))
-  }, MAX_CONCURRENT_VECTOR_TILE_REQUESTS)
+    this.tileDataCache = {}
+    this.tileProviderCache = {}
+    this.tileHtmlCache = {} // A cache of HTML elements created. Used to prevent flicker.
+    // Hold a map of layer keys to image urls (and image data once it is loaded)
+    this.entityImageCache = {}
+    this.featuresToExclude = new Set() // Locations with these location ids will not be rendered
+    this.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
+    this.modifiedBoundaries = {}
+    this.mapLayers = {}
+    this.tileReceivers = {}
+    this.setupSocketReceivers()
 
-  tileDataService.locationStates = {
-    LOCK_ICON_KEY: 'LOCK_ICON_KEY',
-    INVALIDATED_ICON_KEY: 'INVALIDATED_ICON_KEY'
+    // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
+    // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
+    // and the app appears unresponsive until all vector tiles are loaded. To get around this, we are going to limit the
+    // number of concurrent vector tiles requests, so as to keep at least 1 "slot" open for other quick  aro-service requests.
+    const MAX_CONCURRENT_VECTOR_TILE_REQUESTS = 5
+    this.httpThrottle = new AsyncQueue((task, callback) => {
+      // We expect 'task' to be a promise. Call the callback after the promise resolves or rejects.
+      task()
+        .then((result) => callback({ status: 'success', data: result }))
+        .catch((err) => callback({ status: 'failure', data: err }))
+    }, MAX_CONCURRENT_VECTOR_TILE_REQUESTS)
+
+    this.locationStates = {
+      LOCK_ICON_KEY: 'LOCK_ICON_KEY',
+      INVALIDATED_ICON_KEY: 'INVALIDATED_ICON_KEY'
+    }
   }
-  tileDataService.setLocationStateIcon = (locationState, iconUrl) => {
-    tileDataService.addEntityImageForLayer(locationState, iconUrl)
+
+  setLocationStateIcon(locationState, iconUrl) {
+    this.addEntityImageForLayer(locationState, iconUrl)
   }
 
-  tileDataService.getTileData = (mapLayer, zoom, tileX, tileY) => {
+  getTileData(mapLayer, zoom, tileX, tileY) {
     if (!mapLayer.aggregateMode || mapLayer.aggregateMode === 'NONE' || mapLayer.aggregateMode === 'FLATTEN') {
       // We have one or multiple URLs where data is coming from, and we want a simple union of the results
-      return tileDataService.getTileDataFlatten(mapLayer, zoom, tileX, tileY)
+      return this.getTileDataFlatten(mapLayer, zoom, tileX, tileY)
     } else if (mapLayer.aggregateMode === 'BY_ID') {
       // We want to aggregate by feature id
-      return tileDataService.getTileDataAggregated(mapLayer, zoom, tileX, tileY)
+      return this.getTileDataAggregated(mapLayer, zoom, tileX, tileY)
     } else {
       return Promise.reject(`Unknown aggregate mode: ${mapLayer.aggregateMode}`)
     }
   }
 
   // Sets the current list of map layers
-  tileDataService.mapLayers = {}
-  tileDataService.setMapLayers = (mapLayers) => {
-    tileDataService.mapLayers = mapLayers
+  setMapLayers(mapLayers) {
+    this.mapLayers = mapLayers
   }
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
-  tileDataService.getMapData = (layerDefinitions, zoom, tileX, tileY) => {
-    // tileDataService.getMapDataInternalSockets(layerDefinitions, zoom, tileX, tileY)
+  getMapData(layerDefinitions, zoom, tileX, tileY) {
     return new Promise((resolve, reject) => {
       // Remember to throttle all vector tile http requests.
-      tileDataService.httpThrottle.push(() => tileDataService.getMapDataInternalSockets(layerDefinitions, zoom, tileX, tileY), (result) => {
+      this.httpThrottle.push(() => this.getMapDataInternalSockets(layerDefinitions, zoom, tileX, tileY), (result) => {
         if (result.status === 'success') {
           resolve(result.data)
         } else {
@@ -72,7 +77,7 @@ app.service('tileDataService', ['$http', ($http) => {
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
   // IMPORTANT: This will immediately fire a HTTP request, so do not use this method directly. Use getMapData().
-  tileDataService.getMapDataInternal = (layerDefinitions, zoom, tileX, tileY) => {
+  getMapDataInternal(layerDefinitions, zoom, tileX, tileY) {
     return new Promise((resolve, reject) => {
       // Getting binary data from the server. Directly use XMLHttpRequest()
       var oReq = new XMLHttpRequest()
@@ -120,47 +125,47 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   // ------------------------------ START new vector-tile-via-websockets section ----------------------
-  tileDataService.tileReceivers = {}
-
-  socket.emit('SOCKET_SUBSCRIBE_TO_ROOM', '/vectorTiles')
-  socket.on('VECTOR_TILE_DATA', (binaryMessage) => {
-    // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(binaryMessage.content))
-    const messageObj = JSON.parse(stringMessage)
-    const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
-    var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
-    // Save the features in a per-layer object
-    var layerToFeatures = {}
-    Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
-      var layer = mapboxVectorTile.layers[layerKey]
-      var features = []
-      for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
-        let feature = layer.feature(iFeature)
-        // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
-        if (layerKey.startsWith('v1.tiles.census_block.')) {
-          formatCensusBlockData(feature)
+  setupSocketReceivers() {
+    this.socket.emit('SOCKET_SUBSCRIBE_TO_ROOM', '/vectorTiles')
+    this.socket.on('VECTOR_TILE_DATA', (binaryMessage) => {
+      // Is there a better way to perform the arraybuffer decoding?
+      const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(binaryMessage.content))
+      const messageObj = JSON.parse(stringMessage)
+      const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
+      var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
+      // Save the features in a per-layer object
+      var layerToFeatures = {}
+      Object.keys(mapboxVectorTile.layers).forEach((layerKey) => {
+        var layer = mapboxVectorTile.layers[layerKey]
+        var features = []
+        for (var iFeature = 0; iFeature < layer.length; ++iFeature) {
+          let feature = layer.feature(iFeature)
+          // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
+          if (layerKey.startsWith('v1.tiles.census_block.')) {
+            formatCensusBlockData(feature)
+          }
+          features.push(feature)
         }
-        features.push(feature)
+        layerToFeatures[layerKey] = features
+      })
+      if (!this.tileReceivers.hasOwnProperty(messageObj.uuid)) {
+        // If we don't have this UUID in our list yet, that means we got tile data back even before the original
+        // POST request completed. In this case we are going to store the result, and let the original POST handler
+        // take care of everything
+        this.tileReceivers[messageObj.uuid] = {
+          binaryMessage: binaryMessage
+        }
+      } else {
+        // At this point the POST request has completed and we can process the socket response here
+        this.tileReceivers[messageObj.uuid].binaryMessage = binaryMessage
+        this.processSocketData(this.tileReceivers[messageObj.uuid])
+        // Remove the receiver data
+        delete this.tileReceivers[messageObj.uuid]
       }
-      layerToFeatures[layerKey] = features
     })
-    if (!tileDataService.tileReceivers.hasOwnProperty(messageObj.uuid)) {
-      // If we don't have this UUID in our list yet, that means we got tile data back even before the original
-      // POST request completed. In this case we are going to store the result, and let the original POST handler
-      // take care of everything
-      tileDataService.tileReceivers[messageObj.uuid] = {
-        binaryMessage: binaryMessage
-      }
-    } else {
-      // At this point the POST request has completed and we can process the socket response here
-      tileDataService.tileReceivers[messageObj.uuid].binaryMessage = binaryMessage
-      tileDataService.processSocketData(tileDataService.tileReceivers[messageObj.uuid])
-      // Remove the receiver data
-      delete tileDataService.tileReceivers[messageObj.uuid]
-    }
-  })
+  }
 
-  tileDataService.processSocketData = receiver => {
+  processSocketData(receiver) {
     // Is there a better way to perform the arraybuffer decoding?
     const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.content))
     const messageObj = JSON.parse(stringMessage)
@@ -193,19 +198,19 @@ app.service('tileDataService', ['$http', ($http) => {
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
   // IMPORTANT: This will immediately fire a HTTP request, so do not use this method directly. Use getMapData().
-  tileDataService.getMapDataInternalSockets = (layerDefinitions, zoom, tileX, tileY) => {
+  getMapDataInternalSockets(layerDefinitions, zoom, tileX, tileY) {
 
     const mapDataPromise = new Promise((resolve, reject) => {
-      $http.post(`/tile/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, layerDefinitions)
+      this.$http.post(`/tile/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt`, layerDefinitions)
         .then(result => {
           const requestUuid = JSON.parse(result.data) // result.data has quotes around it, so JON.parse..ing
-          if (tileDataService.tileReceivers[requestUuid]) {
+          if (this.tileReceivers[requestUuid]) {
             // This means that our websocket has already received data for this request. Go ahead and proces it.
-            var receiver = tileDataService.tileReceivers[requestUuid] // This will now have the "binaryData" field set
+            var receiver = this.tileReceivers[requestUuid] // This will now have the "binaryData" field set
             receiver.resolve = resolve
             receiver.reject = reject
             receiver.layerDefinitions = layerDefinitions
-            tileDataService.processSocketData(receiver)
+            this.processSocketData(receiver)
           } else {
             // We don't have the socket data yet. Save the receiver so we can use it later
             const receiver = {
@@ -214,7 +219,7 @@ app.service('tileDataService', ['$http', ($http) => {
               reject: reject,
               layerDefinitions: layerDefinitions
             }
-            tileDataService.tileReceivers[requestUuid] = receiver
+            this.tileReceivers[requestUuid] = receiver
           }
           return Promise.resolve()
         })
@@ -230,13 +235,13 @@ app.service('tileDataService', ['$http', ($http) => {
   // ------------------------------ END new vector-tile-via-websockets section ----------------------
 
   // Returns a promise that will (once it is resolved) deliver the tile data for this tile.
-  var getTileDataProviderCache = (tileDefinition, zoom, tileX, tileY) => {
+  getTileDataProviderCache(tileDefinition, zoom, tileX, tileY) {
     const tileId = `${zoom}-${tileX}-${tileY}`
-    if (!tileDataService.tileProviderCache.hasOwnProperty(tileId)) {
-      tileDataService.tileProviderCache[tileId] = {}
+    if (!this.tileProviderCache.hasOwnProperty(tileId)) {
+      this.tileProviderCache[tileId] = {}
     }
 
-    var tileProviderCache = tileDataService.tileProviderCache[tileId]
+    var tileProviderCache = this.tileProviderCache[tileId]
     if (tileProviderCache.hasOwnProperty(tileDefinition.dataId)) {
       // We already have a data provider for this tile definition. Return it.
       return tileProviderCache[tileDefinition.dataId]
@@ -247,8 +252,8 @@ app.service('tileDataService', ['$http', ($http) => {
       // by the time we get here, we still always guarantee that we will provide data for the requested tile definition.
       var tileDefinitionsToDownload = [tileDefinition]
       // Next, add everything from the map layers that has not already been downloaded.
-      Object.keys(tileDataService.mapLayers).forEach((mapLayerKey) => {
-        const mapLayer = tileDataService.mapLayers[mapLayerKey]
+      Object.keys(this.mapLayers).forEach((mapLayerKey) => {
+        const mapLayer = this.mapLayers[mapLayerKey]
         mapLayer.tileDefinitions.forEach((mapLayerTileDef) => {
           if (!tileProviderCache.hasOwnProperty(mapLayerTileDef.dataId) && (mapLayerTileDef.dataId !== tileDefinition.dataId)) {
             tileDefinitionsToDownload.push(mapLayerTileDef)
@@ -256,38 +261,38 @@ app.service('tileDataService', ['$http', ($http) => {
         })
       })
       // Wrap a promise that will make the request
-      var dataPromise = tileDataService.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
+      var dataPromise = this.getMapData(tileDefinitionsToDownload, zoom, tileX, tileY)
         .catch((err) => {
           console.error(err)
           // There was a server error when getting the data. Delete this promise from the tileProviderCache
           // so that the system will re-try downloading tile data if it is asked for again
           tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
-            delete tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId]
+            delete this.tileProviderCache[tileId][tileDefinitionToDownload.dataId]
           })
         })
       // For all the tile definitions that we are going to download, this is the promise that we save.
       // Note that some map layers may have been downloaded previously. We have to be careful not to overwrite those promises.
-      // Hence, using tileDefinitionsToDownload and not tileDataService.mapLayers
+      // Hence, using tileDefinitionsToDownload and not this.mapLayers
       tileDefinitionsToDownload.forEach((tileDefinitionToDownload) => {
-        tileDataService.tileProviderCache[tileId][tileDefinitionToDownload.dataId] = dataPromise
+        this.tileProviderCache[tileId][tileDefinitionToDownload.dataId] = dataPromise
       })
       return dataPromise
     }
   }
 
-  var getTileDataSingleDefinition = (tileDefinition, zoom, tileX, tileY) => {
+  getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY) {
     const tileId = `${zoom}-${tileX}-${tileY}`
-    if (!tileDataService.tileDataCache.hasOwnProperty(tileId)) {
+    if (!this.tileDataCache.hasOwnProperty(tileId)) {
       // There is no data object for this tile. Create an empty one.
-      tileDataService.tileDataCache[tileId] = {}
+      this.tileDataCache[tileId] = {}
     }
-    const thisTileDataCache = tileDataService.tileDataCache[tileId]
+    const thisTileDataCache = this.tileDataCache[tileId]
     if (thisTileDataCache.hasOwnProperty(tileDefinition.dataId)) {
       // We have the required data stored as a promise. Return it.
       return thisTileDataCache[tileDefinition.dataId]
     } else {
       // We don't have any data for this tile. Get it from the server.
-      return getTileDataProviderCache(tileDefinition, zoom, tileX, tileY)
+      return this.getTileDataProviderCache(tileDefinition, zoom, tileX, tileY)
         .then((result) => {
           // Save the results of just this tile definition. The server may return other definitions, they will
           // be saved by the corresponding calls for those definitions.
@@ -300,7 +305,7 @@ app.service('tileDataService', ['$http', ($http) => {
     }
   }
 
-  var formatCensusBlockData = function (cBlock) {
+  formatCensusBlockData(cBlock) {
     let sepA = ';'
     let sepB = ':'
     cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
@@ -315,10 +320,10 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   // Flattens all URLs and returns tile data that is a simple union of all features
-  tileDataService.getTileDataFlatten = (mapLayer, zoom, tileX, tileY) => {
+  getTileDataFlatten(mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
     var promises = []
-    mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
+    mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(this.getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
 
     // A promise that will return an Image from a URL
     var imagePromise = (url) => new Promise((resolve, reject) => {
@@ -377,10 +382,10 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   // Returns aggregated results for a tile
-  tileDataService.getTileDataAggregated = (mapLayer, zoom, tileX, tileY) => {
+  getTileDataAggregated(mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from. Return the aggregated result
     var promises = []
-    mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
+    mapLayer.tileDefinitions.forEach((tileDefinition) => promises.push(this.getTileDataSingleDefinition(tileDefinition, zoom, tileX, tileY)))
     return Promise.all(promises)
       .then((results) => {
         // We have data from all urls. First, we create an object that will map the objects
@@ -450,8 +455,8 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   // Adds a layer key and url to the tile data service
-  tileDataService.addEntityImageForLayer = (layerKey, imageUrl) => {
-    if (tileDataService.entityImageCache[layerKey]) {
+  addEntityImageForLayer(layerKey, imageUrl) {
+    if (this.entityImageCache[layerKey]) {
       // This has already been added. Nothing to do.
       return
     }
@@ -466,12 +471,12 @@ app.service('tileDataService', ['$http', ($http) => {
     })
 
     // Save the mapping
-    tileDataService.entityImageCache[layerKey] = imageLoadedPromise
+    this.entityImageCache[layerKey] = imageLoadedPromise
   }
 
   // Returns a promise for the image associated with a layer key
-  tileDataService.getEntityImageForLayer = (layerKey) => {
-    var entityImagePromise = tileDataService.entityImageCache[layerKey]
+  getEntityImageForLayer(layerKey) {
+    var entityImagePromise = this.entityImageCache[layerKey]
     if (!entityImagePromise) {
       throw 'No promise for image with layerKey ' + layerKey
     }
@@ -479,51 +484,51 @@ app.service('tileDataService', ['$http', ($http) => {
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
-  tileDataService.addFeatureToExclude = (featureId) => {
-    tileDataService.featuresToExclude.add(featureId)
+  addFeatureToExclude(featureId) {
+    this.featuresToExclude.add(featureId)
   }
 
   // Add a specified location ID to the set of features to be excluded from the render
-  tileDataService.removeFeatureToExclude = (featureId) => {
-    tileDataService.featuresToExclude.delete(featureId)
+  removeFeatureToExclude(featureId) {
+    this.featuresToExclude.delete(featureId)
   }
 
   // Add a modified feature to the set of modified features
-  tileDataService.addModifiedFeature = (feature) => {
-    tileDataService.modifiedFeatures[feature.objectId] = feature
+  addModifiedFeature(feature) {
+    this.modifiedFeatures[feature.objectId] = feature
   }
 
   // Add a modified boundary to the set of modified features
-  tileDataService.addModifiedBoundary = (feature) => {
-    tileDataService.modifiedBoundaries[feature.objectId] = feature
+  addModifiedBoundary(feature) {
+    this.modifiedBoundaries[feature.objectId] = feature
   }
 
   // Clear the entire tile data cache
-  tileDataService.clearDataCache = () => {
-    tileDataService.tileDataCache = {}
-    tileDataService.tileProviderCache = {}
-    tileDataService.featuresToExclude = new Set()
-    tileDataService.modifiedFeatures = {}
-    tileDataService.modifiedBoundaries = {}
+  clearDataCache() {
+    this.tileDataCache = {}
+    this.tileProviderCache = {}
+    this.featuresToExclude = new Set()
+    this.modifiedFeatures = {}
+    this.modifiedBoundaries = {}
   }
 
   // Clear only those entries in the tile data cache containing the specified keywords
-  tileDataService.clearDataCacheContaining = (keywords) => {
+  clearDataCacheContaining(keywords) {
     // Clear data from the data cache
-    Object.keys(tileDataService.tileDataCache).forEach((tileId) => {
-      var singleTileCache = tileDataService.tileDataCache[tileId]
+    Object.keys(this.tileDataCache).forEach((tileId) => {
+      var singleTileCache = this.tileDataCache[tileId]
       Object.keys(singleTileCache).forEach((cacheKey) => {
         var shouldDelete = false
         keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
         if (shouldDelete) {
-          delete tileDataService.tileDataCache[tileId][cacheKey]
+          delete this.tileDataCache[tileId][cacheKey]
         }
       })
     })
 
     // Clear data from the data provider cache
-    Object.keys(tileDataService.tileProviderCache).forEach((tileId) => {
-      var singleTileProvider = tileDataService.tileProviderCache[tileId]
+    Object.keys(this.tileProviderCache).forEach((tileId) => {
+      var singleTileProvider = this.tileProviderCache[tileId]
       Object.keys(singleTileProvider).forEach((cacheKey) => {
         var shouldDelete = false
         keywords.forEach((keyword) => shouldDelete = shouldDelete || (cacheKey.indexOf(keyword) >= 0))
@@ -531,15 +536,15 @@ app.service('tileDataService', ['$http', ($http) => {
           // Delete the pointer to the promise. This kind of leaves a "dangling" set of data, since the
           // promise will contain the data for this and for other layers. However, since we deleted
           // the pointer to the promise, our code will never access that dangling data.
-          delete tileDataService.tileProviderCache[tileId][cacheKey]
+          delete this.tileProviderCache[tileId][cacheKey]
         }
       })
     })
   }
 
   // Mark all tiles in the HTML cache as dirty
-  tileDataService.markHtmlCacheDirty = (tilesToRefresh) => {
-    Object.keys(tileDataService.tileHtmlCache).forEach((cacheId) => {
+  markHtmlCacheDirty(tilesToRefresh) {
+    Object.keys(this.tileHtmlCache).forEach((cacheId) => {
       var isDirty = false
       if (tilesToRefresh) {
         // Only mark specified tiles as dirty.
@@ -548,24 +553,26 @@ app.service('tileDataService', ['$http', ($http) => {
       } else {
         isDirty = true // Mark all tiles as dirty
       }
-      tileDataService.tileHtmlCache[cacheId].isDirty = isDirty
+      this.tileHtmlCache[cacheId].isDirty = isDirty
     })
   }
 
   // Remove the specified HTML element from the cache and from the document
-  tileDataService.removeHtmlCacheNode = (cacheId) => {
-    if (tileDataService.tileHtmlCache.hasOwnProperty(cacheId)) {
+  removeHtmlCacheNode(cacheId) {
+    if (this.tileHtmlCache.hasOwnProperty(cacheId)) {
       // We have the specified node in our cache
-      var htmlTileNode = tileDataService.tileHtmlCache[cacheId].div
+      var htmlTileNode = this.tileHtmlCache[cacheId].div
       htmlTileNode.parentNode.removeChild(htmlTileNode) // Remove the HTML node from the document
-      delete tileDataService.tileHtmlCache[cacheId] // Remove the reference to the (now non-existent) HTML element
+      delete this.tileHtmlCache[cacheId] // Remove the reference to the (now non-existent) HTML element
     }
   }
 
   // Completely erase the entire cache of HTML elements associated with tiles
-  tileDataService.clearHtmlCache = () => {
-    tileDataService.tileHtmlCache = {}
+  clearHtmlCache() {
+    this.tileHtmlCache = {}
   }
+}
 
-  return tileDataService
-}])
+TileDataService.$inject = ['$http']
+
+export default TileDataService
