@@ -3,6 +3,7 @@ import io from 'socket.io-client'
 class SocketManager {
   constructor () {
     this.router = {}
+    this.websocketSessionId = null
     this.socket = io()
     this.socket.on('message', message => this.routeMessage(message))
   }

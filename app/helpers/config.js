@@ -17,3 +17,8 @@ try {
 
 module.exports.base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
 module.exports.aro_service_url = process.env.ARO_SERVICE_URL || module.exports.aro_service_url
+module.exports.rabbitmq = {
+  server: process.env.RABBITMQ_SERVER || 'rabbitmq',
+  username: process.env.RABBITMQ_USERNAME || 'guest',
+  password: process.env.RABBITMQ_PASSWORD || 'guest'
+}

@@ -1,7 +1,8 @@
 const amqp = require('amqplib/callback_api')
+const helpers = require('../helpers')
+const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
-const vtExchangeName = 'aro_vt', vtQueueName = 'vectorTileQueue'
-
+const VECTOR_TILE_EXCHANGE = 'aro_vt', VECTOR_TILE_QUEUE = 'vectorTileQueue'
 class SocketManager {
 
   constructor(app) {
@@ -27,18 +28,32 @@ class SocketManager {
   }
 
   setupVectorTileAMQP() {
+    // We will receive vector tile data via a RabbitMQ server
     var self = this
-    amqp.connect('amqp://guest:guest@rabbitmq/', (err, conn) => {
+    const rabbitMqConnectionString = `amqp://${config.rabbitmq.username}:${config.rabbitmq.password}@${config.rabbitmq.server}`
+    amqp.connect(rabbitMqConnectionString, (err, conn) => {
+      if (err) {
+        console.error('ERROR when connecting to the RabbitMQ server')
+        console.error(err)
+      }
       conn.createChannel(function(err, ch) {
-        ch.assertQueue(vtQueueName, {durable: false})
-        ch.assertExchange(vtExchangeName, 'topic')
-        ch.bindQueue(vtQueueName, vtExchangeName, '#')
+        if (err) {
+          console.error('ERROR when trying to create a channel on the RabbitMQ server')
+          console.error(err)
+        }
+        ch.assertQueue(VECTOR_TILE_QUEUE, {durable: false})
+        ch.assertExchange(VECTOR_TILE_EXCHANGE, 'topic')
+        ch.bindQueue(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, '#')
 
-        ch.consume(vtQueueName, function(msg) {
+        ch.consume(VECTOR_TILE_QUEUE, function(msg) {
           const uuid = JSON.parse(msg.content.toString()).uuid
           const roomId = self.vectorTileRequestToRoom[uuid]
-          delete self.vectorTileRequestToRoom[uuid]
-          self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+          if (!roomId) {
+            console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
+          } else {
+            delete self.vectorTileRequestToRoom[uuid]
+            self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+          }
         }, {noAck: true})
       })
     })
