@@ -38,22 +38,10 @@ class Socket {
         ch.bindQueue(vtQueueName, vtExchangeName, '#')
 
         ch.consume(vtQueueName, function(msg) {
-          // console.log(" [x] Received %s", msg.content.toString())
-
-          // const mvtData = Buffer.from(JSON.parse(msg.content.toString()).data, 'base64')
-          // var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
-          // console.log(mapboxVectorTile.layers)
-
-          // TIMEOUT FOR DEBUGGING ONLY - Things are happing too fast. We get tile data before the POST returns
-          setTimeout(() => {
-            // There must be a better way than JSON.parse...
-            self.io.to('/vectorTiles').emit(VECTOR_TILE_DATA_MESSAGE, msg)
-          }, 0)
-          
+          self.io.to('/vectorTiles').emit(VECTOR_TILE_DATA_MESSAGE, msg)
         }, {noAck: true})
       })
     })
-
 }
 
   // Mock - For coverage report endpoints, start simulating websocket responses
