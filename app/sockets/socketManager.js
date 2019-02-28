@@ -51,6 +51,7 @@ class SocketManager {
           if (!roomId) {
             console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
           } else {
+            console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
             delete self.vectorTileRequestToRoom[uuid]
             self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
           }
