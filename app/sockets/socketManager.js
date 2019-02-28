@@ -36,16 +36,21 @@ class SocketManager {
 
         ch.consume(vtQueueName, function(msg) {
           const uuid = JSON.parse(msg.content.toString()).uuid
-          const roomId = this.vectorTileRequestToRoom[uuid]
-          self.io.to('/vectorTiles').emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+          const roomId = self.vectorTileRequestToRoom[uuid]
+          delete self.vectorTileRequestToRoom[uuid]
+          self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
         }, {noAck: true})
       })
     })
+  }
+
+  mapVectorTileUuidToRoom(vtUuid, roomId) {
+    this.vectorTileRequestToRoom[vtUuid] = roomId
   }
 }
 
 let socketManager = null
 module.exports = {
   initialize: app => socketManager = new SocketManager(app),
-  socketManager: socketManager
+  socketManager: () => socketManager
 }

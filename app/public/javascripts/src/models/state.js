@@ -8,6 +8,7 @@ import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import SelectionModes from '../react/components/selection/selection-modes'
+import socketManager from '../react/common/socket-manager'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = state => state.mapLayers.location
@@ -1533,7 +1534,7 @@ class State {
     }
 
     service.configuration = {}
-    service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing) => {
+    service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing, websocketSessionId) => {
       service.configuration = appConfiguration
       service.googleMapsLicensing = googleMapsLicensing
       service.configuration.loadPerspective = (perspective) => {
@@ -1547,7 +1548,7 @@ class State {
       service.setOptimizationOptions()
       tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
       tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-
+      socketManager.initializeSession(websocketSessionId)
       service.getReleaseVersions()
     }
 

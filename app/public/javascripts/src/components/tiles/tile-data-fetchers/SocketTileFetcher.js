@@ -9,7 +9,6 @@ class SocketTileFetcher {
 
   constructor() {
     this.tileReceivers = {}
-    socketManager.joinRoom('vectorTiles')
     this.unsubscriber = socketManager.subscribe('VECTOR_TILE_DATA', message => this._receiveSocketData(message))
   }
 
@@ -21,7 +20,11 @@ class SocketTileFetcher {
     // even before the POST request returns. We have to handle both the cases.
     const requestUuid = uuidv4()  // Not cryptographically secure but good enough for our purposes
     const mapDataPromise = new Promise((resolve, reject) => {
-      AroHttp.post(`/tile/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, layerDefinitions)
+      const requestBody = {
+        websocketSessionId: socketManager.websocketSessionId,
+        layerDefinitions: layerDefinitions
+      }
+      AroHttp.post(`/tile-sockets/v1/async/tiles/layers/${zoom}/${tileX}/${tileY}.mvt?request_uuid=${requestUuid}`, requestBody)
         .then(result => {
           if (this.tileReceivers[requestUuid]) {
             // This means that our websocket has already received data for this request. Go ahead and proces it.

@@ -7,6 +7,11 @@ class SocketManager {
     this.socket.on('message', message => this.routeMessage(message))
   }
 
+  initializeSession (websocketSessionId) {
+    this.websocketSessionId = websocketSessionId
+    this.joinRoom(websocketSessionId)
+  }
+
   joinRoom (roomId) {
     this.socket.emit('SOCKET_JOIN_ROOM', roomId)
   }
