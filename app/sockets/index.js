@@ -17,14 +17,12 @@ class Socket {
   }
 
   setupConnectionhandlers() {
-
     this.io.on('connection', (socket) => {
       console.log(`Connected socket with session id ${socket.client.id}`)
 
-      socket.on('SOCKET_SUBSCRIBE_TO_ROOM', (roomId) => {
-        console.log(`Joining socket room: ${roomId}`)
-        socket.join(roomId)
-        // socket.join('/plan')  // For debugging only
+      socket.on('SOCKET_JOIN_ROOM', (roomId) => {
+        console.log(`Joining socket room: /${roomId}`)
+        socket.join(`/${roomId}`)
       })
     })
   }
@@ -38,7 +36,7 @@ class Socket {
         ch.bindQueue(vtQueueName, vtExchangeName, '#')
 
         ch.consume(vtQueueName, function(msg) {
-          self.io.to('/vectorTiles').emit(VECTOR_TILE_DATA_MESSAGE, msg)
+          self.io.to('/vectorTiles').emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
         }, {noAck: true})
       })
     })

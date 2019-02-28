@@ -1,17 +1,16 @@
 // Helper class to fetch tile data using websockets
-import io from 'socket.io-client'
 import { VectorTile } from 'vector-tile'
 import Protobuf from 'pbf'
 import AroHttp from '../../../react/common/aro-http'
 import uuidv4 from 'uuid/v4'
+import socketManager from '../../../react/common/socket-manager'
 
 class SocketTileFetcher {
 
   constructor() {
     this.tileReceivers = {}
-    this.socket = io()
-    this.socket.emit('SOCKET_SUBSCRIBE_TO_ROOM', '/vectorTiles')
-    this.socket.on('VECTOR_TILE_DATA', (binaryMessage) => this._receiveSocketData(binaryMessage))
+    socketManager.joinRoom('vectorTiles')
+    this.unsubscriber = socketManager.subscribe('VECTOR_TILE_DATA', message => this._receiveSocketData(message))
   }
 
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
@@ -53,9 +52,9 @@ class SocketTileFetcher {
     return mapDataPromise
   }
 
-  _receiveSocketData(binaryMessage) {
+  _receiveSocketData(message) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(binaryMessage.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(message.data.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))
@@ -79,11 +78,11 @@ class SocketTileFetcher {
       // POST request completed. In this case we are going to store the result, and let the original POST handler
       // take care of everything
       this.tileReceivers[messageObj.uuid] = {
-        binaryMessage: binaryMessage
+        binaryMessage: message
       }
     } else {
       // At this point the POST request has completed and we can process the socket response here
-      this.tileReceivers[messageObj.uuid].binaryMessage = binaryMessage
+      this.tileReceivers[messageObj.uuid].binaryMessage = message
       this._processSocketData(this.tileReceivers[messageObj.uuid])
       // Remove the receiver data
       delete this.tileReceivers[messageObj.uuid]
@@ -92,7 +91,7 @@ class SocketTileFetcher {
 
   _processSocketData(receiver) {
     // Is there a better way to perform the arraybuffer decoding?
-    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.content))
+    const stringMessage = new TextDecoder('utf-8').decode(new Uint8Array(receiver.binaryMessage.data.content))
     const messageObj = JSON.parse(stringMessage)
     const mvtData = Uint8Array.from(atob(messageObj.data), c => c.charCodeAt(0))
     var mapboxVectorTile = new VectorTile(new Protobuf(mvtData))

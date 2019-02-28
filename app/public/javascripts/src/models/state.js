@@ -1034,8 +1034,6 @@ class State {
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds, tag.id))
 
       service.setPlanRedux(plan)
-      // Subscribe to the socket for this plan
-      service.subscribeToPlanSocket(plan.id)
 
       return service.loadPlanInputs(plan.id)
         .then(() => service.recreateTilesAndCache())
@@ -1821,7 +1819,6 @@ class State {
     return {
       setLoggedInUserRedux: (loggedInUser) => { dispatch(UserActions.setLoggedInUser(loggedInUser)) },
       setPlanRedux: (plan) => { dispatch(PlanActions.setPlan(plan)) },
-      subscribeToPlanSocket: (planId) => { dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` } }) },
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
