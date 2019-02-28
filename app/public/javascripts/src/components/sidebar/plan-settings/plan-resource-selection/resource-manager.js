@@ -97,8 +97,9 @@ class ResourceManagerController {
       */
     ]
   }
-
+  
   $onChanges (changes) {
+    console.log(changes)
     if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
       this.buildRows()
     }

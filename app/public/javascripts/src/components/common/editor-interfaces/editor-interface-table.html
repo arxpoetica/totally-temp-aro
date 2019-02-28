@@ -35,11 +35,6 @@
 	          
 	        </td>
 	        <td class="ei-table-cell">
-	          <button class="btn btn-outline-danger btn-sm"
-	                  ng-if="$ctrl.canDelete" 
-	                  ng-click="$ctrl.deleteItem(rowKey)"
-	                  data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="far fa-trash-alt ei-button-icon"></i></button>
-	          
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 
 	                  ng-repeat="(btnKey, btnValue) in $ctrl.actions"
 	                  ng-click="btnValue.callBack(rowValue, rowKey)"
@@ -57,10 +52,5 @@
       <div class="ei-pagination-item-active" ng-if="-1 != page && $ctrl.pageOffset != page" ng-click="$ctrl.setPage(page)">{{-1 == page ? "…" : page+1}}</div>
     </div>
   </div>
-        
   
-  <button class="btn btn-primary btn-sm" 
-          ng-if="$ctrl.isEdit && $ctrl.canAdd" 
-          ng-click="$ctrl.addItem()"
-          style="display: inline-block;"><i class="fa fa-file action-button-icon"></i> add item</button>
 </div>
