@@ -1,6 +1,6 @@
 // Browserify includes
 import TileUtilities from './tile-utilities'
-var pointInPolygon = require('point-in-polygon')
+import PointInPolygon from 'point-in-polygon'
 
 class FeatureSelector {
   // Loops through all features in this tile and selects the ones that match a comparator function
@@ -71,13 +71,13 @@ class FeatureSelector {
         if (shape.length === 1) {
           // Only support points for now
           var locationCoords = [shape[0].x + deltaX, shape[0].y + deltaY]
-          if (pointInPolygon(locationCoords, polygonCoords)) {
+          if (PointInPolygon(locationCoords, polygonCoords)) {
             selectFeature = true
           }
         } else if (feature.properties.gid) {
           const roadGeom = TileUtilities.pixelCoordinatesFromScaledTileCoordinates(feature.loadGeometry()[0])
           for (var i = 0; i < roadGeom.length; i++) {
-            if (pointInPolygon([roadGeom[i].x + deltaX, roadGeom[i].y + deltaY], polygonCoords)) {
+            if (PointInPolygon([roadGeom[i].x + deltaX, roadGeom[i].y + deltaY], polygonCoords)) {
               selectFeature = true
               break
             }
@@ -95,7 +95,7 @@ class FeatureSelector {
               eachPoint.push(eachValue.x + deltaX)
               eachPoint.push(eachValue.y + deltaY)
 
-              if (pointInPolygon(eachPoint, polygonCoords)) {
+              if (PointInPolygon(eachPoint, polygonCoords)) {
                 selectFeature = true
               }
             })
@@ -115,7 +115,7 @@ class FeatureSelector {
                 areaPolyCoordinates.push(eachPoint)
               })
               polygonCoords.some(function (polyCoord) {
-                if (pointInPolygon([polyCoord[0], polyCoord[1]], areaPolyCoordinates)) {
+                if (PointInPolygon([polyCoord[0], polyCoord[1]], areaPolyCoordinates)) {
                   selectFeature = true
                   return true
                 }
@@ -254,7 +254,7 @@ class FeatureSelector {
               areaPolyCoordinates.push(eachPoint)
             })
 
-            if (pointInPolygon([xWithinTile, yWithinTile], areaPolyCoordinates)) {
+            if (PointInPolygon([xWithinTile, yWithinTile], areaPolyCoordinates)) {
               selectFeature = true
             }
           })

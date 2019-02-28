@@ -1,8 +1,8 @@
 import io from 'socket.io-client'
 // IMPORTANT: The vector-tile, pbf and async bundles must have been included before this point
-const VectorTile = require('vector-tile').VectorTile
-const Protobuf = require('pbf')
-const AsyncQueue = require('async').queue
+import { VectorTile } from 'vector-tile'
+import Protobuf from 'pbf'
+import AsyncQueue from 'async/queue'
 
 class TileDataService {
 
