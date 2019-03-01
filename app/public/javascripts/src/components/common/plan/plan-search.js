@@ -31,8 +31,6 @@ class PlanSearchController {
           user.type = 'created_by' // Just a lot of legacy stuff that depends upon this
           return user
         })
-
-      this.creatorsSearchList = this.systemUsers.slice(10)
     }
   }
 
@@ -215,11 +213,19 @@ class PlanSearchController {
     return creator && creator.fullName
   }
 
-  searchCreatorsList (searchObj) {
-    this.creatorsSearchList = this.systemUsers.filter((creator) => {
-      if (creator.fullName.toLocaleLowerCase().includes(searchObj.toLocaleLowerCase())) { return creator }
+  searchCreatorsList (filter) {
+    let MAX_CREATORS_FROM_ODATA = 10
+    var url = `/service/odata/UserEntity?$select=firstName,lastName,fullName`
+    if(filter) {
+      url = url + `&$filter=substringof(fullName,'${filter}')`
+    }
+    url = url + `&$top=${MAX_CREATORS_FROM_ODATA}`
+    return this.$http.get(url)
+    .then((response) => {
+      this.creatorsSearchList = response.data
     })
   }
+
 }
 
 PlanSearchController.$inject = ['$http', '$timeout', 'state']

@@ -191,7 +191,7 @@ class LocationEditorController {
 
   // Sets the last-used number-of-locations property so we can use it for new locations
   setLastUsedNumberOfLocations (newValue) {
-    this.lastUsedNumberOfLocations = +newValue
+    this.lastUsedNumberOfLocations = +newValue < 1 ? 1 : +newValue
   }
 
   // Marks the properties of the selected location as dirty (changed).
