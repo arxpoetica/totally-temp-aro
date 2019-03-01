@@ -108,10 +108,12 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
         oldMapLayers[mapLayerKey] = {
           tileDefinitions: [fiberTileDefinition],
           iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-          strokeStyle: '#000000',
-          fillStyle: '#000000',
-          zIndex: 1042,
-          lineWidth: fiberLineWidth
+          drawingOptions: {
+            strokeStyle: '#000000',
+            fillStyle: '#000000',
+            lineWidth: fiberLineWidth
+          },
+          zIndex: 1042
         }
         createdMapLayerKeys.add(mapLayerKey)
       } else {
@@ -126,10 +128,12 @@ app.controller('fiber_plant_controller', ['$scope', '$rootScope', '$location', '
           oldMapLayers[mapLayerKey] = {
             tileDefinitions: [fiberTileDefinition],
             iconUrl: `${baseUrl}/images/map_icons/aro/businesses_small_default.png`,
-            strokeStyle: selectedCompetitor.strokeStyle,
-            fillStyle: selectedCompetitor.fillStyle,
+            drawingOptions: {
+              strokeStyle: selectedCompetitor.strokeStyle,
+              fillStyle: selectedCompetitor.fillStyle,
+              lineWidth: fiberLineWidth
+            },
             zIndex: 1043,
-            lineWidth: fiberLineWidth
           }
           createdMapLayerKeys.add(mapLayerKey)
         })
