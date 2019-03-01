@@ -1339,7 +1339,6 @@ class State {
     }
 
     service.showDirectedCable = false
-    service.showSiteBoundary = false
     service.boundaryTypes = []
     service.selectedBoundaryType = {}
 
@@ -1802,7 +1801,11 @@ class State {
     }
 
     service.toggleSiteBoundary = () => {
+      service.updateShowSiteBoundary(!service.showSiteBoundary)
+      service.updateSiteBoundaryLayer()
+    }
 
+    service.updateSiteBoundaryLayer = () => {
       Object.keys(service.networkEquipmentLayers.boundaries).forEach((boundaryKey) => {
         var selectedBoundaryName
         service.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
@@ -1815,10 +1818,9 @@ class State {
           //   this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
           var isVisible = (service.showSiteBoundary && boundaryKey === selectedBoundaryName &&
             service.networkEquipmentLayers.equipments['cell_5g'].checked)
-            service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
+          service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
         }
       })
-
     }
 
     service.getDispatchers = () => {
@@ -1837,7 +1839,8 @@ class State {
     return {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
-      reduxPlanTargets: reduxState.selection.planTargets
+      reduxPlanTargets: reduxState.selection.planTargets,
+      showSiteBoundary: reduxState.mapLayers.showSiteBoundary
     }
   }
 
@@ -1851,7 +1854,8 @@ class State {
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
       updateBoundaryLayerVisibility: (layerType, layer, isVisible) => {
         dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
-      }
+      },
+      updateShowSiteBoundary: (isVisible) => {dispatch(MapLayerActions.setShowSiteBoundary(isVisible))}
     }
   }
 }

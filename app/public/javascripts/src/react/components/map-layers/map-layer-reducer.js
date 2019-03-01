@@ -5,7 +5,8 @@ const defaultState = {
   location: new List(),
   networkEquipment: new Map(),
   constructionSite: new List(),
-  boundary: new List()
+  boundary: new List(),
+  showSiteBoundary: false
 }
 
 function setLayers (state, layerKey, layers) {
@@ -44,9 +45,11 @@ function setNetworkEquipmentLayerVisibility (state, layerType, layer, visibility
 function setLayerVisibility (state, layer, visibility) {
   // First determine which category/key (e.g. 'location' the layer belongs to)
   var layerToChange = null; var layerKey = null; var layerIndex = NaN
-  Object.keys(state).forEach(key => {
+  const list = ['location', 'constructionSite', 'boundary']
+  // Object.keys(state).forEach(key => {
+  list.forEach(key => {
     const layers = state[key]
-    key !== 'networkEquipment' && layers.forEach((stateLayer, index) => {
+    layers.forEach((stateLayer, index) => {
       if (stateLayer.key === layer.key && stateLayer.uiLayerId === layer.uiLayerId) {
         layerToChange = stateLayer
         layerKey = key
@@ -58,6 +61,10 @@ function setLayerVisibility (state, layer, visibility) {
   const newLayer = { ...layerToChange, checked: visibility }
   // Replace this category in the state
   return { ...state, [layerKey]: state[layerKey].set(layerIndex, newLayer) }
+}
+
+function setShowSiteBoundary (state, visibility) {
+  return { ...state, showSiteBoundary: visibility }
 }
 
 function mapLayersReducer (state = defaultState, action) {
@@ -79,6 +86,9 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)
+
+    case Actions.LAYERS_SET_SITE_BOUNDARY:
+      return setShowSiteBoundary(state, action.payload.visibility)
 
     default:
       return state

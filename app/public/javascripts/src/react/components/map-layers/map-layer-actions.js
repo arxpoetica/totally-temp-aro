@@ -43,10 +43,20 @@ function setBoundaryLayers (boundaryLayers) {
   }
 }
 
+function setShowSiteBoundary (newVisibility) {
+  return {
+    type: Actions.LAYERS_SET_SITE_BOUNDARY,
+    payload: {
+      visibility: newVisibility
+    }
+  }
+}
+
 export default {
   setLayerVisibility: setLayerVisibility,
   setNetworkEquipmentLayerVisibility: setNetworkEquipmentLayerVisibility,
   setNetworkEquipmentLayers: setNetworkEquipmentLayers,
   setConstructionSiteLayers: setConstructionSiteLayers,
-  setBoundaryLayers: setBoundaryLayers
+  setBoundaryLayers: setBoundaryLayers,
+  setShowSiteBoundary: setShowSiteBoundary
 }
