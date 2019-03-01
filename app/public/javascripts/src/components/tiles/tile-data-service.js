@@ -1,6 +1,6 @@
 import AsyncQueue from 'async/queue'
 import SocketTileFetcher from './tile-data-fetchers/SocketTileFetcher'
-// import HttpTileFetcher from './tile-data-fetchers/HttpTileFetcher'
+import HttpTileFetcher from './tile-data-fetchers/HttpTileFetcher'
 
 class TileDataService {
 
@@ -16,7 +16,11 @@ class TileDataService {
     this.modifiedFeatures = {} // A set of features (keyed by objectId) that are modified from their original position
     this.modifiedBoundaries = {}
     this.mapLayers = {}
-    this.tileFetcher = new SocketTileFetcher()
+    this.tileFetchers = [
+      { description: 'HTTP (legacy)', fetcher: new HttpTileFetcher() },
+      { description: 'Websockets', fetcher: new SocketTileFetcher() },
+    ]
+    this.activeTileFetcher = this.tileFetchers[0]
 
     // For Chrome, Firefox 3+, Safari 5+, the browser throttles all http 1 requests to 6 maximum concurrent requests.
     // If we have a large number of vector tile requests, then any other calls to aro-service get queued after these,
@@ -61,7 +65,7 @@ class TileDataService {
   getMapData(layerDefinitions, zoom, tileX, tileY) {
     return new Promise((resolve, reject) => {
       // Remember to throttle all vector tile http requests.
-      this.httpThrottle.push(() => this.tileFetcher.getMapData(layerDefinitions, zoom, tileX, tileY), (result) => {
+      this.httpThrottle.push(() => this.activeTileFetcher.fetcher.getMapData(layerDefinitions, zoom, tileX, tileY), (result) => {
         if (result.status === 'success') {
           resolve(result.data)
         } else {

@@ -80,6 +80,16 @@
     </tr>
 
     <tr>
+      <td>Tile Fetcher</td>
+      <td>
+        <select class="form-control"
+                ng-model="$ctrl.tileDataService.activeTileFetcher"
+                ng-options="item.description for item in $ctrl.tileDataService.tileFetchers"
+                ng-change="$ctrl.onActiveTileFetcherChanged()">
+        </select>
+      </td>
+    </tr>
+    <tr>
       <td>Show equipment properties (csv)</td>
       <td>
         <div class="input-group">
