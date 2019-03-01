@@ -39,11 +39,11 @@ let roicReportsModal = {
       </div>
     </modal-header>
     <modal-body style="height: 500px;">
-      <roic-reports ng-if="$ctrl.state.showRoicReportsModal"
+      <network-build-roic-reports ng-if="$ctrl.state.showRoicReportsModal"
                     plan-id="$ctrl.state.plan.getValue().id"
                     optimization-state="$ctrl.state.Optimizingplan.planState"
                     report-size="'large'">
-      </roic-reports>
+      </network-build-roic-reports>
     </modal-body>
     <modal-footer>
       <button class="btn btn-primary" ng-click="$ctrl.close()">Close</button>
