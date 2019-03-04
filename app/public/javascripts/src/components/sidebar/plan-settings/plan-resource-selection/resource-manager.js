@@ -4,6 +4,7 @@ class ResourceManagerController {
     this.$document = $document
     this.state = state
     this.filterByOptions = {}
+    this.searchText = ''
     // Hold a mapping that we use to map from resource keys to endpoints
     this.resourceKeyToEndpointId = {
       price_book: 'pricebook',
@@ -29,7 +30,7 @@ class ResourceManagerController {
 
     this.displayProps = [
       {
-        'propertyName': 'managerType',
+        'propertyName': 'resourceType', //'managerType',
         'levelOfDetail': 0,
         'format': '',
         'displayName': 'Resource Type',
@@ -100,18 +101,24 @@ class ResourceManagerController {
   
   $onChanges (changes) {
     console.log(changes)
+    /*
     if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
       this.buildRows()
     }
+    */
     if (changes.hasOwnProperty('resourceItems')) {
       this.buildFilterOptions()
+    }
+    if (changes.hasOwnProperty('selectedResourceKey')) {
+      this.getRows()
     }
   }
 
   onSelectedResourceKeyChanged () {
-    this.buildRows()
+    //this.buildRows()
+    this.getRows()
   }
-
+/*
   buildRows () {
     var newRows = []
 
@@ -124,9 +131,11 @@ class ResourceManagerController {
         }
       }
     }
+    console.log(this.resourceItems)
     this.rows = newRows
+    console.log(this.rows)
   }
-
+*/
   buildFilterOptions () {
     var newFilterByOptions = { 'all': 'all' }
 
@@ -145,13 +154,45 @@ class ResourceManagerController {
 
     this.filterByOptions = newFilterByOptions
   }
-
+  
+  onSearch () {
+    this.getRows()
+  }
+  
+  getRows () {
+    var props = ''
+    
+    if (this.searchText.trim() != '') {
+      props += `&name=${this.searchText}`
+    }
+    if (this.selectedResourceKey && 'all' != this.selectedResourceKey) {
+      props += `&resourceType=${this.selectedResourceKey}`
+    }
+    
+    this.$http.get(`service/v2/resource-manager?user_id=${this.state.loggedInUser.id}${props}`)
+      .then((result) => {
+        console.log(result)
+        var newRows = []
+        var i
+        for (i = 0; i<result.data.length; i++){
+          if (!result.data[i].deleted){
+            console.log()
+            newRows.push(result.data[i])
+          }
+        }
+        console.log(newRows)
+        this.rows = newRows
+      })
+    // end promise
+  }
+  
+/*
   $doCheck () {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
       this.oldResourceItems = this.resourceItems
     }
   }
-
+*/
   createBlankPriceBook () {
     this.setEditingManagerId({ newId: null })
     this.setEditingMode({ mode: this.createPriceBookMode })
