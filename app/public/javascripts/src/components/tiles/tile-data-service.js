@@ -295,10 +295,7 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
               if (!entityData[aggregateEntityGID]) {
                 entityData[aggregateEntityGID] = {}
               }
-              // TODO: Cannot do a "import TileUtilities from './tile-utilities'" so we have copy/pasted code here
-              const TILE_COORDINATE_SCALING_FACTOR = 1.0 / 16
-              const scaledGeom = feature.loadGeometry().map(shape => ({ x: shape.x * TILE_COORDINATE_SCALING_FACTOR, y: shape.y * TILE_COORDINATE_SCALING_FACTOR }))
-              entityData[aggregateEntityGID].geometry = scaledGeom
+              entityData[aggregateEntityGID].geometry = feature.loadGeometry()
               // Store the value to be aggregated (e.g. download_speed) in this layer
               if (!entityData[aggregateEntityGID].layers) {
                 entityData[aggregateEntityGID].layers = []
