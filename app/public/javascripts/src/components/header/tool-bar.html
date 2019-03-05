@@ -229,6 +229,7 @@
                 ng-change="$ctrl.state.updateSiteBoundaryLayer()">
         </select> -->
         <select class="form-control" style="margin-top: 10px"
+          ng-value="$ctrl.state.selectedBoundaryType.description"
           ng-if="$ctrl.state.showSiteBoundary" 
           ng-click="$ctrl.state.setSelectedBoundaryType($ctrl.state.boundaryTypes[$event.target.selectedIndex])">
           <option ng-repeat="item in $ctrl.state.boundaryTypes"
