@@ -1,4 +1,4 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
@@ -15,6 +15,12 @@ const getLocationLayersList = createSelector([getAllLocationLayers], (locationLa
 
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
+
+const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
+const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
+
+const getselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
+const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType.toJS())
 
 /* global app localStorage map */
 class State {
@@ -1368,7 +1374,7 @@ class State {
           boundaryTypes.sort((a, b) => a.id - b.id)
           var selectedBoundaryType = boundaryTypes[0]
 
-          service.setBoundaryTypes(boundaryTypes)          
+          service.setBoundaryTypes(boundaryTypes)         
           service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
@@ -1378,14 +1384,14 @@ class State {
     service.setBoundaryTypes = function (boundaryTypes) {
       $ngRedux.dispatch({
         type: Actions.LAYERS_SET_BOUNDARY_TYPES,
-        payload: boundaryTypes
+        payload: new List(boundaryTypes)
       })
     }
 
     service.setSelectedBoundaryType = function (selectedBoundaryType) {
       $ngRedux.dispatch({
         type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
-        payload: selectedBoundaryType
+        payload: new Map(selectedBoundaryType)
       })
     }
 
@@ -1858,8 +1864,8 @@ class State {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
-      boundaryTypes: reduxState.mapLayers.boundaryTypes,
-      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
+      boundaryTypes: getBoundaryTypesList(reduxState),
+      selectedBoundaryType: getSelectedBoundaryType(reduxState)
     }
   }
 
