@@ -1339,8 +1339,8 @@ class State {
     }
 
     service.showDirectedCable = false
-    service.boundaryTypes = []
-    service.selectedBoundaryType = {}
+    //service.boundaryTypes = []
+    //service.selectedBoundaryType = {}
 
     var loadCensusCatData = function () {
       return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
@@ -1363,14 +1363,31 @@ class State {
     var loadBoundaryLayers = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
-          service.boundaryTypes = result.data
-          service.boundaryTypes.push({ id: result.data.length + 1, name: 'fiveg_coverage', description: 'Undefined' })
-          service.boundaryTypes.sort((a, b) => a.id - b.id)
-          service.selectedBoundaryType = service.boundaryTypes[0]
+          var boundaryTypes = result.data
+          boundaryTypes.push({ id: result.data.length + 1, name: 'fiveg_coverage', description: 'Undefined' })
+          boundaryTypes.sort((a, b) => a.id - b.id)
+          var selectedBoundaryType = boundaryTypes[0]
+
+          service.setBoundaryTypes(boundaryTypes)          
+          service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
 
     loadBoundaryLayers()
+
+    service.setBoundaryTypes = function (boundaryTypes) {
+      $ngRedux.dispatch({
+        type: Actions.LAYERS_SET_BOUNDARY_TYPES,
+        payload: boundaryTypes
+      })
+    }
+
+    service.setSelectedBoundaryType = function (selectedBoundaryType) {
+      $ngRedux.dispatch({
+        type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
+        payload: selectedBoundaryType
+      })
+    }
 
     service.listOfTags = []
     service.currentPlanTags = []
@@ -1840,7 +1857,9 @@ class State {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       reduxPlanTargets: reduxState.selection.planTargets,
-      showSiteBoundary: reduxState.mapLayers.showSiteBoundary
+      showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
+      boundaryTypes: reduxState.mapLayers.boundaryTypes,
+      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
     }
   }
 

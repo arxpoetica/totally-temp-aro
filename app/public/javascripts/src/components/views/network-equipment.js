@@ -6,6 +6,9 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
+// const getAllselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
+// const getSelectedBoundaryType = createSelector([getAllselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType)
+
 class NetworkEquipmentController {
   constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, optimization, state) {
     this.map_tools = map_tools
@@ -38,15 +41,6 @@ class NetworkEquipmentController {
   }
 
   $onInit() {
-    // var networkEquipmentLayers = []
-    // var types = ['equipments','cables']
-
-    // types.forEach((type) => {
-    //   this.state.configuration && Object.keys(this.state.configuration.networkEquipment[type]).forEach((layerKey) => {
-    //     networkEquipmentLayers.push(this.state.configuration.networkEquipment[type][layerKey])
-    //   })
-    // })
-
     if (config.ARO_CLIENT === 'tdc') {
       var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
       this.state.configuration.networkEquipment.equipments = {}
@@ -217,6 +211,8 @@ class NetworkEquipmentController {
     //     index !== -1 && this.state.rulerActions.splice(index, 1)
     //   }
     // })
+    
+    // this.networkEquipmentLayers.boundaries && this.state.updateSiteBoundaryLayer()        
     this.createMapLayersForCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
@@ -243,8 +239,9 @@ class NetworkEquipmentController {
 
   mapStateToThis (reduxState) {
     return {
-      networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState)
-      //networkEquipmentLayers: reduxState.mapLayers.networkEquipment
+      networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
+      // selectedBoundaryType: getSelectedBoundaryType(reduxState)
+      selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
     }
   }
 
@@ -263,12 +260,14 @@ class NetworkEquipmentController {
 
   mergeToTarget (nextState, actions) {
     const currentNetworkEquipmentLayers = this.networkEquipmentLayers
+    const currentSelectedBoundaryType = this.selectedBoundaryType
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
-    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers) {
+    if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers ||
+      currentSelectedBoundaryType !== nextState.selectedBoundaryType) {
       this.updateMapLayers()
     }
   }
