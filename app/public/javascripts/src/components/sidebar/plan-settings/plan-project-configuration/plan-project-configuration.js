@@ -10,10 +10,24 @@ class PlanProjectConfigurationController {
     this.showProjectCreation = false
     this.newProjectName = 'New Project'
     this.parentProjectForNewProject = null
+
+    this.modes = Object.freeze({
+      HOME: 'HOME',
+      MANAGE_PROJECTS: 'MANAGE_PROJECTS',
+      CREATE_PROJECT: 'CREATE_PROJECT',
+      COPY_PROJECT_TO_PLAN: 'COPY_PROJECT_TO_PLAN',
+      COPY_PLAN_TO_PROJECT: 'COPY_PLAN_TO_PROJECT'
+    })
+    this.selectedMode = this.modes.HOME
   }
 
   $onInit () {
     this.reloadProjects()
+  }
+
+  setSelectedMode(mode) {
+    this.selectedMode = mode
+    this.$timeout()
   }
 
   reloadProjects() {
@@ -32,12 +46,16 @@ class PlanProjectConfigurationController {
 
   copySelectedProjectSettingsToPlan () {
     this.state.copyProjectSettingsToPlan(this.selectedProjectId, this.planId, this.userId)
+    this.setSelectedMode(this.modes.HOME)
   }
 
   planSettingsToProject () {
     // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()
-      .then(() => this.state.saveNetworkConfigurationToDefaultProject())
+      .then(() => {
+        this.state.saveNetworkConfigurationToDefaultProject()
+        this.setSelectedMode(this.modes.HOME)
+      })
       .catch((err) => console.error(err))
   }
 
@@ -45,6 +63,7 @@ class PlanProjectConfigurationController {
     this.$http.post(`/service/v1/project-template?user_id=${this.userId}`, { name: projectName, parentId: parentProject.id })
       .then(result => {
         this.reloadProjects()
+        this.setSelectedMode(this.modes.HOME)
         this.$timeout()
       })
       .catch(err => console.error(err))
@@ -52,8 +71,7 @@ class PlanProjectConfigurationController {
 
   cancelProjectCreation () {
     this.newProjectName = 'New Project'
-    this.showProjectCreation = false
-    this.$timeout()
+    this.setSelectedMode(this.modes.HOME)
   }
 
   deleteProject (project) {
@@ -62,6 +80,7 @@ class PlanProjectConfigurationController {
       .then(result => {
         project.isDeleting = false
         this.reloadProjects()
+        this.setSelectedMode(this.modes.HOME)
       })
       .catch(err => {
         project.isDeleting = false
