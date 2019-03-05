@@ -1,19 +1,70 @@
 <style scoped>
-    .container {
-      display: flex;
-      flex-direction: column;
-      width: -webkit-fill-available;
-    }
-    .indent {
-      margin: 5px;
-    }
-    #tblProjectConfiguration td {
-      line-height: 33px;
-      border: none;
-    }
-  </style>
+  .indent {
+    margin: 5px;
+  }
+  #tblProjectConfigurationOld td {
+    line-height: 33px;
+    border: none;
+  }
+</style>
 <div style="position: relative; padding: 10px">
-  <table id="tblProjectConfiguration" class="table">
+
+  <table id="tblProjectConfiguration" class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <td>Project name</td>
+        <td>Actions</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="project in $ctrl.allProjects">
+        <td>{{project.name}}</td>
+        <td>
+          <div class="btn btn-group btn-group-sm" style="padding: 0px;">
+            <button class="btn btn-danger" ng-disabled="project.isDeleting" ng-click="$ctrl.deleteProject(project)">
+              <i ng-if="!project.isDeleting" class="fas fa-trash-alt"></i>
+              <i ng-if="project.isDeleting" class="fa fa-spinner fa-spin"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+    </tbody>
+  </table>
+
+  <button class="btn btn-light" ng-if="!$ctrl.showProjectCreation" ng-click="$ctrl.showProjectCreation = true">Create new project...</button>
+
+  <form ng-if="$ctrl.showProjectCreation">
+
+    <div class="form-group row">
+      <div class="col-sm-4">Name</div>
+      <div class="col-sm-8">
+        <input class="form-control" ng-model="$ctrl.newProjectName">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-4">Parent</div>
+      <div class="col-sm-8">
+        <select class="form-control" ng-model="$ctrl.parentProjectForNewProject"
+          ng-options="item.name for item in $ctrl.allProjects">
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-4"></div>
+      <div class="col-sm-8">
+        <div class="btn btn-group btn-group-sm">
+          <button class="btn btn-primary" ng-click="$ctrl.createProject($ctrl.newProjectName, $ctrl.parentProjectForNewProject)">Create</button>
+          <button class="btn btn-light" ng-click="$ctrl.cancelProjectCreation()">Cancel</button>
+        </div>
+      </div>
+    </div>
+      
+  </form>
+
+  <table id="tblProjectConfigurationOld" class="table">
     <tbody>
       <tr>
         <td>Projects:</td>

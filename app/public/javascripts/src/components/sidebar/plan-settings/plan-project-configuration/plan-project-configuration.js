@@ -7,12 +7,20 @@ class PlanProjectConfigurationController {
 
     this.allProjects = []
     this.selectedProjectId = null
+    this.showProjectCreation = false
+    this.newProjectName = 'New Project'
+    this.parentProjectForNewProject = null
   }
 
   $onInit () {
+    this.reloadProjects()
+  }
+
+  reloadProjects() {
     this.$http.get(`/service/v1/project-template?user_id=${this.userId}`)
       .then((result) => {
         this.allProjects = result.data
+        this.parentProjectForNewProject = this.allProjects[0]
         return this.$http.get(`/service/auth/users/${this.userId}/configuration`)
       })
       .then((result) => {
@@ -31,6 +39,35 @@ class PlanProjectConfigurationController {
     this.savePlanDataAndResourceSelectionToProject()
       .then(() => this.state.saveNetworkConfigurationToDefaultProject())
       .catch((err) => console.error(err))
+  }
+
+  createProject (projectName, parentProject) {
+    this.$http.post(`/service/v1/project-template?user_id=${this.userId}`, { name: projectName, parentId: parentProject.id })
+      .then(result => {
+        this.reloadProjects()
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
+  }
+
+  cancelProjectCreation () {
+    this.newProjectName = 'New Project'
+    this.showProjectCreation = false
+    this.$timeout()
+  }
+
+  deleteProject (project) {
+    project.isDeleting = true
+    this.$http.delete(`/service/v1/project-template/${project.id}?user_id=${this.userId}`)
+      .then(result => {
+        project.isDeleting = false
+        this.reloadProjects()
+      })
+      .catch(err => {
+        project.isDeleting = false
+        this.$timeout()
+        console.error(err)
+      })
   }
 
   // Saves the plan Data Selection and Resource Selection to the project
