@@ -141,11 +141,21 @@
       <tr>
         <td>Endpoint Technology</td>
         <td>
+          <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.Fiber.checked,
+                             'btn-primary': $ctrl.state.optimizationOptions.technologies.Fiber.checked }"
+            ng-click="$ctrl.onFiberClicked()">
+            Fiber
+          </button>
           <div class="btn-group btn-group-sm">
-            <button ng-repeat="(technologyKey, technology) in $ctrl.state.optimizationOptions.technologies"
-                    ng-class="{'btn': true, 'btn-light': !technology.checked, 'btn-primary': technology.checked}"
-                    ng-click="$ctrl.onFiberOrFiveGClicked(technologyKey)">
-              {{technology.label}}
+            <button ng-class="{'btn': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.FiveG.checked,
+                               'btn-primary': $ctrl.state.optimizationOptions.technologies.FiveG.checked}"
+                    ng-click="$ctrl.onFiveGClicked(technologyKey)">
+              5G
+            </button>
+            <button ng-class="{'btn': true, 'btn-light': !$ctrl.state.optimizationOptions.technologies.Copper.checked,
+                               'btn-primary': $ctrl.state.optimizationOptions.technologies.Copper.checked}"
+                    ng-click="$ctrl.onCopperClicked(technologyKey)">
+              DSL
             </button>
           </div>
           <button ng-class="{'btn btn-sm': true, 'btn-light': !$ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis,
@@ -155,6 +165,7 @@
           </button>
         </td>
       </tr>
+      <!-- Options to show if 5G is selected-->
       <tr ng-if="$ctrl.state.optimizationOptions.technologies.FiveG.checked || $ctrl.state.optimizationOptions.networkConstraints.advancedAnalysis">
         <td class="indent-1">Polygon Type</td>
         <td> 
@@ -187,6 +198,27 @@
             ng-model="$ctrl.state.optimizationOptions.networkConstraints.cellNodeConstraints.minimumRayLength">
         </td>
       </tr>
+
+      <!-- Options to show if Copper (DSL) is selected -->
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.Copper.checked">
+        <td class="indent-1">Placement interval (m)</td>
+        <td> 
+          <input type="text" class="form-control text-right" placeholder="Placement interval"
+            ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.cellRadius">
+        </td>
+      </tr>
+      <tr ng-if="$ctrl.state.optimizationOptions.technologies.Copper.checked">
+        <td class="indent-1">Target speed</td>
+        <td>
+          <!-- <input type="text" class="form-control text-right" placeholder="Target speed"
+            ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.optimizationSpeedMbs"> -->
+          <select class="form-control"
+                  ng-model="$ctrl.state.optimizationOptions.networkConstraints.dslamNodeConstraints.optimizationSpeedMbs"
+                  ng-options="item.speed as item.description for item in $ctrl.rateReachCategories">
+          </select>
+        </td>
+      </tr>
+
       <tr>
         <td width="48%">Network Construction</td>
         <td> 
