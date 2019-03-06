@@ -1,46 +1,148 @@
 <style scoped>
-    .container {
-      display: flex;
-      flex-direction: column;
-      width: -webkit-fill-available;
-    }
-    .indent {
-      margin: 5px;
-    }
-    #tblProjectConfiguration td {
-      line-height: 33px;
-      border: none;
-    }
-  </style>
+  .indent {
+    margin: 5px;
+  }
+  .form-div-center,#tblProjectConfiguration td {
+    line-height: 33px;
+  }
+  .btn-project-configuration {
+    width: calc(49% - 20px);
+    margin: 10px;
+    height: 100px
+  }
+  .btn-delete-project {
+    padding: 3px 7px;
+  }
+</style>
 <div style="position: relative; padding: 10px">
-  <table id="tblProjectConfiguration" class="table">
+
+  <!-- First, a section that shows up with different actions we can perform on Projects -->
+  <div ng-if="$ctrl.selectedMode === $ctrl.modes.HOME">
+    <button class="btn btn-light btn-project-configuration" ng-click="$ctrl.setSelectedMode($ctrl.modes.CREATE_PROJECT)">
+      <i class="far fa-2x fa-file"></i>
+      <br>Create new
+    </button>
+
+    <button class="btn btn-light btn-project-configuration" ng-click="$ctrl.setSelectedMode($ctrl.modes.MANAGE_PROJECTS)">
+      <i class="fas fa-2x fa-tasks"></i>
+      <br>Manage
+    </button>
+
+    <button class="btn btn-light btn-project-configuration" ng-click="$ctrl.setSelectedMode($ctrl.modes.COPY_PROJECT_TO_PLAN)">
+      <i class="fa fa-2x fa-angle-double-down"></i>
+      <br>Project to Plan
+    </button>
+
+    <button class="btn btn-light btn-project-configuration" ng-click="$ctrl.setSelectedMode($ctrl.modes.COPY_PLAN_TO_PROJECT)">
+      <i class="fa fa-2x fa-angle-double-up"></i>
+      <br>Plan to Project
+    </button>
+  </div>
+
+  <!-- Section for creating new projects -->
+  <form ng-if="$ctrl.selectedMode === $ctrl.modes.CREATE_PROJECT">
+
+    <div class="form-group row">
+      <div class="col-sm-4 form-div-center">Name</div>
+      <div class="col-sm-8">
+        <input class="form-control" ng-model="$ctrl.newProjectName">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-4 form-div-center">Parent</div>
+      <div class="col-sm-8">
+        <select class="form-control" ng-model="$ctrl.parentProjectForNewProject"
+          ng-options="item.name for item in $ctrl.allProjects">
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <div class="col-sm-4 form-div-center"></div>
+      <div class="col-sm-8">
+        <div class="btn-group float-right">
+          <button class="btn btn-primary" ng-click="$ctrl.createProject($ctrl.newProjectName, $ctrl.parentProjectForNewProject)">Create</button>
+          <button class="btn btn-light" ng-click="$ctrl.cancelProjectCreation()">Cancel</button>
+        </div>
+      </div>
+    </div>
+      
+  </form>
+  
+  <!-- Section for managing / deleting projects -->
+  <table ng-if="$ctrl.selectedMode === $ctrl.modes.MANAGE_PROJECTS" id="tblProjectConfiguration" class="table table-striped table-sm">
+    <thead class="thead-light">
+      <tr>
+        <th>Project name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
     <tbody>
-      <tr>
-        <td>Projects:</td>
+      <tr ng-repeat="project in $ctrl.allProjects">
+        <td>{{project.name}}</td>
         <td>
-          <select class="form-control"
-                  ng-model="$ctrl.selectedProjectId"
-                  ng-options="item.id as item.name for item in $ctrl.allProjects">
-          </select>
+          <div class="btn btn-group" style="padding: 0px;">
+            <button class="btn btn-danger btn-delete-project" ng-disabled="project.isDeleting" ng-click="$ctrl.deleteProject(project)">
+              <i ng-if="!project.isDeleting" class="fas fa-trash-alt"></i>
+              <i ng-if="project.isDeleting" class="fa fa-spinner fa-spin"></i>
+            </button>
+          </div>
         </td>
       </tr>
       <tr>
-        <td></td>
-        <td>
-          <button class="btn btn-block btn-light" ng-click="$ctrl.copySelectedProjectSettingsToPlan()">
-            <i class="fa fa-download"></i>&nbsp;&nbsp;Copy project settings to current plan
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>
-          <button class="btn btn-block btn-light" ng-click="$ctrl.planSettingsToProject()">
-            <i class="fa fa-upload"></i>&nbsp;&nbsp;Save plan settings to selected project
-          </button>
-        </td>
-      </tr>
     </tbody>
   </table>
-  
+
+  <!-- Section for copying project settings to current plan -->
+  <div ng-if="$ctrl.selectedMode === $ctrl.modes.COPY_PROJECT_TO_PLAN">
+    <p>
+      Each project has a set of default plan settings. You can copy these default settings from the selected project into the current plan.
+    </p>
+    <form>
+      <div class="form-group row">
+        <div class="col-sm-4 form-div-center">Source project</div>
+        <div class="col-sm-8">
+          <select class="form-control"
+            ng-model="$ctrl.selectedProjectId"
+            ng-options="item.id as item.name for item in $ctrl.allProjects">
+          </select>
+        </div>
+      </div>
+    </form>
+    <button class="btn btn-block btn-primary" ng-click="$ctrl.copySelectedProjectSettingsToPlan()" style="margin-bottom: 10px;">
+      Copy project settings to current plan
+    </button>
+  </div>
+
+  <!-- Section for copying project settings to current plan -->
+  <div ng-if="$ctrl.selectedMode === $ctrl.modes.COPY_PLAN_TO_PROJECT">
+    <p>
+      The currently open plan has a number of plan settings that are defined. You can copy these settings over
+      to a project. Once this is done, plans created using the project will inherit these new settings.
+    </p>
+    <div class="alert alert-danger" role="alert">
+      Warning: Once you perform this operation, ALL existing plans created from this project will be in an invalid state.
+    </div>
+    <form>
+      <div class="form-group row">
+        <div class="col-sm-4 form-div-center">Target project</div>
+        <div class="col-sm-8">
+          <select class="form-control"
+            ng-model="$ctrl.selectedProjectId"
+            ng-options="item.id as item.name for item in $ctrl.allProjects">
+          </select>
+        </div>
+      </div>
+    </form>
+    <button class="btn btn-block btn-danger" ng-click="$ctrl.copySelectedProjectSettingsToPlan()" style="margin-bottom: 10px;">
+      Copy project settings to current plan
+    </button>
+  </div>
+
+  <!-- Show a "back" button only if we are not in "Home" mode -->
+  <button ng-if="$ctrl.selectedMode !== $ctrl.modes.HOME" class="btn btn-light" ng-click="$ctrl.setSelectedMode($ctrl.modes.HOME)">
+    <i class="fas fa-arrow-left"></i>
+    &nbsp;&nbsp;Back
+  </button>
 </div>
