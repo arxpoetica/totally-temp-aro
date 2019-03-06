@@ -176,6 +176,45 @@ class NetworkEquipmentController {
     })
   }
 
+  createMapLayersForBoundaryCategory(categoryItems, categoryType, mapLayers, createdMapLayerKeys) {
+    // First loop through all the equipment types
+    this.mapZoom = map.getZoom()
+    // Boundary selection depends on showSiteBoundary checkbox and the selected boundary type in the dropdown
+    categoryItems && Object.keys(categoryItems).forEach((categoryItemKey) => {
+      var networkEquipment = categoryItems[categoryItemKey]
+
+      var selectedBoundaryName
+      this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
+
+      //Type of Boundary to show
+      if ((networkEquipment.equipmentType !== 'point' ||
+        this.usePointAggregate ||
+        this.mapZoom > networkEquipment.aggregateZoomThreshold) && selectedBoundaryName === categoryItemKey) {
+
+        //Existing Boundaries
+        if (this.state.equipmentLayerTypeVisibility.existing && this.state.showSiteBoundary) {
+          // We need to show the existing network equipment. Loop through all the selected library ids.
+          this.state.dataItems && this.state.dataItems[networkEquipment.dataItemKey] &&
+            this.state.dataItems[networkEquipment.dataItemKey].selectedLibraryItems.forEach((selectedLibraryItem) => {
+              var mapLayerKey = `${categoryItemKey}_existing_${selectedLibraryItem.identifier}`
+              mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'existing', selectedLibraryItem.identifier, null)
+              createdMapLayerKeys.add(mapLayerKey)
+            })
+        }
+
+        //Planned Boundaries
+        const planId = this.state.plan && this.state.plan.getValue() && this.state.plan.getValue().id
+        if (this.state.equipmentLayerTypeVisibility.planned && this.state.showSiteBoundary && planId) {
+          // We need to show the planned network equipment for this plan.
+          var mapLayerKey = `${categoryItemKey}_planned`
+          mapLayers[mapLayerKey] = this.createSingleMapLayer(categoryItemKey, categoryType, networkEquipment, 'planned', null, planId)
+          createdMapLayerKeys.add(mapLayerKey)
+        }
+      }
+
+    })
+  }
+
   updateMapLayers() {
     if(!this.networkEquipmentLayers) return
     // Make a copy of the state mapLayers. We will update this
@@ -212,8 +251,7 @@ class NetworkEquipmentController {
     //   }
     // })
     
-    // this.networkEquipmentLayers.boundaries && this.state.updateSiteBoundaryLayer()        
-    this.createMapLayersForCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
+    this.createMapLayersForBoundaryCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
     this.state.mapLayers.next(oldMapLayers)
@@ -240,7 +278,7 @@ class NetworkEquipmentController {
   mapStateToThis (reduxState) {
     return {
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
-      // selectedBoundaryType: getSelectedBoundaryType(reduxState)
+      showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       selectedBoundaryType: reduxState.mapLayers.selectedBoundaryType
     }
   }
@@ -261,13 +299,15 @@ class NetworkEquipmentController {
   mergeToTarget (nextState, actions) {
     const currentNetworkEquipmentLayers = this.networkEquipmentLayers
     const currentSelectedBoundaryType = this.selectedBoundaryType
+    const currentShowSiteBoundary = this.showSiteBoundary
 
     // merge state and actions onto controller
     Object.assign(this, nextState)
     Object.assign(this, actions)
 
     if (currentNetworkEquipmentLayers !== nextState.networkEquipmentLayers ||
-      currentSelectedBoundaryType !== nextState.selectedBoundaryType) {
+      currentSelectedBoundaryType !== nextState.selectedBoundaryType ||
+      currentShowSiteBoundary !== nextState.showSiteBoundary) {
       this.updateMapLayers()
     }
   }

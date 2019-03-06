@@ -1825,26 +1825,26 @@ class State {
 
     service.toggleSiteBoundary = () => {
       service.updateShowSiteBoundary(!service.showSiteBoundary)
-      service.updateSiteBoundaryLayer()
+      // service.updateSiteBoundaryLayer()
     }
 
-    service.updateSiteBoundaryLayer = () => {
-      Object.keys(service.networkEquipmentLayers.boundaries).forEach((boundaryKey) => {
-        var selectedBoundaryName
-        service.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-        if (selectedBoundaryName === 'siteBoundaries') {
-          //this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
-          var isVisible = service.showSiteBoundary && boundaryKey === selectedBoundaryName
-          service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
-        } else if (selectedBoundaryName === 'fiveg_coverage') {
-          // this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
-          //   this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
-          var isVisible = (service.showSiteBoundary && boundaryKey === selectedBoundaryName &&
-            service.networkEquipmentLayers.equipments['cell_5g'].checked)
-          service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
-        }
-      })
-    }
+    // service.updateSiteBoundaryLayer = () => {
+    //   Object.keys(service.networkEquipmentLayers.boundaries).forEach((boundaryKey) => {
+    //     var selectedBoundaryName
+    //     service.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
+    //     if (selectedBoundaryName === 'siteBoundaries') {
+    //       //this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
+    //       var isVisible = service.showSiteBoundary && boundaryKey === selectedBoundaryName
+    //       service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
+    //     } else if (selectedBoundaryName === 'fiveg_coverage') {
+    //       // this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
+    //       //   this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
+    //       var isVisible = (service.showSiteBoundary && boundaryKey === selectedBoundaryName &&
+    //         service.networkEquipmentLayers.equipments['cell_5g'].checked)
+    //       service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
+    //     }
+    //   })
+    // }
 
     service.getDispatchers = () => {
     // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
@@ -1877,9 +1877,9 @@ class State {
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
-      updateBoundaryLayerVisibility: (layerType, layer, isVisible) => {
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
-      },
+      // updateBoundaryLayerVisibility: (layerType, layer, isVisible) => {
+      //   dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
+      // },
       updateShowSiteBoundary: (isVisible) => {dispatch(MapLayerActions.setShowSiteBoundary(isVisible))}
     }
   }
