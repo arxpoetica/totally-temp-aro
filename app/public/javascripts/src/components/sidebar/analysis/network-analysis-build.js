@@ -48,21 +48,39 @@ class NetworkAnalysisBuildController {
     this.state.optimizationOptions.budget = this.budgetDisplay
   }
 
-  onFiberOrFiveGClicked (networkType) {
-    // If Fiber or FiveG is enabled, disable advanced analysis
-    this.state.optimizationOptions.technologies[networkType].checked = !this.state.optimizationOptions.technologies[networkType].checked
-    if (this.state.optimizationOptions.technologies[networkType].checked) {
+  onFiberClicked() {
+    this.state.optimizationOptions.technologies.Fiber.checked = !this.state.optimizationOptions.technologies.Fiber.checked
+    // Disable advanced analysis
+    if (this.state.optimizationOptions.technologies.Fiber.checked) {
       this.state.optimizationOptions.networkConstraints.advancedAnalysis = false
     }
   }
 
-  onAdvancedAnalysisClicked () {
-    // If "Advanced Analysis" is enabled, disable Fiber and 5G
+  onFiveGClicked() {
+    this.state.optimizationOptions.technologies.FiveG.checked = !this.state.optimizationOptions.technologies.FiveG.checked
+    // Disable advanced analysis and Copper
+    if (this.state.optimizationOptions.technologies.FiveG.checked) {
+      this.state.optimizationOptions.networkConstraints.advancedAnalysis = false
+      this.state.optimizationOptions.technologies.Copper.checked = false
+    }
+  }
+
+  onCopperClicked() {
+    this.state.optimizationOptions.technologies.Copper.checked = !this.state.optimizationOptions.technologies.Copper.checked
+    // Disable advanced analysis and 5G
+    if (this.state.optimizationOptions.technologies.Copper.checked) {
+      this.state.optimizationOptions.networkConstraints.advancedAnalysis = false
+      this.state.optimizationOptions.technologies.FiveG.checked = false
+    }
+  }
+
+  onAdvancedAnalysisClicked() {
+    // If "Advanced Analysis" is enabled, disable all other technology types
     this.state.optimizationOptions.networkConstraints.advancedAnalysis = !this.state.optimizationOptions.networkConstraints.advancedAnalysis
     if (this.state.optimizationOptions.networkConstraints.advancedAnalysis) {
-      Object.keys(this.state.optimizationOptions.technologies).forEach(technologyKey => {
-        this.state.optimizationOptions.technologies[technologyKey].checked = false
-      })
+      this.state.optimizationOptions.technologies.Fiber.checked = false
+      this.state.optimizationOptions.technologies.FiveG.checked = false
+      this.state.optimizationOptions.technologies.Copper.checked = false
     }
   }
 
