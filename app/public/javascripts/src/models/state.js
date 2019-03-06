@@ -1416,8 +1416,8 @@ class State {
 
     service.isFeatureLayerOn = (categoryItemKey) => {
       var isOn = false
-      if (service.configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) &&
-        service.configuration.networkEquipment.equipments[categoryItemKey].checked) {
+      if (service.networkEquipmentLayers.equipments.hasOwnProperty(categoryItemKey) &&
+        service.networkEquipmentLayers.equipments[categoryItemKey].checked) {
         isOn = true
       }
       return isOn
