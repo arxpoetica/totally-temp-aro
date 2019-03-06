@@ -8,8 +8,9 @@ const getSelectionModes = state => state.selection.selectionModes
 const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes))
 
 class NetworkAnalysisBuildController {
-  constructor ($http, $ngRedux, state, optimization) {
+  constructor ($http, $timeout, $ngRedux, state, optimization) {
     this.$http = $http
+    this.$timeout = $timeout
     this.$ngRedux = $ngRedux
     this.state = state
     this.optimization = optimization
@@ -17,6 +18,7 @@ class NetworkAnalysisBuildController {
     this.targetsTotal = 0
     this.serviceAreas = []
     this.analysisAreas = []
+    this.rateReachCategories = []
     this.config = config
     this.toggleAdvanceSettings = false
 
@@ -84,33 +86,15 @@ class NetworkAnalysisBuildController {
     }
   }
 
-  $onChanges (changesObj) {
-    if (changesObj.selection) {
-      // // The selected locations have changed. Get the count and addresses that we want to show
-      // this.targetsTotal = this.state.selection.planTargets.locationIds.size
-      // var locationIds = Array.from(this.state.selection.planTargets.locationIds) // Only get addresses for a few locations
-      // this.$http.post('/network_plan/targets/addresses', { locationIds: locationIds })
-      //   .then((result) => {
-      //     this.targets = result.data
-      //   })
-      //   .catch(err => console.error(err))
-
-      // // The selected service areas have changed.
-      // var serviceAreaIds = Array.from(this.state.selection.planTargets.serviceAreaIds)
-      // this.$http.post('/network_plan/service_area/addresses', { serviceAreaIds: serviceAreaIds })
-      //   .then((result) => {
-      //     this.serviceAreas = result.data
-      //   })
-      //   .catch(err => console.error(err))
-
-      // // The selected analysis areas have changed.
-      // var analysisAreaIds = Array.from(this.state.selection.planTargets.analysisAreaIds)
-      // this.$http.post('/network_plan/analysis_area/addresses', { analysisAreaIds: analysisAreaIds })
-      //   .then((result) => {
-      //     this.analysisAreas = result.data
-      //   })
-      //   .catch(err => console.error(err))
-    }
+  $onInit() {
+    // Get the list of available speeds for the currently selected rate reach manager
+    const selectedRateReachManagerId = this.state.resourceItems.rate_reach_manager.selectedManager.id
+    this.$http.get(`/service/rate-reach-matrix/resource/${selectedRateReachManagerId}/config`)
+      .then(result => {
+        this.rateReachCategories = result.data.categories
+        this.$timeout()
+      })
+      .catch(err => console.error(err))
   }
 
   $onDestroy () {
@@ -132,7 +116,7 @@ class NetworkAnalysisBuildController {
   }
 }
 
-NetworkAnalysisBuildController.$inject = ['$http', '$ngRedux', 'state', 'optimization']
+NetworkAnalysisBuildController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'optimization']
 
 let networkAnalysisBuild = {
   templateUrl: '/components/sidebar/analysis/network-analysis-build.html',
