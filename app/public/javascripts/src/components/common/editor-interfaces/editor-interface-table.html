@@ -22,17 +22,19 @@
 	    </thead>
 	    <tbody>
 	      <tr class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
-	        <td class="ei-table-cell" ng-repeat="(colKey, colValue) in $ctrl.displayProps">
-	          
-	          <editor-interface-value ng-if="rowValue.hasOwnProperty(colValue.propertyName)"
-	                                  display-props="colValue" 
-                                    on-change="$ctrl.onChange()" 
-                                    model="rowValue[colValue.propertyName]" 
-                                    is-edit="$ctrl.isEdit"
-                                    parent-obj="rowValue"
-                                    root-meta-data="$ctrl.rootMetaData">
-	          </editor-interface-value>
-	          
+	        <td class="ei-table-cell" 
+	            data-toggle="tooltip" data-placement="bottom" title="{{rowValue[colValue.propertyName]}}"
+	            ng-repeat="(colKey, colValue) in $ctrl.displayProps">
+	          <div class="ei-table-content">
+		          <editor-interface-value ng-if="rowValue.hasOwnProperty(colValue.propertyName)"
+		                                  display-props="colValue" 
+	                                    on-change="$ctrl.onChange()" 
+	                                    model="rowValue[colValue.propertyName]" 
+	                                    is-edit="$ctrl.isEdit"
+	                                    parent-obj="rowValue"
+	                                    root-meta-data="$ctrl.rootMetaData">
+		          </editor-interface-value>
+	          </div>
 	        </td>
 	        <td class="ei-table-cell">
 	          <button class="btn btn-sm ng-class: btnValue.buttonClass;" 

@@ -21,7 +21,7 @@
       ng-options="item.id as item.description for item in $ctrl.enumSet">
   </select>
   
-  <div ng-switch-default>
+  <div class="ei-output-text" ng-switch-default>
     {{ $ctrl.model }}
   </div>
   
@@ -29,17 +29,17 @@
 <div ng-if="$ctrl.isEdit && !$ctrl.isValid" class="ei-invalid-message">required</div>
 
 <div ng-if="!$ctrl.isEdit" ng-switch="$ctrl.displayProps.displayDataType">
-  <div ng-switch-when="date">
+  <div class="ei-output-text" ng-switch-when="date">
     {{ $ctrl.dateVal.toDateString() }}
   </div>
-  <div ng-switch-when="datetime">
+  <div class="ei-output-text" ng-switch-when="datetime">
     {{ $ctrl.dateVal.toUTCString() }}
   </div>
-  <div ng-switch-when="enum">
+  <div class="ei-output-text" ng-switch-when="enum">
     {{$ctrl.getEnumSet();""}}
     {{ $ctrl.enumVal }}
   </div>
-  <div ng-switch-default>
+  <div class="ei-output-text" ng-switch-default>
     {{ $ctrl.model }}
   </div>
 </div>
