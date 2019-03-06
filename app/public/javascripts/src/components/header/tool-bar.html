@@ -223,11 +223,6 @@
         <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.state.showSiteBoundary" ng-click="$ctrl.state.toggleSiteBoundary()" name="ctype-name"
                style="margin-left: 2px;">
         <font>Site Boundaries</font>
-        <!-- <select ng-if="$ctrl.state.showSiteBoundary" class="form-control" style="margin-top: 10px"
-                ng-model="$ctrl.state.selectedBoundaryType"
-                ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
-                ng-change="$ctrl.state.updateSiteBoundaryLayer()">
-        </select> -->
         <select class="form-control" style="margin-top: 10px"
           ng-value="$ctrl.state.selectedBoundaryType.description"
           ng-if="$ctrl.state.showSiteBoundary" 

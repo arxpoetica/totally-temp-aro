@@ -6,9 +6,6 @@ import MapLayerActions from '../../react/components/map-layers/map-layer-actions
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
-// const getAllselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
-// const getSelectedBoundaryType = createSelector([getAllselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType)
-
 class NetworkEquipmentController {
   constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, optimization, state) {
     this.map_tools = map_tools
@@ -228,29 +225,7 @@ class NetworkEquipmentController {
     // Create layers for network equipment nodes and cables
     this.createdMapLayerKeys.clear()
     this.createMapLayersForCategory(this.networkEquipmentLayers.equipments, 'equipment', oldMapLayers, this.createdMapLayerKeys)
-    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)
-    // Hack to check/uncheck site boundaries based on view settings
-    // Object.keys(this.state.configuration.networkEquipment.boundaries).forEach((boundaryKey) => {
-    //   var selectedBoundaryName
-    //   this.state.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-    //   if (boundaryKey === 'siteBoundaries') {
-    //     this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
-    //   } else if (boundaryKey === 'fiveg_coverage') {
-    //     this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
-    //       this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
-    //   }
-    // })
-
-    // Hack to show copper in toolbar ruler options
-    // Object.keys(this.state.configuration.networkEquipment.cables).forEach((cable) => {
-    //   if (cable === 'COPPER' && this.state.configuration.networkEquipment.cables['COPPER'].checked) {
-    //     this.state.rulerActions.indexOf(this.state.allRulerActions.COPPER) === -1 && this.state.rulerActions.push(this.state.allRulerActions.COPPER)
-    //   } else if (cable === 'COPPER' && !this.state.configuration.networkEquipment.cables['COPPER'].checked) {
-    //     var index = this.state.rulerActions.indexOf(this.state.allRulerActions.COPPER)
-    //     index !== -1 && this.state.rulerActions.splice(index, 1)
-    //   }
-    // })
-    
+    this.createMapLayersForCategory(this.networkEquipmentLayers.cables, 'cable', oldMapLayers, this.createdMapLayerKeys)    
     this.createMapLayersForBoundaryCategory(this.networkEquipmentLayers.boundaries, 'boundaries', oldMapLayers, this.createdMapLayerKeys)
 
     // "oldMapLayers" now contains the new layers. Set it in the state
