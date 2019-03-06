@@ -8,6 +8,7 @@ class EditorInterfaceTableController {
     this.isOrderAscending = true
     this.pageOffset = 0
     this.lastPage = 0
+    this.actionDisplayLimit = 1
     this.pages = []
   }
 

@@ -66,7 +66,7 @@ class ResourceManagerController {
 
     this.actions = [
       {
-        buttonText: '', // Edit
+        buttonText: 'Edit', // Edit
         buttonClass: 'btn-light',
         iconClass: 'fa-edit',
         toolTip: 'Edit',
@@ -77,7 +77,7 @@ class ResourceManagerController {
         }
       },
       {
-        buttonText: '', // Clone
+        buttonText: 'Clone', // Clone
         buttonClass: 'btn-light',
         iconClass: 'fa-copy',
         toolTip: 'Clone',
@@ -88,7 +88,7 @@ class ResourceManagerController {
         }
       },
       {
-        buttonText: '', // Delete
+        buttonText: 'Delete', // Delete
         buttonClass: 'btn-outline-danger',
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
@@ -112,11 +112,12 @@ class ResourceManagerController {
   
   $onChanges (changes) {
     console.log(changes)
-    /*
+    
     if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
-      this.buildRows()
+      //this.buildRows()
+      this.getRows()
     }
-    */
+    
     if (changes.hasOwnProperty('resourceItems')) {
       this.buildFilterOptions()
     }
@@ -231,7 +232,7 @@ class ResourceManagerController {
   }
 
   cloneSelectedManagerFromSource (selectedManager) {
-    var managerId = this.resourceKeyToEndpointId[selectedManager.managerType]
+    var managerId = this.resourceKeyToEndpointId[selectedManager.resourceType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
       this.cloneSelectedPriceBook(selectedManager)
@@ -260,7 +261,8 @@ class ResourceManagerController {
   editSelectedManager (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
-    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.managerType })
+    console.log(selectedManager)
+    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
   }
 
   askUserToConfirmManagerDelete (managerName) {
@@ -299,7 +301,7 @@ class ResourceManagerController {
         if (okToDelete) {
           const managerIdToDelete = selectedManager.id
           // this.selectedResourceKey selectedManager.managerType
-          const deleteUrl = this.managerDeleteUrl[selectedManager.managerType].replace(this.managerIdString, managerIdToDelete)
+          const deleteUrl = this.managerDeleteUrl[selectedManager.resourceType].replace(this.managerIdString, managerIdToDelete)
           this.deleteManager(deleteUrl)
         }
       })
