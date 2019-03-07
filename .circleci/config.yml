@@ -45,7 +45,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: update opwsworks deployment
+          name: update opsworks deployment
           command: |
             sudo pip install boto3
             python docker/create_or_update_stack.py qa update
@@ -59,7 +59,9 @@ workflows:
       - build:
           filters:
             branches:
-              only: master
+              only: 
+                - master
+                - circle_upgrade_test
       - deploy:
           requires:
             - build
