@@ -32,12 +32,14 @@ jobs:
             eval $(aws ecr get-login --region us-east-1 --no-include-email --registry-ids 976168524097)
             export IMAGE_TAG=${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export ECR_IMAGE_TAG=${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
+            export BRANCH_LOWER="$(tr '[:upper:]' '[:lower:]' <<< "$CIRCLE_BRANCH")"
+            export BRANCH="$(tr '_' '-' <<< "$BRANCH_LOWER")"
             docker/build.sh
             docker build -t ${IMAGE_TAG} ./target
             docker push ${IMAGE_TAG}
             docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
             docker push ${ECR_IMAGE_TAG}
-            python docker/publish_version.py ait-test app $CIRCLE_BUILD_NUM
+            python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
 
   deploy:
     docker:
@@ -45,10 +47,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: update opwsworks deployment
+          name: update opsworks deployment
           command: |
             sudo pip install boto3
-            python docker/create_or_update_stack.py qa update
+            python docker/update_stack.py qa update
 
 
 
@@ -59,7 +61,9 @@ workflows:
       - build:
           filters:
             branches:
-              only: master
+              only: 
+                - master
+                - circle_upgrade_test
       - deploy:
           requires:
             - build
