@@ -9,8 +9,8 @@ jobs:
     docker:
       - image: circleci/node:6
     environment:
-      IMAGE_NAME: avco/test-aro-app
-      ECR_IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/test-aro-app
+      IMAGE_NAME: avco/aro-app
+      ECR_IMAGE_NAME: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app
     steps:
       - setup_remote_docker
       - checkout
@@ -63,7 +63,7 @@ workflows:
             branches:
               only: 
                 - master
-                - circle_upgrade_test
+
       - deploy:
           requires:
             - build
