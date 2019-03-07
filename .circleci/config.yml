@@ -32,12 +32,13 @@ jobs:
             eval $(aws ecr get-login --region us-east-1 --no-include-email --registry-ids 976168524097)
             export IMAGE_TAG=${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export ECR_IMAGE_TAG=${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
+            export BRANCH_LOWER="$(tr '[:upper:]' '[:lower:]' <<< "$CIRCLE_BRANCH")"
             docker/build.sh
             docker build -t ${IMAGE_TAG} ./target
             docker push ${IMAGE_TAG}
             docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
             docker push ${ECR_IMAGE_TAG}
-            python docker/publish_version.py ait-test app $CIRCLE_BUILD_NUM
+            python docker/publish_version.py qa-${BRANCH_LOWER} app $CIRCLE_BUILD_NUM
 
   deploy:
     docker:
