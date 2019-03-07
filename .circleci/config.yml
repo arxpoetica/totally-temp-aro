@@ -33,12 +33,13 @@ jobs:
             export IMAGE_TAG=${IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export ECR_IMAGE_TAG=${ECR_IMAGE_NAME}:${CIRCLE_BUILD_NUM}
             export BRANCH_LOWER="$(tr '[:upper:]' '[:lower:]' <<< "$CIRCLE_BRANCH")"
+            export BRANCH="$(tr '_' '-' <<< "$BRANCH_LOWER")"
             docker/build.sh
             docker build -t ${IMAGE_TAG} ./target
             docker push ${IMAGE_TAG}
             docker tag ${IMAGE_TAG} ${ECR_IMAGE_TAG}
             docker push ${ECR_IMAGE_TAG}
-            python docker/publish_version.py qa-${BRANCH_LOWER} app $CIRCLE_BUILD_NUM
+            python docker/publish_version.py qa-${BRANCH} app $CIRCLE_BUILD_NUM
 
   deploy:
     docker:
@@ -49,7 +50,7 @@ jobs:
           name: update opsworks deployment
           command: |
             sudo pip install boto3
-            python docker/create_or_update_stack.py qa update
+            python docker/update_stack.py qa update
 
 
 
