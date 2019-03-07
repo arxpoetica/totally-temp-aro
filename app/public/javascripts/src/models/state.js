@@ -1,4 +1,4 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
@@ -15,6 +15,12 @@ const getLocationLayersList = createSelector([getAllLocationLayers], (locationLa
 
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
+
+const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
+const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
+
+const getselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
+const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType.toJS())
 
 /* global app localStorage map */
 class State {
@@ -1339,8 +1345,8 @@ class State {
     }
 
     service.showDirectedCable = false
-    service.boundaryTypes = []
-    service.selectedBoundaryType = {}
+    //service.boundaryTypes = []
+    //service.selectedBoundaryType = {}
 
     var loadCensusCatData = function () {
       return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
@@ -1363,14 +1369,31 @@ class State {
     var loadBoundaryLayers = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
-          service.boundaryTypes = result.data
-          service.boundaryTypes.push({ id: result.data.length + 1, name: 'fiveg_coverage', description: 'Undefined' })
-          service.boundaryTypes.sort((a, b) => a.id - b.id)
-          service.selectedBoundaryType = service.boundaryTypes[0]
+          var boundaryTypes = result.data
+          boundaryTypes.push({ id: result.data.length + 1, name: 'fiveg_coverage', description: 'Undefined' })
+          boundaryTypes.sort((a, b) => a.id - b.id)
+          var selectedBoundaryType = boundaryTypes[0]
+
+          service.setBoundaryTypes(boundaryTypes)         
+          service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
 
     loadBoundaryLayers()
+
+    service.setBoundaryTypes = function (boundaryTypes) {
+      $ngRedux.dispatch({
+        type: Actions.LAYERS_SET_BOUNDARY_TYPES,
+        payload: new List(boundaryTypes)
+      })
+    }
+
+    service.setSelectedBoundaryType = function (selectedBoundaryType) {
+      $ngRedux.dispatch({
+        type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
+        payload: new Map(selectedBoundaryType)
+      })
+    }
 
     service.listOfTags = []
     service.currentPlanTags = []
@@ -1393,8 +1416,8 @@ class State {
 
     service.isFeatureLayerOn = (categoryItemKey) => {
       var isOn = false
-      if (service.configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) &&
-        service.configuration.networkEquipment.equipments[categoryItemKey].checked) {
+      if (service.networkEquipmentLayers.equipments.hasOwnProperty(categoryItemKey) &&
+        service.networkEquipmentLayers.equipments[categoryItemKey].checked) {
         isOn = true
       }
       return isOn
@@ -1802,25 +1825,6 @@ class State {
 
     service.toggleSiteBoundary = () => {
       service.updateShowSiteBoundary(!service.showSiteBoundary)
-      service.updateSiteBoundaryLayer()
-    }
-
-    service.updateSiteBoundaryLayer = () => {
-      Object.keys(service.networkEquipmentLayers.boundaries).forEach((boundaryKey) => {
-        var selectedBoundaryName
-        service.selectedBoundaryType.name !== 'fiveg_coverage' ? selectedBoundaryName = 'siteBoundaries' : selectedBoundaryName = 'fiveg_coverage'
-        if (selectedBoundaryName === 'siteBoundaries') {
-          //this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName)
-          var isVisible = service.showSiteBoundary && boundaryKey === selectedBoundaryName
-          service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
-        } else if (selectedBoundaryName === 'fiveg_coverage') {
-          // this.state.configuration.networkEquipment.boundaries[boundaryKey].checked = (this.state.showSiteBoundary && boundaryKey === selectedBoundaryName &&
-          //   this.state.configuration.networkEquipment.equipments['cell_5g'].checked)
-          var isVisible = (service.showSiteBoundary && boundaryKey === selectedBoundaryName &&
-            service.networkEquipmentLayers.equipments['cell_5g'].checked)
-          service.updateBoundaryLayerVisibility('boundaries', service.networkEquipmentLayers.boundaries[boundaryKey], isVisible)
-        }
-      })
     }
 
     service.getDispatchers = () => {
@@ -1840,7 +1844,9 @@ class State {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
       reduxPlanTargets: reduxState.selection.planTargets,
-      showSiteBoundary: reduxState.mapLayers.showSiteBoundary
+      showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
+      boundaryTypes: getBoundaryTypesList(reduxState),
+      selectedBoundaryType: getSelectedBoundaryType(reduxState)
     }
   }
 
@@ -1852,9 +1858,6 @@ class State {
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
-      updateBoundaryLayerVisibility: (layerType, layer, isVisible) => {
-        dispatch(MapLayerActions.setNetworkEquipmentLayerVisibility(layerType, layer, isVisible))
-      },
       updateShowSiteBoundary: (isVisible) => {dispatch(MapLayerActions.setShowSiteBoundary(isVisible))}
     }
   }

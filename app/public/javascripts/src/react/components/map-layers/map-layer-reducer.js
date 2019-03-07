@@ -6,7 +6,9 @@ const defaultState = {
   networkEquipment: new Map(),
   constructionSite: new List(),
   boundary: new List(),
-  showSiteBoundary: false
+  showSiteBoundary: false,
+  selectedBoundaryType: new Map(),
+  boundaryTypes: new List()
 }
 
 function setLayers (state, layerKey, layers) {
@@ -86,6 +88,12 @@ function mapLayersReducer (state = defaultState, action) {
 
     case Actions.LAYERS_SET_VISIBILITY:
       return setLayerVisibility(state, action.payload.layer, action.payload.visibility)
+
+    case Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE:
+      return setLayers(state, 'selectedBoundaryType', action.payload)
+
+    case Actions.LAYERS_SET_BOUNDARY_TYPES:
+      return setLayers(state, 'boundaryTypes', action.payload)
 
     case Actions.LAYERS_SET_SITE_BOUNDARY:
       return setShowSiteBoundary(state, action.payload.visibility)
