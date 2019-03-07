@@ -16,6 +16,9 @@ const getLocationLayersList = createSelector([getAllLocationLayers], (locationLa
 const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
+const getAllBoundaryLayers = reduxState => reduxState.mapLayers.boundary
+const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
+
 const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
 const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
 
@@ -1843,6 +1846,7 @@ class State {
     return {
       locationLayers: getLocationLayersList(reduxState),
       networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
+      boundaries: getBoundaryLayersList(reduxState),
       reduxPlanTargets: reduxState.selection.planTargets,
       showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
       boundaryTypes: getBoundaryTypesList(reduxState),
