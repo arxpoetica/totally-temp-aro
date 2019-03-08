@@ -44,11 +44,6 @@ class PlanProjectConfigurationController {
       .catch((err) => console.error(err))
   }
 
-  copySelectedProjectSettingsToPlan () {
-    this.state.copyProjectSettingsToPlan(this.selectedProjectId, this.planId, this.userId)
-    this.setSelectedMode(this.modes.HOME)
-  }
-
   planSettingsToProject () {
     // Making these calls in parallel causes a crash in aro-service. Call sequentially.
     this.savePlanDataAndResourceSelectionToProject()

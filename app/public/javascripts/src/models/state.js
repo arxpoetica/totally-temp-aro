@@ -956,16 +956,6 @@ class State {
         })
     }
 
-    // Copies the settings from a project template to a plan
-    service.copyProjectSettingsToPlan = (projectTemplateId, planId, userId) => {
-      return $http.get(`/service/v1/project-template/${projectTemplateId}/configuration?user_id=${userId}`)
-        .then((result) => $http.put(`/service/v1/plan/${planId}/configuration?user_id=${userId}`, result.data))
-        .then(() => service.loadPlanInputs(planId))
-        .then(() => service.loadNetworkConfigurationFromServer())
-        .then(() => service.recreateTilesAndCache())
-        .catch((err) => console.error(err))
-    }
-
     service.copyCurrentPlanTo = (planName) => {
       var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
       newPlan.name = planName

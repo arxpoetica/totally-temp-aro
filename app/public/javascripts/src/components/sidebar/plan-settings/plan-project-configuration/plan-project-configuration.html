@@ -28,11 +28,6 @@
       <br>Manage
     </button>
 
-    <button class="btn btn-light btn-project-configuration" ng-click="$ctrl.setSelectedMode($ctrl.modes.COPY_PROJECT_TO_PLAN)">
-      <i class="fa fa-2x fa-angle-double-down"></i>
-      <br>Project to Plan
-    </button>
-
     <button class="btn btn-light btn-project-configuration" ng-click="$ctrl.setSelectedMode($ctrl.modes.COPY_PLAN_TO_PROJECT)">
       <i class="fa fa-2x fa-angle-double-up"></i>
       <br>Plan to Project
@@ -93,27 +88,6 @@
       <tr>
     </tbody>
   </table>
-
-  <!-- Section for copying project settings to current plan -->
-  <div ng-if="$ctrl.selectedMode === $ctrl.modes.COPY_PROJECT_TO_PLAN">
-    <p>
-      Each project has a set of default plan settings. You can copy these default settings from the selected project into the current plan.
-    </p>
-    <form>
-      <div class="form-group row">
-        <div class="col-sm-4 form-div-center">Source project</div>
-        <div class="col-sm-8">
-          <select class="form-control"
-            ng-model="$ctrl.selectedProjectId"
-            ng-options="item.id as item.name for item in $ctrl.allProjects">
-          </select>
-        </div>
-      </div>
-    </form>
-    <button class="btn btn-block btn-primary" ng-click="$ctrl.copySelectedProjectSettingsToPlan()" style="margin-bottom: 10px;">
-      Copy project settings to current plan
-    </button>
-  </div>
 
   <!-- Section for copying plan settings to selected project -->
   <div ng-if="$ctrl.selectedMode === $ctrl.modes.COPY_PLAN_TO_PROJECT">
