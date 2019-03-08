@@ -115,7 +115,7 @@
     </button>
   </div>
 
-  <!-- Section for copying project settings to current plan -->
+  <!-- Section for copying plan settings to selected project -->
   <div ng-if="$ctrl.selectedMode === $ctrl.modes.COPY_PLAN_TO_PROJECT">
     <p>
       The currently open plan has a number of plan settings that are defined. You can copy these settings over
@@ -135,8 +135,8 @@
         </div>
       </div>
     </form>
-    <button class="btn btn-block btn-danger" ng-click="$ctrl.copySelectedProjectSettingsToPlan()" style="margin-bottom: 10px;">
-      Copy project settings to current plan
+    <button class="btn btn-block btn-danger" ng-click="$ctrl.planSettingsToProject()" style="margin-bottom: 10px;">
+      Copy plan settings to selected project
     </button>
   </div>
 
