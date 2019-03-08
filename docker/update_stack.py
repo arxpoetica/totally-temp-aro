@@ -29,20 +29,20 @@ PROJECT_TAG = 'AIT:ARO'
 PROJECT_BASE_NAME = 'ARO-STACK-'
 
 SERVICE_TAG = 'APP'
-TEMPLATE_URLS = {
-    'QA': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
-    'STAGING': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
-    'PRODUCTION': 'https://cf-templates.altvil.com.s3.amazonaws.com/P-ARO.template'
-}
+# TEMPLATE_URLS = {
+#     'QA': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
+#     'STAGING': 'https://cf-templates.altvil.com.s3.amazonaws.com/S-ARO.template',
+#     'PRODUCTION': 'https://cf-templates.altvil.com.s3.amazonaws.com/P-ARO.template'
+# }
 
-if environment == 'PROD':
-    TEMPLATE_FILE = os.path.dirname(__file__) + '/P-ARO-template.yml'
-elif environment == 'QA':
-    TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-QA-template.yml'
-else:
-    TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json' 
-with open(TEMPLATE_FILE, 'r') as template_file:
-    TEMPLATE_BODY=template_file.read()
+# if environment == 'PROD':
+#     TEMPLATE_FILE = os.path.dirname(__file__) + '/P-ARO-template.yml'
+# elif environment == 'QA':
+#     TEMPLATE_FILE = os.path.dirname(__file__) + '/S-ARO-QA-template.yml'
+# else:
+#     TEMPLATE_FILE = os.path.dirname(__file__) + '/debug-template.json' 
+# with open(TEMPLATE_FILE, 'r') as template_file:
+#     TEMPLATE_BODY=template_file.read()
 
 # Config from environment
 branch_name = os.environ['CIRCLE_BRANCH'].translate(string.maketrans('_', '-'))
@@ -55,7 +55,7 @@ aro_nginx_image_name = os.environ.get('ARO_NGINX_IMAGE_NAME') or 'aro/aro-app-ng
 
 aro_client = os.environ.get('ARO_CLIENT') or 'aro'
 env_slug = branch_name
-name_component = 'QA' if branch_name == 'master' else 'QA-' + branch_name
+cloudformation_name_suffix = 'QA' if branch_name == 'master' else 'QA-' + branch_name
 
 db_user = os.environ.get('ARO_APP_DB_USER') or 'aro'
 db_pass = os.environ.get('ARO_APP_DB_PASS')
@@ -67,6 +67,9 @@ google_maps_api_ip_key = os.environ.get('GOOGLE_MAPS_API_IP_KEY')
 aws_region = os.environ.get('AWS_REGION') or 'us-east-1'
 ecr_uri_root = os.environ.get('ECR_URI_ROOT')
 aro_environment = os.environ.get('ARO_ENVIRONMENT') or 'ait-master'
+# this sets the environment to lookup in the versioning table, which determines which build numbers to deploy
+aro_environment = 'qa-' + branch_name 
+
 
 aro_etl_image_version = versioning.get_component_version(environment=aro_environment, component='etl') 
 aro_nginx_image_version = versioning.get_component_version(environment=aro_environment, component='nginx') 
@@ -75,7 +78,7 @@ aro_app_image_version = versioning.get_component_version(environment=aro_environ
 
 session = Session(region_name='us-east-1')
 
-cloudformation_stack_name = PROJECT_BASE_NAME + name_component
+cloudformation_stack_name = PROJECT_BASE_NAME + cloudformation_name_suffix
 
 if branch_name == 'master':
     host_name = 'qa.aro.altvil.com'
@@ -95,77 +98,6 @@ logs_client = boto3.client('logs', region_name='us-east-1')
 iam_client = boto3.client('iam', region_name='us-east-1')
 cloudwatch_client = boto3.client('cloudwatch', region_name='us-east-1')
 
-# def create_new_stack():
-#     """Create a new Staging CloudFormation stack (and OpsWorks stack)"""
-#     parameters = {
-#         # 'RdsFlag': 'yes',
-#         'DBUsername': db_user,
-#         'DBPassword': db_pass,
-#         # 'StackBranchName': branch_name,
-#         # 'StackDomainName': branch_name + '.aro',
-#         # 'StackContainerVersion': build_num,
-#         # 'GithubSshKey': github_ssh_key,
-#         # 'DockerRegistryPassword': docker_pass,
-#         # 'ProjectBaseName': PROJECT_BASE_NAME[environment],
-#         # 'ServiceTag': SERVICE_TAG,
-#         # 'DeployRecipe': 'aro_app_compose',
-#         # 'ExtraInternalPort': '8088'
-#         'ClientSlug': name_component,
-#         'EnvSlug': env_slug,
-#         'ProjectTag': PROJECT_TAG,
-#         'AroClient': aro_client,
-#         'GithubSshKey': github_ssh_key
-#     }
-#     if environment == 'PRODUCTION':
-#         parameters.update({
-#             'ClientSlug': client_slug,
-#             'NameComponent': name_component
-#         })
-#         print "Stack creation parameters:"
-#         pprint.pprint(parameters)
-#         proceed = raw_input("Proceed? (y/N)").lower() == 'y'
-#     else:
-#         proceed = True
-
-#     if proceed:
-#         return stack.create_aro_cfn_stack(
-#             cloudformation_stack_name,
-#             environment=environment,
-#             parameters=parameters,
-#             tags={
-#                 'Project': PROJECT_TAG
-#             },
-#             template_body=TEMPLATE_BODY,
-#             #template_urls=TEMPLATE_URLS,
-#             cloudformation_client=cloudformation_client
-#         )
-#     else:
-#         print "Operation canceled by user."
-#         exit(0)
-
-# def provision_stack(cloudformation_stack):
-#     """Provision and start a newly created QA OpsWorks stack."""
-#     real_name_component = branch_name if environment == 'staging' else name_component
-#     stack.provision_aro_stack(
-#         aws_region=aws_region,
-#         opsworks_stack_id=stack.get_cfn_stack_output(cloudformation_stack, 'Stack'),
-#         opsworks_manager_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'ManagerLayer'),
-#         opsworks_ignite_layer_id=stack.get_cfn_stack_output(cloudformation_stack, 'IgniteLayer'),
-#         rds_instance_identifier=stack.get_cfn_stack_output(cloudformation_stack, 'RDSInstance') if SERVICE_TAG == 'SERVICE' else 'None',
-#         environment=environment,
-#         name='ARO-' + SERVICE_TAG,
-#         name_component=real_name_component,
-#         db={'user': db_user, 'pass': db_pass},
-#         environment_vars=_set_environment(),
-#         start_stack=True,
-#         # initialize_database = True if (environment == 'qa' and SERVICE_TAG == 'service') else False,
-#         initialize_database = False,
-#         opsworks_client=opsworks_client,
-#         logs_client=logs_client,
-#         iam_client= iam_client,
-#         ignite_instance_type='c4.xlarge',
-#         manager_instance_type='t2.large'
-#     )
 
 
 def update_stack(outputs):
@@ -204,22 +136,9 @@ def _set_environment():
 
 
 
-# if action == 'CREATE':
-#     try:
-#         outputs = cloudformation_stack.outputs
-#     except botocore.exceptions.ClientError:
-#         opsworks_stack = create_new_stack()
-#         provision_stack(opsworks_stack)
-#         sys.exit(0)
-
-#     print "Stack already exists."
-#     resp = raw_input("Would you like to update it? (y/N)")
-#     if resp.lower() == 'y':
-#         update_stack(outputs)
-#     sys.exit(0)
 
 # debug block
-print "name_component: " + name_component
+print "aro_environment: " + aro_environment
 print "host_name: " + host_name
 print "cloudformation_stack_name: " + cloudformation_stack_name
 print "app_base_url: " + app_base_url
