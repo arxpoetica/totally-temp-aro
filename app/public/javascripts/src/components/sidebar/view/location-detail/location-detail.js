@@ -100,6 +100,7 @@ class LocationDetailController {
           var locationProperties = this.locationDetailPropertiesFactory.getLocationDetailPropertiesFor(result.data)
           locationProperties.geog = result.data.geog
           locationProperties.location_id = result.data.location_id
+          locationProperties.attributes = result.data.attributes
           return Promise.resolve(locationProperties)
         } else {
           return Promise.reject('You must have either default or sales details shown')
@@ -121,20 +122,6 @@ class LocationDetailController {
     this.selectedLocationInfo = locationInfo
     this.selectedLocationInfo.attributes = this.selectedLocationInfo.attributes.filter(val => val != null)
     this.showAttributes = (this.currentUser.perspective === 'sales_engineer' || this.currentUser.perspective === 'account_exec') && !angular.equals(locationInfo.attributes, {})
-    /*
-    var coordinates = locationInfo.geog.coordinates[1] + ',' + locationInfo.geog.coordinates[0]
-    var params = {
-      center: coordinates,
-      zoom: 13,
-      size: '325x110',
-      scale: 2,
-      maptype: 'roadmap',
-      markers: 'color:red|label:L|' + coordinates,
-      key: this.state.googleMapsLicensing.API_KEY
-    }
-    //this.map_url = 'https://maps.googleapis.com/maps/api/staticmap?' +
-    //  _.keys(params).map((key) => key + '=' + encodeURIComponent(params[key])).join('&')
-    */
     this.state.activeViewModePanel = this.state.viewModePanels.LOCATION_INFO
     this.$timeout()
   }
