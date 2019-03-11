@@ -154,7 +154,7 @@ class LocationsController {
             if (this.state.configuration.perspective.hasLocationFilters) {
               var hasFiltersSelected = this.state.locationFilters.filter((f) => { return f.checked }).length > 0
               if (hasFiltersSelected) {
-                asGroup()
+                asGroup.bind(this)()
               } else {
                 asSingle.bind(this)()
               }
@@ -271,11 +271,11 @@ class LocationsController {
     var isMinOneFilterChecked = false
     this.state.locationFilters.forEach((filter) => isMinOneFilterChecked |= (filter.checked))
     const locationTypesToChange = ['Tier 1', 'Tier 2', 'Tier 3']
-    this.locationLayers.toJS().forEach((locationType, index) => {
-      if (locationTypesToChange.indexOf(locationType.key) >= 0) {
-        this.locationLayers.set(index, this.locationLayers.get(index).checked = isMinOneFilterChecked)
-      }
-    })
+    // this.locationLayers.forEach((locationType, index) => {
+    //   if (locationTypesToChange.indexOf(locationType.key) >= 0) {
+    //     this.locationLayers.set(index, this.locationLayers.get(index).checked = isMinOneFilterChecked)
+    //   }
+    // })
     this.updateMapLayers()
   }
 

@@ -55,8 +55,15 @@ app.service('tileDataService', ['uiNotificationService', (uiNotificationService)
   // Returns a promise that will eventually provide map data for all the layer definitions in the specified tile
   tileDataService.getMapData = (layerDefinitions, zoom, tileX, tileY) => {
     return new Promise((resolve, reject) => {
+      // layerDefinitions must be unique (keyed by dataId), or else we get an exception from service
+      const uniqueLayerDefinitions = []
+      layerDefinitions.forEach(layerDefinition => {
+        if (!uniqueLayerDefinitions.find(item => item.dataId === layerDefinition.dataId)) {
+          uniqueLayerDefinitions.push(layerDefinition)
+        }
+      })
       // Remember to throttle all vector tile http requests.
-      tileDataService.httpThrottle.push(() => tileDataService.getMapDataInternal(layerDefinitions, zoom, tileX, tileY), (result) => {
+      tileDataService.httpThrottle.push(() => tileDataService.getMapDataInternal(uniqueLayerDefinitions, zoom, tileX, tileY), (result) => {
         if (result.status === 'success') {
           resolve(result.data)
         } else {

@@ -17,19 +17,19 @@
         <h5 class="map-tool-title-text">Locations</h5>
       </div>
       <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('locations')">
-        <div ng-if="state.configuration.perspective.mapTools['prosects'].show">
-          <div style="padding-left: 10px">
+        <div ng-if="$ctrl.state.configuration.perspective.mapTools['prosects'].show">
+          <div>
             <span style="font-weight: bold">Filter:</span>
           </div>
-          <div class="row" style="padding-bottom: 5px;margin-right: 0;margin-left: 0;padding-left: 11px;">
-            <div class="col-md-4" style="padding-left: 0;padding-right: 0" ng-repeat="filter in locationFilters">
+          <div class="row" style="padding-bottom: 5px; margin-right: 0; margin-left: 0;">
+            <div class="col-md-4" style="padding-left: 0;padding-right: 0" ng-repeat="filter in $ctrl.state.locationFilters">
               <div class="ctype-checkbox">
                 <input type="checkbox" class="checkboxfill layer-type-checkboxes"
-                        style="margin-top: 0px; margin-right: 3px;"
+                        style="margin-top: 0px;"
                         ng-model="filter.checked"
                         ng-checked="filter.checked"
-                        ng-change="handleFiltersChanged()">
-                <img ng-src="{{filter.iconUrl}}" style="width:16px; margin-right:5px">
+                        ng-change="$ctrl.handleFiltersChanged()">
+                <img ng-src="{{filter.iconUrl}}" style="width:16px;">
                 <span>{{filter.label}}</span>
               </div>
             </div>
