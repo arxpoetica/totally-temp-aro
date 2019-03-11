@@ -32,8 +32,8 @@ RoicReportsModalController.$inject = ['$http', 'state', 'Utils']
 let roicReportsModal = {
   template: `
   <modal visible="$ctrl.state.showRoicReportsModal" backdrop="static" modal-size="'modal-lg'">
-    <modal-header title="ROIC Reports">
-      <h2 class="mb-0">ROIC Reports</h2>
+    <modal-header title="Financial Details">
+      <h2 class="mb-0">Financial Details</h2>
       <div class="float-right">
         <button class="btn btn-light" ng-click="$ctrl.close()"> X </button></modal-header>
       </div>
