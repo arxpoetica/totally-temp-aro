@@ -4,12 +4,55 @@ var models = require('../models')
 const helpers = require('../helpers')
 const config = helpers.config
 const requestPromise = require('request-promise-native')
+const jwt = require('jsonwebtoken')
+
+const EXTERNAL_API_PREFIX = '/v1/api-ext'
+const OAUTH_CONNECTION_STRING = `http://${config.OAUTH_CLIENT}:${config.OAUTH_CLIENT_SECRET}@${config.oauth_server_host}`
+
+// A promise that resolves with the public signing key of the OAuth server (which may not be online before this app server)
+const authSigningKey = requestPromise({
+  method: 'GET',
+  uri: `${OAUTH_CONNECTION_STRING}/oauth/token_key`,
+  json: true
+})
+  .then(res => res.value)
+  .catch(err => console.error(err))
+
+// A promise that resolves if the user is authenticated correctly, using JWT strategy (will decrypt JWT without calls to the auth server)
+const checkUserAuthJWT = (jwtToken) => authSigningKey
+    .then(signingKey => {
+      return new Promise((resolve, reject) => {
+        jwt.verify(jwtToken, signingKey, (err, decoded) => {
+          if (err) {
+            console.error(err)
+            reject({
+              statusCode: 400,
+              error: 'ERROR: Unable to verify JWT token'
+            })
+          } else {
+            resolve(decoded)
+          }
+        })
+      })
+    })
+    .catch(err => {
+      console.error(err)
+      return Promise.reject(err)
+    })
+
+// A promise that resolves if the user is authenticated correctly, using token strategy (will call auth server)
+const checkUserAuthToken = (token) => requestPromise({
+  method: 'POST',
+  uri: `${OAUTH_CONNECTION_STRING}/oauth/check_token`,
+  qs: {
+    token: authTokens[1]
+  },
+  json: true
+})
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
-  const EXTERNAL_API_PREFIX = '/v1/api-ext'
-  const OAUTH_CONNECTION_STRING = `http://${config.OAUTH_CLIENT}:${config.OAUTH_CLIENT_SECRET}@${config.oauth_server_host}`
   // Expose an unsecured endpoint for API logins.
   api.post(`${EXTERNAL_API_PREFIX}/login`, (request, response, next) => {
 
@@ -44,14 +87,7 @@ exports.configure = (api, middleware) => {
     }
 
     // We have a bearer token, check with our OAuth server to see if it is valid
-    requestPromise({
-      method: 'POST',
-      uri: `${OAUTH_CONNECTION_STRING}/oauth/check_token`,
-      qs: {
-        token: authTokens[1]
-      },
-      json: true
-    })
+    checkUserAuthJWT(authTokens[1])   // Replace with checkUserAuthToken if you want to use jdbc tokens
       .then(result => {
         // Success, we can forward the request to service
         var req = {
