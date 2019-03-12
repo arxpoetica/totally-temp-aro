@@ -129,6 +129,10 @@ class RoicReportsController {
             }
           }
         ]
+      },
+      title: {
+        display: true,
+        text: calcType.description
       }
     }
   }
