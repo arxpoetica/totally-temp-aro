@@ -105,7 +105,7 @@
     <div style="display:flex; flex-direction: column; position: absolute; width: 50%;height: 100%;">
       <div ng-repeat="calcType in $ctrl.selectedCategory.calcTypes" ng-if="$even" style="flex: 1 1 auto; width: 100%; position: relative;">
         <div style="display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute">
-          <h5 style="flex: 0 0 auto;" class="text-center mt-2">{{calcType.description}}</h5>
+          <!-- <h5 style="flex: 0 0 auto;" class="text-center mt-2">{{calcType.description}}</h5> -->
           <div style="flex: 1 1 auto;">
             <canvas ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
                             [$ctrl.selectedEntityType.id + '.' + calcType.id].values
@@ -131,7 +131,7 @@
     <div style="display:flex; flex-direction: column; position: absolute; left: 50%; width: 50%;height: 100%;">
       <div ng-repeat="calcType in $ctrl.selectedCategory.calcTypes" ng-if="$odd" style="flex: 1 1 auto; width: 100%; position: relative;">
         <div style="display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute;">
-          <h5 style="flex: 0 0 auto;" class="text-center mt-2">{{calcType.description}}</h5>
+          <!-- <h5 style="flex: 0 0 auto;" class="text-center mt-2">{{calcType.description}}</h5> -->
           <div style="flex: 1 1 auto;">
             <canvas ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
                           [$ctrl.selectedEntityType.id + '.' + calcType.id].values
