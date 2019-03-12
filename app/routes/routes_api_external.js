@@ -9,12 +9,13 @@ exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   const EXTERNAL_API_PREFIX = '/v1/api-ext'
+  const OAUTH_CONNECTION_STRING = `http://${config.OAUTH_CLIENT}:${config.OAUTH_CLIENT_SECRET}@${config.oauth_server_host}`
   // Expose an unsecured endpoint for API logins.
   api.post(`${EXTERNAL_API_PREFIX}/login`, (request, response, next) => {
 
     requestPromise({
       method: 'POST',
-      uri: `http://acme:acmesecret@172.18.0.1:8999/oauth/token`,
+      uri: `${OAUTH_CONNECTION_STRING}/oauth/token`,
       qs: {
         username: request.body.username,
         password: request.body.password,
@@ -45,7 +46,7 @@ exports.configure = (api, middleware) => {
     // We have a bearer token, check with our OAuth server to see if it is valid
     requestPromise({
       method: 'POST',
-      uri: `http://acme:acmesecret@172.18.0.1:8999/oauth/check_token`, //?token=${authTokens[1]}`,
+      uri: `${OAUTH_CONNECTION_STRING}/oauth/check_token`,
       qs: {
         token: authTokens[1]
       },
