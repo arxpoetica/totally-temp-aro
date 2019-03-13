@@ -19,6 +19,8 @@ class EditorInterfaceTableController {
   }
 
   $onChanges (changes) {
+    console.log("CHANGES")
+    console.log(changes)
     if (changes.hasOwnProperty('rows')) {
       this.orderTable()
       this.setPage()

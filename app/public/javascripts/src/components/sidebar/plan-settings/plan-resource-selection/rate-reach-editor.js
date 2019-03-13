@@ -1,6 +1,7 @@
 class RateReachEditorController {
-  constructor ($http, $timeout) {
+  constructor ($http, state, $timeout) {
     this.$http = $http
+    this.state = state
     this.$timeout = $timeout
     this.categoryDescription = {
       SPEED: 'Speeds',
@@ -23,11 +24,11 @@ class RateReachEditorController {
   }
 
   reloadRateReachManagerConfiguration () {
-    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}`)
+    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}?user_id=${this.state.loggedInUser.id}`)
       .then(result => this.rateReachManager = result.data)
       .catch(err => console.error(err))
 
-    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`)
+    this.$http.get(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config?user_id=${this.state.loggedInUser.id}`)
       .then(result => {
         this.rateReachConfig = result.data
         return this.loadAllTechnologyTypeDetails()
@@ -90,8 +91,8 @@ class RateReachEditorController {
 
   loadTechnologyTypeDetails (technologyType) {
     return Promise.all([
-      this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
-      this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}`)
+      this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}&user_id=${this.state.loggedInUser.id}`),
+      this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}&user_id=${this.state.loggedInUser.id}`)
     ])
       .then(results => {
         this.technologyTypeDetails[technologyType] = {
@@ -116,7 +117,7 @@ class RateReachEditorController {
   saveConfigurationToServer () {
     var configuration = JSON.parse(angular.toJson(this.rateReachConfig)) // Remove angularjs-specific properties from object
     configuration = this.orderedArrayToMatrixMaps(configuration) // Transform object in aro-service format
-    this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config`, configuration)
+    this.$http.put(`/service/rate-reach-matrix/resource/${this.rateReachManagerId}/config?user_id=${this.state.loggedInUser.id}`, configuration)
       .then(result => this.exitEditingMode())
       .catch(err => console.error(err))
   }
@@ -126,7 +127,7 @@ class RateReachEditorController {
   }
 }
 
-RateReachEditorController.$inject = ['$http', '$timeout']
+RateReachEditorController.$inject = ['$http', 'state', '$timeout']
 
 let rateReachEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/rate-reach-editor.html',

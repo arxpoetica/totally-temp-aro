@@ -17,13 +17,13 @@ class ResourceManagerController {
     }
     this.managerIdString = 'MANAGER_ID'
     this.managerDeleteUrl = {
-      price_book: `/service/v1/pricebook/${this.managerIdString}`,
-      roic_manager: `/service/v1/roic_manager/${this.managerIdString}`,
-      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}`,
-      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}`,
-      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}`,
-      competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
-      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
+      price_book: `/service/v1/pricebook/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      roic_manager: `/service/v1/roic_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      competition_manager: `/service/v1/competition_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`
     }
 
     this.rows = []
@@ -232,6 +232,7 @@ class ResourceManagerController {
   }
 
   cloneSelectedManagerFromSource (selectedManager) {
+    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
     var managerId = this.resourceKeyToEndpointId[selectedManager.resourceType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
@@ -243,7 +244,8 @@ class ResourceManagerController {
       this.getNewResourceDetailsFromUser()
         .then((resourceName) => {
         // Create a new manager with the specified name and description
-          return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}`,
+          console.log(managerId)
+          return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}&user_id=${this.state.loggedInUser.id}`,
             { name: resourceName, description: resourceName })
         })
         .then((result) => this.onManagerCreated(result.data.id))
@@ -252,6 +254,8 @@ class ResourceManagerController {
   }
 
   onManagerCreated (createdManagerId) {
+    console.log("on created")
+    console.log(this.editMode)
     this.setEditingManagerId({ newId: createdManagerId })
     this.setEditingMode({ mode: this.editMode })
     this.onManagersChanged && this.onManagersChanged()
@@ -259,6 +263,8 @@ class ResourceManagerController {
   }
 
   editSelectedManager (selectedManager) {
+    console.log("on edit selected")
+    console.log(this.editMode)
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
     console.log(selectedManager)
