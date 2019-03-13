@@ -22,10 +22,12 @@ class ResourceManagerController {
       arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
       impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
       tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      competition_manager: `/service/v1/competition_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      competition_manager: `/service/v1/competitor-manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
       rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`
     }
-
+    
+    // /v1/tsm-manager/23?user_id=4
+    // /v1/tsm_manager/23?user_id=4
     this.rows = []
 
     this.displayProps = [
@@ -291,9 +293,9 @@ class ResourceManagerController {
     })
   }
 
-  deleteManager (deleteUrl) {
-    console.log(deleteUrl)
-    this.$http.delete(deleteUrl)
+  deleteManager (selectedManager) {
+    console.log(selectedManager)
+    this.$http.delete(`service/v2/resource-manager/${selectedManager.id}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.onManagersChanged && this.onManagersChanged()
       // this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
@@ -305,10 +307,10 @@ class ResourceManagerController {
     this.askUserToConfirmManagerDelete(selectedManager.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          const managerIdToDelete = selectedManager.id
+          //const managerIdToDelete = selectedManager.id
           // this.selectedResourceKey selectedManager.managerType
-          const deleteUrl = this.managerDeleteUrl[selectedManager.resourceType].replace(this.managerIdString, managerIdToDelete)
-          this.deleteManager(deleteUrl)
+          //const deleteUrl = this.managerDeleteUrl[selectedManager.resourceType].replace(this.managerIdString, managerIdToDelete)
+          this.deleteManager(selectedManager)
         }
       })
       .catch((err) => console.error(err))

@@ -22,7 +22,7 @@ class CompetitorEditorController {
     this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.competitorManagerConfiguration = result.data
-        //console.log(this.competitorManagerConfiguration)
+        console.log(this.competitorManagerConfiguration)
         // carrierId
         this.pristineCompetitorManagerConfiguration = angular.copy(result.data)
       })
