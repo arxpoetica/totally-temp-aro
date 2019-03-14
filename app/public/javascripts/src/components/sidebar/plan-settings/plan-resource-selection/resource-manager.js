@@ -246,9 +246,16 @@ class ResourceManagerController {
       this.getNewResourceDetailsFromUser()
         .then((resourceName) => {
         // Create a new manager with the specified name and description
+          /*
+          {
+            "resourceType": "tsm_manager",
+            "name": "clone test C",
+            "description": "test of swagger clone C"
+          } 
+          */
           console.log(managerId)
-          return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}&user_id=${this.state.loggedInUser.id}`,
-            { name: resourceName, description: resourceName })
+          return this.$http.post(`/service/v2/resource-manager/${selectedManager.id}?user_id=${this.state.loggedInUser.id}`,
+            {resourceType: selectedManager.resourceType, name: resourceName, description: resourceName })
         })
         .then((result) => this.onManagerCreated(result.data.id))
         .catch((err) => console.error(err))
