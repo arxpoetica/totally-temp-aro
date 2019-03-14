@@ -71,6 +71,7 @@
     "central_office": {
       "label": "Central Office",
       "networkNodeType": "central_office",
+			"key": "central_office",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/central_office.png",
       "selectedIconUrl": "/images/map_icons/aro/central_office_selected.png",
@@ -85,6 +86,7 @@
     "dslam": {
       "label": "Remote Terminal",
       "networkNodeType": "dslam",
+      "key": "dslam",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/remote_terminal.png",
       "selectedIconUrl": "/images/map_icons/aro/remote_terminal.png",
@@ -102,6 +104,7 @@
     "fiber_distribution_hub": {
       "label": "FDH",
       "networkNodeType": "fiber_distribution_hub",
+      "key": "fiber_distribution_hub",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/fiber_distribution_hub.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_distribution_hub.png",
@@ -116,6 +119,7 @@
     "fiber_distribution_terminal": {
       "label": "FDT",
       "networkNodeType": "fiber_distribution_terminal",
+      "key": "fiber_distribution_terminal",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/fiber_distribution_terminal.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_distribution_terminal.png",
@@ -130,6 +134,7 @@
     "bulk_distribution_terminal": {
       "label": "Bulk Distribution Terminal",
       "networkNodeType": "bulk_distribution_terminal",
+      "key": "bulk_distribution_terminal",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
       "selectedIconUrl": "/images/map_icons/aro/bulk_distribution_terminal.png",
@@ -144,6 +149,7 @@
     "splice_point": {
       "label": "Splice point",
       "networkNodeType": "splice_point",
+      "key": "splice_point",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/splice_point.png",
       "selectedIconUrl": "/images/map_icons/aro/splice_point.png",
@@ -158,6 +164,7 @@
     "cell_5g": {
       "label": "5G Site",
       "networkNodeType": "cell_5g",
+      "key": "cell_5g",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
       "selectedIconUrl": "/images/map_icons/aro/composite/all_cell_5g.png",
@@ -172,6 +179,7 @@
     "loop_extender": {
       "label": "Loop Extender",
       "networkNodeType": "loop_extender",
+      "key": "loop_extender",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/composite/loop_extender.png",
       "selectedIconUrl": "/images/map_icons/aro/loop_extender.png",
@@ -186,6 +194,7 @@
     "network_anchor": {
       "label": "Network Anchor",
       "networkNodeType": "network_anchor",
+      "key": "network_anchor",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/composite/network_anchor.png",
       "selectedIconUrl": "/images/map_icons/aro/network_anchor.png",
@@ -200,6 +209,7 @@
     "multiple_dwelling_unit": {
       "label": "Multiple Dwelling Unit",
       "networkNodeType": "multiple_dwelling_unit",
+      "key": "multiple_dwelling_unit",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/multiple_dwelling_unit.png",
       "selectedIconUrl": "/images/map_icons/aro/multiple_dwelling_unit.png",
@@ -215,6 +225,7 @@
   "cables": {
     "FEEDER": {
       "label": "Feeder Fiber",
+      "key": "FEEDER",
       "dataItemKey": "fiber",
       "iconUrl": "/images/map_icons/aro/fiber_feeder.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_feeder.png",
@@ -234,6 +245,7 @@
     },
     "DISTRIBUTION": {
       "label": "Distribution Fiber",
+      "key": "DISTRIBUTION",
       "dataItemKey": "fiber",
       "iconUrl": "/images/map_icons/aro/fiber_distribution.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_distribution.png",
@@ -253,6 +265,7 @@
     },
     "IOF": {
       "label": "IOF Fiber",
+      "key": "IOF",
       "dataItemKey": "fiber",
       "iconUrl": "/images/map_icons/aro/fiber_backhaul.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_backhaul.png",
@@ -268,6 +281,7 @@
     },
     "UNKNOWN": {
       "label": "Unknown Fiber",
+      "key": "UNKNOWN",
       "dataItemKey": "fiber",
       "iconUrl": "/images/map_icons/aro/fiber_unknown.png",
       "selectedIconUrl": "/images/map_icons/aro/fiber_unknown.png",
@@ -283,6 +297,7 @@
     },
     "COPPER": {
       "label": "Copper Cable",
+      "key": "COPPER",
       "dataItemKey": "fiber",
       "iconUrl": "/images/map_icons/aro/copper.png",
       "selectedIconUrl": "/images/map_icons/aro/copper.png",
@@ -300,6 +315,7 @@
   "boundaries": {
     "siteBoundaries": {
       "label": "Site Boundaries",
+      "key": "siteBoundaries",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
       "selectedIconUrl": "/images/map_icons/aro/service_layer_cran.png",
@@ -316,6 +332,7 @@
   },
   "fiveg_coverage": {
       "label": "5G Coverage",
+      "key": "fiveg_coverage",
       "dataItemKey": "equipment",
       "iconUrl": "/images/map_icons/aro/service_layer_cran.png",
       "selectedIconUrl": "/images/map_icons/aro/service_layer_cran.png",

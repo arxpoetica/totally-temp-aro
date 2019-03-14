@@ -81,7 +81,7 @@ class PolygonFeatureRenderer {
       drawingStyles.fillStyle = mapLayer.highlightStyle.fillStyle
       drawingStyles.opacity = mapLayer.highlightStyle.opacity
       drawingStyles.lineOpacity = mapLayer.highlightStyle.lineOpacity
-    } else if ((oldSelection.details.serviceAreaId == feature.properties.id) &&
+    } else if (oldSelection.details.serviceAreaId && (oldSelection.details.serviceAreaId == feature.properties.id) &&
       selectedDisplayMode == displayModes.VIEW) {
       // Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle

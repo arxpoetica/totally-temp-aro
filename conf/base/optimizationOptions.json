@@ -15,6 +15,10 @@
       "tiles": [],
       "selectedTile": null
     },
+    "dslamNodeConstraints": {
+      "cellRadius": 300.0,
+      "optimizationSpeedMbs": 1
+    },
     "routeFromFiber": false,
     "fiberRoutingMode": null
   },
@@ -69,6 +73,10 @@
     },
     "FiveG": {
       "label": "5G",
+      "checked": false
+    },
+    "Copper": {
+      "label": "DSL",
       "checked": false
     }
   },

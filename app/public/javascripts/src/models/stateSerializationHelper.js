@@ -145,6 +145,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       }
     }
 
+    // If Copper is enabled, add dslamNodeConstraints
+    if (state.optimizationOptions.technologies.Copper.checked) {
+      postBody.networkConstraints.dslamNodeConstraints = state.optimizationOptions.networkConstraints.dslamNodeConstraints
+    }
+
     // Add technologies like "Fiber" and "5G"
     postBody.networkConstraints.networkTypes = []
     Object.keys(state.optimizationOptions.technologies).forEach((technologyKey) => {
@@ -302,6 +307,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
           cellNodeConstraintsObj.selectedTile = selectedTile[0]
         }
       }
+    }
+
+    if (postBody.networkConstraints &&
+        postBody.networkConstraints.dslamNodeConstraints) {
+      state.optimizationOptions.networkConstraints.dslamNodeConstraints = postBody.networkConstraints.dslamNodeConstraints
     }
 
     if (postBody.networkConstraints && postBody.networkConstraints.fiberRoutingMode &&

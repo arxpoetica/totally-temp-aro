@@ -90,16 +90,20 @@
           
           <div style="display: flex">
             <div style="flex: 0 0 auto; padding-right: 20px; line-height: 33px;">
-	            <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showSiteBoundary" ng-change="$ctrl.toggleSiteBoundary()" name="ctype-name"
+	            <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.state.showSiteBoundary" ng-click="$ctrl.state.toggleSiteBoundary()" name="ctype-name"
 				        style="margin: 0px;">
 				        Site Boundaries
 				    </div>
-			      <select class="form-control" style="flex: 1 1 auto"
-			        ng-if="$ctrl.state.showSiteBoundary" 
-			        ng-model="$ctrl.state.selectedBoundaryType"
-			        ng-options="item as item.description for item in $ctrl.state.boundaryTypes"
-			        ng-change="$ctrl.toggleSiteBoundary()">
-			      </select>
+            <select class="form-control" style="flex: 1 1 auto"
+              ng-value="$ctrl.state.selectedBoundaryType.description"
+              ng-if="$ctrl.state.showSiteBoundary" 
+              ng-click="$ctrl.state.setSelectedBoundaryType($ctrl.state.boundaryTypes[$event.target.selectedIndex])">
+              <option ng-repeat="item in $ctrl.state.boundaryTypes"
+                ng-selected="{{ item.id === $ctrl.state.selectedBoundaryType.id }}"
+                value="{{item.description}}">
+                {{item.description}}
+              </option>
+            </select>
           </div>
           
           <div ng-if="$ctrl.state.showSiteBoundary" style="display: flex; flex-direction: row; width: 100%">
