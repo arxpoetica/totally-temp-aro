@@ -28,7 +28,7 @@
                         style="margin-top: 0px;"
                         ng-model="filter.checked"
                         ng-checked="filter.checked"
-                        ng-change="$ctrl.handleFiltersChanged()">
+                        ng-change="$ctrl.updateMapLayers()">
                 <img ng-src="{{filter.iconUrl}}" style="width:16px;">
                 <span>{{filter.label}}</span>
               </div>
