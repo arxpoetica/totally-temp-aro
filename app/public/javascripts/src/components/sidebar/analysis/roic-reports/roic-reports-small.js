@@ -7,7 +7,7 @@ class RoicReportsSmallController {
 
   $onInit () {
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'network')[0] // Because "medium" is the only thing supported in service right now
-    this.selectedNetworkType = this.networkTypes.filter(item => item.id === 'new_network')[0]
+    this.selectedNetworkType = this.networkTypes.filter(item => item.id === 'planned_network')[0]
     this.selectCategory(this.categories[1])
     this.selectedCalcType = this.selectedCategory.calcTypes[0]
   }

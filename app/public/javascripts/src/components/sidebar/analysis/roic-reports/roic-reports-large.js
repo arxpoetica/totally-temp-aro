@@ -10,6 +10,7 @@ class RoicReportsLargeController {
   $onInit () {
     this.selectCategory(this.categories[0])
     this.selectedEntityType = this.entityTypes.filter(item => item.id === 'medium')[0]
+    this.selectedNetworkType = this.networkTypes.filter(item => item.id === 'planned_network')[0]
   }
 
   selectCategory (category) {
@@ -31,6 +32,7 @@ let roicReportsLarge = {
   bindings: {
     categories: '<',
     calcTypes: '<',
+    networkTypes: '<',
     entityTypes: '<',
     roicResults: '<',
     timeLabels: '<',
