@@ -29,15 +29,20 @@
   <div style="flex: 0 0 auto;">
     <form>
       <div class="form-group row">
-        <div class="col-sm-2"></div>
+        <div class="col-sm-2">Network Type</div>
+        <div class="col-sm-4">
+          <select class="form-control"
+                  ng-model="$ctrl.selectedNetworkType"
+                  ng-options="item as item.description for item in $ctrl.networkTypes">
+          </select>
+        </div>
         <div class="col-sm-2 roic-report-label">EntityType</div>
-        <div class="col-sm-6">
+        <div class="col-sm-4">
           <select class="form-control"
                   ng-model="$ctrl.selectedEntityType"
                   ng-options="item as item.description for item in $ctrl.entityTypes">
           </select>
         </div>
-        <div class="col-sm-2"></div>
       </div>
     </form>
   </div>
@@ -107,19 +112,19 @@
         <div style="display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute">
           <!-- <h5 style="flex: 0 0 auto;" class="text-center mt-2">{{calcType.description}}</h5> -->
           <div style="flex: 1 1 auto;">
-            <canvas ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
+            <canvas ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                             [$ctrl.selectedEntityType.id + '.' + calcType.id].values
                             && $ctrl.shouldRenderCharts"
-                    style="width: 100%; height: 100%;"
+                    style="width: 100%; height: 90%;"
                     class="chart chart-line"
-                    chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
+                    chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                                 [$ctrl.selectedEntityType.id + '.' + calcType.id].values"
                     chart-labels="$ctrl.timeLabels"
                     chart-series="$ctrl.series"
                     chart-options="$ctrl.graphOptions[calcType.id]"
                     chart-dataset-override="$ctrl.datasetOverride">
             </canvas>
-            <div ng-if="!$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
+            <div ng-if="!$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                         [$ctrl.selectedEntityType.id + '.' + calcType.id].values"
                  class="alert bg-light border-info text-center" style="margin: 0px 20%;">
               No data
@@ -133,19 +138,19 @@
         <div style="display: flex; flex-direction: column; width: 100%; height: 100%; position: absolute;">
           <!-- <h5 style="flex: 0 0 auto;" class="text-center mt-2">{{calcType.description}}</h5> -->
           <div style="flex: 1 1 auto;">
-            <canvas ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
+            <canvas ng-if="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                           [$ctrl.selectedEntityType.id + '.' + calcType.id].values
                           && $ctrl.shouldRenderCharts"
-                  style="width: 100%; height: 100%;"
+                  style="width: 100%; height: 90%;"
                   class="chart chart-line"
-                  chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
+                  chart-data="$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                               [$ctrl.selectedEntityType.id + '.' + calcType.id].values"
                   chart-labels="$ctrl.timeLabels"
                   chart-series="$ctrl.series"
                   chart-options="$ctrl.graphOptions[calcType.id]"
                   chart-dataset-override="$ctrl.datasetOverride">
             </canvas>
-            <div ng-if="!$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedCategory.selectedNetworkType.toUpperCase()]
+            <div ng-if="!$ctrl.roicResults.roicAnalysis.components[$ctrl.selectedNetworkType.id.toUpperCase()]
                         [$ctrl.selectedEntityType.id + '.' + calcType.id].values"
                  class="alert bg-light border-info text-center" style="margin: 0px 20%;">
               No data

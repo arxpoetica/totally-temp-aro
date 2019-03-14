@@ -48,8 +48,7 @@
       "categoryKey": "business",
       "plannerKey": "small",
       "key": "small_businesses",
-      "selected": false,
-      "group": 1
+      "selected": false
     },
     "medium_businesses": {
       "show": true,
@@ -68,8 +67,7 @@
       "categoryKey": "business",
       "plannerKey": "medium",
       "key": "medium_businesses",
-      "selected": false,
-      "group": 1
+      "selected": false
     },
     "large_businesses": {
       "show": true,
@@ -88,8 +86,7 @@
       "categoryKey": "business",
       "plannerKey": "large",
       "key": "large_businesses",
-      "selected": false,
-      "group": 1
+      "selected": false
     },
     "household": {
       "show": true,
@@ -108,8 +105,7 @@
       "categoryKey": "household",
       "plannerKey": "household",
       "key": "household",
-      "selected": false,
-      "group": 1
+      "selected": false
     },
     "celltower": {
       "show": true,
@@ -128,8 +124,7 @@
       "categoryKey": "celltower",
       "plannerKey": "celltower",
       "key": "celltower",
-      "selected": false,
-      "group": 1
+      "selected": false
     },
     "Ethernet Lit Buildings": {
       "show": true,
@@ -165,8 +160,7 @@
       "categoryKey": "Ethernet Lit Buildings",
       "plannerKey": "Ethernet Lit Buildings",
       "key": "Ethernet Lit Buildings",
-      "selected": false,
-      "group": 2
+      "selected": false
     },
     "Fiber Lit Buildings": {
       "show": true,
@@ -202,8 +196,7 @@
       "categoryKey": "Fiber Lit Buildings",
       "plannerKey": "Fiber Lit Buildings",
       "key": "Fiber Lit Buildings",
-      "selected": false,
-      "group": 2
+      "selected": false
     },
     "Tier 1": {
       "show": true,
@@ -239,8 +232,7 @@
       "categoryKey": "Tier 1",
       "plannerKey": "Tier 1",
       "key": "Tier 1",
-      "selected": false,
-      "group": 3
+      "selected": false
     },
     "Tier 2": {
       "show": true,
@@ -276,8 +268,7 @@
       "categoryKey": "Tier 2",
       "plannerKey": "Tier 2",
       "key": "Tier 2",
-      "selected": false,
-      "group": 3
+      "selected": false
     },
     "Tier 3": {
       "show": true,
@@ -313,8 +304,7 @@
       "categoryKey": "Tier 3",
       "plannerKey": "Tier 3",
       "key": "Tier 3",
-      "selected": false,
-      "group": 3
+      "selected": false
     }
   },
   "env_is_test": false
