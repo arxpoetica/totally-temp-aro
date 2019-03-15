@@ -25,7 +25,7 @@
 	            {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}} K
 	          </td>
 	        </tr>
-	        
+
 	        <tr ng-repeat="networkStatistic in $ctrl.roicResults.networkStatistics"
 	          ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
 	          <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'"><strong>IRR</strong></td>
@@ -33,12 +33,12 @@
 	            {{(networkStatistic.value * 100) | number : 1}} %
 	          </td>
 	        </tr>
-	  
+
 	        <tr>
 	          <td><strong>Total Capex</strong></td>
 	          <td>{{$ctrl.roicResults.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
 	        </tr>
-	  
+
 	        <tr>
 	          <td colspan="2"><strong>Fiber Capex</strong></td>
 	        </tr>
@@ -53,14 +53,10 @@
 	          <td class="indent-1 text-capitalize">{{$ctrl.state.configuration.networkEquipment.equipments[equipmentCost.nodeType].label || $ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
 	          <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
 	        </tr>
-	  
-	        <tr>
-	          <td><strong>Premises Passed</strong></td>
-	          <td> {{$ctrl.plannedNetworkDemand.locationDemand.rawCoverage | number}} </td>
-	        </tr>
+
 	        <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
 	          <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
-	          <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
+	          <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>
 	          <td> {{value.rawCoverage | number}} </td>
 	        </tr>
 	      </tbody>
@@ -81,7 +77,7 @@
             {{networkStatistic.value / 1000 | currency:$ctrl.config.currency_symbol:1}} K
           </td>
         </tr>
-        
+
         <tr ng-repeat="networkStatistic in $ctrl.roicResults.networkStatistics"
           ng-if="networkStatistic.networkStatisticType === 'roic_irr'">
           <td ng-if="networkStatistic.networkStatisticType === 'roic_irr'"><strong>IRR</strong></td>
@@ -89,12 +85,12 @@
             {{(networkStatistic.value * 100) | number : 1}} %
           </td>
         </tr>
-  
+
         <tr>
           <td><strong>Total Capex</strong></td>
           <td>{{$ctrl.roicResults.priceModel.totalCost / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
         </tr>
-  
+
         <tr>
           <td colspan="2"><strong>Fiber Capex</strong></td>
         </tr>
@@ -109,14 +105,10 @@
           <td class="indent-1 text-capitalize">{{$ctrl.state.configuration.networkEquipment.equipments[equipmentCost.nodeType].label || $ctrl.state.networkNodeTypesEntity[equipmentCost.nodeType]}} (x{{equipmentCost.quantity | number }})</td>
           <td>{{equipmentCost.total / 1000 | currency:$ctrl.config.currency_symbol:1}}K</td>
         </tr>
-  
-        <tr>
-          <td><strong>Premises Passed</strong></td>
-          <td> {{$ctrl.plannedNetworkDemand.locationDemand.rawCoverage | number}} </td>
-        </tr>
+
         <tr ng-repeat="(key, value) in $ctrl.plannedNetworkDemand.locationDemand.entityDemands">
           <td class="indent-1 text-capitalize" ng-if="key === 'small' || key === 'medium' || key === 'large'"> {{key}} Business </th>
-          <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>  
+          <td class="indent-1 text-capitalize" ng-if="key === 'household' || key === 'celltower'"> {{key}} </th>
           <td> {{value.rawCoverage | number}} </td>
         </tr>
       </tbody>
@@ -125,10 +117,20 @@
 
 
   <div style="flex: 0 0 auto;">
-    <h3 class="pb-3 pt-3" style="border-top: 1px solid lightgray;">ROIC Analysis</h3>
+    <h3 class="pb-3 pt-3" style="border-top: 1px solid lightgray;">Financial Details</h3>
   </div>
   <div style="flex: 0 0 auto;">
     <form>
+      <div class="form-group row">
+        <div class="col-sm-4 roic-report-label">Network Type</div>
+        <div class="col-sm-8">
+          <select class="form-control"
+                  ng-model="$ctrl.selectedNetworkType"
+                  ng-options="item as item.description for item in $ctrl.networkTypes">
+          </select>
+        </div>
+      </div>
+
       <div class="form-group row">
         <div class="col-sm-4 roic-report-label">Group</div>
         <div class="col-sm-8">
@@ -149,7 +151,7 @@
           </select>
         </div>
       </div>
-  
+
       <div class="form-group row">
         <div class="col-sm-4 roic-report-label">Entity Type</div>
         <div class="col-sm-8">
@@ -183,4 +185,3 @@
     </div>
   </div>
 </div>
-  

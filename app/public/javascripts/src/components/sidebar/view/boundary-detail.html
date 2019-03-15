@@ -19,7 +19,7 @@
     </div>
     <div class="col" style="display:table-cell;vertical-align:middle">
       <select class="form-control-sm" ng-model="$ctrl.state.selectedBoundaryTypeforSearch" ng-change="$ctrl.onChangeBoundaryTypeforSearch()"
-        ng-options="item as item.description for item in $ctrl.state.boundaries.tileLayers | filter:{visible:true}">
+        ng-options="item as item.description for item in $ctrl.state.boundaries | filter:{checked:true}">
         <option value="" selected="selected" hidden>Select a boundary type for search</option>
       </select>
     </div>

@@ -1,4 +1,4 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
@@ -10,8 +10,20 @@ import SelectionActions from '../react/components/selection/selection-actions'
 import SelectionModes from '../react/components/selection/selection-modes'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
-const getAllLocationLayers = state => state.mapLayers.location
+const getAllLocationLayers = reduxState => reduxState.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
+
+const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkEquipment
+const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
+
+const getAllBoundaryLayers = reduxState => reduxState.mapLayers.boundary
+const getBoundaryLayersList = createSelector([getAllBoundaryLayers], (boundaries) => boundaries.toJS())
+
+const getAllBoundaryTypesList = reduxState => reduxState.mapLayers.boundaryTypes
+const getBoundaryTypesList = createSelector([getAllBoundaryTypesList], (boundaryTypes) => boundaryTypes.toJS())
+
+const getselectedBoundaryType = reduxState => reduxState.mapLayers.selectedBoundaryType
+const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selectedBoundaryType) => selectedBoundaryType.toJS())
 
 /* global app localStorage map */
 class State {
@@ -944,16 +956,6 @@ class State {
         })
     }
 
-    // Copies the settings from a project template to a plan
-    service.copyProjectSettingsToPlan = (projectTemplateId, planId, userId) => {
-      return $http.get(`/service/v1/project-template/${projectTemplateId}/configuration?user_id=${userId}`)
-        .then((result) => $http.put(`/service/v1/plan/${planId}/configuration?user_id=${userId}`, result.data))
-        .then(() => service.loadPlanInputs(planId))
-        .then(() => service.loadNetworkConfigurationFromServer())
-        .then(() => service.recreateTilesAndCache())
-        .catch((err) => console.error(err))
-    }
-
     service.copyCurrentPlanTo = (planName) => {
       var newPlan = JSON.parse(JSON.stringify(service.plan.getValue()))
       newPlan.name = planName
@@ -1336,9 +1338,8 @@ class State {
     }
 
     service.showDirectedCable = false
-    service.showSiteBoundary = false
-    service.boundaryTypes = []
-    service.selectedBoundaryType = {}
+    //service.boundaryTypes = []
+    //service.selectedBoundaryType = {}
 
     var loadCensusCatData = function () {
       return $http.get(`/service/tag-mapping/meta-data/census_block/categories`)
@@ -1361,14 +1362,31 @@ class State {
     var loadBoundaryLayers = function () {
       return $http.get(`/service/boundary_type`)
         .then((result) => {
-          service.boundaryTypes = result.data
-          service.boundaryTypes.push({ id: result.data.length + 1, name: 'fiveg_coverage', description: 'Undefined' })
-          service.boundaryTypes.sort((a, b) => a.id - b.id)
-          service.selectedBoundaryType = service.boundaryTypes[0]
+          var boundaryTypes = result.data
+          boundaryTypes.push({ id: result.data.length + 1, name: 'fiveg_coverage', description: 'Undefined' })
+          boundaryTypes.sort((a, b) => a.id - b.id)
+          var selectedBoundaryType = boundaryTypes[0]
+
+          service.setBoundaryTypes(boundaryTypes)         
+          service.setSelectedBoundaryType(selectedBoundaryType)
         })
     }
 
     loadBoundaryLayers()
+
+    service.setBoundaryTypes = function (boundaryTypes) {
+      $ngRedux.dispatch({
+        type: Actions.LAYERS_SET_BOUNDARY_TYPES,
+        payload: new List(boundaryTypes)
+      })
+    }
+
+    service.setSelectedBoundaryType = function (selectedBoundaryType) {
+      $ngRedux.dispatch({
+        type: Actions.LAYERS_SET_SELECTED_BOUNDARY_TYPE,
+        payload: new Map(selectedBoundaryType)
+      })
+    }
 
     service.listOfTags = []
     service.currentPlanTags = []
@@ -1391,8 +1409,8 @@ class State {
 
     service.isFeatureLayerOn = (categoryItemKey) => {
       var isOn = false
-      if (service.configuration.networkEquipment.equipments.hasOwnProperty(categoryItemKey) &&
-        service.configuration.networkEquipment.equipments[categoryItemKey].checked) {
+      if (service.networkEquipmentLayers.equipments.hasOwnProperty(categoryItemKey) &&
+        service.networkEquipmentLayers.equipments[categoryItemKey].checked) {
         isOn = true
       }
       return isOn
@@ -1798,6 +1816,10 @@ class State {
       }
     }
 
+    service.toggleSiteBoundary = () => {
+      service.updateShowSiteBoundary(!service.showSiteBoundary)
+    }
+
     service.getDispatchers = () => {
     // So we can send dispatchers to stateSerializationHelper. This function can go away after stateSerializationHelper is refactored.
       return {
@@ -1813,7 +1835,12 @@ class State {
   mapStateToThis (reduxState) {
     return {
       locationLayers: getLocationLayersList(reduxState),
-      reduxPlanTargets: reduxState.selection.planTargets
+      networkEquipmentLayers: getNetworkEquipmentLayersList(reduxState),
+      boundaries: getBoundaryLayersList(reduxState),
+      reduxPlanTargets: reduxState.selection.planTargets,
+      showSiteBoundary: reduxState.mapLayers.showSiteBoundary,
+      boundaryTypes: getBoundaryTypesList(reduxState),
+      selectedBoundaryType: getSelectedBoundaryType(reduxState)
     }
   }
 
@@ -1824,7 +1851,8 @@ class State {
       subscribeToPlanSocket: (planId) => { dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` } }) },
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
-      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets))
+      removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
+      updateShowSiteBoundary: (isVisible) => {dispatch(MapLayerActions.setShowSiteBoundary(isVisible))}
     }
   }
 }

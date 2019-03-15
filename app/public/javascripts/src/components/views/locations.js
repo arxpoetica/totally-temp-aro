@@ -154,7 +154,7 @@ class LocationsController {
             if (this.state.configuration.perspective.hasLocationFilters) {
               var hasFiltersSelected = this.state.locationFilters.filter((f) => { return f.checked }).length > 0
               if (hasFiltersSelected) {
-                asGroup()
+                asGroup.bind(this)()
               } else {
                 asSingle.bind(this)()
               }
@@ -266,19 +266,6 @@ class LocationsController {
     this.state.mapLayers.next(oldMapLayers)
   }
 
-  handleFiltersChanged () {
-    // When filters change, we want to turn on/off the Tier checkboxes
-    var isMinOneFilterChecked = false
-    this.state.locationFilters.forEach((filter) => isMinOneFilterChecked |= (filter.checked))
-    const locationTypesToChange = ['Tier 1', 'Tier 2', 'Tier 3']
-    this.locationLayers.toJS().forEach((locationType, index) => {
-      if (locationTypesToChange.indexOf(locationType.key) >= 0) {
-        this.locationLayers.set(index, this.locationLayers.get(index).checked = isMinOneFilterChecked)
-      }
-    })
-    this.updateMapLayers()
-  }
-
   // Update old and new map layers when data sources change
   onSelectedDataSourcesChanged () {
     this.updateMapLayers()
@@ -295,13 +282,6 @@ class LocationsController {
       updateLayerVisibility: (layer, isVisible, allLocationLayers) => {
         // First set the visibility of the current layer
         dispatch(MapLayerActions.setLayerVisibility(layer, isVisible))
-
-        // Then check if other layers are in a different group
-        allLocationLayers.forEach(locLayer => {
-          if (locLayer.group !== layer.group) {
-            dispatch(MapLayerActions.setLayerVisibility(locLayer, false))
-          }
-        })
       }
     }
   }

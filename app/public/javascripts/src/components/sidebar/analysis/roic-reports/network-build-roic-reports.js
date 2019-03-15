@@ -16,7 +16,7 @@ class NetworkBuildRoicReportsController {
 
   refreshData () {
     if (!this.planId) {
-      console.error('Plan ID not available in ROIC Reports component')
+      console.error('Plan ID not available')
       return
     }
 
