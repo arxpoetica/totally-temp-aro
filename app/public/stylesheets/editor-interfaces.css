@@ -186,7 +186,6 @@ editor-interface-tree .ei-header{
 
 /* === table === */
 .ei-table-contain{
-	overflow: scroll;
 	margin-bottom: 6px;
 }
 

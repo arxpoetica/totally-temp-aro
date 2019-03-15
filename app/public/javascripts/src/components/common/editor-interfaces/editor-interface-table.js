@@ -10,6 +10,7 @@ class EditorInterfaceTableController {
     this.lastPage = 0
     this.actionDisplayLimit = 1
     this.pages = []
+    this.prevRowsJSON = ''
   }
 
   $onInit () {
@@ -19,15 +20,21 @@ class EditorInterfaceTableController {
   }
 
   $onChanges (changes) {
-    console.log("CHANGES")
-    console.log(changes)
     if (changes.hasOwnProperty('rows')) {
+      this.prevRowsJSON = JSON.stringify(this.rows)
       this.orderTable()
       this.setPage()
     }
   }
 
   $doCheck () {
+    // check for parent changing rows
+    var rowsJSON = JSON.stringify(this.rows)
+    if (this.prevRowsJSON != rowsJSON){
+      this.prevRowsJSON = rowsJSON
+      this.orderTable()
+    }
+    
     this.setPage()
   }
 
@@ -77,33 +84,22 @@ class EditorInterfaceTableController {
   }
 
   orderTable () {
-    if (this.isOrderAscending) {
-      this.rows.sort((a, b) => {
-        var valA = a[this.orderCol]
-        var valB = b[this.orderCol]
-        if (valA < valB) {
-          return -1
-        }
-        if (valA > valB) {
-          return 1
-        }
-        // if equal
-        return 0
-      })
-    } else {
-      this.rows.sort((a, b) => {
-        var valA = a[this.orderCol]
-        var valB = b[this.orderCol]
-        if (valA > valB) {
-          return -1
-        }
-        if (valA < valB) {
-          return 1
-        }
-        // if equal
-        return 0
-      })
-    }
+    var ascendMult = -1.0
+    if (this.isOrderAscending) ascendMult = 1.0
+    
+    this.rows.sort((a, b) => {
+      var valA = a[this.orderCol]
+      var valB = b[this.orderCol]
+      if (valA < valB) {
+        return -1 * ascendMult
+      }
+      if (valA > valB) {
+        return 1 * ascendMult
+      }
+      // if equal
+      return 0
+    })
+    
   }
 }
 

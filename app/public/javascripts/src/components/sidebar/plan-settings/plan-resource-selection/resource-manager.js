@@ -26,8 +26,6 @@ class ResourceManagerController {
       rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`
     }
     
-    // /v1/tsm-manager/23?user_id=4
-    // /v1/tsm_manager/23?user_id=4
     this.rows = []
 
     this.displayProps = [
@@ -73,8 +71,6 @@ class ResourceManagerController {
         iconClass: 'fa-edit',
         toolTip: 'Edit',
         callBack: (row, index) => {
-          // console.log('Edit')
-          // console.log(row)
           this.editSelectedManager(row)
         }
       },
@@ -84,8 +80,6 @@ class ResourceManagerController {
         iconClass: 'fa-copy',
         toolTip: 'Clone',
         callBack: (row, index) => {
-          // console.log('Clone')
-          // console.log(row)
           this.cloneSelectedManagerFromSource(row)
         }
       },
@@ -95,8 +89,6 @@ class ResourceManagerController {
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
         callBack: (row, index) => {
-          // console.log('Delete')
-          // console.log(row)
           this.deleteSelectedResourceManager(row)
         }
       }
@@ -113,8 +105,6 @@ class ResourceManagerController {
   }
   
   $onChanges (changes) {
-    console.log(changes)
-    
     if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
       //this.buildRows()
       this.getRows()
@@ -185,7 +175,6 @@ class ResourceManagerController {
     
     this.$http.get(`service/v2/resource-manager?user_id=${this.state.loggedInUser.id}${props}`)
       .then((result) => {
-        console.log(result)
         var newRows = []
         var i
         for (i = 0; i<result.data.length; i++){
@@ -200,7 +189,6 @@ class ResourceManagerController {
             newRows.push(row)
           }
         }
-        console.log(newRows)
         this.rows = newRows
       })
     // end promise
@@ -235,6 +223,8 @@ class ResourceManagerController {
 
   cloneSelectedManagerFromSource (selectedManager) {
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
+    
+    // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
     var managerId = this.resourceKeyToEndpointId[selectedManager.resourceType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
@@ -242,29 +232,22 @@ class ResourceManagerController {
     } else if (managerId === 'rate-reach-matrix') {
       this.cloneSelectedRateReachManager(selectedManager)
     } else {
+      
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
         .then((resourceName) => {
         // Create a new manager with the specified name and description
-          /*
-          {
-            "resourceType": "tsm_manager",
-            "name": "clone test C",
-            "description": "test of swagger clone C"
-          } 
-          */
-          console.log(managerId)
-          return this.$http.post(`/service/v2/resource-manager/${selectedManager.id}?user_id=${this.state.loggedInUser.id}`,
+          
+          return this.$http.post(`/service/v2/resource-manager?resourceManagerId=${selectedManager.id}&user_id=${this.state.loggedInUser.id}`,
             {resourceType: selectedManager.resourceType, name: resourceName, description: resourceName })
         })
         .then((result) => this.onManagerCreated(result.data.id))
         .catch((err) => console.error(err))
+      
     }
   }
 
   onManagerCreated (createdManagerId) {
-    console.log("on created")
-    console.log(this.editMode)
     this.setEditingManagerId({ newId: createdManagerId })
     this.setEditingMode({ mode: this.editMode })
     this.onManagersChanged && this.onManagersChanged()
@@ -272,11 +255,8 @@ class ResourceManagerController {
   }
 
   editSelectedManager (selectedManager) {
-    console.log("on edit selected")
-    console.log(this.editMode)
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
-    console.log(selectedManager)
     this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
   }
 
@@ -301,7 +281,6 @@ class ResourceManagerController {
   }
 
   deleteManager (selectedManager) {
-    console.log(selectedManager)
     this.$http.delete(`service/v2/resource-manager/${selectedManager.id}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.onManagersChanged && this.onManagersChanged()

@@ -16,7 +16,6 @@ class PlanResourceEditorController {
   }
 
   setEditingMode (newEditingMode) {
-    console.log(newEditingMode)
     this.selectedEditingMode = newEditingMode
   }
 
@@ -29,7 +28,6 @@ class PlanResourceEditorController {
   }
 
   setSelectedResourceKey (resourceKey) {
-    console.log(resourceKey)
     this.selectedResourceKey = resourceKey
   }
 }
