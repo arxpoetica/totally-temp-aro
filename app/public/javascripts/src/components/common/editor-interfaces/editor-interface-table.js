@@ -8,7 +8,9 @@ class EditorInterfaceTableController {
     this.isOrderAscending = true
     this.pageOffset = 0
     this.lastPage = 0
+    this.actionDisplayLimit = 1
     this.pages = []
+    this.prevRowsJSON = ''
   }
 
   $onInit () {
@@ -19,30 +21,21 @@ class EditorInterfaceTableController {
 
   $onChanges (changes) {
     if (changes.hasOwnProperty('rows')) {
+      this.prevRowsJSON = JSON.stringify(this.rows)
       this.orderTable()
       this.setPage()
     }
   }
 
   $doCheck () {
+    // check for parent changing rows
+    var rowsJSON = JSON.stringify(this.rows)
+    if (this.prevRowsJSON != rowsJSON){
+      this.prevRowsJSON = rowsJSON
+      this.orderTable()
+    }
+    
     this.setPage()
-  }
-
-  addItem () {
-    console.log('add item')
-    /*
-    console.log(this)
-    console.log(this.rows)
-    let newItem = {}
-
-    // ToDo: should actually make a new instance of a defined class.
-    //  we should pass in a class. There may be properties that we don't show bu want to pass. It can also cut down on the structure definition
-    this.rows.cols.forEach(col => {
-      newItem[col.property] = col.hasOwnProperty('defaultVal') ? col.defaultVal : null
-    })
-
-    this.rows.rows.push(newItem)
-    */
   }
 
   setPage (page) {
@@ -79,11 +72,6 @@ class EditorInterfaceTableController {
     this.pageOffset = page
   }
 
-  deleteItem (index) {
-    console.log('delete ' + index)
-    // this.rows.rows.splice(index, 1)
-  }
-
   setOrderCol (colName) {
     if (colName == this.orderCol) {
       this.isOrderAscending = !this.isOrderAscending
@@ -96,35 +84,22 @@ class EditorInterfaceTableController {
   }
 
   orderTable () {
-    if (this.isOrderAscending) {
-      this.rows.sort((a, b) => {
-        var valA = a[this.orderCol]
-        var valB = b[this.orderCol]
-        if (valA < valB) {
-          return -1
-        }
-        if (valA > valB) {
-          return 1
-        }
-
-        // names must be equal
-        return 0
-      })
-    } else {
-      this.rows.sort((a, b) => {
-        var valA = a[this.orderCol]
-        var valB = b[this.orderCol]
-        if (valA > valB) {
-          return -1
-        }
-        if (valA < valB) {
-          return 1
-        }
-
-        // names must be equal
-        return 0
-      })
-    }
+    var ascendMult = -1.0
+    if (this.isOrderAscending) ascendMult = 1.0
+    
+    this.rows.sort((a, b) => {
+      var valA = a[this.orderCol]
+      var valB = b[this.orderCol]
+      if (valA < valB) {
+        return -1 * ascendMult
+      }
+      if (valA > valB) {
+        return 1 * ascendMult
+      }
+      // if equal
+      return 0
+    })
+    
   }
 }
 
@@ -135,8 +110,6 @@ let editorInterfaceTable = {
     rows: '=',
     onChange: '&',
     isEdit: '<',
-    canAdd: '<',
-    canDelete: '<',
     actions: '<',
     rowsPerPage: '<',
     rootMetaData: '<'

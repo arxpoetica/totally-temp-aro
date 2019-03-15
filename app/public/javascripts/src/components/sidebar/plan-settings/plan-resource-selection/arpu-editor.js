@@ -14,13 +14,13 @@ class ArpuEditorController {
   }
 
   reloadArpuManagerConfiguration () {
-    this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}`)
+    this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.arpuManager = result.data
       })
       .catch(err => console.error(err))
 
-    this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`)
+    this.$http.get(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         var arpuModels = []
         // Sort the arpu models based on the locationTypeEntity
@@ -63,7 +63,7 @@ class ArpuEditorController {
     })
 
     if (changedModels.length > 0) {
-      this.$http.put(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration`, changedModels)
+      this.$http.put(`/service/v1/arpu-manager/${this.arpuManagerId}/configuration?user_id=${this.state.loggedInUser.id}`, changedModels)
         .then((result) => this.exitEditingMode())
         .catch((err) => console.error(err))
     } else {

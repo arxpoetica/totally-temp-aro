@@ -1,6 +1,7 @@
 class ImpedanceEditorController {
-  constructor ($http) {
+  constructor ($http, state) {
     this.$http = $http
+    this.state = state
     this.impedanceManagerConfiguration = []
     // "mappingLabels" should map from a impedance mapping key (e.g. 0) to a text description of the mapping
     this.mappingLabels = {
@@ -22,13 +23,13 @@ class ImpedanceEditorController {
   }
 
   reloadImpedanceManagerConfiguration () {
-    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}`)
+    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.impedanceManager = result.data
       })
       .catch(err => console.error(err))
 
-    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`)
+    this.$http.get(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.impedanceManagerConfiguration = result.data
         // The map is a set of key value pairs, we convert it to a sorted array
@@ -39,7 +40,7 @@ class ImpedanceEditorController {
   }
 
   saveConfigurationToServer () {
-    this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration`, this.impedanceManagerConfiguration)
+    this.$http.put(`/service/v1/impedance-manager/${this.impedanceManagerId}/configuration?user_id=${this.state.loggedInUser.id}`, this.impedanceManagerConfiguration)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
   }
@@ -49,7 +50,7 @@ class ImpedanceEditorController {
   }
 }
 
-ImpedanceEditorController.$inject = ['$http']
+ImpedanceEditorController.$inject = ['$http', 'state']
 
 let impedanceEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/impedance-editor.html',
