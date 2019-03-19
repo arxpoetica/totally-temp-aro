@@ -20,7 +20,5 @@ try {
 
 configuration.base_url = process.env.APP_BASE_URL || 'http://localhost:8000'
 configuration.aro_service_url = process.env.ARO_SERVICE_URL || configuration.aro_service_url
-configuration.OAUTH_CLIENT = process.env.OAUTH_CLIENT || 'acme'
-configuration.OAUTH_CLIENT_SECRET = process.env.OAUTH_CLIENT_SECRET || 'acmesecret'
 
 module.exports = configuration

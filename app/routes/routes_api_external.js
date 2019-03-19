@@ -5,9 +5,9 @@ const helpers = require('../helpers')
 const config = helpers.config
 const requestPromise = require('request-promise-native')
 const jwt = require('jsonwebtoken')
+const url = require('url')
 
-const EXTERNAL_API_PREFIX = '/v1/api-ext'
-const OAUTH_CONNECTION_STRING = `http://${config.OAUTH_CLIENT}:${config.OAUTH_CLIENT_SECRET}@${config.oauth_server_host}`
+const OAUTH_CONNECTION_STRING = `http://${config.oauth_server_host}`
 
 // A promise that resolves with the public signing key of the OAuth server (which may not be online before this app server)
 const authSigningKey = requestPromise({
@@ -54,16 +54,11 @@ exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
 
   // Expose an unsecured endpoint for API logins.
-  api.post(`${EXTERNAL_API_PREFIX}/login`, (request, response, next) => {
-
+  api.post(`/oauth/*`, (request, response, next) => {
     requestPromise({
       method: 'POST',
       uri: `${OAUTH_CONNECTION_STRING}/oauth/token`,
-      qs: {
-        username: request.body.username,
-        password: request.body.password,
-        grant_type: 'password'
-      },
+      qs: request.body,
       json: true
     })
       .then(jsonSuccess(response, next))
@@ -77,6 +72,7 @@ exports.configure = (api, middleware) => {
   // Get all requests (POST/GET/DELETE/PUT,etc) that start with /v1/api-ext, and then pass those
   // on to ARO-Service if the bearer token is authenticated.
   // Do NOT modify any data - this is intended to be a pass-through service
+  const EXTERNAL_API_PREFIX = '/v1/api-ext'
   api.all(`${EXTERNAL_API_PREFIX}/*`, (request, response, next) => {
 
     // First, get the bearer token from the request
@@ -92,6 +88,7 @@ exports.configure = (api, middleware) => {
         // Success, we can forward the request to service
         var req = {
           url: `${config.aro_service_url}/${request.url}`,
+          headers: request.headers,
           method: request.method,
           params: request.params,
           json: true
