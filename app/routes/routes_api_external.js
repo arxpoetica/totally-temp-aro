@@ -57,7 +57,7 @@ exports.configure = (api, middleware) => {
     requestPromise({
       method: 'POST',
       uri: `${OAUTH_CONNECTION_STRING}${request.url}`,
-      qs: request.body,
+      body: request.body,
       json: true
     })
       .then(jsonSuccess(response, next))
