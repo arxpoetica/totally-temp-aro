@@ -272,7 +272,9 @@ class PlanEditorController {
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-
+    
+    //optimizationBody.locationObjects = {} // <----------------------------- test
+    
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -335,7 +337,9 @@ class PlanEditorController {
 
     // optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed // directed analysis if thats what the user wants
-
+    
+    //optimizationBody.locationObjects = {} // <----------------------------- test
+    
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
