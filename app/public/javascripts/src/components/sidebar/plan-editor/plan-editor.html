@@ -51,6 +51,7 @@
                          on-select-object="$ctrl.handleSelectedObjectChanged(mapObject)"
                          on-delete-object="$ctrl.handleObjectDeleted(mapObject)"
                          display-view-object="$ctrl.displayViewObject(feature)"
+                         display-edit-object="$ctrl.displayEditObject(feature)"
                          on-object-dropped-on-marker="$ctrl.handleObjectDroppedOnMarker({dropEvent: dropEvent, targetObjectId: targetObjectId})"
                          register-object-delete-callback="$ctrl.registerObjectDeleteCallback(deleteObjectWithId)"
                          register-create-map-objects-callback="$ctrl.registerCreateMapObjectsCallback(createMapObjects)"
@@ -178,9 +179,11 @@
               <img ng-src="{{$ctrl.viewIconUrl}}" style="vertical-align:middle; padding-right: 10px">
               <span>{{$ctrl.viewLabel}}</span>
               
-              <button class="btn btn-primary ei-panel-header-btn-set ei-foldout-header-btn" 
-                  ng-click="$ctrl.editViewObject()"
-                  >edit</button>
+              <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
+                'btn-light': $ctrl.viewFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects,
+                'btn-primary': !($ctrl.viewFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects) }"
+                ng-disabled="$ctrl.viewFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects"
+                ng-click="$ctrl.editViewObject()">edit</button>
               <div class="sidebar-header-subinfo">
                 <div class="sidebar-header-subinfo-item">lat: {{$ctrl.viewEventFeature.geometry.coordinates[1] | number : 6}}</div>
                 <div class="sidebar-header-subinfo-item">long: {{$ctrl.viewEventFeature.geometry.coordinates[0] | number : 6}}</div>
@@ -189,11 +192,11 @@
           
           <!-- A table containing the editable properties of the selected object -->
           <editor-interface-tree 
-                              ng-if="!$ctrl.isEditFeatureProps"
-                              object-to-view="$ctrl.viewFeature.networkNodeEquipment" 
-                              is-edit="false"
-                              root-meta-data="{'networkNodeType':$ctrl.viewFeature.siteNetworkNodeType}"
-                              ></editor-interface-tree>
+            ng-if="!$ctrl.isEditFeatureProps"
+            object-to-view="$ctrl.viewFeature.networkNodeEquipment" 
+            is-edit="false"
+            root-meta-data="{'networkNodeType':$ctrl.viewFeature.siteNetworkNodeType}">
+          </editor-interface-tree>
           
 
           <button ng-if="$ctrl.isEditFeatureProps"
@@ -259,9 +262,64 @@
           </button>
         </div>
 
-
         <!-- Section to show properties when the selected map object is an equipment boundary -->
-        <div class="plan-editor-bounds-contain" ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject)">
+        <!-- <div class="clearfix" ng-if="!$ctrl.isBoundaryEditMode && $ctrl.viewBoundaryProps.length > 0" style="margin-top: 10px"> -->
+        <!-- Section header showing the type of the selected object -->
+        <!-- <div class="sidebar-table-header">
+            <span>Site Boundary</span>
+            
+            <button class="btn btn-primary ei-panel-header-btn-set ei-foldout-header-btn" 
+                ng-click="$ctrl.editViewObject()"
+                >edit</button>
+        </div> -->
+        
+        <!-- A table containing the editable properties of the selected equipment boundary -->
+        <!-- <editor-interface-tree 
+          ng-if="!$ctrl.isBoundaryEditMode"
+          object-to-view="$ctrl.viewBoundaryProps" 
+          is-edit="false">
+        </editor-interface-tree> -->
+
+        <!-- Section to show properties when the selected map object is an equipment boundary - view-->
+        <div class="plan-editor-bounds-contain" ng-if="$ctrl.state.showSiteBoundary && $ctrl.viewBoundaryProps && !$ctrl.isBoundaryEditMode">
+          <!-- A table containing the editable properties of the selected object -->
+          <table id="tblBoundaryProperties" class="table table-sm table-striped sidebar-table" style="margin-bottom: 10px">
+            <thead>
+              <div class="clearfix" style="margin-top: 10px">
+                <!-- Section header showing the type of the selected object -->
+                <div class="sidebar-table-header">
+                  <span>Site Boundary</span>
+                  <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
+                  'btn-light': $ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects,
+                  'btn-primary': !($ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects) }"
+                  ng-click="$ctrl.editViewSiteBoundaryObject()">edit</button>
+                </div>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Site boundary type</td>
+                <td>
+                  {{$ctrl.viewBoundaryProps.selectedSiteBoundaryType.description}}
+                </td>
+              </tr>
+              <tr>
+                <td>Site move update</td>
+                <td>
+                  {{$ctrl.viewBoundaryProps.selectedSiteMoveUpdate}}
+                </td>
+              </tr>
+              <tr>
+                <td>Site boundary generation</td>
+                <td>
+                  {{$ctrl.viewBoundaryProps.selectedSiteBoundaryGeneration}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Section to show properties when the selected map object is an equipment boundary - edit -->
+        <div class="plan-editor-bounds-contain" ng-if="$ctrl.selectedMapObject && !$ctrl.isMarker($ctrl.selectedMapObject) && $ctrl.isBoundaryEditMode">
           <!-- Section header showing the type of the selected object -->
           <div class="sidebar-table-header" ng-if="$ctrl.getSelectedBoundaryNetworkConfig()">
               <img src="/images/map_icons/aro/boundary_road_segments.png" style="vertical-align:middle; padding-right: 10px">
@@ -271,14 +329,21 @@
           <table id="tblBoundaryProperties"
                  class="table table-sm table-striped sidebar-table"
                  style="margin-bottom: 10px">
+            <thead>
+              <div class="clearfix" ng-if="!$ctrl.getSelectedBoundaryNetworkConfig()" style="margin-top: 10px">
+                <!-- Section header showing the type of the selected object -->
+                <div class="sidebar-table-header">
+                  <span>Site Boundary</span>
+                </div>
+            </thead>
             <tbody>
               <tr>
                 <td>Site boundary type</td>
                 <td>
                   <select class="form-control"
-                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryTypeId"
-                          ng-options="item.id as item.description for item in $ctrl.state.boundaryTypes"
-                          ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.handleSiteBoundaryTypeChanged();">
+                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryTypeId"
+                    ng-options="item.id as item.description for item in $ctrl.state.boundaryTypes"
+                    ng-change="$ctrl.markSelectedBoundaryPropertiesDirty(); $ctrl.handleSiteBoundaryTypeChanged();">
                   </select>
                 </td>
               </tr>
@@ -286,9 +351,9 @@
                 <td>Site move update</td>
                 <td>
                   <select class="form-control"
-                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteMoveUpdate"
-                          ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteMoveUpdates"
-                          ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
+                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteMoveUpdate"
+                    ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteMoveUpdates"
+                    ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
                   </select>
                 </td>
               </tr>
@@ -296,9 +361,9 @@
                 <td>Site boundary generation</td>
                 <td>
                   <select class="form-control"
-                          ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryGeneration"
-                          ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteBoundaryGenerations"
-                          ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
+                    ng-model="$ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].selectedSiteBoundaryGeneration"
+                    ng-options="item as item for item in $ctrl.objectIdToProperties[$ctrl.selectedMapObject.objectId].siteBoundaryGenerations"
+                    ng-change="$ctrl.markSelectedBoundaryPropertiesDirty()">
                   </select>
                 </td>
               </tr>

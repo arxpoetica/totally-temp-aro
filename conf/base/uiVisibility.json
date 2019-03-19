@@ -241,7 +241,8 @@
     "limitBoundaries": {
       "enabled": false
     },
-    "extendedAnalysis": true
+    "extendedAnalysis": true,
+		"editExistingObjects": true
   },
   {
     "name": "sales_engineer",
@@ -485,6 +486,7 @@
       "enabled": false
     },
     "extendedAnalysis": true,
+		"editExistingObjects": true,
     "hasLocationFilters": true
   },
   {
@@ -729,6 +731,7 @@
       "enabled": false
     },
     "extendedAnalysis": true,
+		"editExistingObjects": true,
     "hasLocationFilters": true
   }
 ]
