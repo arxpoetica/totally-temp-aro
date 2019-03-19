@@ -235,7 +235,7 @@ class BoundaryCoverageController {
     var options = {
       title: {
         display: true,
-        text: 'Locations by Distance'
+        text: 'Locations by Road Distance'
       },
       legend: {
         display: true,
