@@ -5,7 +5,6 @@ const helpers = require('../helpers')
 const config = helpers.config
 const requestPromise = require('request-promise-native')
 const jwt = require('jsonwebtoken')
-const url = require('url')
 
 const OAUTH_CONNECTION_STRING = `http://${config.oauth_server_host}`
 
