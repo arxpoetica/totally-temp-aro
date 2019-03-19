@@ -273,8 +273,6 @@ class PlanEditorController {
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
     
-    //optimizationBody.locationObjects = {} // <----------------------------- test
-    
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -310,8 +308,6 @@ class PlanEditorController {
         this.computedBoundaries.add(feature.objectId)
         this.createMapObjects && this.createMapObjects([feature])
 
-        // this.digestBoundaryCoverage(feature.objectId, result.data)
-        // this.coverageOutput = {'feature': feature, 'data': result.data}
         this.digestBoundaryCoverage(feature, result.data, true)
 
         this.isWorkingOnCoverage = false
@@ -338,8 +334,6 @@ class PlanEditorController {
     // optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed // directed analysis if thats what the user wants
     
-    //optimizationBody.locationObjects = {} // <----------------------------- test
-    
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
@@ -350,8 +344,6 @@ class PlanEditorController {
           return
         }
         this.computedBoundaries.add(mapObject.feature.objectId)
-        // this.digestBoundaryCoverage(mapObject.feature.objectId, result.data)
-        // this.coverageOutput = {'feature': mapObject.feature, 'data': result.data}
         this.digestBoundaryCoverage(mapObject.feature, result.data, true)
 
         this.isWorkingOnCoverage = false
@@ -362,7 +354,6 @@ class PlanEditorController {
       })
   }
 
-  // --- snip <---------------------------------------------------------------------------------<<<
   digestBoundaryCoverage (feature, coverageData, forceUpdate) {
     if (typeof forceUpdate === 'undefined') forceUpdate = false
     this.coverageOutput = { 'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate }
