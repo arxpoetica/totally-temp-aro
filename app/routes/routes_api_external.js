@@ -1,8 +1,8 @@
 // These are routes for external API access to ARO-Service
 
-var models = require('../models')
 const helpers = require('../helpers')
 const config = helpers.config
+const expressProxy = require('express-http-proxy')
 const requestPromise = require('request-promise-native')
 const jwt = require('jsonwebtoken')
 
@@ -39,7 +39,7 @@ const checkUserAuthJWT = (jwtToken) => authSigningKey
       return Promise.reject(err)
     })
 
-// A promise that resolves if the user is authenticated correctly, using token strategy (will call auth server)
+// A promise that resolves if the user is authenticated correctly, using token strategy (will call auth server every)
 const checkUserAuthToken = (token) => requestPromise({
   method: 'POST',
   uri: `${OAUTH_CONNECTION_STRING}/oauth/check_token`,
@@ -49,64 +49,36 @@ const checkUserAuthToken = (token) => requestPromise({
   json: true
 })
 
-exports.configure = (api, middleware) => {
-  var jsonSuccess = middleware.jsonSuccess
-
-  // Expose an unsecured endpoint for API logins.
-  api.post(`/oauth/*`, (request, response, next) => {
-    requestPromise({
-      method: 'POST',
-      uri: `${OAUTH_CONNECTION_STRING}${request.url}`,
-      headers: request.headers,
-      qs: request.body,
-      json: true
-    })
-      .then(jsonSuccess(response, next))
-      .catch(err => {
-        // Error when getting the token. Send it back
-        console.error(err.error)
-        response.status(err.statusCode).json(err.error)
-      })
-  })
-
-  // Get all requests (POST/GET/DELETE/PUT,etc) that start with /v1/api-ext, and then pass those
-  // on to ARO-Service if the bearer token is authenticated.
-  // Do NOT modify any data - this is intended to be a pass-through service
-  const EXTERNAL_API_PREFIX = '/v1/api-ext'
-  api.all(`${EXTERNAL_API_PREFIX}/*`, (request, response, next) => {
-
+// Middleware to check the validity of a bearer token
+const bearerTokenCheckMiddleware = (req, res, next) => {
+  {
     // First, get the bearer token from the request
-    const authHeader = request.headers.authorization || ''
+    const authHeader = req.headers.authorization || ''
     const authTokens  = authHeader.split(' ')
     if ((authTokens.length !== 2) || (authTokens[0] !== 'Bearer')) {
-      return response.status(401).json('Missing or malformed Bearer token')
+      return res.status(401).json('Missing or malformed Bearer token')
     }
 
     // We have a bearer token, check with our OAuth server to see if it is valid
     checkUserAuthJWT(authTokens[1])   // Replace with checkUserAuthToken if you want to use jdbc tokens
       .then(result => {
-        // Success, we can forward the request to service
-        var req = {
-          url: `${config.aro_service_url}/${request.url}`,
-          headers: request.headers,
-          method: request.method,
-          params: request.params,
-          json: true
-        }
-
-        // Attach request body if required
-        if (request.method !== 'GET') {
-          req.body = request.body
-        }
-
-        models.AROService.request(req)
-          .then(jsonSuccess(response, next))
-          .catch(next)
+        next()  // Success, we can forward the request to service. The forwarding will be handled by the next middleware in the chain.
       })
       .catch(err => {
         // Error when authenticating the token. Send it back
         console.error(err)
-        response.status(err.statusCode).json(err.error)
+        res.status(err.statusCode).json(err.error)
       })
-  })
+  }
+}
+
+exports.configure = (api, middleware) => {
+  // Expose an unsecured endpoint for API logins.
+  api.post(`/oauth/*`, expressProxy(OAUTH_CONNECTION_STRING))
+
+  // Get all requests (POST/GET/DELETE/PUT,etc) that start with /v1/api-ext, and then pass those
+  // on to ARO-Service if the bearer token is authenticated.
+  // Do NOT modify any data - this is intended to be a pass-through service
+  const EXTERNAL_API_PREFIX = '/v1/api-ext'
+  api.all(`${EXTERNAL_API_PREFIX}/*`, bearerTokenCheckMiddleware, expressProxy(`${config.aro_service_url}`))
 }
