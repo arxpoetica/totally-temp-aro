@@ -149,12 +149,37 @@ class FeatureSelector {
       pointX = xWithinTile // pointX, pointY are the point of the reference point.
       pointY = yWithinTile
 
-      distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY) // calling function to find the shortest distance
-      // distanceTolineX1Y1 = findDistanceToPoint(lineX1, lineY1, pointX, pointY)
-      // distanceTolineX2Y2 = findDistanceToPoint(lineX2, lineY2, pointX, pointY)
-      // console.log(distance + ' , ' + distanceTolineX1Y1 + ' , '+ distanceTolineX2Y2)
-      if (distance <= minPointToPolylineDistance) {
+      //distance = findDistanceToSegment(lineX1, lineY1, lineX2, lineY2, pointX, pointY) // calling function to find the shortest distance
+      
+      // if (distance <= minPointToPolylineDistance) {
+      //   return true
+      // }
+
+      var point1 = {x:lineX1,y:lineY1}
+      var point2 = {x:lineX2,y:lineY2}
+      var point = {x:pointX,y:pointY}
+      var isInside = calcIsInsideThickLineSegment(point1,point2,point,minPointToPolylineDistance)
+      if(isInside) {
         return true
+      }
+    }
+
+    function calcIsInsideThickLineSegment(line1, line2, pnt, lineThickness) {
+      var L2 = (((line2.x - line1.x) * (line2.x - line1.x)) + ((line2.y - line1.y) * (line2.y - line1.y)));
+      if (L2 == 0) return false;
+      var r = (((pnt.x - line1.x) * (line2.x - line1.x)) + ((pnt.y - line1.y) * (line2.y - line1.y))) / L2;
+    
+      //Assume line thickness is circular
+      if (r < 0) {
+        //Outside line1
+        return findDistanceToPoint(line1.x,line1.y,pnt.x,pnt.y) <= lineThickness;
+      } else if ((0 <= r) && (r <= 1)) {
+        //On the line segment
+        var s = (((line1.y - pnt.y) * (line2.x - line1.x)) - ((line1.x - pnt.x) * (line2.y - line1.y))) / L2;
+        return (Math.abs(s) * Math.sqrt(L2) <= lineThickness);
+      } else {
+        //Outside line2
+        return findDistanceToPoint(line2.x,line2.y,pnt.x,pnt.y) <= lineThickness;
       }
     }
 
@@ -195,7 +220,7 @@ class FeatureSelector {
   // Perform hit detection on features and get the first one (if any) under the mouse
   static performHitDetection (tileDataService, tileSize, mapLayers, tileZoom, tileX, tileY, xWithinTile, yWithinTile, selectedBoundaryLayerId) {
     var minimumPointToRoadDistance = 10
-    var minimumPointToFiberDistance = 50
+    var minimumPointToFiberDistance = 20
     // Define a function that will return true if a given feature should be selected
     var shouldFeatureBeSelected = (feature, icon, deltaX, deltaY) => {
       var selectFeature = false
