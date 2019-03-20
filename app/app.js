@@ -26,6 +26,7 @@ if (process.env.NODE_ENV === 'staging') {
 
 var middleware = require('./middleware')
 require('./routes/routes_authentication').configure(app, middleware)
+require('./routes/routes_api_external').configure(app, middleware)  // Has its own authorization scheme
 
 var api = express.Router()
 var routes = [
