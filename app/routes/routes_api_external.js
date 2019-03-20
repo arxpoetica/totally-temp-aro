@@ -15,7 +15,11 @@ const authSigningKey = requestPromise({
   json: true
 })
   .then(res => res.value)
-  .catch(err => console.error(err))
+  .catch(err => {
+    console.error('********************** Error when getting token key from OAuth server')
+    console.error('If you don\'t have a OAuth server setup, then you can ignore this error')
+    console.error(err.error)
+  })
 
 // A promise that resolves if the user is authenticated correctly, using JWT strategy (will decrypt JWT without calls to the auth server)
 const checkUserAuthJWT = (jwtToken) => authSigningKey
