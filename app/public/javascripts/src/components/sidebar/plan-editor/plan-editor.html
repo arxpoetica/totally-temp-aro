@@ -292,6 +292,7 @@
                   <button ng-class="{ 'btn ei-panel-header-btn-set ei-foldout-header-btn': true,
                   'btn-light': $ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects,
                   'btn-primary': !($ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects) }"
+                  ng-disabled="$ctrl.viewSiteBoundaryEventFeature.deploymentType !== 'PLANNED' && !$ctrl.state.configuration.perspective.editExistingObjects"                  
                   ng-click="$ctrl.editViewSiteBoundaryObject()">edit</button>
                 </div>
             </thead>
