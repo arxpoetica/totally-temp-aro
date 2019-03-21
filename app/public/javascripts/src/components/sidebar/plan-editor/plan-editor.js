@@ -5,6 +5,7 @@ import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 // import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
 
@@ -41,10 +42,13 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.coSearchType = 'SERVICE_AREA'
     this.viewEventFeature = {}
+    this.viewSiteBoundaryEventFeature = {}
     this.viewFeature = {}
+    this.viewBoundaryProps = null
     this.viewIconUrl = ''
     this.viewLabel = ''
     this.isEditFeatureProps = true
+    this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
@@ -545,7 +549,7 @@ class PlanEditorController {
   }
 
   getSelectedBoundaryNetworkConfig () {
-    return this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
+    return this.selectedMapObject && this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
   }
 
   getNetworkConfig (objectId) {
@@ -598,32 +602,95 @@ class PlanEditorController {
     this.viewIconUrl = ''
     this.viewLabel = ''
     this.isEditFeatureProps = true
+    this.isBoundaryEditMode = false
     this.updateSelectedState()
   }
 
   displayViewObject (feature, iconUrl) {
-    // this.viewIconUrl = iconUrl
-    var planId = this.state.plan.getValue().id
-    this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-      .then((result) => {
-        if (result.data.hasOwnProperty('geometry')) {
-          this.viewEventFeature = feature
-          // use feature's coord NOT the event's coords
-          this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
-          this.viewFeature = AroFeatureFactory.createObject(result.data)
-          var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
-          this.viewLabel = viewConfig.label
-          this.viewIconUrl = viewConfig.iconUrl
-          this.isEditFeatureProps = false
-          // this.updateSelectedState(feature, feature.objectId)
-          this.getViewObjectSBTypes(feature.objectId)
-        } else {
-        // clear selection
-          this.clearViewSelection()
-        }
-      }).catch((err) => {
-        console.error(err)
-      })
+    if (feature.type && feature.type === "equipment_boundary.select") {
+      var newSelection = this.state.cloneSelection()
+      newSelection.details.siteBoundaryId = feature.objectId
+      this.state.selection = newSelection
+      this.displaySiteBoundaryViewObject(feature, iconUrl)      
+    }
+    else
+      this.displayEquipmentViewObject(feature,iconUrl)
+  }
+
+  displayEditObject(feature) {
+    if (feature.type && feature.type === "equipment_boundary.select")
+      this.displaySiteBoundaryViewObject(feature)
+        .then((result) => {
+          this.editViewSiteBoundaryObject()
+        })
+    else
+      this.displayEquipmentViewObject(feature)
+        .then((result) => {
+          this.editViewObject()
+        })
+  }
+
+  displayEquipmentViewObject(feature, iconUrl) {
+    return new Promise((resolve, reject) => {
+      var planId = this.state.plan.getValue().id
+      this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          if (result.data.hasOwnProperty('geometry')) {
+            this.viewEventFeature = feature
+            // use feature's coord NOT the event's coords
+            this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
+            this.viewFeature = AroFeatureFactory.createObject(result.data)
+            var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+            this.viewLabel = viewConfig.label
+            this.viewIconUrl = viewConfig.iconUrl
+            this.isEditFeatureProps = false
+            // this.updateSelectedState(feature, feature.objectId)
+            this.getViewObjectSBTypes(feature.objectId)
+          } else {
+            // clear selection
+            this.clearViewSelection()
+          }
+          resolve()
+        }).catch((err) => {
+          console.error(err)
+          reject()
+        })
+    })
+  }
+
+  displaySiteBoundaryViewObject(feature, iconUrl) {
+    return new Promise((resolve, reject) => {
+      var planId = this.state.plan.getValue().id
+      this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          if (result.data.hasOwnProperty('geometry')) {
+            this.viewSiteBoundaryEventFeature = result.data
+            this.viewSiteBoundaryEventFeature.attributes = {
+              network_node_object_id: this.viewSiteBoundaryEventFeature.networkObjectId,
+              networkNodeType: this.viewSiteBoundaryEventFeature.networkNodeType
+            }
+            this.viewSiteBoundaryEventFeature.isExistingObject = true
+
+            // use feature's coord NOT the event's coords
+            var boundaryProps = AroFeatureFactory.createObject(result.data)
+
+            this.viewBoundaryProps = new BoundaryProperties(boundaryProps.boundaryTypeId, 'Auto-redraw', 'Road Distance',
+              null, null, boundaryProps.attributes, boundaryProps.deploymentType)
+
+            this.viewBoundaryProps.selectedSiteBoundaryType =
+              this.state.boundaryTypes.filter((boundary) => boundary.id === this.viewBoundaryProps.selectedSiteBoundaryTypeId)[0]
+
+            this.isBoundaryEditMode = false
+          } else {
+            // clear selection
+            this.clearViewSelection()
+          }
+          resolve()
+        }).catch((err) => {
+          console.error(err)
+          reject()
+        })
+    })
   }
 
   getViewObjectSBTypes (objectId) {
@@ -660,6 +727,10 @@ class PlanEditorController {
 
   editViewObject () {
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
+  }
+
+  editViewSiteBoundaryObject () {
+    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewSiteBoundaryEventFeature, null)    
   }
 
   handleObjectCreated (mapObject, usingMapClick, feature, deleteExistingBoundary) {
@@ -789,6 +860,7 @@ class PlanEditorController {
     if (mapObject != null) {
       this.updateSelectedState()
       this.isEditFeatureProps = true
+      this.isBoundaryEditMode = true
       this.selectedObjectId = mapObject.objectId || mapObject.object_id
     } else {
       this.selectedObjectId = null

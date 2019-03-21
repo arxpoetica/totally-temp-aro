@@ -93,6 +93,11 @@ class PolygonFeatureRenderer {
       // Highlight the selected SA in view mode
       drawingStyles.strokeStyle = mapLayer.highlightStyle.strokeStyle
       drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
+    } else if (oldSelection.details.siteBoundaryId && (oldSelection.details.siteBoundaryId == feature.properties.object_id) &&
+      feature.properties.hasOwnProperty('_data_type') &&
+      selectedDisplayMode == displayModes.EDIT_PLAN) {
+      // Highlight the selected siteBoundary in Edit mode on selection
+      drawingStyles.lineWidth = mapLayer.highlightStyle.lineWidth
     }
     // console.log(feature)
     if (tileDataService.modifiedBoundaries.hasOwnProperty(feature.properties.object_id) &&

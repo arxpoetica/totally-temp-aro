@@ -328,6 +328,9 @@
         "lineOpacity": 0.7,
         "fillStyle": "#0000ff",
         "opacity": 0.15
+      },
+      "highlightStyle": {
+        "lineWidth": 6
       }
   },
   "fiveg_coverage": {
