@@ -607,8 +607,12 @@ class PlanEditorController {
   }
 
   displayViewObject (feature, iconUrl) {
-    if (feature.type && feature.type === "equipment_boundary.select")
-      this.displaySiteBoundaryViewObject(feature, iconUrl)
+    if (feature.type && feature.type === "equipment_boundary.select") {
+      var newSelection = this.state.cloneSelection()
+      newSelection.details.siteBoundaryId = feature.objectId
+      this.state.selection = newSelection
+      this.displaySiteBoundaryViewObject(feature, iconUrl)      
+    }
     else
       this.displayEquipmentViewObject(feature,iconUrl)
   }
