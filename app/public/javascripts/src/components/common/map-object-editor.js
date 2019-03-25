@@ -327,8 +327,15 @@ class MapObjectEditorController {
                 options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => { this.deleteObjectWithId(result.objectId) }))
               } else {
                 options.push(this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => { this.viewExistingFeature(result, latLng) }))
-                if(result.deployment_type !== 1 && !this.state.configuration.perspective.editExistingObjects)
+                if(result.deployment_type !== 1 && !this.state.configuration.perspective.editExistingObjects) {
                   options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))                
+                  if (result._data_type.indexOf("equipment.") > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
+                    options.push(this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => { 
+                      this.editExistingFeature(result, latLng)
+                      .then(() => this.startDrawingBoundaryForId(result.objectId)) 
+                    }))
+                  }
+                }
               }
 
               var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
@@ -1201,17 +1208,20 @@ class MapObjectEditorController {
   }
 
   editExistingFeature(clickedObject,latLng) {
-    var feature = {
-      objectId: clickedObject.object_id,
-      geometry: {
-        type: 'Point',
-        coordinates: [latLng.lng(), latLng.lat()]
-      },
-      type: clickedObject._data_type,
-      deployment_type: clickedObject.deployment_type,
-      isExistingObject: true
-    }
-    this.displayEditObject({ feature: feature })
+    return new Promise((resolve, reject) => {
+      var feature = {
+        objectId: clickedObject.object_id,
+        geometry: {
+          type: 'Point',
+          coordinates: [latLng.lng(), latLng.lat()]
+        },
+        type: clickedObject._data_type,
+        deployment_type: clickedObject.deployment_type,
+        isExistingObject: true
+      }
+      this.displayEditObject({ feature: feature })
+      .then(() => resolve())
+    })
   }
 
   $onChanges (changesObj) {
