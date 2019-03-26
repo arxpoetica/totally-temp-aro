@@ -317,7 +317,9 @@
 
   <button ng-if="$ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW &&
     $ctrl.state.configuration.perspective.toolbar.showExportSelection.show &&
-    $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS" ng-click="$ctrl.setSelectionExport()" ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET }"
+    $ctrl.state.activeViewModePanel !== $ctrl.state.viewModePanels.EDIT_LOCATIONS"
+    ng-class="{ 'btn': true, 'btn-selected': $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET }"
+    ng-click="$ctrl.setSelectionExport()"
     data-toggle="tooltip" data-placement="bottom" 
     title="Export selected polygon">
       <i class="fa fa-cube"></i>

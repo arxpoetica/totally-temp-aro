@@ -52,7 +52,7 @@ class MapSelectorPlanTargetController {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
-      this.drawingManager.setDrawingMode(null)
+      this.drawingManager.setDrawingMode('marker')
       this.drawingManager.setMap(null)
     }
   }
@@ -88,7 +88,7 @@ class MapSelectorPlanTargetController {
     if (this.unsub) { this.unsub.unsubscribe() }
 
     if (this.drawingManager) {
-      this.drawingManager.setDrawingMode(null)
+      this.drawingManager.setDrawingMode('marker')
       this.drawingManager.setMap(null)
     }
     this.unsubscribeRedux()

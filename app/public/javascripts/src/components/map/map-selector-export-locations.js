@@ -2,6 +2,10 @@ class MapSelectorExportLocationsController {
   constructor ($document, $http, state, Utils) {
     this.mapRef = null
     this.drawingManager = null
+    this.document = $document
+    this.$http = $http
+    this.state = state
+    this.Utils = Utils
 
     // Hold display mode and selection mode variables from application state
     this.displayModes = state.displayModes
@@ -10,17 +14,13 @@ class MapSelectorExportLocationsController {
       this.targetSelectionMode = this.state && this.state.selectedTargetSelectionMode
       this.updateDrawingManagerState()
     })
-    this.document = $document
-    this.$http = $http
-    this.state = state
-    this.Utils = Utils
   }
 
   $onDestroy () {
     if (this.unsub) { this.unsub.unsubscribe() }
 
     if (this.drawingManager) {
-      this.drawingManager.setDrawingMode(null)
+      this.drawingManager.setDrawingMode('marker')
       this.drawingManager.setMap(null)
     }
   }
@@ -35,7 +35,7 @@ class MapSelectorExportLocationsController {
       this.drawingManager.setDrawingMode('polygon')
       this.drawingManager.setMap(this.mapRef)
     } else {
-      this.drawingManager.setDrawingMode(null)
+      this.drawingManager.setDrawingMode('marker')
       this.drawingManager.setMap(null)
     }
   }
@@ -99,13 +99,7 @@ class MapSelectorExportLocationsController {
     this.drawingManager.addListener('overlaycomplete', (e) => {
       if (this.state.selectedTargetSelectionMode === this.state.targetSelectionModes.POLYGON_EXPORT_TARGET) {
         this.exportLocationsByPolygon(e.overlay.getPath().getArray())
-      } else {
-        // not sure if this is still used
-        this.state.requestPolygonSelect.next({
-          coords: e.overlay.getPath().getArray()
-        })
       }
-
       setTimeout(() => e.overlay.setMap(null), 100)
     })
   }
