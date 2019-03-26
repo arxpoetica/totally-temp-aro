@@ -619,14 +619,14 @@ class PlanEditorController {
 
   displayEditObject(feature) {
     if (feature.type && feature.type === "equipment_boundary.select")
-      this.displaySiteBoundaryViewObject(feature)
+      return this.displaySiteBoundaryViewObject(feature)
         .then((result) => {
-          this.editViewSiteBoundaryObject()
+          return this.editViewSiteBoundaryObject()
         })
     else
-      this.displayEquipmentViewObject(feature)
+      return this.displayEquipmentViewObject(feature)
         .then((result) => {
-          this.editViewObject()
+          return this.editViewObject()
         })
   }
 
@@ -824,6 +824,7 @@ class PlanEditorController {
         // If the associated equipment has a boundary associated with it, first delete *that* boundary
         var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
         deleteExistingBoundary && this.deleteBoundary(existingBoundaryId)
+        deleteExistingBoundary && !existingBoundaryId && this.getAndDeleteAssociatedEquSiteBoundary(feature.attributes.network_node_object_id, this.state.selectedBoundaryType.id)
         existingBoundaryId = null
 
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
@@ -979,27 +980,37 @@ class PlanEditorController {
     // If this is an equipment, delete its associated boundary (if any)
     const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
     if (!boundaryObjectId) {
-      // Get the associated boundary (boundary is not in edit mode)
-      this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${mapObject.objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
-        .then((result) => {
-          if (result.data.length > 0) {
-            // Delete the boundary assocaited to equipment if exists
-            result.data.forEach((boundary) => {
-              var boundaryId = boundary.objectId
-              this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
-                .then(() => {
-                  // Once commited boundary will be deleted until then it's excluded from showing on the map
-                  this.tileDataService.addFeatureToExclude(boundaryId)
-                  this.state.requestMapLayerRefresh.next(null)
-                  this.refreshViewObjectSBTypes(boundaryId) // refresh network node SB type
-                  this.state.planEditorChanged.next(true) // recaluculate plansummary
-                })
-            })
-          }
-        })
+      this.state.boundaryTypes.forEach((boundaryType) => {
+        boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId,boundaryType.id)        
+      })
     } else {
       this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
     }
+  }
+
+  getAndDeleteAssociatedEquSiteBoundary (objectId, boundaryTypeId) {
+    // Get the associated boundary (boundary is not in edit mode)
+    this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${objectId}' and deleted eq false and boundaryType eq ${boundaryTypeId}&$top=${this.state.boundaryTypes.length}`)
+    .then((result) => {
+      if (result.data.length > 0) {
+        // Delete the boundary assocaited to equipment if exists
+        result.data.forEach((boundary) => {
+          var boundaryId = boundary.objectId
+          this.deleteBoundaryInNonEditMode(boundaryId)
+        })
+      }
+    })
+  }
+
+  deleteBoundaryInNonEditMode(boundaryId) {
+    this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
+    .then(() => {
+      // Once commited boundary will be deleted until then it's excluded from showing on the map
+      this.tileDataService.addFeatureToExclude(boundaryId)
+      this.state.requestMapLayerRefresh.next(null)
+      this.refreshViewObjectSBTypes(boundaryId) // refresh network node SB type
+      this.state.planEditorChanged.next(true) // recaluculate plansummary
+    })
   }
 
   handleSiteBoundaryTypeChanged () {
