@@ -36,18 +36,16 @@ class RoicReportsController {
         description: 'Premises',
         calcTypes: [
           this.calcTypes.filter(item => item.id === 'premises')[0],
-          this.calcTypes.filter(item => item.id === 'tam_curve')[0]],
-        networkTypes: ['new_network'],
-        selectedNetworkType: 'new_network'
+          this.calcTypes.filter(item => item.id === 'tam_curve')[0]
+        ]
       },
       {
         id: 'subscribers',
         description: 'Subscribers',
         calcTypes: [
           this.calcTypes.filter(item => item.id === 'customer_penetration')[0],
-          this.calcTypes.filter(item => item.id === 'customers')[0]],
-        networkTypes: ['new_network'],
-        selectedNetworkType: 'new_network'
+          this.calcTypes.filter(item => item.id === 'customers')[0]
+        ]
       },
       {
         id: 'revenue',
@@ -56,16 +54,12 @@ class RoicReportsController {
           this.calcTypes.filter(item => item.id === 'arpu_curve')[0],
           this.calcTypes.filter(item => item.id === 'penetration')[0],
           this.calcTypes.filter(item => item.id === 'revenue')[0]
-        ],
-        networkTypes: ['new_network'],
-        selectedNetworkType: 'new_network'
+        ]
       },
       {
         id: 'opex',
         description: 'Opex',
-        calcTypes: [this.calcTypes.filter(item => item.id === 'opex_expenses')[0]],
-        networkTypes: ['new_network'],
-        selectedNetworkType: 'new_network'
+        calcTypes: [this.calcTypes.filter(item => item.id === 'opex_expenses')[0]]
       },
       {
         id: 'capex',
@@ -74,25 +68,18 @@ class RoicReportsController {
           this.calcTypes.filter(item => item.id === 'build_cost')[0],
           this.calcTypes.filter(item => item.id === 'maintenance_expenses')[0],
           this.calcTypes.filter(item => item.id === 'new_connections')[0],
-          this.calcTypes.filter(item => item.id === 'new_connections_cost')[0]],
-        networkTypes: ['new_network'],
-        selectedNetworkType: 'new_network'
+          this.calcTypes.filter(item => item.id === 'new_connections_cost')[0]]
       },
       {
         id: 'cashFlow',
         description: 'Cash Flow',
-        calcTypes: [this.calcTypes.filter(item => item.id === 'cashFlow')[0]],
-        networkTypes: ['new_network'],
-        selectedNetworkType: 'new_network'
+        calcTypes: [this.calcTypes.filter(item => item.id === 'cashFlow')[0]]
       }
     ]
     this.graphOptions = {}
     this.calcTypes.forEach(calcType => this.graphOptions[calcType.id] = this.getOptionsForCalcType(calcType))
     this.networkTypes = [
-      { id: 'new_network', description: 'New Network' },
       { id: 'planned_network', description: 'Planned Network' },
-      { id: 'bau', description: 'BAU' },
-      { id: 'bau_intersects', description: 'BAU Intersection' },
       { id: 'bau_plan', description: 'BAU + Plan' },
       { id: 'incremental', description: 'Incremental' }
     ]
@@ -111,6 +98,7 @@ class RoicReportsController {
     return {
       id: Math.random(), // What is this? The chart binding is doing an "angular.equals()" comparison, so without a unique ID it will not recompute axes labels, etc.
       maintainAspectRatio: false,
+      aspectRatio: 0.7,
       tooltips: {
         callbacks: {
           label: (tooltipItem, data) => this.formatYAxisValue(+tooltipItem.yLabel, [+tooltipItem.yLabel], calcType, 3)
@@ -129,6 +117,10 @@ class RoicReportsController {
             }
           }
         ]
+      },
+      title: {
+        display: true,
+        text: calcType.description
       }
     }
   }

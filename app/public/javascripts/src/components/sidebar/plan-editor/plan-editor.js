@@ -5,6 +5,7 @@ import AroFeatureFactory from '../../../service-typegen/dist/AroFeatureFactory'
 import TrackedEquipment from '../../../service-typegen/dist/TrackedEquipment'
 import EquipmentComponent from '../../../service-typegen/dist/EquipmentComponent'
 import EquipmentFeature from '../../../service-typegen/dist/EquipmentFeature'
+import EquipmentBoundaryFeature from '../../../service-typegen/dist/EquipmentBoundaryFeature'
 // import MarketableEquipment from '../../../service-typegen/dist/MarketableEquipment'
 import TileUtilities from '../../tiles/tile-utilities.js'
 
@@ -41,10 +42,13 @@ class PlanEditorController {
     this.stickyAssignment = true
     this.coSearchType = 'SERVICE_AREA'
     this.viewEventFeature = {}
+    this.viewSiteBoundaryEventFeature = {}
     this.viewFeature = {}
+    this.viewBoundaryProps = null
     this.viewIconUrl = ''
     this.viewLabel = ''
     this.isEditFeatureProps = true
+    this.isBoundaryEditMode = false
     this.mapObjectEditorComms = {}
     this.networkNodeSBTypes = {}
     // Create a list of all the network node types that we MAY allow the user to edit (add onto the map)
@@ -272,7 +276,7 @@ class PlanEditorController {
 
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
-
+    
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
       .then((result) => {
       // The user may have destroyed the component before we get here. In that case, just return
@@ -308,8 +312,6 @@ class PlanEditorController {
         this.computedBoundaries.add(feature.objectId)
         this.createMapObjects && this.createMapObjects([feature])
 
-        // this.digestBoundaryCoverage(feature.objectId, result.data)
-        // this.coverageOutput = {'feature': feature, 'data': result.data}
         this.digestBoundaryCoverage(feature, result.data, true)
 
         this.isWorkingOnCoverage = false
@@ -335,7 +337,7 @@ class PlanEditorController {
 
     // optimizationBody.spatialEdgeType = spatialEdgeType;
     optimizationBody.directed = directed // directed analysis if thats what the user wants
-
+    
     var equipmentObjectId = mapObject.objectId
     this.isWorkingOnCoverage = true
     this.$http.post('/service/v1/network-analysis/boundary', optimizationBody)
@@ -346,8 +348,6 @@ class PlanEditorController {
           return
         }
         this.computedBoundaries.add(mapObject.feature.objectId)
-        // this.digestBoundaryCoverage(mapObject.feature.objectId, result.data)
-        // this.coverageOutput = {'feature': mapObject.feature, 'data': result.data}
         this.digestBoundaryCoverage(mapObject.feature, result.data, true)
 
         this.isWorkingOnCoverage = false
@@ -358,7 +358,6 @@ class PlanEditorController {
       })
   }
 
-  // --- snip <---------------------------------------------------------------------------------<<<
   digestBoundaryCoverage (feature, coverageData, forceUpdate) {
     if (typeof forceUpdate === 'undefined') forceUpdate = false
     this.coverageOutput = { 'feature': feature, 'data': coverageData, 'forceUpdate': forceUpdate }
@@ -550,7 +549,7 @@ class PlanEditorController {
   }
 
   getSelectedBoundaryNetworkConfig () {
-    return this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
+    return this.selectedMapObject && this.getNetworkConfig(this.boundaryIdToEquipmentId[this.selectedMapObject.objectId])
   }
 
   getNetworkConfig (objectId) {
@@ -603,32 +602,95 @@ class PlanEditorController {
     this.viewIconUrl = ''
     this.viewLabel = ''
     this.isEditFeatureProps = true
+    this.isBoundaryEditMode = false
     this.updateSelectedState()
   }
 
   displayViewObject (feature, iconUrl) {
-    // this.viewIconUrl = iconUrl
-    var planId = this.state.plan.getValue().id
-    this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-      .then((result) => {
-        if (result.data.hasOwnProperty('geometry')) {
-          this.viewEventFeature = feature
-          // use feature's coord NOT the event's coords
-          this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
-          this.viewFeature = AroFeatureFactory.createObject(result.data)
-          var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
-          this.viewLabel = viewConfig.label
-          this.viewIconUrl = viewConfig.iconUrl
-          this.isEditFeatureProps = false
-          // this.updateSelectedState(feature, feature.objectId)
-          this.getViewObjectSBTypes(feature.objectId)
-        } else {
-        // clear selection
-          this.clearViewSelection()
-        }
-      }).catch((err) => {
-        console.error(err)
-      })
+    if (feature.type && feature.type === "equipment_boundary.select") {
+      var newSelection = this.state.cloneSelection()
+      newSelection.details.siteBoundaryId = feature.objectId
+      this.state.selection = newSelection
+      this.displaySiteBoundaryViewObject(feature, iconUrl)      
+    }
+    else
+      this.displayEquipmentViewObject(feature,iconUrl)
+  }
+
+  displayEditObject(feature) {
+    if (feature.type && feature.type === "equipment_boundary.select")
+      return this.displaySiteBoundaryViewObject(feature)
+        .then((result) => {
+          return this.editViewSiteBoundaryObject()
+        })
+    else
+      return this.displayEquipmentViewObject(feature)
+        .then((result) => {
+          return this.editViewObject()
+        })
+  }
+
+  displayEquipmentViewObject(feature, iconUrl) {
+    return new Promise((resolve, reject) => {
+      var planId = this.state.plan.getValue().id
+      this.$http.get(`/service/plan-feature/${planId}/equipment/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          if (result.data.hasOwnProperty('geometry')) {
+            this.viewEventFeature = feature
+            // use feature's coord NOT the event's coords
+            this.viewEventFeature.geometry.coordinates = result.data.geometry.coordinates
+            this.viewFeature = AroFeatureFactory.createObject(result.data)
+            var viewConfig = this.state.configuration.networkEquipment.equipments[this.viewFeature.networkNodeType]
+            this.viewLabel = viewConfig.label
+            this.viewIconUrl = viewConfig.iconUrl
+            this.isEditFeatureProps = false
+            // this.updateSelectedState(feature, feature.objectId)
+            this.getViewObjectSBTypes(feature.objectId)
+          } else {
+            // clear selection
+            this.clearViewSelection()
+          }
+          resolve()
+        }).catch((err) => {
+          console.error(err)
+          reject()
+        })
+    })
+  }
+
+  displaySiteBoundaryViewObject(feature, iconUrl) {
+    return new Promise((resolve, reject) => {
+      var planId = this.state.plan.getValue().id
+      this.$http.get(`/service/plan-feature/${planId}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        .then((result) => {
+          if (result.data.hasOwnProperty('geometry')) {
+            this.viewSiteBoundaryEventFeature = result.data
+            this.viewSiteBoundaryEventFeature.attributes = {
+              network_node_object_id: this.viewSiteBoundaryEventFeature.networkObjectId,
+              networkNodeType: this.viewSiteBoundaryEventFeature.networkNodeType
+            }
+            this.viewSiteBoundaryEventFeature.isExistingObject = true
+
+            // use feature's coord NOT the event's coords
+            var boundaryProps = AroFeatureFactory.createObject(result.data)
+
+            this.viewBoundaryProps = new BoundaryProperties(boundaryProps.boundaryTypeId, 'Auto-redraw', 'Road Distance',
+              null, null, boundaryProps.attributes, boundaryProps.deploymentType)
+
+            this.viewBoundaryProps.selectedSiteBoundaryType =
+              this.state.boundaryTypes.filter((boundary) => boundary.id === this.viewBoundaryProps.selectedSiteBoundaryTypeId)[0]
+
+            this.isBoundaryEditMode = false
+          } else {
+            // clear selection
+            this.clearViewSelection()
+          }
+          resolve()
+        }).catch((err) => {
+          console.error(err)
+          reject()
+        })
+    })
   }
 
   getViewObjectSBTypes (objectId) {
@@ -665,6 +727,10 @@ class PlanEditorController {
 
   editViewObject () {
     this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewEventFeature, this.viewIconUrl)
+  }
+
+  editViewSiteBoundaryObject () {
+    this.createEditableExistingMapObject && this.createEditableExistingMapObject(this.viewSiteBoundaryEventFeature, null)    
   }
 
   handleObjectCreated (mapObject, usingMapClick, feature, deleteExistingBoundary) {
@@ -758,6 +824,7 @@ class PlanEditorController {
         // If the associated equipment has a boundary associated with it, first delete *that* boundary
         var existingBoundaryId = this.equipmentIdToBoundaryId[feature.attributes.network_node_object_id]
         deleteExistingBoundary && this.deleteBoundary(existingBoundaryId)
+        deleteExistingBoundary && !existingBoundaryId && this.getAndDeleteAssociatedEquSiteBoundary(feature.attributes.network_node_object_id, this.state.selectedBoundaryType.id)
         existingBoundaryId = null
 
         this.objectIdToProperties[mapObject.objectId] = new BoundaryProperties(this.state.selectedBoundaryType.id, 'Auto-redraw', 'Road Distance',
@@ -794,6 +861,7 @@ class PlanEditorController {
     if (mapObject != null) {
       this.updateSelectedState()
       this.isEditFeatureProps = true
+      this.isBoundaryEditMode = true
       this.selectedObjectId = mapObject.objectId || mapObject.object_id
     } else {
       this.selectedObjectId = null
@@ -912,27 +980,37 @@ class PlanEditorController {
     // If this is an equipment, delete its associated boundary (if any)
     const boundaryObjectId = this.equipmentIdToBoundaryId[mapObject.objectId]
     if (!boundaryObjectId) {
-      // Get the associated boundary (boundary is not in edit mode)
-      this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${mapObject.objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
-        .then((result) => {
-          if (result.data.length > 0) {
-            // Delete the boundary assocaited to equipment if exists
-            result.data.forEach((boundary) => {
-              var boundaryId = boundary.objectId
-              this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
-                .then(() => {
-                  // Once commited boundary will be deleted until then it's excluded from showing on the map
-                  this.tileDataService.addFeatureToExclude(boundaryId)
-                  this.state.requestMapLayerRefresh.next(null)
-                  this.refreshViewObjectSBTypes(boundaryId) // refresh network node SB type
-                  this.state.planEditorChanged.next(true) // recaluculate plansummary
-                })
-            })
-          }
-        })
+      this.state.boundaryTypes.forEach((boundaryType) => {
+        boundaryType.name !== 'fiveg_coverage' && this.getAndDeleteAssociatedEquSiteBoundary(mapObject.objectId,boundaryType.id)        
+      })
     } else {
       this.deleteBoundary(boundaryObjectId) // boundary is in edit mode
     }
+  }
+
+  getAndDeleteAssociatedEquSiteBoundary (objectId, boundaryTypeId) {
+    // Get the associated boundary (boundary is not in edit mode)
+    this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${objectId}' and deleted eq false and boundaryType eq ${boundaryTypeId}&$top=${this.state.boundaryTypes.length}`)
+    .then((result) => {
+      if (result.data.length > 0) {
+        // Delete the boundary assocaited to equipment if exists
+        result.data.forEach((boundary) => {
+          var boundaryId = boundary.objectId
+          this.deleteBoundaryInNonEditMode(boundaryId)
+        })
+      }
+    })
+  }
+
+  deleteBoundaryInNonEditMode(boundaryId) {
+    this.$http.delete(`/service/plan-transactions/${this.currentTransaction.id}/modified-features/equipment_boundary/${boundaryId}`)
+    .then(() => {
+      // Once commited boundary will be deleted until then it's excluded from showing on the map
+      this.tileDataService.addFeatureToExclude(boundaryId)
+      this.state.requestMapLayerRefresh.next(null)
+      this.refreshViewObjectSBTypes(boundaryId) // refresh network node SB type
+      this.state.planEditorChanged.next(true) // recaluculate plansummary
+    })
   }
 
   handleSiteBoundaryTypeChanged () {

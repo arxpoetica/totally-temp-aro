@@ -13,15 +13,17 @@ class CompetitorEditorController {
   }
 
   reloadCompetitionManagerConfiguration () {
-    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}`)
+    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.competitorManager = result.data
       })
       .catch(err => console.error(err))
 
-    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths`)
+    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.competitorManagerConfiguration = result.data
+        //console.log(this.competitorManagerConfiguration)
+        // carrierId
         this.pristineCompetitorManagerConfiguration = angular.copy(result.data)
       })
       .catch((err) => console.error(err))
@@ -48,7 +50,7 @@ class CompetitorEditorController {
     })
 
     if (changedModels.length > 0) {
-      this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths`, changedModels)
+      this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`, changedModels)
         .then((result) => this.exitEditingMode())
         .catch((err) => console.error(err))
     } else {

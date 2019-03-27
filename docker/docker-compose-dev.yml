@@ -2,7 +2,7 @@ version: '2'
 
 services:
     db:
-        image: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-postgis:10
+        image: avco/aro-postgis:10
         volumes:
             - postgres-data:/var/lib/postgresql/data
         ports:
@@ -16,7 +16,7 @@ services:
             - "5672:5672"
             - "15672:15672"
     service:
-        image: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-service:latest
+        image: avco/aro-service:latest
         expose:
             - "8080"
         links:
@@ -35,7 +35,7 @@ services:
         image: zookeeper
 
     app:
-        image: 976168524097.dkr.ecr.us-east-1.amazonaws.com/aro/aro-app-base-dev:latest
+        image: avco/aro-app-base:dev
         volumes:
             - ..:/srv/www/aro
             - ../../aro-etl:/srv/www/aro/db

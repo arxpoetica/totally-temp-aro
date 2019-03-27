@@ -18,12 +18,12 @@ class TsmEditorController {
   }
 
   reloadTsmManagerConfiguration () {
-    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}`)
+    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.tsmManager = result.data
       })
 
-    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}/strengths`)
+    this.$http.get(`/service/v1/tsm-manager/${this.tsmManagerId}/strengths?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.tsmManagerConfiguration = result.data
         this.pristineTsmManagerConfiguration = angular.copy(result.data)
@@ -47,7 +47,7 @@ class TsmEditorController {
     })
 
     if (changedModels.length > 0) {
-      this.$http.put(`/service/v1/tsm-manager/${this.tsmManagerId}/spends?refreshState=true`, changedModels)
+      this.$http.put(`/service/v1/tsm-manager/${this.tsmManagerId}/spends?refreshState=true&user_id=${this.state.loggedInUser.id}`, changedModels)
         .then((result) => this.exitEditingMode())
         .catch((err) => console.error(err))
     } else {

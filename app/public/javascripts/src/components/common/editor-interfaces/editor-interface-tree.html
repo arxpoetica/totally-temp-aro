@@ -110,7 +110,7 @@
       <div class="ei-foldout" ng-if="propVal.getDisplayProperties() && prop.children.length > 0 && 'tree' == prop.displayDataType || 'list' == prop.displayDataType" style="width: 100%;">
       -->
       <div class="ei-foldout" ng-if="$ctrl.hasChildren(propVal) && prop.displayDataType.startsWith('object') || prop.displayDataType.startsWith('array')" style="width: 100%;">
-        {{summeryCount = $ctrl.getSummeryCount(propVal.getDisplayProperties());""}}
+        {{summeryCount = $ctrl.getSummeryCount(propVal);""}}
         <div class="ei-header" ng-click="$ctrl.toggleIsKeyExpanded(foldoutIndex)">
           <i class="far fa-plus-square ei-foldout-icon" ng-if="!$ctrl.isKeyExpanded[foldoutIndex]"></i>
           <i class="far fa-minus-square ei-foldout-icon" ng-if="$ctrl.isKeyExpanded[foldoutIndex]"></i>

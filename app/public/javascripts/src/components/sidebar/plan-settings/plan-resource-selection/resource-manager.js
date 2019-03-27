@@ -4,6 +4,7 @@ class ResourceManagerController {
     this.$document = $document
     this.state = state
     this.filterByOptions = {}
+    this.searchText = ''
     // Hold a mapping that we use to map from resource keys to endpoints
     this.resourceKeyToEndpointId = {
       price_book: 'pricebook',
@@ -16,20 +17,20 @@ class ResourceManagerController {
     }
     this.managerIdString = 'MANAGER_ID'
     this.managerDeleteUrl = {
-      price_book: `/service/v1/pricebook/${this.managerIdString}`,
-      roic_manager: `/service/v1/roic_manager/${this.managerIdString}`,
-      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}`,
-      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}`,
-      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}`,
-      competition_manager: `/service/v1/competition_manager/${this.managerIdString}`,
-      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}`
+      price_book: `/service/v1/pricebook/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      roic_manager: `/service/v1/roic_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      competition_manager: `/service/v1/competitor-manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
+      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`
     }
-
+    
     this.rows = []
 
     this.displayProps = [
       {
-        'propertyName': 'managerType',
+        'propertyName': 'resourceType', //'managerType',
         'levelOfDetail': 0,
         'format': '',
         'displayName': 'Resource Type',
@@ -49,40 +50,45 @@ class ResourceManagerController {
         'defaultValue': '',
         'editable': true,
         'visible': true
+      }, 
+      {
+        'propertyName': 'permissionsView',
+        'levelOfDetail': 0,
+        'format': '',
+        'displayName': 'Permissions',
+        'enumTypeURL': '',
+        'displayDataType': 'string',
+        'defaultValue': '',
+        'editable': false,
+        'visible': true
       }
     ]
 
     this.actions = [
       {
-        buttonText: '', // Edit
+        buttonText: 'Edit', // Edit
         buttonClass: 'btn-light',
         iconClass: 'fa-edit',
         toolTip: 'Edit',
         callBack: (row, index) => {
-          // console.log('Edit')
-          // console.log(row)
           this.editSelectedManager(row)
         }
       },
       {
-        buttonText: '', // Clone
+        buttonText: 'Clone', // Clone
         buttonClass: 'btn-light',
         iconClass: 'fa-copy',
         toolTip: 'Clone',
         callBack: (row, index) => {
-          // console.log('Clone')
-          // console.log(row)
           this.cloneSelectedManagerFromSource(row)
         }
       },
       {
-        buttonText: '', // Delete
+        buttonText: 'Delete', // Delete
         buttonClass: 'btn-outline-danger',
         iconClass: 'fa-trash-alt',
         toolTip: 'Delete',
         callBack: (row, index) => {
-          // console.log('Delete')
-          // console.log(row)
           this.deleteSelectedResourceManager(row)
         }
       }
@@ -97,20 +103,26 @@ class ResourceManagerController {
       */
     ]
   }
-
+  
   $onChanges (changes) {
     if (changes.hasOwnProperty('resourceItems') || changes.hasOwnProperty('selectedResourceKey')) {
-      this.buildRows()
+      //this.buildRows()
+      this.getRows()
     }
+    
     if (changes.hasOwnProperty('resourceItems')) {
       this.buildFilterOptions()
+    }
+    if (changes.hasOwnProperty('selectedResourceKey')) {
+      this.getRows()
     }
   }
 
   onSelectedResourceKeyChanged () {
-    this.buildRows()
+    //this.buildRows()
+    this.getRows()
   }
-
+/*
   buildRows () {
     var newRows = []
 
@@ -123,9 +135,11 @@ class ResourceManagerController {
         }
       }
     }
+    console.log(this.resourceItems)
     this.rows = newRows
+    console.log(this.rows)
   }
-
+*/
   buildFilterOptions () {
     var newFilterByOptions = { 'all': 'all' }
 
@@ -144,13 +158,49 @@ class ResourceManagerController {
 
     this.filterByOptions = newFilterByOptions
   }
-
+  
+  onSearch () {
+    this.getRows()
+  }
+  
+  getRows () {
+    var props = ''
+    
+    if (this.searchText.trim() != '') {
+      props += `&name=${this.searchText}`
+    }
+    if (this.selectedResourceKey && 'all' != this.selectedResourceKey) {
+      props += `&resourceType=${this.selectedResourceKey}`
+    }
+    
+    this.$http.get(`service/v2/resource-manager?user_id=${this.state.loggedInUser.id}${props}`)
+      .then((result) => {
+        var newRows = []
+        var i
+        for (i = 0; i<result.data.length; i++){
+          if (!result.data[i].deleted){
+            var row = result.data[i]
+            row.permissionsView = ""
+            if (row.permissions){
+              if (row.permissions & 4) row.permissionsView += "read "
+              if (row.permissions & 2) row.permissionsView += "write "
+              if (row.permissions & 1) row.permissionsView += "admin "    
+            }
+            newRows.push(row)
+          }
+        }
+        this.rows = newRows
+      })
+    // end promise
+  }
+  
+/*
   $doCheck () {
     if (this.resourceItems && this.resourceItems !== this.oldResourceItems) {
       this.oldResourceItems = this.resourceItems
     }
   }
-
+*/
   createBlankPriceBook () {
     this.setEditingManagerId({ newId: null })
     this.setEditingMode({ mode: this.createPriceBookMode })
@@ -172,22 +222,28 @@ class ResourceManagerController {
   }
 
   cloneSelectedManagerFromSource (selectedManager) {
-    var managerId = this.resourceKeyToEndpointId[selectedManager.managerType]
+    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
+    
+    // TODO: once endpoint is ready use v2/resource-manager for pricebook and rate-reach-matrix as well
+    var managerId = this.resourceKeyToEndpointId[selectedManager.resourceType]
     if (managerId === 'pricebook') {
       // Have to put this switch in here because the API for pricebook cloning is different. Can remove once API is unified.
       this.cloneSelectedPriceBook(selectedManager)
     } else if (managerId === 'rate-reach-matrix') {
       this.cloneSelectedRateReachManager(selectedManager)
     } else {
+      
       // Create a resource manager
       this.getNewResourceDetailsFromUser()
         .then((resourceName) => {
         // Create a new manager with the specified name and description
-          return this.$http.post(`/service/v1/${managerId}?source_manager=${selectedManager.id}`,
-            { name: resourceName, description: resourceName })
+          
+          return this.$http.post(`/service/v2/resource-manager?resourceManagerId=${selectedManager.id}&user_id=${this.state.loggedInUser.id}`,
+            {resourceType: selectedManager.resourceType, name: resourceName, description: resourceName })
         })
         .then((result) => this.onManagerCreated(result.data.id))
         .catch((err) => console.error(err))
+      
     }
   }
 
@@ -201,7 +257,7 @@ class ResourceManagerController {
   editSelectedManager (selectedManager) {
     this.setEditingManagerId({ newId: selectedManager.id })
     this.setEditingMode({ mode: this.editMode })
-    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.managerType })
+    this.setCurrentSelectedResourceKey({ resourceKey: selectedManager.resourceType })
   }
 
   askUserToConfirmManagerDelete (managerName) {
@@ -224,9 +280,8 @@ class ResourceManagerController {
     })
   }
 
-  deleteManager (deleteUrl) {
-    console.log(deleteUrl)
-    this.$http.delete(deleteUrl)
+  deleteManager (selectedManager) {
+    this.$http.delete(`service/v2/resource-manager/${selectedManager.id}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.onManagersChanged && this.onManagersChanged()
       // this.resourceItems[this.selectedResourceKey].selectedManager = this.resourceItems[this.selectedResourceKey].allManagers[0]
@@ -238,10 +293,10 @@ class ResourceManagerController {
     this.askUserToConfirmManagerDelete(selectedManager.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          const managerIdToDelete = selectedManager.id
+          //const managerIdToDelete = selectedManager.id
           // this.selectedResourceKey selectedManager.managerType
-          const deleteUrl = this.managerDeleteUrl[selectedManager.managerType].replace(this.managerIdString, managerIdToDelete)
-          this.deleteManager(deleteUrl)
+          //const deleteUrl = this.managerDeleteUrl[selectedManager.resourceType].replace(this.managerIdString, managerIdToDelete)
+          this.deleteManager(selectedManager)
         }
       })
       .catch((err) => console.error(err))

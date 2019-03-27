@@ -16,7 +16,7 @@ class RateReachManagerCreatorController {
 
   $onInit () {
     if (this.sourceRateReachManagerId) {
-      this.$http.get(`/service/rate-reach-matrix/resource/${this.sourceRateReachManagerId}`)
+      this.$http.get(`/service/rate-reach-matrix/resource/${this.sourceRateReachManagerId}?user_id=${this.state.loggedInUser.id}`)
         .then(result => this.sourceRateReachManager = result.data)
         .catch(err => console.error(err))
     }
@@ -24,9 +24,9 @@ class RateReachManagerCreatorController {
 
   createRateReachManager () {
     // Create a new rate reach manager with the specified name and description
-    var createUrl = '/service/rate-reach-matrix/resource'
+    var createUrl = `/service/rate-reach-matrix/resource?user_id=${this.state.loggedInUser.id}`
     if (this.sourceRateReachManagerId) {
-      createUrl += `?source_resource_manager=${this.sourceRateReachManagerId}`
+      createUrl += `&source_resource_manager=${this.sourceRateReachManagerId}`
     }
     var createdRateReachManager = null
     return this.$http.post(createUrl, { name: this.newRateReachManagerName, description: this.newRateReachManagerDescription })
@@ -34,7 +34,7 @@ class RateReachManagerCreatorController {
         createdRateReachManager = result.data
         return this.getDefaultConfiguration()
       })
-      .then((defaultConfiguration) => this.$http.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config`, defaultConfiguration))
+      .then((defaultConfiguration) => this.$http.put(`/service/rate-reach-matrix/resource/${createdRateReachManager.id}/config?user_id=${this.state.loggedInUser.id}`, defaultConfiguration))
       .then(() => {
         this.onManagerCreated && this.onManagerCreated({ newId: createdRateReachManager.id })
         this.onManagersChanged && this.onManagersChanged()
@@ -65,8 +65,8 @@ class RateReachManagerCreatorController {
       }
 
       const configPromise = Promise.all([
-        this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}`),
-        this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}`)
+        this.$http.get(`/service/rate-reach-matrix/network-structures?technology_type=${technologyType}&user_id=${this.state.loggedInUser.id}`),
+        this.$http.get(`/service/rate-reach-matrix/technologies?technology_type=${technologyType}&user_id=${this.state.loggedInUser.id}`)
       ])
         .then(results => {
           configuration.rateReachGroupMap[technologyType].active = false

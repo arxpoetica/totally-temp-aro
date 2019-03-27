@@ -217,7 +217,7 @@ class MapObjectEditorController {
       })
   }
 
-  editExistingFeature (feature, latLng) {
+  viewExistingFeature (feature, latLng) {
     var hitFeatures = {}
     hitFeatures['latLng'] = latLng
     if (this.featureType == 'location') hitFeatures['locations'] = [feature]
@@ -326,7 +326,16 @@ class MapObjectEditorController {
                 }
                 options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => { this.deleteObjectWithId(result.objectId) }))
               } else {
-                options.push(this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))
+                options.push(this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => { this.viewExistingFeature(result, latLng) }))
+                if(result.deployment_type !== 1 && !this.state.configuration.perspective.editExistingObjects) {
+                  options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))                
+                  if (result._data_type.indexOf("equipment.") > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
+                    options.push(this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => { 
+                      this.editExistingFeature(result, latLng)
+                      .then(() => this.startDrawingBoundaryForId(result.objectId)) 
+                    }))
+                  }
+                }
               }
 
               var name = this.utils.getFeatureDisplayName(feature, this.state, dataTypeList)
@@ -396,13 +405,13 @@ class MapObjectEditorController {
                 // it's on the edit layer / in the transaction
                   feature = this.createdMapObjects[result.objectId].feature
                   options.push(this.contextMenuService.makeItemOption('Select', 'fa-pencil', () => { this.selectProposedFeature(result.objectId) }))
-                  // options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.editExistingFeature(result, latLng)}) )
+                  // options.push( this.contextMenuService.makeItemOption('Edit Service Area', 'fa-pencil', () => {this.viewExistingFeature(result, latLng)}) )
                   options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => {
                     this.deleteObjectWithId(result.objectId)
                     this.deleteCreatedMapObject(result.objectId)
                   }))
                 } else {
-                  options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))
+                  options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.viewExistingFeature(result, latLng) }))
                 }
 
                 var name = this.utils.getFeatureDisplayName(result, this.state, dataTypeList)
@@ -892,24 +901,29 @@ class MapObjectEditorController {
       const clickedObject = this.state.getValidEquipmentFeaturesList(equipmentFeatures)[0] // Filter Deleted equipments
       feature.objectId = clickedObject.object_id
       feature.isExistingObject = true
+      feature.type = clickedObject._data_type
+      feature.deployment_type = clickedObject.deployment_type
       if (clickedObject._data_type === 'equipment_boundary.select') {
         iconKey = Constants.MAP_OBJECT_CREATE_KEY_EQUIPMENT_BOUNDARY
+        this.displayViewObject({ feature: feature })
+        this.selectMapObject(null)        
         // Get the boundary geometry from aro-service
-        featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
-          .then((result) => {
-          // ToDo: check for empty object, reject on true
-            if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')) {
-              return Promise.reject(`object: ${feature.objectId} may have been deleted`)
-            }
+        // featurePromise = this.$http.get(`/service/plan-feature/${this.state.plan.getValue().id}/equipment_boundary/${feature.objectId}?userId=${this.state.loggedInUser.id}`)
+        //   .then((result) => {
+        //   // ToDo: check for empty object, reject on true
+        //     if (!result.hasOwnProperty('data') || !result.data.hasOwnProperty('objectId')) {
+        //       return Promise.reject(`object: ${feature.objectId} may have been deleted`)
+        //     }
 
-            var serviceFeature = result.data
-            serviceFeature.attributes = {
-              network_node_object_id: serviceFeature.networkObjectId,
-              networkNodeType: serviceFeature.networkNodeType
-            }
-            serviceFeature.isExistingObject = true
-            return Promise.resolve(serviceFeature)
-          })
+        //     var serviceFeature = result.data
+        //     serviceFeature.attributes = {
+        //       network_node_object_id: serviceFeature.networkObjectId,
+        //       networkNodeType: serviceFeature.networkNodeType
+        //     }
+        //     serviceFeature.isExistingObject = true
+        //     return Promise.resolve(serviceFeature)
+        //   })
+          return
       } else {
         // Quickfix - Display the equipment and return, do not make multiple calls to aro-service #159544541
         this.displayViewObject({ feature: feature })
@@ -1193,6 +1207,23 @@ class MapObjectEditorController {
     }
   }
 
+  editExistingFeature(clickedObject,latLng) {
+    return new Promise((resolve, reject) => {
+      var feature = {
+        objectId: clickedObject.object_id,
+        geometry: {
+          type: 'Point',
+          coordinates: [latLng.lng(), latLng.lat()]
+        },
+        type: clickedObject._data_type,
+        deployment_type: clickedObject.deployment_type,
+        isExistingObject: true
+      }
+      this.displayEditObject({ feature: feature })
+      .then(() => resolve())
+    })
+  }
+
   $onChanges (changesObj) {
     if (changesObj && changesObj.hideObjectIds && (this.hideObjectIds) instanceof Set) {
       // First set all objects as visible
@@ -1267,6 +1298,7 @@ let mapObjectEditor = {
     onModifyObject: '&',
     onDeleteObject: '&',
     displayViewObject: '&',
+    displayEditObject: '&',
     onObjectDroppedOnMarker: '&',
     registerObjectDeleteCallback: '&', // To be called to register a callback, which will delete the selected object
     registerCreateMapObjectsCallback: '&', // To be called to register a callback, which will create map objects for existing objectIds

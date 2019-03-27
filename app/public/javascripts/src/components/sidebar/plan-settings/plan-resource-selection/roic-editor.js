@@ -12,12 +12,12 @@ class RoicEditorController {
   }
 
   reloadRoicManagerConfiguration () {
-    this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}`)
+    this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.roicManager = result.data
       })
 
-    this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}/configuration`)
+    this.$http.get(`/service/v1/roic-manager/${this.roicManagerId}/configuration?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         var roicModels = []
         // Sort the roic models based on the locationTypeEntity
@@ -39,7 +39,7 @@ class RoicEditorController {
   }
 
   saveConfigurationToServer () {
-    this.$http.put(`/service/v1/roic-manager/${this.roicManagerId}/configuration`, this.roicManagerConfiguration)
+    this.$http.put(`/service/v1/roic-manager/${this.roicManagerId}/configuration?user_id=${this.state.loggedInUser.id}`, this.roicManagerConfiguration)
       .then((result) => this.exitEditingMode())
       .catch((err) => console.error(err))
   }

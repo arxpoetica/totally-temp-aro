@@ -97,14 +97,13 @@ class BoundaryCoverageController {
       locCoverage.locationType = locationType
       // locCoverage.totalCount = locData.length // entityCount
       locCoverage.totalCount = 0
-
+      var infiniteDistCount = 0
       // boundsCoverage.totalLocations += locData.length
 
       for (var localI = 0; localI < locData.length; localI++) {
         var location = locData[localI]
         locCoverage.totalCount += location.entityCount
         boundsCoverage.totalLocations += location.entityCount
-        // console.log( this.formatCensusBlockData( location.censusBlockTagInfo ) )
         var tags = this.formatCensusBlockData(location.censusBlockTagInfo)
 
         for (const catId in tags) {
@@ -130,24 +129,35 @@ class BoundaryCoverageController {
             })
           }// else report that we don't have data for that category?
         }
-
-        if (typeof location.distance !== 'number') continue // skip these
+        
+        if (typeof location.distance !== 'number'){
+          infiniteDistCount++
+          continue // skip these
+        }
         if (this.state.configuration.units.length_units == 'feet') location.distance *= 3.28084
 
         var dist = location.distance
         var barIndex = Math.floor(dist / 1000)
+        /*
         if (barIndex >= locCoverage.barChartData.length || typeof locCoverage.barChartData[barIndex] === 'undefined') {
           locCoverage.barChartData[barIndex] = 0
+        }
+        */
+        if (barIndex >= locCoverage.barChartData.length) {
+          var prevLen = locCoverage.barChartData.length
+          locCoverage.barChartData[barIndex] = 0
+          locCoverage.barChartData.fill(0, prevLen, barIndex)
         }
         // locCoverage.barChartData[barIndex]++
         locCoverage.barChartData[barIndex] += location.entityCount
       }
-
+      // put unreachable at beginning 
+      locCoverage.barChartData.unshift(infiniteDistCount)
+      
       boundsCoverage.locations[locationType] = locCoverage
     }
 
     this.boundaryCoverageById[objectId] = boundsCoverage
-    // console.log(this.boundaryCoverageById)
     if (this.isChartInit) this.showCoverageChart()
   }
 
@@ -200,12 +210,23 @@ class BoundaryCoverageController {
       locDataset.data = locCoverage.barChartData
       datasets.push(locDataset)
     }
-
-    var labels = []
-    for (var i = 0; i < colCount; i++) {
-      labels.push((i + 1) * 1000)
+    
+    var i = 0
+    // move unreachable col to end
+    for (i=0; i<datasets.length; i++){
+      var prevLen = datasets[i].data.length
+      // prevLen should be <= colCount or something has gone wrong
+      datasets[i].data[colCount] = datasets[i].data[0]
+      datasets[i].data.fill(0, prevLen, colCount)
+      datasets[i].data.shift()
     }
-
+    
+    var labels = []
+    for (i = 0; i < colCount-1; i++) {
+      labels.push((i+1) * 1000)
+    }
+    labels.push('N/A') // unreachable last col is infinite distance (may be count of 0)
+    
     var settingsData = {
       labels: labels,
       datasets: datasets
@@ -214,7 +235,7 @@ class BoundaryCoverageController {
     var options = {
       title: {
         display: true,
-        text: 'Locations by Distance'
+        text: 'Locations by Road Distance'
       },
       legend: {
         display: true,
