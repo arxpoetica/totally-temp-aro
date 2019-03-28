@@ -2,8 +2,7 @@ import PointFeatureRenderer from './point-feature-renderer'
 import PolylineFeatureRenderer from './polyline-feature-renderer'
 import PolygonFeatureRenderer from './polygon-feature-renderer'
 import TileUtilities from './tile-utilities'
-// Browserify includes
-var AsyncPriorityQueue = require('async').priorityQueue
+import AsyncPriorityQueue from 'async/priorityQueue'
 
 class MapTileRenderer {
   constructor (tileSize, tileDataService, mapTileOptions, censusCategories, selectedDisplayMode, selectionModes, analysisSelectionMode, displayModes,

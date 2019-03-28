@@ -203,7 +203,8 @@
         // have to rely on a global user object (like we did before this change)
         angular.element(document.body).injector().get('state').initializeAppConfiguration(<%- JSON.stringify(user) %>,
                                                                                           <%- JSON.stringify(appConfiguration) %>,
-                                                                                          <%- JSON.stringify(googleMapsLicensing) %>);
+                                                                                          <%- JSON.stringify(googleMapsLicensing) %>,
+                                                                                          "<%- sessionWebsocketId %>");
       }
 
       function openReleaseNotes() {
@@ -237,7 +238,6 @@
     <!-- Components -->
     <script src="javascripts/lib/components/footer/ui-notification-service.js"></script>
     <script src="javascripts/lib/components/common/context-menu-service.js"></script>
-    <script src="javascripts/lib/components/tiles/tile-data-service.js"></script>
 
     <script src="javascripts/lib/controllers/body_controller.js"></script>
     <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>

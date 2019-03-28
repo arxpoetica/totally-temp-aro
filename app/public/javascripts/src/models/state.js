@@ -8,6 +8,7 @@ import PlanActions from '../react/components/plan/plan-actions'
 import MapLayerActions from '../react/components/map-layers/map-layer-actions'
 import SelectionActions from '../react/components/selection/selection-actions'
 import SelectionModes from '../react/components/selection/selection-modes'
+import socketManager from '../react/common/socket-manager'
 
 // We need a selector, else the .toJS() call will create an infinite digest loop
 const getAllLocationLayers = reduxState => reduxState.mapLayers.location
@@ -1037,8 +1038,6 @@ class State {
       service.currentPlanServiceAreaTags = service.listOfServiceAreaTags.filter(tag => _.contains(plan.tagMapping.linkTags.serviceAreaIds, tag.id))
 
       service.setPlanRedux(plan)
-      // Subscribe to the socket for this plan
-      service.subscribeToPlanSocket(plan.id)
 
       return service.loadPlanInputs(plan.id)
         .then(() => service.recreateTilesAndCache())
@@ -1554,7 +1553,7 @@ class State {
     }
 
     service.configuration = {}
-    service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing) => {
+    service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing, websocketSessionId) => {
       service.configuration = appConfiguration
       service.googleMapsLicensing = googleMapsLicensing
       service.configuration.loadPerspective = (perspective) => {
@@ -1568,7 +1567,7 @@ class State {
       service.setOptimizationOptions()
       tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
       tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-
+      socketManager.initializeSession(websocketSessionId)
       service.getReleaseVersions()
     }
 
@@ -1849,7 +1848,6 @@ class State {
     return {
       setLoggedInUserRedux: (loggedInUser) => { dispatch(UserActions.setLoggedInUser(loggedInUser)) },
       setPlanRedux: (plan) => { dispatch(PlanActions.setPlan(plan)) },
-      subscribeToPlanSocket: (planId) => { dispatch({ type: Actions.SOCKET_SUBSCRIBE_TO_ROOM, payload: { planId: `/plan/${planId}` } }) },
       setSelectionTypeById: selectionTypeId => dispatch(SelectionActions.setActiveSelectionMode(selectionTypeId)),
       addPlanTargets: (planId, planTargets) => dispatch(SelectionActions.addPlanTargets(planId, planTargets)),
       removePlanTargets: (planId, planTargets) => dispatch(SelectionActions.removePlanTargets(planId, planTargets)),
