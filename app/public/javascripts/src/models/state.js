@@ -1,5 +1,6 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
+import format from './string-template'
 import StateViewMode from './state-view-mode'
 import Constants from '../components/common/constants'
 import Actions from '../react/common/actions'
@@ -270,6 +271,7 @@ class State {
       MANUAL_PLAN_TARGET_ENTRY: null,
       MANUAL_PLAN_SA_ENTRY: null
     }
+    service.expertModeScopeContext = null
 
     service.hackRaiseEvent = (features) => {
       $rootScope.$broadcast('map_layer_clicked_feature', features, {})
@@ -1739,9 +1741,10 @@ class State {
     service.loadServiceLayers()
 
     service.executeManualPlanTargetsQuery = () => {
-    // select id from aro.location_entity where data_source_id = 1 and id in
-    // (239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
-      $http.post('/locations/getLocationIds', { query: service.expertMode[service.selectedExpertMode] })
+      var query = service.formatExpertModeQuery(service.expertMode[service.selectedExpertMode], service.expertModeScopeContext)
+      // select id from aro.location_entity where data_source_id = 1 and id in
+      // (239573,239586,239607,91293,91306,91328,237792,86289,86290,109232,239603,145556,145557,239604,239552)
+      $http.post('/locations/getLocationIds', { query: query })
         .then((result) => {
           var plan = service.plan.getValue()
 
@@ -1779,6 +1782,12 @@ class State {
           }
         })
         .catch(err => console.log(err))
+    }
+
+    service.formatExpertModeQuery = (string, replaceWithobject) => {
+      var query
+      query = format(string, replaceWithobject)
+      return query;
     }
 
     service.getValidEquipmentFeaturesList = (equipmentFeaturesList) => {
