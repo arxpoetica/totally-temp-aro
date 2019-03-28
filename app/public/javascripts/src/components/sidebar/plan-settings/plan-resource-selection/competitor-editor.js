@@ -4,8 +4,87 @@ class CompetitorEditorController {
     this.state = state
     this.competitorManagerConfiguration = []
     this.pristineCompetitorManagerConfiguration = {}
+    
+    // - for test - //
+    this.regionSelectDisabled = false
+    this.selectedRegions = []
+    this.regions = [
+      'AK', 
+      'AL', 
+      'AR', 
+      'AZ', 
+      'CA', 
+      'CO', 
+      'CT', 
+      'DE', 
+      'FL', 
+      'GA', 
+      'HI', 
+      'IA', 
+      'ID', 
+      'IL', 
+      'IN', 
+      'KS', 
+      'KY', 
+      'LA', 
+      'MA', 
+      'MD', 
+      'ME', 
+      'MI', 
+      'MN', 
+      'MO', 
+      'MS', 
+      'MT', 
+      'NC', 
+      'ND', 
+      'NE', 
+      'NH', 
+      'NJ', 
+      'NM', 
+      'NV', 
+      'NY', 
+      'OH', 
+      'OK', 
+      'OR', 
+      'PA', 
+      'RI', 
+      'SC', 
+      'SD', 
+      'TN', 
+      'TX', 
+      'UT', 
+      'VA', 
+      'VT', 
+      'WA', 
+      'WI', 
+      'WV', 
+      'WY'
+    ]
+    
+    this.openTab = 0
+    this.prominenceThreshold = 0.02
+    // --- //  
+    
   }
-
+  
+  
+  // - test - //
+  
+  onSelectedRegionsChanged () {
+    console.log('on regions changed')
+    console.log(this.selectedRegions)
+  }
+  
+  onRegionCommit () {
+    console.log('region commit')
+    this.regionSelectDisabled = true
+  }
+  
+  
+  // --- //
+  
+  
+  
   $onChanges (changesObj) {
     if (changesObj.competitorManagerId) {
       this.reloadCompetitionManagerConfiguration()
@@ -22,7 +101,7 @@ class CompetitorEditorController {
     this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`)
       .then((result) => {
         this.competitorManagerConfiguration = result.data
-        //console.log(this.competitorManagerConfiguration)
+        console.log(this.competitorManagerConfiguration)
         // carrierId
         this.pristineCompetitorManagerConfiguration = angular.copy(result.data)
       })

@@ -6,6 +6,96 @@
 
 <modal-header title="{{$ctrl.competitorManager.name}}"></modal-header>
 <modal-body>
+  <div>
+    <strong>Regions</strong>
+    
+    
+    
+    <ui-select multiple ng-model="$ctrl.selectedRegions"
+               ng-disabled="$ctrl.regionSelectDisabled"
+               theme="bootstrap"
+               close-on-select="true"
+               on-select="$ctrl.onSelectedRegionsChanged()"
+               on-remove="$ctrl.onSelectedRegionsChanged()">
+      <ui-select-match placeholder="Select data sources...">
+        {{$item}}
+      </ui-select-match>
+      <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="region in $ctrl.regions | filter: $select.search">
+        <div>
+          {{region}}
+        </div>
+      </ui-select-choices>
+    </ui-select>
+    
+    <div>
+	    <button class="btn btn-primary" ng-click="$ctrl.onRegionCommit()">
+	      <i class="fa fa-save action-button-icon"></i> Select
+	    </button>
+	  </div>
+    
+    <strong>Prominence Threshold</strong>
+    <div class="row">
+      <div class="col-md-6">
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.001"
+          ng-model="$ctrl.prominenceThreshold"
+          style="margin-top: 10px; width:100%">
+      </div>
+      <div class="col-md-6">
+        <div class="form-group form-group-sm">
+          <div class="input-group input-group-sm">
+            <input id="coverageTargetValue"
+              type="number" step="0.1"
+              ng-model="$ctrl.prominenceThreshold"
+              class="form-control text-right"
+              percentage-input>
+            <div class="input-group-addon">%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+  </div>
+  
+  <div>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 0 }"
+          href="#"
+          ng-click="$ctrl.openTab = 0">prominent</a>
+      </li>
+      <li class="nav-item">
+        <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 1 }"
+          href="#"
+          ng-click="$ctrl.openTab = 1">diminutive</a>
+      </li>
+    </ul>
+  
+    <div ng-if="$ctrl.openTab === 0">
+      list of prominent competitors
+    </div>
+    
+    <div ng-if="$ctrl.openTab === 1">
+      list of diminutive competitors
+    </div>
+  
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   <div style="max-height: 500px; overflow-y: auto;">
     <table id="tblCompetitorModel" class="table table-sm table-striped">
       <thead class="thead-dark">
