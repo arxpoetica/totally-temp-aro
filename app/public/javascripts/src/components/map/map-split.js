@@ -160,7 +160,7 @@ let mapSplit = {
                && !$ctrl.state.isRulerEnabled">
       </map-selector-plan-target>
       <map-selector-export-locations map-global-object-name="map" ng-if="$ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW
-        && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.POLYGON_EXPORT_TARGET"></map-selector-export-locations>
+        "></map-selector-export-locations>
     </div>
 
     <!-- Define the sidebar -->
