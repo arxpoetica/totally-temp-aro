@@ -5,7 +5,6 @@ var fs = require('fs')
 var multer = require('multer')
 var os = require('os')
 var upload = multer({ dest: os.tmpDir() })
-var Socket = require('../sockets')
 
 exports.configure = (api, middleware) => {
   var jsonSuccess = middleware.jsonSuccess
@@ -13,12 +12,6 @@ exports.configure = (api, middleware) => {
   // Get all requests (POST/GET/DELETE/PUT,etc) that start with /service, and then pass those
   // on to ARO-Service. Do NOT modify any data - this is intended to be a pass-through service
   api.all('/service/*', (request, response, next) => {
-
-    // Mock - For coverage report endpoints, start simulating websocket responses
-    // var regexMatch = request.url.match(/^\/service\/coverage\/report\/.*[0-9]\/init/g)
-    // if (regexMatch && regexMatch.length > 0) {
-    //   api.Socket.mockCoverageEndpoint()
-    // }
 
     // Chop off the prefix on this requests URL, and we get the URL to pass to aro-service
     var serviceUrl = request.url.substring('/service/'.length)

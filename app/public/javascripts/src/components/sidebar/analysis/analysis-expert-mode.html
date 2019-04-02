@@ -10,6 +10,7 @@
       ng-model="$ctrl.state.expertMode[$ctrl.state.selectedExpertMode]"
       ng-model-options="{ debounce: 500 }"
       ng-change="$ctrl.validateExpertModeQuery()"
+      placeholder="Available Keys: {{ $ctrl.scopeContextKeys }}"
       spellcheck="false"> 
     </textarea>
 

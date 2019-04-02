@@ -1,6 +1,7 @@
-var helpers = require('../helpers')
-var cache = helpers.cache
-var public_config = helpers.public_config
+const helpers = require('../helpers')
+const cache = helpers.cache
+const public_config = helpers.public_config
+const uuidv4 = require('uuid/v4')
 
 exports.configure = (api, middleware) => {
   api.get('/', (request, response, next) => {
@@ -14,6 +15,7 @@ exports.configure = (api, middleware) => {
       analysisLayers: cache.analysisLayers,
       mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP', 
       appConfiguration: cache.configuration,
+      sessionWebsocketId: uuidv4(),
       // For google maps licensing, specify one of the following:
       // 1. Nothing (no API_KEY, no CLIENT_ID, no CHANNEL)
       // 2. API_KEY only

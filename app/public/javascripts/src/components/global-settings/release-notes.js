@@ -1,4 +1,4 @@
-var marked = require('marked')
+import marked from 'marked'
 
 class ReleaseNotesController {
   constructor ($element, $http, $timeout, globalSettingsService) {

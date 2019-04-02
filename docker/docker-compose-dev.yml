@@ -10,6 +10,11 @@ services:
         environment:
             POSTGRES_PASSWORD: aro
             POSTGRES_USER: aro
+    rabbitmq:
+        image: rabbitmq:management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
     service:
         image: avco/aro-service:latest
         expose:

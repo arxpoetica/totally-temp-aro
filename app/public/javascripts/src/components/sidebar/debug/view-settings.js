@@ -1,7 +1,7 @@
 class ViewSettingsController {
-  constructor (state, $rootScope) {
+  constructor (state, tileDataService) {
     this.state = state
-    this.$rootScope = $rootScope
+    this.tileDataService = tileDataService
 
     this.state.viewSetting.selectedFiberOption = this.state.viewFiberOptions[0]
     this.mapTileOptions
@@ -14,6 +14,12 @@ class ViewSettingsController {
   }
 
   fiberOptionChanged () {
+    this.state.requestMapLayerRefresh.next(null)
+  }
+
+  onActiveTileFetcherChanged() {
+    // If the tile fetcher changes, delete the tile cache and re-render everything
+    this.tileDataService.clearDataCache()
     this.state.requestMapLayerRefresh.next(null)
   }
 
@@ -30,7 +36,7 @@ class ViewSettingsController {
   }
 }
 
-ViewSettingsController.$inject = ['state', '$rootScope']
+ViewSettingsController.$inject = ['state', 'tileDataService']
 
 let viewSettings = {
   templateUrl: '/components/sidebar/debug/view-settings.html',

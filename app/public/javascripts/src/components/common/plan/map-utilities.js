@@ -1,6 +1,5 @@
 import Constants from '../constants'
-
-var gpsi = require('geojson-polygon-self-intersections')
+import gpsi from 'geojson-polygon-self-intersections'
 
 class MapUtilities {
   // Returns the tile coordinates (x, y) for a given lat/long and zoom level
