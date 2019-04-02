@@ -2,6 +2,37 @@
   #tblCompetitorModel td {
     line-height: 33px; /* To vertically align text */
   }
+  
+  .comp_edit_flex_section {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .comp_edit_filter_row_left{
+    flex-grow: 1;
+    padding-right: 10px;
+  } 
+  
+  .comp_edit_filter_row_right{
+    width: 20%;
+  } 
+  
+  #comp_edit_region_select_list {
+    padding-top: 2px;
+  }
+  
+  #comp_edit_region_btn {
+    
+  }
+  
+  .comp_edit_percent_item{
+    width: 6em;
+  }
+  
+  .nowrap_label{
+    white-space: nowrap;
+  }
+  
 </style>
 
 <modal-header title="{{$ctrl.competitorManager.name}}"></modal-header>
@@ -9,59 +40,74 @@
   <div>
     <strong>Regions</strong>
     
-    
-    
-    <ui-select multiple ng-model="$ctrl.selectedRegions"
-               ng-disabled="$ctrl.regionSelectDisabled"
-               theme="bootstrap"
-               close-on-select="true"
-               on-select="$ctrl.onSelectedRegionsChanged()"
-               on-remove="$ctrl.onSelectedRegionsChanged()">
-      <ui-select-match placeholder="Select data sources...">
-        {{$item}}
-      </ui-select-match>
-      <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="region in $ctrl.regions | filter: $select.search">
-        <div>
-          {{region}}
-        </div>
-      </ui-select-choices>
-    </ui-select>
-    
-    <div>
-	    <button class="btn btn-primary" ng-click="$ctrl.onRegionCommit()">
-	      <i class="fa fa-save action-button-icon"></i> Select
-	    </button>
-	  </div>
-    
-    <strong>Prominence Threshold</strong>
-    <div class="row">
-      <div class="col-md-6">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.001"
-          ng-model="$ctrl.prominenceThreshold"
-          style="margin-top: 10px; width:100%">
-      </div>
-      <div class="col-md-6">
-        <div class="form-group form-group-sm">
-          <div class="input-group input-group-sm">
-            <input id="coverageTargetValue"
-              type="number" step="0.1"
-              ng-model="$ctrl.prominenceThreshold"
-              class="form-control text-right"
-              percentage-input>
-            <div class="input-group-addon">%</div>
-          </div>
-        </div>
+    <div class="comp_edit_flex_section">
+      
+      <div class="comp_edit_filter_row_left" id="comp_edit_region_select_list">
+		    <ui-select multiple ng-model="$ctrl.selectedRegions"
+		               ng-disabled="!$ctrl.regionSelectEnabled"
+		               theme="bootstrap"
+		               close-on-select="true"
+		               on-select="$ctrl.onSelectedRegionsChanged()"
+		               on-remove="$ctrl.onSelectedRegionsChanged()">
+		      <ui-select-match placeholder="Select data sources...">
+		        {{$item.stusps}}
+		      </ui-select-match>
+		      <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="region in $ctrl.regions | filter: $select.search">
+		        <div>
+		          {{region.name}}
+		        </div>
+		      </ui-select-choices>
+		    </ui-select>
+	    </div>
+	    
+	    <div class="comp_edit_filter_row_right" id="comp_edit_region_btn">
+        <button class="btn btn-light nowrap_label" 
+                ng-if="!$ctrl.regionSelectEnabled"
+                ng-click="$ctrl.reselectRegion()">
+          <i class="fa fa-undo action-button-icon"></i> Discard changes
+        </button>
+        
+        <button class="btn btn-primary nowrap_label" 
+                ng-if="$ctrl.regionSelectEnabled"
+                ng-disabled="$ctrl.selectedRegions.length < 1"
+                ng-click="$ctrl.onRegionCommit()">
+          <i class="fa fa-save action-button-icon"></i> Select
+        </button>
       </div>
     </div>
     
     
+    
+    <div ng-if="!$ctrl.regionSelectEnabled">
+	    <strong>Prominence Threshold</strong>
+	    <div class="comp_edit_flex_section">
+	      <div class="comp_edit_filter_row_left">
+	        <input
+	          type="range"
+	          min="0"
+	          max="100"
+	          step="0.1"
+	          ng-model="$ctrl.prominenceThreshold"
+	          style="margin-top: 10px; width:100%">
+	      </div>
+	      <div class="comp_edit_filter_row_right">
+	        <div class="comp_edit_percent_item">
+	          <div class="input-group input-group-sm">
+	            <input id="coverageTargetValue"
+	              type="number" step="0.1"
+	              ng-model="$ctrl.prominenceThreshold"
+	              class="form-control text-right"
+	              >
+	            <div class="input-group-addon">%</div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+    </div>
+    
   </div>
   
-  <div>
+  <div ng-if="!$ctrl.regionSelectEnabled">
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 0 }"
@@ -76,11 +122,55 @@
     </ul>
   
     <div ng-if="$ctrl.openTab === 0">
-      list of prominent competitors
+      
+      <div style="max-height: 500px; overflow-y: auto;">
+		    <table id="tblCompetitorModel" class="table table-sm table-striped">
+		      <thead class="thead-dark">
+		        <tr>
+		          <th>Carrier</th>
+		          <th>Percent</th>
+		          <th>Strength</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		        <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.greaterEqualTo('cbPercent', $ctrl.prominenceThreshold)">
+		          <td>{{carrier.alias}}</td>
+		          <td>{{carrier.cbPercent}}%</td>
+		          <td>
+		            <div ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
+		              {{strength.providerTypeId}}: <input type="text" class="form-control comp_edit_percent_item" ng-model="strength.strength">
+		            </div>
+		          </td>
+		        </tr>
+		      </tbody>
+		    </table>
+		  </div>
+      
     </div>
     
     <div ng-if="$ctrl.openTab === 1">
-      list of diminutive competitors
+      <div style="max-height: 500px; overflow-y: auto;">
+        <table id="tblCompetitorModel" class="table table-sm table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>Carrier</th>
+              <th>Percent</th>
+              <th>Strength</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.lessThan('cbPercent', $ctrl.prominenceThreshold)">
+              <td>{{carrier.alias}}</td>
+              <td>{{carrier.cbPercent}}%</td>
+              <td>
+                <div ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
+                  {{strength.providerTypeId}}: <input type="text" class="form-control comp_edit_percent_item" ng-model="strength.strength">
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   
   </div>
@@ -95,7 +185,7 @@
   
   
   
-  
+  <!-- 
   <div style="max-height: 500px; overflow-y: auto;">
     <table id="tblCompetitorModel" class="table table-sm table-striped">
       <thead class="thead-dark">
@@ -114,7 +204,7 @@
       </tbody>
     </table>
   </div>
-  
+  -->
   <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
     <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
       <i class="fa fa-undo action-button-icon"></i> Discard changes

@@ -5,70 +5,33 @@ class CompetitorEditorController {
     this.competitorManagerConfiguration = []
     this.pristineCompetitorManagerConfiguration = {}
     
-    // - for test - //
-    this.regionSelectDisabled = false
+    this.carriersById = {}
+    this.carriersByPct = []
+    this.strengthsById = {}
+    this.pristineStrengthsById = {}
+    
+    this.regionSelectEnabled = true
     this.selectedRegions = []
-    this.regions = [
-      'AK', 
-      'AL', 
-      'AR', 
-      'AZ', 
-      'CA', 
-      'CO', 
-      'CT', 
-      'DE', 
-      'FL', 
-      'GA', 
-      'HI', 
-      'IA', 
-      'ID', 
-      'IL', 
-      'IN', 
-      'KS', 
-      'KY', 
-      'LA', 
-      'MA', 
-      'MD', 
-      'ME', 
-      'MI', 
-      'MN', 
-      'MO', 
-      'MS', 
-      'MT', 
-      'NC', 
-      'ND', 
-      'NE', 
-      'NH', 
-      'NJ', 
-      'NM', 
-      'NV', 
-      'NY', 
-      'OH', 
-      'OK', 
-      'OR', 
-      'PA', 
-      'RI', 
-      'SC', 
-      'SD', 
-      'TN', 
-      'TX', 
-      'UT', 
-      'VA', 
-      'VT', 
-      'WA', 
-      'WI', 
-      'WV', 
-      'WY'
-    ]
+    
+    this.regions = []
     
     this.openTab = 0
-    this.prominenceThreshold = 0.02
-    // --- //  
-    
+    this.prominenceThreshold = 2.0
+    this.onInit()
   }
   
+  //ToDo: loading indicators 
   
-  // - test - //
+  onInit (){
+    // ToDo: move this to state.js once we know the return won't change with plan selection 
+    this.$http.get(`/service/odata/stateEntity?$select=name,stusps,gid,statefp&$orderby=name`)
+    .then((result) => {
+      //console.log(result.data)
+      this.regions = result.data
+    })
+    .catch(err => console.error(err))
+  }
+  
   
   onSelectedRegionsChanged () {
     console.log('on regions changed')
@@ -77,9 +40,17 @@ class CompetitorEditorController {
   
   onRegionCommit () {
     console.log('region commit')
-    this.regionSelectDisabled = true
+    this.regionSelectEnabled = false
+    this.loadCompManForStates()
   }
   
+  reselectRegion () {
+    if (this.regionSelectEnabled) return
+    // discard warning 
+    console.log("DISCARD CHANGES!")
+    
+    this.regionSelectEnabled = true
+  }
   
   // --- //
   
@@ -87,47 +58,65 @@ class CompetitorEditorController {
   
   $onChanges (changesObj) {
     if (changesObj.competitorManagerId) {
-      this.reloadCompetitionManagerConfiguration()
+      console.log('man id changed: '+this.competitorManagerId)
+      this.loadCompManForStates()
     }
   }
-
-  reloadCompetitionManagerConfiguration () {
-    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}?user_id=${this.state.loggedInUser.id}`)
-      .then((result) => {
-        this.competitorManager = result.data
+  
+  loadCompManForStates () {
+    if ('undefined' == typeof this.competitorManagerId || this.selectedRegions.length < 1) return
+    var regionsString = this.selectedRegions.map(ele => ele.stusps).join(",");
+    
+    this.$http.get(`/service/v1/competitor-profiles?states=${regionsString}`)
+    .then((carrierResult) => {
+      var newCarriersById = {}
+      
+      
+      carrierResult.data.forEach(ele => {
+        newCarriersById[ele.carrierId] = ele
       })
-      .catch(err => console.error(err))
-
-    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`)
-      .then((result) => {
-        this.competitorManagerConfiguration = result.data
-        console.log(this.competitorManagerConfiguration)
-        // carrierId
-        this.pristineCompetitorManagerConfiguration = angular.copy(result.data)
+      this.carriersById = newCarriersById
+      
+      carrierResult.data.sort((a,b) => {return b.cbPercent - a.cbPercent})
+      
+      this.carriersByPct = carrierResult.data
+      
+      this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?states=${regionsString}&user_id=${this.state.loggedInUser.id}`)
+      .then((strengthsResult) => {
+        var newStrengthsById = {}
+        
+        strengthsResult.data.forEach(ele => {
+          if (!newStrengthsById.hasOwnProperty(ele.carrierId)){
+            newStrengthsById[ele.carrierId] = []
+          }
+          newStrengthsById[ele.carrierId].push(ele)
+        })
+        this.pristineStrengthsById = newStrengthsById
+        this.strengthsById = JSON.parse(JSON.stringify(this.pristineStrengthsById))
       })
-      .catch((err) => console.error(err))
+      
+    })
+    .catch(err => console.error(err))
+        
+    
   }
-
+  
+  
   saveConfigurationToServer () {
     // Only save those configurations that have changed
     var changedModels = []
-    this.competitorManagerConfiguration.forEach((competitorModel, index) => {
-      var pristineModel = this.pristineCompetitorManagerConfiguration[index]
-      if (pristineModel) {
-        // Check to see if the model has changed
-        if (JSON.stringify(pristineModel) !== angular.toJson(competitorModel)) {
-          // Only copy over the properties that we can send to aro-service
-          const changedModel = {
-            carrierId: competitorModel.carrierId,
-            providerTypeId: competitorModel.providerTypeId,
-            resourceManagerId: competitorModel.resourceManagerId,
-            strength: competitorModel.strength
-          }
-          changedModels.push(changedModel)
+    
+    for (var carrierId in this.strengthsById){
+      this.strengthsById[carrierId].forEach((strength, index) => {
+        var strengthJSON = angular.toJson(strength)
+        if (strengthJSON !== JSON.stringify(this.pristineStrengthsById[carrierId][index])) {
+          changedModels.push(JSON.parse(strengthJSON))
         }
-      }
-    })
-
+      })
+    }
+    
+    //console.log(changedModels)
+    
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`, changedModels)
         .then((result) => this.exitEditingMode())
@@ -135,11 +124,27 @@ class CompetitorEditorController {
     } else {
       console.log('Competitor Editor: No models were changed. Nothing to save.')
     }
+    
   }
 
   exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
   }
+  
+  // filters 
+  
+  greaterEqualTo (propName, val) {
+    return function (item) {
+      return item[propName] >= val
+    }
+  }
+  
+  lessThan (propName, val) {
+    return function (item) {
+      return item[propName] < val
+    }
+  }
+  
 }
 
 CompetitorEditorController.$inject = ['$http', 'state']
