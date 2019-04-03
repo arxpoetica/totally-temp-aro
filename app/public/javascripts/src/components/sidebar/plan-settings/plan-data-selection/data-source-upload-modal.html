@@ -127,7 +127,8 @@
 
     </form>
   </modal-body>
-  <modal-footer ng-show="!$ctrl.isDataManagementView">
+  <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
+    <a href="/csv/{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download example file</a>    
     <button class="btn btn-primary" ng-disabled="$ctrl.isUploading" ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
   </modal-footer>
 </modal>

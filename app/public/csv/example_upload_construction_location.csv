@@ -1,0 +1,8 @@
+entity_category_id,lat,longitude,number_of_employees,industry_id,construction_code
+business,44.779,-71.5832,125,5099,cell_5g_existing_tower
+business,42.7581,-72.3232,125,5099,cell_5g_existing_tower
+business,44.0639,-70.1502,125,5099,cell_5g_existing_tower
+business,45.2182,-69.5286,125,5099,cell_5g_existing_tower
+business,45.1805,-69.424,125,5099,cell_5g_existing_tower
+business,45.2055,-69.4555,125,5099,cell_5g_existing_tower
+business,43.5023,-70.8584,125,5099,cell_5g_existing_tower
