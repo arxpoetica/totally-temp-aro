@@ -31,13 +31,13 @@ class DataSourceUploadController {
     this.isDataManagementView = false
 
     this.downloads = {
-      location: {fileName: 'locations.zip'},
+      location: {fileName: 'template_locations.zip'},
       equipment: {fileName: 'template_equipment.csv'},
       fiber: {fileName: 'sample_fiber.zip'},
-      construction_location: {fileName: 'example_upload_construction_location.csv'},
+      construction_location: {fileName: 'template_construction_locations.zip'},
       service_layer: {fileName: 'sample_service_area.zip'},
       tile_system: {fileName: 'example_upload_tile_system.csv'},
-      edge: {fileName: 'sample_edges.csv'}
+      edge: {fileName: 'sample_edges.zip'}
     }
 
     state.showDataSourceUploadModal.subscribe((newValue) => {
