@@ -89,8 +89,6 @@
       </div>
     </div>
     
-    
-    
     <div ng-if="!$ctrl.regionSelectEnabled">
 	    <strong>Market Share Threshold</strong>
 	    <div class="comp_edit_flex_section">
@@ -188,36 +186,6 @@
   
   </div>
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  <!-- 
-  <div style="max-height: 500px; overflow-y: auto;">
-    <table id="tblCompetitorModel" class="table table-sm table-striped">
-      <thead class="thead-dark">
-        <tr>
-          <th>Provider type</th>
-          <th>Carrier</th>
-          <th>Strength</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="competitorModel in $ctrl.competitorManagerConfiguration">
-          <td>{{competitorModel.providerTypeId}}</td>
-          <td>{{competitorModel.carrierName}}</td>
-          <td><input type="text" class="form-control" ng-model="competitorModel.strength"></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  -->
   <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
     <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
       <i class="fa fa-undo action-button-icon"></i> Discard changes

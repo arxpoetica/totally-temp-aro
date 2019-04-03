@@ -34,12 +34,12 @@ class CompetitorEditorController {
   
   
   onSelectedRegionsChanged () {
-    console.log('on regions changed')
-    console.log(this.selectedRegions)
+    //console.log('on regions changed')
+    //console.log(this.selectedRegions)
   }
   
   onRegionCommit () {
-    console.log('region commit')
+    //console.log('region commit')
     this.regionSelectEnabled = false
     this.loadCompManForStates()
   }
