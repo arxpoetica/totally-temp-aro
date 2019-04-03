@@ -145,6 +145,11 @@ class CompetitorEditorController {
     }
   }
   
+  truncateNum (num, digits) {
+    var scale = Math.pow(10, digits)
+    return Math.round(num * scale) / scale
+  }
+  
 }
 
 CompetitorEditorController.$inject = ['$http', 'state']

@@ -35,28 +35,29 @@ class SocketManager {
       if (err) {
         console.error('ERROR when connecting to the RabbitMQ server')
         console.error(err)
-      }
-      conn.createChannel(function(err, ch) {
-        if (err) {
-          console.error('ERROR when trying to create a channel on the RabbitMQ server')
-          console.error(err)
-        }
-        ch.assertQueue(VECTOR_TILE_QUEUE, {durable: false})
-        ch.assertExchange(VECTOR_TILE_EXCHANGE, 'topic')
-        ch.bindQueue(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, '#')
-
-        ch.consume(VECTOR_TILE_QUEUE, function(msg) {
-          const uuid = JSON.parse(msg.content.toString()).uuid
-          const roomId = self.vectorTileRequestToRoom[uuid]
-          if (!roomId) {
-            console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
-          } else {
-            console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
-            delete self.vectorTileRequestToRoom[uuid]
-            self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+      }else{
+        conn.createChannel(function(err, ch) {
+          if (err) {
+            console.error('ERROR when trying to create a channel on the RabbitMQ server')
+            console.error(err)
           }
-        }, {noAck: true})
-      })
+          ch.assertQueue(VECTOR_TILE_QUEUE, {durable: false})
+          ch.assertExchange(VECTOR_TILE_EXCHANGE, 'topic')
+          ch.bindQueue(VECTOR_TILE_QUEUE, VECTOR_TILE_EXCHANGE, '#')
+  
+          ch.consume(VECTOR_TILE_QUEUE, function(msg) {
+            const uuid = JSON.parse(msg.content.toString()).uuid
+            const roomId = self.vectorTileRequestToRoom[uuid]
+            if (!roomId) {
+              console.error(`ERROR: No socket roomId found for vector tile UUID ${uuid}`)
+            } else {
+              console.log(`Vector Tile Socket: Routing message with UUID ${uuid} to /${roomId}`)
+              delete self.vectorTileRequestToRoom[uuid]
+              self.io.to(`/${roomId}`).emit('message', { type: VECTOR_TILE_DATA_MESSAGE, data: msg })
+            }
+          }, {noAck: true})
+        })
+      }
     })
   }
 

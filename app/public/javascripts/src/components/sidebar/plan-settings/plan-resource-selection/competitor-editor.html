@@ -8,12 +8,12 @@
     margin-bottom: 20px;
   }
   
-  .comp_edit_filter_row_left{
+  .comp_edit_filter_row_left {
     flex-grow: 1;
     padding-right: 10px;
   } 
   
-  .comp_edit_filter_row_right{
+  .comp_edit_filter_row_right {
     width: 20%;
   } 
   
@@ -25,12 +25,25 @@
     
   }
   
-  .comp_edit_percent_item{
+  .comp_edit_percent_item {
     width: 6em;
   }
   
-  .nowrap_label{
+  .comp_edit_input_set {
     white-space: nowrap;
+    text-align: right;
+  }
+  
+  .comp_edit_input_set input {
+    display: inline-block;
+  }
+  
+  .nowrap_label {
+    white-space: nowrap;
+  }
+  
+  .comp_edit_center_label {
+    text-align: center;
   }
   
 </style>
@@ -64,7 +77,7 @@
         <button class="btn btn-light nowrap_label" 
                 ng-if="!$ctrl.regionSelectEnabled"
                 ng-click="$ctrl.reselectRegion()">
-          <i class="fa fa-undo action-button-icon"></i> Discard changes
+          <i class="fa fa-undo action-button-icon"></i> Reselect
         </button>
         
         <button class="btn btn-primary nowrap_label" 
@@ -79,7 +92,7 @@
     
     
     <div ng-if="!$ctrl.regionSelectEnabled">
-	    <strong>Prominence Threshold</strong>
+	    <strong>Market Share Threshold</strong>
 	    <div class="comp_edit_flex_section">
 	      <div class="comp_edit_filter_row_left">
 	        <input
@@ -128,16 +141,16 @@
 		      <thead class="thead-dark">
 		        <tr>
 		          <th>Carrier</th>
-		          <th>Percent</th>
-		          <th>Strength</th>
+		          <th>Market Share</th>
+		          <th class="comp_edit_center_label">Strength</th>
 		        </tr>
 		      </thead>
 		      <tbody>
 		        <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.greaterEqualTo('cbPercent', $ctrl.prominenceThreshold)">
 		          <td>{{carrier.alias}}</td>
-		          <td>{{carrier.cbPercent}}%</td>
+		          <td>{{$ctrl.truncateNum(carrier.cbPercent, 4)}}%</td>
 		          <td>
-		            <div ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
+		            <div class="comp_edit_input_set" ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
 		              {{strength.providerTypeId}}: <input type="text" class="form-control comp_edit_percent_item" ng-model="strength.strength">
 		            </div>
 		          </td>
@@ -161,9 +174,9 @@
           <tbody>
             <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.lessThan('cbPercent', $ctrl.prominenceThreshold)">
               <td>{{carrier.alias}}</td>
-              <td>{{carrier.cbPercent}}%</td>
+              <td>{{$ctrl.truncateNum(carrier.cbPercent, 4)}}%</td>
               <td>
-                <div ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
+                <div class="comp_edit_input_set" ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
                   {{strength.providerTypeId}}: <input type="text" class="form-control comp_edit_percent_item" ng-model="strength.strength">
                 </div>
               </td>
