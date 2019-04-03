@@ -30,6 +30,16 @@ class DataSourceUploadController {
 
     this.isDataManagementView = false
 
+    this.downloads = {
+      location: {fileName: 'example_upload_location.csv'},
+      equipment: {fileName: 'example_upload_equipment.csv'},
+      fiber: {fileName: 'example_upload_fiber.kml'},
+      construction_location: {fileName: 'example_upload_construction_location.csv'},
+      service_layer: {fileName: 'example_upload_service_layer.kml'},
+      tile_system: {fileName: 'example_upload_tile_system.csv'},
+      edge: {fileName: 'example_upload_edge.csv'}
+    }
+
     state.showDataSourceUploadModal.subscribe((newValue) => {
       setTimeout(function () {
         if ($('#data_source_upload_modal input[type=file]').get(0) &&
