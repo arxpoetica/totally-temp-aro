@@ -2,8 +2,9 @@ class CompetitorEditorController {
   constructor ($http, state) {
     this.$http = $http
     this.state = state
-    this.competitorManagerConfiguration = []
-    this.pristineCompetitorManagerConfiguration = {}
+    //this.competitorManagerConfiguration = []
+    //this.pristineCompetitorManagerConfiguration = {}
+    this.compManMeta = {}
     
     this.carriersById = {}
     this.carriersByPct = []
@@ -18,6 +19,7 @@ class CompetitorEditorController {
     
     this.openTab = 0
     this.hasChanged = false
+    this.doRecalc = false
     this.prominenceThreshold = 2.0
     
     this.onInit()
@@ -32,6 +34,8 @@ class CompetitorEditorController {
       this.regions = result.data
     })
     .catch(err => console.error(err))
+    
+    this.loadCompManMeta()
   }
   
   
@@ -81,8 +85,18 @@ class CompetitorEditorController {
   
   $onChanges (changesObj) {
     if (changesObj.competitorManagerId) {
+      this.loadCompManMeta()
       this.loadCompManForStates()
     }
+  }
+  
+  loadCompManMeta () {
+    if (!this.competitorManagerId) return
+    this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}?user_id=${this.state.loggedInUser.id}`)
+    .then((result) => {
+      this.compManMeta = result.data
+    })  
+    .catch(err => console.error(err))
   }
   
   loadCompManForStates () {
@@ -92,7 +106,6 @@ class CompetitorEditorController {
     this.$http.get(`/service/v1/competitor-profiles?states=${regionsString}`)
     .then((carrierResult) => {
       var newCarriersById = {}
-      
       
       carrierResult.data.forEach(ele => {
         newCarriersById[ele.carrierId] = ele
@@ -146,18 +159,19 @@ class CompetitorEditorController {
         }
       }
     }
-    console.log(changedModels)
+    //console.log(changedModels)
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`, changedModels)
         .then((result) => {
           
-          /* ToDo: this refresh business needs to be handled by the back end NOT and blocking call from the front end 
+          /* ToDo: this refresh business is currently called on destroy if anything was saved 
           this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
           .then((result) => {
             console.log(result)
             if (thenClose) this.exitEditingMode()
           })
           */
+          this.doRecalc = true
           if (thenClose) this.exitEditingMode()
         })
         .catch((err) => console.error(err))
@@ -168,6 +182,22 @@ class CompetitorEditorController {
 
   exitEditingMode () {
     this.setEditingMode({ mode: this.listMode })
+  }
+  
+  $onDestroy () {
+    //console.log("destroy")
+    
+    if (this.doRecalc) {
+      this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
+      .then((result) => {
+        // ToDo: chat with Harry about this, 
+        //       use lower left notification? 
+        console.log('Competitor Manager Recalculated')
+        console.log(result)
+      })
+      .catch((err) => console.error(err))
+    }
+    
   }
   
   // filters 
