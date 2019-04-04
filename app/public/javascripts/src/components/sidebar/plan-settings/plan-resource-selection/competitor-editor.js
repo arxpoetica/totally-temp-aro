@@ -9,6 +9,7 @@ class CompetitorEditorController {
     this.carriersByPct = []
     this.strengthsById = {}
     this.pristineStrengthsById = {}
+    this.strengthCols = []
     
     this.regionSelectEnabled = true
     this.selectedRegions = []
@@ -16,7 +17,9 @@ class CompetitorEditorController {
     this.regions = []
     
     this.openTab = 0
+    this.hasChanged = false
     this.prominenceThreshold = 2.0
+    
     this.onInit()
   }
   
@@ -26,7 +29,6 @@ class CompetitorEditorController {
     // ToDo: move this to state.js once we know the return won't change with plan selection 
     this.$http.get(`/service/odata/stateEntity?$select=name,stusps,gid,statefp&$orderby=name`)
     .then((result) => {
-      //console.log(result.data)
       this.regions = result.data
     })
     .catch(err => console.error(err))
@@ -39,7 +41,6 @@ class CompetitorEditorController {
   }
   
   onRegionCommit () {
-    //console.log('region commit')
     this.regionSelectEnabled = false
     this.loadCompManForStates()
   }
@@ -47,9 +48,31 @@ class CompetitorEditorController {
   reselectRegion () {
     if (this.regionSelectEnabled) return
     // discard warning 
-    console.log("DISCARD CHANGES!")
+    
+    if (this.hasChanged) {
+      swal({
+        title: 'Unsaved Changes',
+        text: 'Do you want to save your changes?',
+        type: 'warning',
+        confirmButtonColor: '#DD6B55',
+        confirmButtonText: 'Save', // 'Yes',
+        showCancelButton: true,
+        cancelButtonText: 'Discard', // 'No',
+        closeOnConfirm: true
+      }, (result) => {
+        if (result) {
+          this.saveConfigurationToServer()
+        } else {
+          // this.discardChanges()
+        }
+      })
+    }
     
     this.regionSelectEnabled = true
+  }
+  
+  onStrengthChange (param) {
+    this.hasChanged = true
   }
   
   // --- //
@@ -58,7 +81,6 @@ class CompetitorEditorController {
   
   $onChanges (changesObj) {
     if (changesObj.competitorManagerId) {
-      console.log('man id changed: '+this.competitorManagerId)
       this.loadCompManForStates()
     }
   }
@@ -84,47 +106,64 @@ class CompetitorEditorController {
       this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?states=${regionsString}&user_id=${this.state.loggedInUser.id}`)
       .then((strengthsResult) => {
         var newStrengthsById = {}
-        
+        var newStrengthColsDict = {}
+        var newStrengthCols = []
         strengthsResult.data.forEach(ele => {
-          if (!newStrengthsById.hasOwnProperty(ele.carrierId)){
-            newStrengthsById[ele.carrierId] = []
+          
+          if (!newStrengthColsDict.hasOwnProperty(ele.providerTypeId)){
+            newStrengthColsDict[ele.providerTypeId] = ele.providerTypeId
+            newStrengthCols.push(ele.providerTypeId)
           }
-          newStrengthsById[ele.carrierId].push(ele)
+          if (!newStrengthsById.hasOwnProperty(ele.carrierId)){
+            newStrengthsById[ele.carrierId] = {}
+          }
+          //newStrengthsById[ele.carrierId].push(ele)
+          newStrengthsById[ele.carrierId][ele.providerTypeId] = ele
         })
         this.pristineStrengthsById = newStrengthsById
         this.strengthsById = JSON.parse(JSON.stringify(this.pristineStrengthsById))
+        this.strengthCols = newStrengthCols
+        this.hasChanged = false
       })
       
     })
     .catch(err => console.error(err))
-        
     
   }
   
   
-  saveConfigurationToServer () {
+  saveConfigurationToServer (thenClose) {
+    if ('undefined' == typeof thenClose) thenClose = false
     // Only save those configurations that have changed
     var changedModels = []
     
     for (var carrierId in this.strengthsById){
-      this.strengthsById[carrierId].forEach((strength, index) => {
-        var strengthJSON = angular.toJson(strength)
-        if (strengthJSON !== JSON.stringify(this.pristineStrengthsById[carrierId][index])) {
+      //this.strengthsById[carrierId].forEach((strength, index) => {
+      for (var providerTypeId in this.strengthsById[carrierId]){
+        var strengthJSON = angular.toJson( this.strengthsById[carrierId][providerTypeId] )
+        if (strengthJSON !== JSON.stringify(this.pristineStrengthsById[carrierId][providerTypeId])) {
           changedModels.push(JSON.parse(strengthJSON))
         }
-      })
+      }
     }
-    
-    //console.log(changedModels)
-    
+    console.log(changedModels)
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`, changedModels)
-        .then((result) => this.exitEditingMode())
+        .then((result) => {
+          
+          /* ToDo: this refresh business needs to be handled by the back end NOT and blocking call from the front end 
+          this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
+          .then((result) => {
+            console.log(result)
+            if (thenClose) this.exitEditingMode()
+          })
+          */
+          if (thenClose) this.exitEditingMode()
+        })
         .catch((err) => console.error(err))
     } else {
       console.log('Competitor Editor: No models were changed. Nothing to save.')
     }
-    
   }
 
   exitEditingMode () {

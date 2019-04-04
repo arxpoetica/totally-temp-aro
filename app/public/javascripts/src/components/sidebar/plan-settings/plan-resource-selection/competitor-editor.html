@@ -46,6 +46,44 @@
     text-align: center;
   }
   
+  
+  
+  
+  /*
+  table {
+	  table-layout:fixed;
+	  margin:auto;
+	}
+	
+	thead, tfoot {
+	  display:table;
+	  width:100%;
+	}
+	tbody {
+	  height:500px;
+	  overflow:auto;
+	  overflow-x:hidden;
+	  display:block;
+	  width:100%;
+	}
+	tbody tr {
+	  display:table;
+	  width:100%;
+	  table-layout:fixed;
+	}
+  */
+ 
+ .comp_edit_tbl_contain{
+   max-height: 500px; 
+   overflow-y: auto;
+ }
+  
+ .comp_edit_tbl_contain table thead tr th {
+   position: sticky;
+   top: -1px;
+ }
+ 
+  
 </style>
 
 <modal-header title="{{$ctrl.competitorManager.name}}"></modal-header>
@@ -90,7 +128,7 @@
     </div>
     
     <div ng-if="!$ctrl.regionSelectEnabled">
-	    <strong>Market Share Threshold</strong>
+	    <strong>Coverage Threshold</strong>
 	    <div class="comp_edit_flex_section">
 	      <div class="comp_edit_filter_row_left">
 	        <input
@@ -123,33 +161,34 @@
       <li class="nav-item">
         <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 0 }"
           href="#"
-          ng-click="$ctrl.openTab = 0">prominent</a>
+          ng-click="$ctrl.openTab = 0">Above Threshold</a>
       </li>
       <li class="nav-item">
         <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 1 }"
           href="#"
-          ng-click="$ctrl.openTab = 1">diminutive</a>
+          ng-click="$ctrl.openTab = 1">Below Threshold</a>
       </li>
     </ul>
   
     <div ng-if="$ctrl.openTab === 0">
       
-      <div style="max-height: 500px; overflow-y: auto;">
+      <div class="comp_edit_tbl_contain">
 		    <table id="tblCompetitorModel" class="table table-sm table-striped">
 		      <thead class="thead-dark">
 		        <tr>
 		          <th>Carrier</th>
-		          <th>Market Share</th>
-		          <th class="comp_edit_center_label">Strength</th>
+		          <th>Coverage</th>
+		          <th class="comp_edit_center_label" ng-repeat="providerType in $ctrl.strengthCols">{{providerType}}</th>
 		        </tr>
 		      </thead>
 		      <tbody>
 		        <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.greaterEqualTo('cbPercent', $ctrl.prominenceThreshold)">
 		          <td>{{carrier.alias}}</td>
-		          <td>{{$ctrl.truncateNum(carrier.cbPercent, 4)}}%</td>
-		          <td>
-		            <div class="comp_edit_input_set" ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
-		              {{strength.providerTypeId}}: <input type="text" class="form-control comp_edit_percent_item" ng-model="strength.strength">
+		          <td>{{$ctrl.truncateNum(carrier.cbPercent, 1)}}%</td>
+		          <td ng-repeat="providerType in $ctrl.strengthCols">
+		            <div class="comp_edit_input_set" 
+		                 ng-if="!!$ctrl.strengthsById[carrier.carrierId][providerType]">
+		              <input type="text" class="form-control comp_edit_percent_item" ng-model="$ctrl.strengthsById[carrier.carrierId][providerType].strength" ng-change="$ctrl.onStrengthChange()">
 		            </div>
 		          </td>
 		        </tr>
@@ -160,22 +199,23 @@
     </div>
     
     <div ng-if="$ctrl.openTab === 1">
-      <div style="max-height: 500px; overflow-y: auto;">
+      <div class="comp_edit_tbl_contain">
         <table id="tblCompetitorModel" class="table table-sm table-striped">
           <thead class="thead-dark">
             <tr>
               <th>Carrier</th>
-              <th>Percent</th>
-              <th>Strength</th>
+              <th>Coverage</th>
+              <th class="comp_edit_center_label" ng-repeat="providerType in $ctrl.strengthCols">{{providerType}}</th>
             </tr>
           </thead>
           <tbody>
             <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.lessThan('cbPercent', $ctrl.prominenceThreshold)">
               <td>{{carrier.alias}}</td>
-              <td>{{$ctrl.truncateNum(carrier.cbPercent, 4)}}%</td>
-              <td>
-                <div class="comp_edit_input_set" ng-repeat="strength in $ctrl.strengthsById[carrier.carrierId]">
-                  {{strength.providerTypeId}}: <input type="text" class="form-control comp_edit_percent_item" ng-model="strength.strength">
+              <td>{{$ctrl.truncateNum(carrier.cbPercent, 1)}}%</td>
+              <td ng-repeat="providerType in $ctrl.strengthCols">
+                <div class="comp_edit_input_set" 
+                     ng-if="!!$ctrl.strengthsById[carrier.carrierId][providerType]">
+                  <input type="text" class="form-control comp_edit_percent_item" ng-model="$ctrl.strengthsById[carrier.carrierId][providerType].strength" ng-change="$ctrl.onStrengthChange()">
                 </div>
               </td>
             </tr>
@@ -190,7 +230,9 @@
     <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
       <i class="fa fa-undo action-button-icon"></i> Discard changes
     </button>
-    <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+    <button class="btn btn-primary" 
+            ng-disabled="!$ctrl.hasChanged || $ctrl.regionSelectEnabled"
+            ng-click="$ctrl.saveConfigurationToServer(true)">
       <i class="fa fa-save action-button-icon"></i> Save
     </button>
   </div>
