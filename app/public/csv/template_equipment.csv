@@ -1,0 +1,13 @@
+entity_category_id,lat,longitude,,
+central_office,56.07839087,12.53463843,,Note: Only one category_id per upload file
+splice_point,,,,
+fiber_distribution_hub,,,,
+fiber_distribution_terminal,,,,
+bulk_distribution_terminal,,,,
+bulk_distribution_consumer,,,,
+cell_5g,,,,
+junction_splitter,,,,
+dslam,,,,
+loop_extender,,,,
+network_anchor,,,,
+multiple_dwelling_unit,,,,

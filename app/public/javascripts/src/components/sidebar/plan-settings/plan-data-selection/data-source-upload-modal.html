@@ -18,11 +18,11 @@
           </select>
         </div>
       </div>
-      
+
       <!-- File upload View -->
-      <!-- For all data sources other than 'conic_tile_system', just upload a file --> 
+      <!-- For all data sources other than 'conic_tile_system', just upload a file -->
       <div ng-if="$ctrl.state.uploadDataSource.name !== 'tile_system'">
-        <div ng-show="!$ctrl.isDataManagementView">   
+        <div ng-show="!$ctrl.isDataManagementView">
 
           <div class="form-group row">
             <label class="col-sm-4 col-form-label">Data Source Name</label>
@@ -34,8 +34,8 @@
           <div class="form-group row" ng-if="$ctrl.state.uploadDataSource.name === 'fiber'">
             <label class="col-sm-4 col-form-label">Cable Type</label>
             <div class="col-sm-8">
-              <select class="form-control" 
-                ng-model="$ctrl.selectedcableType" 
+              <select class="form-control"
+                ng-model="$ctrl.selectedcableType"
                 ng-options="item as item for item in $ctrl.cableTypes">
               </select>
             </div>
@@ -44,13 +44,13 @@
           <div class="form-group row" ng-if="$ctrl.state.uploadDataSource.name === 'service_layer'">
             <label class="col-sm-4 col-form-label">Creation Type</label>
             <div class="col-sm-8">
-              <select class="form-control" 
-                ng-model="$ctrl.saCreationType" 
+              <select class="form-control"
+                ng-model="$ctrl.saCreationType"
                 ng-options="item as item.label for item in $ctrl.saCreationTypes">
               </select>
             </div>
           </div>
-          
+
           <div class="form-group row" ng-if="$ctrl.state.uploadDataSource.name !== 'service_layer' || $ctrl.saCreationType.id === 'upload_file'">
             <label class="col-sm-4 col-form-label">File Location</label>
             <div class="col-sm-8">
@@ -62,7 +62,7 @@
             <label class="col-sm-4 col-form-label">Select Equipment layers</label>
             <div class="col-sm-8">
               <select class="form-control"
-                ng-model="$ctrl.selectedEquipment" 
+                ng-model="$ctrl.selectedEquipment"
                 ng-options="equipment as equipment.name for equipment in $ctrl.state.dataItems.equipment.allLibraryItems">
               </select>
             </div>
@@ -127,7 +127,8 @@
 
     </form>
   </modal-body>
-  <modal-footer ng-show="!$ctrl.isDataManagementView">
+  <modal-footer class="justify-content-between" ng-show="!$ctrl.isDataManagementView">
+    <a href="/csv/{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}" class="btn btn-primary" role="button" download="{{$ctrl.downloads[$ctrl.state.uploadDataSource.name].fileName}}">Download upload template</a>    
     <button class="btn btn-primary" ng-disabled="$ctrl.isUploading" ng-click="$ctrl.save()"><span ng-show="$ctrl.isUpLoad" class="fa fa-spinner fa-spin"></span> Save</button>
   </modal-footer>
 </modal>

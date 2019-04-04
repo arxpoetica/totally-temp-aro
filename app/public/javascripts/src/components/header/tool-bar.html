@@ -209,7 +209,7 @@
       <i class="fa fa-eye"></i>
     </button>
     <div class="dropdown-menu dropdown-menu-right view-dropdown">
-      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.heatMapOption" ng-change="$ctrl.toggleHeatMapOptions();$ctrl.closeDropdowns()" name="ctype-name"
+      <input type="checkbox" class="checkboxfill" ng-model="$ctrl.heatMapOption" ng-change="$ctrl.toggleHeatMapOptions()" name="ctype-name"
         style="margin-left: 2px;">
       <font>Location Heatmap On</font>
 
@@ -220,7 +220,7 @@
 
       <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteBoundaries">
         <div class="dropdown-divider"></div>
-        <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.state.showSiteBoundary" ng-click="$ctrl.state.toggleSiteBoundary();$ctrl.closeDropdowns()" name="ctype-name"
+        <input type="checkbox" class="checkboxfill" ng-checked="$ctrl.state.showSiteBoundary" ng-click="$ctrl.state.toggleSiteBoundary()" name="ctype-name"
                style="margin-left: 2px;">
         <font>Site Boundaries</font>
         <select class="form-control" style="margin-top: 10px"
@@ -238,21 +238,21 @@
       <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showDirectedCable">
         <div class="dropdown-divider"></div>
 
-        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection();$ctrl.closeDropdowns()" name="ctype-name"
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showDirectedCable" ng-change="$ctrl.showCableDirection()" name="ctype-name"
                style="margin-left: 2px;">
         <font>Directed Cable</font>
       </div>
 
       <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showSiteLabels">
         <div class="dropdown-divider"></div>
-        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged();$ctrl.closeDropdowns()" name="ctype-name"
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showEquipmentLabels" ng-change="$ctrl.showEquipmentLabelsChanged()" name="ctype-name"
           style="margin-left: 2px;">
         <font>Site Labels</font>
       </div>
 
       <div ng-if="$ctrl.state.configuration.perspective.toolbar.viewSettings.showFiberSize">
         <div class="dropdown-divider"></div>
-        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null);$ctrl.closeDropdowns()" name="ctype-name"
+        <input type="checkbox" class="checkboxfill" ng-model="$ctrl.state.showFiberSize" ng-change="$ctrl.state.requestMapLayerRefresh.next(null)" name="ctype-name"
           style="margin-left: 2px;">
         <font>Fiber Size</font>
         <select ng-if="$ctrl.state.showFiberSize" class="form-control" style="margin-top: 10px"
