@@ -1,7 +1,12 @@
 import t from 'typy'; 
 
 var nargs = /\${([0-9a-zA-Z_.0-9a-zA-Z_]+)\}/g
-
+// Replace the key of type "${<key>}" in the string with associated value in the json
+// arguments String and Jsonobject
+// Ex: format("Hello ${name}, It's ${time.hour}", {
+//   name: "Angular",
+//   time: {hour: 12}
+// })
 export default function template(string) {
   var args
 
