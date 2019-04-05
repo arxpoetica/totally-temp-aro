@@ -45,7 +45,6 @@ var routes = [
   'tiles',
   'market_size',
   'network_plan',
-  'customer_profile',
   'admin_users',
   'admin_settings',
   'settings',

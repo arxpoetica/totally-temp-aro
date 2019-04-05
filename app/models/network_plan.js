@@ -180,7 +180,6 @@ module.exports = class NetworkPlan {
       .then(() => {
         var sql = `
           SELECT
-            $2::text AS carrier_name,
             plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
             users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
             created_at, updated_at
@@ -190,7 +189,7 @@ module.exports = class NetworkPlan {
           LEFT JOIN auth.users ON users.id = permissions.user_id
           WHERE plan.id=$1
         `
-        return database.findOne(sql, [id, config.client_carrier_name])
+        return database.findOne(sql, [id])
       })
     })
   }
@@ -206,7 +205,6 @@ module.exports = class NetworkPlan {
 
     return database.findOne(`
         SELECT
-          $2::text AS carrier_name,
           plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
           created_at, updated_at, location_types, optimization_type,
@@ -215,7 +213,7 @@ module.exports = class NetworkPlan {
         LEFT JOIN auth.permissions ON permissions.plan_id = plan.id AND permissions.rol = 'owner'
         LEFT JOIN auth.users ON users.id = permissions.user_id
         WHERE plan.id=$1
-      `, [plan_id, config.client_carrier_name])
+      `, [plan_id])
       .then((_plan) => {
         if (!_plan) return Promise.reject(new Error('Plan not found'))
 
@@ -412,7 +410,6 @@ module.exports = class NetworkPlan {
         var sql = `
           SELECT
             plan.*,
-            $1::text AS carrier_name,
             plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
             users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
             created_at, updated_at,
@@ -422,7 +419,7 @@ module.exports = class NetworkPlan {
           LEFT JOIN auth.users ON users.id = permissions.user_id
           WHERE plan.plan_type='R'
         `
-        var params = [config.client_carrier_name]
+        var params = []
         var allPlans = user && (user.perspective === 'admin' || user.perspective === 'sales') && options.allPlans
         if (user && !allPlans) {
           params.push(user.id)
@@ -520,7 +517,6 @@ module.exports = class NetworkPlan {
     .then(() => {
       var sql = `
         SELECT
-          $2::text AS carrier_name,
           plan.id, name, area_name, ST_AsGeoJSON(area_centroid)::json as area_centroid, ST_AsGeoJSON(area_bounds)::json as area_bounds,
           users.id as owner_id, users.first_name as owner_first_name, users.last_name as owner_last_name,
           created_at, updated_at
@@ -530,7 +526,7 @@ module.exports = class NetworkPlan {
         LEFT JOIN auth.users ON users.id = permissions.user_id
         WHERE plan.id=$1
       `
-      return database.findOne(sql, [id, config.client_carrier_name])
+      return database.findOne(sql, [id])
     })
   }
 

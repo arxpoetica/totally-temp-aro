@@ -78,28 +78,6 @@ module.exports = class Network {
     return database.lines(sql, [datasource], true, viewport)
   }
 
-  // View existing fiber plant for competitors
-  static viewFiberPlantForCompetitors (viewport) {
-    var sql = `
-      SELECT geom
-      FROM aro.fiber_plant
-      WHERE carrier_id <> (SELECT id FROM carriers WHERE name=$1)
-      ${database.intersects(viewport, 'geom', 'AND')}
-    `
-    return database.lines(sql, [config.client_carrier_name], true, viewport)
-  }
-
-  // View existing fiber plant for competitors with a heat map
-  static viewFiberPlantDensity (viewport) {
-    var sql = `
-      SELECT geom, carrier_name
-      FROM fiber_plant
-      WHERE carrier_name <> $1
-    `
-    var density = 'COUNT(DISTINCT features.carrier_name)'
-    return database.density(sql, [config.client_carrier_name], true, viewport, density)
-  }
-
   static carriers (fiberType, viewport) {
     var params = [fiberType]
     var sql
