@@ -26,15 +26,18 @@
 
 <div class="map-tools-buttons-container">
   <div ng-controller="map_tools_controller"
-       ng-class="{ 'map_tools_container': true, 'map-tools-vertical-center': state.configuration.perspective.mapTools.centerVertically }">
+    ng-class="{ 'map_tools_container': true, 'map-tools-vertical-center': state.configuration.perspective.mapTools.centerVertically }">
     <div ng-repeat="tool in map_tools.available_tools">
       <hr ng-if="tool.separator">
-      <p ng-if="!tool.separator">
-        <a ng-if="state.configuration.perspective.mapTools[tool.id].showIcon" class="btn btn-primary map-tools-button text-white"
-          ng-attr-id="map_tools_toggle_{{tool.id}}"
+      <p ng-show="!tool.separator && state.configuration.perspective.mapTools.isVisible[tool.id]">
+        <a class="btn btn-primary map-tools-button text-white" ng-attr-id="map_tools_toggle_{{tool.id}}"
           ng-class="{'active': map_tools.is_visible(tool.id), 'disabled': (!map_tools.isEnabled(tool.id)) }"
-          ng-click="map_tools.toggle(tool)"><span ng-attr-class="{{tool.icon}} map-tools-button-icon"></span></a>
-        <div ng-if="state.configuration.perspective.mapTools[tool.id].showLabel" class="map_tool_label">{{tool.name}}</div>
+          ng-click="map_tools.toggle(tool)">
+          <span ng-attr-class="{{tool.icon}} map-tools-button-icon"></span>
+        </a>
+        <div ng-if="state.configuration.perspective.mapTools.isVisible[tool.id] && state.configuration.perspective.mapTools.showLabels" class="map_tool_label">
+          {{tool.name}}
+        </div>
       </p>
     </div>
   </div>

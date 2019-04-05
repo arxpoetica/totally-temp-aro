@@ -22,9 +22,8 @@
       "enabled": false
     },
     "mapTools": {
-      "boundaries": {
-        "showIcon": true,
-        "showLabel": false
+      "isVisible": {
+        "boundaries": false
       }
     },
 		"editExistingObjects": false
@@ -53,9 +52,8 @@
       "showOnlyNames": ["zipcode"]
     },
     "mapTools": {
-      "boundaries": {
-        "showIcon": false,
-        "showLabel": false
+      "isVisible": {
+        "boundaries": false
       }
     },
 		"editExistingObjects": false
@@ -84,9 +82,8 @@
       "showOnlyNames": ["zipcode"]
     },
     "mapTools": {
-      "boundaries": {
-        "showIcon": false,
-        "showLabel": false
+      "isVisible": {
+        "boundaries": false
       }
     },
 		"editExistingObjects": false

@@ -2,27 +2,16 @@
   {
     "name": "default",
     "mapTools": {
-      "locations": {
-        "showIcon": true,
-        "showLabel": false
+      "isVisible": {
+        "locations": true,
+        "network_nodes": true,
+        "construction_sites": true,
+        "fiber_plant": true,
+        "boundaries": true
       },
-      "network_nodes": {
-        "showIcon": true,
-        "showLabel": false
-      },
-      "construction_sites": {
-        "showIcon": true,
-        "showLabel": false
-      },
-      "fiber_plant": {
-        "showIcon": true,
-        "showLabel": false
-      },
-      "boundaries": {
-        "showIcon": true,
-        "showLabel": false
-      },
-      "alignVertically": false
+      "showLabels": false,
+      "showProspectsFilter": false,
+      "centerVertically": false
     },
     "locationCategories": {
       "small_businesses": {
@@ -247,30 +236,16 @@
   {
     "name": "sales_engineer",
     "mapTools": {
-      "locations": {
-        "showIcon": true,
-        "showLabel": true
+      "isVisible": {
+        "locations": true,
+        "network_nodes": true,
+        "construction_sites": false,
+        "fiber_plant": true,
+        "boundaries": true
       },
-      "network_nodes": {
-        "showIcon": true,
-        "showLabel": true
-      },
-      "construction_sites": {
-        "showIcon": false,
-        "showLabel": false
-      },
-      "fiber_plant": {
-        "showIcon": true,
-        "showLabel": true
-      },
-      "boundaries": {
-        "showIcon": true,
-        "showLabel": true
-      },
-      "prosects": {
-        "show": true
-      },
-      "alignVertically": true
+      "showLabels": true,
+      "showProspectsFilter": true,
+      "centerVertically": true
     },
     "locationCategories": {
       "small_businesses": {
@@ -492,30 +467,16 @@
   {
     "name": "account_exec",
     "mapTools": {
-      "locations": {
-        "showIcon": true,
-        "showLabel": true
+      "isVisible": {
+        "locations": true,
+        "network_nodes": true,
+        "construction_sites": false,
+        "fiber_plant": true,
+        "boundaries": true
       },
-      "network_nodes": {
-        "showIcon": true,
-        "showLabel": true
-      },
-      "construction_sites": {
-        "showIcon": false,
-        "showLabel": false
-      },
-      "fiber_plant": {
-        "showIcon": true,
-        "showLabel": true
-      },
-      "boundaries": {
-        "showIcon": true,
-        "showLabel": true
-      },
-      "prosects": {
-        "show": true
-      },
-      "alignVertically": true
+      "showLabels": true,
+      "showProspectsFilter": true,
+      "centerVertically": true
     },
     "locationCategories": {
       "small_businesses": {
