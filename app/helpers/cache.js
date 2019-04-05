@@ -47,7 +47,7 @@ function loadConfiguration() {
     'aroClient',
     'mapType',
     'locationDetailProperties',
-    'uiVisibility',
+    'perspectives',
     'optimizationOptions',
     'planEditor',
     'resourceEditors'

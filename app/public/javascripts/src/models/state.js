@@ -1556,8 +1556,8 @@ class State {
           service.googleMapsLicensing = result.data.googleMapsLicensing
           service.configuration.loadPerspective = (perspective) => {
           // If a perspective is not found, go to the default
-            const defaultPerspective = service.configuration.uiVisibility.filter(item => item.name === 'default')[0]
-            const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
+            const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
+            const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]
             service.configuration.perspective = thisPerspective || defaultPerspective
           }
           service.configuration.loadPerspective(result.data.user.perspective)
