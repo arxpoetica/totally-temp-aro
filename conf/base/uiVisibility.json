@@ -53,7 +53,7 @@
     },
     "showToolbarButtons": {
       "globalSettings": true,
-      "emphericalPlan": true,
+      "ephemeralPlan": true,
       "savePlanAs": true,
       "planModel": true,
       "exportSelection": true,
@@ -129,7 +129,7 @@
     },
     "showToolbarButtons": {
       "globalSettings": true,
-      "emphericalPlan": false,
+      "ephemeralPlan": false,
       "savePlanAs": false,
       "planModel": false,
       "exportSelection": true,
@@ -205,7 +205,7 @@
     },
     "showToolbarButtons": {
       "globalSettings": true,
-      "emphericalPlan": false,
+      "ephemeralPlan": false,
       "savePlanAs": false,
       "planModel": false,
       "exportSelection": true,
