@@ -24,13 +24,17 @@ class ConstructionSitesController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $onInit () {
-    var constructionSiteLayers = []
+  $doCheck () {
+    const constructionSiteCategories = this.state.configuration && this.state.configuration.constructionSiteCategories
+    if (constructionSiteCategories && (this.cachedConstructionSiteCategories !== constructionSiteCategories)) {
+      var constructionSiteLayers = []
 
-    this.state.configuration && Object.keys(this.state.configuration.constructionSiteCategories.categories).forEach((layerKey) => {
-      constructionSiteLayers.push(this.state.configuration.constructionSiteCategories.categories[layerKey])
-    })
-    this.setConstructionSiteLayers(new List(constructionSiteLayers))
+      this.state.configuration && this.state.configuration.constructionSiteCategories && Object.keys(this.state.configuration.constructionSiteCategories.categories).forEach((layerKey) => {
+        constructionSiteLayers.push(this.state.configuration.constructionSiteCategories.categories[layerKey])
+      })
+      this.setConstructionSiteLayers(new List(constructionSiteLayers))
+      this.cachedConstructionSiteCategories = constructionSiteCategories
+    }
   }
 
   // Replaces any occurrences of searchText by replaceText in the keys of an object

@@ -37,16 +37,19 @@ class NetworkEquipmentController {
     this.unsubscribeRedux = $ngRedux.connect(this.mapStateToThis, this.mapDispatchToTarget)(this.mergeToTarget.bind(this))
   }
 
-  $onInit() {
-    if (config.ARO_CLIENT === 'tdc') {
-      var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
-      this.state.configuration.networkEquipment.equipments = {}
-      this.equ_tdc_order.forEach((key) => {
-        this.state.configuration.networkEquipment.equipments[key] = equ[key]
-      })
+  $doCheck() {
+    const networkEquipments = this.state.configuration.networkEquipment && this.state.configuration.networkEquipment.equipments
+    if (networkEquipments && (this.cachedNetworkEquipments !== networkEquipments)) {
+      if (config.ARO_CLIENT === 'tdc') {
+        var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
+        this.state.configuration.networkEquipment.equipments = {}
+        this.equ_tdc_order.forEach((key) => {
+          this.state.configuration.networkEquipment.equipments[key] = equ[key]
+        })
+      }
+      this.setNetworkEquipmentLayers(this.state.configuration.networkEquipment)
+      this.cachedNetworkEquipments = networkEquipments
     }
-
-    this.setNetworkEquipmentLayers(this.state.configuration.networkEquipment)
   }
 
   // Get the point transformation mode with the current zoom level

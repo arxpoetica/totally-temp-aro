@@ -16,16 +16,6 @@ class ResourceManagerController {
       rate_reach_manager: 'rate-reach-matrix'
     }
     this.managerIdString = 'MANAGER_ID'
-    this.managerDeleteUrl = {
-      price_book: `/service/v1/pricebook/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      roic_manager: `/service/v1/roic_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      arpu_manager: `/service/v1/arpu_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      impedance_mapping_manager: `/service/v1/impedance_mapping_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      tsm_manager: `/service/v1/tsm_manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      competition_manager: `/service/v1/competitor-manager/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`,
-      rate_reach_manager: `/service/rate-reach-matrix/resource/${this.managerIdString}?user_id=${this.state.loggedInUser.id}`
-    }
-    
     this.rows = []
 
     this.displayProps = [
@@ -164,6 +154,10 @@ class ResourceManagerController {
   }
   
   getRows () {
+    if (!this.state.loggedInUser) {
+      return
+    }
+
     var props = ''
     
     if (this.searchText.trim() != '') {
@@ -293,9 +287,6 @@ class ResourceManagerController {
     this.askUserToConfirmManagerDelete(selectedManager.name)
       .then((okToDelete) => {
         if (okToDelete) {
-          //const managerIdToDelete = selectedManager.id
-          // this.selectedResourceKey selectedManager.managerType
-          //const deleteUrl = this.managerDeleteUrl[selectedManager.resourceType].replace(this.managerIdString, managerIdToDelete)
           this.deleteManager(selectedManager)
         }
       })

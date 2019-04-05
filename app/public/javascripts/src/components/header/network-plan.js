@@ -1,12 +1,12 @@
 class NetworkPlanController {
   constructor ($timeout, state) {
     this.plan = null
-    this.currentUser = state.loggedInUser
+    this.state = state
     this.showPlan = true
 
     state.plan.subscribe((newValue) => {
       this.plan = newValue
-      this.showPlan = (this.plan && this.plan.ephemeral) && this.currentUser.perspective === 'admin'
+      this.showPlan = (this.plan && this.plan.ephemeral) && this.state.loggedInUser.perspective === 'admin'
     })
   }
 }

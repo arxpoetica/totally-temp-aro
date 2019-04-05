@@ -197,14 +197,6 @@
           });
         // rewrite default options
         map.setStreetView(panorama);
-
-        // At this point, our angular app and the document is initialized. Take the "logged in user" that we have on the
-        // server side, use EJS to expand it and then set that in our "state" service. This is done so that we don't
-        // have to rely on a global user object (like we did before this change)
-        angular.element(document.body).injector().get('state').initializeAppConfiguration(<%- JSON.stringify(user) %>,
-                                                                                          <%- JSON.stringify(appConfiguration) %>,
-                                                                                          <%- JSON.stringify(googleMapsLicensing) %>,
-                                                                                          "<%- sessionWebsocketId %>");
       }
 
       function openReleaseNotes() {
@@ -216,6 +208,7 @@
       var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
       var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;
       var mapTypeId = <%- JSON.stringify(mapType) %>;
+      var sessionWebsocketId = "<%- sessionWebsocketId %>"
 
       $(document).ready(initialize);
     </script>

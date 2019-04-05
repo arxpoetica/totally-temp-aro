@@ -4,7 +4,6 @@ class DataSourceUploadController {
     this.$http = $http
     this.$timeout = $timeout
     this.aclManager = aclManager
-    this.projectId = state.loggedInUser.projectId
     this.conicTileSystemUploaderApi = null // Will be set if the conic tile uploader is active
     this.editingDataset = {
       name: ''
@@ -193,7 +192,7 @@ class DataSourceUploadController {
 
   layerBoundary (equipmentLibraryId, serviceLayerLibraryId) {
     var boundaryOptions = {
-      url: '/service/v1/project/' + this.projectId + '/serviceLayers-cmd?user_id=' + this.state.loggedInUser.id,
+      url: '/service/v1/project/' + this.state.loggedInUser.projectId + '/serviceLayers-cmd?user_id=' + this.state.loggedInUser.id,
       method: 'POST',
       data: {
         action: 'GENERATE_POLYGONS',

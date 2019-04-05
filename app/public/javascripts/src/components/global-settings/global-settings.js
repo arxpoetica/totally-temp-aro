@@ -2,7 +2,6 @@ class GlobalSettingsController {
   constructor (state, globalSettingsService) {
     this.state = state
     this.globalSettingsService = globalSettingsService
-    this.currentUser = state.loggedInUser
 
     this.views = Object.freeze({
       GLOBAL_SETTINGS: 'Global Settings',
@@ -15,7 +14,7 @@ class GlobalSettingsController {
       RELEASE_NOTES: 'Release Notes'
     })
     this.currentView = this.views.GLOBAL_SETTINGS
-    this.userIdForSettingsEdit = this.state.loggedInUser.id
+    this.userIdForSettingsEdit = null
 
     state.openGlobalSettingsView.skip(1).subscribe((view) => {
       this.currentView = this.views[view]

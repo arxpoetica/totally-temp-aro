@@ -41,7 +41,7 @@ class BoundariesController {
       .then(() => {
         var newTileLayers = []
         var filteredGlobalServiceLayers = globalServiceLayers
-        if (this.state.configuration.perspective.limitBoundaries.enabled) {
+        if (this.state.configuration.perspective && this.state.configuration.perspective.limitBoundaries.enabled) {
           const namesToInclude = this.state.configuration.perspective.limitBoundaries.showOnlyNames
           filteredGlobalServiceLayers = globalServiceLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
         }
@@ -59,7 +59,7 @@ class BoundariesController {
         })
 
         var includeCensusBlocks = true
-        if (this.state.configuration.perspective.limitBoundaries.enabled) {
+        if (this.state.configuration.perspective && this.state.configuration.perspective.limitBoundaries.enabled) {
           const namesToInclude = this.state.configuration.perspective.limitBoundaries.showOnlyNames
           includeCensusBlocks = namesToInclude.indexOf('census_blocks') >= 0
         }
@@ -73,7 +73,7 @@ class BoundariesController {
         }
 
         var analysisLayers = this.state.entityTypeList.AnalysisLayer
-        if (this.state.configuration.perspective.limitBoundaries.enabled) {
+        if (this.state.configuration.perspective && this.state.configuration.perspective.limitBoundaries.enabled) {
           const namesToInclude = this.state.configuration.perspective.limitBoundaries.showOnlyNames
           analysisLayers = analysisLayers.filter((item) => namesToInclude.indexOf(item.name) >= 0)
         }
