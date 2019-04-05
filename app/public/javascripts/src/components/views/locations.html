@@ -55,15 +55,17 @@
           <div ng-if="locationFilter.type === 'multiSelect'">
             <!-- The filter title -->
             <div class="row location-category-title">
-              <button class="btn btn-xs btn-light"
+              <button ng-class="{ 'btn btn-xs': true,
+                                  'btn-light': !locationFilter.useFilter,
+                                  'btn-danger': locationFilter.useFilter }"
                       style="padding: 3px 5px 0px 5px;"
-                      ng-click="locationFilter.isExpanded = !locationFilter.isExpanded">
-                <i ng-class="{ 'fas fa-filter': true, 'text-danger': locationFilter.isExpanded }"></i>
+                      ng-click="locationFilter.useFilter = !locationFilter.useFilter; $ctrl.updateMapLayers()">
+                <i class="fas fa-filter"></i>
               </button>
               <span style="line-height: 26px; margin-left: 5px;">{{locationFilter.label}}</span>
             </div>
             <!-- All the checkboxes for this filter -->
-            <div class="row" ng-show="locationFilter.isExpanded">
+            <div class="row" ng-show="locationFilter.useFilter">
               <div ng-repeat="filterValue in locationFilter.values" class="col-sm-12" style="padding: 5px 15px;">
                 <span class="ctype-icon" ng-if="filterValue.iconUrl">
                   <img ng-src="{{filterValue.iconUrl}}" style="width:16px;margin-right:10px">
@@ -83,15 +85,17 @@
           <div ng-if="locationFilter.type === 'threshold'">
             <!-- The filter title -->
             <div class="row location-category-title">
-              <button class="btn btn-xs btn-light"
+              <button ng-class="{ 'btn btn-xs': true,
+                                  'btn-light': !locationFilter.useFilter,
+                                  'btn-danger': locationFilter.useFilter }"
                       style="padding: 3px 5px 0px 5px;"
-                      ng-click="locationFilter.isExpanded = !locationFilter.isExpanded">
-                <i ng-class="{ 'fas fa-filter': true, 'text-danger': locationFilter.isExpanded }"></i>
+                      ng-click="locationFilter.useFilter = !locationFilter.useFilter; $ctrl.updateMapLayers()">
+                <i ng-class="{ 'fas fa-filter': true, 'text-danger': locationFilter.isAnyFilterSelected }"></i>
               </button>
             <span style="line-height: 26px; margin-left: 5px;">{{locationFilter.label}} ( {{locationFilter.value | number: 2}} )</span>
             </div>
             <!-- A range input for this filter -->
-            <div class="row" style="padding: 15px;" ng-show="locationFilter.isExpanded">
+            <div class="row" style="padding: 15px;" ng-show="locationFilter.useFilter">
               <input type="range" min="{{locationFilter.minValue}}" max="{{locationFilter.maxValue}}"
                      step="{{(locationFilter.maxValue - locationFilter.minValue) / 100}}" ng-model="locationFilter.value"
                      ng-change="$ctrl.updateMapLayers()" class="aro-slider">

@@ -154,7 +154,8 @@ class LocationsController {
             // to a single filter (e.g. salesType).
             var featureFilters = []
             var layerIconUrl = locationType.iconUrl
-            this.state.configuration.perspective.locationFilters.forEach(locationFilter => {
+            const activeLocationFilters = this.state.configuration.perspective.locationFilters.filter(item => item.useFilter)
+            activeLocationFilters.forEach(locationFilter => {
               var individualFilter = feature => true // A filter that returns back all the input items
               if (locationFilter.type === 'multiSelect') {
                 const checkedAttributes = locationFilter.values.filter(item => item.checked).map(item => item.key)
