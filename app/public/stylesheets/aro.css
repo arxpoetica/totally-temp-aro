@@ -659,10 +659,6 @@ a[data-toggle="collapse"]:not(.collapsed) > .fa-caret-down {
   display: none;
 }
 
-#plan-saving-progress {
-  display: none;
-}
-
 .fiber-label {
   text-overflow: ellipsis;
   max-width: 75%;

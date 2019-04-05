@@ -8,12 +8,11 @@ const getSelectionModes = state => state.selection.selectionModes
 const getAllSelectionModes = createSelector([getSelectionModes], (selectionModes) => angular.copy(selectionModes))
 
 class NetworkAnalysisBuildController {
-  constructor ($http, $timeout, $ngRedux, state, optimization) {
+  constructor ($http, $timeout, $ngRedux, state) {
     this.$http = $http
     this.$timeout = $timeout
     this.$ngRedux = $ngRedux
     this.state = state
-    this.optimization = optimization
     this.targets = []
     this.targetsTotal = 0
     this.serviceAreas = []
@@ -116,7 +115,7 @@ class NetworkAnalysisBuildController {
   }
 }
 
-NetworkAnalysisBuildController.$inject = ['$http', '$timeout', '$ngRedux', 'state', 'optimization']
+NetworkAnalysisBuildController.$inject = ['$http', '$timeout', '$ngRedux', 'state']
 
 let networkAnalysisBuild = {
   templateUrl: '/components/sidebar/analysis/network-analysis-build.html',

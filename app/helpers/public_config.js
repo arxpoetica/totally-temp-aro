@@ -2,7 +2,6 @@ var _ = require('underscore')
 var config = require('./config')
 
 var public_config = _.pick(config,
-  'route_planning',
   'ui',
   'currency_symbol',
   'hsv_defaults',

@@ -12,10 +12,6 @@ app.service('selection', ($rootScope, map_layers) => {
     }
   }
 
-  selection.setEnabled = (_enabled) => {
-    enabled = _enabled && config.route_planning.length > 0
-  }
-
   selection.isEnabled = () => {
     return enabled
   }

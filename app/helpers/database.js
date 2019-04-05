@@ -189,13 +189,6 @@ module.exports = class Database {
   }
 }
 
-module.exports.query('SELECT * from aro.algorithms')
-  .then((result) => {
-    Array.prototype.splice.apply(config.route_planning,
-      [0, config.route_planning.length].concat(result))
-  })
-  .catch((err) => console.error(err.stack))
-
 var postgisversion
 module.exports.findOne("SELECT split_part(PostGIS_version(), ' ', 1) AS version")
   .then((result) => {
