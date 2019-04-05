@@ -40,7 +40,7 @@ class NetworkEquipmentController {
   $doCheck() {
     const networkEquipments = this.state.configuration.networkEquipment && this.state.configuration.networkEquipment.equipments
     if (networkEquipments && (this.cachedNetworkEquipments !== networkEquipments)) {
-      if (config.ARO_CLIENT === 'tdc') {
+      if (this.state.configuration && (this.state.configuration.ARO_CLIENT === 'tdc')) {
         var equ = angular.copy(this.state.configuration.networkEquipment.equipments)
         this.state.configuration.networkEquipment.equipments = {}
         this.equ_tdc_order.forEach((key) => {

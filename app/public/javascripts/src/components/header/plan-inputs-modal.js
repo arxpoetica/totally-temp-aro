@@ -67,7 +67,7 @@ class PlanInputsModalController {
   checkIfSATagExists () {
     return new Promise((resolve, reject) => {
       // For frontier client check for atleast one SA tag selected
-      if (config.ARO_CLIENT === 'frontier') {
+      if (this.state.configuration.ARO_CLIENT === 'frontier') {
         if (this.state.currentPlanServiceAreaTags.length <= 0) {
           swal({
             title: 'Service Area Tag is Required',
@@ -86,7 +86,7 @@ class PlanInputsModalController {
   checkIfPlanNameExists () {
     return new Promise((resolve, reject) => {
       // For frontier client check for duplicate plan name
-      if (config.ARO_CLIENT === 'frontier') {
+      if (this.state.configuration.ARO_CLIENT === 'frontier') {
         var filter = `(name eq '${this.planName.replace(/'/g, "''")}') and (ephemeral eq false)`
         return this.$http.get(`/service/odata/PlanSummaryEntity?$select=id,name&$filter=${encodeURIComponent(filter)}&$top=20`)
           .then((result) => {

@@ -21,7 +21,8 @@ exports.configure = (api, middleware) => {
       analysisLayers: cache.analysisLayers,
       googleMapsLicensing: googleMapsLicensing,
       mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP', 
-      analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY
+      analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY,
+      ARO_CLIENT_DONOT_USE_IN_CODE: process.env.ARO_CLIENT
     })
   })
 

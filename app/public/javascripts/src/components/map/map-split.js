@@ -9,7 +9,6 @@ class MapSplitController {
     this.sizesBeforeCollapse = null
     this.transitionTimeMsec = 100
     this.transitionCSS = `width ${this.transitionTimeMsec}ms` // This must be the same for the map and sidebar, otherwise animations don't work correctly
-    $scope.showFooter = config.ARO_CLIENT === 'frontier'
 
     $document.ready(() => {
       if (!this.splitterObj) {
@@ -140,7 +139,7 @@ let mapSplit = {
     }
   </style>
   <!-- First define the container for both the map and the sidebar. -->
-  <div class="app_wrapper_container {{showFooter ? 'footer' : ''}}">
+  <div class="app_wrapper_container {{($ctrl.state.configuration.ARO_CLIENT === 'frontier') ? 'footer' : ''}}">
 
     <!-- Define the canvas that will hold the map. -->
     <div id="map-canvas-container" ng-style="{ position: 'relative', float: 'left', height: '100%', width: '100%', transition: $ctrl.transitionCSS }">
@@ -204,7 +203,7 @@ let mapSplit = {
     </div>
   </div>
   <ui-notification style="pointer-events: none; position: absolute; left: 25px; bottom: 25px;" channel="'main'"></ui-notification>
-  <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="showFooter"></div>
+  <div ng-include="'javascripts/lib/components/footer/frontier_footer.html'" ng-if="$ctrl.state.configuration.ARO_CLIENT === 'frontier'"></div>
   `,
   bindings: { },
   controller: MapSplitController

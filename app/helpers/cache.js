@@ -54,6 +54,7 @@ function loadConfiguration() {
 
   exports.configuration = {}
   configurationTypes.forEach((configurationType) => exports.configuration[configurationType] = UIConfiguration.getConfigurationSet(configurationType))
+  exports.configuration.ARO_CLIENT = process.env.ARO_CLIENT
   return Promise.resolve()  
 }
 

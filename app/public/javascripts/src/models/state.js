@@ -232,9 +232,6 @@ class State {
       },
       selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
     }
-    if (config.ARO_CLIENT === 'frontier') {
-      heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
-    }
     service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
 
     service.defaultPlanCoordinates = {
@@ -1574,6 +1571,9 @@ class State {
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
           socketManager.initializeSession(sessionWebsocketId)
           service.getReleaseVersions()
+          if (service.configuration.ARO_CLIENT === 'frontier') {
+            heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
+          }
         })
         .catch(err => console.error(err))
     }

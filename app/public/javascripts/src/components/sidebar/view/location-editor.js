@@ -56,7 +56,7 @@ class LocationEditorController {
 
   $onInit () {
     this.resumeOrCreateTransaction()
-    config.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers(this.locationLayers)
+    this.state.configuration.ARO_CLIENT === 'frontier' && this.selectAllLocationLayers(this.locationLayers)
   }
 
   $onDestroy () {
@@ -341,7 +341,7 @@ class LocationEditorController {
 
   checkCanCreateObject (feature, usingMapClick) {
     // For frontier client check If households layer is enabled or not, If not enabled don't allow to create a object
-    if (config.ARO_CLIENT === 'frontier' && !feature.isExistingObject) {
+    if (this.state.configuration.ARO_CLIENT === 'frontier' && !feature.isExistingObject) {
       var hhLocationLayer = this.locationLayers.filter((locationType) => locationType.label === 'Residential')[0]
 
       if (!hhLocationLayer.checked) {

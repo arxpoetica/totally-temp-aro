@@ -4,7 +4,7 @@
     <title ng-bind="appTitle"></title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
-    <% if (config.ARO_CLIENT != 'frontier') { %>
+    <% if (ARO_CLIENT_DONOT_USE_IN_CODE != 'frontier') { %>
       <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <% } %>
     <link href="https://fonts.googleapis.com/css?family=Exo:400,700" rel="stylesheet">
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">    <link rel="stylesheet" type="text/css" href="/stylesheets/animate.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/aro.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/editor-interfaces.css">
-    <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= config.ARO_CLIENT %>.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/client_<%= ARO_CLIENT_DONOT_USE_IN_CODE %>.css">
     <link rel="stylesheet" type="text/css" href="/stylesheets/layout_<%= config.ui.layout %>.css">
 
     <!-- Putting google maps include here because sometimes our app code loads before maps, and tries to use the map. It is going

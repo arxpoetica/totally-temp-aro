@@ -1,7 +1,7 @@
 import WorkflowState from '../common/workflow-state'
 
 class PointFeatureRenderer {
-  static renderFeatures (pointFeatureRendererList) {
+  static renderFeatures (pointFeatureRendererList, ARO_CLIENT) {
     var deletedPointFeatureRendererList = pointFeatureRendererList.filter((featureObj) => {
       if (this.getModificationTypeForFeature(featureObj.feature, featureObj.mapLayer, featureObj.tileDataService) === PointFeatureRenderer.modificationTypes.DELETED) {
         return featureObj
@@ -17,20 +17,22 @@ class PointFeatureRenderer {
     deletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
-        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility)
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
+        ARO_CLIENT)
     })
 
     unDeletedPointFeatureRendererList.forEach((Obj) => {
       PointFeatureRenderer.renderFeature(Obj.ctx, Obj.shape, Obj.feature, Obj.featureData, Obj.geometryOffset, Obj.mapLayer, Obj.mapLayers, Obj.tileDataService,
         Obj.selection, Obj.oldSelection, Obj.selectedLocationImage, Obj.lockOverlayImage, Obj.invalidatedOverlayImage,
-        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility)
+        Obj.selectedDisplayMode, Obj.displayModes, Obj.analysisSelectionMode, Obj.selectionModes, Obj.equipmentLayerTypeVisibility,
+        ARO_CLIENT)
     })
   }
 
   static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
-    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility) {
-    const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService)
+    selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, ARO_CLIENT) {
+    const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService, ARO_CLIENT)
     var selectedListType = null
     var selectedListId = null
     if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
@@ -131,12 +133,12 @@ class PointFeatureRenderer {
     return modificationType
   }
 
-  static getEntityImageForFeature (feature, featureData) {
+  static getEntityImageForFeature (feature, featureData, ARO_CLIENT) {
     var entityImage = featureData.icon
     if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
       if (feature.properties.hasOwnProperty('object_id')) {
         // greyout an RT with hsiEanbled true for frontier client
-        if (config.ARO_CLIENT === 'frontier' &&
+        if (ARO_CLIENT === 'frontier' &&
             (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
             (feature.properties.hsiEnabled !== 'true')) {
           entityImage = featureData.greyOutIcon

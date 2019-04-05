@@ -9,6 +9,5 @@ var public_config = _.pick(config,
   'client_carrier_name',
   'length',
   'displayable_client_carrier_name')
-public_config.ARO_CLIENT = process.env.ARO_CLIENT
 
 module.exports = public_config
