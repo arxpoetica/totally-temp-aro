@@ -71,8 +71,8 @@
   </div>
   -->
   <accordion style="position: relative; flex: 1 1 auto;" initial-expanded-panel="'DATA_SELECTION'">
-    <accordion-panel-title title="'Data Selection'" panel-id="'DATA_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.dataSelection.show"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'DATA_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.dataSelection.show">
+    <accordion-panel-title title="'Data Selection'" panel-id="'DATA_SELECTION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'DATA_SELECTION'">
       <plan-data-selection project-id="$ctrl.state.getProjectId()" 
                            user-id="$ctrl.userId" 
                            plan-id="$ctrl.plan.id" 
@@ -83,8 +83,8 @@
         ng-hide="$ctrl.areControlsEnabled">
       </div>
     </accordion-panel-contents>
-    <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.resourceSelection.show"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'RESOURCE_SELECTION'" ng-if="$ctrl.state.configuration.perspective.planSettings.resourceSelection.show">
+    <accordion-panel-title title="'Resource Selection'" panel-id="'RESOURCE_SELECTION'""></accordion-panel-title>
+    <accordion-panel-contents panel-id="'RESOURCE_SELECTION'">
       <plan-resource-selection project-id="$ctrl.state.getProjectId()" 
                                user-id="$ctrl.userId" 
                                on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
@@ -94,8 +94,8 @@
         ng-hide="$ctrl.areControlsEnabled">
       </div>
     </accordion-panel-contents>
-    <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.networkConfiguration.show"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.networkConfiguration.show">
+    <accordion-panel-title title="'Network Configuration'" panel-id="'NETWORK_CONFIGURATION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'NETWORK_CONFIGURATION'">
       <plan-network-configuration project-id="$ctrl.state.getProjectId()" 
                                   user-id="$ctrl.userId" 
                                   on-change="$ctrl.onChange({childKey:childKey, isValid:isValid, isInit:isInit})"
@@ -105,8 +105,8 @@
         ng-hide="$ctrl.areControlsEnabled">
       </div>
     </accordion-panel-contents>
-    <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.projectConfiguration.show"></accordion-panel-title>
-    <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'" ng-if="$ctrl.state.configuration.perspective.planSettings.projectConfiguration.show">
+    <accordion-panel-title title="'Project Configuration'" panel-id="'PROJECT_CONFIGURATION'"></accordion-panel-title>
+    <accordion-panel-contents panel-id="'PROJECT_CONFIGURATION'">
       <plan-project-configuration project-id="$ctrl.state.getProjectId()" 
                                   user-id="$ctrl.currentUser.id" 
                                   plan-id="$ctrl.plan.id"></plan-project-configuration>

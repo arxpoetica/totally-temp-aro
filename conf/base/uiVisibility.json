@@ -17,7 +17,6 @@
     "locationDetails": {
       "showDefaultDetails": true,
       "showSalesDetails": false,
-      "showMoreInfoButton": true,
       "showAuditLog": true
     },
     "networkEquipment": {
@@ -99,20 +98,6 @@
       }
     },
     "fiberPlantAlternateLabel": false,
-    "planSettings": {
-      "resourceSelection": {
-        "show": true
-      },
-      "networkConfiguration": {
-        "show": true
-      },
-      "projectConfiguration": {
-        "show": true
-      },
-      "dataSelection": {
-        "show": true
-      }
-    },
     "limitBoundaries": {
       "enabled": false
     },
@@ -137,7 +122,6 @@
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
-      "showMoreInfoButton": true,
       "showAuditLog": false
     },
     "networkEquipment": {
@@ -217,20 +201,6 @@
         "show": false
       }
     },
-    "planSettings": {
-      "resourceSelection": {
-        "show": true
-      },
-      "networkConfiguration": {
-        "show": true
-      },
-      "projectConfiguration": {
-        "show": true
-      },
-      "dataSelection": {
-        "show": true
-      }
-    },
     "limitBoundaries": {
       "enabled": false
     },
@@ -256,7 +226,6 @@
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
-      "showMoreInfoButton": true,
       "showAuditLog": false
     },
     "networkEquipment": {
@@ -337,20 +306,6 @@
       }
     },
     "fiberPlantAlternateLabel": true,
-    "planSettings": {
-      "resourceSelection": {
-        "show": true
-      },
-      "networkConfiguration": {
-        "show": true
-      },
-      "projectConfiguration": {
-        "show": true
-      },
-      "dataSelection": {
-        "show": true
-      }
-    },
     "limitBoundaries": {
       "enabled": false
     },
