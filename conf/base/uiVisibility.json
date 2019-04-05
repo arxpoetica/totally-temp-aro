@@ -26,16 +26,10 @@
       "showPlanned": true,
       "showExisting": true
     },
-    "boundaries":{
-      "wirecenter": {
-        "show": true
-      },
-      "census_blocks": {
-        "show": true
-      },
-      "analysis_layer": {
-        "show": true
-      }
+    "showBoundaries":{
+      "wirecenter": true,
+      "census_blocks": true,
+      "analysis_layer": true
     },
     "viewModePanels": {
       "LOCATION_INFO": {
