@@ -197,13 +197,15 @@
           });
         // rewrite default options
         map.setStreetView(panorama);
+
+        // At this point, our angular app and the document is initialized. Perform any further initialization via the state service.
+        angular.element(document.body).injector().get('state').initializeApp()
       }
 
       function openReleaseNotes() {
         angular.element(document.body).injector().get('state').openReleaseNotes()
       }
 
-      var user_id = <%= user.id %>;
       var config = <%- JSON.stringify(config) %>;
       var globalServiceLayers = <%- JSON.stringify(serviceLayers) %>;
       var globalAnalysisLayers = <%- JSON.stringify(analysisLayers) %>;

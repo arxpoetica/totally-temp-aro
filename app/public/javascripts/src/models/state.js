@@ -1555,22 +1555,27 @@ class State {
     }
 
     service.configuration = {}
-    service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing, websocketSessionId) => {
-      service.configuration = appConfiguration
-      service.googleMapsLicensing = googleMapsLicensing
-      service.configuration.loadPerspective = (perspective) => {
-      // If a perspective is not found, go to the default
-        const defaultPerspective = service.configuration.uiVisibility.filter(item => item.name === 'default')[0]
-        const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
-        service.configuration.perspective = thisPerspective || defaultPerspective
-      }
-      service.configuration.loadPerspective(loggedInUser.perspective)
-      service.setLoggedInUser(loggedInUser)
-      service.setOptimizationOptions()
-      tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
-      tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-      socketManager.initializeSession(websocketSessionId)
-      service.getReleaseVersions()
+    service.initializeApp = () => {
+      // Get application configuration from the server
+      $http.get('/configuration')
+        .then(result => {
+          service.configuration = result.data.appConfiguration
+          service.googleMapsLicensing = result.data.googleMapsLicensing
+          service.configuration.loadPerspective = (perspective) => {
+          // If a perspective is not found, go to the default
+            const defaultPerspective = service.configuration.uiVisibility.filter(item => item.name === 'default')[0]
+            const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
+            service.configuration.perspective = thisPerspective || defaultPerspective
+          }
+          service.configuration.loadPerspective(result.data.user.perspective)
+          service.setLoggedInUser(result.data.user)
+          service.setOptimizationOptions()
+          tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
+          tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
+          socketManager.initializeSession(sessionWebsocketId)
+          service.getReleaseVersions()
+        })
+        .catch(err => console.error(err))
     }
 
     service.setOptimizationOptions = () => {
