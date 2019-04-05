@@ -48,22 +48,9 @@
       "DEBUG": true,
       "PLAN_SETTINGS": true
     },
-    "areaNetworkPlanning": {
-      "expertMode": {
-        "show": true
-      }
-    },
     "competitorNetworks": {
-      "fiberPlantAlternateLabel": false,
-      "showCompetitorTypes": true,
-      "disableGeotel": false,
-      "disableRoutes": false,
-      "disableRoutesBuffer": false
-    },
-    "targetBuilder": {
-      "expertMode": {
-        "show": true
-      }
+      "fiberPlantLabel": "NBM",
+      "showCompetitorTypes": true
     },
     "toolbar": {
       "globalSettings": {
@@ -180,22 +167,9 @@
       "DEBUG": false,
       "PLAN_SETTINGS": true
     },
-    "areaNetworkPlanning": {
-      "expertMode": {
-        "show": false
-      }
-    },
     "competitorNetworks": {
-      "fiberPlantAlternateLabel": true,
-      "showCompetitorTypes": false,
-      "disableGeotel": false,
-      "disableRoutes": false,
-      "disableRoutesBuffer": false
-    },
-    "targetBuilder": {
-      "expertMode": {
-        "show": false
-      }
+      "fiberPlantLabel": "FCC Form 477",
+      "showCompetitorTypes": false
     },
     "toolbar": {
       "globalSettings": {
@@ -312,21 +286,9 @@
       "DEBUG": false,
       "PLAN_SETTINGS": false
     },
-    "areaNetworkPlanning": {
-      "expertMode": {
-        "show": false
-      }
-    },
     "competitorNetworks": {
-      "showCompetitorTypes": false,
-      "disableGeotel": false,
-      "disableRoutes": false,
-      "disableRoutesBuffer": false
-    },
-    "targetBuilder": {
-      "expertMode": {
-        "show": false
-      }
+      "fiberPlantLabel": "NBM",
+      "showCompetitorTypes": false
     },
     "toolbar": {
       "globalSettings": {
