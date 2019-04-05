@@ -49,6 +49,7 @@ function loadConfiguration() {
     'locationDetailProperties',
     'uiVisibility',
     'optimizationOptions',
+    'planEditor',
     'resourceEditors'
   ]
 

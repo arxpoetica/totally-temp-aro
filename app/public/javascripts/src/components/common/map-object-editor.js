@@ -327,12 +327,12 @@ class MapObjectEditorController {
                 options.push(this.contextMenuService.makeItemOption('Delete', 'fa-trash-alt', () => { this.deleteObjectWithId(result.objectId) }))
               } else {
                 options.push(this.contextMenuService.makeItemOption('View Existing', 'fa-pencil', () => { this.viewExistingFeature(result, latLng) }))
-                if(result.deployment_type !== 1 && !this.state.configuration.perspective.editExistingObjects) {
+                if (result.deployment_type !== 1 && !this.state.configuration.planEditor.editExistingObjects) {
                   options.push(this.contextMenuService.makeItemOption('Edit Existing', 'fa-pencil', () => { this.editExistingFeature(result, latLng) }))                
                   if (result._data_type.indexOf("equipment.") > -1 && this.isBoundaryCreationAllowed({ 'mapObject': result })) {
                     options.push(this.contextMenuService.makeItemOption('Add Boundary', 'fa-plus', () => { 
                       this.editExistingFeature(result, latLng)
-                      .then(() => this.startDrawingBoundaryForId(result.objectId)) 
+                        .then(() => this.startDrawingBoundaryForId(result.objectId)) 
                     }))
                   }
                 }

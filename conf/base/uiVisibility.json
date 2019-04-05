@@ -97,12 +97,9 @@
         "show": true
       }
     },
-    "fiberPlantAlternateLabel": false,
     "limitBoundaries": {
       "enabled": false
-    },
-    "extendedAnalysis": true,
-		"editExistingObjects": true
+    }
   },
   {
     "name": "sales_engineer",
@@ -204,8 +201,6 @@
     "limitBoundaries": {
       "enabled": false
     },
-    "extendedAnalysis": true,
-		"editExistingObjects": true,
     "hasLocationFilters": true
   },
   {
@@ -305,12 +300,9 @@
         "show": true
       }
     },
-    "fiberPlantAlternateLabel": true,
     "limitBoundaries": {
       "enabled": false
     },
-    "extendedAnalysis": true,
-		"editExistingObjects": true,
     "hasLocationFilters": true
   }
 ]
