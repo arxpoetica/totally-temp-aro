@@ -91,10 +91,10 @@
             <span style="line-height: 26px; margin-left: 5px;">{{locationFilter.label}} ( {{locationFilter.value | number: 2}} )</span>
             </div>
             <!-- A range input for this filter -->
-            <div class="row" style="padding: 5px 15px;" ng-show="locationFilter.isExpanded">
+            <div class="row" style="padding: 15px;" ng-show="locationFilter.isExpanded">
               <input type="range" min="{{locationFilter.minValue}}" max="{{locationFilter.maxValue}}"
                      step="{{(locationFilter.maxValue - locationFilter.minValue) / 100}}" ng-model="locationFilter.value"
-                     ng-change="$ctrl.updateMapLayers()" style="width: 100%;">
+                     ng-change="$ctrl.updateMapLayers()" class="aro-slider">
             </div>
           </div>
         </div>
