@@ -200,8 +200,7 @@
     },
     "limitBoundaries": {
       "enabled": false
-    },
-    "hasLocationFilters": true
+    }
   },
   {
     "name": "account_exec",
@@ -302,7 +301,6 @@
     },
     "limitBoundaries": {
       "enabled": false
-    },
-    "hasLocationFilters": true
+    }
   }
 ]

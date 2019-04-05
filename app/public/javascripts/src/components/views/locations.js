@@ -151,7 +151,7 @@ class LocationsController {
             this.disablelocations = false
             this.$timeout()
 
-            if (this.state.configuration.perspective.hasLocationFilters) {
+            if (this.state.configuration.perspective.mapTools.showProspectsFilter) {
               var hasFiltersSelected = this.state.locationFilters.filter((f) => { return f.checked }).length > 0
               if (hasFiltersSelected) {
                 asGroup.bind(this)()
