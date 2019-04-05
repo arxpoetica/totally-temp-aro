@@ -1,5 +1,5 @@
 /* global app map google $ config globalServiceLayers globalAnalysisLayers */
-app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'MapLayer', 'optimization', ($rootScope, $timeout, $http, $q, map_tools, MapLayer, optimization) => {
+app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'MapLayer', ($rootScope, $timeout, $http, $q, map_tools, MapLayer) => {
   var regions = { selectedRegions: [] }
 
   var selectionLayer
@@ -48,7 +48,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
       })
     })
     $rootScope.$broadcast('regions_changed')
-    if (regions.selectedRegions.length > 0) optimization.setMode('boundaries')
+    // if (regions.selectedRegions.length > 0) optimization.setMode('boundaries')
   })
 
   $rootScope.$on('map_tool_changed_visibility', () => configureSelectionVisibility())
@@ -78,7 +78,7 @@ app.service('regions', ['$rootScope', '$timeout', '$http', '$q', 'map_tools', 'M
     })
     if (!suppressEvents) {
       $rootScope.$broadcast('regions_changed')
-      optimization.setMode('boundaries')
+      // optimization.setMode('boundaries')
     }
   }
 

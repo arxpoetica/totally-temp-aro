@@ -50,7 +50,10 @@ class MapToggleController {
       this.mapRefPromise
         .then((result) => {
           const mapRef = result
-          this.currentMapType = this.state.configuration.mapType[this.userPerspective] || this.state.configuration.mapType.default
+          this.currentMapType = 'roadmap'
+          if (this.state.configuration.mapType) {
+            this.currentMapType = this.state.configuration.mapType[this.userPerspective] || this.state.configuration.mapType.default
+          }
           mapRef.setMapTypeId(this.currentMapType)
         })
         .catch((err) => console.log(err))

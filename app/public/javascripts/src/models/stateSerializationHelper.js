@@ -12,14 +12,14 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Get a POST body that we will send to aro-service for performing optimization
-  stateSerializationHelper.getOptimizationBody = (state, reduxState, optimization) => {
+  stateSerializationHelper.getOptimizationBody = (state, reduxState) => {
     var optimizationBody = {
       planId: state.plan.getValue().id,
       projectTemplateId: state.loggedInUser.projectId,
       analysis_type: 'NETWORK_PLAN'
     }
 
-    addLocationTypesToBody(state, reduxState, optimization, optimizationBody)
+    addLocationTypesToBody(state, reduxState, optimizationBody)
     addDataSelectionsToBody(state, optimizationBody)
     addAlgorithmParametersToBody(state, optimizationBody)
     addFiberNetworkConstraintsToBody(state, optimizationBody)
@@ -42,7 +42,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Add location types to a POST body that we will send to aro-service for performing optimization
-  var addLocationTypesToBody = (state, reduxState, optimization, postBody) => {
+  var addLocationTypesToBody = (state, reduxState, postBody) => {
     var selectedLocationLayers = state.locationLayers.filter((item) => item.checked)
     postBody.locationConstraints = {
       locationTypes: _.pluck(selectedLocationLayers, 'plannerKey'),
@@ -174,11 +174,11 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   // ------------------------------------------------------------------------------------------------------------------
 
   // Load optimization options from a JSON string
-  stateSerializationHelper.loadStateFromJSON = (state, dispatchers, optimization, planInputs) => {
+  stateSerializationHelper.loadStateFromJSON = (state, dispatchers, planInputs) => {
     loadAnalysisTypeFromBody(state, planInputs)
     loadLocationTypesFromBody(state, planInputs)
     loadSelectedExistingFiberFromBody(state, planInputs)
-    loadAlgorithmParametersFromBody(state, dispatchers, optimization, planInputs)
+    loadAlgorithmParametersFromBody(state, dispatchers, planInputs)
     loadFiberNetworkConstraintsFromBody(state, planInputs)
     loadTechnologiesFromBody(state, planInputs)
   }
@@ -241,7 +241,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
   }
 
   // Load algorithm parameters from a POST body object that is sent to the optimization engine
-  var loadAlgorithmParametersFromBody = (state, dispatchers, optimization, postBody) => {
+  var loadAlgorithmParametersFromBody = (state, dispatchers, postBody) => {
     if (!postBody.optimization) {
       console.warn('No optimization in postBody. This can happen when we have manually edited plans.')
       return
@@ -271,11 +271,7 @@ app.service('stateSerializationHelper', ['$q', ($q) => {
       state.optimizationOptions.budget = +postBody.optimization.budget / 1000
     }
     dispatchers.setSelectionTypeById(postBody.locationConstraints.analysisSelectionMode)
-    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_AREAS') {
-      optimization.setMode('boundaries')
-    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_LOCATIONS') {
-      optimization.setMode('targets')
-    } else if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
+    if (postBody.locationConstraints.analysisSelectionMode === 'SELECTED_ANALYSIS_AREAS') {
       state.setLayerVisibilityByKey('analysisLayerId', postBody.locationConstraints.analysisLayerId, true)
     }
   }

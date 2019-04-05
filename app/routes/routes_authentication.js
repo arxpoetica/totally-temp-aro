@@ -150,7 +150,8 @@ exports.configure = (app, middleware) => {
       error: request.flash('error'),
       info: request.flash('info'),
       success: request.flash('success'),
-      config: public_config
+      config: public_config,
+      ARO_CLIENT: process.env.ARO_CLIENT
     })
   })
 
@@ -181,7 +182,8 @@ exports.configure = (app, middleware) => {
       error: request.flash('error'),
       info: request.flash('info'),
       success: request.flash('success'),
-      config: public_config
+      config: public_config,
+      ARO_CLIENT: process.env.ARO_CLIENT
     })
   })
 
@@ -199,7 +201,8 @@ exports.configure = (app, middleware) => {
   app.get('/forgot_password', (request, response, next) => {
     response.render('forgot_password.html', {
       error: request.flash('error'),
-      config: public_config
+      config: public_config,
+      ARO_CLIENT: process.env.ARO_CLIENT
     })
   })
 
@@ -221,7 +224,8 @@ exports.configure = (app, middleware) => {
     response.render('reset_password.html', {
       error: request.flash('error'),
       code: code,
-      config: public_config
+      config: public_config,
+      ARO_CLIENT: process.env.ARO_CLIENT
     })
   })
 

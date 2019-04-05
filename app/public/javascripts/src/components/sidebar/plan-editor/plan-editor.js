@@ -65,9 +65,8 @@ class PlanEditorController {
       'multiple_dwelling_unit'
     ]
     this.allEditableNetworkNodeTypes = []
-    Object.keys(this.state.configuration.perspective.networkEquipment).forEach((equipmentType) => {
-      const equipment = this.state.configuration.perspective.networkEquipment[equipmentType]
-      if (equipment.show && (editableNetworkNodeTypes.indexOf(equipmentType) >= 0)) {
+    this.state.configuration.perspective.networkEquipment.areVisible.forEach((equipmentType) => {
+      if (editableNetworkNodeTypes.indexOf(equipmentType) >= 0) {
         this.allEditableNetworkNodeTypes.push(equipmentType)
       }
     })
@@ -1180,7 +1179,7 @@ class PlanEditorController {
   checkIfBoundaryExists (mapObject) {
     // For frontier if bounudary exists show a warning
     return new Promise((resolve, reject) => {
-      if (config.ARO_CLIENT === 'frontier') {
+      if (this.state.configuration.ARO_CLIENT === 'frontier') {
         return this.$http.get(`/service/odata/NetworkBoundaryEntity?$select=objectId&$filter=networkNodeObjectId eq guid'${mapObject.objectId}' and deleted eq false&$top=${this.state.boundaryTypes.length}`)
           .then((result) => {
             if (result.data.length > 0) {

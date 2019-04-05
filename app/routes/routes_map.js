@@ -3,6 +3,12 @@ const cache = helpers.cache
 const public_config = helpers.public_config
 const uuidv4 = require('uuid/v4')
 
+const googleMapsLicensing = {
+  API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+  CLIENT_ID: process.env.GOOGLE_MAPS_CLIENT_ID,
+  CHANNEL: process.env.GOOGLE_MAPS_CHANNEL
+}
+
 exports.configure = (api, middleware) => {
   api.get('/', (request, response, next) => {
     response.render('index.html', {
@@ -13,7 +19,16 @@ exports.configure = (api, middleware) => {
       config: public_config,
       serviceLayers: cache.serviceLayers,
       analysisLayers: cache.analysisLayers,
+      googleMapsLicensing: googleMapsLicensing,
       mapType: process.env.ARO_CLIENT === 'frontier' ? 'SATELLITE' : 'ROADMAP', 
+      analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY,
+      ARO_CLIENT_DONOT_USE_IN_CODE: process.env.ARO_CLIENT
+    })
+  })
+
+  api.get('/configuration', (request, response, next) => {
+    response.status(200).json({
+      user: request.user,
       appConfiguration: cache.configuration,
       sessionWebsocketId: uuidv4(),
       // For google maps licensing, specify one of the following:
@@ -21,12 +36,7 @@ exports.configure = (api, middleware) => {
       // 2. API_KEY only
       // 3. CLIENT_ID only
       // 4. CHANNEL and CLIENT_ID only
-      googleMapsLicensing: {
-        API_KEY: process.env.GOOGLE_MAPS_API_KEY,
-        CLIENT_ID: process.env.GOOGLE_MAPS_CLIENT_ID,
-        CHANNEL: process.env.GOOGLE_MAPS_CHANNEL
-      },
-      analyticsTrackingKey: process.env.ANALYTICS_TRACKING_KEY
+      googleMapsLicensing: googleMapsLicensing
     })
   })
 }

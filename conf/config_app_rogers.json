@@ -4,9 +4,6 @@
   "LOCALdatabase_url": "postgres://aro:aro@localhost/aro",
   "LOCALaro_service_url": "http://localhost:8080",
   "client_schema": "client",
-  "client_carrier_name": "ZAYO",
-  "displayable_client_carrier_name": "ENA",
-  "route_planning": ["fttp", "shortest_path"],
   "spend_by_city": false,
   "currency_symbol": "$",
   "hsv_defaults" : {
@@ -51,7 +48,6 @@
         "cell_radius":300
       }
     },
-    "top_bar_tools": ["customer_profile"],
     "project_menu": ["share", "export_kml"],
     "defaults" : {
       "impedence":[{

@@ -8,23 +8,6 @@ class RoicReportsModalController {
   close () {
     this.state.showRoicReportsModal = false
   }
-
-  downloadReport () {
-    // Run the export endpoint
-    this.$http.get(`/financial_profile/${this.state.plan.getValue().id}/export`)
-      .then((r) => {
-        if (r.data === '') {
-          return swal({
-            title: 'Error',
-            text: 'No data returned',
-            type: 'error'
-          })
-        }
-
-        this.Utils.downloadFile(r.data, `financial_profile_${new Date()}.csv`)
-      })
-      .catch((err) => console.error(err))
-  }
 }
 
 RoicReportsModalController.$inject = ['$http', 'state', 'Utils']

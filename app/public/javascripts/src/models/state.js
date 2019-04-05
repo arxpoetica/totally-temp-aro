@@ -29,7 +29,7 @@ const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selec
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -231,9 +231,6 @@ class State {
         worldMaxValue: 500000
       },
       selectedHeatmapOption: service.viewSetting.heatmapOptions[0]
-    }
-    if (config.ARO_CLIENT === 'frontier') {
-      heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
     }
     service.mapTileOptions = new Rx.BehaviorSubject(heatmapOptions)
 
@@ -554,7 +551,7 @@ class State {
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
 
-        if (service.configuration.perspective.locationCategories[locationKey].show) {
+        if (service.configuration.perspective.visibleLocationCategories.indexOf(locationKey) >= 0) {
           location.checked = location.selected
           location.uiLayerId = uiLayerId++
           locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location))) // angular.toJson will strip out the $$hashkey key
@@ -591,14 +588,14 @@ class State {
 
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
-      return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState(), optimization)
+      return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
     service.loadOptimizationOptionsFromJSON = (json) => {
     // Note that we are NOT returning the state (the state is set after the call), but a promise
     // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, json)
+      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), json)
     }
 
     $document.ready(() => {
@@ -1052,7 +1049,7 @@ class State {
       return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, planInputs)
+          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
           return Promise.all([
             service.loadPlanDataSelectionFromServer(),
             service.loadPlanResourceSelectionFromServer(),
@@ -1243,10 +1240,6 @@ class State {
             // Make the API call that starts optimization calculations on aro-service
             var apiUrl = (service.networkAnalysisType.type === 'NETWORK_ANALYSIS') ? '/service/v1/analyze/masterplan' : '/service/v1/optimize/masterplan'
             apiUrl += `?userId=${service.loggedInUser.id}`
-
-            // console.log(apiUrl)
-            // console.log(optimizationBody)
-
             $http.post(apiUrl, optimizationBody)
               .then((response) => {
               // console.log(response)
@@ -1555,22 +1548,30 @@ class State {
     }
 
     service.configuration = {}
-    service.initializeAppConfiguration = (loggedInUser, appConfiguration, googleMapsLicensing, websocketSessionId) => {
-      service.configuration = appConfiguration
-      service.googleMapsLicensing = googleMapsLicensing
-      service.configuration.loadPerspective = (perspective) => {
-      // If a perspective is not found, go to the default
-        const defaultPerspective = service.configuration.uiVisibility.filter(item => item.name === 'default')[0]
-        const thisPerspective = service.configuration.uiVisibility.filter(item => item.name === perspective)[0]
-        service.configuration.perspective = thisPerspective || defaultPerspective
-      }
-      service.configuration.loadPerspective(loggedInUser.perspective)
-      service.setLoggedInUser(loggedInUser)
-      service.setOptimizationOptions()
-      tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
-      tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-      socketManager.initializeSession(websocketSessionId)
-      service.getReleaseVersions()
+    service.initializeApp = () => {
+      // Get application configuration from the server
+      $http.get('/configuration')
+        .then(result => {
+          service.configuration = result.data.appConfiguration
+          service.googleMapsLicensing = result.data.googleMapsLicensing
+          service.configuration.loadPerspective = (perspective) => {
+          // If a perspective is not found, go to the default
+            const defaultPerspective = service.configuration.perspectives.filter(item => item.name === 'default')[0]
+            const thisPerspective = service.configuration.perspectives.filter(item => item.name === perspective)[0]
+            service.configuration.perspective = thisPerspective || defaultPerspective
+          }
+          service.configuration.loadPerspective(result.data.user.perspective)
+          service.setLoggedInUser(result.data.user)
+          service.setOptimizationOptions()
+          tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
+          tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
+          socketManager.initializeSession(result.data.sessionWebsocketId)
+          service.getReleaseVersions()
+          if (service.configuration.ARO_CLIENT === 'frontier') {
+            heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
+          }
+        })
+        .catch(err => console.error(err))
     }
 
     service.setOptimizationOptions = () => {
@@ -1865,6 +1866,6 @@ class State {
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'optimization', 'stateSerializationHelper', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'stateSerializationHelper', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State

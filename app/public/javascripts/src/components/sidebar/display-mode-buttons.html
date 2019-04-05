@@ -5,7 +5,7 @@
 </style>
 <div class="btn-group pull-left" role="group" aria-label="Mode buttons">
   <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.displayModeButtons['VIEW'].show"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.VIEW"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.VIEW,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.VIEW }"
@@ -16,7 +16,7 @@
                 title="View Mode"></div>
   </button>
   <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.displayModeButtons['ANALYSIS'].show"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.ANALYSIS"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.ANALYSIS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.ANALYSIS }"
@@ -28,7 +28,7 @@
                 title="Analysis Mode"></div>
   </button>
   <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.displayModeButtons['EDIT_PLAN'].show"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.EDIT_PLAN"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.EDIT_PLAN,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.EDIT_PLAN }"
@@ -43,7 +43,7 @@
 </div>
 <div class="btn-group float-right">
   <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.displayModeButtons['DEBUG'].show && $ctrl.state.loggedInUser.isAdministrator"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.DEBUG && $ctrl.state.loggedInUser.isAdministrator"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.DEBUG,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.DEBUG }"
@@ -54,7 +54,7 @@
                   title="Debugging Mode"></div>
   </button>
   <button type="button"
-          ng-if="$ctrl.state.configuration.perspective.displayModeButtons['PLAN_SETTINGS'].show"
+          ng-if="$ctrl.state.configuration.perspective.showDisplayModeButtons.PLAN_SETTINGS"
           ng-class="{ 'btn display-mode-button': true,
                       'btn-light': $ctrl.selectedDisplayMode !== $ctrl.displayModes.PLAN_SETTINGS,
                       'btn-primary': $ctrl.selectedDisplayMode === $ctrl.displayModes.PLAN_SETTINGS }"

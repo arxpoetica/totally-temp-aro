@@ -53,20 +53,6 @@ exports.configure = (api, middleware) => {
       .catch(next)
   })
 
-  api.get('/network/fiber_plant_competitors', middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    models.Network.viewFiberPlantForCompetitors(viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
-  api.get('/network/fiber_plant_density', middleware.viewport, (request, response, next) => {
-    var viewport = request.viewport
-    models.Network.viewFiberPlantDensity(viewport)
-      .then(jsonSuccess(response, next))
-      .catch(next)
-  })
-
   api.get('/network/fairshare_density', middleware.viewport, (request, response, next) => {
     var viewport = request.viewport
     models.MarketSize.fairShareHeatmap(viewport)

@@ -463,7 +463,7 @@ class MapTileRenderer {
         } else if (feature.properties.hasOwnProperty('object_id')) {
           selectedListId = feature.properties.object_id
           // greyout an RT with hsiEanbled true for frontier client
-          if (config.ARO_CLIENT === 'frontier' &&
+          if (this.state.configuration.ARO_CLIENT === 'frontier' &&
             (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
             (feature.properties.hsiEnabled !== 'true')) {
             entityImage = featureData.greyOutIcon
@@ -578,7 +578,7 @@ class MapTileRenderer {
       })
     }
     // render point feature
-    PointFeatureRenderer.renderFeatures(pointFeatureRendererList)
+    PointFeatureRenderer.renderFeatures(pointFeatureRendererList, this.state.configuration.ARO_CLIENT)
     // render polygon feature
     PolygonFeatureRenderer.renderFeatures(closedPolygonFeatureLayersList, this.selection, this.oldSelection)
   }

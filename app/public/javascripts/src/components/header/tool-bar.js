@@ -17,7 +17,6 @@ class ToolBarController {
     this.measuringStickEnabled = false
     this.isViewSettingsEnabled = false
     this.currentUser = state.loggedInUser
-    this.switchIcon = config.ARO_CLIENT === 'frontier'
     this.Constants = Constants
 
     this.min = 0
@@ -119,7 +118,7 @@ class ToolBarController {
 
   savePlanAs () {
     this.state.planInputsModal.next(true)
-    if (config.ARO_CLIENT === 'frontier') this.state.currentPlanTags = []
+    if (this.state.configuration.ARO_CLIENT === 'frontier') this.state.currentPlanTags = []
   }
 
   toggleMeasuringStick () {

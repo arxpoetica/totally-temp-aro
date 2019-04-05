@@ -13,17 +13,6 @@ var pync = require('pync')
 const emptyArray = (arr) => !Array.isArray(arr) || arr.length === 0
 
 module.exports = class MarketSize {
-
-  // Current carrier always first
-  static _sortFairShare (fair_share) {
-    var current = fair_share.find((carrier) => carrier.name === config.client_carrier_name)
-    if (current) {
-      var i = fair_share.indexOf(current)
-      fair_share.splice(i, 1)
-      fair_share.splice(0, 0, current)
-    }
-  }
-
   static _prepareMarketSizeQuery (plan_id, type, options, params) {
     var filters = options.filters
 

@@ -44,17 +44,26 @@ function loadConfiguration() {
     'constructionSiteCategories',
     'boundaryCategories',
     'units',
-    'aroClient',
     'mapType',
     'locationDetailProperties',
-    'uiVisibility',
+    'perspectives',
     'optimizationOptions',
+    'planEditor',
     'resourceEditors'
   ]
 
-  exports.configuration = {}
-  configurationTypes.forEach((configurationType) => exports.configuration[configurationType] = UIConfiguration.getConfigurationSet(configurationType))
-  return Promise.resolve()  
+  var configurationPromises = []
+  configurationTypes.forEach(configurationType => configurationPromises.push(UIConfiguration.getConfigurationSet(configurationType)))
+  return Promise.all(configurationPromises)
+    .then(results => {
+      exports.configuration = {}
+      configurationTypes.forEach((configurationType, index) => {
+        exports.configuration[configurationType] = results[index]
+      })
+      // console.log(exports.configuration)
+      return Promise.resolve()
+    })
+    .catch(err => console.error(err))
 }
 
 exports.refresh = () => {

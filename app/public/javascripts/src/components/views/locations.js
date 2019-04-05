@@ -6,11 +6,10 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 class LocationsController {
-  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, optimization, state) {
+  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state) {
     this.$location = $location
     this.$timeout = $timeout
     this.map_tools = map_tools
-    this.optimization = optimization
     this.state = state
     this.createdMapLayerKeys = new Set()
     this.disablelocations = false
@@ -146,96 +145,71 @@ class LocationsController {
         // Loop through the location types
         this.locationLayers.forEach((locationType) => {
           if (locationType.checked &&
-            // Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
-            map && map.getZoom() >= 10) {
+              // Temp: 155808171 preventing calls to service if zoom is between 1 to 9 as service is not ready with pre-caching
+              map && map.getZoom() >= 10) {
             this.disablelocations = false
             this.$timeout()
 
-            if (this.state.configuration.perspective.hasLocationFilters) {
-              var hasFiltersSelected = this.state.locationFilters.filter((f) => { return f.checked }).length > 0
-              if (hasFiltersSelected) {
-                asGroup.bind(this)()
-              } else {
-                asSingle.bind(this)()
-              }
-            } else {
-              asSingle.bind(this)()
-            }
-
-            // Returns a feature filter if we are in "sales" mode, otherwise return null
-            function getFilterIfSales (locationType, filterName) {
-              if (!locationType.isSalesTile) {
-                return null
-              }
-              if (!filterName) {
-                console.warn('We must have a filter name at this point')
-              }
-              return (feature) => {
-                return (feature.properties.salesCategory === locationType.categoryKey) &&
-                      (feature.properties.salesType === filterName)
-              }
-            }
-
-            function asSingle () {
-              // Location type is visible
-              var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
-              var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
-              var tileDefinitions = []
-              locationType.tileDefinitions.forEach((rawTileDefinition) => {
-                var tileDefinition = angular.copy(rawTileDefinition)
-                objectKeyReplace(tileDefinition, '${tilePointTransform}', pointTransform)
-                objectKeyReplace(tileDefinition, '${libraryId}', selectedLocationLibrary.identifier)
-                tileDefinitions.push(tileDefinition)
-              })
-
-              if (pointTransform === 'aggregate') {
-                // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-                mergedLayerDefinitions = mergedLayerDefinitions.concat(tileDefinitions)
-              } else {
-                // We want to create an individual layer
-                oldMapLayers[mapLayerKey] = {
-                  tileDefinitions: tileDefinitions,
-                  iconUrl: `${baseUrl}${locationType.iconUrl}`,
-                  renderMode: 'PRIMITIVE_FEATURES',
-                  zIndex: locationType.zIndex, // ToDo: MOVE THIS TO A SETTINGS FILE! <------------- (!) -----<<<
-                  selectable: true,
-                  featureFilter: getFilterIfSales(locationType)
-                }
-                this.createdMapLayerKeys.add(mapLayerKey)
-              }
-            }
-
-            function asGroup () {
-              for (let filter of this.state.locationFilters) {
-                if (filter.checked) {
-                  // Location type is visible
-                  var mapLayerKey = `${locationType.key}_${filter.name}_${selectedLocationLibrary.identifier}`
-                  var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
-                  var tileDefinitions = []
-                  locationType.tileDefinitions.forEach((rawTileDefinition) => {
-                    var tileDefinition = angular.copy(rawTileDefinition)
-                    objectKeyReplace(tileDefinition, '${tilePointTransform}', pointTransform)
-                    objectKeyReplace(tileDefinition, '${libraryId}', selectedLocationLibrary.identifier)
-                    objectKeyReplace(tileDefinition, '${locationType}', filter.name)
-                    tileDefinitions.push(tileDefinition)
-                  })
-                  if (pointTransform === 'aggregate') {
-                    // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
-                    mergedLayerDefinitions = mergedLayerDefinitions.concat(tileDefinitions)
-                  } else {
-                    // We want to create an individual layer
-                    oldMapLayers[mapLayerKey] = {
-                      tileDefinitions: tileDefinitions,
-                      iconUrl: `${baseUrl}${filter.iconUrl}`, // NOTE that we are using the icon for the filter, not the location category
-                      renderMode: 'PRIMITIVE_FEATURES',
-                      zIndex: locationType.zIndex,
-                      selectable: true,
-                      featureFilter: getFilterIfSales(locationType, filter.name)
-                    }
-                    this.createdMapLayerKeys.add(mapLayerKey)
+            // First, construct the filtering function based on the selected values. Each "featureFilter" corresponds
+            // to a single filter (e.g. salesType).
+            var featureFilters = []
+            var layerIconUrl = locationType.iconUrl
+            const activeLocationFilters = this.state.configuration.perspective.locationFilters.filter(item => item.useFilter)
+            activeLocationFilters.forEach(locationFilter => {
+              var individualFilter = feature => true // A filter that returns back all the input items
+              if (locationFilter.type === 'multiSelect') {
+                const checkedAttributes = locationFilter.values.filter(item => item.checked).map(item => item.key)
+                if (checkedAttributes.length > 0) {
+                  // Some items are selected. Apply filtering
+                  individualFilter = feature => checkedAttributes.indexOf(feature.properties[locationFilter.attributeKey]) >= 0
+                  const firstCheckedFilterWithIconUrl = locationFilter.values.filter(item => item.checked && item.iconUrl)[0]
+                  if (firstCheckedFilterWithIconUrl) {
+                    layerIconUrl = firstCheckedFilterWithIconUrl.iconUrl
                   }
                 }
+              } else if (locationFilter.type === 'threshold') {
+                // For threshold we assume that the property value is going to be numeric
+                individualFilter = feature => (+feature.properties[locationFilter.attributeKey]) > locationFilter.value
               }
+              featureFilters.push(individualFilter)
+            })
+            // For sales tiles, we will also filter by the salesCategory. This is done just to keep the same logic as
+            // non-sales tiles where we have small/medium/large businesses. This is actually just another type of filter.
+            if (locationType.isSalesTile) {
+              featureFilters.push(feature => feature.properties.locationCategory === locationType.categoryKey)
+            }
+            // The final result of the filter is obtained by AND'ing the individual filters
+            const featureFilter = feature => {
+              var returnValue = true
+              featureFilters.forEach(f => { returnValue = returnValue && f(feature) })
+              return returnValue
+            }
+
+            // Location type is visible
+            var mapLayerKey = `${locationType.key}_${selectedLocationLibrary.identifier}`
+            var pointTransform = getPointTransformForLayer(+locationType.aggregateZoomThreshold)
+            var tileDefinitions = []
+            locationType.tileDefinitions.forEach((rawTileDefinition) => {
+              var tileDefinition = angular.copy(rawTileDefinition)
+              objectKeyReplace(tileDefinition, '${tilePointTransform}', pointTransform)
+              objectKeyReplace(tileDefinition, '${libraryId}', selectedLocationLibrary.identifier)
+              tileDefinitions.push(tileDefinition)
+            })
+
+            if (pointTransform === 'aggregate') {
+              // For aggregated locations (all types - businesses, households, celltowers) we want to merge them into one layer
+              mergedLayerDefinitions = mergedLayerDefinitions.concat(tileDefinitions)
+            } else {
+              // We want to create an individual layer
+              oldMapLayers[mapLayerKey] = {
+                tileDefinitions: tileDefinitions,
+                iconUrl: `${baseUrl}${layerIconUrl}`,
+                renderMode: 'PRIMITIVE_FEATURES',
+                zIndex: locationType.zIndex,
+                selectable: true,
+                featureFilter: featureFilter
+              }
+              this.createdMapLayerKeys.add(mapLayerKey)
             }
           } else if (map && map.getZoom() < 10) {
             this.disablelocations = true
@@ -299,7 +273,7 @@ class LocationsController {
   }
 }
 
-LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'optimization', 'state']
+LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state']
 
 let locations = {
   templateUrl: '/components/views/locations.html',
