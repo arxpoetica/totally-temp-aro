@@ -38,7 +38,7 @@
         <form>
           <ul class="customer-type">
             <!-- Loop through all location types -->
-            <li ng-repeat="locationType in $ctrl.locationLayers">
+            <li ng-repeat="locationType in $ctrl.locationLayers | orderBy: '-key'">
               <div class="ctype-icon" ng-if="locationType.showIcon"><img ng-src="{{locationType.iconUrl}}" style="width:16px;margin-right:10px"></div>
               <div class="ctype-name">{{locationType.label}}</div>
               <div class="ctype-checkbox">
