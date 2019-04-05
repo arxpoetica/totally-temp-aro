@@ -168,14 +168,15 @@ class LocationsController {
                   }
                 }
               } else if (locationFilter.type === 'threshold') {
-                individualFilter = feature => feature.properties[locationFilter.attributeKey] > locationFilter.value
+                // For threshold we assume that the property value is going to be numeric
+                individualFilter = feature => (+feature.properties[locationFilter.attributeKey]) > locationFilter.value
               }
               featureFilters.push(individualFilter)
             })
             // For sales tiles, we will also filter by the salesCategory. This is done just to keep the same logic as
             // non-sales tiles where we have small/medium/large businesses. This is actually just another type of filter.
             if (locationType.isSalesTile) {
-              featureFilters.push(feature => feature.properties.salesCategory === locationType.categoryKey)
+              featureFilters.push(feature => feature.properties.locationCategory === locationType.categoryKey)
             }
             // The final result of the filter is obtained by AND'ing the individual filters
             const featureFilter = feature => {
