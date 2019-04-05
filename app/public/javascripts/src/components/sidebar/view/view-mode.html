@@ -17,31 +17,31 @@
       <accordion-panel-title title="'Location Info'" panel-id="$ctrl.state.viewModePanels.LOCATION_INFO"></accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.LOCATION_INFO">
         <location-detail ng-if="($ctrl.state.selectedDisplayMode.getValue() === $ctrl.state.displayModes.VIEW)
-                                && ($ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO].show)">
+                                && ($ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.LOCATION_INFO])">
         </location-detail>
       </accordion-panel-contents>
 
-      <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO].show"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO].show">
+      <accordion-panel-title title="'Equipment Info'" panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO]"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.EQUIPMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.EQUIPMENT_INFO]">
         <equipment-detail></equipment-detail>
       </accordion-panel-contents>
 
-      <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO].show"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO].show">
+      <accordion-panel-title title="'Boundaries Info'" panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO]"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.BOUNDARIES_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.BOUNDARIES_INFO]">
         <boundary-detail></boundary-detail>
       </accordion-panel-contents>
 
-      <accordion-panel-title title="'Road Segment Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO].show"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO].show">
+      <accordion-panel-title title="'Road Segment Info'" panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO]"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.ROAD_SEGMENT_INFO]">
         <road-segment-detail selection="$ctrl.state.selection"></road-segment-detail>
       </accordion-panel-contents>
 
-      <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_INFO].show">
+      <accordion-panel-title title="'Plan Info'" panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_INFO]"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_INFO" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_INFO]">
         <network-plan-manage ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_INFO"></network-plan-manage>
       </accordion-panel-contents>
-      <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS].show"></accordion-panel-title>
-      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS].show">
+      <accordion-panel-title title="'Plan Summary'" panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS]"></accordion-panel-title>
+      <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS" ng-if="$ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS]">
         <summary-reports ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.PLAN_SUMMARY_REPORTS"></summary-reports>
       </accordion-panel-contents>
       <!-- Planner coverage is a little different. Show it only if we are in COVERAGE_BOUNDARY mode. -->
@@ -49,7 +49,7 @@
                              panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"
                              ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY
                                     && $ctrl.state.selectedTargetSelectionMode === $ctrl.state.targetSelectionModes.COVERAGE_BOUNDARY 
-                                    && $ctrl.state.configuration.perspective.viewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY].show">
+                                    && $ctrl.state.configuration.perspective.showViewModePanels[$ctrl.state.viewModePanels.COVERAGE_BOUNDARY]">
       </accordion-panel-title>
       <accordion-panel-contents panel-id="$ctrl.state.viewModePanels.COVERAGE_BOUNDARY"
                                 ng-if="$ctrl.state.activeViewModePanel === $ctrl.state.viewModePanels.COVERAGE_BOUNDARY

@@ -31,31 +31,15 @@
       "census_blocks": true,
       "analysis_layer": true
     },
-    "viewModePanels": {
-      "LOCATION_INFO": {
-        "show": true
-      },
-      "EQUIPMENT_INFO": {
-        "show": true
-      },
-      "BOUNDARIES_INFO": {
-        "show": true
-      },
-      "ROAD_SEGMENT_INFO": {
-        "show": true
-      },
-      "PLAN_SUMMARY_REPORTS": {
-        "show": true
-      },
-      "COVERAGE_BOUNDARY": {
-        "show": true
-      },
-      "EDIT_LOCATIONS": {
-        "show": true
-      },
-      "PLAN_INFO": {
-        "show": true
-      }
+    "showViewModePanels": {
+      "LOCATION_INFO": true,
+      "EQUIPMENT_INFO": true,
+      "BOUNDARIES_INFO": true,
+      "ROAD_SEGMENT_INFO": true,
+      "PLAN_SUMMARY_REPORTS": true,
+      "COVERAGE_BOUNDARY": true,
+      "EDIT_LOCATIONS": true,
+      "PLAN_INFO": true
     },
     "displayModeButtons": {
       "VIEW": {
@@ -195,31 +179,15 @@
         "show": true
       }
     },
-    "viewModePanels": {
-      "LOCATION_INFO": {
-        "show": true
-      },
-      "EQUIPMENT_INFO": {
-        "show": true
-      },
-      "BOUNDARIES_INFO": {
-        "show": true
-      },
-      "ROAD_SEGMENT_INFO": {
-        "show": false
-      },
-      "PLAN_SUMMARY_REPORTS": {
-        "show": false
-      },
-      "COVERAGE_BOUNDARY": {
-        "show": false
-      },
-      "EDIT_LOCATIONS": {
-        "show": true
-      },
-      "PLAN_INFO": {
-        "show": false
-      }
+    "showViewModePanels": {
+      "LOCATION_INFO": true,
+      "EQUIPMENT_INFO": true,
+      "BOUNDARIES_INFO": true,
+      "ROAD_SEGMENT_INFO": false,
+      "PLAN_SUMMARY_REPORTS": false,
+      "COVERAGE_BOUNDARY": false,
+      "EDIT_LOCATIONS": true,
+      "PLAN_INFO": false
     },
     "displayModeButtons": {
       "VIEW": {
@@ -359,31 +327,15 @@
         "show": true
       }
     },
-    "viewModePanels": {
-      "LOCATION_INFO": {
-        "show": true
-      },
-      "EQUIPMENT_INFO": {
-        "show": false
-      },
-      "BOUNDARIES_INFO": {
-        "show": false
-      },
-      "ROAD_SEGMENT_INFO": {
-        "show": false
-      },
-      "PLAN_SUMMARY_REPORTS": {
-        "show": false
-      },
-      "COVERAGE_BOUNDARY": {
-        "show": true
-      },
-      "EDIT_LOCATIONS": {
-        "show": true
-      },
-      "PLAN_INFO": {
-        "show": false
-      }
+    "showViewModePanels": {
+      "LOCATION_INFO": true,
+      "EQUIPMENT_INFO": false,
+      "BOUNDARIES_INFO": false,
+      "ROAD_SEGMENT_INFO": false,
+      "PLAN_SUMMARY_REPORTS": false,
+      "COVERAGE_BOUNDARY": true,
+      "EDIT_LOCATIONS": true,
+      "PLAN_INFO": false
     },
     "displayModeButtons": {
       "VIEW": {
