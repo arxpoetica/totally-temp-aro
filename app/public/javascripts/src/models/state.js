@@ -1565,7 +1565,7 @@ class State {
           service.setOptimizationOptions()
           tileDataService.setLocationStateIcon(tileDataService.locationStates.LOCK_ICON_KEY, service.configuration.locationCategories.entityLockIcon)
           tileDataService.setLocationStateIcon(tileDataService.locationStates.INVALIDATED_ICON_KEY, service.configuration.locationCategories.entityInvalidatedIcon)
-          socketManager.initializeSession(sessionWebsocketId)
+          socketManager.initializeSession(result.data.sessionWebsocketId)
           service.getReleaseVersions()
           if (service.configuration.ARO_CLIENT === 'frontier') {
             heatmapOptions.selectedHeatmapOption = service.viewSetting.heatmapOptions.filter((option) => option.id === 'HEATMAP_OFF')[0]
