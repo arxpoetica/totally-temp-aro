@@ -11,7 +11,7 @@ class HttpTileFetcher {
       oReq.setRequestHeader('Content-Type', 'application/json')
       oReq.responseType = 'arraybuffer'
 
-      oReq.onload = function (oEvent) {
+      oReq.onload = (oEvent) => {
         var arrayBuffer = oReq.response
         // De-serialize the binary data into a VectorTile object
         var mapboxVectorTile = new VectorTile(new Protobuf(arrayBuffer))
@@ -24,7 +24,7 @@ class HttpTileFetcher {
             let feature = layer.feature(iFeature)
             // ToDo: once we have feature IDs in place we can get rid of this check against a hardtyped URL
             if (layerKey.startsWith('v1.tiles.census_block.')) {
-              formatCensusBlockData(feature)
+              this.formatCensusBlockData(feature)
             }
             features.push(feature)
           }
@@ -48,6 +48,19 @@ class HttpTileFetcher {
       }
       oReq.send(JSON.stringify(layerDefinitions))
     })
+  }
+
+  formatCensusBlockData(cBlock) {
+    let sepA = ';'
+    let sepB = ':'
+    cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
+  	let kvPairs = cBlock.properties.tags.split(sepA)
+  	cBlock.properties.tags = {}
+  	kvPairs.forEach((pair) => {
+  	  let kv = pair.split(sepB)
+  	  // incase there are extra ':'s in the value we join all but the first together
+  	  if (kv[0] != '') cBlock.properties.tags[ kv[0] + '' ] = kv.slice(1).join(sepB)
+  	})
   }
 }
 

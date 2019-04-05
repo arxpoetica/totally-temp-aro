@@ -153,20 +153,6 @@ class TileDataService {
     }
   }
 
-  formatCensusBlockData(cBlock) {
-    let sepA = ';'
-    let sepB = ':'
-    cBlock.properties.layerType = 'census_block' // ToDo: once we have server-side feature naming we wont need this
-  	let kvPairs = cBlock.properties.tags.split(sepA)
-  	cBlock.properties.tags = {}
-  	kvPairs.forEach((pair) => {
-  	  let kv = pair.split(sepB)
-  	  // incase there are extra ':'s in the value we join all but the first together
-  	  if (kv[0] != '') cBlock.properties.tags[ kv[0] + '' ] = kv.slice(1).join(sepB)
-  	})
-    // return cBlock
-  }
-
   // Flattens all URLs and returns tile data that is a simple union of all features
   getTileDataFlatten(mapLayer, zoom, tileX, tileY) {
     // We have multiple URLs where data is coming from, and we want a simple union of the results
