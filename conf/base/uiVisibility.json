@@ -21,45 +21,10 @@
       "showAuditLog": true
     },
     "networkEquipment": {
-      "central_office": {
-        "show": true
-      },
-      "dslam": {
-        "show": true
-      },
-      "fiber_distribution_hub": {
-        "show": true
-      },
-      "fiber_distribution_terminal": {
-        "show": true
-      },
-      "bulk_distribution_terminal": {
-        "show": true
-      },
-      "splice_point": {
-        "show": true
-      },
-      "fiveg_coverage": {
-        "show": true
-      },
-      "cell_5g": {
-        "show": true
-      },
-      "loop_extender": {
-        "show": true
-      },
-      "network_anchor": {
-        "show": true
-      },
-      "multiple_dwelling_unit": {
-        "show": true
-      },
-      "planned": {
-        "show": true
-      },
-      "existing": {
-        "show": true
-      }
+      "areVisible": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal",
+                     "splice_point", "fiveg_coverage", "cell_5g", "loop_extender", "network_anchor", "multiple_dwelling_unit"],
+      "showPlanned": true,
+      "showExisting": true
     },
     "boundaries":{
       "wirecenter": {
@@ -221,45 +186,9 @@
       "showAuditLog": false
     },
     "networkEquipment": {
-      "central_office": {
-        "show": true
-      },
-      "dslam": {
-        "show": false
-      },
-      "fiber_distribution_hub": {
-        "show": false
-      },
-      "fiber_distribution_terminal": {
-        "show": false
-      },
-      "bulk_distribution_terminal": {
-        "show": false
-      },
-      "splice_point": {
-        "show": true
-      },
-      "fiveg_coverage": {
-        "show": false
-      },
-      "cell_5g": {
-        "show": false
-      },
-      "loop_extender": {
-        "show": false
-      },
-      "network_anchor": {
-        "show": false
-      },
-      "multiple_dwelling_unit": {
-        "show": false
-      },
-      "planned": {
-        "show": true
-      },
-      "existing": {
-        "show": true
-      }
+      "areVisible": ["central_office", "splice_point"],
+      "showPlanned": true,
+      "showExisting": true
     },
     "boundaries":{
       "wirecenter": {
@@ -421,45 +350,9 @@
       "showAuditLog": false
     },
     "networkEquipment": {
-      "central_office": {
-        "show": true
-      },
-      "dslam": {
-        "show": false
-      },
-      "fiber_distribution_hub": {
-        "show": false
-      },
-      "fiber_distribution_terminal": {
-        "show": false
-      },
-      "bulk_distribution_terminal": {
-        "show": false
-      },
-      "splice_point": {
-        "show": true
-      },
-      "fiveg_coverage": {
-        "show": false
-      },
-      "cell_5g": {
-        "show": false
-      },
-      "loop_extender": {
-        "show": false
-      },
-      "network_anchor": {
-        "show": false
-      },
-      "multiple_dwelling_unit": {
-        "show": false
-      },
-      "planned": {
-        "show": false
-      },
-      "existing": {
-        "show": true
-      }
+      "areVisible": ["central_office", "splice_point"],
+      "showPlanned": false,
+      "showExisting": true
     },
     "boundaries":{
       "wirecenter": {

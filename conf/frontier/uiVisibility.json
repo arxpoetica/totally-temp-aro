@@ -14,9 +14,8 @@
       }
     },
     "networkEquipment": {
-      "multiple_dwelling_unit": {
-        "show": false
-      }
+      "areVisible": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal",
+                     "splice_point", "fiveg_coverage", "cell_5g", "loop_extender", "network_anchor"]
     },
     "limitBoundaries": {
       "enabled": false
@@ -42,11 +41,6 @@
         "showMultiFactorAuthentication": false
       }
     },
-    "networkEquipment": {
-      "multiple_dwelling_unit": {
-        "show": false
-      }
-    },
     "limitBoundaries": {
       "enabled": true,
       "showOnlyNames": ["zipcode"]
@@ -70,11 +64,6 @@
           }
         },
         "showMultiFactorAuthentication": false
-      }
-    },
-    "networkEquipment": {
-      "multiple_dwelling_unit": {
-        "show": false
       }
     },
     "limitBoundaries": {

@@ -13,15 +13,8 @@
       }
     },
     "networkEquipment": {
-      "dslam": {
-        "show": false
-      },
-      "loop_extender": {
-        "show": false
-      },
-      "network_anchor": {
-        "show": false
-      }
+      "areVisible": ["central_office", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal",
+                     "splice_point", "fiveg_coverage", "cell_5g", "multiple_dwelling_unit"]
     },
     "boundaries":{
       "census_blocks": {
@@ -42,17 +35,6 @@
         }
       }
     },
-    "networkEquipment": {
-      "dslam": {
-        "show": false
-      },
-      "loop_extender": {
-        "show": false
-      },
-      "network_anchor": {
-        "show": false
-      }
-    },
     "boundaries":{
       "census_blocks": {
         "show": false
@@ -70,17 +52,6 @@
             "show": false
           }
         }
-      }
-    },
-    "networkEquipment": {
-      "dslam": {
-        "show": false
-      },
-      "loop_extender": {
-        "show": false
-      },
-      "network_anchor": {
-        "show": false
       }
     },
     "boundaries":{

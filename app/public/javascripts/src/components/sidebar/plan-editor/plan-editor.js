@@ -65,9 +65,8 @@ class PlanEditorController {
       'multiple_dwelling_unit'
     ]
     this.allEditableNetworkNodeTypes = []
-    Object.keys(this.state.configuration.perspective.networkEquipment).forEach((equipmentType) => {
-      const equipment = this.state.configuration.perspective.networkEquipment[equipmentType]
-      if (equipment.show && (editableNetworkNodeTypes.indexOf(equipmentType) >= 0)) {
+    this.state.configuration.perspective.networkEquipment.areVisible.forEach((equipmentType) => {
+      if (editableNetworkNodeTypes.indexOf(equipmentType) >= 0) {
         this.allEditableNetworkNodeTypes.push(equipmentType)
       }
     })
