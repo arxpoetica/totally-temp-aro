@@ -49,10 +49,10 @@
       </script>
     <%}%>
   </head>
-  <body ng-controller="body_controller">
+  <body>
 
     <!-- The tile component subscribes to map layer events raised from state.js. Include it before changing the state -->
-    <tile map-global-object-name="map" old-selection="state.selection"></tile>
+    <tile map-global-object-name="map"></tile>
 
     <div ng-controller="data_management_controller">
       <% include modal_data_management.html %>
@@ -239,7 +239,6 @@
     <script src="javascripts/lib/components/footer/ui-notification-service.js"></script>
     <script src="javascripts/lib/components/common/context-menu-service.js"></script>
 
-    <script src="javascripts/lib/controllers/body_controller.js"></script>
     <script src="javascripts/lib/controllers/customer_profile_controller.js"></script>
     <script src="javascripts/lib/controllers/fiber_plant_controller.js"></script>
     <script src="javascripts/lib/controllers/selected_location_controller.js"></script>

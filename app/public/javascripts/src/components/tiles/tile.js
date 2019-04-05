@@ -263,7 +263,7 @@ class TileComponentController {
 
     // Update the selection in the renderer. We should have a bound "this.oldSelection" at this point
     if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.oldSelection)
+      this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.state && this.state.selection)
       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setSelection(this.selection)
     }
 
@@ -583,14 +583,31 @@ class TileComponentController {
     }
   }
 
-  $onChanges (changesObj) {
-    if (changesObj.oldSelection) {
+  // $onChanges (changesObj) {
+  //   if (changesObj.oldSelection) {
+  //     // Update the selection in the renderer
+  //     if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
+  //       this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.oldSelection)
+  //       // If the selection has changed, redraw the tiles
+  //       this.tileDataService.markHtmlCacheDirty()
+  //       this.refreshMapTiles()
+  //     }
+  //   }
+  // }
+
+  $doCheck () {
+    if (!this.state) {
+      return
+    }
+
+    if (this.cachedOldSelection !== this.state.selection) {
       // Update the selection in the renderer
       if (this.mapRef && this.mapRef.overlayMapTypes.getLength() > this.OVERLAY_MAP_INDEX) {
-        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.oldSelection)
+        this.mapRef.overlayMapTypes.getAt(this.OVERLAY_MAP_INDEX).setOldSelection(this.state.selection)
         // If the selection has changed, redraw the tiles
         this.tileDataService.markHtmlCacheDirty()
         this.refreshMapTiles()
+        this.cachedOldSelection = this.state.selection
       }
     }
   }
@@ -658,8 +675,7 @@ TileComponentController.$inject = ['$document', '$timeout', '$ngRedux', 'state',
 let tile = {
   template: '',
   bindings: {
-    mapGlobalObjectName: '@',
-    oldSelection: '<' // An object describing the selected objects in the UI
+    mapGlobalObjectName: '@'
   },
   controller: TileComponentController
 }
