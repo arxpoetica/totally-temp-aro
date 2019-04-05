@@ -551,7 +551,7 @@ class State {
       Object.keys(locations).forEach((locationKey) => {
         var location = locations[locationKey]
 
-        if (service.configuration.perspective.locationCategories[locationKey].show) {
+        if (service.configuration.perspective.visibleLocationCategories.indexOf(locationKey) >= 0) {
           location.checked = location.selected
           location.uiLayerId = uiLayerId++
           locationTypesForRedux = locationTypesForRedux.push(JSON.parse(angular.toJson(location))) // angular.toJson will strip out the $$hashkey key

@@ -13,41 +13,7 @@
       "showProspectsFilter": false,
       "centerVertically": false
     },
-    "locationCategories": {
-      "small_businesses": {
-        "show": true
-      },
-      "medium_businesses": {
-        "show": true
-      },
-      "large_businesses": {
-        "show": true
-      },
-      "celltower": {
-        "show": true
-      },
-      "household": {
-        "show": true
-      },
-      "Ethernet Lit Buildings": {
-        "show": false
-      },
-      "Fiber Lit Buildings": {
-        "show": false
-      },
-      "Tier 1": {
-        "show": false
-      },
-      "Tier 2": {
-        "show": false
-      },
-      "Tier 3": {
-        "show": false
-      },
-      "prosects": {
-        "show": true
-      }
-    },
+    "visibleLocationCategories": ["small_businesses", "medium_businesses", "large_businesses", "celltower", "household"],
     "locationDetails": {
       "showDefaultDetails": true,
       "showSalesDetails": false,
@@ -247,38 +213,7 @@
       "showProspectsFilter": true,
       "centerVertically": true
     },
-    "locationCategories": {
-      "small_businesses": {
-        "show": false
-      },
-      "medium_businesses": {
-        "show": false
-      },
-      "large_businesses": {
-        "show": false
-      },
-      "household": {
-        "show": false
-      },
-      "celltower": {
-        "show": false
-      },
-      "Ethernet Lit Buildings": {
-        "show": true
-      },
-      "Fiber Lit Buildings": {
-        "show": true
-      },
-      "Tier 1": {
-        "show": true
-      },
-      "Tier 2": {
-        "show": true
-      },
-      "Tier 3": {
-        "show": true
-      }
-    },
+    "visibleLocationCategories": ["Ethernet Lit Buildings", "Fiber Lit Buildings", "Tier 1", "Tier 2", "Tier 3"],
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
@@ -478,38 +413,7 @@
       "showProspectsFilter": true,
       "centerVertically": true
     },
-    "locationCategories": {
-      "small_businesses": {
-        "show": false
-      },
-      "medium_businesses": {
-        "show": false
-      },
-      "large_businesses": {
-        "show": false
-      },
-      "household": {
-        "show": false
-      },
-      "celltower": {
-        "show": false
-      },
-      "Ethernet Lit Buildings": {
-        "show": true
-      },
-      "Fiber Lit Buildings": {
-        "show": true
-      },
-      "Tier 1": {
-        "show": true
-      },
-      "Tier 2": {
-        "show": true
-      },
-      "Tier 3": {
-        "show": true
-      }
-    },
+    "visibleLocationCategories": ["Ethernet Lit Buildings", "Fiber Lit Buildings", "Tier 1", "Tier 2", "Tier 3"],
     "locationDetails": {
       "showDefaultDetails": false,
       "showSalesDetails": true,
