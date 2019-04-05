@@ -17,6 +17,54 @@
         <h5 class="map-tool-title-text">Locations</h5>
       </div>
       <div class="card-body map-tools-card-body" ng-show="$ctrl.map_tools.is_expanded('locations')">
+
+        <!-- Markup for any location filters that are specified for the current perspective -->
+        <div ng-repeat="locationFilter in $ctrl.state.configuration.perspective.locationFilters">
+          
+          <!-- Multi-select filters will have a number of checkboxes -->
+          <div ng-if="locationFilter.type === 'multiSelect'"
+               class="container">
+            <!-- The filter title -->
+            <div class="row" style="font-weight: bold">
+              <div class="col-sm-12">
+                {{locationFilter.label}}
+              </div>
+            </div>
+            <!-- All the checkboxes for this filter -->
+            <div class="row">
+              <div ng-repeat="filterValue in locationFilter.values" class="col-sm-12">
+                <span class="ctype-icon" ng-if="filterValue.iconUrl">
+                  <img ng-src="{{filterValue.iconUrl}}" style="width:16px;margin-right:10px">
+                </span>
+                <span class="ctype-name">{{filterValue.label}}</span>
+                <span class="ctype-checkbox float-right">
+                  <input type="checkbox" class="checkboxfill layer-type-checkboxes"
+                         style="margin-top: 0px;"
+                         ng-model="filterValue.checked"
+                         ng-change="$ctrl.updateMapLayers()">
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Threshold filters will have a range bar -->
+          <div ng-if="locationFilter.type === 'threshold'"
+               class="container">
+            <!-- The filter title -->
+            <div class="row">
+              <div class="col-sm-12">
+                {{locationFilter.label}} ( {{locationFilter.value | number: 2}} )
+              </div>
+            </div>
+            <!-- A range input for this filter -->
+            <div class="row">
+              <input type="range" min="{{locationFilter.minValue}}" max="{{locationFilter.maxValue}}"
+                     step="{{(locationFilter.maxValue - locationFilter.minValue) / 100}}" ng-model="locationFilter.value"
+                     style="width: 100%;">
+            </div>
+          </div>
+        </div>
+
         <div ng-if="$ctrl.state.configuration.perspective.mapTools.showProspectsFilter">
           <div>
             <span style="font-weight: bold">Filter:</span>

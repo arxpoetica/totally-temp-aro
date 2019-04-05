@@ -7,7 +7,7 @@ const getAllNetworkEquipmentLayers = reduxState => reduxState.mapLayers.networkE
 const getNetworkEquipmentLayersList = createSelector([getAllNetworkEquipmentLayers], (networkEquipmentLayers) => networkEquipmentLayers)
 
 class NetworkEquipmentController {
-  constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, optimization, state) {
+  constructor($rootScope, $http, $location, $ngRedux, map_tools, MapLayer, $timeout, state) {
     this.map_tools = map_tools
     this.state = state
     this.currentUser = state.loggedInUser
@@ -295,7 +295,7 @@ class NetworkEquipmentController {
   }
 }
 
-NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'MapLayer', '$timeout', 'optimization', 'state']
+NetworkEquipmentController.$inject = ['$rootScope', '$http', '$location', '$ngRedux', 'map_tools', 'MapLayer', '$timeout', 'state']
 
 let networkEquipment = {
   templateUrl: '/components/views/network-equipment.html',

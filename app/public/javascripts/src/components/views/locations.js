@@ -6,11 +6,10 @@ const getAllLocationLayers = state => state.mapLayers.location
 const getLocationLayersList = createSelector([getAllLocationLayers], (locationLayers) => locationLayers.toJS())
 
 class LocationsController {
-  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, optimization, state) {
+  constructor ($rootScope, $location, $timeout, $ngRedux, map_tools, state) {
     this.$location = $location
     this.$timeout = $timeout
     this.map_tools = map_tools
-    this.optimization = optimization
     this.state = state
     this.createdMapLayerKeys = new Set()
     this.disablelocations = false
@@ -299,7 +298,7 @@ class LocationsController {
   }
 }
 
-LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'optimization', 'state']
+LocationsController.$inject = ['$rootScope', '$location', '$timeout', '$ngRedux', 'map_tools', 'state']
 
 let locations = {
   templateUrl: '/components/views/locations.html',

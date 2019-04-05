@@ -29,7 +29,7 @@ const getSelectedBoundaryType = createSelector([getselectedBoundaryType], (selec
 
 /* global app localStorage map */
 class State {
-  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, optimization, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
+  constructor ($rootScope, $http, $document, $timeout, $sce, $ngRedux, stateSerializationHelper, $filter, tileDataService, Utils, tracker, Notification) {
   // Important: RxJS must have been included using browserify before this point
     var Rx = require('rxjs')
 
@@ -588,14 +588,14 @@ class State {
 
     // Get a POST body that we will send to aro-service for performing optimization
     service.getOptimizationBody = () => {
-      return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState(), optimization)
+      return stateSerializationHelper.getOptimizationBody(service, $ngRedux.getState())
     }
 
     // Load optimization options from a JSON string
     service.loadOptimizationOptionsFromJSON = (json) => {
     // Note that we are NOT returning the state (the state is set after the call), but a promise
     // that resolves once all the geographies have been loaded
-      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, json)
+      return stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), json)
     }
 
     $document.ready(() => {
@@ -1049,7 +1049,7 @@ class State {
       return $http.get(`/service/v1/plan/${planId}/inputs?user_id=${userId}`)
         .then((result) => {
           var planInputs = Object.keys(result.data).length > 0 ? result.data : service.getDefaultPlanInputs()
-          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), optimization, planInputs)
+          stateSerializationHelper.loadStateFromJSON(service, service.getDispatchers(), planInputs)
           return Promise.all([
             service.loadPlanDataSelectionFromServer(),
             service.loadPlanResourceSelectionFromServer(),
@@ -1866,6 +1866,6 @@ class State {
   }
 }
 
-State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'optimization', 'stateSerializationHelper', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
+State.$inject = ['$rootScope', '$http', '$document', '$timeout', '$sce', '$ngRedux', 'stateSerializationHelper', '$filter', 'tileDataService', 'Utils', 'tracker', 'Notification']
 
 export default State
