@@ -41,22 +41,12 @@
       "EDIT_LOCATIONS": true,
       "PLAN_INFO": true
     },
-    "displayModeButtons": {
-      "VIEW": {
-        "show": true
-      },
-      "ANALYSIS": {
-        "show": true
-      },
-      "EDIT_PLAN": {
-        "show": true
-      },
-      "DEBUG": {
-        "show": true
-      },
-      "PLAN_SETTINGS": {
-        "show": true
-      }
+    "showDisplayModeButtons": {
+      "VIEW": true,
+      "ANALYSIS": true,
+      "EDIT_PLAN": true,
+      "DEBUG": true,
+      "PLAN_SETTINGS": true
     },
     "areaNetworkPlanning": {
       "expertMode": {
@@ -168,16 +158,10 @@
       "showPlanned": true,
       "showExisting": true
     },
-    "boundaries":{
-      "wirecenter": {
-        "show": true
-      },
-      "census_blocks": {
-        "show": true
-      },
-      "analysis_layer": {
-        "show": true
-      }
+    "showBoundaries": {
+      "wirecenter": true,
+      "census_blocks": true,
+      "analysis_layer": true
     },
     "showViewModePanels": {
       "LOCATION_INFO": true,
@@ -189,22 +173,12 @@
       "EDIT_LOCATIONS": true,
       "PLAN_INFO": false
     },
-    "displayModeButtons": {
-      "VIEW": {
-        "show": true
-      },
-      "ANALYSIS": {
-        "show": false
-      },
-      "EDIT_PLAN": {
-        "show": false
-      },
-      "DEBUG": {
-        "show": false
-      },
-      "PLAN_SETTINGS": {
-        "show": true
-      }
+    "showDisplayModeButtons": {
+      "VIEW": true,
+      "ANALYSIS": false,
+      "EDIT_PLAN": false,
+      "DEBUG": false,
+      "PLAN_SETTINGS": true
     },
     "areaNetworkPlanning": {
       "expertMode": {
@@ -316,16 +290,10 @@
       "showPlanned": false,
       "showExisting": true
     },
-    "boundaries":{
-      "wirecenter": {
-        "show": true
-      },
-      "census_blocks": {
-        "show": true
-      },
-      "analysis_layer": {
-        "show": true
-      }
+    "showBoundaries": {
+      "wirecenter": true,
+      "census_blocks": true,
+      "analysis_layer": true
     },
     "showViewModePanels": {
       "LOCATION_INFO": true,
@@ -337,22 +305,12 @@
       "EDIT_LOCATIONS": true,
       "PLAN_INFO": false
     },
-    "displayModeButtons": {
-      "VIEW": {
-        "show": true
-      },
-      "ANALYSIS": {
-        "show": false
-      },
-      "EDIT_PLAN": {
-        "show": false
-      },
-      "DEBUG": {
-        "show": false
-      },
-      "PLAN_SETTINGS": {
-        "show": false
-      }
+    "showDisplayModeButtons": {
+      "VIEW": true,
+      "ANALYSIS": false,
+      "EDIT_PLAN": false,
+      "DEBUG": false,
+      "PLAN_SETTINGS": false
     },
     "areaNetworkPlanning": {
       "expertMode": {
