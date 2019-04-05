@@ -153,19 +153,29 @@ class LocationsController {
             // First, construct the filtering function based on the selected values. Each "featureFilter" corresponds
             // to a single filter (e.g. salesType).
             var featureFilters = []
+            var layerIconUrl = locationType.iconUrl
             this.state.configuration.perspective.locationFilters.forEach(locationFilter => {
-              var individualFilter = feature => true  // A filter that returns back all the input items
+              var individualFilter = feature => true // A filter that returns back all the input items
               if (locationFilter.type === 'multiSelect') {
                 const checkedAttributes = locationFilter.values.filter(item => item.checked).map(item => item.key)
                 if (checkedAttributes.length > 0) {
                   // Some items are selected. Apply filtering
                   individualFilter = feature => checkedAttributes.indexOf(feature.properties[locationFilter.attributeKey]) >= 0
+                  const firstCheckedFilterWithIconUrl = locationFilter.values.filter(item => item.checked && item.iconUrl)[0]
+                  if (firstCheckedFilterWithIconUrl) {
+                    layerIconUrl = firstCheckedFilterWithIconUrl.iconUrl
+                  }
                 }
               } else if (locationFilter.type === 'threshold') {
                 individualFilter = feature => feature.properties[locationFilter.attributeKey] > locationFilter.value
               }
               featureFilters.push(individualFilter)
             })
+            // For sales tiles, we will also filter by the salesCategory. This is done just to keep the same logic as
+            // non-sales tiles where we have small/medium/large businesses. This is actually just another type of filter.
+            if (locationType.isSalesTile) {
+              featureFilters.push(feature => feature.properties.salesCategory === locationType.categoryKey)
+            }
             // The final result of the filter is obtained by AND'ing the individual filters
             const featureFilter = feature => {
               var returnValue = true
@@ -191,7 +201,7 @@ class LocationsController {
               // We want to create an individual layer
               oldMapLayers[mapLayerKey] = {
                 tileDefinitions: tileDefinitions,
-                iconUrl: `${baseUrl}${locationType.iconUrl}`,
+                iconUrl: `${baseUrl}${layerIconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
                 zIndex: locationType.zIndex,
                 selectable: true,
