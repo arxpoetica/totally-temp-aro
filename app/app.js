@@ -49,7 +49,6 @@ var routes = [
   'admin_users',
   'admin_settings',
   'settings',
-  'financial_profile',
   'reports'
 ]
 routes.forEach((route) => {
