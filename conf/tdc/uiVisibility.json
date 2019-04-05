@@ -1,17 +1,6 @@
 [
   {
     "name": "default",
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": true
-          }
-        }
-      }
-    },
     "networkEquipment": {
       "areVisible": ["central_office", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal",
                      "splice_point", "fiveg_coverage", "cell_5g", "multiple_dwelling_unit"]
@@ -22,34 +11,12 @@
   },
   {
     "name": "sales_engineer",
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": true
-          }
-        }
-      }
-    },
     "showBoundaries":{
       "census_blocks": false
     }
   },
   {
     "name": "account_exec",
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": false
-          }
-        }
-      }
-    },
     "showBoundaries":{
       "census_blocks": false
     }

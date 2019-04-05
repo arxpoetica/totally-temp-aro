@@ -51,54 +51,29 @@
       "fiberPlantLabel": "NBM",
       "showCompetitorTypes": true
     },
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": true
-          }
-        },
-        "showMultiFactorAuthentication": true
-      },
-      "emphericalPlan": {
-        "show": true
-      },
-      "savePlanAs": {
-        "show": true
-      },
-      "showPlanModel": {
-        "show": true
-      },
-      "showExportSelection": {
-        "show": true
-      },
-      "measuringStick": {
-        "show": true
-      },
-      "viewSettings": {
-        "show": true,
-        "showSiteBoundaries": true,
-        "showDirectedCable": true,
-        "showSiteLabels": true,
-        "showFiberSize": true
-      },
-      "selectionSingle": {
-        "show": true
-      },
-      "selectionPolygon": {
-        "show": true
-      },
-      "openCoverageBoundary": {
-        "show": true
-      },
-      "annotationTool": {
-        "show": true
-      }
+    "showToolbarButtons": {
+      "globalSettings": true,
+      "emphericalPlan": true,
+      "savePlanAs": true,
+      "planModel": true,
+      "exportSelection": true,
+      "measuringStick": true,
+      "viewSettings": true,
+      "selectionPolygon": true,
+      "openCoverageBoundary": true,
+      "annotationTool": true
     },
     "limitBoundaries": {
       "enabled": false
+    },
+    "globalSettings": {
+      "showManageUsers": true,
+      "showRegisterUser": true,
+      "showMultiFactorAuthentication": true
+    },
+    "viewSettings": {
+      "showSiteLabels": true,
+      "showFiberSize": true
     }
   },
   {
@@ -152,54 +127,29 @@
       "fiberPlantLabel": "FCC Form 477",
       "showCompetitorTypes": false
     },
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": true
-          }
-        },
-        "showMultiFactorAuthentication": true
-      },
-      "emphericalPlan": {
-        "show": false
-      },
-      "savePlanAs": {
-        "show": false
-      },
-      "showPlanModel": {
-        "show": false
-      },
-      "showExportSelection": {
-        "show": true
-      },
-      "measuringStick": {
-        "show": true
-      },
-      "viewSettings": {
-        "show": true,
-        "showSiteBoundaries": true,
-        "showDirectedCable": true,
-        "showSiteLabels": true,
-        "showFiberSize": true
-      },
-      "selectionSingle": {
-        "show": true
-      },
-      "selectionPolygon": {
-        "show": false
-      },
-      "openCoverageBoundary": {
-        "show": true
-      },
-      "annotationTool": {
-        "show": false
-      }
+    "showToolbarButtons": {
+      "globalSettings": true,
+      "emphericalPlan": false,
+      "savePlanAs": false,
+      "planModel": false,
+      "exportSelection": true,
+      "measuringStick": true,
+      "viewSettings": true,
+      "selectionPolygon": false,
+      "openCoverageBoundary": true,
+      "annotationTool": false
     },
     "limitBoundaries": {
       "enabled": false
+    },
+    "globalSettings": {
+      "showManageUsers": true,
+      "showRegisterUser": true,
+      "showMultiFactorAuthentication": true
+    },
+    "viewSettings": {
+      "showSiteLabels": true,
+      "showFiberSize": true
     }
   },
   {
@@ -253,54 +203,29 @@
       "fiberPlantLabel": "NBM",
       "showCompetitorTypes": false
     },
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": true
-          }
-        },
-        "showMultiFactorAuthentication": true
-      },
-      "emphericalPlan": {
-        "show": false
-      },
-      "savePlanAs": {
-        "show": false
-      },
-      "showPlanModel": {
-        "show": false
-      },
-      "showExportSelection": {
-        "show": true
-      },
-      "measuringStick": {
-        "show": true
-      },
-      "viewSettings": {
-        "show": true,
-        "showSiteBoundaries": true,
-        "showDirectedCable": true,
-        "showSiteLabels": false,
-        "showFiberSize": false
-      },
-      "selectionSingle": {
-        "show": true
-      },
-      "selectionPolygon": {
-        "show": true
-      },
-      "openCoverageBoundary": {
-        "show": true
-      },
-      "annotationTool": {
-        "show": true
-      }
+    "showToolbarButtons": {
+      "globalSettings": true,
+      "emphericalPlan": false,
+      "savePlanAs": false,
+      "planModel": false,
+      "exportSelection": true,
+      "measuringStick": true,
+      "viewSettings": true,
+      "selectionPolygon": true,
+      "openCoverageBoundary": true,
+      "annotationTool": true
     },
     "limitBoundaries": {
       "enabled": false
+    },
+    "globalSettings": {
+      "showManageUsers": true,
+      "showRegisterUser": true,
+      "showMultiFactorAuthentication": true
+    },
+    "viewSettings": {
+      "showSiteLabels": false,
+      "showFiberSize": false
     }
   }
 ]

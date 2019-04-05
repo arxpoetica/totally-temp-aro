@@ -30,7 +30,7 @@
         <br>My Account
       </button>
 
-      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.configuration.perspective.toolbar.globalSettings.showMultiFactorAuthentication"
+      <button class="btn btn-light settings-btn" ng-if="$ctrl.state.configuration.perspective.globalSettings.showMultiFactorAuthentication"
               ng-click="$ctrl.currentView = $ctrl.views.MULTIFACTOR_AUTHENTICATION">
         <i class="fa fa-2x fa-user-shield"></i>
         <br>Multi Factor Authentication
@@ -70,7 +70,7 @@
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
 
-    <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION && $ctrl.state.configuration.perspective.toolbar.globalSettings.showMultiFactorAuthentication">
+    <multifactor-settings ng-if="$ctrl.currentView === $ctrl.views.MULTIFACTOR_AUTHENTICATION && $ctrl.state.configuration.perspective.globalSettings.showMultiFactorAuthentication">
     </multifactor-settings>
 
     <manage-users ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS"
@@ -103,8 +103,8 @@
        type="button" class="btn btn-light" ng-href='/admin/users/csv'>Download CSV</a>
     <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users"
        type="button" class="btn btn-light" ng-click="$ctrl.globalSettingsService.openSendMailView()">Send email to all users</a>
-    <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users && $ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
-       type="button" class="btn btn-light" ng-if="$ctrl.state.configuration.perspective.toolbar.globalSettings.manageUsers.registerUser.show"
+    <a ng-if="$ctrl.currentView === $ctrl.views.MANAGE_USERS && $ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.Users && $ctrl.state.configuration.perspective.globalSettings.showRegisterUser"
+       type="button" class="btn btn-light" ng-if="$ctrl.state.configuration.perspective.globalSettings.showRegisterUser"
        ng-click="$ctrl.globalSettingsService.openNewUserView()">Register a new user</a>
 
     <button ng-if="$ctrl.globalSettingsService.currentManageUserView === $ctrl.globalSettingsService.ManageUserViews.SendEmail" type="button" class="btn btn-primary" ng-click="$ctrl.globalSettingsService.sendMail()">Send mail</button>

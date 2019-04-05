@@ -1,17 +1,9 @@
 [
   {
     "name": "default",
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": false
-          }
-        },
-        "showMultiFactorAuthentication": false
-      }
+    "globalSettings": {
+      "showRegisterUser": false,
+      "showMultiFactorAuthentication": false
     },
     "networkEquipment": {
       "areVisible": ["central_office", "dslam", "fiber_distribution_hub", "fiber_distribution_terminal", "bulk_distribution_terminal",
@@ -28,17 +20,9 @@
   },
   {
     "name": "sales_engineer",
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": false
-          }
-        },
-        "showMultiFactorAuthentication": false
-      }
+    "globalSettings": {
+      "showRegisterUser": false,
+      "showMultiFactorAuthentication": false
     },
     "limitBoundaries": {
       "enabled": true,
@@ -52,17 +36,9 @@
   },
   {
     "name": "account_exec",
-    "toolbar": {
-      "globalSettings": {
-        "show": true,
-        "manageUsers": {
-          "show": true,
-          "registerUser": {
-            "show": false
-          }
-        },
-        "showMultiFactorAuthentication": false
-      }
+    "globalSettings": {
+      "showRegisterUser": false,
+      "showMultiFactorAuthentication": false
     },
     "limitBoundaries": {
       "enabled": true,
