@@ -1,7 +1,8 @@
 class CompetitorEditorController {
-  constructor ($http, state) {
+  constructor ($http, state, uiNotificationService) {
     this.$http = $http
     this.state = state
+    this.uiNotificationService = uiNotificationService
     //this.competitorManagerConfiguration = []
     //this.pristineCompetitorManagerConfiguration = {}
     this.compManMeta = {}
@@ -22,6 +23,12 @@ class CompetitorEditorController {
     this.doRecalc = false
     this.prominenceThreshold = 2.0
     
+    /*
+    this.modal = angular.element("#planRModal")
+    this.modal.on("hide.bs.modal", function() {
+      console.log("reset data model..");
+    });
+    */
     this.onInit()
   }
   
@@ -163,16 +170,17 @@ class CompetitorEditorController {
     if (changedModels.length > 0) {
       this.$http.put(`/service/v1/competitor-manager/${this.competitorManagerId}/strengths?user_id=${this.state.loggedInUser.id}`, changedModels)
         .then((result) => {
-          
-          /* ToDo: this refresh business is currently called on destroy if anything was saved 
-          this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
-          .then((result) => {
-            console.log(result)
+          if (!this.doRecalc){
+            this.$http.get(`/service/v1/competitor-manager/${this.competitorManagerId}/state`)
+            .then((result) => {
+              if (result.data.modifiedCount > 0){
+                this.doRecalc = true
+              }
+              if (thenClose) this.exitEditingMode()
+            })
+          }else{
             if (thenClose) this.exitEditingMode()
-          })
-          */
-          this.doRecalc = true
-          if (thenClose) this.exitEditingMode()
+          }
         })
         .catch((err) => console.error(err))
     } else {
@@ -188,14 +196,16 @@ class CompetitorEditorController {
     //console.log("destroy")
     
     if (this.doRecalc) {
+      var compManMes = 'recalculating: '+this.compManMeta.name
+      this.uiNotificationService.addNotification('main', compManMes)
       this.$http.post(`/service/v1/competitor-manager/${this.competitorManagerId}/refresh`)
       .then((result) => {
-        // ToDo: chat with Harry about this, 
-        //       use lower left notification? 
-        console.log('Competitor Manager Recalculated')
-        console.log(result)
+        this.uiNotificationService.removeNotification('main', compManMes)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        this.uiNotificationService.removeNotification('main', compManMes)
+      })
     }
     
   }
@@ -221,7 +231,7 @@ class CompetitorEditorController {
   
 }
 
-CompetitorEditorController.$inject = ['$http', 'state']
+CompetitorEditorController.$inject = ['$http', 'state', 'uiNotificationService']
 
 let competitorEditor = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/competitor-editor.html',
