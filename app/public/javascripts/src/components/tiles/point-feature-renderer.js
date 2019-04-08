@@ -32,7 +32,7 @@ class PointFeatureRenderer {
   static renderFeature (ctx, shape, feature, featureData, geometryOffset, mapLayer, mapLayers, tileDataService,
     selection, oldSelection, selectedLocationImage, lockOverlayImage, invalidatedOverlayImage,
     selectedDisplayMode, displayModes, analysisSelectionMode, selectionModes, equipmentLayerTypeVisibility, ARO_CLIENT) {
-    const entityImage = this.getEntityImageForFeature(feature, featureData, tileDataService, ARO_CLIENT)
+    const entityImage = this.getEntityImageForFeature(feature, featureData, ARO_CLIENT, mapLayer)
     var selectedListType = null
     var selectedListId = null
     if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
@@ -93,11 +93,7 @@ class PointFeatureRenderer {
         ctx.globalAlpha = 0.5
       }
       // Increase the size of household icon if entity_count > 1
-      if (feature.properties.entity_count && feature.properties.entity_count > 1) {
-        ctx.drawImage(entityImage, x, y, entityImage.width * 1.3, entityImage.height * 1.3)
-      } else {
-        ctx.drawImage(entityImage, x, y)
-      }
+      ctx.drawImage(entityImage, x, y)
       ctx.globalAlpha = originalAlpha
     }
     const overlaySize = 12
@@ -133,7 +129,7 @@ class PointFeatureRenderer {
     return modificationType
   }
 
-  static getEntityImageForFeature (feature, featureData, ARO_CLIENT) {
+  static getEntityImageForFeature (feature, featureData, ARO_CLIENT, mapLayer) {
     var entityImage = featureData.icon
     if (feature.properties.hasOwnProperty('_data_type') && feature.properties._data_type != '') {
       if (feature.properties.hasOwnProperty('object_id')) {
@@ -142,6 +138,11 @@ class PointFeatureRenderer {
             (feature.properties._data_type === 'equipment.central_office' || feature.properties._data_type === 'equipment.dslam') &&
             (feature.properties.hsiEnabled !== 'true')) {
           entityImage = featureData.greyOutIcon
+        }
+        if (feature.properties.entity_count &&
+            feature.properties.entity_count > 1 &&
+            mapLayer.mduIconUrl) {
+          entityImage = featureData.mduIcon
         }
       }
     }

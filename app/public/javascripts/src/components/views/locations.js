@@ -204,6 +204,7 @@ class LocationsController {
               oldMapLayers[mapLayerKey] = {
                 tileDefinitions: tileDefinitions,
                 iconUrl: `${baseUrl}${layerIconUrl}`,
+                mduIconUrl: locationType.mduIconUrl && `${baseUrl}${locationType.mduIconUrl}`,
                 renderMode: 'PRIMITIVE_FEATURES',
                 zIndex: locationType.zIndex,
                 selectable: true,
