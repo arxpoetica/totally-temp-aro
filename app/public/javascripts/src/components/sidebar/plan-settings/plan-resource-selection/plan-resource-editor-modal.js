@@ -12,6 +12,7 @@ class PlanResourceEditorController {
   }
 
   modalHide () {
+    this.setEditingMode(this.editingModes.LIST_RESOURCE_MANAGERS)
     this.state.showPlanResourceEditorModal = false
   }
 

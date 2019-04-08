@@ -2,34 +2,237 @@
   #tblCompetitorModel td {
     line-height: 33px; /* To vertically align text */
   }
+  
+  .comp_edit_flex_section {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  
+  .comp_edit_filter_row_left {
+    flex-grow: 1;
+    padding-right: 10px;
+  } 
+  
+  .comp_edit_filter_row_right {
+    width: 20%;
+  } 
+  
+  #comp_edit_region_select_list {
+    padding-top: 2px;
+  }
+  
+  #comp_edit_region_btn {
+    
+  }
+  
+  .comp_edit_percent_item {
+    width: 6em;
+  }
+  
+  .comp_edit_input_set {
+    white-space: nowrap;
+    text-align: right;
+  }
+  
+  .comp_edit_input_set input {
+    display: inline-block;
+  }
+  
+  .nowrap_label {
+    white-space: nowrap;
+  }
+  
+  .comp_edit_center_label {
+    text-align: center;
+  }
+  
+  
+  
+  
+  /*
+  table {
+	  table-layout:fixed;
+	  margin:auto;
+	}
+	
+	thead, tfoot {
+	  display:table;
+	  width:100%;
+	}
+	tbody {
+	  height:500px;
+	  overflow:auto;
+	  overflow-x:hidden;
+	  display:block;
+	  width:100%;
+	}
+	tbody tr {
+	  display:table;
+	  width:100%;
+	  table-layout:fixed;
+	}
+  */
+ 
+ .comp_edit_tbl_contain{
+   max-height: 500px; 
+   overflow-y: auto;
+ }
+  
+ .comp_edit_tbl_contain table thead tr th {
+   position: sticky;
+   top: -1px;
+ }
+ 
+  
 </style>
 
-<modal-header title="{{$ctrl.competitorManager.name}}"></modal-header>
+<modal-header id="testID" title="{{$ctrl.compManMeta.name}}"></modal-header>
 <modal-body>
-  <div style="max-height: 500px; overflow-y: auto;">
-    <table id="tblCompetitorModel" class="table table-sm table-striped">
-      <thead class="thead-dark">
-        <tr>
-          <th>Provider type</th>
-          <th>Carrier</th>
-          <th>Strength</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="competitorModel in $ctrl.competitorManagerConfiguration">
-          <td>{{competitorModel.providerTypeId}}</td>
-          <td>{{competitorModel.carrierName}}</td>
-          <td><input type="text" class="form-control" ng-model="competitorModel.strength"></td>
-        </tr>
-      </tbody>
-    </table>
+  <div>
+    <strong>Regions</strong>
+    
+    <div class="comp_edit_flex_section">
+      
+      <div class="comp_edit_filter_row_left" id="comp_edit_region_select_list">
+		    <ui-select multiple ng-model="$ctrl.selectedRegions"
+		               ng-disabled="!$ctrl.regionSelectEnabled"
+		               theme="bootstrap"
+		               close-on-select="true"
+		               on-select="$ctrl.onSelectedRegionsChanged()"
+		               on-remove="$ctrl.onSelectedRegionsChanged()">
+		      <ui-select-match placeholder="Select data sources...">
+		        {{$item.stusps}}
+		      </ui-select-match>
+		      <ui-select-choices class="ui-select-width-300 ui-select-font" repeat="region in $ctrl.regions | filter: $select.search">
+		        <div>
+		          {{region.name}}
+		        </div>
+		      </ui-select-choices>
+		    </ui-select>
+	    </div>
+	    
+	    <div class="comp_edit_filter_row_right" id="comp_edit_region_btn">
+        <button class="btn btn-light nowrap_label" 
+                ng-if="!$ctrl.regionSelectEnabled"
+                ng-click="$ctrl.reselectRegion()">
+          <i class="fa fa-undo action-button-icon"></i> Reselect
+        </button>
+        
+        <button class="btn btn-primary nowrap_label" 
+                ng-if="$ctrl.regionSelectEnabled"
+                ng-disabled="$ctrl.selectedRegions.length < 1"
+                ng-click="$ctrl.onRegionCommit()">
+          <i class="fa fa-save action-button-icon"></i> Select
+        </button>
+      </div>
+    </div>
+    
+    <div ng-if="!$ctrl.regionSelectEnabled">
+	    <strong>Coverage Threshold</strong>
+	    <div class="comp_edit_flex_section">
+	      <div class="comp_edit_filter_row_left">
+	        <input
+	          type="range"
+	          min="0"
+	          max="100"
+	          step="0.1"
+	          ng-model="$ctrl.prominenceThreshold"
+	          style="margin-top: 10px; width:100%">
+	      </div>
+	      <div class="comp_edit_filter_row_right">
+	        <div class="comp_edit_percent_item">
+	          <div class="input-group input-group-sm">
+	            <input id="coverageTargetValue"
+	              type="number" step="0.1"
+	              ng-model="$ctrl.prominenceThreshold"
+	              class="form-control text-right"
+	              >
+	            <div class="input-group-addon">%</div>
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+    </div>
+    
+  </div>
+  
+  <div ng-if="!$ctrl.regionSelectEnabled">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 0 }"
+          href="#"
+          ng-click="$ctrl.openTab = 0">Above Threshold</a>
+      </li>
+      <li class="nav-item">
+        <a ng-class="{ 'nav-link': true, 'active': $ctrl.openTab === 1 }"
+          href="#"
+          ng-click="$ctrl.openTab = 1">Below Threshold</a>
+      </li>
+    </ul>
+  
+    <div ng-if="$ctrl.openTab === 0">
+      
+      <div class="comp_edit_tbl_contain">
+		    <table id="tblCompetitorModel" class="table table-sm table-striped">
+		      <thead class="thead-dark">
+		        <tr>
+		          <th>Carrier</th>
+		          <th>Coverage</th>
+		          <th class="comp_edit_center_label" ng-repeat="providerType in $ctrl.strengthCols">{{providerType}}</th>
+		        </tr>
+		      </thead>
+		      <tbody>
+		        <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.greaterEqualTo('cbPercent', $ctrl.prominenceThreshold)">
+		          <td>{{carrier.alias}}</td>
+		          <td>{{$ctrl.truncateNum(carrier.cbPercent, 1)}}%</td>
+		          <td ng-repeat="providerType in $ctrl.strengthCols">
+		            <div class="comp_edit_input_set" 
+		                 ng-if="!!$ctrl.strengthsById[carrier.carrierId][providerType]">
+		              <input type="text" class="form-control comp_edit_percent_item" ng-model="$ctrl.strengthsById[carrier.carrierId][providerType].strength" ng-change="$ctrl.onStrengthChange()">
+		            </div>
+		          </td>
+		        </tr>
+		      </tbody>
+		    </table>
+		  </div>
+      
+    </div>
+    
+    <div ng-if="$ctrl.openTab === 1">
+      <div class="comp_edit_tbl_contain">
+        <table id="tblCompetitorModel" class="table table-sm table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th>Carrier</th>
+              <th>Coverage</th>
+              <th class="comp_edit_center_label" ng-repeat="providerType in $ctrl.strengthCols">{{providerType}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="carrier in $ctrl.carriersByPct | filter: $ctrl.lessThan('cbPercent', $ctrl.prominenceThreshold)">
+              <td>{{carrier.alias}}</td>
+              <td>{{$ctrl.truncateNum(carrier.cbPercent, 1)}}%</td>
+              <td ng-repeat="providerType in $ctrl.strengthCols">
+                <div class="comp_edit_input_set" 
+                     ng-if="!!$ctrl.strengthsById[carrier.carrierId][providerType]">
+                  <input type="text" class="form-control comp_edit_percent_item" ng-model="$ctrl.strengthsById[carrier.carrierId][providerType].strength" ng-change="$ctrl.onStrengthChange()">
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
   </div>
   
   <div style="text-align: right; padding-top: 15px; border-top: #ddd solid 1px;">
     <button class="btn btn-light" ng-click="$ctrl.exitEditingMode()">
       <i class="fa fa-undo action-button-icon"></i> Discard changes
     </button>
-    <button class="btn btn-primary" ng-click="$ctrl.saveConfigurationToServer()">
+    <button class="btn btn-primary" 
+            ng-disabled="!$ctrl.hasChanged || $ctrl.regionSelectEnabled"
+            ng-click="$ctrl.saveConfigurationToServer(true)">
       <i class="fa fa-save action-button-icon"></i> Save
     </button>
   </div>
