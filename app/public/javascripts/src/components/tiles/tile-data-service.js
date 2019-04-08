@@ -169,25 +169,30 @@ class TileDataService {
       }
     })
 
-    var hasIcon = mapLayer.hasOwnProperty('iconUrl')
-    if (hasIcon) {
+    const hasIcon = Boolean(mapLayer.iconUrl)
+    if (mapLayer.iconUrl) {
       promises.push(imagePromise(mapLayer.iconUrl))
     }
 
-    var hasSelectedIcon = mapLayer.hasOwnProperty('selectedIconUrl')
+    const hasSelectedIcon = Boolean(mapLayer.selectedIconUrl)
     if (hasSelectedIcon) {
       promises.push(imagePromise(mapLayer.selectedIconUrl))
     }
 
-    var hasGreyedOutIcon = mapLayer.hasOwnProperty('greyOutIconUrl') && mapLayer.greyOutIconUrl !== undefined
+    const hasGreyedOutIcon = Boolean(mapLayer.greyOutIconUrl)
     if (hasGreyedOutIcon) {
       promises.push(imagePromise(mapLayer.greyOutIconUrl))
+    }
+
+    const hasMDUIcon = Boolean(mapLayer.mduIconUrl)
+    if (hasMDUIcon) {
+      promises.push(imagePromise(mapLayer.mduIconUrl))
     }
 
     return Promise.all(promises)
       .then((results) => {
         var allFeatures = []
-        var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon) // booleans are 0 or 1 so True + True = 2
+        var numDataResults = results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon + hasMDUIcon) // booleans are 0 or 1 so True + True = 2
 
         for (var iResult = 0; iResult < numDataResults; ++iResult) {
           var result = results[iResult]
@@ -203,13 +208,16 @@ class TileDataService {
         }
 
         if (hasIcon) {
-          tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon)]
+          tileData.icon = results[results.length - (hasIcon + hasSelectedIcon + hasGreyedOutIcon + hasMDUIcon)]
         }
         if (hasSelectedIcon) {
-          tileData.selectedIcon = results[results.length - ((hasIcon + hasGreyedOutIcon))]
+          tileData.selectedIcon = results[results.length - (hasIcon + hasGreyedOutIcon + hasMDUIcon)]
         }
         if (hasGreyedOutIcon) {
-          tileData.greyOutIcon = results[results.length - 1]
+          tileData.greyOutIcon = results[results.length - (hasGreyedOutIcon + hasMDUIcon)]
+        }
+        if (hasMDUIcon) {
+          tileData.mduIcon = results[results.length - 1]
         }
         return Promise.resolve(tileData)
       })
