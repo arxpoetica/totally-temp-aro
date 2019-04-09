@@ -60,7 +60,7 @@ function loadConfiguration() {
       configurationTypes.forEach((configurationType, index) => {
         exports.configuration[configurationType] = results[index]
       })
-      // console.log(exports.configuration)
+      exports.configuration.ARO_CLIENT = process.env.ARO_CLIENT
       return Promise.resolve()
     })
     .catch(err => console.error(err))
