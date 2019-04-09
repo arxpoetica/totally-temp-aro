@@ -10,7 +10,7 @@ class PlanResourceEditorController {
     this.selectedEditingMode = this.editingModes.LIST_RESOURCE_MANAGERS
     this.editingManagerId = 1
   }
-
+  
   modalHide () {
     this.setEditingMode(this.editingModes.LIST_RESOURCE_MANAGERS)
     this.state.showPlanResourceEditorModal = false
@@ -29,7 +29,7 @@ class PlanResourceEditorController {
   }
 
   setSelectedResourceKey (resourceKey) {
-    this.selectedResourceKey = resourceKey
+    this.state.editingPlanResourceKey = resourceKey
   }
 }
 
@@ -37,9 +37,6 @@ PlanResourceEditorController.$inject = ['state']
 
 let planResourceEditorModal = {
   templateUrl: '/components/sidebar/plan-settings/plan-resource-selection/plan-resource-editor-modal.html',
-  bindings: {
-    selectedResourceKey: '<'
-  },
   controller: PlanResourceEditorController
 }
 

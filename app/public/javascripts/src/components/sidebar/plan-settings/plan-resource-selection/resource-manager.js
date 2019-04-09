@@ -110,7 +110,8 @@ class ResourceManagerController {
 
   onSelectedResourceKeyChanged () {
     //this.buildRows()
-    this.getRows()
+    this.setCurrentSelectedResourceKey({ resourceKey: this.selectedResourceKey })
+    //this.getRows()
   }
 /*
   buildRows () {
