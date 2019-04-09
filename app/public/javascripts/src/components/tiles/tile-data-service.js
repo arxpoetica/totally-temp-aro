@@ -167,6 +167,11 @@ class TileDataService {
         // Image has been loaded
         resolve(img)
       }
+      img.onerror = () => {
+        // Not printing an error message here as it will fill up the console. Just render an error icon instead
+        img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wQJDBUloSfh8QAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAERSURBVDjLpdMxSgNREAbgb5dFMGBlGaxyhvR7huQCEtIEBQvrYGFjkRQWYmFIYx/wBq/xJB4hkBQGscgYo+6ugq95MPP///wz816WOMIQC7yUvGk4iRwn6GGWY4AJHtFJZA3kDJ3ATjDIMY9AF1doV4lErB2YbnDmeckSI9yhj5sakeOo2g/sqGSZQ8ka4zqRRAvXkXvAODhfqyQOA3iGJ5xjhWkMeobLchsDxb5AyTptnRxEW8tInVaRfzjYc9LCbWxIDPriO5ntTv91iprq07A932thkypaKGrIu4FFahMxVSI7cuI+8Rp36y+5vwEaMFmV7UqLNS0W8at+Jcc7WaXPuQzx/OGgh0UTucJJD4t3tvRnsAEYLucAAAAASUVORK5CYII='
+        resolve(img)
+      }
     })
 
     const hasIcon = Boolean(mapLayer.iconUrl)
