@@ -1842,8 +1842,7 @@ class State {
     socketManager.subscribe('BROADCAST_MESSAGE', message => service._receiveBroadCastData(message))
 
     service._receiveBroadCastData = (msg) => {
-      console.log(msg)
-      alert(msg.data.body)
+      Notification.error({title: msg.data.subject,message: msg.data.body});
     }
 
     return service

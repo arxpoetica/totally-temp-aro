@@ -9,6 +9,20 @@ class BroadcastController {
     this.mailBody = null
   }
 
+  getConfirmation() {
+    swal({
+      title: 'Are you sure?',
+      text: 'This message will be broadcast to all users. Are you sure you wish to proceed?',
+      type: 'warning',
+      confirmButtonColor: '#DD6B55',
+      confirmButtonText: 'Yes, Broadcast!',
+      showCancelButton: true,
+      closeOnConfirm: true
+    }, (confirmed) => {
+      confirmed && this.send()
+    })
+  }
+
   send() {
     this.$http.post('/socket/broadcast', {
       subject: this.mailSubject,
