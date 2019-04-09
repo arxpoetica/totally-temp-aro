@@ -1839,6 +1839,12 @@ class State {
       }
     }
 
+    socketManager.subscribe('BROADCAST_MESSAGE', message => service._receiveBroadCastData(message))
+
+    service._receiveBroadCastData = (msg) => {
+      console.log(msg)
+    }
+
     return service
   }
 

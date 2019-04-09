@@ -4,12 +4,14 @@ const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
 const VECTOR_TILE_EXCHANGE = 'aro_vt', VECTOR_TILE_QUEUE = 'vectorTileQueue'
 class SocketManager {
-
+  
   constructor(app) {
     this.vectorTileRequestToRoom = {}
     this.io = require('socket.io')(app)
     this.setupConnectionhandlers()
     this.setupVectorTileAMQP()
+    // this.emitMessage()
+    this.clients = 0
   }
 
   setupConnectionhandlers() {
@@ -23,6 +25,12 @@ class SocketManager {
       socket.on('SOCKET_LEAVE_ROOM', (roomId) => {
         console.log(`Leaving socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
+      })
+      socket.on('SOCKET_BROADCAST', (roomId) => {
+        this.clients++
+        console.log(`Broadcast socket room: /broadcastRoom`)
+        socket.join(`/broadcastRoom`)
+        this.io.to(`/broadcastRoom`).emit('message', { type: 'BROADCAST_MESSAGE', data: this.clients + ' clients connected!' })
       })
     })
   }

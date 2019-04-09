@@ -15,6 +15,7 @@ class SocketManager {
 
   joinRoom (roomId) {
     this.socket.emit('SOCKET_JOIN_ROOM', roomId)
+    this.socket.emit('SOCKET_BROADCAST', roomId)
   }
 
   leaveRoom (roomId) {

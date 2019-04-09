@@ -82,6 +82,7 @@ import userAccountSettings from './global-settings/user-account-settings'
 import manageUsers from './global-settings/manage-users'
 import multifactorSettings from './global-settings/multifactor-settings'
 import manageGroups from './global-settings/manage-groups'
+import broadcast from './global-settings/broadcast'
 import globalSettings from './global-settings/global-settings'
 import aroPanel from './common/aro-panel'
 import aroMultiSelect from './common/aro-multiselect'
@@ -191,6 +192,7 @@ app.component('boundaryDetail', boundaryDetail)
   .component('manageUsers', manageUsers)
   .component('multifactorSettings', multifactorSettings)
   .component('manageGroups', manageGroups)
+  .component('broadcast', broadcast)
   .component('globalSettings', globalSettings)
   .component('aroPanel', aroPanel)
   .component('aroMultiSelect', aroMultiSelect)

@@ -66,6 +66,11 @@
         <i class="fa fa-2x fa-upload"></i>
         <br>Data Upload
       </button>
+
+      <button class="btn btn-light settings-btn" ng-click="$ctrl.currentView = $ctrl.views.BROADCAST">
+        <i class="fa fa-2x fa-volume-up"></i>
+        <br>BroadCast
+      </button>
     </div>
 
     <user-account-settings ng-if="$ctrl.currentView === $ctrl.views.MY_ACCOUNT"></user-account-settings>
@@ -91,6 +96,8 @@
     <release-notes ng-if="$ctrl.currentView === $ctrl.views.RELEASE_NOTES"
       release-notes-view="$ctrl.globalSettingsService.currentReleaseNotesView">
     </release-notes>
+
+    <broadcast ng-if="$ctrl.currentView === $ctrl.views.BROADCAST"></broadcast>
   </modal-body>
 
   <modal-footer>
