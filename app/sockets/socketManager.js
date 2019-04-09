@@ -31,8 +31,7 @@ class SocketManager {
     this.broadcastnsp.on('connection', (socket) => {
       socket.on('SOCKET_BROADCAST_ROOM', (roomId) => {
         console.log(`Joining Broadcast socket namespace: /broadcastRoom , room: /${roomId}`)
-        // socket.join(`/${roomId}`)
-        socket.join(`/admin`)
+        socket.join(`/${roomId}`)
       })
     })
   }
@@ -76,9 +75,10 @@ class SocketManager {
   }
 
   broadcastMessage(msg) {
-    // this.io.to(`/broadcastRoom`).emit('message', { type: BROADCAST_MESSAGE, data: msg })    
-    // sending to all clients in namespace 'myNamespace', including sender
-    this.broadcastnsp.emit('message', { type: BROADCAST_MESSAGE, data: msg })   
+    // sending to all clients in namespace 'broadcastnsp', including sender
+    this.broadcastnsp.emit('message', { type: BROADCAST_MESSAGE, data: msg })
+    // sending to a specific room in a specific namespace, including sender
+    // this.broadcastnsp.to('/allUsers').emit('message', { type: BROADCAST_MESSAGE, data: msg })
   }
 }
 
