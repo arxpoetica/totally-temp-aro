@@ -5,17 +5,18 @@ class SocketManager {
     this.router = {}
     this.websocketSessionId = null
     this.socket = io()
+    this.broadcastSocketnsp = io('/broadcastRoom')
     this.socket.on('message', message => this.routeMessage(message))
   }
 
-  initializeSession (websocketSessionId) {
+  initializeSession (websocketSessionId, userRole) {
     this.websocketSessionId = websocketSessionId
-    this.joinRoom(websocketSessionId)
+    this.joinRoom(websocketSessionId, userRole)
   }
 
-  joinRoom (roomId) {
+  joinRoom (roomId, userRole) {
     this.socket.emit('SOCKET_JOIN_ROOM', roomId)
-    this.socket.emit('SOCKET_BROADCAST_ROOM')
+    this.broadcastSocketnsp.emit('SOCKET_BROADCAST_ROOM', userRole)
   }
 
   leaveRoom (roomId) {

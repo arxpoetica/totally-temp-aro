@@ -9,6 +9,7 @@ class SocketManager {
   constructor(app) {
     this.vectorTileRequestToRoom = {}
     this.io = require('socket.io')(app)
+    this.broadcastnsp = this.io.of('/broadcastRoom')
     this.setupConnectionhandlers()
     this.setupVectorTileAMQP()
   }
@@ -25,9 +26,13 @@ class SocketManager {
         console.log(`Leaving socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
       })
-      socket.on('SOCKET_BROADCAST_ROOM', () => {
-        console.log(`Joining Broadcast socket room: /broadcastRoom`)
-        socket.join(`/broadcastRoom`)
+    })
+
+    this.broadcastnsp.on('connection', (socket) => {
+      socket.on('SOCKET_BROADCAST_ROOM', (roomId) => {
+        console.log(`Joining Broadcast socket namespace: /broadcastRoom , room: /${roomId}`)
+        // socket.join(`/${roomId}`)
+        socket.join(`/admin`)
       })
     })
   }
@@ -71,7 +76,9 @@ class SocketManager {
   }
 
   broadcastMessage(msg) {
-    this.io.to(`/broadcastRoom`).emit('message', { type: BROADCAST_MESSAGE, data: msg })    
+    // this.io.to(`/broadcastRoom`).emit('message', { type: BROADCAST_MESSAGE, data: msg })    
+    // sending to all clients in namespace 'myNamespace', including sender
+    this.broadcastnsp.emit('message', { type: BROADCAST_MESSAGE, data: msg })   
   }
 }
 
