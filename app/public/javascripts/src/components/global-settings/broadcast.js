@@ -10,8 +10,11 @@ class BroadcastController {
   }
 
   send() {
-    console.log(this.mailSubject);
-    console.log(this.mailBody)
+    this.$http.post('/socket/broadcast', {
+      subject: this.mailSubject,
+      body: this.mailBody
+    })
+    .catch((err) => console.error(err))
   }
 }
 

@@ -1843,6 +1843,7 @@ class State {
 
     service._receiveBroadCastData = (msg) => {
       console.log(msg)
+      alert(msg.data.body)
     }
 
     return service

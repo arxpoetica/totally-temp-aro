@@ -3,6 +3,7 @@ const helpers = require('../helpers')
 const config = helpers.config
 const VECTOR_TILE_DATA_MESSAGE = 'VECTOR_TILE_DATA'
 const VECTOR_TILE_EXCHANGE = 'aro_vt', VECTOR_TILE_QUEUE = 'vectorTileQueue'
+const BROADCAST_MESSAGE = 'BROADCAST_MESSAGE'
 class SocketManager {
   
   constructor(app) {
@@ -10,8 +11,6 @@ class SocketManager {
     this.io = require('socket.io')(app)
     this.setupConnectionhandlers()
     this.setupVectorTileAMQP()
-    // this.emitMessage()
-    this.clients = 0
   }
 
   setupConnectionhandlers() {
@@ -26,11 +25,9 @@ class SocketManager {
         console.log(`Leaving socket room: /${roomId}`)
         socket.leave(`/${roomId}`)
       })
-      socket.on('SOCKET_BROADCAST', (roomId) => {
-        this.clients++
-        console.log(`Broadcast socket room: /broadcastRoom`)
+      socket.on('SOCKET_BROADCAST_ROOM', () => {
+        console.log(`Joining Broadcast socket room: /broadcastRoom`)
         socket.join(`/broadcastRoom`)
-        this.io.to(`/broadcastRoom`).emit('message', { type: 'BROADCAST_MESSAGE', data: this.clients + ' clients connected!' })
       })
     })
   }
@@ -71,6 +68,10 @@ class SocketManager {
 
   mapVectorTileUuidToRoom(vtUuid, roomId) {
     this.vectorTileRequestToRoom[vtUuid] = roomId
+  }
+
+  broadcastMessage(msg) {
+    this.io.to(`/broadcastRoom`).emit('message', { type: BROADCAST_MESSAGE, data: msg })    
   }
 }
 
