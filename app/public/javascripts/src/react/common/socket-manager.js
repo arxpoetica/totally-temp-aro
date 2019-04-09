@@ -7,6 +7,7 @@ class SocketManager {
     this.socket = io()
     this.broadcastSocketnsp = io('/broadcastRoom')
     this.socket.on('message', message => this.routeMessage(message))
+    this.broadcastSocketnsp.on('message', message => this.routeMessage(message))
   }
 
   initializeSession (websocketSessionId, userRole) {
