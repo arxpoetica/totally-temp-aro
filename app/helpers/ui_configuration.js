@@ -11,7 +11,7 @@ module.exports = class UIConfiguration {
   // Configuration sets are read from disk as required, and are dependent upon the ARO_CLIENT
   // environment variable. We save them after reading so the next request does not reload from disk.
   constructor () {
-    this.configurations = {}
+    this.clearCache()
   }
 
   // Loads the specified JSON file if it exists. If not, returns defaultValue
@@ -73,6 +73,10 @@ module.exports = class UIConfiguration {
       }
     }
     return this.configurations[configSet]
+  }
+
+  clearCache () {
+    this.configurations = {}
   }
 
   static basicDeepObjMerge (baseObj, maskObj) {

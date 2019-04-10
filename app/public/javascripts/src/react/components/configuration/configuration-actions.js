@@ -12,6 +12,15 @@ function loadConfigurationFromServer () {
   }
 }
 
+function saveConfigurationToServerAndReload (type, configuration) {
+  return dispatch => {
+    AroHttp.post(`/ui_settings/save/${type}`, { configuration: configuration })
+      .then(result => dispatch(loadConfigurationFromServer))
+      .catch(err => console.error(err))
+  }
+}
+
 export default {
-  loadConfigurationFromServer: loadConfigurationFromServer
+  loadConfigurationFromServer: loadConfigurationFromServer,
+  saveConfigurationToServerAndReload: saveConfigurationToServerAndReload
 }
