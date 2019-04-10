@@ -1,6 +1,5 @@
 // === table view === //
 
-// Note: edit mode is not implimented yet
 
 class EditorInterfaceTableController {
   constructor () {
@@ -11,6 +10,8 @@ class EditorInterfaceTableController {
     this.actionDisplayLimit = 1
     this.pages = []
     this.prevRowsJSON = ''
+    this.openRowId = null
+    this.rowViewName = "<editor-interface-primitive></editor-interface-primitive>"
   }
 
   $onInit () {
@@ -99,14 +100,23 @@ class EditorInterfaceTableController {
       // if equal
       return 0
     })
-    
   }
+  
+  toggleRow (rowKey) {
+    if (this.openRowId == rowKey){
+      this.openRowId = null
+    }else{
+      this.openRowId = rowKey
+    }
+  }
+  
 }
 
 let editorInterfaceTable = {
   templateUrl: '/components/common/editor-interfaces/editor-interface-table.html',
   bindings: {
     displayProps: '=',
+    idProp: '<', 
     rows: '=',
     onChange: '&',
     isEdit: '<',

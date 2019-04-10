@@ -5,9 +5,10 @@
   -->
   
   <div class="ei-table-contain">
-	  <table class="table table-sm table-striped">
+	  <table class="table table-sm ei-table-foldout-striped">
       <thead class="thead-dark">
 	      <tr>
+	        <th></th>
 	        <th class="ei-table-col-head-sortable" 
 	             ng-repeat="(colKey, colValue) in $ctrl.displayProps"
 	             ng-click="$ctrl.setOrderCol(colValue.propertyName)">
@@ -21,7 +22,11 @@
 	      </tr>
 	    </thead>
 	    <tbody>
-	      <tr class="ei-table-row" ng-repeat="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
+	      <tr ng-class="$ctrl.openRowId == rowValue[$ctrl.idProp] ? 'ei-foldout-table-open' : ''" class="ei-table-row" ng-repeat-start="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
+	        <td ng-click="$ctrl.toggleRow(rowValue[$ctrl.idProp])">
+	          <i class="far fa-plus-square ei-foldout-icon ei-foldout-icon-table-closed"></i>
+            <i class="far fa-minus-square ei-foldout-icon ei-foldout-icon-table-open"></i>
+	        </td>
 	        <td class="ei-table-cell" 
 	            data-toggle="tooltip" data-placement="bottom" title="{{rowValue[colValue.propertyName]}}"
 	            ng-repeat="(colKey, colValue) in $ctrl.displayProps">
@@ -54,6 +59,11 @@
 						  </div>
 						</div>
 						
+	        </td>
+	      </tr>
+	      <tr class="ei-foldout-row" ng-repeat-end>
+	        <td colspan="999">
+	          {{$compile($ctrl.rowViewName)}}
 	        </td>
 	      </tr>
 	      

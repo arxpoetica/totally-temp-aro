@@ -53,7 +53,9 @@ class ResourceManagerController {
         'visible': true
       }
     ]
-
+    
+    this.idProp = 'id' // unique id of each row
+    
     this.actions = [
       {
         buttonText: 'Edit', // Edit
