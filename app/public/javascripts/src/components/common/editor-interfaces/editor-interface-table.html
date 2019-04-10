@@ -8,7 +8,7 @@
 	  <table class="table table-sm ei-table-foldout-striped">
       <thead class="thead-dark">
 	      <tr>
-	        <th></th>
+	        <th ng-if="!!$ctrl.detailView"></th>
 	        <th class="ei-table-col-head-sortable" 
 	             ng-repeat="(colKey, colValue) in $ctrl.displayProps"
 	             ng-click="$ctrl.setOrderCol(colValue.propertyName)">
@@ -22,8 +22,10 @@
 	      </tr>
 	    </thead>
 	    <tbody>
-	      <tr ng-class="$ctrl.openRowId == rowValue[$ctrl.idProp] ? 'ei-foldout-table-open' : ''" class="ei-table-row" ng-repeat-start="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
-	        <td ng-click="$ctrl.toggleRow(rowValue[$ctrl.idProp])">
+	      <tr ng-class="$ctrl.openRowId == rowValue[$ctrl.idProp] ? 'ei-foldout-table-open' : ''" class="ei-table-row" 
+	          ng-repeat-start="(rowKey, rowValue) in $ctrl.rows | limitTo : $ctrl.rowsPerPage : $ctrl.pageOffset * $ctrl.rowsPerPage">
+	        <td ng-if="!!$ctrl.detailView" 
+	            ng-click="$ctrl.toggleRow(rowValue[$ctrl.idProp])">
 	          <i class="far fa-plus-square ei-foldout-icon ei-foldout-icon-table-closed"></i>
             <i class="far fa-minus-square ei-foldout-icon ei-foldout-icon-table-open"></i>
 	        </td>
@@ -63,7 +65,10 @@
 	      </tr>
 	      <tr class="ei-foldout-row" ng-repeat-end>
 	        <td colspan="999">
-	          {{$compile($ctrl.rowViewName)}}
+	          <!-- ToDo: use a better strategy for dynamic components -->
+	          <resource-manager-detail ng-if="$ctrl.detailView == 'resource-manager-detail'"
+	                                   resource-manager="rowValue">
+	          </resource-manager-detail>
 	        </td>
 	      </tr>
 	      
